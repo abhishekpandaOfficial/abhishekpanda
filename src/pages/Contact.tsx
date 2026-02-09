@@ -20,6 +20,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
 import { iconForKey } from "@/lib/social/iconMap";
+import { supabase } from "@/integrations/supabase/client";
 
 type PublicProfile = {
   platform: string;
@@ -75,17 +76,56 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for reaching out. I'll get back to you soon.",
-    });
-    
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    setIsSubmitting(false);
+
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const reason = formData.subject.trim();
+    const intent = formData.message.trim();
+
+    if (!name || !email || !reason || !intent) {
+      toast({ title: "Missing info", description: "Please fill in all fields." });
+      setIsSubmitting(false);
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({ title: "Invalid email", description: "Please enter a valid email address." });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      // Store server-side for tracking/admin panel (RLS should allow anonymous inserts).
+      const { error: insertErr } = await supabase.from("contact_requests").insert({
+        name,
+        email,
+        reason,
+        intent,
+        user_agent: navigator.userAgent,
+      });
+      if (insertErr) throw insertErr;
+
+      // Send Resend email via Edge Function.
+      const { error: notifyErr } = await supabase.functions.invoke("contact-notification", {
+        body: { name, email, reason, intent },
+      });
+      if (notifyErr) throw notifyErr;
+
+      toast({
+        title: "Message Sent!",
+        description: "Thanks for reaching out. I’ll get back to you soon.",
+      });
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (err: any) {
+      console.error("Contact submit failed:", err);
+      toast({
+        title: "Failed to send",
+        description: "Please try again in a moment. If it persists, email hello@abhishekpanda.com.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

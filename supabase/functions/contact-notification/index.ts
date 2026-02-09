@@ -5,6 +5,13 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
 const ADMIN_EMAIL = Deno.env.get("ADMIN_EMAIL") || "hello@abhishekpanda.com";
+const SITE_URL = Deno.env.get("SITE_URL") || "https://www.abhishekpanda.com";
+// Resend requires the FROM domain to be verified. Use a verified sender here.
+// Recommended: "Abhishek Panda <no-reply@abhishekpanda.com>" after verifying the domain in Resend.
+const RESEND_FROM =
+  Deno.env.get("RESEND_FROM") ||
+  Deno.env.get("RESEND_FROM_EMAIL") ||
+  "Abhishek Panda <onboarding@resend.dev>";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -58,6 +65,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    if (!RESEND_API_KEY) {
+      return new Response(JSON.stringify({ error: "Missing RESEND_API_KEY" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     // Get client IP for rate limiting
     const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
                      req.headers.get("cf-connecting-ip") || 
@@ -116,7 +130,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Abhishek Panda Website <no-reply@abhishekpanda.com>",
+        from: RESEND_FROM,
         to: [ADMIN_EMAIL],
         subject: `New Contact Request: ${safeReason}`,
         html: `
@@ -170,7 +184,7 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             
             <p style="text-align: center; color: #94a3b8; font-size: 12px; margin-top: 20px;">
-              Sent from abhishekpanda.com contact form
+              Sent from www.abhishekpanda.com contact form
             </p>
           </div>
         `,
@@ -179,6 +193,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     const adminResult = await adminEmailResponse.json();
     console.log("Admin email sent:", adminResult);
+    if (!adminEmailResponse.ok) {
+      return new Response(JSON.stringify({ error: "Resend admin email failed", details: adminResult }), {
+        status: 502,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     // Send confirmation email to user
     const userEmailResponse = await fetch("https://api.resend.com/emails", {
@@ -188,7 +208,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Abhishek Panda <no-reply@abhishekpanda.com>",
+        from: RESEND_FROM,
         to: [email],
         subject: "Thanks for reaching out!",
         html: `
@@ -207,9 +227,9 @@ const handler = async (req: Request): Promise<Response> => {
               </p>
               
               <div style="margin-top: 20px; text-align: center;">
-                <a href="https://abhishekpanda.com/blog" style="display: inline-block; margin: 5px; color: #3B82F6; text-decoration: none;">Blog</a> •
-                <a href="https://abhishekpanda.com/courses" style="display: inline-block; margin: 5px; color: #3B82F6; text-decoration: none;">Courses</a> •
-                <a href="https://linkedin.com/in/abhishekpandaofficial" style="display: inline-block; margin: 5px; color: #3B82F6; text-decoration: none;">LinkedIn</a>
+                <a href="${SITE_URL}/blog" style="display: inline-block; margin: 5px; color: #3B82F6; text-decoration: none;">Blog</a> •
+                <a href="${SITE_URL}/courses" style="display: inline-block; margin: 5px; color: #3B82F6; text-decoration: none;">Courses</a> •
+                <a href="https://www.linkedin.com/in/abhishekpandaofficial/" style="display: inline-block; margin: 5px; color: #3B82F6; text-decoration: none;">LinkedIn</a>
               </div>
               
               <p style="color: #1e293b; font-size: 16px; line-height: 1.6; margin-top: 30px;">
@@ -229,6 +249,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     const userResult = await userEmailResponse.json();
     console.log("User confirmation email sent:", userResult);
+    if (!userEmailResponse.ok) {
+      return new Response(JSON.stringify({ error: "Resend user email failed", details: userResult }), {
+        status: 502,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     return new Response(
       JSON.stringify({ 
