@@ -9,11 +9,10 @@ import { TechStackShowcase } from "@/components/about/TechStackShowcase";
 
 import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
 import { ContactIntentModal } from "@/components/about/ContactIntentModal";
+import { BooksSection } from "@/components/products/BooksSection";
+import { BookNewsletterPopup } from "@/components/BookNewsletterPopup";
 import {
   Download, 
-  Award, 
-  BookOpen,
-  ExternalLink,
   Phone
 } from "lucide-react";
 
@@ -45,14 +44,6 @@ const certifications = [
   "Solera Employee of the Month (May 2024)",
   "Rising Star Author Award – Notion Press 2025",
 ];
-
-const bookLinks = {
-  title: "Awake While Alive!",
-  amazon: "https://amzn.in/d/f2kbz5j",
-  flipkart: "https://www.flipkart.com/awake-while-alive/p/itmc8fc663e9b8aa",
-  kindle: "https://amzn.in/d/hUih88n",
-  notionPress: "https://notionpress.com/in/read/awake-while-alive/",
-};
 
 const About = () => {
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
@@ -269,87 +260,15 @@ const About = () => {
           </div>
         </section>
 
-        {/* Published Book Section */}
-        <section id="mybooks" className="py-12 md:py-20 scroll-mt-24">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-8 md:mb-12"
-            >
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-black mb-3 md:mb-4 tracking-tight">
-                <span className="gradient-text">Published</span> Author
-              </h2>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                Beyond technology, I explore human consciousness and freedom through writing
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="max-w-2xl mx-auto glass-card-hover rounded-2xl p-6 md:p-8"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
-                  <BookOpen className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-foreground mb-2">{bookLinks.title}</h3>
-                  <p className="text-sm text-primary italic mb-3">
-                    "For the Next Generation Who Refuses to Live in Cages"
-                  </p>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    A thought-provoking journey challenging conventional beliefs. Published August 2025 • Rising Star Author Award
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href={bookLinks.amazon}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                    >
-                      Amazon <ExternalLink className="w-3 h-3" />
-                    </a>
-                    <span className="text-muted-foreground">•</span>
-                    <a
-                      href={bookLinks.flipkart}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                    >
-                      Flipkart <ExternalLink className="w-3 h-3" />
-                    </a>
-                    <span className="text-muted-foreground">•</span>
-                    <a
-                      href={bookLinks.kindle}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                    >
-                      Kindle <ExternalLink className="w-3 h-3" />
-                    </a>
-                    <span className="text-muted-foreground">•</span>
-                    <a
-                      href={bookLinks.notionPress}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                    >
-                      Notion Press <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+        {/* MyBooks Section */}
+        <section id="mybooks" className="scroll-mt-24">
+          <BooksSection />
         </section>
 
       </main>
 
       <Footer />
+      <BookNewsletterPopup />
       
       <CVDownloadModal isOpen={isDownloadModalOpen} onClose={() => setIsDownloadModalOpen(false)} />
       <ContactIntentModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
