@@ -33,13 +33,10 @@ const footerLinks = {
     { name: "Kindle Edition", url: "https://amzn.in/d/hUih88n", external: true },
     { name: "Notion Press", url: "https://notionpress.com/in/read/awake-while-alive/", external: true },
   ],
-  originx: [
-    { name: "OriginX Labs", url: "https://www.originxlabs.com/", external: true },
-    { name: "OriginX Academy", url: "https://www.originxlabs.com/academy", external: true },
-    { name: "Marketplace - Courses", url: "https://www.originxlabs.com/marketplace/courses", external: true },
-    { name: "E-Books", url: "https://www.originxlabs.com/library/ebooks", external: true },
-    { name: "Automation Workflows", url: "https://www.originxlabs.com/marketplace/workflows", external: true },
-    { name: "Code Snippets", url: "https://www.originxlabs.com/marketplace/code-snippets", external: true },
+  ecosystem: [
+    { name: "Stackcraft.io", url: "https://stackcraft.io", external: true, note: "Engineering blog" },
+    { name: "NEWSTACK.LIVE", url: "https://newstack.live", external: true, note: "All global news at one place" },
+    { name: "CHRONYX", url: "https://www.getchronyx.com", external: true, note: "Personal one-place destination" },
   ],
   legal: [
     { name: "Privacy Policy", path: "/privacy" },
@@ -284,13 +281,13 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* OriginX Labs */}
+          {/* Ecosystem */}
           <div>
             <h4 className="font-bold text-foreground mb-4 text-sm flex items-center gap-2">
-              <span className="text-primary font-black">OX</span> OriginX Labs
+              Ecosystem
             </h4>
             <ul className="space-y-2">
-              {footerLinks.originx.map((link) => (
+              {footerLinks.ecosystem.map((link) => (
                 <li key={link.url}>
                   <a
                     href={link.url}
@@ -298,9 +295,12 @@ export const Footer = () => {
                     rel="noopener noreferrer"
                     className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-1"
                   >
-                    {link.name}
+                    <span className="truncate">{link.name}</span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
+                  {"note" in link && link.note ? (
+                    <div className="text-[11px] text-muted-foreground/70 mt-0.5">{link.note}</div>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -339,12 +339,19 @@ export const Footer = () => {
                 <span className="text-foreground font-medium">Abhishek Panda</span>
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                OriginX Labs (OX) R&D Division
+                OriginX Labs R&amp;D Division
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Powered by</span>
-              <span className="font-black text-primary text-lg">OX</span>
+              <span className="text-xs text-muted-foreground">CEO &amp; Founder of</span>
+              <a
+                href="https://www.originxlabs.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-semibold text-primary hover:underline underline-offset-4"
+              >
+                OriginX Labs (www.originxlabs.com)
+              </a>
             </div>
           </div>
         </div>
