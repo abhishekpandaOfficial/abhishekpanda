@@ -23,6 +23,7 @@ import InstallPWA from "./pages/InstallPWA";
 import PasskeyRegistration from "./pages/PasskeyRegistration";
 import Login from "./pages/Login";
 import Account from "./pages/Account";
+import Chronyx from "./pages/Chronyx";
 
 // Admin imports
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -81,6 +82,7 @@ const App = () => (
             <Route path="/llm-galaxy" element={<LLMGalaxy />} />
             <Route path="/llm-galaxy/model/:modelId" element={<ModelDetail />} />
             <Route path="/blogs" element={<BlogAggregator />} />
+            <Route path="/chronyx" element={<Chronyx />} />
             <Route path="/login" element={<Login />} />
             <Route path="/account" element={<Account />} />
             

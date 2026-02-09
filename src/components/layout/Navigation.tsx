@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BurningLogo } from "@/components/ui/BurningLogo";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -269,12 +270,17 @@ export const Navigation = () => {
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-3">
               <ThemeToggle />
-              <Button variant="hero-outline" size="sm" asChild>
-                <Link to="/llm-galaxy">
-                  <Brain className="w-4 h-4" />
-                  Explore Galaxy
-                </Link>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="hero-outline" size="sm" asChild>
+                    <Link to="/chronyx">
+                      <Sparkles className="w-4 h-4" />
+                      CHRONYX
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Personal Quiet Space for Life, Please explore freely</TooltipContent>
+              </Tooltip>
             </div>
 
             {/* Mobile Menu Button */}
