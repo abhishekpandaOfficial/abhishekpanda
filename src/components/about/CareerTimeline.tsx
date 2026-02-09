@@ -39,6 +39,16 @@ interface TimelineProject {
   highlights: string[];
 }
 
+interface TimelineHoverLinks {
+  title: string;
+  items: {
+    name: string;
+    description?: string;
+    url?: string;
+    note?: string;
+  }[];
+}
+
 interface TimelineItem {
   year: string;
   title: string;
@@ -51,6 +61,7 @@ interface TimelineItem {
   location?: string;
   icon: typeof Baby;
   projects?: TimelineProject;
+  hoverLinks?: TimelineHoverLinks;
   achievements?: string[];
 }
 
@@ -262,28 +273,6 @@ const timelineData: TimelineItem[] = [
     achievements: ["Chose Innovation Over Theory", "Entrepreneurial Mindset"]
   },
   {
-    year: "2025",
-    title: "OriginX Labs — Started",
-    subtitle: "OriginX Labs Pvt. Ltd. (initially Cropxon Innovations Pvt. Ltd.)",
-    description: "Launched the OriginX Labs initiative focused on AI systems, distributed architecture, and cloud-native engineering.",
-    type: "founder",
-    company: "OriginX Labs",
-    companyLogo: originxLogo,
-    companyColor: "#6366F1",
-    location: "India",
-    icon: Rocket,
-    projects: {
-      title: "AI & Automation Innovation",
-      highlights: [
-        "Multi-agent systems development",
-        "AI workflow orchestration",
-        "Cloud-native automation engines",
-        "LLM infrastructure and toolchains",
-        "Product innovation and R&D"
-      ]
-    }
-  },
-  {
     year: "Aug 2025",
     title: "Published Author",
     subtitle: "Awake While Alive!",
@@ -305,7 +294,7 @@ const timelineData: TimelineItem[] = [
   },
   {
     year: "16 Oct 2025",
-    title: "Incorporation",
+    title: "OriginX Labs Pvt. Ltd. — Incorporated",
     subtitle: "OriginX Labs Pvt. Ltd. (initially Cropxon Innovations Pvt. Ltd.)",
     description: "Company incorporated on 16th October 2025.",
     type: "founder",
@@ -321,28 +310,20 @@ const timelineData: TimelineItem[] = [
         "Initial entity name: Cropxon Innovations Pvt. Ltd."
       ]
     },
+    hoverLinks: {
+      title: "OriginX Labs Products",
+      items: [
+        { name: "HUMINEX", description: "Workforce Operating System", url: "https://www.gethuminex.com" },
+        { name: "Qualyx", description: "Agentic Autonomous QA as a Service", url: "https://www.getqualyx.com" },
+        { name: "TRACEFLOW", description: "Digital Experience Engine (DXE)", url: "https://www.traceflowhq.com" },
+        { name: "OpenHuman", description: "Agentic Autonomous Interview Platform", note: "Division under HUMINEX" },
+        { name: "AEON", description: "Autonomous Enterprise Intelligence", note: "Under development" },
+        { name: "Cognix", description: "AI Backend as a Service", url: "https://www.getcognix.io" },
+        { name: "Opzenix", description: "MLOps, LLMOps, DevSecOps Platform", url: "https://www.opzenix.com" },
+        { name: "StackCraft", description: "Next Gen Blogging Platform", url: "https://www.stackcraft.io" },
+      ],
+    },
   },
-  {
-    year: "Today",
-    title: "CEO & Founder",
-    subtitle: "OriginX Labs Pvt. Ltd.",
-    description: ".NET Architect • AI/ML Engineer • Enterprise Systems Designer — Building next-gen digital ecosystems.",
-    type: "founder",
-    company: "OriginX Labs Pvt. Ltd.",
-    companyLogo: originxLogo,
-    companyColor: "#111827",
-    icon: Crown,
-    projects: {
-      title: "Current Focus Areas",
-      highlights: [
-        "Next-gen digital ecosystems",
-        "Automation frameworks",
-        "Intelligent architectures",
-        "Solutions for developers, founders & enterprises",
-        "Founder of OriginX Labs"
-      ]
-    }
-  }
 ];
 
 interface MobileModalProps {
@@ -393,6 +374,42 @@ const MobileProjectModal = ({ item, isOpen, onClose }: MobileModalProps) => {
                 </li>
               ))}
             </ul>
+          )}
+
+          {item.hoverLinks && (
+            <div className="pt-4 border-t border-border">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <span className="text-sm font-semibold text-foreground">{item.hoverLinks.title}</span>
+                <span className="text-xs text-muted-foreground">Links</span>
+              </div>
+              <ul className="space-y-2">
+                {item.hoverLinks.items.map((p, i) => (
+                  <li key={i} className="text-sm">
+                    {p.url ? (
+                      <a
+                        href={p.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-start gap-2 hover:underline underline-offset-4"
+                      >
+                        <span className="font-semibold text-foreground">{p.name}</span>
+                        <span className="text-muted-foreground">{p.description || ""}</span>
+                      </a>
+                    ) : (
+                      <div className="flex items-start gap-2">
+                        <span className="font-semibold text-foreground">{p.name}</span>
+                        <span className="text-muted-foreground">{p.description || ""}</span>
+                        {p.note && (
+                          <span className="text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border">
+                            {p.note}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
 
           {item.achievements && (
@@ -537,10 +554,10 @@ const TimelineCard = ({ item, index, onMobileClick }: { item: TimelineItem; inde
           )}
 
           {/* Hover indicator - Desktop only */}
-          {item.projects && (
+          {(item.hoverLinks || item.projects) && (
             <div className="mt-4 hidden md:flex items-center gap-2 text-xs text-muted-foreground group-hover:text-primary transition-colors">
               <Target className="w-4 h-4" />
-              <span>Hover for project details</span>
+              <span>{item.hoverLinks ? "Hover for products" : "Hover for project details"}</span>
             </div>
           )}
 
@@ -565,9 +582,9 @@ const TimelineCard = ({ item, index, onMobileClick }: { item: TimelineItem; inde
         </motion.div>
       </div>
 
-      {/* Project Details Popup - Desktop only */}
+      {/* Hover Popup - Desktop only */}
       <AnimatePresence>
-        {isHovered && item.projects && (
+        {isHovered && (item.hoverLinks || item.projects) && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -594,28 +611,69 @@ const TimelineCard = ({ item, index, onMobileClick }: { item: TimelineItem; inde
                   </div>
                 )}
                 <div>
-                  <h4 className="font-bold text-foreground">{item.projects.title}</h4>
-                  <p className="text-xs text-muted-foreground">Project Highlights</p>
+                  <h4 className="font-bold text-foreground">
+                    {item.hoverLinks ? item.hoverLinks.title : item.projects?.title}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    {item.hoverLinks ? "Products & Platforms" : "Project Highlights"}
+                  </p>
                 </div>
               </div>
 
-              <ul className="space-y-2">
-                {item.projects.highlights.map((highlight, i) => (
-                  <motion.li
-                    key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="flex items-start gap-2 text-sm text-muted-foreground"
-                  >
-                    <CheckCircle2 
-                      className="w-4 h-4 mt-0.5 flex-shrink-0"
-                      style={{ color: item.companyColor }}
-                    />
-                    <span>{highlight}</span>
-                  </motion.li>
-                ))}
-              </ul>
+              {item.hoverLinks ? (
+                <ul className="space-y-2">
+                  {item.hoverLinks.items.map((p, i) => (
+                    <motion.li
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.04 }}
+                      className="flex items-start justify-between gap-3"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-foreground truncate">{p.name}</div>
+                        {(p.description || p.note) && (
+                          <div className="text-xs text-muted-foreground">
+                            {p.description || ""}
+                            {p.description && p.note ? " • " : ""}
+                            {p.note || ""}
+                          </div>
+                        )}
+                      </div>
+                      {p.url ? (
+                        <a
+                          href={p.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-medium text-primary hover:underline underline-offset-4 whitespace-nowrap"
+                        >
+                          Open
+                        </a>
+                      ) : (
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">Internal</span>
+                      )}
+                    </motion.li>
+                  ))}
+                </ul>
+              ) : (
+                <ul className="space-y-2">
+                  {item.projects?.highlights.map((highlight, i) => (
+                    <motion.li
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="flex items-start gap-2 text-sm text-muted-foreground"
+                    >
+                      <CheckCircle2 
+                        className="w-4 h-4 mt-0.5 flex-shrink-0"
+                        style={{ color: item.companyColor }}
+                      />
+                      <span>{highlight}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+              )}
 
               {item.achievements && (
                 <div className="mt-4 pt-4 border-t border-border">
