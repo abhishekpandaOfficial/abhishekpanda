@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Index from "./pages/Index";
@@ -12,7 +12,7 @@ import { RouteSeo } from "@/components/seo/RouteSeo";
 const About = lazy(() => import("./pages/About"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
-const Academy = lazy(() => import("./pages/Academy"));
+const Courses = lazy(() => import("./pages/Courses"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const Products = lazy(() => import("./pages/Products"));
 const Mentorship = lazy(() => import("./pages/Mentorship"));
@@ -93,7 +93,8 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/academy" element={<Academy />} />
+                <Route path="/academy" element={<Navigate to="/courses" replace />} />
+                <Route path="/courses" element={<Courses />} />
                 <Route path="/courses/:courseId" element={<CourseDetail />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/mentorship" element={<Mentorship />} />

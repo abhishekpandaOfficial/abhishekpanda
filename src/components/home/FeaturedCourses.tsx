@@ -68,7 +68,7 @@ export const FeaturedCourses = () => {
             </p>
           </div>
           <Button variant="hero-outline" asChild>
-            <Link to="/academy">
+            <Link to="/courses">
               View All Courses
               <ArrowRight className="w-4 h-4" />
             </Link>

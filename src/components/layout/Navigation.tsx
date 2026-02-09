@@ -35,11 +35,11 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-// Nav links in order: Home, About, Academy, Blog, Mentorship, Contact
+// Nav links in order: Home, About, Courses, Blog, Mentorship, Contact
 const navLinks = [
   { name: "Home", path: "/", icon: Compass },
   { name: "About", path: "/about", icon: UserCircle },
-  { name: "Academy", path: "/academy", icon: GraduationCap },
+  { name: "Courses", path: "/courses", icon: GraduationCap },
   { name: "Mentorship", path: "/mentorship", icon: MessageCircle },
   { name: "Contact", path: "/contact", icon: Send },
 ];
@@ -76,6 +76,7 @@ export const Navigation = () => {
 
   const isGalaxyActive = location.pathname.startsWith("/llm-galaxy");
   const isBlogActive = location.pathname.startsWith("/blog") || location.pathname === "/blogs";
+  const isCoursesActive = location.pathname === "/courses" || location.pathname.startsWith("/courses/");
 
   return (
     <>
@@ -125,12 +126,12 @@ export const Navigation = () => {
                 </Link>
               ))}
 
-              {/* Academy */}
+              {/* Courses */}
               <Link
-                to="/academy"
+                to="/courses"
                 className={cn(
                   "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 group",
-                  location.pathname === "/academy"
+                  isCoursesActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
                 )}
@@ -139,7 +140,7 @@ export const Navigation = () => {
                 <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                 <span className="relative flex items-center gap-2">
                   <GraduationCap className="w-4 h-4 transition-transform group-hover:scale-110" />
-                  Academy
+                  Courses
                 </span>
               </Link>
 
@@ -333,23 +334,23 @@ export const Navigation = () => {
                 </motion.div>
               ))}
 
-              {/* Academy */}
+              {/* Courses */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
               >
                 <Link
-                  to="/academy"
+                  to="/courses"
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
-                    location.pathname === "/academy"
+                    isCoursesActive
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
                   <GraduationCap className="w-5 h-5" />
-                  Academy
+                  Courses
                 </Link>
               </motion.div>
 

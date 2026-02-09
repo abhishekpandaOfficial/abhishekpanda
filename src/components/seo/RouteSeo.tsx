@@ -44,18 +44,27 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     },
   },
   {
-    pattern: "/academy",
+    pattern: "/courses",
     data: {
-      title: "Academy | Courses by Abhishek Panda",
+      title: "Courses | Abhishek Panda",
       description:
         "Explore premium and free courses by Abhishek Panda on modern software engineering, architecture, cloud, and AI.",
     },
   },
   {
+    pattern: "/academy",
+    data: {
+      title: "Courses | Abhishek Panda",
+      description:
+        "Legacy academy URL. Redirecting to the new Courses hub.",
+      robots: "noindex,follow",
+    },
+  },
+  {
     pattern: "/courses/:courseId",
     data: {
-      title: "Course Detail | Abhishek Panda Academy",
-      description: "Course content, outcomes, and enrollment details from Abhishek Panda Academy.",
+      title: "Course Detail | Abhishek Panda Courses",
+      description: "Course content, outcomes, and enrollment details from Abhishek Panda Courses.",
     },
   },
   {
