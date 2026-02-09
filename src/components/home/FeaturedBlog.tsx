@@ -6,26 +6,48 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const isMissingTableError = (err: unknown) => {
+  if (!err || typeof err !== "object") return false;
+  return (err as { code?: unknown }).code === "PGRST205";
+};
+
 export const FeaturedBlog = () => {
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['featured-blog-posts'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('blog_posts')
+      const res = await supabase
+        .from('blog_posts_public_cache')
         .select('*')
         .eq('is_published', true)
         .order('published_at', { ascending: false })
         .limit(6);
-      
-      if (error) throw error;
-      return data || [];
+
+      if (!res.error) return res.data || [];
+
+      if (isMissingTableError(res.error)) {
+        const fallback = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('is_published', true)
+          .order('published_at', { ascending: false })
+          .limit(6);
+        if (fallback.error) throw fallback.error;
+        return fallback.data || [];
+      }
+
+      throw res.error;
     },
   });
 
-  const getReadTime = (content: string | null) => {
-    if (!content) return "5 min";
-    const words = content.split(/\s+/).length;
-    return `${Math.ceil(words / 200)} min`;
+  const getReadTime = (minutes: number | null | undefined) => {
+    const m = typeof minutes === "number" && Number.isFinite(minutes) ? minutes : 5;
+    return `${Math.max(1, Math.round(m))} min`;
+  };
+
+  const readMinutesFromRow = (row: unknown) => {
+    if (!row || typeof row !== "object") return undefined;
+    const v = (row as { reading_time_minutes?: unknown }).reading_time_minutes;
+    return typeof v === "number" ? v : undefined;
   };
 
   if (isLoading) {
@@ -120,10 +142,10 @@ export const FeaturedBlog = () => {
                           {new Date(mainFeatured.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                       )}
-                      <span className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-primary" />
-                        {getReadTime(mainFeatured.content)} read
-                      </span>
+                        <span className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-primary" />
+                          {getReadTime(readMinutesFromRow(mainFeatured))} read
+                        </span>
                     </div>
                   </div>
                 </div>
@@ -170,7 +192,7 @@ export const FeaturedBlog = () => {
                       <div className="flex items-center justify-between text-xs text-muted-foreground mt-auto pt-4 border-t border-border/50">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          {getReadTime(post.content)}
+                          {getReadTime(readMinutesFromRow(post))}
                         </span>
                         <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
                       </div>

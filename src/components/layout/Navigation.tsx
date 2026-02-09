@@ -73,7 +73,7 @@ export const Navigation = () => {
   }, [location.pathname]);
 
   const isGalaxyActive = location.pathname.startsWith("/llm-galaxy");
-  const isBlogActive = location.pathname === "/blog" || location.pathname === "/blogs";
+  const isBlogActive = location.pathname.startsWith("/blog") || location.pathname === "/blogs";
 
   return (
     <>

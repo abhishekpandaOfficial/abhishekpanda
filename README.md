@@ -29,8 +29,8 @@ npm run dev
 
 ## Admin URLs
 
-- Admin Login: `https://abhishekpanda.com/admin/login` (local: `http://localhost:8080/admin/login`)
-- Admin Dashboard (protected): `https://abhishekpanda.com/admin` (local: `http://localhost:8080/admin`)
+- Admin Login: `https://www.abhishekpanda.com/admin/login` (local: `http://localhost:8080/admin/login`)
+- Admin Dashboard (protected): `https://www.abhishekpanda.com/admin` (local: `http://localhost:8080/admin`)
 
 ## License
 

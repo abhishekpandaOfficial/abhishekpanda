@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -34,77 +34,39 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { BiometricVerificationModal } from "./BiometricVerificationModal";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Markdown } from "@/components/blog/Markdown";
 
-interface BlogPost {
+type BlogPost = {
   id: string;
   title: string;
   slug: string;
-  excerpt: string;
-  content: string;
-  heroImage: string;
-  tags: string[];
-  metaTitle: string;
-  metaDescription: string;
-  isPublished: boolean;
-  isPremium: boolean;
-  views: number;
-  createdAt: string;
-  publishedAt: string | null;
-}
+  excerpt: string | null;
+  content: string | null;
+  hero_image: string | null;
+  tags: string[] | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  is_published: boolean | null;
+  is_premium: boolean | null;
+  views: number | null;
+  created_at: string;
+  published_at: string | null;
+  updated_at: string;
+};
 
-const mockPosts: BlogPost[] = [
-  {
-    id: "1",
-    title: "Building Scalable Microservices with .NET 8",
-    slug: "scalable-microservices-dotnet-8",
-    excerpt: "Learn how to architect and build production-ready microservices using .NET 8 and modern patterns.",
-    content: "# Introduction\n\nMicroservices architecture has become the standard...",
-    heroImage: "/placeholder.svg",
-    tags: [".NET", "Microservices", "Architecture"],
-    metaTitle: "Building Scalable Microservices with .NET 8 | Abhishek Panda",
-    metaDescription: "Comprehensive guide to building scalable microservices with .NET 8, covering DDD, CQRS, and event sourcing patterns.",
-    isPublished: true,
-    isPremium: false,
-    views: 12500,
-    createdAt: "2024-01-15",
-    publishedAt: "2024-01-16"
-  },
-  {
-    id: "2",
-    title: "The Future of AI in Enterprise Applications",
-    slug: "future-ai-enterprise-applications",
-    excerpt: "Exploring how AI is transforming enterprise software development and what architects need to know.",
-    content: "# AI Revolution\n\nArtificial Intelligence is reshaping...",
-    heroImage: "/placeholder.svg",
-    tags: ["AI", "Enterprise", "Machine Learning"],
-    metaTitle: "The Future of AI in Enterprise Applications",
-    metaDescription: "Deep dive into AI adoption in enterprise applications with practical insights for architects.",
-    isPublished: true,
-    isPremium: true,
-    views: 8900,
-    createdAt: "2024-01-20",
-    publishedAt: "2024-01-21"
-  },
-  {
-    id: "3",
-    title: "Cloud-Native Design Patterns [Draft]",
-    slug: "cloud-native-design-patterns",
-    excerpt: "Essential patterns for building cloud-native applications on Azure and AWS.",
-    content: "# Cloud Native...",
-    heroImage: "",
-    tags: ["Cloud", "Patterns", "Azure"],
-    metaTitle: "",
-    metaDescription: "",
-    isPublished: false,
-    isPremium: false,
-    views: 0,
-    createdAt: "2024-02-01",
-    publishedAt: null
-  }
-];
+const slugify = (input: string) =>
+  input
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 export const AdminBlogManager = () => {
-  const [posts, setPosts] = useState<BlogPost[]>(mockPosts);
+  const qc = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -114,6 +76,13 @@ export const AdminBlogManager = () => {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showPublishBiometric, setShowPublishBiometric] = useState(false);
   const [pendingPublish, setPendingPublish] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
+  const [uploadingHero, setUploadingHero] = useState(false);
+  const [uploadingInline, setUploadingInline] = useState(false);
+  const contentRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const errMsg = (err: unknown, fallback: string) =>
+    err instanceof Error ? err.message : fallback;
 
   const handleBiometricSuccess = () => {
     setIsUnlocked(true);
@@ -123,59 +92,83 @@ export const AdminBlogManager = () => {
   const handlePublishBiometricSuccess = () => {
     setShowPublishBiometric(false);
     if (selectedPost && pendingPublish) {
-      setSelectedPost({ ...selectedPost, isPublished: true, publishedAt: new Date().toISOString().split("T")[0] });
+      setSelectedPost({
+        ...selectedPost,
+        is_published: true,
+        published_at: selectedPost.published_at || new Date().toISOString(),
+      });
       setPendingPublish(false);
     }
   };
 
   const handlePublishToggle = (checked: boolean) => {
-    if (checked && !selectedPost?.isPublished) {
+    if (checked && !selectedPost?.is_published) {
       // Require biometric verification to publish
       setPendingPublish(true);
       setShowPublishBiometric(true);
     } else {
-      setSelectedPost({ ...selectedPost!, isPublished: checked });
+      setSelectedPost({ ...selectedPost!, is_published: checked });
     }
   };
 
-  const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const { data: posts = [], isLoading: postsLoading } = useQuery({
+    queryKey: ["admin-blog-posts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as BlogPost[];
+    },
+  });
+
+  const filteredPosts = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return posts;
+    return posts.filter((post) => {
+      const inTitle = post.title.toLowerCase().includes(q);
+      const inTags = (post.tags ?? []).some((t) => t.toLowerCase().includes(q));
+      return inTitle || inTags;
+    });
+  }, [posts, searchQuery]);
 
   const stats = {
     total: posts.length,
-    published: posts.filter(p => p.isPublished).length,
-    drafts: posts.filter(p => !p.isPublished).length,
-    totalViews: posts.reduce((sum, p) => sum + p.views, 0)
+    published: posts.filter((p) => !!p.is_published).length,
+    drafts: posts.filter((p) => !p.is_published).length,
+    totalViews: posts.reduce((sum, p) => sum + (p.views ?? 0), 0),
   };
 
   const handleCreatePost = () => {
+    const now = new Date().toISOString();
     const newPost: BlogPost = {
-      id: `post-${Date.now()}`,
+      id: crypto.randomUUID(),
       title: "Untitled Post",
       slug: "untitled-post",
       excerpt: "",
       content: "",
-      heroImage: "",
+      hero_image: null,
       tags: [],
-      metaTitle: "",
-      metaDescription: "",
-      isPublished: false,
-      isPremium: false,
+      meta_title: "",
+      meta_description: "",
+      is_published: false,
+      is_premium: false,
       views: 0,
-      createdAt: new Date().toISOString().split("T")[0],
-      publishedAt: null
+      created_at: now,
+      published_at: null,
+      updated_at: now,
     };
     setSelectedPost(newPost);
     setIsEditing(true);
+    setPreviewMode(false);
   };
 
   const handleAddTag = () => {
-    if (newTag && selectedPost && !selectedPost.tags.includes(newTag)) {
+    if (newTag && selectedPost && !(selectedPost.tags ?? []).includes(newTag)) {
       setSelectedPost({
         ...selectedPost,
-        tags: [...selectedPost.tags, newTag]
+        tags: [...(selectedPost.tags ?? []), newTag],
       });
       setNewTag("");
     }
@@ -185,8 +178,135 @@ export const AdminBlogManager = () => {
     if (selectedPost) {
       setSelectedPost({
         ...selectedPost,
-        tags: selectedPost.tags.filter(t => t !== tagToRemove)
+        tags: (selectedPost.tags ?? []).filter((t) => t !== tagToRemove),
       });
+    }
+  };
+
+  const upsertPost = useMutation({
+    mutationFn: async (post: BlogPost) => {
+      // Basic slug normalization.
+      const nextSlug = slugify(post.slug || post.title || "post");
+
+      // If slug changed, ensure uniqueness.
+      const { data: existing } = await supabase
+        .from("blog_posts")
+        .select("id, slug")
+        .eq("slug", nextSlug)
+        .maybeSingle();
+
+      if (existing && existing.id !== post.id) {
+        throw new Error("Slug already exists. Pick another one.");
+      }
+
+      const payload = {
+        id: post.id,
+        title: post.title,
+        slug: nextSlug,
+        excerpt: post.excerpt,
+        content: post.content,
+        hero_image: post.hero_image,
+        tags: post.tags,
+        meta_title: post.meta_title,
+        meta_description: post.meta_description,
+        is_published: !!post.is_published,
+        is_premium: !!post.is_premium,
+        published_at: post.is_published ? (post.published_at || new Date().toISOString()) : post.published_at,
+      };
+
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .upsert(payload)
+        .select("*")
+        .single();
+      if (error) throw error;
+      return data as BlogPost;
+    },
+    onSuccess: (saved) => {
+      toast.success("Post saved.");
+      qc.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+      setSelectedPost(saved);
+      setIsEditing(false);
+    },
+    onError: (err: unknown) => toast.error(errMsg(err, "Failed to save post.")),
+  });
+
+  const deletePost = useMutation({
+    mutationFn: async (postId: string) => {
+      const { error } = await supabase.from("blog_posts").delete().eq("id", postId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Post deleted.");
+      qc.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+      setSelectedPost(null);
+      setIsEditing(false);
+      setPreviewMode(false);
+    },
+    onError: (err: unknown) => toast.error(errMsg(err, "Failed to delete post.")),
+  });
+
+  const uploadHeroImage = async (file: File) => {
+    if (!selectedPost) return;
+    setUploadingHero(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const path = `hero/${selectedPost.slug || selectedPost.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("blog-assets")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("blog-assets").getPublicUrl(path);
+      setSelectedPost((p) => (p ? { ...p, hero_image: data.publicUrl } : p));
+      toast.success("Hero image uploaded.");
+    } catch (err: unknown) {
+      toast.error(errMsg(err, "Failed to upload image."));
+    } finally {
+      setUploadingHero(false);
+    }
+  };
+
+  const uploadInlineImage = async (file: File) => {
+    if (!selectedPost) return;
+    setUploadingInline(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const path = `inline/${selectedPost.slug || selectedPost.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("blog-assets")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("blog-assets").getPublicUrl(path);
+
+      const md = `\n\n![](${data.publicUrl})\n`;
+      setSelectedPost((p) => {
+        if (!p) return p;
+        const current = p.content || "";
+        const el = contentRef.current;
+        if (el && typeof el.selectionStart === "number") {
+          const start = el.selectionStart;
+          const end = el.selectionEnd;
+          const next =
+            current.slice(0, start) + md + current.slice(end);
+          // Move cursor after inserted markdown.
+          requestAnimationFrame(() => {
+            try {
+              el.focus();
+              el.selectionStart = el.selectionEnd = start + md.length;
+            } catch {
+              // ignore
+            }
+          });
+          return { ...p, content: next };
+        }
+        return { ...p, content: current + md };
+      });
+
+      toast.success("Inline image uploaded.");
+    } catch (err: unknown) {
+      toast.error(errMsg(err, "Failed to upload inline image."));
+    } finally {
+      setUploadingInline(false);
     }
   };
 
@@ -214,6 +334,29 @@ export const AdminBlogManager = () => {
           <tool.icon className="w-4 h-4" />
         </Button>
       ))}
+      <label className="inline-flex ml-auto">
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          disabled={!isEditing || uploadingInline}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) uploadInlineImage(f);
+          }}
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 hover:bg-background"
+          disabled={!isEditing || uploadingInline}
+          title="Upload inline image"
+        >
+          <ImageIcon className="w-4 h-4 mr-2" />
+          {uploadingInline ? "Uploading..." : "Inline"}
+        </Button>
+      </label>
     </div>
   );
 
@@ -314,6 +457,9 @@ export const AdminBlogManager = () => {
         <div className="lg:col-span-1 space-y-4">
           <h3 className="text-lg font-semibold text-foreground">All Posts</h3>
           <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+            {postsLoading ? (
+              <div className="text-sm text-muted-foreground">Loading posts...</div>
+            ) : null}
             {filteredPosts.map((post) => (
               <motion.div
                 key={post.id}
@@ -327,25 +473,25 @@ export const AdminBlogManager = () => {
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <h4 className="font-semibold text-foreground text-sm line-clamp-2">{post.title}</h4>
-                  {post.isPremium && <Crown className="w-4 h-4 text-amber-500 flex-shrink-0" />}
+                  {post.is_premium && <Crown className="w-4 h-4 text-amber-500 flex-shrink-0" />}
                 </div>
                 <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{post.excerpt}</p>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {post.isPublished ? (
+                  {post.is_published ? (
                     <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-0">Published</Badge>
                   ) : (
                     <Badge className="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-0">Draft</Badge>
                   )}
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Eye className="w-3 h-3" />{post.views}
+                    <Eye className="w-3 h-3" />{post.views ?? 0}
                   </span>
                 </div>
                 <div className="flex gap-1 mt-2 flex-wrap">
-                  {post.tags.slice(0, 2).map(tag => (
+                  {(post.tags ?? []).slice(0, 2).map((tag) => (
                     <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
                   ))}
-                  {post.tags.length > 2 && (
-                    <Badge variant="secondary" className="text-xs">+{post.tags.length - 2}</Badge>
+                  {(post.tags ?? []).length > 2 && (
+                    <Badge variant="secondary" className="text-xs">+{(post.tags ?? []).length - 2}</Badge>
                   )}
                 </div>
               </motion.div>
@@ -386,7 +532,11 @@ export const AdminBlogManager = () => {
                           <Edit className="w-4 h-4 mr-2" />
                           Edit
                         </Button>
-                        <Button variant="destructive" size="sm">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => selectedPost && deletePost.mutate(selectedPost.id)}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </>
@@ -396,9 +546,14 @@ export const AdminBlogManager = () => {
                           <X className="w-4 h-4 mr-2" />
                           Cancel
                         </Button>
-                        <Button size="sm" className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                        <Button
+                          size="sm"
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                          onClick={() => selectedPost && upsertPost.mutate(selectedPost)}
+                          disabled={upsertPost.isPending}
+                        >
                           <Save className="w-4 h-4 mr-2" />
-                          Save
+                          {upsertPost.isPending ? "Saving..." : "Save"}
                         </Button>
                       </>
                     )}
@@ -422,17 +577,29 @@ export const AdminBlogManager = () => {
                       <label className="text-sm font-medium text-foreground mb-2 block">Hero Image</label>
                       <div className="flex items-center gap-4">
                         <div className="w-32 h-20 rounded-lg bg-muted flex items-center justify-center overflow-hidden border border-border">
-                          {selectedPost.heroImage ? (
-                            <img src={selectedPost.heroImage} alt="" className="w-full h-full object-cover" />
+                          {selectedPost.hero_image ? (
+                            <img src={selectedPost.hero_image} alt="" className="w-full h-full object-cover" />
                           ) : (
                             <ImageIcon className="w-8 h-8 text-muted-foreground" />
                           )}
                         </div>
                         {isEditing && (
-                          <Button variant="outline" size="sm">
+                          <label className="inline-flex">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={uploadingHero}
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) uploadHeroImage(f);
+                              }}
+                            />
+                            <Button variant="outline" size="sm" disabled={uploadingHero}>
                             <ImageIcon className="w-4 h-4 mr-2" />
-                            Upload Image
+                            {uploadingHero ? "Uploading..." : "Upload Image"}
                           </Button>
+                          </label>
                         )}
                       </div>
                     </div>
@@ -450,14 +617,41 @@ export const AdminBlogManager = () => {
 
                     <div>
                       <label className="text-sm font-medium text-foreground mb-2 block">Content</label>
-                      {isEditing && <EditorToolbar />}
-                      <Textarea
-                        value={selectedPost.content}
-                        disabled={!isEditing}
-                        onChange={(e) => setSelectedPost({ ...selectedPost, content: e.target.value })}
-                        className="bg-background min-h-[300px] font-mono text-sm"
-                        placeholder="Write your post content in Markdown..."
-                      />
+                      {isEditing ? (
+                        <>
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <EditorToolbar />
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setPreviewMode((v) => !v)}
+                            >
+                              {previewMode ? "Edit" : "Preview"}
+                            </Button>
+                          </div>
+                          {previewMode ? (
+                            <div className="rounded-xl border border-border bg-background p-4 min-h-[300px]">
+                              <Markdown value={selectedPost.content || ""} />
+                            </div>
+                          ) : (
+                            <Textarea
+                              value={selectedPost.content || ""}
+                              onChange={(e) => setSelectedPost({ ...selectedPost, content: e.target.value })}
+                              ref={(el) => {
+                                // shadcn Textarea forwards ref to the DOM element.
+                                contentRef.current = el;
+                              }}
+                              className="bg-background min-h-[300px] font-mono text-sm"
+                              placeholder="Write your post content in Markdown..."
+                            />
+                          )}
+                        </>
+                      ) : (
+                        <div className="rounded-xl border border-border bg-background p-4 min-h-[300px]">
+                          <Markdown value={selectedPost.content || ""} />
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -508,39 +702,39 @@ export const AdminBlogManager = () => {
 
                     <div>
                       <label className="text-sm font-medium text-foreground mb-2 block">Meta Title</label>
-                      <Input
-                        value={selectedPost.metaTitle}
-                        disabled={!isEditing}
-                        onChange={(e) => setSelectedPost({ ...selectedPost, metaTitle: e.target.value })}
-                        className="bg-background"
-                        placeholder="SEO-optimized title (60 chars max)"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">{selectedPost.metaTitle.length}/60 characters</p>
+                        <Input
+                          value={selectedPost.meta_title || ""}
+                          disabled={!isEditing}
+                          onChange={(e) => setSelectedPost({ ...selectedPost, meta_title: e.target.value })}
+                          className="bg-background"
+                          placeholder="SEO-optimized title (60 chars max)"
+                        />
+                      <p className="text-xs text-muted-foreground mt-1">{(selectedPost.meta_title || "").length}/60 characters</p>
                     </div>
 
                     <div>
                       <label className="text-sm font-medium text-foreground mb-2 block">Meta Description</label>
                       <Textarea
-                        value={selectedPost.metaDescription}
+                        value={selectedPost.meta_description || ""}
                         disabled={!isEditing}
-                        onChange={(e) => setSelectedPost({ ...selectedPost, metaDescription: e.target.value })}
+                        onChange={(e) => setSelectedPost({ ...selectedPost, meta_description: e.target.value })}
                         className="bg-background min-h-[100px]"
                         placeholder="SEO description (160 chars max)"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">{selectedPost.metaDescription.length}/160 characters</p>
+                      <p className="text-xs text-muted-foreground mt-1">{(selectedPost.meta_description || "").length}/160 characters</p>
                     </div>
 
                     {/* SEO Preview */}
                     <div className="p-4 bg-muted rounded-lg">
                       <p className="text-xs text-muted-foreground mb-2">Google Preview</p>
                       <p className="text-blue-600 dark:text-blue-400 font-medium text-sm truncate">
-                        {selectedPost.metaTitle || selectedPost.title}
+                        {selectedPost.meta_title || selectedPost.title}
                       </p>
                       <p className="text-green-600 dark:text-green-400 text-xs truncate">
                         abhishekpanda.com/blog/{selectedPost.slug}
                       </p>
                       <p className="text-muted-foreground text-xs line-clamp-2 mt-1">
-                        {selectedPost.metaDescription || selectedPost.excerpt}
+                        {selectedPost.meta_description || selectedPost.excerpt}
                       </p>
                     </div>
                   </div>
@@ -560,7 +754,7 @@ export const AdminBlogManager = () => {
                         </div>
                       </div>
                       <Switch
-                        checked={selectedPost.isPublished}
+                        checked={!!selectedPost.is_published}
                         disabled={!isEditing}
                         onCheckedChange={handlePublishToggle}
                       />
@@ -572,9 +766,9 @@ export const AdminBlogManager = () => {
                         <p className="text-sm text-muted-foreground">Require payment to access full content</p>
                       </div>
                       <Switch
-                        checked={selectedPost.isPremium}
+                        checked={!!selectedPost.is_premium}
                         disabled={!isEditing}
-                        onCheckedChange={(checked) => setSelectedPost({ ...selectedPost, isPremium: checked })}
+                        onCheckedChange={(checked) => setSelectedPost({ ...selectedPost, is_premium: checked })}
                       />
                     </div>
 
@@ -583,15 +777,15 @@ export const AdminBlogManager = () => {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <p className="text-muted-foreground">Created</p>
-                          <p className="text-foreground font-medium">{selectedPost.createdAt}</p>
+                          <p className="text-foreground font-medium">{new Date(selectedPost.created_at).toLocaleDateString()}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Published</p>
-                          <p className="text-foreground font-medium">{selectedPost.publishedAt || "Not published"}</p>
+                          <p className="text-foreground font-medium">{selectedPost.published_at ? new Date(selectedPost.published_at).toLocaleDateString() : "Not published"}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Views</p>
-                          <p className="text-foreground font-medium">{selectedPost.views.toLocaleString()}</p>
+                          <p className="text-foreground font-medium">{(selectedPost.views ?? 0).toLocaleString()}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Post ID</p>
@@ -601,7 +795,11 @@ export const AdminBlogManager = () => {
                     </div>
 
                     {isEditing && (
-                      <Button variant="destructive" className="w-full">
+                      <Button
+                        variant="destructive"
+                        className="w-full"
+                        onClick={() => selectedPost && deletePost.mutate(selectedPost.id)}
+                      >
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete Post
                       </Button>

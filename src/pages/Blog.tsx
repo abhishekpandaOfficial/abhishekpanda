@@ -18,6 +18,11 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const isMissingTableError = (err: unknown) => {
+  if (!err || typeof err !== "object") return false;
+  return (err as { code?: unknown }).code === "PGRST205";
+};
+
 const Blog = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -26,14 +31,26 @@ const Blog = () => {
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['published-blog-posts'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('blog_posts')
+      const res = await supabase
+        .from('blog_posts_public_cache')
         .select('*')
         .eq('is_published', true)
         .order('published_at', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
+
+      if (!res.error) return res.data || [];
+
+      // Migration not applied yet fallback
+      if (isMissingTableError(res.error)) {
+        const fallback = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('is_published', true)
+          .order('published_at', { ascending: false });
+        if (fallback.error) throw fallback.error;
+        return fallback.data || [];
+      }
+
+      throw res.error;
     },
   });
 
@@ -56,11 +73,15 @@ const Blog = () => {
   });
 
   // Estimate read time from content length
-  const getReadTime = (content: string | null) => {
-    if (!content) return "5 min";
-    const words = content.split(/\s+/).length;
-    const minutes = Math.ceil(words / 200);
-    return `${minutes} min`;
+  const getReadTime = (minutes: number | null | undefined) => {
+    const m = typeof minutes === "number" && Number.isFinite(minutes) ? minutes : 5;
+    return `${Math.max(1, Math.round(m))} min`;
+  };
+
+  const readMinutesFromRow = (row: unknown) => {
+    if (!row || typeof row !== "object") return undefined;
+    const v = (row as { reading_time_minutes?: unknown }).reading_time_minutes;
+    return typeof v === "number" ? v : undefined;
   };
 
   return (
@@ -244,7 +265,7 @@ const Blog = () => {
                                 )}
                                 <span className="flex items-center gap-1">
                                   <Clock className="w-4 h-4" />
-                                  {getReadTime(post.content)} read
+                                  {getReadTime(readMinutesFromRow(post))} read
                                 </span>
                               </div>
                               <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />

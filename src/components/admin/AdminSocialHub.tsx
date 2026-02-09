@@ -162,7 +162,7 @@ const SOCIAL_ACCOUNTS: SocialAccount[] = [
     platform: "Website", 
     connected: true, 
     username: "abhishekpanda.com", 
-    profileUrl: "https://abhishekpanda.com/",
+    profileUrl: "https://www.abhishekpanda.com/",
     followers: 0, 
     icon: Globe, 
     color: "text-primary",

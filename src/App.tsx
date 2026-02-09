@@ -8,6 +8,7 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Academy from "./pages/Academy";
 import CourseDetail from "./pages/CourseDetail";
 import Products from "./pages/Products";
@@ -20,6 +21,8 @@ import BlogAggregator from "./pages/BlogAggregator";
 import AdminLogin from "./pages/AdminLogin";
 import InstallPWA from "./pages/InstallPWA";
 import PasskeyRegistration from "./pages/PasskeyRegistration";
+import Login from "./pages/Login";
+import Account from "./pages/Account";
 
 // Admin imports
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -67,7 +70,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/academy" element={<Academy />} />
             <Route path="/courses/:courseId" element={<CourseDetail />} />
             <Route path="/products" element={<Products />} />
@@ -76,6 +79,8 @@ const App = () => (
             <Route path="/llm-galaxy" element={<LLMGalaxy />} />
             <Route path="/llm-galaxy/model/:modelId" element={<ModelDetail />} />
             <Route path="/blogs" element={<BlogAggregator />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/account" element={<Account />} />
             
             {/* Admin Install & Login */}
             <Route path="/install" element={<InstallPWA />} />
