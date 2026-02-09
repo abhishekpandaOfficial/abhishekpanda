@@ -21,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
 import { iconForKey } from "@/lib/social/iconMap";
 import { supabase } from "@/integrations/supabase/client";
+import originxLabsLogo from "@/assets/originxlabs.png";
 
 type PublicProfile = {
   platform: string;
@@ -233,14 +234,21 @@ const Contact = () => {
                   {/* Attribution */}
                   <div className="p-4 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl border border-primary/10">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="font-black text-primary text-xl">OX</span>
+                      <div className="h-8 rounded-lg bg-white/95 px-2 py-1 ring-1 ring-border/40 shadow-sm">
+                        <img
+                          src={originxLabsLogo}
+                          alt="OriginX Labs"
+                          className="h-6 w-auto object-contain"
+                          loading="lazy"
+                        />
+                      </div>
                       <span className="text-sm font-medium text-foreground">OriginX Labs</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Created & Maintained by <span className="text-foreground font-medium">Abhishek Panda</span>
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      OriginX Labs (OX) R&D Division
+                      OriginX Labs R&amp;D Division
                     </p>
                     <a 
                       href="https://www.originxlabs.com/" 

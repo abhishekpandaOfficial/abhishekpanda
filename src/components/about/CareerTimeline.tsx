@@ -32,7 +32,7 @@ import conduentLogo from "@/assets/company-logos/conduent.png";
 import virtusaLogo from "@/assets/company-logos/virtusa.png";
 import wellsfargoLogo from "@/assets/company-logos/wellsfargo.png";
 import soleraLogo from "@/assets/company-logos/solera.png";
-import originxLogo from "@/assets/company-logos/originx.png";
+import originxLogo from "@/assets/originxlabs.png";
 
 interface TimelineProject {
   title: string;

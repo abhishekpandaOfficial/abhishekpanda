@@ -16,6 +16,7 @@ import { BurningLogo } from "@/components/ui/BurningLogo";
 import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
 import { iconForKey } from "@/lib/social/iconMap";
 import { supabase } from "@/integrations/supabase/client";
+import originxLabsLogo from "@/assets/originxlabs.png";
 
 const footerLinks = {
   explore: [
@@ -129,7 +130,18 @@ export const Footer = () => {
               .NET Architect • AI/ML Engineer • Cloud-Native Specialist
             </p>
             <p className="text-xs text-muted-foreground mb-6">
-              Founder, <span className="text-secondary">OriginX Labs</span>
+              Founder,{" "}
+              <span className="inline-flex items-center gap-2">
+                <span className="h-6 rounded-md bg-white/95 px-2 py-1 ring-1 ring-border/40 shadow-sm">
+                  <img
+                    src={originxLabsLogo}
+                    alt="OriginX Labs"
+                    className="h-4 w-auto object-contain"
+                    loading="lazy"
+                  />
+                </span>
+                <span className="text-secondary">OriginX Labs</span>
+              </span>
             </p>
             
             {/* Social Links */}
@@ -273,7 +285,17 @@ export const Footer = () => {
                 rel="noopener noreferrer"
                 className="text-sm font-semibold text-primary hover:underline underline-offset-4"
               >
-                OriginX Labs (www.originxlabs.com)
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-6 rounded-md bg-white/95 px-2 py-1 ring-1 ring-border/40 shadow-sm">
+                    <img
+                      src={originxLabsLogo}
+                      alt="OriginX Labs"
+                      className="h-4 w-auto object-contain"
+                      loading="lazy"
+                    />
+                  </span>
+                  <span>OriginX Labs (www.originxlabs.com)</span>
+                </span>
               </a>
             </div>
           </div>
