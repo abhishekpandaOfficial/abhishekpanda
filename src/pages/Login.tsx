@@ -25,9 +25,8 @@ const Login = () => {
     setSending(true);
     try {
       const redirectTo = `${window.location.origin}/login?next=${encodeURIComponent(next)}`;
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: redirectTo },
+      const { error } = await supabase.functions.invoke("send-magic-link", {
+        body: { email, redirectTo },
       });
       if (error) throw error;
       toast.success("Magic link sent. Check your email.");

@@ -59,9 +59,9 @@ values
   null,
   'Proprietary',
   '[
-    {\"name\":\"GPT-5.3-Codex\",\"highlight\":\"Coding-focused generation\"},
-    {\"name\":\"GPT-5.2\",\"highlight\":\"Latest general flagship\"},
-    {\"name\":\"GPT-4o\",\"highlight\":\"Multimodal, fast\"}
+    {"name":"GPT-5.3-Codex","highlight":"Coding-focused generation"},
+    {"name":"GPT-5.2","highlight":"Latest general flagship"},
+    {"name":"GPT-4o","highlight":"Multimodal, fast"}
   ]'::jsonb,
   true,
   'Feb 2026'
@@ -90,9 +90,9 @@ values
   null,
   'Proprietary',
   '[
-    {\"name\":\"Claude Opus 4.6\",\"highlight\":\"Flagship reasoning & writing\"},
-    {\"name\":\"Claude Sonnet 4\",\"highlight\":\"Balanced performance\"},
-    {\"name\":\"Claude Haiku 3.5\",\"highlight\":\"Fast + cost-efficient\"}
+    {"name":"Claude Opus 4.6","highlight":"Flagship reasoning & writing"},
+    {"name":"Claude Sonnet 4","highlight":"Balanced performance"},
+    {"name":"Claude Haiku 3.5","highlight":"Fast + cost-efficient"}
   ]'::jsonb,
   true,
   'Feb 2026'
@@ -121,9 +121,9 @@ values
   null,
   'Proprietary',
   '[
-    {\"name\":\"Gemini 3\",\"highlight\":\"Next-gen multimodal\"},
-    {\"name\":\"Gemini 2\",\"highlight\":\"Agentic workflows\"},
-    {\"name\":\"Gemini 1.5\",\"highlight\":\"Long-context\"}
+    {"name":"Gemini 3","highlight":"Next-gen multimodal"},
+    {"name":"Gemini 2","highlight":"Agentic workflows"},
+    {"name":"Gemini 1.5","highlight":"Long-context"}
   ]'::jsonb,
   true,
   'Feb 2026'
@@ -152,9 +152,9 @@ values
   'https://huggingface.co/meta-llama',
   'Meta Llama License',
   '[
-    {\"name\":\"Llama 4 Scout\",\"highlight\":\"Efficient open-weight\" ,\"hf_url\":\"https://huggingface.co/meta-llama\"},
-    {\"name\":\"Llama 4 Maverick\",\"highlight\":\"Frontier open-weight\",\"hf_url\":\"https://huggingface.co/meta-llama\"},
-    {\"name\":\"Llama 4 Behemoth (preview)\",\"highlight\":\"Preview frontier\",\"hf_url\":\"https://huggingface.co/meta-llama\"}
+    {"name":"Llama 4 Scout","highlight":"Efficient open-weight" ,"hf_url":"https://huggingface.co/meta-llama"},
+    {"name":"Llama 4 Maverick","highlight":"Frontier open-weight","hf_url":"https://huggingface.co/meta-llama"},
+    {"name":"Llama 4 Behemoth (preview)","highlight":"Preview frontier","hf_url":"https://huggingface.co/meta-llama"}
   ]'::jsonb,
   true,
   'Feb 2026'
@@ -183,8 +183,8 @@ values
   'https://huggingface.co/Qwen',
   'Apache-2.0 / Qwen License (varies)',
   '[
-    {\"name\":\"Qwen3\",\"highlight\":\"Next-gen open-weight\",\"hf_url\":\"https://huggingface.co/Qwen\"},
-    {\"name\":\"Qwen2.5\",\"highlight\":\"Strong coding + multilingual\",\"hf_url\":\"https://huggingface.co/Qwen\"}
+    {"name":"Qwen3","highlight":"Next-gen open-weight","hf_url":"https://huggingface.co/Qwen"},
+    {"name":"Qwen2.5","highlight":"Strong coding + multilingual","hf_url":"https://huggingface.co/Qwen"}
   ]'::jsonb,
   true,
   'Feb 2026'
@@ -213,8 +213,8 @@ values
   'https://huggingface.co/deepseek-ai',
   'DeepSeek license (varies)',
   '[
-    {\"name\":\"DeepSeek V3\",\"highlight\":\"Frontier open-weight\",\"hf_url\":\"https://huggingface.co/deepseek-ai\"},
-    {\"name\":\"DeepSeek Coder\",\"highlight\":\"Coding specialist\",\"hf_url\":\"https://huggingface.co/deepseek-ai\"}
+    {"name":"DeepSeek V3","highlight":"Frontier open-weight","hf_url":"https://huggingface.co/deepseek-ai"},
+    {"name":"DeepSeek Coder","highlight":"Coding specialist","hf_url":"https://huggingface.co/deepseek-ai"}
   ]'::jsonb,
   true,
   'Feb 2026'
@@ -243,8 +243,8 @@ values
   'https://huggingface.co/mistralai',
   'Apache-2.0 / Mistral license (varies)',
   '[
-    {\"name\":\"Pixtral 12B\",\"highlight\":\"Multimodal open-weight\",\"hf_url\":\"https://huggingface.co/mistralai\"},
-    {\"name\":\"Mixtral 8x22B\",\"highlight\":\"Open MoE\",\"hf_url\":\"https://huggingface.co/mistralai\"}
+    {"name":"Pixtral 12B","highlight":"Multimodal open-weight","hf_url":"https://huggingface.co/mistralai"},
+    {"name":"Mixtral 8x22B","highlight":"Open MoE","hf_url":"https://huggingface.co/mistralai"}
   ]'::jsonb,
   false,
   'Feb 2026'
@@ -273,8 +273,8 @@ values
   'https://huggingface.co/microsoft',
   'MIT / Microsoft license (varies)',
   '[
-    {\"name\":\"Phi-4\",\"highlight\":\"Small but strong\",\"hf_url\":\"https://huggingface.co/microsoft\"},
-    {\"name\":\"Phi-3.5\",\"highlight\":\"Edge-ready\",\"hf_url\":\"https://huggingface.co/microsoft\"}
+    {"name":"Phi-4","highlight":"Small but strong","hf_url":"https://huggingface.co/microsoft"},
+    {"name":"Phi-3.5","highlight":"Edge-ready","hf_url":"https://huggingface.co/microsoft"}
   ]'::jsonb,
   false,
   'Feb 2026'
@@ -303,8 +303,8 @@ values
   'https://huggingface.co/xai-org',
   'Proprietary / xAI license (varies)',
   '[
-    {\"name\":\"Grok 3\",\"highlight\":\"Latest flagship\"},
-    {\"name\":\"Grok 2.5 (open)\",\"highlight\":\"Open release\",\"hf_url\":\"https://huggingface.co/xai-org\"}
+    {"name":"Grok 3","highlight":"Latest flagship"},
+    {"name":"Grok 2.5 (open)","highlight":"Open release","hf_url":"https://huggingface.co/xai-org"}
   ]'::jsonb,
   true,
   'Feb 2026'

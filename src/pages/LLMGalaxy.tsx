@@ -7,10 +7,13 @@ import { ModelComparison } from "@/components/atlas/ModelComparison";
 import { UseCaseNavigator } from "@/components/atlas/UseCaseNavigator";
 import { TrendsInsights } from "@/components/atlas/TrendsInsights";
 import { AtlasNewsletter } from "@/components/atlas/AtlasNewsletter";
+import { GalaxyHowItWorks } from "@/components/atlas/GalaxyHowItWorks";
 import { useLLMModels, getLastUpdated } from "@/hooks/useLLMModels";
+import { useOriginXUpdates } from "@/hooks/useOriginXUpdates";
 
 const LLMGalaxy = () => {
   const { data: models = [] } = useLLMModels();
+  const { data: updates = [] } = useOriginXUpdates(3);
   const lastUpdated = getLastUpdated(models);
 
   return (
@@ -18,7 +21,8 @@ const LLMGalaxy = () => {
       <Navigation />
       
       <main>
-        <AtlasHero models={models} lastUpdated={lastUpdated} />
+        <AtlasHero models={models} lastUpdated={lastUpdated} updates={updates} />
+        <GalaxyHowItWorks />
         <ModelFamilies models={models} />
         <BenchmarkLeaderboard models={models} lastUpdated={lastUpdated} />
         <ModelComparison models={models} />

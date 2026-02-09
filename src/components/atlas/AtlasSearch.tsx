@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import type { LLMModel } from "@/hooks/useLLMModels";
 import { getBenchmarkNumber } from "@/hooks/useLLMModels";
+import { getModelCategoryTags } from "@/lib/llmGalaxy";
 
 interface AtlasSearchProps {
   models: LLMModel[];
@@ -81,7 +82,11 @@ export const AtlasSearch = ({ models, onSearch }: AtlasSearchProps) => {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                      <Brain className="w-5 h-5 text-primary" />
+                      {model.logo && (model.logo.startsWith("http://") || model.logo.startsWith("https://") || model.logo.startsWith("/")) ? (
+                        <img src={model.logo} alt={`${model.company} logo`} className="w-6 h-6 object-contain" loading="lazy" />
+                      ) : (
+                        <Brain className="w-5 h-5 text-primary" />
+                      )}
                     </div>
                     <div>
                       <div className="font-semibold text-foreground flex items-center gap-2">
@@ -93,6 +98,16 @@ export const AtlasSearch = ({ models, onSearch }: AtlasSearchProps) => {
                         )}
                       </div>
                       <div className="text-sm text-muted-foreground">{model.company}</div>
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${model.is_open_source ? "bg-emerald-500/15 text-emerald-600" : "bg-amber-500/15 text-amber-600"}`}>
+                          {model.is_open_source ? "Open Source" : "Closed Source"}
+                        </span>
+                        {getModelCategoryTags(model).slice(0, 3).map((tag) => (
+                          <span key={`${model.slug}-${tag}`} className="px-1.5 py-0.5 rounded bg-muted text-[10px] text-muted-foreground">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">

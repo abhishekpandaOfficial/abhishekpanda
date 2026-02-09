@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { AtlasSearch } from "./AtlasSearch";
 import type { LLMModel } from "@/hooks/useLLMModels";
 import { getLastUpdated } from "@/hooks/useLLMModels";
+import type { OriginXUpdate } from "@/hooks/useOriginXUpdates";
 
-export const AtlasHero = (props: { models: LLMModel[]; lastUpdated: Date | null }) => {
+export const AtlasHero = (props: { models: LLMModel[]; lastUpdated: Date | null; updates?: OriginXUpdate[] }) => {
   const last = props.lastUpdated || getLastUpdated(props.models);
   const total = props.models.length;
   const open = props.models.filter((m) => m.is_open_source).length;
   const closed = total - open;
+  const updates = props.updates || [];
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
@@ -186,6 +188,25 @@ export const AtlasHero = (props: { models: LLMModel[]; lastUpdated: Date | null 
               </motion.div>
             ))}
           </motion.div>
+
+          {updates.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
+              className="mt-6 max-w-4xl mx-auto rounded-2xl border border-primary/20 bg-card/70 backdrop-blur p-4 text-left"
+            >
+              <div className="text-xs uppercase tracking-[0.16em] text-primary font-semibold mb-2">Latest OriginX Updates</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {updates.map((update) => (
+                  <div key={update.id} className="rounded-xl border border-border/60 bg-background/60 p-3">
+                    <div className="text-sm font-semibold text-foreground line-clamp-2">{update.title}</div>
+                    <div className="mt-1 text-xs text-muted-foreground line-clamp-2">{update.summary}</div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 

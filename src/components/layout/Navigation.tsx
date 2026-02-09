@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BurningLogo } from "@/components/ui/BurningLogo";
+import { ChronyxLogo } from "@/components/ui/ChronyxLogo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   NavigationMenu,
@@ -272,10 +273,10 @@ export const Navigation = () => {
               <ThemeToggle />
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="hero-outline" size="sm" asChild>
+                  <Button variant="hero-outline" size="sm" className="chronyx-animated-border relative overflow-hidden" asChild>
                     <Link to="/chronyx">
-                      <Sparkles className="w-4 h-4" />
-                      CHRONYX
+                      <ChronyxLogo compact size="sm" imageClassName="h-5 w-5" className="ring-slate-200/45" />
+                      <span className="font-bold tracking-wide">CHRONYX</span>
                     </Link>
                   </Button>
                 </TooltipTrigger>
@@ -429,6 +430,12 @@ export const Navigation = () => {
                 transition={{ delay: 0.4 }}
                 className="mt-4"
               >
+                <Button variant="hero-outline" size="lg" className="w-full chronyx-animated-border relative overflow-hidden mb-2" asChild>
+                  <Link to="/chronyx">
+                    <ChronyxLogo compact size="sm" imageClassName="h-5 w-5" className="ring-slate-200/45" />
+                    CHRONYX
+                  </Link>
+                </Button>
                 <Button variant="hero" size="lg" className="w-full" asChild>
                   <Link to="/llm-galaxy">
                     <Brain className="w-5 h-5" />

@@ -13,11 +13,12 @@ type VersionItem = {
 };
 
 function readVersionItems(model: LLMModel): VersionItem[] {
-  const v = model.versions as any;
-  const arr = Array.isArray(v) ? v : v?.items;
+  const v = model.versions as unknown;
+  type VersionsContainer = { items?: unknown[] };
+  const arr = Array.isArray(v) ? v : (v as VersionsContainer | null)?.items;
   if (!Array.isArray(arr)) return [];
   return arr
-    .map((x: any) => {
+    .map((x) => {
       if (typeof x === "string") return { name: x } as VersionItem;
       if (x && typeof x === "object" && typeof x.name === "string") return x as VersionItem;
       return null;
@@ -25,12 +26,19 @@ function readVersionItems(model: LLMModel): VersionItem[] {
     .filter(Boolean) as VersionItem[];
 }
 
+function isLogoUrl(logo: string | null): boolean {
+  if (!logo) return false;
+  return logo.startsWith("http://") || logo.startsWith("https://") || logo.startsWith("/");
+}
+
 export const ModelFamilyModal = (props: { isOpen: boolean; onClose: () => void; family: LLMModel | null }) => {
   const family = props.family;
   if (!family) return null;
+  const familyExt = family as LLMModel & { considerations?: string[] | null; homepage_url?: string | null; huggingface_url?: string | null };
 
   const color = family.color || "from-primary to-secondary";
   const logo = family.logo || "✨";
+  const useImageLogo = isLogoUrl(logo);
   const versions = readVersionItems(family);
   const mmlu = getBenchmarkNumber(family, "mmlu");
   const gsm8k = getBenchmarkNumber(family, "gsm8k");
@@ -64,7 +72,11 @@ export const ModelFamilyModal = (props: { isOpen: boolean; onClose: () => void; 
                 <div className="relative flex items-start justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-4xl shadow-xl">
-                      {logo}
+                      {useImageLogo ? (
+                        <img src={logo} alt={`${family.company} logo`} className="w-12 h-12 object-contain" loading="lazy" />
+                      ) : (
+                        logo
+                      )}
                     </div>
                     <div>
                       <h2 className="text-3xl font-black text-white mb-1">{family.name} Family</h2>
@@ -211,13 +223,13 @@ export const ModelFamilyModal = (props: { isOpen: boolean; onClose: () => void; 
                       <div className="font-semibold text-foreground">Considerations</div>
                     </div>
                     <ul className="space-y-2 text-sm text-muted-foreground">
-                      {(family as any).considerations?.slice?.(0, 8)?.map((c: string) => (
+                      {(familyExt.considerations || []).slice(0, 8).map((c) => (
                         <li key={c} className="flex items-start gap-2">
                           <Sparkles className="w-4 h-4 mt-0.5 text-primary/60" />
                           <span>{c}</span>
                         </li>
                       ))}
-                      {!(family as any).considerations?.length ? <li>—</li> : null}
+                      {!familyExt.considerations?.length ? <li>—</li> : null}
                     </ul>
                   </div>
                 </div>
@@ -230,16 +242,16 @@ export const ModelFamilyModal = (props: { isOpen: boolean; onClose: () => void; 
                       </a>
                     </Button>
                   ) : null}
-                  {(family as any).homepage_url ? (
+                  {familyExt.homepage_url ? (
                     <Button variant="outline" size="sm" asChild>
-                      <a href={(family as any).homepage_url} target="_blank" rel="noopener noreferrer">
+                      <a href={familyExt.homepage_url} target="_blank" rel="noopener noreferrer">
                         Website <ExternalLink className="w-4 h-4" />
                       </a>
                     </Button>
                   ) : null}
-                  {(family as any).huggingface_url ? (
+                  {familyExt.huggingface_url ? (
                     <Button variant="outline" size="sm" asChild>
-                      <a href={(family as any).huggingface_url} target="_blank" rel="noopener noreferrer">
+                      <a href={familyExt.huggingface_url} target="_blank" rel="noopener noreferrer">
                         Hugging Face <ExternalLink className="w-4 h-4" />
                       </a>
                     </Button>
@@ -253,4 +265,3 @@ export const ModelFamilyModal = (props: { isOpen: boolean; onClose: () => void; 
     </AnimatePresence>
   );
 };
-

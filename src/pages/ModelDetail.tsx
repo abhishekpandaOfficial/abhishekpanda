@@ -19,7 +19,7 @@ import {
 } from "recharts";
 
 function normalizeBenchmarks(model: LLMModel): { name: string; score: number }[] {
-  const b = model.benchmarks as any;
+  const b = model.benchmarks as Record<string, unknown> | null;
   if (!b || typeof b !== "object") return [];
   const keys = [
     ["mmlu", "MMLU"],
@@ -51,8 +51,10 @@ export default function ModelDetail() {
   });
 
   const m = model;
+  const mExt = m as (LLMModel & { huggingface_url?: string | null }) | null;
   const color = m?.color || "from-primary to-secondary";
   const logo = m?.logo || "✨";
+  const useImageLogo = typeof logo === "string" && (logo.startsWith("http://") || logo.startsWith("https://") || logo.startsWith("/"));
   const openLabel = m?.is_open_source ? "Open weight" : "Closed source";
 
   const benchmarks = m ? normalizeBenchmarks(m) : [];
@@ -89,7 +91,11 @@ export default function ModelDetail() {
                 <div className="relative z-10">
                   <div className="flex flex-col md:flex-row items-start gap-6">
                     <div className="w-24 h-24 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-5xl shadow-xl">
-                      {logo}
+                      {useImageLogo ? (
+                        <img src={logo} alt={`${m.company} logo`} className="w-14 h-14 object-contain" loading="lazy" />
+                      ) : (
+                        logo
+                      )}
                     </div>
                     <div className="flex-1">
                       <h1 className="text-4xl md:text-5xl font-black text-white mb-2">{m.name}</h1>
@@ -243,9 +249,9 @@ export default function ModelDetail() {
                         </a>
                       </Button>
                     ) : null}
-                    {(m as any).huggingface_url ? (
+                    {mExt?.huggingface_url ? (
                       <Button variant="outline" size="sm" asChild>
-                        <a href={(m as any).huggingface_url} target="_blank" rel="noopener noreferrer">
+                        <a href={mExt.huggingface_url} target="_blank" rel="noopener noreferrer">
                           Hugging Face <ExternalLink className="w-4 h-4" />
                         </a>
                       </Button>
@@ -262,4 +268,3 @@ export default function ModelDetail() {
     </div>
   );
 }
-

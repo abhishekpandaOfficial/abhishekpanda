@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, Calendar, Sparkles, Code2, Cloud, Brain } from "lucide-react";
+import { BookOpen, Calendar, Sparkles, Code2, Cloud, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import abhishekAvatar from "@/assets/abhishek-avatar.png";
 import abhishekAvatarAlt from "@/assets/abhishek-avatar-alt.png";
+import { ChronyxLogo } from "@/components/ui/ChronyxLogo";
 
 const badges = [
   { icon: Code2, label: ".NET Architect", color: "from-primary to-secondary" },
@@ -210,11 +211,10 @@ export const HeroSection = () => {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Button variant="hero" size="xl" asChild>
-              <Link to="/courses">
-                <Sparkles className="w-5 h-5" />
-                Explore Courses
-                <ArrowRight className="w-5 h-5" />
+            <Button variant="hero-outline" size="xl" className="chronyx-animated-border relative overflow-hidden" asChild>
+              <Link to="/chronyx">
+                <ChronyxLogo compact size="md" imageClassName="h-5 w-5" />
+                Explore CHRONYX
               </Link>
             </Button>
             <Button variant="hero-outline" size="xl" asChild>

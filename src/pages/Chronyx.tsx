@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { ChronyxLogo } from "@/components/ui/ChronyxLogo";
 import { ArrowRight, Shield, Sparkles, NotebookPen, Wallet, GraduationCap, Database } from "lucide-react";
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || "https://www.abhishekpanda.com";
@@ -53,9 +54,12 @@ export default function Chronyx() {
           <div className="relative container mx-auto px-4 py-14 md:py-20">
             <div className="max-w-4xl mx-auto text-center">
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <div className="flex justify-center">
+                  <ChronyxLogo size="lg" imageClassName="h-12 w-12 md:h-14 md:w-14" className="ring-slate-100/50" />
+                </div>
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/70 backdrop-blur border border-border/50">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-semibold text-foreground">CHRONYX by OriginX Labs</span>
+                  <ChronyxLogo compact size="sm" imageClassName="h-5 w-5" />
+                  <span className="text-sm font-semibold text-foreground">by OriginX Labs</span>
                 </div>
 
                 <h1 className="mt-6 text-4xl md:text-6xl font-black tracking-tight">

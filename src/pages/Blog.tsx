@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { StackcraftTrackCards } from "@/components/blog/StackcraftTrackCards";
 import { 
   Search, 
   Clock, 
@@ -124,6 +125,18 @@ const Blog = () => {
               />
             </motion.div>
           </div>
+        </section>
+
+        <section className="container mx-auto px-4 pb-10">
+          <div className="mb-6">
+            <h2 className="text-2xl md:text-3xl font-black tracking-tight text-foreground">
+              Stackcraft <span className="gradient-text">Learning Tracks</span>
+            </h2>
+            <p className="text-muted-foreground mt-2">
+              Browse by core domains with official tech logos for quick scan and navigation.
+            </p>
+          </div>
+          <StackcraftTrackCards />
         </section>
 
         {/* Filters & Content */}
