@@ -13,16 +13,17 @@ import { StackcraftIcon } from "@/components/icons/StackcraftIcon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const socialLinks = [
-  { name: "X (Twitter)", icon: Twitter, url: "https://x.com/Panda_Abhishek8", color: "hover:bg-[#000]" },
-  { name: "LinkedIn", icon: Linkedin, url: "https://www.linkedin.com/in/abhishekpandaofficial/", color: "hover:bg-[#0077B5]" },
-  { name: "YouTube", icon: Youtube, url: "https://www.youtube.com/@abhishekpanda_official", color: "hover:bg-[#FF0000]" },
-  { name: "GitHub", icon: Github, url: "https://github.com/abhishekpandaOfficial", color: "hover:bg-[#333]" },
-  { name: "Instagram", icon: Instagram, url: "https://www.instagram.com/the_abhishekpanda/", color: "hover:bg-gradient-to-br hover:from-[#833AB4] hover:via-[#FD1D1D] hover:to-[#F77737]" },
-  { name: "Stackcraft", icon: StackcraftIcon, url: "https://stackcraft.io/abhishekpanda", color: "hover:bg-black" },
-  { name: "Medium", icon: BookOpen, url: "https://medium.com/@official.abhishekpanda", color: "hover:bg-[#000]" },
-  { name: "Substack", icon: Layers, url: "https://substack.com/@abhishekpanda08", color: "hover:bg-[#FF6719]" },
-  { name: "Hashnode", icon: ExternalLink, url: "https://hashnode.com/@abhishekpanda", color: "hover:bg-[#2962FF]" },
-  { name: "Stack Exchange", icon: Layers, url: "https://writing.stackexchange.com/users/82639/abhishek-official", color: "hover:bg-[#F48024]" },
+  // Order requested: Stackcraft, LinkedIn, GitHub, YouTube, then others.
+  { name: "Stackcraft", icon: StackcraftIcon, url: "https://stackcraft.io/abhishekpanda", color: "hover:bg-black", glowRgb: "17 24 39" },
+  { name: "LinkedIn", icon: Linkedin, url: "https://www.linkedin.com/in/abhishekpandaofficial/", color: "hover:bg-[#0077B5]", glowRgb: "0 119 181" },
+  { name: "GitHub", icon: Github, url: "https://github.com/abhishekpandaOfficial", color: "hover:bg-[#333]", glowRgb: "51 51 51" },
+  { name: "YouTube", icon: Youtube, url: "https://www.youtube.com/@abhishekpanda_official", color: "hover:bg-[#FF0000]", glowRgb: "255 0 0" },
+  { name: "X (Twitter)", icon: Twitter, url: "https://x.com/Panda_Abhishek8", color: "hover:bg-[#000]", glowRgb: "0 0 0" },
+  { name: "Instagram", icon: Instagram, url: "https://www.instagram.com/the_abhishekpanda/", color: "hover:bg-gradient-to-br hover:from-[#833AB4] hover:via-[#FD1D1D] hover:to-[#F77737]", glowRgb: "228 64 95" },
+  { name: "Medium", icon: BookOpen, url: "https://medium.com/@official.abhishekpanda", color: "hover:bg-[#000]", glowRgb: "0 0 0" },
+  { name: "Substack", icon: Layers, url: "https://substack.com/@abhishekpanda08", color: "hover:bg-[#FF6719]", glowRgb: "255 103 25" },
+  { name: "Hashnode", icon: ExternalLink, url: "https://hashnode.com/@abhishekpanda", color: "hover:bg-[#2962FF]", glowRgb: "41 98 255" },
+  { name: "Stack Exchange", icon: Layers, url: "https://writing.stackexchange.com/users/82639/abhishek-official", color: "hover:bg-[#F48024]", glowRgb: "244 128 36" },
 ];
 
 export const SocialSection = () => {
@@ -64,12 +65,13 @@ export const SocialSection = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={social.name}
+                    style={{ ["--brand-rgb" as any]: social.glowRgb }}
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     whileHover={{ scale: 1.1, y: -5 }}
-                    className={`group glass-card w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center transition-all duration-300 ${social.color} hover:text-primary-foreground hover:shadow-glow`}
+                    className={`group glass-card brand-glow-card w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center transition-all duration-300 ${social.color} hover:text-primary-foreground hover:shadow-glow`}
                   >
                     <social.icon className={iconClass} />
                   </motion.a>
