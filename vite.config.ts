@@ -41,7 +41,8 @@ export default defineConfig(() => ({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,json}"],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
+        // Redoc and the admin app bundle can be large; raise the precache limit.
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB limit
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api/, /^\/rest/, /^\/functions/],
         runtimeCaching: [

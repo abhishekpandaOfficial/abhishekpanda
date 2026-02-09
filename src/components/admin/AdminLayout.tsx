@@ -115,6 +115,7 @@ const sidebarGroups: SidebarGroup[] = [
     title: "SYSTEM",
     items: [
       { name: "Integrations Hub", icon: Link2, path: "/admin/integrations", badge: null, color: "text-blue-500" },
+      { name: "Ops Docs", icon: Command, path: "/admin/ops", badge: "API", color: "text-slate-300" },
       { name: "Audit Logs", icon: Shield, path: "/admin/audit-logs", badge: "IP Track", color: "text-red-500" },
       { name: "Sentinel", icon: Shield, path: "/admin/security", badge: null, color: "text-orange-500" },
       { name: "System Settings", icon: Settings, path: "/admin/settings", badge: null, color: "text-slate-500" },

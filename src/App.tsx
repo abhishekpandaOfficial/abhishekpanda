@@ -50,6 +50,7 @@ import AdminIntegrations from "@/components/admin/AdminIntegrations";
 import AdminNimbusDesk from "@/components/admin/AdminNimbusDesk";
 import AdminAuditLogs from "@/components/admin/AdminAuditLogs";
 import AdminIPManagement from "@/components/admin/AdminIPManagement";
+import AdminOpsDocs from "@/components/admin/AdminOpsDocs";
 
 // Analytics wrapper component
 const AnalyticsWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -106,6 +107,7 @@ const App = () => (
               <Route path="drive" element={<AdminEncryptedDrive />} />
               <Route path="lifemap" element={<AdminLifeMap />} />
               <Route path="integrations" element={<AdminIntegrations />} />
+              <Route path="ops" element={<AdminOpsDocs />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="security" element={<AdminSecurity />} />
               <Route path="audit-logs" element={<AdminAuditLogs />} />
