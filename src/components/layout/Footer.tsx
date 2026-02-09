@@ -57,7 +57,7 @@ const socialLinks = [
   { name: "YouTube", icon: Youtube, url: "https://www.youtube.com/@abhishekpanda_official", color: "hover:bg-[#FF0000]" },
   { name: "LinkedIn", icon: Linkedin, url: "https://www.linkedin.com/in/abhishekpandaofficial/", color: "hover:bg-[#0077B5]" },
   { name: "GitHub", icon: Github, url: "https://github.com/abhishekpandaOfficial", color: "hover:bg-[#333]" },
-  { name: "X (Twitter)", icon: XIcon, url: "https://twitter.com/abhishekpanda", color: "hover:bg-[#000]", isCustom: true },
+  { name: "X (Twitter)", icon: XIcon, url: "https://x.com/Panda_Abhishek8", color: "hover:bg-[#000]", isCustom: true },
 ];
 
 const blogLinks = [
