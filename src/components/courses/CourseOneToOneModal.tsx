@@ -15,16 +15,28 @@ type Props = {
   courseTitle: string;
   coursePriceInr?: number | null;
   courseSlug?: string;
+  oneToOneEnabled?: boolean;
+  oneToOnePriceInr?: number | null;
+  oneToOneDurationMinutes?: number | null;
+  oneToOneStartHourIst?: number | null;
+  oneToOneEndHourIst?: number | null;
+  payAfterSchedule?: boolean | null;
 };
 
-const TIME_SLOTS = [
-  { label: "20:00 IST", value: "20:00" },
-  { label: "21:00 IST", value: "21:00" },
-  { label: "22:00 IST", value: "22:00" },
-  { label: "23:00 IST", value: "23:00" },
-];
-
 const formatDate = (d?: Date) => (d ? d.toLocaleDateString("en-IN") : "Not selected");
+
+const buildSlots = (startHour: number, endHour: number, durationMinutes: number) => {
+  const slots: { label: string; value: string }[] = [];
+  const start = Math.max(0, Math.min(23, startHour));
+  const end = Math.max(0, Math.min(24, endHour));
+  if (end <= start) return slots;
+  for (let h = start; h < end; h += Math.max(1, durationMinutes / 60)) {
+    const hour = Math.floor(h);
+    const hh = String(hour).padStart(2, "0");
+    slots.push({ label: `${hh}:00 IST`, value: `${hh}:00` });
+  }
+  return slots;
+};
 
 export function CourseOneToOneModal({
   open,
@@ -32,6 +44,12 @@ export function CourseOneToOneModal({
   courseTitle,
   coursePriceInr,
   courseSlug,
+  oneToOneEnabled = true,
+  oneToOnePriceInr,
+  oneToOneDurationMinutes,
+  oneToOneStartHourIst,
+  oneToOneEndHourIst,
+  payAfterSchedule = true,
 }: Props) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -39,14 +57,20 @@ export function CourseOneToOneModal({
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [slot, setSlot] = useState<string>("");
-  const [paid, setPaid] = useState(false);
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const feeLabel = useMemo(() => {
-    if (coursePriceInr && coursePriceInr > 0) return `₹${coursePriceInr.toLocaleString("en-IN")}`;
+    const fee = oneToOnePriceInr ?? coursePriceInr;
+    if (fee && fee > 0) return `₹${fee.toLocaleString("en-IN")}`;
     return "₹9,999";
-  }, [coursePriceInr]);
+  }, [coursePriceInr, oneToOnePriceInr]);
+
+  const durationMinutes = Math.max(30, oneToOneDurationMinutes ?? 60);
+  const slots = useMemo(
+    () => buildSlots(oneToOneStartHourIst ?? 20, oneToOneEndHourIst ?? 24, durationMinutes),
+    [oneToOneStartHourIst, oneToOneEndHourIst, durationMinutes]
+  );
 
   const reset = () => {
     setName("");
@@ -55,7 +79,6 @@ export function CourseOneToOneModal({
     setStartDate(undefined);
     setEndDate(undefined);
     setSlot("");
-    setPaid(false);
     setNotes("");
     setSubmitting(false);
   };
@@ -71,7 +94,6 @@ export function CourseOneToOneModal({
     if (!mobile.trim() || mobile.trim().length < 7) return "Enter a valid mobile.";
     if (!startDate || !endDate) return "Select start and end date.";
     if (!slot) return "Select a night slot (8 to 12 IST).";
-    if (!paid) return "Please confirm payment to schedule 1:1.";
     return null;
   };
 
@@ -88,11 +110,12 @@ export function CourseOneToOneModal({
       const intent = [
         `Course: ${courseTitle}`,
         `Fee: ${feeLabel}`,
-        `Session: 1 hour daily (Night slot)`,
+        `Session: ${durationMinutes} min daily (Night slot)`,
         `Preferred slot: ${slot}`,
         `Start date: ${formatDate(startDate)}`,
         `End date: ${formatDate(endDate)}`,
         `Course slug: ${courseSlug || "n/a"}`,
+        `Payment: ${payAfterSchedule ? "Pay after schedule confirmation" : "Pay before scheduling"}`,
         `Notes: ${notes || "n/a"}`,
       ].join("\n");
 
@@ -128,10 +151,11 @@ export function CourseOneToOneModal({
       `Email: ${email || "-"}`,
       `Course: ${courseTitle}`,
       `Fee: ${feeLabel}`,
-      `Session: 1 hour daily (Night slot)`,
+      `Session: ${durationMinutes} min daily (Night slot)`,
       `Preferred slot: ${slot || "-"}`,
       `Start date: ${formatDate(startDate)}`,
       `End date: ${formatDate(endDate)}`,
+      `Payment: ${payAfterSchedule ? "Pay after schedule confirmation" : "Pay before scheduling"}`,
     ].join("\n");
     const encoded = encodeURIComponent(text);
     return `https://wa.me/918917549065?text=${encoded}`;
@@ -155,8 +179,9 @@ export function CourseOneToOneModal({
               <div className="text-sm font-semibold">1:1 Plan Details</div>
               <div className="mt-2 text-xs text-muted-foreground space-y-1">
                 <div>Fee: <span className="text-foreground font-semibold">{feeLabel}</span></div>
-                <div>Duration: 1 hour daily</div>
-                <div>Preferred time: 8 PM to 12 AM IST</div>
+                <div>Duration: {durationMinutes} minutes daily</div>
+                <div>Preferred time: {String(oneToOneStartHourIst ?? 20).padStart(2, "0")}:00 to {String(oneToOneEndHourIst ?? 24).padStart(2, "0")}:00 IST</div>
+                <div className="text-emerald-600 dark:text-emerald-400">Payment will be collected after schedule confirmation.</div>
               </div>
             </div>
 
@@ -190,7 +215,7 @@ export function CourseOneToOneModal({
                 Night slots (IST)
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">
-                {TIME_SLOTS.map((s) => (
+                {slots.map((s) => (
                   <Button
                     key={s.value}
                     type="button"
@@ -202,6 +227,9 @@ export function CourseOneToOneModal({
                   </Button>
                 ))}
               </div>
+              {!slots.length ? (
+                <div className="mt-2 text-xs text-muted-foreground">No slots configured. Update in Admin Panel.</div>
+              ) : null}
             </div>
           </div>
 
@@ -223,10 +251,9 @@ export function CourseOneToOneModal({
                 <Label>Notes (optional)</Label>
                 <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} />
               </div>
-              <label className="flex items-start gap-2 text-xs text-muted-foreground">
-                <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} />
-                I confirm that payment has been completed for this 1:1 plan.
-              </label>
+              <div className="text-xs text-muted-foreground">
+                Payment will be collected after schedule confirmation.
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-2">

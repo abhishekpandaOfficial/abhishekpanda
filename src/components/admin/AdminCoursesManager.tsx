@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -22,6 +22,7 @@ import {
   Shield,
   Lock
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,6 +36,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { BiometricVerificationModal } from "./BiometricVerificationModal";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Module {
   id: string;
@@ -47,15 +49,27 @@ interface Course {
   title: string;
   slug: string;
   description: string;
+  longDescription?: string;
   thumbnail: string;
   level: string;
   duration: string;
   price: number;
+  priceCurrency?: string;
   isPremium: boolean;
   isPublished: boolean;
   studentsCount: number;
   rating: number;
+  reviewsCount?: number;
+  tags?: string[];
+  outcomes?: string[];
+  requirements?: string[];
   modules: Module[];
+  oneToOneEnabled?: boolean;
+  oneToOnePriceInr?: number | null;
+  oneToOneDurationMinutes?: number | null;
+  oneToOneStartHourIst?: number | null;
+  oneToOneEndHourIst?: number | null;
+  oneToOnePayAfterSchedule?: boolean | null;
 }
 
 const mockCourses: Course[] = [
@@ -100,8 +114,65 @@ const mockCourses: Course[] = [
   }
 ];
 
+const mapFromDb = (row: any): Course => ({
+  id: row.id,
+  title: row.title,
+  slug: row.slug,
+  description: row.description || "",
+  longDescription: row.long_description || "",
+  thumbnail: row.thumbnail || "",
+  level: row.level || "Beginner",
+  duration: row.duration || "0 hours",
+  price: row.price_amount || 0,
+  priceCurrency: row.price_currency || "INR",
+  isPremium: !!row.is_premium,
+  isPublished: !!row.is_published,
+  studentsCount: row.students_count || 0,
+  rating: Number(row.rating || 0),
+  reviewsCount: row.reviews_count || 0,
+  tags: row.tags || [],
+  outcomes: row.outcomes || [],
+  requirements: row.requirements || [],
+  modules: Array.isArray(row.modules) ? row.modules : row.modules || [],
+  oneToOneEnabled: row.one_to_one_enabled ?? true,
+  oneToOnePriceInr: row.one_to_one_price_inr ?? null,
+  oneToOneDurationMinutes: row.one_to_one_duration_minutes ?? 60,
+  oneToOneStartHourIst: row.one_to_one_start_hour_ist ?? 20,
+  oneToOneEndHourIst: row.one_to_one_end_hour_ist ?? 24,
+  oneToOnePayAfterSchedule: row.one_to_one_pay_after_schedule ?? true,
+});
+
+const mapToDb = (course: Course) => ({
+  id: course.id || undefined,
+  title: course.title,
+  slug: course.slug,
+  description: course.description,
+  long_description: course.longDescription || course.description,
+  thumbnail: course.thumbnail || null,
+  duration: course.duration,
+  level: course.level,
+  price_amount: course.price || 0,
+  price_currency: course.priceCurrency || "INR",
+  is_premium: !!course.isPremium,
+  is_published: !!course.isPublished,
+  tags: course.tags || [],
+  modules: course.modules || [],
+  outcomes: course.outcomes || [],
+  requirements: course.requirements || [],
+  students_count: course.studentsCount || 0,
+  rating: course.rating || 0,
+  reviews_count: course.reviewsCount || 0,
+  one_to_one_enabled: course.oneToOneEnabled ?? true,
+  one_to_one_price_inr: course.oneToOnePriceInr ?? null,
+  one_to_one_duration_minutes: course.oneToOneDurationMinutes ?? 60,
+  one_to_one_start_hour_ist: course.oneToOneStartHourIst ?? 20,
+  one_to_one_end_hour_ist: course.oneToOneEndHourIst ?? 24,
+  one_to_one_pay_after_schedule: course.oneToOnePayAfterSchedule ?? true,
+});
+
 export const AdminCoursesManager = () => {
-  const [courses, setCourses] = useState<Course[]>(mockCourses);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -111,35 +182,103 @@ export const AdminCoursesManager = () => {
   const [showPublishBiometric, setShowPublishBiometric] = useState(false);
   const [pendingPublish, setPendingPublish] = useState(false);
 
-  const filteredCourses = courses.filter(course =>
-    course.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const loadCourses = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("courses")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const rows = (data || []).map(mapFromDb);
+      setCourses(rows);
+      if (!selectedCourse && rows.length) setSelectedCourse(rows[0]);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to load courses.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isUnlocked) loadCourses();
+  }, [isUnlocked]);
+
+  const filteredCourses = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return courses.filter(course => course.title.toLowerCase().includes(q));
+  }, [courses, searchQuery]);
 
   const stats = {
     totalCourses: courses.length,
     publishedCourses: courses.filter(c => c.isPublished).length,
     totalStudents: courses.reduce((sum, c) => sum + c.studentsCount, 0),
-    totalRevenue: courses.reduce((sum, c) => sum + (c.price * c.studentsCount * 0.1), 0)
+    totalRevenue: courses.reduce((sum, c) => sum + (c.price * c.studentsCount * 0.1), 0),
   };
 
   const handleCreateCourse = () => {
     const newCourse: Course = {
-      id: `course-${Date.now()}`,
+      id: "",
       title: "New Course",
       slug: "new-course",
       description: "",
+      longDescription: "",
       thumbnail: "",
       level: "Beginner",
       duration: "0 hours",
       price: 0,
+      priceCurrency: "INR",
       isPremium: false,
       isPublished: false,
       studentsCount: 0,
       rating: 0,
+      reviewsCount: 0,
+      tags: [],
+      outcomes: [],
+      requirements: [],
       modules: []
     };
     setSelectedCourse(newCourse);
     setIsEditing(true);
+  };
+
+  const handleSave = async () => {
+    if (!selectedCourse) return;
+    setIsLoading(true);
+    try {
+      const payload = mapToDb(selectedCourse);
+      if (selectedCourse.id) {
+        const { error } = await supabase.from("courses").update(payload).eq("id", selectedCourse.id);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase.from("courses").insert(payload).select("*").single();
+        if (error) throw error;
+        if (data) setSelectedCourse(mapFromDb(data));
+      }
+      toast.success("Course saved.");
+      setIsEditing(false);
+      await loadCourses();
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to save course.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedCourse?.id) return;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.from("courses").delete().eq("id", selectedCourse.id);
+      if (error) throw error;
+      toast.success("Course deleted.");
+      setSelectedCourse(null);
+      await loadCourses();
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to delete course.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleAddModule = () => {
@@ -184,6 +323,14 @@ export const AdminCoursesManager = () => {
     setShowPublishBiometric(false);
     if (selectedCourse && pendingPublish) {
       setSelectedCourse({ ...selectedCourse, isPublished: true });
+      supabase
+        .from("courses")
+        .update({ is_published: true })
+        .eq("id", selectedCourse.id)
+        .then(({ error }) => {
+          if (error) toast.error("Failed to publish course.");
+          else loadCourses();
+        });
       setPendingPublish(false);
     }
   };
@@ -192,9 +339,18 @@ export const AdminCoursesManager = () => {
     if (checked && !selectedCourse?.isPublished) {
       setPendingPublish(true);
       setShowPublishBiometric(true);
-    } else {
-      setSelectedCourse({ ...selectedCourse!, isPublished: checked });
+      return;
     }
+    if (!selectedCourse) return;
+    setSelectedCourse({ ...selectedCourse, isPublished: checked });
+    supabase
+      .from("courses")
+      .update({ is_published: checked })
+      .eq("id", selectedCourse.id)
+      .then(({ error }) => {
+        if (error) toast.error("Failed to update publish status.");
+        else loadCourses();
+      });
   };
 
   if (!isUnlocked) {
@@ -349,7 +505,7 @@ export const AdminCoursesManager = () => {
                           <Edit className="w-4 h-4 mr-2" />
                           Edit
                         </Button>
-                        <Button variant="destructive" size="sm">
+                        <Button variant="destructive" size="sm" onClick={handleDelete} disabled={isLoading}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </>
@@ -359,7 +515,12 @@ export const AdminCoursesManager = () => {
                           <X className="w-4 h-4 mr-2" />
                           Cancel
                         </Button>
-                        <Button size="sm" className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                        <Button
+                          size="sm"
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                          onClick={handleSave}
+                          disabled={isLoading}
+                        >
                           <Save className="w-4 h-4 mr-2" />
                           Save
                         </Button>
@@ -459,6 +620,71 @@ export const AdminCoursesManager = () => {
                           onCheckedChange={handlePublishToggle}
                         />
                       </div>
+                    </div>
+                  </div>
+
+                  {/* 1:1 Settings */}
+                  <div className="rounded-xl border border-border p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-primary" />
+                        <h4 className="text-sm font-semibold text-foreground">1:1 Session Settings</h4>
+                      </div>
+                      <Switch
+                        checked={selectedCourse.oneToOneEnabled ?? true}
+                        disabled={!isEditing}
+                        onCheckedChange={(checked) => setSelectedCourse({ ...selectedCourse, oneToOneEnabled: checked })}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-2 block">1:1 Fee (₹)</label>
+                        <Input
+                          type="number"
+                          value={selectedCourse.oneToOnePriceInr ?? 0}
+                          disabled={!isEditing}
+                          onChange={(e) => setSelectedCourse({ ...selectedCourse, oneToOnePriceInr: parseInt(e.target.value) })}
+                          className="bg-background"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-2 block">Duration (min)</label>
+                        <Input
+                          type="number"
+                          value={selectedCourse.oneToOneDurationMinutes ?? 60}
+                          disabled={!isEditing}
+                          onChange={(e) => setSelectedCourse({ ...selectedCourse, oneToOneDurationMinutes: parseInt(e.target.value) })}
+                          className="bg-background"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-2 block">Start Hour (IST)</label>
+                        <Input
+                          type="number"
+                          value={selectedCourse.oneToOneStartHourIst ?? 20}
+                          disabled={!isEditing}
+                          onChange={(e) => setSelectedCourse({ ...selectedCourse, oneToOneStartHourIst: parseInt(e.target.value) })}
+                          className="bg-background"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-2 block">End Hour (IST)</label>
+                        <Input
+                          type="number"
+                          value={selectedCourse.oneToOneEndHourIst ?? 24}
+                          disabled={!isEditing}
+                          onChange={(e) => setSelectedCourse({ ...selectedCourse, oneToOneEndHourIst: parseInt(e.target.value) })}
+                          className="bg-background"
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between p-2 rounded-lg border border-border">
+                      <div className="text-sm text-muted-foreground">Pay after schedule confirmation</div>
+                      <Switch
+                        checked={selectedCourse.oneToOnePayAfterSchedule ?? true}
+                        disabled={!isEditing}
+                        onCheckedChange={(checked) => setSelectedCourse({ ...selectedCourse, oneToOnePayAfterSchedule: checked })}
+                      />
                     </div>
                   </div>
 

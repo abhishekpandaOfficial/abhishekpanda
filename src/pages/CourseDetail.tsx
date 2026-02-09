@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
   Play,
@@ -72,6 +73,12 @@ const coursesDatabase: Record<string, {
     isPremium: true,
     level: "Advanced",
     tags: [".NET", "Microservices", "Docker", "Kubernetes"],
+    oneToOneEnabled: true,
+    oneToOnePriceInr: 4999,
+    oneToOneDurationMinutes: 60,
+    oneToOneStartHourIst: 20,
+    oneToOneEndHourIst: 24,
+    oneToOnePayAfterSchedule: true,
     modules: [
       {
         title: "Introduction to Microservices",
@@ -147,6 +154,12 @@ const coursesDatabase: Record<string, {
     isPremium: true,
     level: "Intermediate",
     tags: ["Python", "ML", "TensorFlow", "MLOps"],
+    oneToOneEnabled: true,
+    oneToOnePriceInr: 5999,
+    oneToOneDurationMinutes: 60,
+    oneToOneStartHourIst: 20,
+    oneToOneEndHourIst: 24,
+    oneToOnePayAfterSchedule: true,
     modules: [
       {
         title: "ML Fundamentals",
@@ -188,9 +201,40 @@ const coursesDatabase: Record<string, {
   },
 };
 
+const mapDbCourse = (row: any) => ({
+  id: row.id,
+  title: row.title,
+  description: row.description || "",
+  longDescription: row.long_description || row.description || "",
+  duration: row.duration || "0 hours",
+  students: row.students_count ? `${row.students_count.toLocaleString()}+` : "0",
+  rating: Number(row.rating || 0),
+  reviews: Number(row.reviews_count || 0),
+  price: row.price_amount ? `₹${row.price_amount}` : "Free",
+  priceAmount: row.price_amount || 0,
+  isPremium: !!row.is_premium,
+  level: row.level || "Beginner",
+  tags: row.tags || [],
+  modules: Array.isArray(row.modules) ? row.modules : row.modules || [],
+  instructor: {
+    name: "Abhishek Panda",
+    role: ".NET Architect & Cloud-Native Specialist",
+    bio: "Architect-level technical mentorship and production-grade engineering practices.",
+  },
+  outcomes: row.outcomes || [],
+  requirements: row.requirements || [],
+  oneToOneEnabled: row.one_to_one_enabled ?? true,
+  oneToOnePriceInr: row.one_to_one_price_inr ?? null,
+  oneToOneDurationMinutes: row.one_to_one_duration_minutes ?? 60,
+  oneToOneStartHourIst: row.one_to_one_start_hour_ist ?? 20,
+  oneToOneEndHourIst: row.one_to_one_end_hour_ist ?? 24,
+  oneToOnePayAfterSchedule: row.one_to_one_pay_after_schedule ?? true,
+});
+
 const CourseDetail = () => {
   const { courseId } = useParams<{ courseId: string }>();
-  const course = coursesDatabase[courseId || "1"] || coursesDatabase["1"];
+  const [dbCourse, setDbCourse] = useState<any | null>(null);
+  const [loadingCourse, setLoadingCourse] = useState(false);
   const { toast } = useToast();
 
   const [expandedModules, setExpandedModules] = useState<number[]>([0]);
@@ -200,6 +244,34 @@ const CourseDetail = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
   const [oneToOneOpen, setOneToOneOpen] = useState(false);
+
+  useEffect(() => {
+    if (!courseId) return;
+    let mounted = true;
+    setLoadingCourse(true);
+    supabase
+      .from("courses")
+      .select("*")
+      .eq("slug", courseId)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!mounted) return;
+        if (error || !data) {
+          setDbCourse(null);
+          return;
+        }
+        setDbCourse(mapDbCourse(data));
+      })
+      .finally(() => mounted && setLoadingCourse(false));
+    return () => {
+      mounted = false;
+    };
+  }, [courseId]);
+
+  const course = useMemo(() => {
+    if (dbCourse) return dbCourse;
+    return coursesDatabase[courseId || "1"] || coursesDatabase["1"];
+  }, [dbCourse, courseId]);
 
   const [syllabusForm, setSyllabusForm] = useState({
     name: "",
@@ -430,28 +502,32 @@ const CourseDetail = () => {
                         <Download className="w-4 h-4" />
                         Download Syllabus
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="w-full"
-                        onClick={() => setOneToOneOpen(true)}
-                      >
-                        1:1 Session
-                      </Button>
+                      {(course.oneToOneEnabled ?? true) ? (
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          className="w-full"
+                          onClick={() => setOneToOneOpen(true)}
+                        >
+                          1:1 Session
+                        </Button>
+                      ) : null}
                     </>
                   ) : (
                     <>
                       <Button variant="hero" size="lg" className="w-full">
                         Start Free Course
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="w-full"
-                        onClick={() => setOneToOneOpen(true)}
-                      >
-                        1:1 Session
-                      </Button>
+                      {(course.oneToOneEnabled ?? true) ? (
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          className="w-full"
+                          onClick={() => setOneToOneOpen(true)}
+                        >
+                          1:1 Session
+                        </Button>
+                      ) : null}
                     </>
                   )}
                 </div>
@@ -786,6 +862,12 @@ const CourseDetail = () => {
         courseTitle={course.title}
         coursePriceInr={course.priceAmount}
         courseSlug={courseId}
+        oneToOneEnabled={course.oneToOneEnabled}
+        oneToOnePriceInr={course.oneToOnePriceInr}
+        oneToOneDurationMinutes={course.oneToOneDurationMinutes}
+        oneToOneStartHourIst={course.oneToOneStartHourIst}
+        oneToOneEndHourIst={course.oneToOneEndHourIst}
+        payAfterSchedule={course.oneToOnePayAfterSchedule}
       />
 
       <Footer />

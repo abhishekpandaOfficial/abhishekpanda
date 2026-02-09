@@ -37,6 +37,12 @@ type UpcomingCourse = {
   price: string | null;
   priceAmount?: number | null;
   slug?: string;
+  oneToOneEnabled?: boolean;
+  oneToOnePriceInr?: number | null;
+  oneToOneDurationMinutes?: number | null;
+  oneToOneStartHourIst?: number | null;
+  oneToOneEndHourIst?: number | null;
+  oneToOnePayAfterSchedule?: boolean | null;
   includes: string[];
 };
 
@@ -51,6 +57,12 @@ const upcomingCourses: UpcomingCourse[] = [
     price: "₹24,999",
     priceAmount: 24999,
     slug: "azure-architect-series",
+    oneToOneEnabled: true,
+    oneToOnePriceInr: 24999,
+    oneToOneDurationMinutes: 60,
+    oneToOneStartHourIst: 20,
+    oneToOneEndHourIst: 24,
+    oneToOnePayAfterSchedule: true,
     includes: ["1:1 Weekend Session", "Lifetime Access"],
   },
   {
@@ -63,6 +75,12 @@ const upcomingCourses: UpcomingCourse[] = [
     price: "₹29,999",
     priceAmount: 29999,
     slug: "dotnet-architect-series",
+    oneToOneEnabled: true,
+    oneToOnePriceInr: 29999,
+    oneToOneDurationMinutes: 60,
+    oneToOneStartHourIst: 20,
+    oneToOneEndHourIst: 24,
+    oneToOnePayAfterSchedule: true,
     includes: ["1:1 Weekend Session", "Lifetime Access"],
   },
   {
@@ -75,6 +93,12 @@ const upcomingCourses: UpcomingCourse[] = [
     price: "₹9,999",
     priceAmount: 9999,
     slug: "microservices-architecture",
+    oneToOneEnabled: true,
+    oneToOnePriceInr: 9999,
+    oneToOneDurationMinutes: 60,
+    oneToOneStartHourIst: 20,
+    oneToOneEndHourIst: 24,
+    oneToOnePayAfterSchedule: true,
     includes: ["Case Studies", "Lifetime Access"],
   },
   {
@@ -87,6 +111,12 @@ const upcomingCourses: UpcomingCourse[] = [
     price: null,
     priceAmount: null,
     slug: "solid-principles",
+    oneToOneEnabled: true,
+    oneToOnePriceInr: 3999,
+    oneToOneDurationMinutes: 60,
+    oneToOneStartHourIst: 20,
+    oneToOneEndHourIst: 24,
+    oneToOnePayAfterSchedule: true,
     includes: ["Free Access", "Starter Exercises"],
   },
   {
@@ -99,6 +129,12 @@ const upcomingCourses: UpcomingCourse[] = [
     price: "₹6,999",
     priceAmount: 6999,
     slug: "design-patterns-masterclass",
+    oneToOneEnabled: true,
+    oneToOnePriceInr: 6999,
+    oneToOneDurationMinutes: 60,
+    oneToOneStartHourIst: 20,
+    oneToOneEndHourIst: 24,
+    oneToOnePayAfterSchedule: true,
     includes: ["Pattern Catalog", "Lifetime Access"],
   },
   {
@@ -111,6 +147,12 @@ const upcomingCourses: UpcomingCourse[] = [
     price: null,
     priceAmount: null,
     slug: "interview-prep-series",
+    oneToOneEnabled: true,
+    oneToOnePriceInr: 2999,
+    oneToOneDurationMinutes: 60,
+    oneToOneStartHourIst: 20,
+    oneToOneEndHourIst: 24,
+    oneToOnePayAfterSchedule: true,
     includes: ["Mock Interviews", "Question Bank"],
   },
   {
@@ -123,6 +165,12 @@ const upcomingCourses: UpcomingCourse[] = [
     price: "₹8,999",
     priceAmount: 8999,
     slug: "apache-kafka-enterprise",
+    oneToOneEnabled: true,
+    oneToOnePriceInr: 8999,
+    oneToOneDurationMinutes: 60,
+    oneToOneStartHourIst: 20,
+    oneToOneEndHourIst: 24,
+    oneToOnePayAfterSchedule: true,
     includes: ["Architecture Labs", "Lifetime Access"],
   },
   {
@@ -135,6 +183,12 @@ const upcomingCourses: UpcomingCourse[] = [
     price: null,
     priceAmount: null,
     slug: "csharp-coding",
+    oneToOneEnabled: true,
+    oneToOnePriceInr: 2499,
+    oneToOneDurationMinutes: 60,
+    oneToOneStartHourIst: 20,
+    oneToOneEndHourIst: 24,
+    oneToOnePayAfterSchedule: true,
     includes: ["Free Core Modules", "Community Support"],
   },
   {
@@ -147,6 +201,12 @@ const upcomingCourses: UpcomingCourse[] = [
     price: "₹7,999",
     priceAmount: 7999,
     slug: "nextjs-typescript-fullstack",
+    oneToOneEnabled: true,
+    oneToOnePriceInr: 7999,
+    oneToOneDurationMinutes: 60,
+    oneToOneStartHourIst: 20,
+    oneToOneEndHourIst: 24,
+    oneToOnePayAfterSchedule: true,
     includes: ["Production Project", "Lifetime Access"],
   },
 ];
@@ -159,6 +219,12 @@ const Courses = () => {
     title: string;
     priceAmount?: number | null;
     slug?: string;
+    oneToOneEnabled?: boolean;
+    oneToOnePriceInr?: number | null;
+    oneToOneDurationMinutes?: number | null;
+    oneToOneStartHourIst?: number | null;
+    oneToOneEndHourIst?: number | null;
+    oneToOnePayAfterSchedule?: boolean | null;
   } | null>(null);
 
   const { data: courses = [], isLoading } = useQuery({
@@ -385,27 +451,39 @@ const Courses = () => {
                           <h3 className="font-bold text-lg text-foreground mb-2 hover:text-primary transition-colors line-clamp-2">{course.title}</h3>
                         </Link>
                         <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">{course.description}</p>
-                        <div className="flex items-center justify-between pt-4 border-t border-border">
-                          <span className={`font-bold text-xl ${course.is_premium ? 'gradient-text' : 'text-accent'}`}>
-                            {course.is_premium && course.price_amount ? `₹${course.price_amount}` : 'Free'}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setOneToOneCourse({ title: course.title, priceAmount: course.price_amount, slug: course.slug });
-                                setOneToOneOpen(true);
-                              }}
-                            >
-                              1:1 Session
-                            </Button>
+                          <div className="flex items-center justify-between pt-4 border-t border-border">
+                            <span className={`font-bold text-xl ${course.is_premium ? 'gradient-text' : 'text-accent'}`}>
+                              {course.is_premium && course.price_amount ? `₹${course.price_amount}` : 'Free'}
+                            </span>
+                            <div className="flex items-center gap-2">
+                            {(course.one_to_one_enabled ?? true) ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setOneToOneCourse({
+                                    title: course.title,
+                                    priceAmount: course.price_amount,
+                                    slug: course.slug,
+                                    oneToOneEnabled: course.one_to_one_enabled,
+                                    oneToOnePriceInr: course.one_to_one_price_inr,
+                                    oneToOneDurationMinutes: course.one_to_one_duration_minutes,
+                                    oneToOneStartHourIst: course.one_to_one_start_hour_ist,
+                                    oneToOneEndHourIst: course.one_to_one_end_hour_ist,
+                                    oneToOnePayAfterSchedule: course.one_to_one_pay_after_schedule,
+                                  });
+                                  setOneToOneOpen(true);
+                                }}
+                              >
+                                1:1 Session
+                              </Button>
+                            ) : null}
                             <Button variant={course.is_premium ? "premium" : "default"} size="sm" asChild>
                               <Link to={`/courses/${course.slug}`}>
                                 {course.is_premium ? "Enroll" : "Start"}<ArrowRight className="w-4 h-4" />
                               </Link>
                             </Button>
-                          </div>
+                            </div>
                         </div>
                       </div>
                     </div>
@@ -456,18 +534,30 @@ const Courses = () => {
                         <Sparkles className="w-3.5 h-3.5 text-primary" />
                         Coming Soon
                       </div>
-                      <div className="mt-4 flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setOneToOneCourse({ title: course.title, priceAmount: course.priceAmount, slug: course.slug });
-                            setOneToOneOpen(true);
-                          }}
-                        >
-                          1:1 Session
-                        </Button>
-                      </div>
+                      {(course.oneToOneEnabled ?? true) ? (
+                        <div className="mt-4 flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setOneToOneCourse({
+                                title: course.title,
+                                priceAmount: course.priceAmount,
+                                slug: course.slug,
+                                oneToOneEnabled: course.oneToOneEnabled,
+                                oneToOnePriceInr: course.oneToOnePriceInr,
+                                oneToOneDurationMinutes: course.oneToOneDurationMinutes,
+                                oneToOneStartHourIst: course.oneToOneStartHourIst,
+                                oneToOneEndHourIst: course.oneToOneEndHourIst,
+                                oneToOnePayAfterSchedule: course.oneToOnePayAfterSchedule,
+                              });
+                              setOneToOneOpen(true);
+                            }}
+                          >
+                            1:1 Session
+                          </Button>
+                        </div>
+                      ) : null}
                     </motion.article>
                   ))}
                 </div>
@@ -483,6 +573,12 @@ const Courses = () => {
         courseTitle={oneToOneCourse?.title || "Course"}
         coursePriceInr={oneToOneCourse?.priceAmount ?? null}
         courseSlug={oneToOneCourse?.slug}
+        oneToOneEnabled={oneToOneCourse?.oneToOneEnabled}
+        oneToOnePriceInr={oneToOneCourse?.oneToOnePriceInr}
+        oneToOneDurationMinutes={oneToOneCourse?.oneToOneDurationMinutes}
+        oneToOneStartHourIst={oneToOneCourse?.oneToOneStartHourIst}
+        oneToOneEndHourIst={oneToOneCourse?.oneToOneEndHourIst}
+        payAfterSchedule={oneToOneCourse?.oneToOnePayAfterSchedule}
       />
 
       <Footer />
