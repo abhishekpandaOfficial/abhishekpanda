@@ -54,7 +54,7 @@ export const SocialSection = () => {
           {socialLinks.map((social, index) => {
             const iconClass =
               social.name === "Stackcraft"
-                ? "w-6 h-6 md:w-7 md:h-7 opacity-95"
+                ? "w-6 h-6 md:w-7 md:h-7 opacity-95 text-white group-hover:text-amber-200 transition-colors"
                 : "w-6 h-6 md:w-7 md:h-7";
             return (
               <Tooltip key={social.name}>
