@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Calendar as CalendarIcon, Clock, Phone, Send, User } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -54,8 +55,7 @@ export function CourseOneToOneModal({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [range, setRange] = useState<DateRange | undefined>(undefined);
   const [slot, setSlot] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -76,8 +76,7 @@ export function CourseOneToOneModal({
     setName("");
     setEmail("");
     setMobile("");
-    setStartDate(undefined);
-    setEndDate(undefined);
+    setRange(undefined);
     setSlot("");
     setNotes("");
     setSubmitting(false);
@@ -92,7 +91,7 @@ export function CourseOneToOneModal({
     if (!name.trim()) return "Enter your name.";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return "Enter a valid email.";
     if (!mobile.trim() || mobile.trim().length < 7) return "Enter a valid mobile.";
-    if (!startDate || !endDate) return "Select start and end date.";
+    if (!range?.from || !range?.to) return "Select start and end date.";
     if (!slot) return "Select a night slot (8 to 12 IST).";
     return null;
   };
@@ -112,8 +111,8 @@ export function CourseOneToOneModal({
         `Fee: ${feeLabel}`,
         `Session: ${durationMinutes} min daily (Night slot)`,
         `Preferred slot: ${slot}`,
-        `Start date: ${formatDate(startDate)}`,
-        `End date: ${formatDate(endDate)}`,
+        `Start date: ${formatDate(range?.from)}`,
+        `End date: ${formatDate(range?.to)}`,
         `Course slug: ${courseSlug || "n/a"}`,
         `Payment: ${payAfterSchedule ? "Pay after schedule confirmation" : "Pay before scheduling"}`,
         `Notes: ${notes || "n/a"}`,
@@ -153,13 +152,13 @@ export function CourseOneToOneModal({
       `Fee: ${feeLabel}`,
       `Session: ${durationMinutes} min daily (Night slot)`,
       `Preferred slot: ${slot || "-"}`,
-      `Start date: ${formatDate(startDate)}`,
-      `End date: ${formatDate(endDate)}`,
+      `Start date: ${formatDate(range?.from)}`,
+      `End date: ${formatDate(range?.to)}`,
       `Payment: ${payAfterSchedule ? "Pay after schedule confirmation" : "Pay before scheduling"}`,
     ].join("\n");
     const encoded = encodeURIComponent(text);
     return `https://wa.me/918917549065?text=${encoded}`;
-  }, [name, email, courseTitle, feeLabel, slot, startDate, endDate]);
+  }, [name, email, courseTitle, feeLabel, slot, range, durationMinutes, payAfterSchedule]);
 
   const canWhatsapp = name.trim() && email.trim();
 
@@ -187,26 +186,18 @@ export function CourseOneToOneModal({
 
             <div className="rounded-xl border border-border p-4 space-y-3">
               <div className="text-sm font-semibold">Pick dates</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <div className="text-xs text-muted-foreground mb-2">Start date</div>
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    disabled={(d) => d < new Date(Date.now() - 24 * 60 * 60 * 1000)}
-                  />
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground mb-2">End date</div>
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    disabled={(d) => d < new Date(Date.now() - 24 * 60 * 60 * 1000)}
-                  />
-                </div>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                <span>Start: <span className="text-foreground font-medium">{formatDate(range?.from)}</span></span>
+                <span>End: <span className="text-foreground font-medium">{formatDate(range?.to)}</span></span>
               </div>
+              <Calendar
+                mode="range"
+                selected={range}
+                onSelect={setRange}
+                numberOfMonths={1}
+                className="w-full p-2"
+                disabled={(d) => d < new Date(Date.now() - 24 * 60 * 60 * 1000)}
+              />
             </div>
 
             <div className="rounded-xl border border-border p-4">

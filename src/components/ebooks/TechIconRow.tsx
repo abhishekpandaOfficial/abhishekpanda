@@ -24,7 +24,7 @@ export function TechIconRow({ techStack, compact = false }: Props) {
           title={tech}
         >
           <TechIcon tech={tech} className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
-          <span className="text-foreground/85 truncate">{tech}</span>
+          <span className="text-foreground/85 truncate leading-tight whitespace-nowrap min-w-0">{tech}</span>
         </span>
       ))}
     </div>

@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { Cloud, Network } from "lucide-react";
+import { Circle, Cloud, Network } from "lucide-react";
 import {
   SiApachekafka,
   SiDocker,
@@ -42,7 +42,7 @@ const map: Record<string, IconMapEntry> = {
 export function TechIcon({ tech, className }: TechIconProps) {
   const entry = map[tech];
   if (!entry) {
-    return <span className={`text-[11px] font-medium text-muted-foreground ${className || ""}`}>{tech}</span>;
+    return <Circle className={`text-muted-foreground/60 ${className || "h-3.5 w-3.5"}`} />;
   }
 
   const Icon = entry.icon;

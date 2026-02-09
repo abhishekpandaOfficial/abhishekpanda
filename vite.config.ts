@@ -16,7 +16,7 @@ export default defineConfig(() => ({
       devOptions: {
         enabled: false,
       },
-      includeAssets: ["robots.txt", "favicon.svg", "favicon.png", "favicon-32.png", "favicon-16.png", "pwa-192x192.png", "pwa-512x512.png"],
+      includeAssets: ["robots.txt", "manifest.webmanifest", "favicon.png", "favicon-32.png", "favicon-16.png", "pwa-192x192.png", "pwa-512x512.png"],
       manifest: {
         name: "Abhishek Panda Command Center",
         short_name: "AP Admin",
