@@ -63,10 +63,10 @@ export default function EbookDetail() {
               <Book3D coverImage={ebook.coverImageUrl} title={ebook.title} spineText="Abhishek Panda" thickness={18} className="h-[340px] w-[240px]" />
             </div>
             <div>
-              <div className="flex flex-wrap gap-2 mb-3">
-                <span className={ebook.isFree ? "badge-free" : "badge-premium"}>{ebook.isFree ? "Free" : "Premium"}</span>
-                {ebook.isComingSoon ? <span className="badge-free">Coming Soon</span> : null}
-                <span className="px-2 py-1 rounded-md bg-muted text-xs font-semibold">{ebook.level}</span>
+              <div className="flex flex-wrap gap-2 gap-y-1.5 mb-3">
+                <span className={`${ebook.isFree ? "badge-free" : "badge-premium"} whitespace-nowrap leading-none`}>{ebook.isFree ? "Free" : "Premium"}</span>
+                {ebook.isComingSoon ? <span className="badge-free whitespace-nowrap leading-none">Coming Soon</span> : null}
+                <span className="px-2 py-1 rounded-md bg-muted text-xs font-semibold whitespace-nowrap leading-none">{ebook.level}</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">{ebook.title}</h1>
               <p className="text-lg text-muted-foreground mb-3">{ebook.subtitle}</p>
