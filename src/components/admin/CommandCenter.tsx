@@ -41,6 +41,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminOnboardingWizard } from "./AdminOnboardingWizard";
+import { AdminLoginAuditStream } from "./AdminLoginAuditStream";
 
 // Module status types
 type ModuleStatus = "active" | "in-progress" | "pending" | "future" | "locked";
@@ -727,6 +728,9 @@ export const CommandCenter = () => {
           ))}
         </AnimatePresence>
       </div>
+
+      {/* Realtime login audit */}
+      <AdminLoginAuditStream />
 
       {/* AETHERGRID Core Intelligence Banner */}
       <motion.div

@@ -339,6 +339,22 @@ const handler = async (req: Request): Promise<Response> => {
         .update({ used: true })
         .eq("id", otpRecord.id);
 
+      // Update server-side MFA session state (4h window), so AdminLayout can enforce it.
+      try {
+        const sessionExpires = new Date(Date.now() + 4 * 60 * 60 * 1000);
+        await supabase.from("admin_mfa_sessions").upsert(
+          {
+            user_id: userId,
+            otp_verified_at: new Date().toISOString(),
+            expires_at: sessionExpires.toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id" }
+        );
+      } catch (e) {
+        console.error("Failed to update admin_mfa_sessions:", e);
+      }
+
       // Reset rate limit on successful verification
       await resetRateLimit(supabase, userId, 'user_id');
       if (clientIP !== 'unknown') {

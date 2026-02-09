@@ -434,14 +434,11 @@ const AdminLogin = () => {
       let success = false;
       
       if (hasExistingPasskey) {
-        // Authenticate with existing passkey
-        success = await authenticateWithCredential();
+        // Server-verified WebAuthn step 4
+        success = await authenticateWithCredential({ step: 4 });
       } else {
-        // Register new passkey for fingerprint
+        // Force passkey setup first
         success = await registerCredential();
-        if (success) {
-          localStorage.setItem('admin_passkey_registered', 'true');
-        }
       }
 
       if (success) {
@@ -498,8 +495,8 @@ const AdminLogin = () => {
     setError("");
 
     try {
-      // Trigger another WebAuthn challenge for FaceID
-      const success = await authenticateWithCredential();
+      // Server-verified WebAuthn step 5
+      const success = await authenticateWithCredential({ step: 5 });
 
       if (success) {
         setFaceIdStatus('success');

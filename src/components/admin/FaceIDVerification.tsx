@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useHapticFeedback } from "@/hooks/useHapticFeedback";
 import { useBiometricSounds } from "@/hooks/useBiometricSounds";
+import { useWebAuthn } from "@/hooks/useWebAuthn";
 
 type FaceIDStatus = 
   | 'idle' 
@@ -47,6 +48,7 @@ const FaceIDVerification = ({
   const [progressMessage, setProgressMessage] = useState("");
   const haptic = useHapticFeedback();
   const sounds = useBiometricSounds();
+  const { authenticateWithCredential } = useWebAuthn();
 
   const handleFaceIDVerification = async () => {
     if (attempts >= maxAttempts) {
@@ -71,57 +73,18 @@ const FaceIDVerification = ({
       setStatus('waiting_device');
       setProgressMessage("Your iPhone will prompt you to scan your FaceID");
 
-      // Create WebAuthn challenge for FaceID (requires separate credential from iPhone)
-      const challenge = new Uint8Array(32);
-      crypto.getRandomValues(challenge);
-
-      // Get stored iPhone FaceID credential (if exists)
-      const storedCredentials = localStorage.getItem('iphone_faceid_credential');
-      
-      const publicKeyOptions: PublicKeyCredentialRequestOptions = {
-        challenge,
-        timeout: 30000,
-        userVerification: 'required',
-        rpId: window.location.hostname,
-      };
-
-      // If we have iPhone credentials, specify them
-      if (storedCredentials) {
-        try {
-          const credData = JSON.parse(storedCredentials);
-          publicKeyOptions.allowCredentials = [{
-            id: Uint8Array.from(atob(credData.id), c => c.charCodeAt(0)),
-            type: 'public-key' as const,
-            transports: ['internal', 'hybrid'] as AuthenticatorTransport[]
-          }];
-        } catch (e) {
-          // Continue without specific credentials
-        }
-      }
-
       setProgressMessage("Look at your iPhone to continue...");
       await new Promise(resolve => setTimeout(resolve, 500));
       
       setStatus('authenticating');
       setProgressMessage("Authenticating with Secure Enclave...");
 
-      // Trigger WebAuthn assertion - this will route to iPhone via Passkey Continuity
-      const assertion = await navigator.credentials.get({
-        publicKey: publicKeyOptions
-      }) as PublicKeyCredential | null;
-
-      if (assertion) {
+      const ok = await authenticateWithCredential({ step: 5 });
+      if (ok) {
         setStatus('success');
         setProgressMessage("Identity verified successfully!");
         haptic.triggerSuccess();
         sounds.playSuccess();
-        
-        // Store the credential for future use
-        const credentialId = btoa(String.fromCharCode(...new Uint8Array(assertion.rawId)));
-        localStorage.setItem('iphone_faceid_credential', JSON.stringify({
-          id: credentialId,
-          type: 'faceid'
-        }));
 
         await new Promise(resolve => setTimeout(resolve, 1500));
         onSuccess();

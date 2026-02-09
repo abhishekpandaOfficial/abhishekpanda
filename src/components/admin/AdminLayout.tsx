@@ -212,21 +212,16 @@ export const AdminLayout = () => {
           return;
         }
 
-        // Check 2FA status
-        const is2FAVerified = sessionStorage.getItem('admin_2fa_verified');
-        const timestamp = sessionStorage.getItem('admin_2fa_timestamp');
-        
-        if (is2FAVerified !== 'true' || !timestamp) {
-          navigate('/admin/login');
-          return;
-        }
+        // Enforce server-verified MFA session (admin_mfa_sessions).
+        const { data: mfaRow, error: mfaErr } = await supabase
+          .from('admin_mfa_sessions')
+          .select('fully_verified_at, expires_at')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
 
-        // Check if 2FA session is still valid (4 hours)
-        const fourHours = 4 * 60 * 60 * 1000;
-        const elapsed = Date.now() - parseInt(timestamp);
-        if (elapsed >= fourHours) {
-          sessionStorage.removeItem('admin_2fa_verified');
-          sessionStorage.removeItem('admin_2fa_timestamp');
+        const expiresAt = mfaRow?.expires_at ? new Date(mfaRow.expires_at).getTime() : 0;
+        const ok = !!mfaRow?.fully_verified_at && expiresAt > Date.now();
+        if (mfaErr || !ok) {
           navigate('/admin/login');
           return;
         }
@@ -255,7 +250,7 @@ export const AdminLayout = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, registerSession]);
 
   const handleSignOut = async () => {
     sessionStorage.removeItem('admin_2fa_verified');
