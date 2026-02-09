@@ -13,6 +13,7 @@ import { BooksSection } from "@/components/products/BooksSection";
 import { BookNewsletterPopup } from "@/components/BookNewsletterPopup";
 import {
   Download, 
+  Award,
   Phone
 } from "lucide-react";
 
