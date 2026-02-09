@@ -63,8 +63,8 @@ interface Note {
 const mockNotes: Note[] = [
   {
     id: "1",
-    title: "LLM Atlas 2.0 Vision",
-    content: "The next evolution of LLM Atlas should include real-time model updates, community benchmarks, and API integration testing...",
+    title: "LLM Galaxy Vision",
+    content: "The next evolution of LLM Galaxy should include real-time model updates, community benchmarks, and API integration testing...",
     category: "strategy",
     tags: ["product", "roadmap", "AI"],
     isPinned: true,

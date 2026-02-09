@@ -1,64 +1,61 @@
 import { motion } from "framer-motion";
-import { TrendingUp, Calendar, Sparkles, ArrowUpRight, Zap, Brain, Code, DollarSign } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { TrendingUp, Calendar, Sparkles, Zap, Brain, DollarSign } from "lucide-react";
+import type { LLMModel } from "@/hooks/useLLMModels";
+import { getBenchmarkNumber } from "@/hooks/useLLMModels";
 
-const timelineData = [
-  { date: "2023 Q1", event: "GPT-4 Release", type: "breakthrough", description: "OpenAI releases GPT-4 with multimodal capabilities" },
-  { date: "2023 Q2", event: "LLaMA Open Source", type: "open-source", description: "Meta releases LLaMA models to researchers" },
-  { date: "2023 Q3", event: "Claude 2 Launch", type: "breakthrough", description: "Anthropic releases Claude 2 with 100K context" },
-  { date: "2023 Q4", event: "Mixtral MoE", type: "architecture", description: "Mistral introduces efficient MoE architecture" },
-  { date: "2024 Q1", event: "Gemini Ultra", type: "breakthrough", description: "Google launches Gemini with native multimodality" },
-  { date: "2024 Q2", event: "LLaMA 3 Release", type: "open-source", description: "Meta releases LLaMA 3 with improved performance" },
-  { date: "2024 Q3", event: "Claude 3.5", type: "breakthrough", description: "Anthropic releases Claude 3.5 Sonnet" },
-  { date: "2024 Q4", event: "GPT-5 Preview", type: "breakthrough", description: "OpenAI announces GPT-5 capabilities" },
-];
+function parseContextWindow(v: string | null): number | null {
+  if (!v) return null;
+  const s = v.trim().toUpperCase();
+  const m = s.match(/^(\d+(\.\d+)?)(K|M)?/);
+  if (!m) return null;
+  const n = Number(m[1]);
+  if (!Number.isFinite(n)) return null;
+  const unit = m[3];
+  if (unit === "M") return Math.round(n * 1_000_000);
+  if (unit === "K") return Math.round(n * 1_000);
+  return Math.round(n);
+}
 
-const performanceData = [
-  { month: "Jan", mmlu: 82, humaneval: 78, reasoning: 75 },
-  { month: "Feb", mmlu: 83, humaneval: 79, reasoning: 77 },
-  { month: "Mar", mmlu: 85, humaneval: 82, reasoning: 80 },
-  { month: "Apr", mmlu: 86, humaneval: 84, reasoning: 82 },
-  { month: "May", mmlu: 88, humaneval: 86, reasoning: 85 },
-  { month: "Jun", mmlu: 89, humaneval: 88, reasoning: 87 },
-  { month: "Jul", mmlu: 90, humaneval: 89, reasoning: 88 },
-  { month: "Aug", mmlu: 91, humaneval: 90, reasoning: 90 },
-  { month: "Sep", mmlu: 92, humaneval: 91, reasoning: 91 },
-];
+function parseDateLike(s: string): number {
+  const t = Date.parse(s);
+  if (!Number.isNaN(t)) return t;
+  // Try year-only
+  const m = s.match(/(20\d{2})/);
+  if (m) return Date.parse(`${m[1]}-01-01`);
+  return 0;
+}
 
-const pricingData = [
-  { month: "Jan '23", gpt4: 60, claude: 40, llama: 0 },
-  { month: "Apr '23", gpt4: 50, claude: 35, llama: 0 },
-  { month: "Jul '23", gpt4: 40, claude: 30, llama: 0 },
-  { month: "Oct '23", gpt4: 30, claude: 20, llama: 0 },
-  { month: "Jan '24", gpt4: 20, claude: 15, llama: 0 },
-  { month: "Apr '24", gpt4: 15, claude: 8, llama: 0 },
-  { month: "Jul '24", gpt4: 10, claude: 3, llama: 0 },
-];
+export const TrendsInsights = (props: { models: LLMModel[] }) => {
+  const total = props.models.length;
+  const open = props.models.filter((m) => m.is_open_source).length;
+  const multimodal = props.models.filter((m) => m.is_multimodal).length;
+  const trending = props.models.filter((m) => m.is_trending).length;
+  const maxCtx = props.models
+    .map((m) => parseContextWindow(m.context_window))
+    .filter((n): n is number => typeof n === "number" && Number.isFinite(n))
+    .sort((a, b) => b - a)[0];
 
-const trendingTopics = [
-  { title: "MoE Architecture Surge", change: "+340%", description: "Mixture of Experts adoption growing rapidly" },
-  { title: "Open-Source Catches Up", change: "+89%", description: "LLaMA 3.1 closing gap with proprietary models" },
-  { title: "Context Windows Expand", change: "+500%", description: "Average context window increased 5x in 2024" },
-  { title: "Pricing Drops 80%", change: "-80%", description: "API costs decreased dramatically YoY" },
-];
+  const latest = [...props.models]
+    .filter((m) => !!m.release_date)
+    .sort((a, b) => parseDateLike(b.release_date || "") - parseDateLike(a.release_date || ""))
+    .slice(0, 10);
 
-const getEventColor = (type: string) => {
-  switch (type) {
-    case "breakthrough": return "from-primary to-secondary";
-    case "open-source": return "from-green-500 to-emerald-600";
-    case "architecture": return "from-purple-500 to-pink-600";
-    default: return "from-gray-500 to-gray-600";
-  }
-};
+  const best = [...props.models]
+    .map((m) => ({ m, v: getBenchmarkNumber(m, "mmlu") ?? 0 }))
+    .sort((a, b) => b.v - a.v)[0];
 
-export const TrendsInsights = () => {
+  const trendingTopics = [
+    { title: "Open-weight Ecosystem", change: total ? `${Math.round((open / total) * 100)}%` : "—", description: "Share of families with open weights" },
+    { title: "Multimodal Expansion", change: total ? `${Math.round((multimodal / total) * 100)}%` : "—", description: "Families supporting vision/audio modalities" },
+    { title: "Context Windows", change: maxCtx ? `${maxCtx >= 1_000_000 ? `${Math.round(maxCtx / 1_000_000)}M` : `${Math.round(maxCtx / 1000)}K`}` : "—", description: "Largest context window tracked" },
+    { title: "Trending Families", change: trending ? `${trending}+` : "—", description: "Families flagged as trending in the Galaxy DB" },
+  ];
+
   return (
     <section className="py-24 relative overflow-hidden">
       <div className="absolute inset-0 mesh-gradient opacity-20" />
-      
+
       <div className="relative container mx-auto px-4">
-        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -73,11 +70,10 @@ export const TrendsInsights = () => {
             Industry <span className="atlas-gradient-text">Evolution</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Track breakthrough moments, architecture innovations, and market shifts
+            Derived from the Galaxy database. Treat this page as the core source of truth.
           </p>
         </motion.div>
 
-        {/* Trending Topics */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -90,14 +86,12 @@ export const TrendsInsights = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.06 }}
               className="glass-card-hover rounded-2xl p-6"
             >
               <div className="flex items-center justify-between mb-3">
                 <Sparkles className="w-5 h-5 text-primary" />
-                <span className={`text-lg font-bold ${topic.change.startsWith("+") ? "text-green-500" : "text-red-500"}`}>
-                  {topic.change}
-                </span>
+                <span className="text-lg font-bold text-foreground">{topic.change}</span>
               </div>
               <h4 className="font-bold text-foreground mb-1">{topic.title}</h4>
               <p className="text-sm text-muted-foreground">{topic.description}</p>
@@ -106,7 +100,6 @@ export const TrendsInsights = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Performance Trends Chart */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -115,44 +108,30 @@ export const TrendsInsights = () => {
           >
             <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
               <Brain className="w-5 h-5 text-primary" />
-              Performance Trends (2024)
+              Current Frontier
             </h3>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={performanceData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis domain={[70, 95]} stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "12px",
-                    }}
-                  />
-                  <Area type="monotone" dataKey="mmlu" stroke="hsl(217, 91%, 60%)" fill="hsl(217, 91%, 60%)" fillOpacity={0.2} strokeWidth={2} />
-                  <Area type="monotone" dataKey="humaneval" stroke="hsl(262, 83%, 58%)" fill="hsl(262, 83%, 58%)" fillOpacity={0.2} strokeWidth={2} />
-                  <Area type="monotone" dataKey="reasoning" stroke="hsl(199, 89%, 48%)" fill="hsl(199, 89%, 48%)" fillOpacity={0.2} strokeWidth={2} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex justify-center gap-6 mt-4">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-primary" />
-                <span className="text-sm text-muted-foreground">MMLU</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-secondary" />
-                <span className="text-sm text-muted-foreground">HumanEval</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-accent" />
-                <span className="text-sm text-muted-foreground">Reasoning</span>
+            <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
+              <div className="text-sm text-muted-foreground">Highest MMLU in DB</div>
+              <div className="mt-2 text-2xl font-black text-foreground">{best?.m?.name || "—"}</div>
+              <div className="text-sm text-muted-foreground">{best?.m?.company || ""}</div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold">
+                  MMLU: {best?.v ? best.v : "—"}
+                </span>
+                {best?.m?.context_window ? (
+                  <span className="px-3 py-1 rounded-full bg-secondary/10 text-secondary text-sm font-semibold">
+                    Context: {best.m.context_window}
+                  </span>
+                ) : null}
+                {best?.m?.pricing ? (
+                  <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground text-sm font-semibold inline-flex items-center gap-1">
+                    <DollarSign className="w-3 h-3" /> {best.m.pricing}
+                  </span>
+                ) : null}
               </div>
             </div>
           </motion.div>
 
-          {/* Pricing Trends Chart */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -160,89 +139,39 @@ export const TrendsInsights = () => {
             className="glass-card rounded-2xl p-6"
           >
             <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-primary" />
-              API Pricing Trends ($/1M tokens)
+              <Zap className="w-5 h-5 text-primary" />
+              Latest Updates
             </h3>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={pricingData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "12px",
-                    }}
-                  />
-                  <Line type="monotone" dataKey="gpt4" stroke="hsl(217, 91%, 60%)" strokeWidth={2} dot={{ fill: "hsl(217, 91%, 60%)" }} />
-                  <Line type="monotone" dataKey="claude" stroke="hsl(262, 83%, 58%)" strokeWidth={2} dot={{ fill: "hsl(262, 83%, 58%)" }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex justify-center gap-6 mt-4">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-primary" />
-                <span className="text-sm text-muted-foreground">GPT-4 Class</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-secondary" />
-                <span className="text-sm text-muted-foreground">Claude Class</span>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Timeline */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-card rounded-2xl p-8"
-        >
-          <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-primary" />
-            LLM Evolution Timeline
-          </h3>
-          
-          <div className="relative">
-            {/* Timeline Line */}
-            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-secondary to-accent transform md:-translate-x-1/2" />
-            
-            {/* Timeline Events */}
-            <div className="space-y-8">
-              {timelineData.map((event, index) => (
+            <div className="space-y-3">
+              {latest.length === 0 ? (
+                <div className="text-sm text-muted-foreground">No release dates yet. Add `release_date` for each family.</div>
+              ) : null}
+              {latest.map((m, idx) => (
                 <motion.div
-                  key={event.date}
-                  initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                  key={m.slug}
+                  initial={{ opacity: 0, x: 12 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className={`relative flex items-center gap-4 ${
-                    index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-                  }`}
+                  transition={{ delay: idx * 0.03 }}
+                  className="rounded-2xl border border-border/60 bg-background/40 p-4 flex items-start justify-between gap-3"
                 >
-                  {/* Content */}
-                  <div className={`flex-1 ml-12 md:ml-0 ${index % 2 === 0 ? "md:text-right md:pr-8" : "md:pl-8"}`}>
-                    <span className="text-sm text-primary font-semibold">{event.date}</span>
-                    <h4 className="font-bold text-foreground text-lg">{event.event}</h4>
-                    <p className="text-sm text-muted-foreground">{event.description}</p>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-foreground truncate">{m.name}</div>
+                    <div className="text-sm text-muted-foreground truncate">{m.company}</div>
+                    <div className="text-xs text-primary mt-1 inline-flex items-center gap-1">
+                      <Calendar className="w-3 h-3" /> {m.release_date}
+                    </div>
                   </div>
-                  
-                  {/* Dot */}
-                  <div className={`absolute left-4 md:left-1/2 w-8 h-8 rounded-full bg-gradient-to-br ${getEventColor(event.type)} flex items-center justify-center transform md:-translate-x-1/2 shadow-lg`}>
-                    <Zap className="w-4 h-4 text-white" />
-                  </div>
-                  
-                  {/* Spacer for alignment */}
-                  <div className="hidden md:block flex-1" />
+                  {m.is_trending ? (
+                    <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">Trending</span>
+                  ) : null}
                 </motion.div>
               ))}
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );
 };
+

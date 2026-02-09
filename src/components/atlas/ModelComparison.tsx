@@ -1,35 +1,33 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { GitCompare, Plus, X, Check, Minus, ExternalLink, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
-const allModels = [
-  { id: "gpt5", name: "GPT-5.1", company: "OpenAI", params: "~2T", context: "128K", mmlu: 92.3, humaneval: 91.2, pricing: "$15/M", speed: "Fast", multimodal: true, finetuning: false, openSource: false },
-  { id: "claude35", name: "Claude 3.5 Sonnet", company: "Anthropic", params: "~175B", context: "200K", mmlu: 90.8, humaneval: 89.7, pricing: "$3/M", speed: "Fast", multimodal: true, finetuning: false, openSource: false },
-  { id: "gemini2", name: "Gemini 2.0 Pro", company: "Google", params: "~1.5T", context: "2M", mmlu: 91.5, humaneval: 88.4, pricing: "$7/M", speed: "Medium", multimodal: true, finetuning: false, openSource: false },
-  { id: "gpt4turbo", name: "GPT-4 Turbo", company: "OpenAI", params: "~1.7T", context: "128K", mmlu: 86.4, humaneval: 87.1, pricing: "$10/M", speed: "Fast", multimodal: true, finetuning: true, openSource: false },
-  { id: "llama31", name: "LLaMA 3.1 405B", company: "Meta", params: "405B", context: "128K", mmlu: 82.0, humaneval: 84.1, pricing: "Free", speed: "Medium", multimodal: false, finetuning: true, openSource: true },
-  { id: "qwen25", name: "Qwen 2.5 72B", company: "Alibaba", params: "72B", context: "128K", mmlu: 84.2, humaneval: 85.3, pricing: "Free", speed: "Fast", multimodal: true, finetuning: true, openSource: true },
-  { id: "mixtral", name: "Mixtral 8x22B", company: "Mistral AI", params: "141B", context: "64K", mmlu: 81.5, humaneval: 82.8, pricing: "Free", speed: "Fast", multimodal: false, finetuning: true, openSource: true },
-  { id: "deepseek", name: "DeepSeek V2", company: "DeepSeek", params: "236B", context: "128K", mmlu: 79.8, humaneval: 86.2, pricing: "$0.14/M", speed: "Fast", multimodal: false, finetuning: true, openSource: true },
-];
+import type { LLMModel } from "@/hooks/useLLMModels";
+import { getBenchmarkNumber } from "@/hooks/useLLMModels";
+import { Link } from "react-router-dom";
 
 const filters = [
-  { key: "openSource", label: "Open Source" },
+  { key: "open", label: "Open Weight" },
   { key: "multimodal", label: "Multimodal" },
-  { key: "finetuning", label: "Fine-tuning" },
-];
+] as const;
 
-export const ModelComparison = () => {
-  const [selectedModels, setSelectedModels] = useState<string[]>(["gpt5", "claude35", "gemini2"]);
+export const ModelComparison = (props: { models: LLMModel[] }) => {
+  const sorted = useMemo(() => {
+    const copy = [...props.models];
+    copy.sort((a, b) => (getBenchmarkNumber(b, "mmlu") ?? 0) - (getBenchmarkNumber(a, "mmlu") ?? 0));
+    return copy;
+  }, [props.models]);
+
+  const defaultSelected = sorted.slice(0, 3).map((m) => m.slug);
+  const [selectedModels, setSelectedModels] = useState<string[]>(defaultSelected);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
-  const toggleModel = (modelId: string) => {
-    if (selectedModels.includes(modelId)) {
-      setSelectedModels(selectedModels.filter((id) => id !== modelId));
+  const toggleModel = (slug: string) => {
+    if (selectedModels.includes(slug)) {
+      setSelectedModels(selectedModels.filter((id) => id !== slug));
     } else if (selectedModels.length < 4) {
-      setSelectedModels([...selectedModels, modelId]);
+      setSelectedModels([...selectedModels, slug]);
     }
   };
 
@@ -41,19 +39,27 @@ export const ModelComparison = () => {
     }
   };
 
-  const filteredModels = allModels.filter((model) => {
-    if (activeFilters.length === 0) return true;
-    return activeFilters.every((filter) => model[filter as keyof typeof model] === true);
-  });
+  const filteredModels = useMemo(() => {
+    if (activeFilters.length === 0) return sorted;
+    return sorted.filter((m) =>
+      activeFilters.every((f) => {
+        if (f === "open") return !!m.is_open_source;
+        if (f === "multimodal") return !!m.is_multimodal;
+        return true;
+      })
+    );
+  }, [sorted, activeFilters]);
 
-  const comparisonModels = allModels.filter((m) => selectedModels.includes(m.id));
+  const comparisonModels = useMemo(
+    () => sorted.filter((m) => selectedModels.includes(m.slug)),
+    [sorted, selectedModels]
+  );
 
   return (
     <section id="model-comparison" className="py-24 relative overflow-hidden">
       <div className="absolute inset-0 mesh-gradient opacity-20" />
-      
+
       <div className="relative container mx-auto px-4">
-        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -68,11 +74,10 @@ export const ModelComparison = () => {
             Compare <span className="atlas-gradient-text">Side by Side</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Select up to 4 models to compare their capabilities, pricing, and performance
+            Select up to 4 model families and compare their latest public characteristics.
           </p>
         </motion.div>
 
-        {/* Filters */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -95,33 +100,28 @@ export const ModelComparison = () => {
           ))}
         </motion.div>
 
-        {/* Model Selector */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="flex flex-wrap justify-center gap-2 mb-12"
         >
-          {filteredModels.map((model) => (
+          {filteredModels.slice(0, 20).map((model) => (
             <Button
-              key={model.id}
-              variant={selectedModels.includes(model.id) ? "default" : "outline"}
+              key={model.slug}
+              variant={selectedModels.includes(model.slug) ? "default" : "outline"}
               size="sm"
-              onClick={() => toggleModel(model.id)}
+              onClick={() => toggleModel(model.slug)}
               className="gap-2"
-              disabled={!selectedModels.includes(model.id) && selectedModels.length >= 4}
+              disabled={!selectedModels.includes(model.slug) && selectedModels.length >= 4}
+              title={model.company}
             >
-              {selectedModels.includes(model.id) ? (
-                <Check className="w-3 h-3" />
-              ) : (
-                <Plus className="w-3 h-3" />
-              )}
+              {selectedModels.includes(model.slug) ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
               {model.name}
             </Button>
           ))}
         </motion.div>
 
-        {/* Comparison Table */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -132,20 +132,17 @@ export const ModelComparison = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border/50 bg-muted/30">
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-40">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-44">
                     Feature
                   </th>
                   {comparisonModels.map((model) => (
-                    <th key={model.id} className="px-6 py-4 text-center min-w-[180px]">
+                    <th key={model.slug} className="px-6 py-4 text-center min-w-[200px]">
                       <div className="flex flex-col items-center gap-2">
-                        <span className="font-bold text-foreground">{model.name}</span>
+                        <Link to={`/llm-galaxy/model/${model.slug}`} className="font-bold text-foreground hover:underline underline-offset-4">
+                          {model.name}
+                        </Link>
                         <span className="text-xs text-muted-foreground">{model.company}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => toggleModel(model.id)}
-                        >
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toggleModel(model.slug)}>
                           <X className="w-3 h-3" />
                         </Button>
                       </div>
@@ -154,122 +151,82 @@ export const ModelComparison = () => {
                 </tr>
               </thead>
               <tbody>
-                {/* Parameters */}
-                <tr className="border-b border-border/30 hover:bg-muted/10">
-                  <td className="px-6 py-4 font-medium text-foreground">Parameters</td>
-                  {comparisonModels.map((model) => (
-                    <td key={model.id} className="px-6 py-4 text-center font-semibold">{model.params}</td>
-                  ))}
-                </tr>
-                
-                {/* Context Window */}
-                <tr className="border-b border-border/30 hover:bg-muted/10">
-                  <td className="px-6 py-4 font-medium text-foreground">Context Window</td>
-                  {comparisonModels.map((model) => (
-                    <td key={model.id} className="px-6 py-4 text-center">
-                      <Badge variant="outline">{model.context}</Badge>
-                    </td>
-                  ))}
-                </tr>
-                
-                {/* MMLU */}
-                <tr className="border-b border-border/30 hover:bg-muted/10">
-                  <td className="px-6 py-4 font-medium text-foreground">MMLU Score</td>
-                  {comparisonModels.map((model) => (
-                    <td key={model.id} className="px-6 py-4 text-center">
-                      <span className="px-3 py-1 rounded-lg bg-primary/10 text-primary font-bold">{model.mmlu}%</span>
-                    </td>
-                  ))}
-                </tr>
-                
-                {/* HumanEval */}
-                <tr className="border-b border-border/30 hover:bg-muted/10">
-                  <td className="px-6 py-4 font-medium text-foreground">HumanEval</td>
-                  {comparisonModels.map((model) => (
-                    <td key={model.id} className="px-6 py-4 text-center">
-                      <span className="px-3 py-1 rounded-lg bg-secondary/10 text-secondary font-bold">{model.humaneval}%</span>
-                    </td>
-                  ))}
-                </tr>
-                
-                {/* Pricing */}
-                <tr className="border-b border-border/30 hover:bg-muted/10">
-                  <td className="px-6 py-4 font-medium text-foreground">Pricing</td>
-                  {comparisonModels.map((model) => (
-                    <td key={model.id} className="px-6 py-4 text-center">
-                      <span className={`px-3 py-1 rounded-lg font-semibold ${model.pricing === "Free" ? "bg-green-500/10 text-green-600" : "bg-muted"}`}>
-                        {model.pricing}
+                {[
+                  {
+                    label: "Parameters",
+                    render: (m: LLMModel) => <span className="font-semibold">{m.parameters || "—"}</span>,
+                  },
+                  {
+                    label: "Context Window",
+                    render: (m: LLMModel) => <Badge variant="outline">{m.context_window || "—"}</Badge>,
+                  },
+                  {
+                    label: "MMLU",
+                    render: (m: LLMModel) => (
+                      <span className="px-3 py-1 rounded-lg bg-primary/10 text-primary font-bold">
+                        {getBenchmarkNumber(m, "mmlu") ?? "—"}
                       </span>
-                    </td>
-                  ))}
-                </tr>
-                
-                {/* Speed */}
-                <tr className="border-b border-border/30 hover:bg-muted/10">
-                  <td className="px-6 py-4 font-medium text-foreground">Speed</td>
-                  {comparisonModels.map((model) => (
-                    <td key={model.id} className="px-6 py-4 text-center text-muted-foreground">{model.speed}</td>
-                  ))}
-                </tr>
-                
-                {/* Multimodal */}
-                <tr className="border-b border-border/30 hover:bg-muted/10">
-                  <td className="px-6 py-4 font-medium text-foreground">Multimodal</td>
-                  {comparisonModels.map((model) => (
-                    <td key={model.id} className="px-6 py-4 text-center">
-                      {model.multimodal ? (
-                        <Check className="w-5 h-5 text-green-500 mx-auto" />
-                      ) : (
-                        <Minus className="w-5 h-5 text-muted-foreground mx-auto" />
-                      )}
-                    </td>
-                  ))}
-                </tr>
-                
-                {/* Fine-tuning */}
-                <tr className="border-b border-border/30 hover:bg-muted/10">
-                  <td className="px-6 py-4 font-medium text-foreground">Fine-tuning</td>
-                  {comparisonModels.map((model) => (
-                    <td key={model.id} className="px-6 py-4 text-center">
-                      {model.finetuning ? (
-                        <Check className="w-5 h-5 text-green-500 mx-auto" />
-                      ) : (
-                        <Minus className="w-5 h-5 text-muted-foreground mx-auto" />
-                      )}
-                    </td>
-                  ))}
-                </tr>
-                
-                {/* Open Source */}
-                <tr className="hover:bg-muted/10">
-                  <td className="px-6 py-4 font-medium text-foreground">Open Source</td>
-                  {comparisonModels.map((model) => (
-                    <td key={model.id} className="px-6 py-4 text-center">
-                      {model.openSource ? (
+                    ),
+                  },
+                  {
+                    label: "HumanEval",
+                    render: (m: LLMModel) => (
+                      <span className="px-3 py-1 rounded-lg bg-secondary/10 text-secondary font-bold">
+                        {getBenchmarkNumber(m, "humaneval") ?? "—"}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: "Pricing",
+                    render: (m: LLMModel) => (
+                      <span className={`px-3 py-1 rounded-lg font-semibold ${m.pricing === "Free" ? "bg-green-500/10 text-green-600" : "bg-muted"}`}>
+                        {m.pricing || "—"}
+                      </span>
+                    ),
+                  },
+                  { label: "Speed", render: (m: LLMModel) => <span className="text-muted-foreground">{m.speed || "—"}</span> },
+                  {
+                    label: "Multimodal",
+                    render: (m: LLMModel) =>
+                      m.is_multimodal ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <Minus className="w-5 h-5 text-muted-foreground mx-auto" />,
+                  },
+                  {
+                    label: "Open Weight",
+                    render: (m: LLMModel) =>
+                      m.is_open_source ? (
                         <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20">Open</Badge>
                       ) : (
                         <Badge variant="outline">Closed</Badge>
-                      )}
-                    </td>
-                  ))}
-                </tr>
+                      ),
+                  },
+                ].map((row) => (
+                  <tr key={row.label} className="border-b border-border/30 hover:bg-muted/10">
+                    <td className="px-6 py-4 font-medium text-foreground">{row.label}</td>
+                    {comparisonModels.map((m) => (
+                      <td key={`${m.slug}-${row.label}`} className="px-6 py-4 text-center">
+                        {row.render(m)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-          
-          {/* API Links */}
-          <div className="p-6 border-t border-border/50 bg-muted/20">
-            <div className="flex flex-wrap justify-center gap-4">
-              {comparisonModels.map((model) => (
-                <Button key={model.id} variant="outline" size="sm" className="gap-2">
-                  {model.name} API
-                  <ExternalLink className="w-3 h-3" />
+
+          <div className="p-4 border-t border-border/50 flex flex-wrap items-center justify-center gap-3">
+            {comparisonModels.map((m) =>
+              m.api_docs_url ? (
+                <Button key={m.slug} variant="outline" size="sm" asChild className="gap-2">
+                  <a href={m.api_docs_url} target="_blank" rel="noopener noreferrer">
+                    {m.name} docs <ExternalLink className="w-4 h-4" />
+                  </a>
                 </Button>
-              ))}
-            </div>
+              ) : null
+            )}
           </div>
         </motion.div>
       </div>
     </section>
   );
 };
+

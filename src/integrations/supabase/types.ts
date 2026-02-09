@@ -1004,13 +1004,17 @@ export type Database = {
           benchmarks: Json | null
           color: string | null
           company: string
+          considerations: string[] | null
           context_window: string | null
           created_at: string
           description: string | null
+          homepage_url: string | null
+          huggingface_url: string | null
           id: string
           is_multimodal: boolean | null
           is_open_source: boolean | null
           is_trending: boolean | null
+          license: string | null
           logo: string | null
           name: string
           parameters: string | null
@@ -1030,13 +1034,17 @@ export type Database = {
           benchmarks?: Json | null
           color?: string | null
           company: string
+          considerations?: string[] | null
           context_window?: string | null
           created_at?: string
           description?: string | null
+          homepage_url?: string | null
+          huggingface_url?: string | null
           id?: string
           is_multimodal?: boolean | null
           is_open_source?: boolean | null
           is_trending?: boolean | null
+          license?: string | null
           logo?: string | null
           name: string
           parameters?: string | null
@@ -1056,13 +1064,17 @@ export type Database = {
           benchmarks?: Json | null
           color?: string | null
           company?: string
+          considerations?: string[] | null
           context_window?: string | null
           created_at?: string
           description?: string | null
+          homepage_url?: string | null
+          huggingface_url?: string | null
           id?: string
           is_multimodal?: boolean | null
           is_open_source?: boolean | null
           is_trending?: boolean | null
+          license?: string | null
           logo?: string | null
           name?: string
           parameters?: string | null

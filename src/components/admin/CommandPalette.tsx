@@ -57,7 +57,7 @@ const commandItems: CommandItem[] = [
   { name: "Digital Products", icon: Package, path: "/admin/products", category: "Creator Suite", keywords: ["products", "digital", "marketplace"] },
   
   // AI & Automation
-  { name: "LLM Atlas", icon: Brain, path: "/admin/llm-atlas", category: "AI & Automation", keywords: ["llm", "ai", "models", "atlas"] },
+  { name: "LLM Galaxy", icon: Brain, path: "/admin/llm-galaxy", category: "AI & Automation", keywords: ["llm", "ai", "models", "galaxy"] },
   { name: "AETHERGRID", icon: Zap, path: "/admin/workflows", category: "AI & Automation", keywords: ["workflows", "automation", "ai"] },
   { name: "OmniFlow Social", icon: Share2, path: "/admin/social", category: "AI & Automation", keywords: ["social", "media", "posts"] },
   { name: "Chronos Scheduler", icon: Clock, path: "/admin/jobs", category: "AI & Automation", keywords: ["schedule", "cron", "jobs", "timer"] },
@@ -84,7 +84,7 @@ const commandItems: CommandItem[] = [
   { name: "Courses", icon: GraduationCap, path: "/courses", category: "Public Pages", keywords: ["courses"] },
   { name: "Products", icon: Package, path: "/products", category: "Public Pages", keywords: ["products", "store"] },
   { name: "Contact", icon: Mail, path: "/contact", category: "Public Pages", keywords: ["contact", "reach"] },
-  { name: "LLM Atlas Public", icon: Globe, path: "/llm-atlas", category: "Public Pages", keywords: ["atlas", "llm"] },
+  { name: "LLM Galaxy Public", icon: Globe, path: "/llm-galaxy", category: "Public Pages", keywords: ["galaxy", "llm"] },
 ];
 
 export const CommandPalette = () => {

@@ -102,7 +102,7 @@ const App = () => (
               <Route path="nimbus" element={<AdminNimbusDesk />} />
               <Route path="courses" element={<AdminCoursesManager />} />
               <Route path="products" element={<AdminProductsManager />} />
-              <Route path="llm-atlas" element={<AdminLLMAtlasManager />} />
+              <Route path="llm-galaxy" element={<AdminLLMAtlasManager />} />
               <Route path="workflows" element={<AdminWorkflows />} />
               <Route path="social" element={<AdminSocialHub />} />
               <Route path="jobs" element={<AdminScheduledJobs />} />

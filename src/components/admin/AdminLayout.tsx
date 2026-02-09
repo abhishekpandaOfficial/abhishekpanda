@@ -87,7 +87,7 @@ const sidebarGroups: SidebarGroup[] = [
   {
     title: "AI & AUTOMATION",
     items: [
-      { name: "LLM Atlas", icon: Brain, path: "/admin/llm-atlas", badge: "ATLASCORE", color: "text-violet-500" },
+      { name: "LLM Galaxy", icon: Brain, path: "/admin/llm-galaxy", badge: "GALAXYCORE", color: "text-violet-500" },
       { name: "AETHERGRID", icon: Zap, path: "/admin/workflows", badge: "AI", color: "text-indigo-500" },
       { name: "OmniFlow Social", icon: Share2, path: "/admin/social", badge: null, color: "text-blue-600" },
       { name: "Chronos Scheduler", icon: Clock, path: "/admin/jobs", badge: null, color: "text-amber-500" },
@@ -375,7 +375,7 @@ export const AdminLayout = () => {
                               "px-1.5 py-0.5 text-[9px] font-medium rounded",
                               item.badge === "AI" 
                                 ? "bg-gradient-to-r from-violet-500/30 to-blue-500/30 text-violet-300 border border-violet-500/30"
-                                : item.badge === "ATLASCORE"
+                                : item.badge === "GALAXYCORE"
                                 ? "bg-violet-500/20 text-violet-300 border border-violet-500/30"
                                 : item.badge === "Encrypted"
                                 ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"

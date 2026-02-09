@@ -80,6 +80,10 @@ interface LLMModel {
   architecture: string | null;
   release_date: string | null;
   api_docs_url: string | null;
+  homepage_url: string | null;
+  huggingface_url: string | null;
+  license: string | null;
+  considerations: string[] | null;
   strengths: string[] | null;
   weaknesses: string[] | null;
   use_cases: string[] | null;
@@ -154,6 +158,10 @@ export const AdminLLMAtlasManager = () => {
         architecture: model.architecture,
         release_date: model.release_date,
         api_docs_url: model.api_docs_url,
+        homepage_url: (model as any).homepage_url,
+        huggingface_url: (model as any).huggingface_url,
+        license: (model as any).license,
+        considerations: (model as any).considerations,
         strengths: model.strengths,
         weaknesses: model.weaknesses,
         use_cases: model.use_cases,
@@ -209,6 +217,10 @@ export const AdminLLMAtlasManager = () => {
             architecture: model.architecture || null,
             release_date: model.release_date || null,
             api_docs_url: model.api_docs_url || null,
+            homepage_url: (model as any).homepage_url || null,
+            huggingface_url: (model as any).huggingface_url || null,
+            license: (model as any).license || null,
+            considerations: (model as any).considerations || null,
             strengths: model.strengths || null,
             weaknesses: model.weaknesses || null,
             use_cases: model.use_cases || null,
@@ -596,6 +608,53 @@ export const AdminLLMAtlasManager = () => {
               />
             </div>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-foreground">Website URL</Label>
+              <Input
+                value={formData.homepage_url || ""}
+                onChange={(e) => setFormData({ ...formData, homepage_url: e.target.value })}
+                placeholder="https://..."
+                className="bg-background border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-foreground">Hugging Face URL</Label>
+              <Input
+                value={formData.huggingface_url || ""}
+                onChange={(e) => setFormData({ ...formData, huggingface_url: e.target.value })}
+                placeholder="https://huggingface.co/org-or-model"
+                className="bg-background border-border"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-foreground">License</Label>
+              <Input
+                value={formData.license || ""}
+                onChange={(e) => setFormData({ ...formData, license: e.target.value })}
+                placeholder="e.g., Proprietary, Apache-2.0"
+                className="bg-background border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-foreground">Considerations (comma-separated)</Label>
+              <Input
+                value={formData.considerations?.join(", ") || ""}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    considerations: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
+                  })
+                }
+                placeholder="Licensing, data residency, vendor risk..."
+                className="bg-background border-border"
+              />
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="features" className="space-y-4 mt-4">
@@ -606,7 +665,7 @@ export const AdminLLMAtlasManager = () => {
                   checked={formData.is_open_source || false}
                   onCheckedChange={(checked) => setFormData({ ...formData, is_open_source: checked })}
                 />
-                <Label className="text-foreground">Open Source</Label>
+                <Label className="text-foreground">Open Weight</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Switch
@@ -730,10 +789,10 @@ export const AdminLLMAtlasManager = () => {
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-foreground flex items-center gap-3">
             <Brain className="w-7 h-7 sm:w-8 sm:h-8 text-primary" />
-            LLM Atlas Manager
+            LLM Galaxy Manager
           </h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-            Manage AI models in the OriginX LLM Atlas database
+            Manage AI models in the OriginX LLM Galaxy database
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -1017,7 +1076,7 @@ export const AdminLLMAtlasManager = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-card border-border">
                           <DropdownMenuItem
-                            onClick={() => window.open(`/llm-atlas/model/${model.slug}`, "_blank")}
+                            onClick={() => window.open(`/llm-galaxy/model/${model.slug}`, "_blank")}
                             className="hover:bg-muted"
                           >
                             <Eye className="w-4 h-4 mr-2" />

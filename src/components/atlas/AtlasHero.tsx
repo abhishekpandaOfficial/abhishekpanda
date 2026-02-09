@@ -1,17 +1,15 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, BarChart3, GitCompare, Globe, Sparkles, Zap, Brain, Layers } from "lucide-react";
+import { BarChart3, GitCompare, Globe, Sparkles, Brain, Layers, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AtlasSearch } from "./AtlasSearch";
+import type { LLMModel } from "@/hooks/useLLMModels";
+import { getLastUpdated } from "@/hooks/useLLMModels";
 
-const stats = [
-  { label: "Global Models", value: "400+", icon: Globe },
-  { label: "Production-grade", value: "120+", icon: Zap },
-  { label: "Closed-source Leaders", value: "50+", icon: Brain },
-  { label: "Weekly Updates", value: "Live", icon: Sparkles },
-];
-
-export const AtlasHero = () => {
+export const AtlasHero = (props: { models: LLMModel[]; lastUpdated: Date | null }) => {
+  const last = props.lastUpdated || getLastUpdated(props.models);
+  const total = props.models.length;
+  const open = props.models.filter((m) => m.is_open_source).length;
+  const closed = total - open;
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
@@ -76,7 +74,7 @@ export const AtlasHero = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8"
           >
             <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold text-primary">OriginX LLM Atlas</span>
+            <span className="text-sm font-semibold text-primary">OriginX LLM Galaxy</span>
           </motion.div>
 
           {/* Main Headline */}
@@ -117,7 +115,7 @@ export const AtlasHero = () => {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="mb-8"
           >
-            <AtlasSearch />
+            <AtlasSearch models={props.models} />
           </motion.div>
 
           {/* CTA Buttons */}
@@ -152,7 +150,7 @@ export const AtlasHero = () => {
               onClick={() => document.getElementById('model-families')?.scrollIntoView({ behavior: 'smooth' })}
             >
               <Layers className="w-5 h-5" />
-              Browse Atlas
+              Browse Galaxy
             </Button>
           </motion.div>
 
@@ -163,7 +161,16 @@ export const AtlasHero = () => {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto"
           >
-            {stats.map((stat, index) => (
+            {[
+              { label: "Model Families", value: total ? `${total}+` : "—", icon: Globe },
+              { label: "Open Weight", value: total ? `${open}+` : "—", icon: Zap },
+              { label: "Closed Source", value: total ? `${closed}+` : "—", icon: Brain },
+              {
+                label: "Last Updated",
+                value: last ? last.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—",
+                icon: Sparkles,
+              },
+            ].map((stat, index) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, scale: 0.9 }}

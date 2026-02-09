@@ -128,14 +128,14 @@ const modules: Module[] = [
   // Research
   {
     id: "atlascore",
-    name: "LLM Atlas (ATLASCORE)",
+    name: "LLM Galaxy (GALAXYCORE)",
     description: "Model index, benchmarks, comparison tool, update ingestors",
     icon: Brain,
     status: "active",
     category: "research",
     importance: "high",
     dependencies: [],
-    path: "/admin/llm-atlas",
+    path: "/admin/llm-galaxy",
     gradient: "from-pink-500 via-rose-500 to-red-500",
     iconBg: "bg-pink-500/20",
   },

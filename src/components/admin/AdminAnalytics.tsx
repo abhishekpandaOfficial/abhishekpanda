@@ -215,7 +215,7 @@ export const AdminAnalytics = () => {
     const sections: Record<string, number> = {
       Blog: 0,
       Courses: 0,
-      "LLM Atlas": 0,
+      "LLM Galaxy": 0,
       Products: 0,
       Other: 0,
     };
@@ -223,7 +223,7 @@ export const AdminAnalytics = () => {
     pageViewsData.forEach((pv) => {
       if (pv.page_path.includes("/blog")) sections.Blog++;
       else if (pv.page_path.includes("/courses")) sections.Courses++;
-      else if (pv.page_path.includes("/llm-atlas")) sections["LLM Atlas"]++;
+      else if (pv.page_path.includes("/llm-galaxy")) sections["LLM Galaxy"]++;
       else if (pv.page_path.includes("/products")) sections.Products++;
       else sections.Other++;
     });
