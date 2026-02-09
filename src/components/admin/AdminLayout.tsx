@@ -424,7 +424,7 @@ export const AdminLayout = () => {
           {(!collapsed || isMobile) && (
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-sm truncate text-foreground">Abhishek Panda</div>
-              <div className="text-[10px] text-muted-foreground truncate">CEO & Founder • CropXon</div>
+              <div className="text-[10px] text-muted-foreground truncate">CEO & Founder • OriginX Labs</div>
             </div>
           )}
           {(!collapsed || isMobile) && (

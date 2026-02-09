@@ -116,7 +116,7 @@ const mockWebhooks: Webhook[] = [
   {
     id: "1",
     name: "Payment Notifications",
-    url: "https://api.cropxon.com/webhooks/payments",
+    url: "https://api.originxlabs.com/webhooks/payments",
     events: ["payment.success", "payment.failed", "refund.created"],
     status: "active",
     lastTriggered: "2024-12-11 14:30",
@@ -125,7 +125,7 @@ const mockWebhooks: Webhook[] = [
   {
     id: "2",
     name: "Course Enrollments",
-    url: "https://api.cropxon.com/webhooks/enrollments",
+    url: "https://api.originxlabs.com/webhooks/enrollments",
     events: ["enrollment.created", "enrollment.completed"],
     status: "active",
     lastTriggered: "2024-12-10 09:15",

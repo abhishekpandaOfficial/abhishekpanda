@@ -33,7 +33,6 @@ import virtusaLogo from "@/assets/company-logos/virtusa.png";
 import wellsfargoLogo from "@/assets/company-logos/wellsfargo.png";
 import soleraLogo from "@/assets/company-logos/solera.png";
 import originxLogo from "@/assets/company-logos/originx.png";
-import cropxonLogo from "@/assets/company-logos/cropxon.png";
 
 interface TimelineProject {
   title: string;
@@ -266,7 +265,7 @@ const timelineData: TimelineItem[] = [
     year: "2025",
     title: "Founder & CEO",
     subtitle: "OriginX Labs",
-    description: "R&D Product Division of CropXon Innovations Pvt Ltd — Building next-gen AI systems.",
+    description: "OriginX Labs Pvt. Ltd. — Building next-gen AI systems.",
     type: "founder",
     company: "OriginX Labs",
     companyLogo: originxLogo,
@@ -280,7 +279,7 @@ const timelineData: TimelineItem[] = [
         "AI workflow orchestration",
         "Cloud-native automation engines",
         "LLM infrastructure and toolchains",
-        "Flagship innovation arm of CropXon"
+        "Product innovation and R&D"
       ]
     }
   },
@@ -327,13 +326,13 @@ const timelineData: TimelineItem[] = [
   },
   {
     year: "Today",
-    title: "CEO & Managing Director",
-    subtitle: "CropXon Innovations Pvt Ltd",
+    title: "CEO of OriginX Labs Private Limited",
+    subtitle: "OriginX Labs Pvt. Ltd.",
     description: ".NET Architect • AI/ML Engineer • Enterprise Systems Designer — Building next-gen digital ecosystems.",
     type: "founder",
-    company: "CropXon Innovations",
-    companyLogo: cropxonLogo,
-    companyColor: "#10B981",
+    company: "OriginX Labs Pvt. Ltd.",
+    companyLogo: originxLogo,
+    companyColor: "#111827",
     icon: Crown,
     projects: {
       title: "Current Focus Areas",
