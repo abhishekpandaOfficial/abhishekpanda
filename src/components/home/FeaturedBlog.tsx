@@ -1,82 +1,32 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { ArrowRight, Clock, Calendar, Lock, Sparkles, FileText } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
-
-const isMissingTableError = (err: unknown) => {
-  if (!err || typeof err !== "object") return false;
-  return (err as { code?: unknown }).code === "PGRST205";
-};
 
 export const FeaturedBlog = () => {
-  const { data: posts = [], isLoading } = useQuery({
-    queryKey: ['featured-blog-posts'],
-    queryFn: async () => {
-      const res = await supabase
-        .from('blog_posts_public_cache')
-        .select('*')
-        .eq('is_published', true)
-        .order('published_at', { ascending: false })
-        .limit(6);
+  const stackcraftProfileUrl = "https://stackcraft.io/abhishekpanda";
+  const stackcraftBaseUrl = "https://stackcraft.io";
 
-      if (!res.error) return res.data || [];
-
-      if (isMissingTableError(res.error)) {
-        const fallback = await supabase
-          .from('blog_posts')
-          .select('*')
-          .eq('is_published', true)
-          .order('published_at', { ascending: false })
-          .limit(6);
-        if (fallback.error) throw fallback.error;
-        return fallback.data || [];
-      }
-
-      throw res.error;
-    },
-  });
-
-  const getReadTime = (minutes: number | null | undefined) => {
-    const m = typeof minutes === "number" && Number.isFinite(minutes) ? minutes : 5;
-    return `${Math.max(1, Math.round(m))} min`;
-  };
-
-  const readMinutesFromRow = (row: unknown) => {
-    if (!row || typeof row !== "object") return undefined;
-    const v = (row as { reading_time_minutes?: unknown }).reading_time_minutes;
-    return typeof v === "number" ? v : undefined;
-  };
-
-  if (isLoading) {
-    return (
-      <section className="py-24 relative overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="glass-card rounded-2xl overflow-hidden">
-                <Skeleton className="aspect-video w-full" />
-                <div className="p-6 space-y-3">
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-6 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (posts.length === 0) {
-    return null;
-  }
-
-  const mainFeatured = posts[0];
-  const gridBlogs = posts.slice(1, 4);
+  const tracks = [
+    { title: ".NET Architect (From Fundamentals to Architect)", tags: [".NET", "Architecture", "C#"], rgb: "99 102 241" },
+    { title: "MICROSERVICES (From Zero to Hero)", tags: ["Microservices", "Distributed Systems"], rgb: "34 197 94" },
+    { title: "Azure Mastery (Fundamentals to Architect)", tags: ["Azure", "Cloud", "DevOps"], rgb: "59 130 246" },
+    { title: "SOLID Principles", tags: ["Clean Code", "OOP"], rgb: "245 158 11" },
+    { title: "DESIGN PATTERNS", tags: ["GoF", "System Design"], rgb: "168 85 247" },
+    { title: "SQL (Zero to Mastery)", tags: ["SQL", "Databases"], rgb: "14 165 233" },
+    { title: "NO SQL (Zero to Mastery)", tags: ["NoSQL", "Data Modeling"], rgb: "236 72 153" },
+    { title: "AI/ML using .NET (Zero to ML Engineer)", tags: ["AI/ML", ".NET", "ML.NET"], rgb: "239 68 68" },
+    { title: "AI/ML Fundamentals Series", tags: ["AI/ML", "Foundations"], rgb: "16 185 129" },
+    { title: "Deep Learning Mastery", tags: ["Deep Learning", "Neural Nets"], rgb: "124 58 237" },
+    { title: "NLP (Basic to Agentic AI)", tags: ["NLP", "LLMs", "Agents"], rgb: "217 70 239" },
+    { title: "Agentization: Agentic, RAG, AGI, Terminologies", tags: ["RAG", "Agentic AI", "LLMs"], rgb: "250 204 21" },
+    { title: "WEB3 Series", tags: ["Web3", "Protocols"], rgb: "96 165 250" },
+    { title: "Block Chain (Fundamentals to Architect)", tags: ["Blockchain", "Architecture"], rgb: "148 163 184" },
+  ].map((t) => ({
+    ...t,
+    href: `${stackcraftBaseUrl}?utm_source=abhishekpanda.com&utm_medium=landing&utm_campaign=tracks&utm_content=${encodeURIComponent(
+      t.title
+    )}`,
+  }));
 
   return (
     <section className="py-24 relative overflow-hidden">
@@ -92,124 +42,65 @@ export const FeaturedBlog = () => {
         >
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-2 text-sm font-medium mb-6">
             <Sparkles className="w-4 h-4" />
-            Featured Insights
+            Stackcraft Tracks
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tight">
             Latest from the <span className="gradient-text">Blog</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Deep dives into .NET, Microservices, LLMs, and modern software engineering
+            Premium learning tracks and deep dives across architecture, cloud, data, and AI.
           </p>
         </motion.div>
 
-        {/* Main Featured Post */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-8"
-        >
-          <Link to={`/blog/${mainFeatured.slug}`} className="block group">
-            <div className="relative rounded-3xl overflow-hidden bg-card border border-border/50 hover:border-primary/50 transition-all duration-500">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 opacity-10 group-hover:opacity-20 transition-opacity duration-500" />
-              <div className="relative p-8 md:p-12">
-                <div className="flex flex-col lg:flex-row gap-8 items-start">
-                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-gradient-to-br from-primary via-secondary to-purple flex items-center justify-center flex-shrink-0 shadow-glow">
-                    <FileText className="w-12 h-12 md:w-16 md:h-16 text-primary-foreground" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-12">
+          {tracks.map((t, index) => (
+            <motion.a
+              key={t.title}
+              href={t.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: index * 0.03 }}
+              whileHover={{ y: -6, scale: 1.02 }}
+              style={{ ["--brand-rgb" as any]: t.rgb }}
+              className="group glass-card brand-glow-card brand-square-glow rounded-2xl p-5 md:p-6 transition-all duration-300 hover:shadow-glow"
+              aria-label={t.title}
+              title={t.title}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-sm font-extrabold tracking-tight text-foreground leading-snug line-clamp-3">
+                    {t.title}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-3 mb-4">
-                      {mainFeatured.tags?.[0] && (
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold border bg-primary/20 text-primary border-primary/30">
-                          {mainFeatured.tags[0]}
-                        </span>
-                      )}
-                      {mainFeatured.is_premium && (
-                        <span className="badge-premium"><Lock className="w-3 h-3" />Premium</span>
-                      )}
-                    </div>
-                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-foreground mb-4 group-hover:text-primary transition-colors leading-tight">
-                      {mainFeatured.title}
-                    </h3>
-                    {mainFeatured.excerpt && (
-                      <p className="text-lg text-muted-foreground mb-6 max-w-3xl">{mainFeatured.excerpt}</p>
-                    )}
-                    <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                      {mainFeatured.published_at && (
-                        <span className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-primary" />
-                          {new Date(mainFeatured.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </span>
-                      )}
-                        <span className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-primary" />
-                          {getReadTime(readMinutesFromRow(mainFeatured))} read
-                        </span>
-                    </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {t.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 rounded-full text-[11px] font-semibold border border-border/60 bg-background/40 text-muted-foreground group-hover:text-foreground transition-colors"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
+                <ArrowRight className="w-5 h-5 text-primary/80 group-hover:text-primary group-hover:translate-x-1 transition-all" />
               </div>
-            </div>
-          </Link>
-        </motion.div>
-
-        {/* Blog Grid */}
-        {gridBlogs.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {gridBlogs.map((post, index) => (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 * (index + 1) }}
-              >
-                <Link to={`/blog/${post.slug}`} className="block group h-full">
-                  <div className="relative h-full rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/50 transition-all duration-500">
-                    <div className="relative p-6 h-full flex flex-col">
-                      <div className="flex items-start justify-between gap-3 mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                          <FileText className="w-6 h-6 text-primary" />
-                        </div>
-                        {post.is_premium && (
-                          <span className="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center">
-                            <Lock className="w-3 h-3 text-secondary" />
-                          </span>
-                        )}
-                      </div>
-                      {post.tags?.[0] && (
-                        <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold border bg-primary/20 text-primary border-primary/30 mb-3 w-fit">
-                          {post.tags[0]}
-                        </span>
-                      )}
-                      <h3 className="text-lg font-bold text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2 flex-grow-0">
-                        {post.title}
-                      </h3>
-                      {post.excerpt && (
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-grow">{post.excerpt}</p>
-                      )}
-                      <div className="flex items-center justify-between text-xs text-muted-foreground mt-auto pt-4 border-t border-border/50">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {getReadTime(readMinutesFromRow(post))}
-                        </span>
-                        <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        )}
+              <div className="mt-4 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-70" />
+              <div className="mt-4 text-xs text-muted-foreground">
+                Read on <span className="text-foreground font-semibold">Stackcraft</span>
+              </div>
+            </motion.a>
+          ))}
+        </div>
 
         <div className="text-center">
           <Button variant="hero-outline" size="lg" asChild>
-            <Link to="/blog">
-              View All Articles
+            <a href={stackcraftProfileUrl} target="_blank" rel="noopener noreferrer">
+              Explore on Stackcraft
               <ArrowRight className="w-4 h-4" />
-            </Link>
+            </a>
           </Button>
         </div>
       </div>
