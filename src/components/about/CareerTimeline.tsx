@@ -263,9 +263,9 @@ const timelineData: TimelineItem[] = [
   },
   {
     year: "2025",
-    title: "Founder & CEO",
-    subtitle: "OriginX Labs",
-    description: "OriginX Labs Pvt. Ltd. — Building next-gen AI systems.",
+    title: "OriginX Labs — Started",
+    subtitle: "OriginX Labs Pvt. Ltd. (initially Cropxon Innovations Pvt. Ltd.)",
+    description: "Launched the OriginX Labs initiative focused on AI systems, distributed architecture, and cloud-native engineering.",
     type: "founder",
     company: "OriginX Labs",
     companyLogo: originxLogo,
@@ -304,29 +304,27 @@ const timelineData: TimelineItem[] = [
     achievements: ["Rising Star Author Award", "Multi-Platform Publication"]
   },
   {
-    year: "2025",
-    title: "AETHERGRID — Launched",
-    subtitle: "Proprietary Automation Intelligence",
-    description: '"Where intelligence, networks, and automation converge."',
+    year: "16 Oct 2025",
+    title: "Incorporation",
+    subtitle: "OriginX Labs Pvt. Ltd. (initially Cropxon Innovations Pvt. Ltd.)",
+    description: "Company incorporated on 16th October 2025.",
     type: "founder",
-    company: "OriginX Labs",
+    company: "OriginX Labs Pvt. Ltd.",
     companyLogo: originxLogo,
-    companyColor: "#8B5CF6",
-    icon: Cpu,
+    companyColor: "#111827",
+    icon: Building2,
     projects: {
-      title: "AETHERGRID Platform",
+      title: "Legal Milestone",
       highlights: [
-        "Workflow automation intelligence",
-        "Multi-agent systems orchestration",
-        "LLM routing & optimization",
-        "Social automation engine",
-        "Personal ecosystem management"
+        "Incorporation date: 16 Oct 2025",
+        "Brand: OriginX Labs Pvt. Ltd.",
+        "Initial entity name: Cropxon Innovations Pvt. Ltd."
       ]
-    }
+    },
   },
   {
     year: "Today",
-    title: "CEO of OriginX Labs Private Limited",
+    title: "CEO & Founder",
     subtitle: "OriginX Labs Pvt. Ltd.",
     description: ".NET Architect • AI/ML Engineer • Enterprise Systems Designer — Building next-gen digital ecosystems.",
     type: "founder",
@@ -706,7 +704,7 @@ export const CareerTimeline = () => {
             { type: "personal", label: "Personal", color: "from-pink-500 to-rose-500" },
             { type: "education", label: "Education", color: "from-emerald-500 to-teal-500" },
             { type: "work", label: "Work Experience", color: "from-primary to-secondary" },
-            { type: "founder", label: "Founder & CEO", color: "from-purple-500 to-indigo-500" },
+            { type: "founder", label: "Founder / Company", color: "from-purple-500 to-indigo-500" },
           ].map((legend) => (
             <div key={legend.type} className="flex items-center gap-2">
               <div className={`w-4 h-4 rounded-full bg-gradient-to-br ${legend.color}`} />
