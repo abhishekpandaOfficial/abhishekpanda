@@ -6,7 +6,15 @@ type Props = {
 };
 
 export function TechIconRow({ techStack, compact = false }: Props) {
-  const uniqueStack = Array.from(new Set(techStack.filter(Boolean).map((t) => t.trim()).filter(Boolean)));
+  const uniqueStack = Array.from(
+    new Set(
+      techStack
+        .filter(Boolean)
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .map((t) => t.toUpperCase() === "DDD" ? "DDD" : t)
+    )
+  );
   return (
     <div className="flex flex-wrap gap-2 gap-y-2 min-w-0">
       {uniqueStack.map((tech) => (

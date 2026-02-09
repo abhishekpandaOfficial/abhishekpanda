@@ -711,22 +711,33 @@ const Courses = () => {
             <h2 className="text-3xl font-black text-foreground mt-2">What Students Say</h2>
             <p className="text-sm text-muted-foreground">Career transformations driven by real-world, production-grade learning.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
             {[
               {
-                name: "Omid M.",
-                quote: "The depth and clarity of Abhishek's architecture explanations helped me upgrade my system design interviews.",
+                name: "Arjun S. (Bangalore)",
+                quote: "After the Azure Architect 1:1 track, I cracked a cloud architect role at a fintech startup. The review sessions were pure gold.",
               },
               {
-                name: "Steve A.",
-                quote: "Great balance between theory and real-world scenarios. The 1:1 guidance made the difference.",
+                name: "Nivedita R. (Hyderabad)",
+                quote: "The 1:1 guidance helped me move from dev to solution architect in 4 months. The clarity on system tradeoffs was a breakthrough.",
               },
               {
-                name: "Timothy M.",
-                quote: "Hands-on patterns and real production setups. This feels like a senior engineer showing you the ropes.",
+                name: "Manish K. (Pune)",
+                quote: "Abhishek’s Azure sessions were hands-on and practical. I now lead cloud migration initiatives confidently.",
+              },
+              {
+                name: "Shreya D. (Chennai)",
+                quote: "The nightly 1:1 sessions fit my schedule perfectly. I shipped my first enterprise-grade cloud design doc in weeks.",
+              },
+              {
+                name: "Rohit V. (Noida)",
+                quote: "From DDD basics to Azure architecture decisions — the sessions filled all gaps and landed me a promotion.",
               },
             ].map((t) => (
-              <div key={t.name} className="glass-card rounded-2xl p-6 border border-border/60">
+              <div
+                key={t.name}
+                className="glass-card rounded-2xl p-6 border border-border/60 min-w-[280px] md:min-w-[360px] snap-start"
+              >
                 <div className="text-sm text-muted-foreground mb-3">★★★★★</div>
                 <p className="text-sm text-foreground/90 leading-relaxed mb-4">“{t.quote}”</p>
                 <div className="text-xs font-semibold text-muted-foreground">{t.name}</div>

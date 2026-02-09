@@ -165,7 +165,7 @@ export function CourseOneToOneModal({
 
   return (
     <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5 text-primary" />
@@ -173,7 +173,7 @@ export function CourseOneToOneModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-6">
           <div className="space-y-3">
             <div className="rounded-xl border border-border bg-muted/30 p-4">
               <div className="text-sm font-semibold">1:1 Plan Details</div>
