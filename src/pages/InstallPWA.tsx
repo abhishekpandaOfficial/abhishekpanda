@@ -15,6 +15,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+import professional from "@/assets/about/professional.jpg";
+import casual from "@/assets/about/casual.jpg";
+import lifestyle from "@/assets/about/lifestyle.jpg";
+import artistic from "@/assets/about/artistic.jpg";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -28,6 +34,7 @@ const InstallPWA = () => {
   const [isAndroid, setIsAndroid] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
   const [isInSafari, setIsInSafari] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     // Check if already installed as PWA
@@ -97,6 +104,15 @@ const InstallPWA = () => {
     }
   };
 
+  const handleInstallWithPreview = async () => {
+    setShowPreview(true);
+  };
+
+  const continueInstall = async () => {
+    setShowPreview(false);
+    await handleInstallClick();
+  };
+
   const features = [
     {
       icon: ScanFace,
@@ -120,6 +136,13 @@ const InstallPWA = () => {
     },
   ];
 
+  const previewScreens = [
+    { src: professional, label: "Profile & Identity" },
+    { src: casual, label: "Timeline & Highlights" },
+    { src: lifestyle, label: "Workflows & Insights" },
+    { src: artistic, label: "Brand & Portfolio" },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white">
       {/* Background Effects */}
@@ -135,14 +158,14 @@ const InstallPWA = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-blue-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-violet-500/30">
-            <Shield className="w-12 h-12 text-white" />
+          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-amber-500/20 via-orange-500/30 to-red-500/20 flex items-center justify-center shadow-2xl shadow-orange-500/30">
+            <img src="/favicon.png" alt="Abhishek Panda" className="w-14 h-14 object-contain" />
           </div>
           <h1 className="text-3xl font-black mb-2 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-            AP Command Center
+            Abhishek Panda App
           </h1>
           <p className="text-slate-400">
-            Install the admin app for biometric authentication
+            Install the app for quick access and a native experience
           </p>
         </motion.div>
 
@@ -255,12 +278,12 @@ const InstallPWA = () => {
             ) : (
               <>
                 <Button
-                  onClick={handleInstallClick}
+                  onClick={handleInstallWithPreview}
                   size="lg"
                   className="w-full h-14 text-lg bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 shadow-lg shadow-violet-500/30"
                 >
                   <Download className="w-5 h-5 mr-2" />
-                  Install App
+                  Download App
                 </Button>
                 <p className="text-center text-slate-500 text-sm mt-3">
                   {isAndroid
@@ -336,6 +359,41 @@ const InstallPWA = () => {
           </Button>
         </motion.div>
       </div>
+
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <img src="/favicon.png" alt="Abhishek Panda" className="h-8 w-8 object-contain" />
+              Preview the App
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-border bg-muted/30 p-4">
+              <div className="text-sm text-muted-foreground">
+                A quick look before installing. Your app icon uses the Burning A logo.
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {previewScreens.map((screen) => (
+                <div key={screen.label} className="rounded-2xl overflow-hidden border border-border bg-card">
+                  <img src={screen.src} alt={screen.label} className="h-40 w-full object-cover" />
+                  <div className="p-3 text-xs text-muted-foreground">{screen.label}</div>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowPreview(false)}>
+                Close
+              </Button>
+              <Button onClick={continueInstall} className="gap-2">
+                <Download className="w-4 h-4" />
+                Continue to Install
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
