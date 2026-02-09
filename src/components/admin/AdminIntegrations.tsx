@@ -85,6 +85,7 @@ const mockApiKeys: ApiKey[] = [
   {
     id: "1",
     name: "Production API Key",
+    // Never commit real API keys. Keep mock data obviously fake.
     key: "sk_live_REDACTED",
     createdAt: "2024-01-15",
     lastUsed: "2024-12-11",
@@ -103,7 +104,7 @@ const mockApiKeys: ApiKey[] = [
   {
     id: "3",
     name: "Analytics Read-Only",
-    key: "sk_ro_xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    key: "sk_ro_REDACTED",
     createdAt: "2024-03-01",
     lastUsed: null,
     status: "expired",
