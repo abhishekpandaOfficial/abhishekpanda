@@ -253,7 +253,17 @@ export function CourseOneToOneModal({
                 {submitting ? "Submitting..." : "Submit 1:1 Request"}
               </Button>
               <Button asChild variant="outline" disabled={!canWhatsapp} className="gap-2">
-                <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={canWhatsapp ? whatsappLink : "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(event) => {
+                    if (!canWhatsapp) {
+                      event.preventDefault();
+                      toast.error("Add name and email to enable WhatsApp.");
+                    }
+                  }}
+                >
                   <Phone className="h-4 w-4" />
                   WhatsApp Abhishek
                 </a>

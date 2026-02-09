@@ -270,7 +270,7 @@ const About = () => {
         </section>
 
         {/* Published Book Section */}
-        <section className="py-12 md:py-20">
+        <section id="mybooks" className="py-12 md:py-20 scroll-mt-24">
           <div className="container mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}

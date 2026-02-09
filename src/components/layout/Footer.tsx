@@ -28,7 +28,7 @@ const footerLinks = {
     { name: "LLM Galaxy", path: "/llm-galaxy" },
   ],
   resources: [
-    { name: "Digital Products", path: "/products" },
+    { name: "MyBooks", path: "/about#mybooks" },
     { name: "Mentorship", path: "/mentorship" },
     { name: "Newsletter", path: "/#newsletter" },
     { name: "Contact", path: "/contact" },
