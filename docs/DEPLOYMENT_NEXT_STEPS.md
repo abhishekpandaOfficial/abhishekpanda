@@ -48,20 +48,12 @@ Expect:
 ## 6) GitHub Actions + Vercel
 Workflows are in:
 - `.github/workflows/supabase-deploy.yml`
-- `.github/workflows/vercel-deploy.yml`
+
+Vercel deployment:
+- Recommended: use the Vercel Dashboard Git integration (no GitHub Action needed).
 
 Add required GitHub secrets:
 - Supabase:
   - `SUPABASE_ACCESS_TOKEN`
   - `SUPABASE_PROJECT_REF` (e.g. `qayywyddbprlhkqcqllf`)
-- Vercel:
-  - `VERCEL_TOKEN`
-  - `VERCEL_ORG_ID`
-  - `VERCEL_PROJECT_ID`
-- Frontend build env:
-  - `VITE_SUPABASE_URL`
-  - `VITE_SUPABASE_PUBLISHABLE_KEY`
-  - `VITE_SUPABASE_PROJECT_ID`
-  - `VITE_SITE_URL`
-  - `SITE_URL`
-
+If you also want GitHub Actions to keep Edge Function secrets in sync, add them to GitHub secrets too.
