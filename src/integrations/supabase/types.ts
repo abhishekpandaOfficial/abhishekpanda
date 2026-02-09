@@ -10,7 +10,32 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.1"
+  }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -44,6 +69,36 @@ export type Database = {
           old_values?: Json | null
           record_id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      admin_mfa_sessions: {
+        Row: {
+          expires_at: string
+          fully_verified_at: string | null
+          otp_verified_at: string | null
+          updated_at: string
+          user_id: string
+          webauthn_step4_verified_at: string | null
+          webauthn_step5_verified_at: string | null
+        }
+        Insert: {
+          expires_at: string
+          fully_verified_at?: string | null
+          otp_verified_at?: string | null
+          updated_at?: string
+          user_id: string
+          webauthn_step4_verified_at?: string | null
+          webauthn_step5_verified_at?: string | null
+        }
+        Update: {
+          expires_at?: string
+          fully_verified_at?: string | null
+          otp_verified_at?: string | null
+          updated_at?: string
+          user_id?: string
+          webauthn_step4_verified_at?: string | null
+          webauthn_step5_verified_at?: string | null
         }
         Relationships: []
       }
@@ -209,6 +264,60 @@ export type Database = {
           title?: string
           updated_at?: string
           views?: number | null
+        }
+        Relationships: []
+      }
+      blog_posts_public_cache: {
+        Row: {
+          created_at: string
+          excerpt: string | null
+          hero_image: string | null
+          id: string
+          is_premium: boolean
+          is_published: boolean
+          meta_description: string | null
+          meta_title: string | null
+          published_at: string | null
+          reading_time_minutes: number
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          word_count: number
+        }
+        Insert: {
+          created_at?: string
+          excerpt?: string | null
+          hero_image?: string | null
+          id: string
+          is_premium?: boolean
+          is_published?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          reading_time_minutes?: number
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          word_count?: number
+        }
+        Update: {
+          created_at?: string
+          excerpt?: string | null
+          hero_image?: string | null
+          id?: string
+          is_premium?: boolean
+          is_published?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          reading_time_minutes?: number
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          word_count?: number
         }
         Relationships: []
       }
@@ -1104,6 +1213,75 @@ export type Database = {
         }
         Relationships: []
       }
+      mentorship_bookings: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          duration_minutes: number
+          email: string
+          id: string
+          metadata: Json | null
+          mobile: string
+          name: string
+          package_name: string
+          payment_row_id: string | null
+          razorpay_order_id: string
+          razorpay_payment_id: string
+          scheduled_end: string
+          scheduled_start: string
+          session_reason: string
+          status: string
+          timezone: string
+          topic: string
+          topic_other: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          duration_minutes: number
+          email: string
+          id?: string
+          metadata?: Json | null
+          mobile: string
+          name: string
+          package_name: string
+          payment_row_id?: string | null
+          razorpay_order_id: string
+          razorpay_payment_id: string
+          scheduled_end: string
+          scheduled_start: string
+          session_reason: string
+          status?: string
+          timezone?: string
+          topic: string
+          topic_other?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          duration_minutes?: number
+          email?: string
+          id?: string
+          metadata?: Json | null
+          mobile?: string
+          name?: string
+          package_name?: string
+          payment_row_id?: string | null
+          razorpay_order_id?: string
+          razorpay_payment_id?: string
+          scheduled_end?: string
+          scheduled_start?: string
+          session_reason?: string
+          status?: string
+          timezone?: string
+          topic?: string
+          topic_other?: string | null
+        }
+        Relationships: []
+      }
       notification_settings: {
         Row: {
           created_at: string
@@ -1491,6 +1669,66 @@ export type Database = {
         }
         Relationships: []
       }
+      social_profiles: {
+        Row: {
+          brand_bg: string | null
+          brand_color: string | null
+          category: string
+          connected: boolean
+          created_at: string
+          credential_hints: Json | null
+          description: string | null
+          display_name: string
+          followers: number
+          icon_key: string
+          id: string
+          is_visible: boolean
+          platform: string
+          profile_url: string | null
+          sort_order: number
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          brand_bg?: string | null
+          brand_color?: string | null
+          category?: string
+          connected?: boolean
+          created_at?: string
+          credential_hints?: Json | null
+          description?: string | null
+          display_name: string
+          followers?: number
+          icon_key: string
+          id?: string
+          is_visible?: boolean
+          platform: string
+          profile_url?: string | null
+          sort_order?: number
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          brand_bg?: string | null
+          brand_color?: string | null
+          category?: string
+          connected?: boolean
+          created_at?: string
+          credential_hints?: Json | null
+          description?: string | null
+          display_name?: string
+          followers?: number
+          icon_key?: string
+          id?: string
+          is_visible?: boolean
+          platform?: string
+          profile_url?: string | null
+          sort_order?: number
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
       study_sessions: {
         Row: {
           created_at: string
@@ -1523,6 +1761,36 @@ export type Database = {
           subject?: string
           topic?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_entitlements: {
+        Row: {
+          created_at: string
+          entitlement: string
+          expires_at: string | null
+          id: string
+          source: string | null
+          source_ref: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entitlement: string
+          expires_at?: string | null
+          id?: string
+          source?: string | null
+          source_ref?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entitlement?: string
+          expires_at?: string | null
+          id?: string
+          source?: string | null
+          source_ref?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1584,11 +1852,51 @@ export type Database = {
         }
         Relationships: []
       }
+      webauthn_challenges: {
+        Row: {
+          challenge: string
+          created_at: string
+          expires_at: string
+          id: string
+          kind: string
+          origin: string
+          rp_id: string
+          used: boolean
+          user_id: string
+        }
+        Insert: {
+          challenge: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          kind: string
+          origin: string
+          rp_id: string
+          used?: boolean
+          user_id: string
+        }
+        Update: {
+          challenge?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          kind?: string
+          origin?: string
+          rp_id?: string
+          used?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_entitlement: {
+        Args: { _entitlement: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1596,6 +1904,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_blog_post_view: { Args: { _slug: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
@@ -1724,6 +2033,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],

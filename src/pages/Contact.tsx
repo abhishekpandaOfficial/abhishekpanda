@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
@@ -18,66 +18,52 @@ import {
   ExternalLink
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
+import { iconForKey } from "@/lib/social/iconMap";
 
-// Custom SVG icons for platforms
-const MediumIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-    <path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/>
-  </svg>
-);
+type PublicProfile = {
+  platform: string;
+  display_name: string;
+  category: string;
+  profile_url: string | null;
+  icon_key: string;
+  brand_bg: string | null;
+};
 
-const SubstackIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-    <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/>
-  </svg>
-);
-
-const HashnodeIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-    <path d="M22.351 8.019l-6.37-6.37a5.63 5.63 0 00-7.962 0l-6.37 6.37a5.63 5.63 0 000 7.962l6.37 6.37a5.63 5.63 0 007.962 0l6.37-6.37a5.63 5.63 0 000-7.962zM12 15.953a3.953 3.953 0 110-7.906 3.953 3.953 0 010 7.906z"/>
-  </svg>
-);
-
-const UdemyIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-    <path d="M12 0L5.81 3.573v3.574l6.189-3.574 6.191 3.574V3.573zM5.81 10.148v8.144c0 1.85.589 3.243 1.741 4.234S10.177 24 11.973 24s3.269-.482 4.448-1.474c1.179-.991 1.768-2.439 1.768-4.314v-8.064h-3.242v7.85c0 2.036-1.509 3.055-2.974 3.055-1.465 0-2.921-1.019-2.921-3.055v-7.85z"/>
-  </svg>
-);
-
-const StackOverflowIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-    <path d="M15.725 0l-1.72 1.277 6.39 8.588 1.72-1.277L15.725 0zm-3.94 3.418l-1.369 1.644 8.225 6.85 1.369-1.644-8.225-6.85zm-3.15 4.465l-.905 1.94 9.702 4.517.904-1.94-9.701-4.517zm-1.85 4.86l-.44 2.093 10.473 2.201.44-2.092-10.473-2.203zM1.89 15.47V24h14.79v-8.53h-2.133v6.397H4.021v-6.396H1.89zm4.265 2.133v2.13h5.82v-2.13H6.154z"/>
-  </svg>
-);
-
-// Twitter/X Icon
-const XIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-  </svg>
-);
-
-const socialLinks = [
-  { name: "Instagram", icon: Instagram, url: "https://www.instagram.com/the_abhishekpanda/", color: "hover:bg-[#E4405F]" },
-  { name: "YouTube", icon: Youtube, url: "https://www.youtube.com/@abhishekpanda_official", color: "hover:bg-[#FF0000]" },
-  { name: "LinkedIn", icon: Linkedin, url: "https://www.linkedin.com/in/abhishekpandaofficial/", color: "hover:bg-[#0077B5]" },
-  { name: "GitHub", icon: Github, url: "https://github.com/abhishekpandaOfficial", color: "hover:bg-[#333]" },
-  { name: "X (Twitter)", icon: XIcon, url: "https://x.com/Panda_Abhishek8", color: "hover:bg-[#000]", isCustom: true },
-];
-
-const blogPlatforms = [
-  { name: "Medium", icon: MediumIcon, url: "https://medium.com/@official.abhishekpanda", color: "hover:bg-[#00AB6C]" },
-  { name: "Substack", icon: SubstackIcon, url: "https://substack.com/@abhishekpanda08", color: "hover:bg-[#FF6719]" },
-  { name: "Hashnode", icon: HashnodeIcon, url: "https://hashnode.com/@abhishekpanda", color: "hover:bg-[#2962FF]" },
-];
-
-const platforms = [
-  { name: "Udemy", icon: UdemyIcon, url: "https://www.udemy.com/user/abhishek-panda-134/", color: "hover:bg-[#A435F0]" },
-  { name: "Stack Overflow", icon: StackOverflowIcon, url: "https://writing.stackexchange.com/users/82639/abhishek-official", color: "hover:bg-[#F48024]" },
-];
+function ProfileIconLink(props: { p: PublicProfile }) {
+  const Icon: any = iconForKey(props.p.icon_key);
+  const bg = props.p.brand_bg || "bg-primary";
+  return (
+    <Tooltip key={props.p.platform}>
+      <TooltipTrigger asChild>
+        <a
+          href={props.p.profile_url || "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group relative w-12 h-12 rounded-xl bg-muted flex items-center justify-center transition-all duration-300 hover:text-primary-foreground hover:scale-110 hover:shadow-glow"
+          aria-label={props.p.display_name}
+        >
+          <span className={`absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity ${bg}`} />
+          <Icon className="relative w-5 h-5 text-muted-foreground group-hover:text-white" />
+        </a>
+      </TooltipTrigger>
+      <TooltipContent>{props.p.display_name}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 const Contact = () => {
   const { toast } = useToast();
+  const { data: profiles } = usePublicSocialProfiles();
+  const { social, blog, platform } = useMemo(() => {
+    const rows = (profiles ?? []) as any[];
+    return {
+      social: rows.filter((r) => r.category === "social" && r.profile_url),
+      blog: rows.filter((r) => r.category === "blog" && r.profile_url),
+      platform: rows.filter((r) => (r.category === "platform" || r.category === "website") && r.profile_url),
+    };
+  }, [profiles]);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -178,21 +164,8 @@ const Contact = () => {
                   <div className="mb-6">
                     <p className="text-sm text-muted-foreground mb-4">Connect on social</p>
                     <div className="flex gap-3">
-                      {socialLinks.map((social) => (
-                        <Tooltip key={social.name}>
-                          <TooltipTrigger asChild>
-                            <a
-                              href={social.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`w-12 h-12 rounded-xl bg-muted flex items-center justify-center transition-all duration-300 hover:text-primary-foreground hover:scale-110 hover:shadow-glow ${social.color}`}
-                              aria-label={social.name}
-                            >
-                              {(social as any).isCustom ? <social.icon /> : <social.icon className="w-5 h-5" />}
-                            </a>
-                          </TooltipTrigger>
-                          <TooltipContent>{social.name}</TooltipContent>
-                        </Tooltip>
+                      {social.map((p: any) => (
+                        <ProfileIconLink key={p.platform} p={p} />
                       ))}
                     </div>
                   </div>
@@ -201,21 +174,8 @@ const Contact = () => {
                   <div className="mb-6">
                     <p className="text-sm text-muted-foreground mb-4">Read my blogs</p>
                     <div className="flex gap-3">
-                      {blogPlatforms.map((platform) => (
-                        <Tooltip key={platform.name}>
-                          <TooltipTrigger asChild>
-                            <a
-                              href={platform.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`w-12 h-12 rounded-xl bg-muted flex items-center justify-center transition-all duration-300 hover:text-primary-foreground hover:scale-110 hover:shadow-glow ${platform.color}`}
-                              aria-label={platform.name}
-                            >
-                              <platform.icon />
-                            </a>
-                          </TooltipTrigger>
-                          <TooltipContent>{platform.name}</TooltipContent>
-                        </Tooltip>
+                      {blog.map((p: any) => (
+                        <ProfileIconLink key={p.platform} p={p} />
                       ))}
                     </div>
                   </div>
@@ -224,21 +184,8 @@ const Contact = () => {
                   <div className="mb-6">
                     <p className="text-sm text-muted-foreground mb-4">Other platforms</p>
                     <div className="flex gap-3">
-                      {platforms.map((platform) => (
-                        <Tooltip key={platform.name}>
-                          <TooltipTrigger asChild>
-                            <a
-                              href={platform.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`w-12 h-12 rounded-xl bg-muted flex items-center justify-center transition-all duration-300 hover:text-primary-foreground hover:scale-110 hover:shadow-glow ${platform.color}`}
-                              aria-label={platform.name}
-                            >
-                              <platform.icon />
-                            </a>
-                          </TooltipTrigger>
-                          <TooltipContent>{platform.name}</TooltipContent>
-                        </Tooltip>
+                      {platform.map((p: any) => (
+                        <ProfileIconLink key={p.platform} p={p} />
                       ))}
                     </div>
                   </div>

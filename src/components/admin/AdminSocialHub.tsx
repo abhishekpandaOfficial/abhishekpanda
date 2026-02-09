@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Share2,
@@ -41,11 +41,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { useAdminSocialProfiles } from "@/hooks/useSocialProfiles";
+import { iconForKey } from "@/lib/social/iconMap";
+import AdminSocialProfilesManager from "./AdminSocialProfilesManager";
 
 interface SocialPost {
   id: string;
   content: string;
-  platforms: string[];
+  platforms: string[]; // platform keys from `public.social_profiles.platform`
   status: "draft" | "scheduled" | "published" | "failed";
   scheduledAt: string | null;
   publishedAt: string | null;
@@ -58,6 +61,7 @@ interface SocialPost {
 }
 
 interface SocialAccount {
+  key: string;
   platform: string;
   connected: boolean;
   username: string;
@@ -71,6 +75,7 @@ interface SocialAccount {
 
 const SOCIAL_ACCOUNTS: SocialAccount[] = [
   { 
+    key: "instagram",
     platform: "Instagram", 
     connected: true, 
     username: "the_abhishekpanda", 
@@ -82,6 +87,7 @@ const SOCIAL_ACCOUNTS: SocialAccount[] = [
     description: "Photo & Reels content"
   },
   { 
+    key: "youtube",
     platform: "YouTube", 
     connected: true, 
     username: "abhishekpanda_official", 
@@ -93,6 +99,7 @@ const SOCIAL_ACCOUNTS: SocialAccount[] = [
     description: "Video tutorials & content"
   },
   { 
+    key: "linkedin",
     platform: "LinkedIn", 
     connected: true, 
     username: "abhishekpandaofficial", 
@@ -104,6 +111,7 @@ const SOCIAL_ACCOUNTS: SocialAccount[] = [
     description: "Professional network"
   },
   { 
+    key: "github",
     platform: "GitHub", 
     connected: true, 
     username: "abhishekpandaOfficial", 
@@ -115,6 +123,7 @@ const SOCIAL_ACCOUNTS: SocialAccount[] = [
     description: "Open source & code"
   },
   { 
+    key: "x",
     platform: "Twitter/X", 
     connected: true, 
     username: "Panda_Abhishek8", 
@@ -126,6 +135,7 @@ const SOCIAL_ACCOUNTS: SocialAccount[] = [
     description: "Tweets & threads"
   },
   { 
+    key: "udemy",
     platform: "Udemy", 
     connected: true, 
     username: "abhishek-panda-134", 
@@ -137,6 +147,7 @@ const SOCIAL_ACCOUNTS: SocialAccount[] = [
     description: "Online courses"
   },
   { 
+    key: "medium",
     platform: "Medium", 
     connected: true, 
     username: "official.abhishekpanda", 
@@ -148,6 +159,7 @@ const SOCIAL_ACCOUNTS: SocialAccount[] = [
     description: "Blog articles"
   },
   { 
+    key: "substack",
     platform: "Substack", 
     connected: true, 
     username: "abhishekpanda08", 
@@ -159,6 +171,7 @@ const SOCIAL_ACCOUNTS: SocialAccount[] = [
     description: "Newsletter"
   },
   { 
+    key: "website",
     platform: "Website", 
     connected: true, 
     username: "abhishekpanda.com", 
@@ -170,6 +183,7 @@ const SOCIAL_ACCOUNTS: SocialAccount[] = [
     description: "Personal website"
   },
   { 
+    key: "stackexchange",
     platform: "Stack Overflow", 
     connected: true, 
     username: "abhishek-official", 
@@ -181,6 +195,7 @@ const SOCIAL_ACCOUNTS: SocialAccount[] = [
     description: "Q&A community"
   },
   { 
+    key: "hashnode",
     platform: "Hashnode", 
     connected: true, 
     username: "abhishekpanda", 
@@ -197,7 +212,7 @@ const SAMPLE_POSTS: SocialPost[] = [
   {
     id: "1",
     content: "🚀 Just published a new blog post on building scalable microservices with .NET 8! Check it out and let me know your thoughts. #dotnet #microservices #architecture",
-    platforms: ["LinkedIn", "Medium"],
+    platforms: ["linkedin", "medium"],
     status: "published",
     scheduledAt: null,
     publishedAt: new Date(Date.now() - 86400000).toISOString(),
@@ -206,7 +221,7 @@ const SAMPLE_POSTS: SocialPost[] = [
   {
     id: "2",
     content: "Excited to announce my upcoming course on AI/ML Engineering! Stay tuned for early bird pricing 🎓 #AI #MachineLearning #Learning",
-    platforms: ["LinkedIn", "YouTube", "Instagram"],
+    platforms: ["linkedin", "youtube", "instagram"],
     status: "scheduled",
     scheduledAt: new Date(Date.now() + 86400000).toISOString(),
     publishedAt: null,
@@ -215,7 +230,7 @@ const SAMPLE_POSTS: SocialPost[] = [
   {
     id: "3",
     content: "Working on something exciting! 🔥 Can't wait to share it with you all. #BuildInPublic #Innovation",
-    platforms: ["Instagram"],
+    platforms: ["instagram"],
     status: "draft",
     scheduledAt: null,
     publishedAt: null,
@@ -225,11 +240,25 @@ const SAMPLE_POSTS: SocialPost[] = [
 
 export const AdminSocialHub = () => {
   const [posts, setPosts] = useState<SocialPost[]>(SAMPLE_POSTS);
-  const [accounts, setAccounts] = useState<SocialAccount[]>(SOCIAL_ACCOUNTS);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isConnectOpen, setIsConnectOpen] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState<SocialAccount | null>(null);
-  const [connectForm, setConnectForm] = useState({ username: "", profileUrl: "" });
+  const { data: socialRows } = useAdminSocialProfiles();
+  const accounts: SocialAccount[] = useMemo(() => {
+    if (!socialRows) return SOCIAL_ACCOUNTS;
+    return socialRows
+      .filter((r) => !!r.profile_url)
+      .map((r) => ({
+        key: r.platform,
+        platform: r.display_name,
+        connected: r.connected,
+        username: r.username || "",
+        profileUrl: r.profile_url || "",
+        followers: r.followers ?? 0,
+        icon: iconForKey(r.icon_key),
+        color: "text-white",
+        bgColor: r.brand_bg || "bg-muted",
+        description: r.description || "",
+      }));
+  }, [socialRows]);
   const [newPost, setNewPost] = useState({
     content: "",
     platforms: [] as string[],
@@ -282,47 +311,6 @@ export const AdminSocialHub = () => {
   const handleDeletePost = (id: string) => {
     setPosts((prev) => prev.filter((p) => p.id !== id));
     toast.success("Post deleted");
-  };
-
-  const handleConnectClick = (account: SocialAccount) => {
-    setSelectedAccount(account);
-    setConnectForm({ 
-      username: account.username || "", 
-      profileUrl: account.profileUrl || "" 
-    });
-    setIsConnectOpen(true);
-  };
-
-  const handleConnectAccount = () => {
-    if (!selectedAccount) return;
-    
-    if (!connectForm.username || !connectForm.profileUrl) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
-    setAccounts((prev) =>
-      prev.map((a) =>
-        a.platform === selectedAccount.platform
-          ? { ...a, connected: true, username: connectForm.username, profileUrl: connectForm.profileUrl }
-          : a
-      )
-    );
-    setIsConnectOpen(false);
-    setSelectedAccount(null);
-    setConnectForm({ username: "", profileUrl: "" });
-    toast.success(`${selectedAccount.platform} connected successfully!`);
-  };
-
-  const handleDisconnectAccount = (platform: string) => {
-    setAccounts((prev) =>
-      prev.map((a) =>
-        a.platform === platform
-          ? { ...a, connected: false, username: "", profileUrl: "", followers: 0 }
-          : a
-      )
-    );
-    toast.success(`${platform} disconnected`);
   };
 
   const getStatusBadge = (status: SocialPost["status"]) => {
@@ -424,7 +412,7 @@ export const AdminSocialHub = () => {
                       {/* Platforms */}
                       <div className="flex flex-col gap-2">
                         {post.platforms.map((platform) => {
-                          const account = accounts.find((a) => a.platform === platform);
+                          const account = accounts.find((a) => a.key === platform);
                           if (!account) return null;
                           return (
                             <div
@@ -500,65 +488,7 @@ export const AdminSocialHub = () => {
         </TabsContent>
 
         <TabsContent value="accounts" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            {accounts.map((account, index) => (
-              <motion.div
-                key={account.platform}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Card className={`transition-all duration-300 ${account.connected ? 'border-green-500/30' : 'border-border/50'}`}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-xl ${account.bgColor} flex items-center justify-center shadow-lg`}>
-                        <account.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-foreground">{account.platform}</h3>
-                          {account.connected && (
-                            <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 text-xs">
-                              Connected
-                            </Badge>
-                          )}
-                        </div>
-                        {account.connected ? (
-                          <div className="space-y-1">
-                            <p className="text-sm text-muted-foreground">
-                              @{account.username} • {account.followers.toLocaleString()} followers
-                            </p>
-                            <p className="text-xs text-muted-foreground">{account.description}</p>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">Not connected • {account.description}</p>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        {account.connected && account.profileUrl && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => window.open(account.profileUrl, '_blank')}
-                            className="gap-1"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </Button>
-                        )}
-                        <Button 
-                          variant={account.connected ? "outline" : "default"}
-                          size="sm"
-                          onClick={() => account.connected ? handleDisconnectAccount(account.platform) : handleConnectClick(account)}
-                        >
-                          {account.connected ? "Disconnect" : "Connect"}
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+          <AdminSocialProfilesManager />
         </TabsContent>
 
         <TabsContent value="analytics">
@@ -609,11 +539,11 @@ export const AdminSocialHub = () => {
                   .filter((a) => a.connected)
                   .map((account) => (
                     <Button
-                      key={account.platform}
+                      key={account.key}
                       type="button"
-                      variant={newPost.platforms.includes(account.platform) ? "default" : "outline"}
+                      variant={newPost.platforms.includes(account.key) ? "default" : "outline"}
                       size="sm"
-                      onClick={() => handleTogglePlatform(account.platform)}
+                      onClick={() => handleTogglePlatform(account.key)}
                       className="gap-2"
                     >
                       <account.icon className="w-4 h-4" />
@@ -652,57 +582,6 @@ export const AdminSocialHub = () => {
               </Button>
               <Button onClick={handleCreatePost}>
                 {newPost.schedulePost ? "Schedule Post" : "Save as Draft"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Connect Account Dialog */}
-      <Dialog open={isConnectOpen} onOpenChange={setIsConnectOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {selectedAccount && (
-                <>
-                  <selectedAccount.icon className={`w-5 h-5 ${selectedAccount.color}`} />
-                  Connect {selectedAccount.platform}
-                </>
-              )}
-            </DialogTitle>
-            <DialogDescription>
-              Enter your account details to connect this platform
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label>Username / Handle</Label>
-              <Input
-                value={connectForm.username}
-                onChange={(e) => setConnectForm({ ...connectForm, username: e.target.value })}
-                placeholder="e.g., abhishekpanda"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Profile URL</Label>
-              <Input
-                value={connectForm.profileUrl}
-                onChange={(e) => setConnectForm({ ...connectForm, profileUrl: e.target.value })}
-                placeholder="https://..."
-              />
-              <p className="text-xs text-muted-foreground">
-                Enter the full URL to your profile page
-              </p>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setIsConnectOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleConnectAccount}>
-                <Link2 className="w-4 h-4 mr-2" />
-                Connect Account
               </Button>
             </div>
           </div>

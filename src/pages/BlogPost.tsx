@@ -171,7 +171,10 @@ const BlogPost = () => {
     if (!slug) return;
     if (!shouldFetchFull) return;
     if (!post) return;
-    supabase.rpc("increment_blog_post_view", { _slug: slug }).catch(() => {});
+    supabase.rpc("increment_blog_post_view", { _slug: slug }).then(
+      () => {},
+      () => {}
+    );
   }, [slug, post, shouldFetchFull]);
 
   useEffect(() => {

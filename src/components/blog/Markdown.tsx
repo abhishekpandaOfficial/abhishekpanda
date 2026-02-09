@@ -39,7 +39,6 @@ const CodeBlockWrapper = ({ children }: { children: React.ReactNode }) => {
   const textToCopy = useMemo(() => {
     // Attempt to grab text from <code> inside <pre>.
     const codeEl = Array.isArray(children) ? children[0] : children;
-    // @ts-expect-error react-markdown node shape
     const raw = codeEl?.props?.children;
     return typeof raw === "string" ? raw : Array.isArray(raw) ? raw.join("") : "";
   }, [children]);
@@ -67,4 +66,3 @@ const CodeBlockWrapper = ({ children }: { children: React.ReactNode }) => {
     </div>
   );
 };
-

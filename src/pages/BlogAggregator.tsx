@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Rss
 } from "lucide-react";
+import { StackcraftIcon } from "@/components/icons/StackcraftIcon";
 
 // Platform icons
 const MediumIcon = () => (
@@ -42,7 +43,7 @@ interface BlogPost {
   id: string;
   title: string;
   excerpt: string;
-  platform: "medium" | "substack" | "hashnode" | "originx";
+  platform: "stackcraft" | "medium" | "substack" | "hashnode";
   url: string;
   category: string;
   readTime: string;
@@ -53,10 +54,10 @@ interface BlogPost {
 
 const platforms = [
   { id: "all", name: "All Platforms", icon: Rss, color: "from-primary to-secondary" },
+  { id: "stackcraft", name: "Stackcraft", icon: StackcraftIcon, color: "from-black to-black", url: "https://stackcraft.io/abhishekpanda" },
   { id: "medium", name: "Medium", icon: MediumIcon, color: "from-[#00AB6C] to-[#00AB6C]", url: "https://medium.com/@official.abhishekpanda" },
   { id: "substack", name: "Substack", icon: SubstackIcon, color: "from-[#FF6719] to-[#FF6719]", url: "https://substack.com/@abhishekpanda08" },
   { id: "hashnode", name: "Hashnode", icon: HashnodeIcon, color: "from-[#2962FF] to-[#2962FF]", url: "https://hashnode.com/@abhishekpanda" },
-  { id: "originx", name: "OriginX Blog", color: "from-primary to-secondary", url: "https://www.originxlabs.com/blog" },
 ];
 
 const blogPosts: BlogPost[] = [
@@ -100,8 +101,8 @@ const blogPosts: BlogPost[] = [
     id: "4",
     title: "Vibe Coding: How AI Pair Programming is Revolutionizing Development",
     excerpt: "Explore the future of coding with AI assistants - from GitHub Copilot to Claude, and building your own dev workflow.",
-    platform: "originx",
-    url: "https://www.originxlabs.com/blog",
+    platform: "stackcraft",
+    url: "https://stackcraft.io/abhishekpanda",
     category: "Vibe Coding",
     readTime: "10 min",
     date: "Dec 4, 2024",
@@ -148,8 +149,8 @@ const blogPosts: BlogPost[] = [
     id: "8",
     title: "Building Multi-Tenant SaaS Applications with .NET and PostgreSQL",
     excerpt: "Complete guide to architecting multi-tenant systems with data isolation, security, and scalability patterns.",
-    platform: "originx",
-    url: "https://www.originxlabs.com/blog",
+    platform: "stackcraft",
+    url: "https://stackcraft.io/abhishekpanda",
     category: "Architecture",
     readTime: "20 min",
     date: "Nov 25, 2024",
@@ -195,17 +196,17 @@ const categoryColors: Record<string, string> = {
 };
 
 const platformIcons = {
+  stackcraft: StackcraftIcon,
   medium: MediumIcon,
   substack: SubstackIcon,
   hashnode: HashnodeIcon,
-  originx: () => <span className="font-black text-primary text-sm">OX</span>,
 };
 
 const platformColors = {
+  stackcraft: "bg-black",
   medium: "bg-[#00AB6C]",
   substack: "bg-[#FF6719]",
   hashnode: "bg-[#2962FF]",
-  originx: "bg-primary",
 };
 
 const BlogAggregator = () => {
@@ -246,7 +247,7 @@ const BlogAggregator = () => {
                 All <span className="gradient-text">Blogs</span> in One Place
               </h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-                Discover articles from Medium, Substack, Hashnode, and OriginX Labs - 
+                Discover articles from Stackcraft, Medium, Substack, and Hashnode, 
                 covering .NET, Microservices, AI/ML, Cloud Architecture, and more.
               </p>
             </motion.div>
