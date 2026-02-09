@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
@@ -17,10 +17,13 @@ import {
   Award,
   BookOpen,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Search
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CourseOneToOneModal } from "@/components/courses/CourseOneToOneModal";
+import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
+import { iconForKey } from "@/lib/social/iconMap";
 
 const filters = {
   levels: ["All", "Beginner", "Intermediate", "Advanced"],
@@ -214,6 +217,8 @@ const upcomingCourses: UpcomingCourse[] = [
 const Courses = () => {
   const [selectedLevel, setSelectedLevel] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [oneToOneOpen, setOneToOneOpen] = useState(false);
   const [oneToOneCourse, setOneToOneCourse] = useState<{
     title: string;
@@ -241,60 +246,147 @@ const Courses = () => {
     },
   });
 
-  const filteredCourses = courses.filter((course) => {
+  const courseMeta = (course: any) => {
+    const modules = Array.isArray(course.modules) ? course.modules : [];
+    const lessons = modules.flatMap((m: any) => (Array.isArray(m.lessons) ? m.lessons : []));
+    const videoCount = lessons.length || course.lesson_count || 0;
+    const durationLabel = course.duration || "Self-paced";
+    return { videoCount, durationLabel };
+  };
+
+  const categories = useMemo(() => {
+    const fromDb = courses.flatMap((course: any) => (course.tags || []).map((t: string) => t.toUpperCase()));
+    const fromUpcoming = upcomingCourses.map((c) => c.category.toUpperCase());
+    const unique = Array.from(new Set(["All", ...fromDb, ...fromUpcoming]));
+    return unique;
+  }, [courses]);
+
+  const filteredCourses = courses.filter((course: any) => {
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch =
+      !q ||
+      course.title?.toLowerCase().includes(q) ||
+      course.description?.toLowerCase().includes(q) ||
+      (course.tags || []).join(" ").toLowerCase().includes(q);
     const matchesLevel = selectedLevel === "All" || course.level === selectedLevel;
     const matchesType = selectedType === "All" || 
       (selectedType === "Free" && !course.is_premium) ||
       (selectedType === "Premium" && course.is_premium);
-    return matchesLevel && matchesType;
+    const matchesCategory =
+      selectedCategory === "All" ||
+      (course.tags || []).map((t: string) => t.toUpperCase()).includes(selectedCategory);
+    return matchesSearch && matchesLevel && matchesType && matchesCategory;
   });
 
   const filteredUpcoming = upcomingCourses.filter((course) => {
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch =
+      !q ||
+      course.title.toLowerCase().includes(q) ||
+      course.category.toLowerCase().includes(q);
     const matchesLevel = selectedLevel === "All" || course.level === selectedLevel;
     const matchesType =
       selectedType === "All" ||
       (selectedType === "Free" && course.isFree) ||
       (selectedType === "Premium" && course.isPremium);
-    return matchesLevel && matchesType;
+    const matchesCategory =
+      selectedCategory === "All" || course.category.toUpperCase() === selectedCategory;
+    return matchesSearch && matchesLevel && matchesType && matchesCategory;
   });
+
+  const { data: profiles } = usePublicSocialProfiles();
+  const socialProfiles = (profiles ?? []).filter((p: any) => p.category === "social" && p.profile_url);
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+
+      {/* Social Rail */}
+      <div className="hidden xl:flex fixed right-6 top-1/2 -translate-y-1/2 z-40 flex-col gap-3">
+        {socialProfiles.map((p: any) => {
+          const Icon: any = iconForKey(p.icon_key);
+          return (
+            <a
+              key={p.platform}
+              href={p.profile_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-12 h-12 rounded-2xl bg-card/90 border border-border/60 backdrop-blur-xl flex items-center justify-center text-muted-foreground hover:text-primary transition-all hover:shadow-glow"
+              aria-label={p.display_name}
+              title={p.display_name}
+            >
+              <Icon className="w-5 h-5" />
+            </a>
+          );
+        })}
+      </div>
       
       <main className="pt-24 pb-20">
         {/* Hero */}
-        <section className="relative overflow-hidden py-16">
-          <div className="absolute inset-0 mesh-gradient opacity-50" />
-          <div className="relative container mx-auto px-4 text-center">
+        <section className="relative overflow-hidden py-14">
+          <div className="absolute inset-0 atlas-mesh-bg opacity-70" />
+          <div className="relative container mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
+              className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-center"
             >
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-2 text-sm font-medium mb-6">
-                <GraduationCap className="w-4 h-4" />
-                Industry-Proven Curriculum
+              <div>
+                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-2 text-xs font-semibold mb-5">
+                  <GraduationCap className="w-4 h-4" />
+                  Abhishek Panda Courses
+                </div>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight">
+                  Master Modern Engineering <span className="gradient-text">with a Direct Architect</span>
+                </h1>
+                <p className="text-lg text-muted-foreground max-w-2xl mb-6">
+                  Premium, job-ready programs across .NET, Azure, microservices, AI/ML, and interview prep.
+                  Built from real production systems and guided mentorship.
+                </p>
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  <div className="inline-flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-primary" />
+                    20+ Premium Tracks
+                  </div>
+                  <div className="inline-flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" />
+                    300k+ learners globally
+                  </div>
+                  <div className="inline-flex items-center gap-2">
+                    <Award className="w-4 h-4 text-primary" />
+                    Architect-level outcomes
+                  </div>
+                </div>
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight">
-                Level Up Your <span className="gradient-text">Engineering Skills</span>
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-                Learn from real-world projects and battle-tested architectures.
-                New series are rolling out continuously across .NET, Azure, microservices, AI, and interview prep.
-              </p>
-              <div className="flex flex-wrap justify-center gap-6 text-sm">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-primary" />
-                  <span className="text-muted-foreground">Expert-Led Content</span>
+              <div className="glass-card rounded-3xl p-6 border border-border/60">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary text-primary-foreground flex items-center justify-center text-2xl font-bold">
+                    AP
+                  </div>
+                  <div>
+                    <div className="text-sm uppercase text-muted-foreground">Your Instructor</div>
+                    <div className="text-xl font-bold text-foreground">Abhishek Panda</div>
+                    <div className="text-sm text-muted-foreground">Architect & AI Engineer • OriginX Labs</div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Award className="w-5 h-5 text-primary" />
-                  <span className="text-muted-foreground">Certificates Included</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-primary" />
-                  <span className="text-muted-foreground">Community Support</span>
+                <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+                  Architecting real-world systems for 10+ years. Focused on production-ready
+                  patterns, scale, and leadership-grade engineering thinking.
+                </p>
+                <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs text-muted-foreground">
+                  <div className="rounded-xl border border-border/70 p-3">
+                    <div className="text-lg font-bold text-foreground">15+</div>
+                    Years exp
+                  </div>
+                  <div className="rounded-xl border border-border/70 p-3">
+                    <div className="text-lg font-bold text-foreground">120+</div>
+                    Modules
+                  </div>
+                  <div className="rounded-xl border border-border/70 p-3">
+                    <div className="text-lg font-bold text-foreground">24/7</div>
+                    Support
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -307,51 +399,85 @@ const Courses = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="glass-card rounded-2xl p-4 flex flex-wrap items-center gap-4"
+            className="glass-card rounded-2xl p-4"
           >
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Filter className="w-5 h-5" />
-              <span className="font-medium">Filters:</span>
-            </div>
-            
-            <div className="flex flex-wrap gap-2">
-              {filters.levels.map((level) => (
-                <button
-                  key={level}
-                  onClick={() => setSelectedLevel(level)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    selectedLevel === level
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
-                  }`}
-                >
-                  {level}
-                </button>
-              ))}
-            </div>
-
-            <div className="h-8 w-px bg-border hidden sm:block" />
-
-            <div className="flex flex-wrap gap-2">
-              {filters.types.map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    selectedType === type
-                      ? "bg-secondary text-secondary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap gap-2">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
+                      selectedCategory === cat
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr_1fr] gap-3 items-center">
+                <div className="relative">
+                  <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search course title, tag, or topic..."
+                    className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm"
+                  />
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                  <Filter className="w-4 h-4" />
+                  Level:
+                  <div className="flex flex-wrap gap-2">
+                    {filters.levels.map((level) => (
+                      <button
+                        key={level}
+                        onClick={() => setSelectedLevel(level)}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                          selectedLevel === level
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                  Type:
+                  <div className="flex flex-wrap gap-2">
+                    {filters.types.map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => setSelectedType(type)}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                          selectedType === type
+                            ? "bg-secondary text-secondary-foreground"
+                            : "bg-muted text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </motion.div>
         </section>
 
         {/* Course Grid */}
         <section className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-3xl font-black tracking-tight text-foreground">Explore Courses</h2>
+              <p className="text-sm text-muted-foreground">Find the right path and start building production-ready skills.</p>
+            </div>
+            <Button variant="outline" size="sm">View All Courses</Button>
+          </div>
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
@@ -365,7 +491,7 @@ const Courses = () => {
                 </div>
               ))}
             </div>
-          ) : filteredCourses.length === 0 ? (
+          ) : filteredCourses.length === 0 && filteredUpcoming.length === 0 ? (
             <div className="space-y-10">
               <div className="text-center pt-8">
                 <GraduationCap className="w-14 h-14 text-primary mx-auto mb-3" />
@@ -447,15 +573,24 @@ const Courses = () => {
                         </div>
                       </Link>
                       <div className="p-6 flex-1 flex flex-col">
+                        <div className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground mb-2">
+                          {(course.tags?.[0] || "PROGRAM").toString().toUpperCase()}
+                        </div>
                         <Link to={`/courses/${course.slug}`}>
                           <h3 className="font-bold text-lg text-foreground mb-2 hover:text-primary transition-colors line-clamp-2">{course.title}</h3>
                         </Link>
                         <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">{course.description}</p>
-                          <div className="flex items-center justify-between pt-4 border-t border-border">
-                            <span className={`font-bold text-xl ${course.is_premium ? 'gradient-text' : 'text-accent'}`}>
-                              {course.is_premium && course.price_amount ? `₹${course.price_amount}` : 'Free'}
-                            </span>
-                            <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
+                          <span className="inline-flex items-center gap-1"><Play className="w-3.5 h-3.5" />{courseMeta(course).videoCount} videos</span>
+                          <span className="inline-flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{courseMeta(course).durationLabel}</span>
+                          <span className="inline-flex items-center gap-1"><Users className="w-3.5 h-3.5" />{course.students_count || 0} learners</span>
+                          <span className="inline-flex items-center gap-1"><Star className="w-3.5 h-3.5 text-amber-500" />{course.rating || "4.9"}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-4 border-t border-border">
+                          <span className={`font-bold text-xl ${course.is_premium ? 'gradient-text' : 'text-accent'}`}>
+                            {course.is_premium && course.price_amount ? `₹${course.price_amount}` : 'Free'}
+                          </span>
+                          <div className="flex items-center gap-2">
                             {(course.one_to_one_enabled ?? true) ? (
                               <Button
                                 variant="outline"
@@ -480,10 +615,13 @@ const Courses = () => {
                             ) : null}
                             <Button variant={course.is_premium ? "premium" : "default"} size="sm" asChild>
                               <Link to={`/courses/${course.slug}`}>
-                                {course.is_premium ? "Enroll" : "Start"}<ArrowRight className="w-4 h-4" />
+                                {course.is_premium ? "Buy Now" : "Start Free"}<ArrowRight className="w-4 h-4" />
                               </Link>
                             </Button>
-                            </div>
+                            <Button variant="ghost" size="sm" asChild>
+                              <Link to={`/courses/${course.slug}`}>Details</Link>
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -564,6 +702,37 @@ const Courses = () => {
               </div>
             </div>
           )}
+        </section>
+
+        {/* Testimonials */}
+        <section className="container mx-auto px-4 mt-16">
+          <div className="text-center mb-8">
+            <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Testimonials</div>
+            <h2 className="text-3xl font-black text-foreground mt-2">What Students Say</h2>
+            <p className="text-sm text-muted-foreground">Career transformations driven by real-world, production-grade learning.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: "Omid M.",
+                quote: "The depth and clarity of Abhishek's architecture explanations helped me upgrade my system design interviews.",
+              },
+              {
+                name: "Steve A.",
+                quote: "Great balance between theory and real-world scenarios. The 1:1 guidance made the difference.",
+              },
+              {
+                name: "Timothy M.",
+                quote: "Hands-on patterns and real production setups. This feels like a senior engineer showing you the ropes.",
+              },
+            ].map((t) => (
+              <div key={t.name} className="glass-card rounded-2xl p-6 border border-border/60">
+                <div className="text-sm text-muted-foreground mb-3">★★★★★</div>
+                <p className="text-sm text-foreground/90 leading-relaxed mb-4">“{t.quote}”</p>
+                <div className="text-xs font-semibold text-muted-foreground">{t.name}</div>
+              </div>
+            ))}
+          </div>
         </section>
       </main>
 

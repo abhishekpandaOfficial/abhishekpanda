@@ -13,7 +13,10 @@ export default defineConfig(() => ({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["robots.txt", "favicon.svg", "favicon.png", "pwa-192x192.png", "pwa-512x512.png"],
+      devOptions: {
+        enabled: false,
+      },
+      includeAssets: ["robots.txt", "favicon.svg", "favicon.png", "favicon-32.png", "favicon-16.png", "pwa-192x192.png", "pwa-512x512.png"],
       manifest: {
         name: "Abhishek Panda Command Center",
         short_name: "AP Admin",
