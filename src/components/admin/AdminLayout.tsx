@@ -72,6 +72,7 @@ const sidebarGroups: SidebarGroup[] = [
       { name: "IP Access Control", icon: Shield, path: "/admin/ip-management", badge: "Security", color: "text-red-500" },
       { name: "CV Downloads", icon: Download, path: "/admin/cv-downloads", badge: null, color: "text-slate-400" },
       { name: "Contact Requests", icon: Inbox, path: "/admin/contacts", badge: null, color: "text-sky-500" },
+      { name: "Mentorship", icon: Users, path: "/admin/mentorship", badge: null, color: "text-emerald-400" },
     ],
   },
   {

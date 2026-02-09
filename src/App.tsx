@@ -50,6 +50,7 @@ import AdminIntegrations from "@/components/admin/AdminIntegrations";
 import AdminNimbusDesk from "@/components/admin/AdminNimbusDesk";
 import AdminAuditLogs from "@/components/admin/AdminAuditLogs";
 import AdminIPManagement from "@/components/admin/AdminIPManagement";
+import AdminMentorshipBookings from "@/components/admin/AdminMentorshipBookings";
 import AdminOpsDocs from "@/components/admin/AdminOpsDocs";
 
 // Analytics wrapper component
@@ -94,6 +95,7 @@ const App = () => (
               <Route path="ip-management" element={<AdminIPManagement />} />
               <Route path="cv-downloads" element={<AdminCVDownloads />} />
               <Route path="contacts" element={<AdminContactRequests />} />
+              <Route path="mentorship" element={<AdminMentorshipBookings />} />
               <Route path="blog" element={<AdminBlogManager />} />
               <Route path="nimbus" element={<AdminNimbusDesk />} />
               <Route path="courses" element={<AdminCoursesManager />} />

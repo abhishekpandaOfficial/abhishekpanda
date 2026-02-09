@@ -3,39 +3,33 @@ import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { 
-  Calendar, 
-  Clock, 
-  Video, 
+import {
+  Calendar,
+  Clock,
+  Video,
   MessageSquare,
   Star,
   CheckCircle2,
   Users,
   Target,
-  Zap
+  Zap,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { MentorshipBookingModal, type MentorshipPackage } from "@/components/mentorship/MentorshipBookingModal";
 
-const packages = [
+const packages: Array<MentorshipPackage & { features: string[]; popular?: boolean; durationLabel: string }> = [
   {
     name: "Quick Consultation",
-    duration: "30 min",
-    price: "₹1,499",
+    durationMinutes: 30,
+    durationLabel: "30 min",
+    amountInr: 1499,
     description: "Perfect for quick questions, code reviews, or architectural guidance.",
-    features: [
-      "1:1 video call",
-      "Screen sharing",
-      "Code review",
-      "Action items summary",
-    ],
-    popular: false,
+    features: ["1:1 video call", "Screen sharing", "Code review", "Action items summary"],
   },
   {
     name: "Deep Dive Session",
-    duration: "60 min",
-    price: "₹2,999",
+    durationMinutes: 60,
+    durationLabel: "60 min",
+    amountInr: 2999,
     description: "Comprehensive session for detailed discussions and hands-on guidance.",
     features: [
       "1:1 video call",
@@ -48,8 +42,9 @@ const packages = [
   },
   {
     name: "Career Strategy",
-    duration: "90 min",
-    price: "₹4,499",
+    durationMinutes: 90,
+    durationLabel: "90 min",
+    amountInr: 4499,
     description: "Strategic career planning, interview prep, and growth roadmap.",
     features: [
       "1:1 video call",
@@ -59,7 +54,6 @@ const packages = [
       "Mock interview session",
       "30-day follow-up support",
     ],
-    popular: false,
   },
 ];
 
@@ -67,56 +61,40 @@ const testimonials = [
   {
     name: "Rahul Sharma",
     role: "Senior Developer at Microsoft",
-    content: "Abhishek's mentorship was transformative. His deep knowledge of .NET architecture helped me crack my dream job.",
+    content:
+      "Abhishek's mentorship was transformative. His deep knowledge of .NET architecture helped me crack my dream job.",
     rating: 5,
   },
   {
     name: "Priya Patel",
     role: "Tech Lead at Amazon",
-    content: "The system design session was incredibly valuable. Clear explanations and practical insights that I still use today.",
+    content:
+      "The system design session was incredibly valuable. Clear explanations and practical insights that I still use today.",
     rating: 5,
   },
   {
     name: "Amit Kumar",
     role: "Startup Founder",
-    content: "Best investment I made for my startup. Abhishek helped us design a scalable architecture from day one.",
+    content:
+      "Best investment I made for my startup. Abhishek helped us design a scalable architecture from day one.",
     rating: 5,
   },
 ];
 
 const Mentorship = () => {
-  const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    experience: "",
-    topic: "",
-    goals: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: "Request Submitted!",
-      description: "I'll get back to you within 24 hours to schedule your session.",
-    });
-    setFormData({ name: "", email: "", experience: "", topic: "", goals: "" });
-  };
+  const [selectedPkg, setSelectedPkg] = useState<MentorshipPackage | null>(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       <main className="pt-24 pb-20">
         {/* Hero */}
         <section className="relative overflow-hidden py-16">
           <div className="absolute inset-0 mesh-gradient opacity-50" />
           <div className="relative container mx-auto px-4 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-2 text-sm font-medium mb-6">
                 <Calendar className="w-4 h-4" />
                 1:1 Mentorship Sessions
@@ -125,8 +103,8 @@ const Mentorship = () => {
                 Book a <span className="gradient-text">1:1 Session</span> with Me
               </h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-                Get personalized guidance on .NET architecture, AI/ML, cloud solutions, 
-                career growth, or any technical challenge you're facing.
+                Get personalized guidance on .NET architecture, AI/ML, cloud solutions, career growth, or any technical
+                challenge you're facing.
               </p>
               <div className="flex flex-wrap justify-center gap-6 text-sm">
                 <div className="flex items-center gap-2">
@@ -140,6 +118,23 @@ const Mentorship = () => {
                 <div className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-primary" />
                   <span className="text-muted-foreground">500+ Sessions Done</span>
+                </div>
+              </div>
+
+              <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Button
+                  variant="hero"
+                  size="lg"
+                  onClick={() => {
+                    setSelectedPkg(packages[1]);
+                    setBookingOpen(true);
+                  }}
+                >
+                  Book a Session
+                </Button>
+                <div className="text-xs text-muted-foreground flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  Times shown in IST (Asia/Kolkata)
                 </div>
               </div>
             </motion.div>
@@ -162,16 +157,20 @@ const Mentorship = () => {
                     <span className="badge-premium">Most Popular</span>
                   </div>
                 )}
-                <div className={`glass-card-hover rounded-2xl p-6 h-full flex flex-col ${
-                  pkg.popular ? "border-2 border-primary shadow-glow" : ""
-                }`}>
+                <div
+                  className={`glass-card-hover rounded-2xl p-6 h-full flex flex-col ${
+                    pkg.popular ? "border-2 border-primary shadow-glow" : ""
+                  }`}
+                >
                   <div className="text-center mb-6">
                     <h3 className="font-bold text-xl text-foreground mb-2">{pkg.name}</h3>
                     <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
                       <Clock className="w-4 h-4" />
-                      {pkg.duration}
+                      {pkg.durationLabel}
                     </div>
-                    <div className="text-4xl font-black gradient-text mb-2">{pkg.price}</div>
+                    <div className="text-4xl font-black gradient-text mb-2">
+                      ₹{pkg.amountInr.toLocaleString("en-IN")}
+                    </div>
                     <p className="text-sm text-muted-foreground">{pkg.description}</p>
                   </div>
 
@@ -184,10 +183,14 @@ const Mentorship = () => {
                     ))}
                   </ul>
 
-                  <Button 
-                    variant={pkg.popular ? "hero" : "hero-outline"} 
-                    size="lg" 
+                  <Button
+                    variant={pkg.popular ? "hero" : "hero-outline"}
+                    size="lg"
                     className="w-full"
+                    onClick={() => {
+                      setSelectedPkg(pkg);
+                      setBookingOpen(true);
+                    }}
                   >
                     Book Now
                   </Button>
@@ -237,108 +240,38 @@ const Mentorship = () => {
           </div>
         </section>
 
-        {/* Booking Form */}
+        {/* Booking CTA */}
         <section className="py-20">
           <div className="container mx-auto px-4">
-            <div className="max-w-2xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-center mb-12"
+            <div className="max-w-3xl mx-auto text-center glass-card rounded-2xl p-10">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-2 text-sm font-medium mb-6">
+                <Zap className="w-4 h-4" />
+                Instant Booking + Secure Payment
+              </div>
+              <h2 className="section-title mb-4">
+                Pick a time and <span className="gradient-text">book instantly</span>
+              </h2>
+              <p className="section-subtitle mx-auto mb-8">
+                Choose a time in IST, fill the details, pay securely via Razorpay, and receive a calendar invite (ICS) on
+                email.
+              </p>
+              <Button
+                variant="hero"
+                size="xl"
+                onClick={() => {
+                  setSelectedPkg(packages[1]);
+                  setBookingOpen(true);
+                }}
               >
-                <h2 className="section-title mb-4">
-                  Request a <span className="gradient-text">Session</span>
-                </h2>
-                <p className="section-subtitle mx-auto">
-                  Fill out the form below and I'll get back to you within 24 hours
-                </p>
-              </motion.div>
-
-              <motion.form
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-                onSubmit={handleSubmit}
-                className="glass-card rounded-2xl p-8 space-y-6"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Your Name
-                    </label>
-                    <Input
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="John Doe"
-                      className="bg-background"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Email Address
-                    </label>
-                    <Input
-                      required
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="john@example.com"
-                      className="bg-background"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Experience Level
-                  </label>
-                  <Input
-                    required
-                    value={formData.experience}
-                    onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                    placeholder="e.g., 3 years as a .NET developer"
-                    className="bg-background"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Topic / Area of Focus
-                  </label>
-                  <Input
-                    required
-                    value={formData.topic}
-                    onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-                    placeholder="e.g., Microservices architecture, Career guidance"
-                    className="bg-background"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    What do you want to achieve?
-                  </label>
-                  <Textarea
-                    required
-                    value={formData.goals}
-                    onChange={(e) => setFormData({ ...formData, goals: e.target.value })}
-                    placeholder="Describe your goals and any specific questions you have..."
-                    className="bg-background min-h-[120px]"
-                  />
-                </div>
-
-                <Button type="submit" variant="hero" size="xl" className="w-full">
-                  <Target className="w-5 h-5" />
-                  Submit Request
-                </Button>
-              </motion.form>
+                <Target className="w-5 h-5" />
+                Book Session
+              </Button>
             </div>
           </div>
         </section>
       </main>
+
+      <MentorshipBookingModal open={bookingOpen} onOpenChange={setBookingOpen} pkg={selectedPkg} />
 
       <Footer />
     </div>
@@ -346,3 +279,4 @@ const Mentorship = () => {
 };
 
 export default Mentorship;
+
