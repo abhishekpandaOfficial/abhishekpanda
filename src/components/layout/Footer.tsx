@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { 
   Instagram, 
   Youtube, 
@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { BurningLogo } from "@/components/ui/BurningLogo";
 import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
 import { iconForKey } from "@/lib/social/iconMap";
+import { supabase } from "@/integrations/supabase/client";
 
 const footerLinks = {
   explore: [
@@ -82,6 +83,7 @@ function ProfileIconLink(props: { p: PublicProfile; sizeClass: string; iconClass
 
 export const Footer = () => {
   const { data: profiles } = usePublicSocialProfiles();
+  const [visitCount, setVisitCount] = useState<number | null>(null);
 
   const { social, blogAndPlatforms } = useMemo(() => {
     const rows = (profiles ?? []) as any[];
@@ -90,6 +92,19 @@ export const Footer = () => {
     const platform = rows.filter((r) => r.category === "platform" && r.profile_url);
     return { social, blogAndPlatforms: [...blog, ...platform] };
   }, [profiles]);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase
+      .rpc("increment_site_visit", { _slug: "site" })
+      .then(({ data, error }) => {
+        if (error || !mounted) return;
+        if (typeof data === "number") setVisitCount(data);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <footer className="relative bg-card border-t border-border">
@@ -270,6 +285,9 @@ export const Footer = () => {
             © {new Date().getFullYear()} Abhishek Panda. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
+            <span className="text-xs text-muted-foreground">
+              Visitors: {visitCount === null ? "—" : visitCount.toLocaleString()}
+            </span>
             {footerLinks.legal.map((link) => (
               <Link
                 key={link.path}

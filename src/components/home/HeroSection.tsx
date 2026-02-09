@@ -56,7 +56,7 @@ export const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+    <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden pt-16">
       {/* Background Effects */}
       <div className="absolute inset-0 mesh-gradient" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
@@ -87,7 +87,7 @@ export const HeroSection = () => {
         }}
       />
 
-      <div className="relative container mx-auto px-4 py-20">
+      <div className="relative container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto text-center">
           {/* Avatar with Hover Tagline */}
           <motion.div

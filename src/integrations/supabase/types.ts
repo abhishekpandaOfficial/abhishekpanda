@@ -1669,6 +1669,24 @@ export type Database = {
         }
         Relationships: []
       }
+      site_metrics: {
+        Row: {
+          slug: string
+          updated_at: string
+          visits: number
+        }
+        Insert: {
+          slug: string
+          updated_at?: string
+          visits?: number
+        }
+        Update: {
+          slug?: string
+          updated_at?: string
+          visits?: number
+        }
+        Relationships: []
+      }
       social_profiles: {
         Row: {
           brand_bg: string | null
@@ -1905,6 +1923,7 @@ export type Database = {
         Returns: boolean
       }
       increment_blog_post_view: { Args: { _slug: string }; Returns: undefined }
+      increment_site_visit: { Args: { _slug?: string }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
