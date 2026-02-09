@@ -10,6 +10,7 @@ import {
   Layers,
 } from "lucide-react";
 import { StackcraftIcon } from "@/components/icons/StackcraftIcon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const socialLinks = [
   { name: "X (Twitter)", icon: Twitter, url: "https://x.com/Panda_Abhishek8", color: "hover:bg-[#000]" },
@@ -50,25 +51,33 @@ export const SocialSection = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="flex flex-wrap justify-center gap-4 max-w-3xl mx-auto"
         >
-          {socialLinks.map((social, index) => (
-            <motion.a
-              key={social.name}
-              href={social.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              whileHover={{ scale: 1.1, y: -5 }}
-              className={`group glass-card w-16 h-16 md:w-20 md:h-20 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-300 ${social.color} hover:text-primary-foreground hover:shadow-glow`}
-            >
-              <social.icon className="w-6 h-6 md:w-7 md:h-7" />
-              <span className="text-[10px] md:text-xs font-medium opacity-70 group-hover:opacity-100">
-                {social.name}
-              </span>
-            </motion.a>
-          ))}
+          {socialLinks.map((social, index) => {
+            const iconClass =
+              social.name === "Stackcraft"
+                ? "w-6 h-6 md:w-7 md:h-7 opacity-95"
+                : "w-6 h-6 md:w-7 md:h-7";
+            return (
+              <Tooltip key={social.name}>
+                <TooltipTrigger asChild>
+                  <motion.a
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.name}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    whileHover={{ scale: 1.1, y: -5 }}
+                    className={`group glass-card w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center transition-all duration-300 ${social.color} hover:text-primary-foreground hover:shadow-glow`}
+                  >
+                    <social.icon className={iconClass} />
+                  </motion.a>
+                </TooltipTrigger>
+                <TooltipContent>{social.name}</TooltipContent>
+              </Tooltip>
+            );
+          })}
         </motion.div>
       </div>
     </section>
