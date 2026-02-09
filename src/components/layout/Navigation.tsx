@@ -11,7 +11,6 @@ import {
   TrendingUp, 
   Rss, 
   Pen,
-  Compass,
   UserCircle,
   BookOpen,
   MessageCircle,
@@ -35,11 +34,11 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-// Nav links in order: Home, About, Courses, Blog, Mentorship, Contact
+// Nav links in order: About, Courses, Ebooks, Mentorship, Contact
 const navLinks = [
-  { name: "Home", path: "/", icon: Compass },
   { name: "About", path: "/about", icon: UserCircle },
   { name: "Courses", path: "/courses", icon: GraduationCap },
+  { name: "Ebooks", path: "/ebooks", icon: BookOpen },
   { name: "Mentorship", path: "/mentorship", icon: MessageCircle },
   { name: "Contact", path: "/contact", icon: Send },
 ];
@@ -77,6 +76,7 @@ export const Navigation = () => {
   const isGalaxyActive = location.pathname.startsWith("/llm-galaxy");
   const isBlogActive = location.pathname.startsWith("/blog") || location.pathname === "/blogs";
   const isCoursesActive = location.pathname === "/courses" || location.pathname.startsWith("/courses/");
+  const isEbooksActive = location.pathname === "/ebooks" || location.pathname.startsWith("/ebooks/");
 
   return (
     <>
@@ -105,8 +105,8 @@ export const Navigation = () => {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
-              {/* Home & About */}
-              {navLinks.slice(0, 2).map((link) => (
+              {/* About */}
+              {navLinks.slice(0, 1).map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
@@ -141,6 +141,24 @@ export const Navigation = () => {
                 <span className="relative flex items-center gap-2">
                   <GraduationCap className="w-4 h-4 transition-transform group-hover:scale-110" />
                   Courses
+                </span>
+              </Link>
+
+              {/* Ebooks */}
+              <Link
+                to="/ebooks"
+                className={cn(
+                  "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 group",
+                  isEbooksActive
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                <span className="relative flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  Ebooks
                 </span>
               </Link>
 
@@ -198,7 +216,7 @@ export const Navigation = () => {
                   to={link.path}
                   className={cn(
                     "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 group",
-                    location.pathname === link.path
+                    (link.path === "/ebooks" ? isEbooksActive : location.pathname === link.path)
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground"
                   )}
@@ -311,8 +329,8 @@ export const Navigation = () => {
           >
             <div className="absolute inset-0 bg-background/95 backdrop-blur-xl" />
             <nav className="relative container mx-auto px-4 py-8 flex flex-col gap-2 max-h-[calc(100vh-5rem)] overflow-y-auto">
-              {/* Home & About */}
-              {navLinks.slice(0, 2).map((link, index) => (
+              {/* About */}
+              {navLinks.slice(0, 1).map((link, index) => (
                 <motion.div
                   key={link.path}
                   initial={{ opacity: 0, x: -20 }}
@@ -351,6 +369,26 @@ export const Navigation = () => {
                 >
                   <GraduationCap className="w-5 h-5" />
                   Courses
+                </Link>
+              </motion.div>
+
+              {/* Ebooks */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.12 }}
+              >
+                <Link
+                  to="/ebooks"
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    isEbooksActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Ebooks
                 </Link>
               </motion.div>
 
@@ -394,7 +432,7 @@ export const Navigation = () => {
                     to={link.path}
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
-                      location.pathname === link.path
+                      (link.path === "/ebooks" ? isEbooksActive : location.pathname === link.path)
                         ? "text-primary bg-primary/10"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     )}

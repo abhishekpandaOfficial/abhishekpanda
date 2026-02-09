@@ -1,4 +1,5 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +9,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Index from "./pages/Index";
 import { RouteSeo } from "@/components/seo/RouteSeo";
+import { BrandIntro } from "@/components/BrandIntro";
 
 const About = lazy(() => import("./pages/About"));
 const Blog = lazy(() => import("./pages/Blog"));
@@ -17,6 +19,8 @@ const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const Products = lazy(() => import("./pages/Products"));
 const Mentorship = lazy(() => import("./pages/Mentorship"));
 const Contact = lazy(() => import("./pages/Contact"));
+const Ebooks = lazy(() => import("./pages/Ebooks"));
+const EbookDetail = lazy(() => import("./pages/EbookDetail"));
 const LLMGalaxy = lazy(() => import("./pages/LLMGalaxy"));
 const ModelDetail = lazy(() => import("./pages/ModelDetail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -77,17 +81,39 @@ const AssistantMount = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="abhishekpanda-theme">
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AnalyticsWrapper>
-            <RouteSeo />
-            <Suspense fallback={<RouteLoader />}>
-              <Routes>
+const App = () => {
+  const [showIntro, setShowIntro] = useState(true);
+
+  useEffect(() => {
+    const start = Date.now();
+    const minDuration = 1500;
+
+    const complete = () => {
+      const elapsed = Date.now() - start;
+      const remaining = Math.max(minDuration - elapsed, 0);
+      setTimeout(() => setShowIntro(false), remaining);
+    };
+
+    if (document.readyState === "complete") {
+      complete();
+    } else {
+      window.addEventListener("load", complete, { once: true });
+      return () => window.removeEventListener("load", complete);
+    }
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="abhishekpanda-theme">
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AnalyticsWrapper>
+              <RouteSeo />
+              <AnimatePresence>{showIntro ? <BrandIntro /> : null}</AnimatePresence>
+              <Suspense fallback={<RouteLoader />}>
+                <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
@@ -96,6 +122,8 @@ const App = () => (
                 <Route path="/academy" element={<Navigate to="/courses" replace />} />
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/courses/:courseId" element={<CourseDetail />} />
+                <Route path="/ebooks" element={<Ebooks />} />
+                <Route path="/ebooks/:slug" element={<EbookDetail />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/mentorship" element={<Mentorship />} />
                 <Route path="/contact" element={<Contact />} />
@@ -139,13 +167,14 @@ const App = () => (
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </Suspense>
-            <AssistantMount />
-          </AnalyticsWrapper>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+              </Suspense>
+              <AssistantMount />
+            </AnalyticsWrapper>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

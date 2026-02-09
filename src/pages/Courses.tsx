@@ -20,6 +20,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CourseOneToOneModal } from "@/components/courses/CourseOneToOneModal";
 
 const filters = {
   levels: ["All", "Beginner", "Intermediate", "Advanced"],
@@ -34,6 +35,8 @@ type UpcomingCourse = {
   isPremium: boolean;
   isFree: boolean;
   price: string | null;
+  priceAmount?: number | null;
+  slug?: string;
   includes: string[];
 };
 
@@ -46,6 +49,8 @@ const upcomingCourses: UpcomingCourse[] = [
     isPremium: true,
     isFree: false,
     price: "₹24,999",
+    priceAmount: 24999,
+    slug: "azure-architect-series",
     includes: ["1:1 Weekend Session", "Lifetime Access"],
   },
   {
@@ -56,6 +61,8 @@ const upcomingCourses: UpcomingCourse[] = [
     isPremium: true,
     isFree: false,
     price: "₹29,999",
+    priceAmount: 29999,
+    slug: "dotnet-architect-series",
     includes: ["1:1 Weekend Session", "Lifetime Access"],
   },
   {
@@ -66,6 +73,8 @@ const upcomingCourses: UpcomingCourse[] = [
     isPremium: true,
     isFree: false,
     price: "₹9,999",
+    priceAmount: 9999,
+    slug: "microservices-architecture",
     includes: ["Case Studies", "Lifetime Access"],
   },
   {
@@ -76,6 +85,8 @@ const upcomingCourses: UpcomingCourse[] = [
     isPremium: false,
     isFree: true,
     price: null,
+    priceAmount: null,
+    slug: "solid-principles",
     includes: ["Free Access", "Starter Exercises"],
   },
   {
@@ -86,6 +97,8 @@ const upcomingCourses: UpcomingCourse[] = [
     isPremium: true,
     isFree: false,
     price: "₹6,999",
+    priceAmount: 6999,
+    slug: "design-patterns-masterclass",
     includes: ["Pattern Catalog", "Lifetime Access"],
   },
   {
@@ -96,6 +109,8 @@ const upcomingCourses: UpcomingCourse[] = [
     isPremium: false,
     isFree: true,
     price: null,
+    priceAmount: null,
+    slug: "interview-prep-series",
     includes: ["Mock Interviews", "Question Bank"],
   },
   {
@@ -106,6 +121,8 @@ const upcomingCourses: UpcomingCourse[] = [
     isPremium: true,
     isFree: false,
     price: "₹8,999",
+    priceAmount: 8999,
+    slug: "apache-kafka-enterprise",
     includes: ["Architecture Labs", "Lifetime Access"],
   },
   {
@@ -116,6 +133,8 @@ const upcomingCourses: UpcomingCourse[] = [
     isPremium: false,
     isFree: true,
     price: null,
+    priceAmount: null,
+    slug: "csharp-coding",
     includes: ["Free Core Modules", "Community Support"],
   },
   {
@@ -126,6 +145,8 @@ const upcomingCourses: UpcomingCourse[] = [
     isPremium: true,
     isFree: false,
     price: "₹7,999",
+    priceAmount: 7999,
+    slug: "nextjs-typescript-fullstack",
     includes: ["Production Project", "Lifetime Access"],
   },
 ];
@@ -133,6 +154,12 @@ const upcomingCourses: UpcomingCourse[] = [
 const Courses = () => {
   const [selectedLevel, setSelectedLevel] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
+  const [oneToOneOpen, setOneToOneOpen] = useState(false);
+  const [oneToOneCourse, setOneToOneCourse] = useState<{
+    title: string;
+    priceAmount?: number | null;
+    slug?: string;
+  } | null>(null);
 
   const { data: courses = [], isLoading } = useQuery({
     queryKey: ['published-courses'],
@@ -333,8 +360,8 @@ const Courses = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
-                    <Link to={`/courses/${course.slug}`} className="block group h-full">
-                      <div className="glass-card-hover rounded-2xl overflow-hidden h-full flex flex-col">
+                    <div className="glass-card-hover rounded-2xl overflow-hidden h-full flex flex-col">
+                      <Link to={`/courses/${course.slug}`} className="block group">
                         <div className="relative aspect-video bg-gradient-to-br from-primary/20 via-secondary/20 to-purple/20 overflow-hidden">
                           <div className="absolute inset-0 flex items-center justify-center">
                             <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-glow">
@@ -352,20 +379,36 @@ const Courses = () => {
                             )}
                           </div>
                         </div>
-                        <div className="p-6 flex-1 flex flex-col">
-                          <h3 className="font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">{course.title}</h3>
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">{course.description}</p>
-                          <div className="flex items-center justify-between pt-4 border-t border-border">
-                            <span className={`font-bold text-xl ${course.is_premium ? 'gradient-text' : 'text-accent'}`}>
-                              {course.is_premium && course.price_amount ? `₹${course.price_amount}` : 'Free'}
-                            </span>
-                            <Button variant={course.is_premium ? "premium" : "default"} size="sm">
-                              {course.is_premium ? "Enroll" : "Start"}<ArrowRight className="w-4 h-4" />
+                      </Link>
+                      <div className="p-6 flex-1 flex flex-col">
+                        <Link to={`/courses/${course.slug}`}>
+                          <h3 className="font-bold text-lg text-foreground mb-2 hover:text-primary transition-colors line-clamp-2">{course.title}</h3>
+                        </Link>
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">{course.description}</p>
+                        <div className="flex items-center justify-between pt-4 border-t border-border">
+                          <span className={`font-bold text-xl ${course.is_premium ? 'gradient-text' : 'text-accent'}`}>
+                            {course.is_premium && course.price_amount ? `₹${course.price_amount}` : 'Free'}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setOneToOneCourse({ title: course.title, priceAmount: course.price_amount, slug: course.slug });
+                                setOneToOneOpen(true);
+                              }}
+                            >
+                              1:1 Session
+                            </Button>
+                            <Button variant={course.is_premium ? "premium" : "default"} size="sm" asChild>
+                              <Link to={`/courses/${course.slug}`}>
+                                {course.is_premium ? "Enroll" : "Start"}<ArrowRight className="w-4 h-4" />
+                              </Link>
                             </Button>
                           </div>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -413,6 +456,18 @@ const Courses = () => {
                         <Sparkles className="w-3.5 h-3.5 text-primary" />
                         Coming Soon
                       </div>
+                      <div className="mt-4 flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setOneToOneCourse({ title: course.title, priceAmount: course.priceAmount, slug: course.slug });
+                            setOneToOneOpen(true);
+                          }}
+                        >
+                          1:1 Session
+                        </Button>
+                      </div>
                     </motion.article>
                   ))}
                 </div>
@@ -421,6 +476,14 @@ const Courses = () => {
           )}
         </section>
       </main>
+
+      <CourseOneToOneModal
+        open={oneToOneOpen}
+        onOpenChange={setOneToOneOpen}
+        courseTitle={oneToOneCourse?.title || "Course"}
+        coursePriceInr={oneToOneCourse?.priceAmount ?? null}
+        courseSlug={oneToOneCourse?.slug}
+      />
 
       <Footer />
     </div>

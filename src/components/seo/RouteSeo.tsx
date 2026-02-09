@@ -68,6 +68,21 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     },
   },
   {
+    pattern: "/ebooks",
+    data: {
+      title: "Ebooks | Abhishek Panda",
+      description:
+        "Explore premium and free ebooks by Abhishek Panda with browser preview, OTP gated free downloads, and Chronyx Hub reading support.",
+    },
+  },
+  {
+    pattern: "/ebooks/:slug",
+    data: {
+      title: "Ebook Details | Abhishek Panda",
+      description: "View ebook overview, preview, tech stack, and unlock/download options.",
+    },
+  },
+  {
     pattern: "/products",
     data: {
       title: "Products | Abhishek Panda",

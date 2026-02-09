@@ -29,6 +29,7 @@ import {
   Loader2,
   FileText,
 } from "lucide-react";
+import { CourseOneToOneModal } from "@/components/courses/CourseOneToOneModal";
 
 const coursesDatabase: Record<string, {
   id: number;
@@ -198,6 +199,7 @@ const CourseDetail = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  const [oneToOneOpen, setOneToOneOpen] = useState(false);
 
   const [syllabusForm, setSyllabusForm] = useState({
     name: "",
@@ -428,11 +430,29 @@ const CourseDetail = () => {
                         <Download className="w-4 h-4" />
                         Download Syllabus
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-full"
+                        onClick={() => setOneToOneOpen(true)}
+                      >
+                        1:1 Session
+                      </Button>
                     </>
                   ) : (
-                    <Button variant="hero" size="lg" className="w-full">
-                      Start Free Course
-                    </Button>
+                    <>
+                      <Button variant="hero" size="lg" className="w-full">
+                        Start Free Course
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-full"
+                        onClick={() => setOneToOneOpen(true)}
+                      >
+                        1:1 Session
+                      </Button>
+                    </>
                   )}
                 </div>
 
@@ -759,6 +779,14 @@ const CourseDetail = () => {
           </div>
         )}
       </AnimatePresence>
+
+      <CourseOneToOneModal
+        open={oneToOneOpen}
+        onOpenChange={setOneToOneOpen}
+        courseTitle={course.title}
+        coursePriceInr={course.priceAmount}
+        courseSlug={courseId}
+      />
 
       <Footer />
     </div>
