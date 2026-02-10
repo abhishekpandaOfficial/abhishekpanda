@@ -214,14 +214,29 @@ export const AdminLayout = () => {
         }
 
         // Enforce server-verified MFA session (admin_mfa_sessions).
-        const { data: mfaRow, error: mfaErr } = await supabase
-          .from('admin_mfa_sessions')
-          .select('fully_verified_at, expires_at')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
+        const getMfaOk = async () => {
+          const { data: mfaRow, error: mfaErr } = await supabase
+            .from('admin_mfa_sessions')
+            .select('fully_verified_at, expires_at')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
 
-        const expiresAt = mfaRow?.expires_at ? new Date(mfaRow.expires_at).getTime() : 0;
-        const ok = !!mfaRow?.fully_verified_at && expiresAt > Date.now();
+          const expiresAt = mfaRow?.expires_at ? new Date(mfaRow.expires_at).getTime() : 0;
+          const ok = !!mfaRow?.fully_verified_at && expiresAt > Date.now();
+          return { ok, error: mfaErr };
+        };
+
+        let { ok, error: mfaErr } = await getMfaOk();
+        if (!ok) {
+          // Allow brief propagation delay after passkey verification
+          const hasClientFlag = sessionStorage.getItem('admin_2fa_verified') === 'true';
+          if (hasClientFlag) {
+            for (let i = 0; i < 5 && !ok; i += 1) {
+              await new Promise((r) => setTimeout(r, 400));
+              ({ ok, error: mfaErr } = await getMfaOk());
+            }
+          }
+        }
         if (mfaErr || !ok) {
           navigate('/admin/login');
           return;
