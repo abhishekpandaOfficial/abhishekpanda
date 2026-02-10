@@ -282,8 +282,9 @@ const AdminLogin = () => {
             setPhase("passkey_setup");
             toast.success("Password verified! Now register your passkey.");
           } else {
-            // Has passkey - proceed to OTP
-            sendOTPAndProceed(data.user.id, data.user.email!);
+            // Has passkey - proceed to passkey verification
+            setPhase("fingerprint");
+            toast.success("Password verified! Now verify your passkey.");
           }
         });
       } else {
@@ -292,8 +293,9 @@ const AdminLogin = () => {
           setPhase("passkey_setup");
           toast.success("Password verified! Now register your passkey.");
         } else {
-          // Has passkey - proceed to OTP
-          await sendOTPAndProceed(data.user.id, data.user.email!);
+          // Has passkey - proceed to passkey verification
+          setPhase("fingerprint");
+          toast.success("Password verified! Now verify your passkey.");
         }
       }
 
@@ -355,16 +357,17 @@ const AdminLogin = () => {
       // Small delay to let the toast appear first
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const success = await registerCredential();
+      const success = await registerCredential({ passkeyOnly: true });
       
       toast.dismiss('touchid-setup-hint');
 
       if (success) {
         localStorage.setItem('admin_passkey_registered', 'true');
-        toast.success('Passkey registered! Sending OTP...');
-        
-        // Now proceed to OTP
-        await sendOTPAndProceed(userId!, email);
+        sessionStorage.setItem('admin_2fa_verified', 'true');
+        sessionStorage.setItem('admin_2fa_timestamp', Date.now().toString());
+        sessionStorage.setItem('biometric_verified', Date.now().toString());
+        toast.success('Passkey registered! Access granted.');
+        setPhase("success");
       } else {
         // Use the error from webAuthn hook if available
         const errorMsg = webAuthnError || 'Passkey registration failed. Please try again.';
@@ -451,11 +454,11 @@ const AdminLogin = () => {
       let success = false;
       
       if (hasExistingPasskey) {
-        // Server-verified WebAuthn step 4
-        success = await authenticateWithCredential({ step: 4 });
+        // Passkey-only verification
+        success = await authenticateWithCredential({ passkeyOnly: true });
       } else {
         // Force passkey setup first
-        success = await registerCredential();
+        success = await registerCredential({ passkeyOnly: true });
       }
 
       if (success) {
@@ -463,8 +466,11 @@ const AdminLogin = () => {
         setFingerprintAttempts(0);
         resetAttempts(email, 'Fingerprint');
         await new Promise(resolve => setTimeout(resolve, 1500));
-        toast.success("Fingerprint verified! Now verify with Face ID.");
-        setPhase("faceid");
+        sessionStorage.setItem('admin_2fa_verified', 'true');
+        sessionStorage.setItem('admin_2fa_timestamp', Date.now().toString());
+        sessionStorage.setItem('biometric_verified', Date.now().toString());
+        toast.success("Passkey verified! Access granted.");
+        setPhase("success");
       } else {
         await handleFingerprintFailure();
       }

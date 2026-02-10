@@ -98,8 +98,8 @@ interface UseWebAuthnReturn {
   availableMethods: string[];
   credentials: WebAuthnCredential[];
   debug: WebAuthnDebugState;
-  registerCredential: () => Promise<boolean>;
-  authenticateWithCredential: (opts?: { step?: 4 | 5 }) => Promise<boolean>;
+  registerCredential: (opts?: { passkeyOnly?: boolean }) => Promise<boolean>;
+  authenticateWithCredential: (opts?: { step?: 4 | 5; passkeyOnly?: boolean }) => Promise<boolean>;
   removeCredential: (id: string) => Promise<void>;
   resetPasskeyState: () => Promise<boolean>;
   detectCapabilities: () => void;
@@ -206,7 +206,7 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
     }));
   }, []);
 
-  const registerCredential = useCallback(async (): Promise<boolean> => {
+  const registerCredential = useCallback(async (opts?: { passkeyOnly?: boolean }): Promise<boolean> => {
     if (!isSupported) {
       setError("WebAuthn is not supported on this device");
       return false;
@@ -236,7 +236,7 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
       if (!cred) throw new Error("No credential returned.");
 
       const { data: verifyData, error: verifyErr } = await supabase.functions.invoke("admin-webauthn", {
-        body: { action: "registration_verify", response: credentialToJSON(cred) },
+        body: { action: "registration_verify", response: credentialToJSON(cred), passkeyOnly: opts?.passkeyOnly },
       });
       recordEdge("registration_verify", verifyData, verifyErr);
       if (verifyErr) throw verifyErr;
@@ -255,7 +255,7 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
   }, [isSupported, loadCredentials, recordEdge, recordWebAuthnError]);
 
   const authenticateWithCredential = useCallback(
-    async (opts?: { step?: 4 | 5 }): Promise<boolean> => {
+    async (opts?: { step?: 4 | 5; passkeyOnly?: boolean }): Promise<boolean> => {
       if (!isSupported) {
         setError("WebAuthn is not supported");
         return false;
@@ -296,7 +296,12 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
         if (!assertion) throw new Error("No assertion returned.");
 
         const { data: verifyData, error: verifyErr } = await supabase.functions.invoke("admin-webauthn", {
-          body: { action: "authentication_verify", step: opts?.step ?? null, response: credentialToJSON(assertion) },
+          body: {
+            action: "authentication_verify",
+            step: opts?.step ?? null,
+            response: credentialToJSON(assertion),
+            passkeyOnly: opts?.passkeyOnly,
+          },
         });
         recordEdge("authentication_verify", verifyData, verifyErr);
         if (verifyErr) throw verifyErr;

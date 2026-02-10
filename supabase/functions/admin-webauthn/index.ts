@@ -79,7 +79,7 @@ const handler = async (req: Request): Promise<Response> => {
     const rpID = ENFORCED_RP_ID;
     const expectedOrigin = ENFORCED_ORIGIN;
 
-    const { action, step, response } = await req.json().catch(() => ({}));
+    const { action, step, response, passkeyOnly } = await req.json().catch(() => ({}));
     if (!action) return json(400, { error: "Missing action." });
 
     const now = new Date();
@@ -192,6 +192,21 @@ const handler = async (req: Request): Promise<Response> => {
       );
 
       await sbAdmin.from("webauthn_challenges").update({ used: true }).eq("id", row.id);
+
+      if (passkeyOnly) {
+        const sessionExpires = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+        await sbAdmin.from("admin_mfa_sessions").upsert(
+          {
+            user_id: user.id,
+            fully_verified_at: now.toISOString(),
+            expires_at: sessionExpires.toISOString(),
+            updated_at: now.toISOString(),
+            webauthn_step4_verified_at: now.toISOString(),
+            webauthn_step5_verified_at: now.toISOString(),
+          },
+          { onConflict: "user_id" },
+        );
+      }
 
       await log("webauthn_reg_verified");
       return json(200, { verified: true });
@@ -317,12 +332,12 @@ const handler = async (req: Request): Promise<Response> => {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      const otpOk = !!existing?.otp_verified_at;
-      const s4Ok = step === 4 ? true : !!existing?.webauthn_step4_verified_at;
-      const s5Ok = step === 5 ? true : !!existing?.webauthn_step5_verified_at;
-      if (otpOk && s4Ok && s5Ok) {
-        patch.fully_verified_at = now.toISOString();
-      }
+    const otpOk = !!existing?.otp_verified_at;
+    const s4Ok = step === 4 ? true : !!existing?.webauthn_step4_verified_at;
+    const s5Ok = step === 5 ? true : !!existing?.webauthn_step5_verified_at;
+    if (passkeyOnly || (otpOk && s4Ok && s5Ok)) {
+      patch.fully_verified_at = now.toISOString();
+    }
 
       await sbAdmin.from("admin_mfa_sessions").upsert(patch, { onConflict: "user_id" });
 
