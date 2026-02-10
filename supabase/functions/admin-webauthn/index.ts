@@ -40,6 +40,8 @@ const uint8ToBase64url = (bytes: Uint8Array) => {
 };
 
 const stringToUint8 = (v: string) => new TextEncoder().encode(v);
+const ENFORCED_RP_ID = "www.abhishekpanda.com";
+const ENFORCED_ORIGIN = "https://www.abhishekpanda.com";
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -71,9 +73,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     const origin = req.headers.get("origin") || "";
     if (!origin) return json(400, { error: "Missing Origin header." });
-    const originUrl = new URL(origin);
-    const rpID = originUrl.hostname;
-    const expectedOrigin = originUrl.origin;
+    if (origin !== ENFORCED_ORIGIN) {
+      return json(403, { error: "Origin not allowed." });
+    }
+    const rpID = ENFORCED_RP_ID;
+    const expectedOrigin = ENFORCED_ORIGIN;
 
     const { action, step, response } = await req.json().catch(() => ({}));
     if (!action) return json(400, { error: "Missing action." });
@@ -111,12 +115,13 @@ const handler = async (req: Request): Promise<Response> => {
         userID: stringToUint8(user.id),
         userName: user.email ?? user.id,
         timeout: 120000,
-        attestationType: "none",
-        authenticatorSelection: {
-          authenticatorAttachment: "platform",
-          userVerification: "preferred",
-          residentKey: "preferred",
-        },
+      attestationType: "none",
+      authenticatorSelection: {
+        authenticatorAttachment: "platform",
+        userVerification: "preferred",
+        residentKey: "required",
+        requireResidentKey: true,
+      },
         supportedAlgorithmIDs: [-7, -257], // ES256, RS256
       excludeCredentials: (existingCreds ?? []).map((c) => ({
         id: c.credential_id,

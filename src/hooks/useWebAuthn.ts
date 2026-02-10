@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const base64urlToBuffer = (base64url: string): ArrayBuffer => {
   const pad = "=".repeat((4 - (base64url.length % 4)) % 4);
@@ -271,6 +272,23 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
         if (optErr) throw optErr;
         const options = data?.options;
         if (!options) throw new Error("Missing authentication options.");
+        if (options?.allowCredentials?.length) {
+          try {
+            const key = "passkey_discoverable_warned";
+            const warned =
+              typeof window !== "undefined" && typeof sessionStorage !== "undefined"
+                ? sessionStorage.getItem(key)
+                : "true";
+            if (!warned) {
+              toast.warning(
+                "This passkey isn't discoverable in this Chrome profile, so you may see a phone QR prompt. Re-register on this browser at www.abhishekpanda.com to fix it.",
+              );
+              sessionStorage.setItem(key, "true");
+            }
+          } catch {
+            // ignore storage errors
+          }
+        }
 
         const assertion = (await navigator.credentials.get({
           publicKey: normalizeRequestOptions(options),
