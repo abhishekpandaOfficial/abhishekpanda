@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -11,6 +11,8 @@ import {
   Lock,
   Eye,
   Star,
+  FileText,
+  BookText,
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 type EbookRow = {
@@ -71,7 +74,11 @@ export const AdminEbooksManager = () => {
   const [selected, setSelected] = useState<EbookRow | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewFormat, setPreviewFormat] = useState<"pdf" | "epub">("pdf");
+  const [epubError, setEpubError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const epubContainerRef = useRef<HTMLDivElement | null>(null);
 
   const errMsg = (err: unknown, fallback: string) =>
     err instanceof Error ? err.message : fallback;
@@ -223,7 +230,139 @@ export const AdminEbooksManager = () => {
     }
   };
 
+  const handlePublishToggle = async (checked: boolean) => {
+    if (!selected) return;
+    setSelected({ ...selected, is_published: checked });
+    const { error } = await supabase
+      .from("ebooks")
+      .update({ is_published: checked })
+      .eq("id", selected.id);
+    if (error) {
+      toast.error(error.message || "Failed to update publish status.");
+      return;
+    }
+    qc.invalidateQueries({ queryKey: ["admin-ebooks"] });
+  };
+
+  useEffect(() => {
+    if (!previewOpen || previewFormat !== "epub") return;
+    if (!selected?.epub_url || !epubContainerRef.current) return;
+    let destroyed = false;
+    let rendition: any;
+    let book: any;
+    let objectUrl: string | null = null;
+    (async () => {
+      try {
+        setEpubError(null);
+        const mod = await import("epubjs");
+        const ePub = (mod as any).default || mod;
+        if (typeof ePub !== "function") {
+          throw new Error("EPUB engine failed to load.");
+        }
+        if (destroyed) return;
+        epubContainerRef.current!.innerHTML = "";
+        const rawUrl = selected.epub_url;
+        const origin = window.location.origin;
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const candidates = [
+          rawUrl,
+          rawUrl.startsWith("/") ? new URL(rawUrl, origin).toString() : "",
+          rawUrl.startsWith("/") && supabaseUrl
+            ? `${supabaseUrl.replace(/\/$/, "")}/storage/v1/object/public${rawUrl}`
+            : "",
+        ].filter(Boolean);
+
+        let sourceUrl = candidates[0];
+        for (const candidate of candidates) {
+          try {
+            if (!candidate) continue;
+            let tryUrl = candidate;
+            if (candidate.includes("/storage/v1/object/public/")) {
+              const path = candidate.split("/storage/v1/object/public/")[1];
+              if (path) {
+                const { data, error } = await supabase.storage.from("ebooks").createSignedUrl(path, 120);
+                if (!error && data?.signedUrl) {
+                  tryUrl = data.signedUrl;
+                }
+              }
+            }
+            const res = await fetch(tryUrl);
+            if (!res.ok) continue;
+            const buf = await res.arrayBuffer();
+            const sig = new Uint8Array(buf.slice(0, 2));
+            const isZip = sig[0] === 0x50 && sig[1] === 0x4b;
+            if (!isZip) {
+              continue;
+            }
+            const blob = new Blob([buf], { type: "application/epub+zip" });
+            objectUrl = URL.createObjectURL(blob);
+            sourceUrl = tryUrl;
+            break;
+          } catch {
+            // try next candidate
+          }
+        }
+
+        if (objectUrl) {
+          book = ePub(objectUrl, { openAs: "epub" });
+        } else {
+          if (!sourceUrl) {
+            throw new Error("No valid EPUB URL found.");
+          }
+          book = ePub(sourceUrl, { openAs: "epub" });
+        }
+        rendition = book.renderTo(epubContainerRef.current!, {
+          width: "100%",
+          height: "70vh",
+        });
+        rendition.on("rendered", () => {
+          // eslint-disable-next-line no-console
+          console.log("EPUB rendered");
+        });
+        rendition.on("relocated", (loc: unknown) => {
+          // eslint-disable-next-line no-console
+          console.log("EPUB relocated", loc);
+        });
+        book.on("openFailed", (err: unknown) => {
+          // eslint-disable-next-line no-console
+          console.error("EPUB open failed", err);
+          setEpubError(errMsg(err, "Failed to open EPUB."));
+        });
+        rendition.flow("paginated");
+        rendition.themes.register("default", {
+          body: {
+            "font-family": "Georgia, 'Times New Roman', serif",
+            "line-height": "1.7",
+            color: "#0f172a",
+            margin: "0",
+            padding: "24px",
+          },
+          img: { "max-width": "100%" },
+          h1: { "font-size": "1.6em" },
+        });
+        rendition.themes.select("default");
+        await rendition.display();
+      } catch (err) {
+        if (destroyed) return;
+        setEpubError(errMsg(err, "Failed to render EPUB preview."));
+      }
+    })();
+    return () => {
+      destroyed = true;
+      try {
+        rendition?.destroy();
+        book?.destroy();
+      } catch {
+        // ignore
+      }
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [previewOpen, previewFormat, selected?.epub_url]);
+
   return (
+    <>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -292,6 +431,28 @@ export const AdminEbooksManager = () => {
                 <div className="flex items-center gap-2">
                   <Button variant="outline" onClick={() => setIsEditing((v) => !v)}>
                     {isEditing ? "Preview" : "Edit"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setPreviewFormat("pdf");
+                      setPreviewOpen(true);
+                    }}
+                    disabled={!selected.preview_pdf_url && !selected.pdf_url}
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Preview PDF
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setPreviewFormat("epub");
+                      setPreviewOpen(true);
+                    }}
+                    disabled={!selected.epub_url}
+                  >
+                    <BookText className="w-4 h-4 mr-2" />
+                    Preview EPUB
                   </Button>
                   <Button onClick={() => upsert.mutate(selected)} disabled={upsert.isPending}>
                     <Save className="w-4 h-4 mr-2" />
@@ -366,7 +527,7 @@ export const AdminEbooksManager = () => {
                 <label className="flex items-center gap-2 text-sm">
                   <Switch
                     checked={selected.is_published}
-                    onCheckedChange={(v) => setSelected({ ...selected, is_published: v })}
+                    onCheckedChange={handlePublishToggle}
                     disabled={!isEditing}
                   />
                   <span className="flex items-center gap-1"><Globe className="w-4 h-4" /> Published</span>
@@ -488,6 +649,35 @@ export const AdminEbooksManager = () => {
         </div>
       </div>
     </div>
+    <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+      <DialogContent className="max-w-5xl bg-background border-border">
+        <DialogHeader>
+          <DialogTitle>
+            {previewFormat === "pdf" ? "PDF Preview" : "EPUB Preview"}
+          </DialogTitle>
+        </DialogHeader>
+        {previewFormat === "pdf" ? (
+          <div className="rounded-xl border border-border overflow-hidden bg-muted/20">
+            <iframe
+              src={selected?.preview_pdf_url || selected?.pdf_url || ""}
+              title="PDF Preview"
+              className="w-full h-[70vh]"
+            />
+          </div>
+        ) : (
+          <div className="rounded-xl border border-border bg-muted/10 p-3">
+            <div className="text-xs text-muted-foreground mb-2">
+              EPUB URL: {selected?.epub_url || "missing"}
+            </div>
+            {epubError ? (
+              <div className="text-sm text-destructive p-4">{epubError}</div>
+            ) : null}
+            <div ref={epubContainerRef} className="w-full h-[70vh]" />
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 };
 

@@ -18,7 +18,8 @@ import {
   Image,
   Video,
   FileText,
-  BookOpen
+  BookOpen,
+  Lock
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";

@@ -208,6 +208,73 @@ export const AdminBlogManager = () => {
     win.print();
   };
 
+  const handleExportEpub = async () => {
+    if (!selectedPost || !exportRef.current) return;
+    const { default: JSZip } = await import("jszip");
+    const htmlBody = exportRef.current.innerHTML;
+    const title = selectedPost.title || "Untitled";
+
+    const zip = new JSZip();
+    zip.file("mimetype", "application/epub+zip", { compression: "STORE" });
+    zip.folder("META-INF")?.file(
+      "container.xml",
+      `<?xml version="1.0" encoding="UTF-8"?>
+      <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+        <rootfiles>
+          <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+        </rootfiles>
+      </container>`
+    );
+    const oebps = zip.folder("OEBPS");
+    oebps?.file(
+      "content.opf",
+      `<?xml version="1.0" encoding="UTF-8"?>
+      <package version="3.0" xmlns="http://www.idpf.org/2007/opf" unique-identifier="book-id">
+        <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+          <dc:identifier id="book-id">${selectedPost.id}</dc:identifier>
+          <dc:title>${title}</dc:title>
+          <dc:language>en</dc:language>
+        </metadata>
+        <manifest>
+          <item id="content" href="content.xhtml" media-type="application/xhtml+xml"/>
+          <item id="style" href="styles.css" media-type="text/css"/>
+        </manifest>
+        <spine>
+          <itemref idref="content"/>
+        </spine>
+      </package>`
+    );
+    oebps?.file(
+      "styles.css",
+      `body { font-family: "Georgia", "Times New Roman", serif; color: #111827; line-height: 1.7; padding: 24px; }
+      h1 { font-size: 28px; margin-bottom: 12px; }
+      .excerpt { color: #6b7280; margin-bottom: 20px; }
+      pre { background: #f3f4f6; padding: 12px; border-radius: 10px; overflow-x: auto; }
+      code { font-family: "SF Mono", Menlo, Consolas, monospace; }
+      img { max-width: 100%; border-radius: 12px; }`
+    );
+    oebps?.file(
+      "content.xhtml",
+      `<?xml version="1.0" encoding="UTF-8"?>
+      <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+          <title>${title}</title>
+          <link rel="stylesheet" type="text/css" href="styles.css"/>
+        </head>
+        <body>
+          ${htmlBody}
+        </body>
+      </html>`
+    );
+    const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${slugify(title)}.epub`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const { data: posts = [], isLoading: postsLoading } = useQuery({
     queryKey: ["admin-blog-posts"],
     queryFn: async () => {
@@ -1150,6 +1217,9 @@ export const AdminBlogManager = () => {
                         <Button variant="outline" size="sm" onClick={handleExportPdf}>
                           Export PDF
                         </Button>
+                        <Button variant="outline" size="sm" onClick={handleExportEpub}>
+                          Export EPUB
+                        </Button>
                       </>
                     ) : (
                       <>
@@ -1185,6 +1255,9 @@ export const AdminBlogManager = () => {
                         </Button>
                         <Button variant="outline" size="sm" onClick={handleExportPdf}>
                           Export PDF
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleExportEpub}>
+                          Export EPUB
                         </Button>
                       </>
                     )}
