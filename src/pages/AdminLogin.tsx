@@ -95,7 +95,18 @@ const AdminLogin = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isRunningAsPWA, setIsRunningAsPWA] = useState(false);
   
-  const { isSupported, registerCredential, authenticateWithCredential, detectCapabilities, credentials, loadCredentials, error: webAuthnError } = useWebAuthn();
+  const { 
+    isSupported, 
+    registerCredential, 
+    authenticateWithCredential, 
+    detectCapabilities, 
+    credentials, 
+    loadCredentials, 
+    error: webAuthnError,
+    debug: webAuthnDebug,
+    resetPasskeyState,
+    availableMethods,
+  } = useWebAuthn();
   const { sendSecurityAlert, resetAttempts, getAttemptCount } = useSecurityAlert();
   const { validateLogin, recordFailedAttempt, resetRateLimit, currentLocation, riskLevel } = useGeoBlocking();
   const { hasOtherActiveSessions, otherSessionDevice, registerSession, killAllOtherSessions, refreshSessions } = useActiveSession();
@@ -378,6 +389,15 @@ const AdminLogin = () => {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResetPasskeyState = async () => {
+    const ok = await resetPasskeyState();
+    if (ok) {
+      toast.success("Passkey state reset. You can register again.");
+    } else {
+      toast.error("Failed to reset passkey state. Check debug panel.");
     }
   };
 
@@ -871,23 +891,51 @@ const AdminLogin = () => {
                     </p>
                   </div>
 
-                  <Button
-                    onClick={handlePasskeySetup}
-                    disabled={isLoading}
-                    className="w-full h-14 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-lg font-semibold shadow-lg shadow-emerald-500/25 rounded-xl"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Waiting for Touch ID...
-                      </>
-                    ) : (
-                      <>
-                        <Fingerprint className="w-5 h-5 mr-2" />
-                        Register Passkey
-                      </>
-                    )}
-                  </Button>
+                  <div className="space-y-3">
+                    <Button
+                      onClick={handlePasskeySetup}
+                      disabled={isLoading}
+                      className="w-full h-14 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-lg font-semibold shadow-lg shadow-emerald-500/25 rounded-xl"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Waiting for Touch ID...
+                        </>
+                      ) : (
+                        <>
+                          <Fingerprint className="w-5 h-5 mr-2" />
+                          Register Passkey
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleResetPasskeyState}
+                      className="w-full border-gray-700 bg-gray-800/30 text-gray-300 hover:bg-gray-800/60"
+                    >
+                      Reset Passkey State
+                    </Button>
+                  </div>
+
+                  <div className="rounded-xl border border-gray-700/60 bg-gray-900/40 p-4 text-xs text-gray-300">
+                    <div className="text-gray-400 font-semibold mb-2">WebAuthn Debug</div>
+                    <div>Supported: {isSupported ? "true" : "false"}</div>
+                    <div>Methods: {availableMethods.length ? availableMethods.join(", ") : "none"}</div>
+                    <div>Last Action: {webAuthnDebug.lastAction ?? "none"}</div>
+                    <div>Hook Error: {webAuthnError ?? "none"}</div>
+                    <div>
+                      WebAuthn Error: {webAuthnDebug.lastWebAuthnError ? `${webAuthnDebug.lastWebAuthnError.name ?? "Error"}: ${webAuthnDebug.lastWebAuthnError.message ?? ""}` : "none"}
+                    </div>
+                    <div>
+                      Edge Error: {webAuthnDebug.lastEdgeError ? `${webAuthnDebug.lastEdgeError.name ?? "Error"}: ${webAuthnDebug.lastEdgeError.message ?? ""}` : "none"}
+                    </div>
+                    <div className="mt-2 text-gray-400">Edge Response:</div>
+                    <pre className="mt-1 max-h-40 overflow-auto rounded-lg bg-black/40 p-2 text-[10px] text-gray-200">
+                      {JSON.stringify(webAuthnDebug.lastEdgeResponse ?? {}, null, 2)}
+                    </pre>
+                  </div>
                 </motion.div>
               )}
 

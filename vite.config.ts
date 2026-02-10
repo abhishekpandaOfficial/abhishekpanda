@@ -16,7 +16,7 @@ export default defineConfig(() => ({
       devOptions: {
         enabled: false,
       },
-      includeAssets: ["robots.txt", "manifest.webmanifest", "favicon.png", "favicon-32.png", "favicon-16.png", "pwa-192x192.png", "pwa-512x512.png"],
+      includeAssets: ["robots.txt", "favicon.png", "favicon-32.png", "favicon-16.png", "pwa-192x192.png", "pwa-512x512.png"],
       manifest: {
         name: "Abhishek Panda Command Center",
         short_name: "AP Admin",
@@ -46,6 +46,7 @@ export default defineConfig(() => ({
         // Keep precache lean for faster SW install and less bandwidth on first visit.
         // Route/app chunks are loaded on-demand by the browser cache strategy.
         globPatterns: ["**/*.{html,ico,png,svg,woff2,json}"],
+        globIgnores: ["**/manifest.webmanifest"],
         // Redoc and the admin app bundle can be large; raise the precache limit.
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB limit
         navigateFallback: "/index.html",

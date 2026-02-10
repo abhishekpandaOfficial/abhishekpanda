@@ -83,15 +83,24 @@ interface WebAuthnCredential {
   createdAt: Date;
 }
 
+interface WebAuthnDebugState {
+  lastAction: string | null;
+  lastEdgeResponse: unknown | null;
+  lastEdgeError: { name?: string; message?: string; status?: number } | null;
+  lastWebAuthnError: { name?: string; message?: string } | null;
+}
+
 interface UseWebAuthnReturn {
   isSupported: boolean;
   isLoading: boolean;
   error: string | null;
   availableMethods: string[];
   credentials: WebAuthnCredential[];
+  debug: WebAuthnDebugState;
   registerCredential: () => Promise<boolean>;
   authenticateWithCredential: (opts?: { step?: 4 | 5 }) => Promise<boolean>;
   removeCredential: (id: string) => Promise<void>;
+  resetPasskeyState: () => Promise<boolean>;
   detectCapabilities: () => void;
   loadCredentials: () => Promise<void>;
 }
@@ -101,6 +110,12 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
   const [error, setError] = useState<string | null>(null);
   const [availableMethods, setAvailableMethods] = useState<string[]>([]);
   const [credentials, setCredentials] = useState<WebAuthnCredential[]>([]);
+  const [debug, setDebug] = useState<WebAuthnDebugState>({
+    lastAction: null,
+    lastEdgeResponse: null,
+    lastEdgeError: null,
+    lastWebAuthnError: null,
+  });
 
   const isSupported =
     typeof window !== "undefined" &&
@@ -164,6 +179,32 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
     setAvailableMethods(methods);
   }, [isSupported]);
 
+  const recordEdge = useCallback((action: string, data: unknown, err?: any) => {
+    setDebug((prev) => ({
+      ...prev,
+      lastAction: action,
+      lastEdgeResponse: data ?? null,
+      lastEdgeError: err
+        ? {
+            name: err?.name,
+            message: err?.message,
+            status: err?.status,
+          }
+        : null,
+    }));
+  }, []);
+
+  const recordWebAuthnError = useCallback((err: any) => {
+    if (!err) return;
+    setDebug((prev) => ({
+      ...prev,
+      lastWebAuthnError: {
+        name: err?.name,
+        message: err?.message,
+      },
+    }));
+  }, []);
+
   const registerCredential = useCallback(async (): Promise<boolean> => {
     if (!isSupported) {
       setError("WebAuthn is not supported on this device");
@@ -183,6 +224,7 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
       const { data, error: optErr } = await supabase.functions.invoke("admin-webauthn", {
         body: { action: "registration_options" },
       });
+      recordEdge("registration_options", data, optErr);
       if (optErr) throw optErr;
       const options = data?.options;
       if (!options) throw new Error("Missing registration options.");
@@ -195,6 +237,7 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
       const { data: verifyData, error: verifyErr } = await supabase.functions.invoke("admin-webauthn", {
         body: { action: "registration_verify", response: credentialToJSON(cred) },
       });
+      recordEdge("registration_verify", verifyData, verifyErr);
       if (verifyErr) throw verifyErr;
       if (!verifyData?.verified) throw new Error("Passkey verification failed.");
 
@@ -202,12 +245,13 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
       await loadCredentials();
       return true;
     } catch (err: any) {
+      recordWebAuthnError(err);
       setError(err?.message || "Failed to register passkey");
       return false;
     } finally {
       setIsLoading(false);
     }
-  }, [isSupported, loadCredentials]);
+  }, [isSupported, loadCredentials, recordEdge, recordWebAuthnError]);
 
   const authenticateWithCredential = useCallback(
     async (opts?: { step?: 4 | 5 }): Promise<boolean> => {
@@ -223,6 +267,7 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
         const { data, error: optErr } = await supabase.functions.invoke("admin-webauthn", {
           body: { action: "authentication_options" },
         });
+        recordEdge("authentication_options", data, optErr);
         if (optErr) throw optErr;
         const options = data?.options;
         if (!options) throw new Error("Missing authentication options.");
@@ -235,19 +280,21 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
         const { data: verifyData, error: verifyErr } = await supabase.functions.invoke("admin-webauthn", {
           body: { action: "authentication_verify", step: opts?.step ?? null, response: credentialToJSON(assertion) },
         });
+        recordEdge("authentication_verify", verifyData, verifyErr);
         if (verifyErr) throw verifyErr;
         if (!verifyData?.verified) throw new Error("Authentication verification failed.");
 
         await loadCredentials();
         return true;
       } catch (err: any) {
+        recordWebAuthnError(err);
         setError(err?.message || "Authentication failed");
         return false;
       } finally {
         setIsLoading(false);
       }
     },
-    [isSupported, loadCredentials]
+    [isSupported, loadCredentials, recordEdge, recordWebAuthnError]
   );
 
   const removeCredential = useCallback(
@@ -270,15 +317,46 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
     [loadCredentials]
   );
 
+  const resetPasskeyState = useCallback(async (): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("admin_passkey_registered");
+        sessionStorage.removeItem("biometric_verified");
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error: resetErr } = await supabase
+          .from("passkey_credentials")
+          .update({ is_active: false })
+          .eq("user_id", user.id);
+        if (resetErr) throw resetErr;
+      }
+
+      await loadCredentials();
+      return true;
+    } catch (err: any) {
+      recordWebAuthnError(err);
+      setError(err?.message || "Failed to reset passkey state");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loadCredentials, recordWebAuthnError]);
+
   return {
     isSupported,
     isLoading,
     error,
     availableMethods,
     credentials,
+    debug,
     registerCredential,
     authenticateWithCredential,
     removeCredential,
+    resetPasskeyState,
     detectCapabilities,
     loadCredentials,
   };
