@@ -55,6 +55,7 @@ const commandItems: CommandItem[] = [
   { name: "Nimbus Desk", icon: BookOpen, path: "/admin/nimbus", category: "Creator Suite", keywords: ["notes", "knowledge", "documents"] },
   { name: "Courses & Academy", icon: GraduationCap, path: "/admin/courses", category: "Creator Suite", keywords: ["courses", "learning", "education"] },
   { name: "Digital Products", icon: Package, path: "/admin/products", category: "Creator Suite", keywords: ["products", "digital", "marketplace"] },
+  { name: "Ebook Studio", icon: BookOpen, path: "/admin/ebooks", category: "Creator Suite", keywords: ["ebook", "book", "pdf", "epub"] },
   
   // AI & Automation
   { name: "LLM Galaxy", icon: Brain, path: "/admin/llm-galaxy", category: "AI & Automation", keywords: ["llm", "ai", "models", "galaxy"] },

@@ -8,18 +8,45 @@ import { Book3D } from "@/components/ebooks/Book3D";
 import { TechIconRow } from "@/components/ebooks/TechIconRow";
 import { PreviewPane } from "@/components/ebooks/PreviewPane";
 import { DownloadGateModal } from "@/components/ebooks/DownloadGateModal";
-import { ebookBySlug } from "@/lib/ebooks";
+import { ebookBySlug, mapEbookRowToEbook, type EbookRow } from "@/lib/ebooks";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserAuth } from "@/hooks/useUserAuth";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || "https://www.abhishekpanda.com";
+const isMissingTableError = (err: unknown) => {
+  if (!err || typeof err !== "object") return false;
+  return (err as { code?: unknown }).code === "PGRST205";
+};
 
 export default function EbookDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const ebook = ebookBySlug(slug);
   const { user } = useUserAuth();
   const [purchased, setPurchased] = useState(false);
+
+  const { data: ebookRow, isLoading } = useQuery({
+    queryKey: ["ebook-detail", slug],
+    enabled: !!slug,
+    queryFn: async () => {
+      if (!slug) return null;
+      const res = await supabase
+        .from("ebooks")
+        .select("*")
+        .eq("slug", slug)
+        .eq("is_published", true)
+        .maybeSingle();
+      if (!res.error) return res.data || null;
+      if (isMissingTableError(res.error)) return null;
+      throw res.error;
+    },
+  });
+
+  const ebook = useMemo(() => {
+    if (ebookRow) return mapEbookRowToEbook(ebookRow as EbookRow);
+    return ebookBySlug(slug);
+  }, [ebookRow, slug]);
 
   useEffect(() => {
     if (!slug) return;
@@ -33,6 +60,21 @@ export default function EbookDetail() {
     if (!ebook || ebook.isFree) return false;
     return !!user && purchased;
   }, [ebook, user, purchased]);
+
+  const canReadInBrowser = !!(ebook.previewPdfUrl || ebook.pdfUrl);
+  const readPath = `/ebooks/${ebook.slug}/read`;
+
+  if (!ebook && isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <main className="pt-24 pb-16 container mx-auto px-4">
+          <h1 className="text-3xl font-black">Loading ebook...</h1>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!ebook) {
     return (
@@ -131,7 +173,12 @@ export default function EbookDetail() {
 
             <TabsContent value="preview" className="space-y-3">
               <PreviewPane previewPdfUrl={ebook.previewPdfUrl} title={ebook.title} />
-              <p className="text-xs text-muted-foreground">Preview is available immediately. Download for offline use from the Download tab.</p>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span>Preview is available immediately. Download for offline use from the Download tab.</span>
+                {canReadInBrowser ? (
+                  <Link to={readPath} className="text-primary underline">Open reading mode</Link>
+                ) : null}
+              </div>
             </TabsContent>
 
             <TabsContent value="download" className="glass-card rounded-2xl p-6 space-y-4">
@@ -142,6 +189,11 @@ export default function EbookDetail() {
                     <p className="text-muted-foreground">Preview is open. Download requires quick email/mobile verification with OTP.</p>
                   </div>
                   <DownloadGateModal ebookSlug={ebook.slug} title={ebook.title} triggerLabel="Download (OTP Verification)" />
+                  {canReadInBrowser ? (
+                    <Button asChild variant="outline">
+                      <Link to={readPath}>Read in Browser</Link>
+                    </Button>
+                  ) : null}
                 </>
               ) : null}
 
@@ -188,6 +240,11 @@ export default function EbookDetail() {
                       <a href={ebook.epubUrl} download>
                         <Button variant="outline">Download EPUB</Button>
                       </a>
+                    ) : null}
+                    {canReadInBrowser ? (
+                      <Button asChild variant="hero-outline">
+                        <Link to={readPath}><BookOpen className="h-4 w-4" />Read in Browser</Link>
+                      </Button>
                     ) : null}
                     <a href={`chronyx://hub/ebooks/${ebook.slug}`}>
                       <Button variant="hero-outline"><BookOpen className="h-4 w-4" />Read in Chronyx Hub</Button>

@@ -58,17 +58,17 @@ const Blog = () => {
   // Extract unique categories from posts
   const categories = [
     { name: "All", count: posts.length },
-    ...Array.from(new Set(posts.map(p => p.tags?.[0]).filter(Boolean)))
+    ...Array.from(new Set(posts.flatMap(p => p.tags || []).filter(Boolean)))
       .map(cat => ({
         name: cat as string,
-        count: posts.filter(p => p.tags?.[0] === cat).length
+        count: posts.filter(p => (p.tags || []).includes(cat as string)).length
       }))
   ];
 
   const filteredPosts = posts.filter((post) => {
     const matchesSearch = post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || post.tags?.[0] === selectedCategory;
+    const matchesCategory = selectedCategory === "All" || (post.tags || []).includes(selectedCategory);
     const matchesPremium = !showPremiumOnly || post.is_premium;
     return matchesSearch && matchesCategory && matchesPremium;
   });
@@ -251,11 +251,15 @@ const Blog = () => {
 
                           {/* Content */}
                           <div className="p-6">
-                            {post.tags?.[0] && (
-                              <span className="text-primary text-sm font-semibold">
-                                {post.tags[0]}
-                              </span>
-                            )}
+                            {post.tags?.length ? (
+                              <div className="flex flex-wrap gap-2">
+                                {post.tags.map((tag: string) => (
+                                  <span key={tag} className="text-primary text-xs font-semibold">
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : null}
                             <h2 className="font-bold text-xl text-foreground mt-2 mb-3 group-hover:text-primary transition-colors line-clamp-2">
                               {post.title}
                             </h2>

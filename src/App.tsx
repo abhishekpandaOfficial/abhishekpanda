@@ -21,6 +21,7 @@ const Mentorship = lazy(() => import("./pages/Mentorship"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Ebooks = lazy(() => import("./pages/Ebooks"));
 const EbookDetail = lazy(() => import("./pages/EbookDetail"));
+const EbookReader = lazy(() => import("./pages/EbookReader"));
 const LLMGalaxy = lazy(() => import("./pages/LLMGalaxy"));
 const ModelDetail = lazy(() => import("./pages/ModelDetail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -56,6 +57,7 @@ const AdminAuditLogs = lazy(() => import("@/components/admin/AdminAuditLogs"));
 const AdminIPManagement = lazy(() => import("@/components/admin/AdminIPManagement"));
 const AdminMentorshipBookings = lazy(() => import("@/components/admin/AdminMentorshipBookings"));
 const AdminOpsDocs = lazy(() => import("@/components/admin/AdminOpsDocs"));
+const AdminEbooksManager = lazy(() => import("@/components/admin/AdminEbooksManager"));
 
 const queryClient = new QueryClient();
 
@@ -124,6 +126,7 @@ const App = () => {
                 <Route path="/courses/:courseId" element={<CourseDetail />} />
                 <Route path="/ebooks" element={<Ebooks />} />
                 <Route path="/ebooks/:slug" element={<EbookDetail />} />
+                <Route path="/ebooks/:slug/read" element={<EbookReader />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/mentorship" element={<Mentorship />} />
                 <Route path="/contact" element={<Contact />} />
@@ -150,6 +153,7 @@ const App = () => {
                   <Route path="nimbus" element={<AdminNimbusDesk />} />
                   <Route path="courses" element={<AdminCoursesManager />} />
                   <Route path="products" element={<AdminProductsManager />} />
+                  <Route path="ebooks" element={<AdminEbooksManager />} />
                   <Route path="llm-galaxy" element={<AdminLLMAtlasManager />} />
                   <Route path="workflows" element={<AdminWorkflows />} />
                   <Route path="social" element={<AdminSocialHub />} />

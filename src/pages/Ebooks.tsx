@@ -3,13 +3,16 @@ import { Search, Sparkles } from "lucide-react";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { Input } from "@/components/ui/input";
-import { ebooks, ebookBundles, type Ebook } from "@/lib/ebooks";
+import { fallbackBundles, mapEbookRowToEbook, type Ebook, type EbookRow, type EbookBundleRow } from "@/lib/ebooks";
 import { EbookCard } from "@/components/ebooks/EbookCard";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-const allCategories = ["All", ...Array.from(new Set(ebooks.map((e) => e.category)))];
-const allLevels = ["All", ...Array.from(new Set(ebooks.map((e) => e.level)))];
 const allTags = ["All", "FREE", "PREMIUM", "COMING SOON"] as const;
-const allTech = Array.from(new Set(ebooks.flatMap((e) => e.techStack))).sort();
+const isMissingTableError = (err: unknown) => {
+  if (!err || typeof err !== "object") return false;
+  return (err as { code?: unknown }).code === "PGRST205";
+};
 
 export default function Ebooks() {
   const [query, setQuery] = useState("");
@@ -17,6 +20,64 @@ export default function Ebooks() {
   const [level, setLevel] = useState("All");
   const [tag, setTag] = useState<(typeof allTags)[number]>("All");
   const [tech, setTech] = useState<string[]>([]);
+
+  const { data: dbEbooks = [], isLoading } = useQuery({
+    queryKey: ["published-ebooks"],
+    queryFn: async () => {
+      const res = await supabase
+        .from("ebooks")
+        .select("*")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false });
+      if (!res.error) return res.data || [];
+      if (isMissingTableError(res.error)) return [];
+      throw res.error;
+    },
+  });
+
+  const ebooks = useMemo(() => {
+    return (dbEbooks as EbookRow[]).map(mapEbookRowToEbook);
+  }, [dbEbooks]);
+
+  const { data: dbBundles = [] } = useQuery({
+    queryKey: ["ebook-bundles"],
+    queryFn: async () => {
+      const res = await supabase
+        .from("ebook_bundles")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      if (!res.error) return res.data || [];
+      if (isMissingTableError(res.error)) return [];
+      throw res.error;
+    },
+  });
+
+  const bundles = useMemo(() => {
+    if (!dbBundles.length) return fallbackBundles;
+    return (dbBundles as EbookBundleRow[]).map((b) => ({
+      id: b.slug,
+      title: b.title,
+      subtitle: b.subtitle || "",
+      discountLabel: b.discount_label || "",
+      priceLabel: b.price_label || "",
+    }));
+  }, [dbBundles]);
+
+  const allCategories = useMemo(
+    () => ["All", ...Array.from(new Set(ebooks.map((e) => e.category)))],
+    [ebooks],
+  );
+
+  const allLevels = useMemo(
+    () => ["All", ...Array.from(new Set(ebooks.map((e) => e.level)))],
+    [ebooks],
+  );
+
+  const allTech = useMemo(
+    () => Array.from(new Set(ebooks.flatMap((e) => e.techStack))).sort(),
+    [ebooks],
+  );
 
   const filtered = useMemo(() => {
     return ebooks.filter((e) => {
@@ -37,11 +98,7 @@ export default function Ebooks() {
 
       return matchesQ && matchesCategory && matchesLevel && matchesTag && matchesTech;
     });
-  }, [query, category, level, tag, tech]);
-
-  const featured = filtered.filter((e) => e.sections.includes("featured"));
-  const interview = filtered.filter((e) => e.sections.includes("interview"));
-  const architect = filtered.filter((e) => e.sections.includes("architect"));
+  }, [query, category, level, tag, tech, ebooks]);
 
   const renderSection = (title: string, items: Ebook[]) => (
     <section className="mb-12">
@@ -110,16 +167,19 @@ export default function Ebooks() {
                 );
               })}
             </div>
+            {isLoading ? (
+              <div className="mt-4 text-xs text-muted-foreground">Loading published ebooks...</div>
+            ) : null}
           </div>
 
           <section className="mb-10">
             <h2 className="text-2xl md:text-3xl font-black tracking-tight text-foreground mb-4">Bundle Deals</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {ebookBundles.map((b) => (
+              {bundles.map((b) => (
                 <div key={b.id} className="glass-card rounded-2xl p-5 border border-border/70">
                   <div className="flex items-center justify-between gap-3 mb-2">
                     <h3 className="text-lg font-bold">{b.title}</h3>
-                    <span className="badge-premium">{b.discountLabel}</span>
+                    {b.discountLabel ? <span className="badge-premium">{b.discountLabel}</span> : null}
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">{b.subtitle}</p>
                   <div className="text-primary font-black text-xl">{b.priceLabel}</div>
@@ -128,9 +188,9 @@ export default function Ebooks() {
             </div>
           </section>
 
-          {renderSection("Featured Ebooks", featured)}
-          {renderSection("Interview Packs", interview)}
-          {renderSection("Architect Series", architect)}
+          {renderSection("Featured Ebooks", filtered.filter((e) => e.sections.includes("featured")))}
+          {renderSection("Interview Packs", filtered.filter((e) => e.sections.includes("interview")))}
+          {renderSection("Architect Series", filtered.filter((e) => e.sections.includes("architect")))}
         </section>
       </main>
       <Footer />

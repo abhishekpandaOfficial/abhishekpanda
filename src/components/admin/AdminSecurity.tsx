@@ -144,6 +144,43 @@ export const AdminSecurity = () => {
     confirm: false,
   });
 
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [{ data: auditRows, error: auditErr }, { data: sessionRows, error: sessionErr }] = await Promise.all([
+          supabase.from("login_audit_logs").select("*").order("created_at", { ascending: false }).limit(20),
+          supabase.from("admin_sessions").select("*").eq("is_active", true).order("last_active_at", { ascending: false }),
+        ]);
+        if (auditErr) throw auditErr;
+        if (sessionErr) throw sessionErr;
+        const mappedEvents: SecurityEvent[] = (auditRows ?? []).map((row: any) => ({
+          id: row.id,
+          type: row.status === "failed" ? "failed_login" : row.status === "blocked" ? "suspicious" : "login",
+          description: row.failure_reason || (row.status === "failed" ? "Failed login" : "Successful login"),
+          ip: row.ip_address || "Unknown",
+          location: row.location || "Unknown",
+          device: row.user_agent || "Unknown",
+          timestamp: row.created_at || new Date().toISOString(),
+          severity: row.status === "failed" || row.status === "blocked" ? "high" : "low",
+        }));
+        const mappedSessions: ActiveSession[] = (sessionRows ?? []).map((row: any) => ({
+          id: row.id,
+          device: row.device_name,
+          browser: row.browser,
+          ip: row.ip_address || "Unknown",
+          location: row.location || "Unknown",
+          lastActive: row.last_active_at,
+          isCurrent: false,
+        }));
+        if (mappedEvents.length) setEvents(mappedEvents);
+        if (mappedSessions.length) setSessions(mappedSessions);
+      } catch {
+        // fall back to mock data
+      }
+    };
+    load();
+  }, []);
+
   // Calculate security score
   const securityScore = (() => {
     let score = 50; // Base score

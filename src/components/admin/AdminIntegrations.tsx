@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Key,
   Webhook,
   Link2,
-  Shield,
   Plus,
   Copy,
   Eye,
@@ -23,7 +22,6 @@ import {
   Settings,
   AlertTriangle,
   ExternalLink,
-  Lock,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,7 +47,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { BiometricVerificationModal } from "./BiometricVerificationModal";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ApiKey {
   id: string;
@@ -81,67 +79,6 @@ interface ConnectedApp {
   category: string;
 }
 
-const mockApiKeys: ApiKey[] = [
-  {
-    id: "1",
-    name: "Production API Key",
-    // Never commit real API keys. Keep mock data obviously fake.
-    key: "STRIPE_LIVE_KEY_PLACEHOLDER",
-    createdAt: "2024-01-15",
-    lastUsed: "2024-12-11",
-    status: "active",
-    permissions: ["read", "write", "delete"],
-  },
-  {
-    id: "2",
-    name: "Development API Key",
-    key: "STRIPE_TEST_KEY_PLACEHOLDER",
-    createdAt: "2024-02-20",
-    lastUsed: "2024-12-10",
-    status: "active",
-    permissions: ["read", "write"],
-  },
-  {
-    id: "3",
-    name: "Analytics Read-Only",
-    key: "READONLY_KEY_PLACEHOLDER",
-    createdAt: "2024-03-01",
-    lastUsed: null,
-    status: "expired",
-    permissions: ["read"],
-  },
-];
-
-const mockWebhooks: Webhook[] = [
-  {
-    id: "1",
-    name: "Payment Notifications",
-    url: "https://api.originxlabs.com/webhooks/payments",
-    events: ["payment.success", "payment.failed", "refund.created"],
-    status: "active",
-    lastTriggered: "2024-12-11 14:30",
-    successRate: 99.2,
-  },
-  {
-    id: "2",
-    name: "Course Enrollments",
-    url: "https://api.originxlabs.com/webhooks/enrollments",
-    events: ["enrollment.created", "enrollment.completed"],
-    status: "active",
-    lastTriggered: "2024-12-10 09:15",
-    successRate: 100,
-  },
-  {
-    id: "3",
-    name: "Contact Form Alerts",
-    url: "https://slack.com/api/webhooks/abc123",
-    events: ["contact.submitted"],
-    status: "failing",
-    lastTriggered: "2024-12-09 16:45",
-    successRate: 45.5,
-  },
-];
-
 const connectedApps: ConnectedApp[] = [
   { id: "1", name: "Razorpay", icon: CreditCard, status: "connected", connectedAt: "2024-01-01", description: "Payment processing", category: "Payments" },
   { id: "2", name: "Resend", icon: Mail, status: "connected", connectedAt: "2024-02-15", description: "Email delivery", category: "Communication" },
@@ -152,15 +89,54 @@ const connectedApps: ConnectedApp[] = [
 ];
 
 export const AdminIntegrations = () => {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>(mockApiKeys);
-  const [webhooks, setWebhooks] = useState<Webhook[]>(mockWebhooks);
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
   const [isAddKeyOpen, setIsAddKeyOpen] = useState(false);
   const [isAddWebhookOpen, setIsAddWebhookOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
   const [newWebhook, setNewWebhook] = useState({ name: "", url: "", events: [] as string[] });
-  const [showBiometricModal, setShowBiometricModal] = useState(true);
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [{ data: keyRows, error: keyErr }, { data: hookRows, error: hookErr }] = await Promise.all([
+          supabase.from("admin_api_keys").select("*").order("created_at", { ascending: false }),
+          supabase.from("admin_webhooks").select("*").order("created_at", { ascending: false }),
+        ]);
+        if (keyErr) throw keyErr;
+        if (hookErr) throw hookErr;
+        setApiKeys(
+          (keyRows ?? []).map((row: any) => ({
+            id: row.id,
+            name: row.name,
+            key: row.api_key,
+            createdAt: row.created_at,
+            lastUsed: row.last_used,
+            status: row.status,
+            permissions: row.scopes || [],
+          })),
+        );
+        setWebhooks(
+          (hookRows ?? []).map((row: any) => ({
+            id: row.id,
+            name: row.name,
+            url: row.url,
+            events: row.events || [],
+            status: row.status,
+            lastTriggered: row.last_triggered,
+            successRate: Number(row.success_rate ?? 100),
+          })),
+        );
+      } catch (e: any) {
+        toast.error(e?.message || "Failed to load integrations");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const toggleKeyVisibility = (id: string) => {
     setVisibleKeys((prev) => {
@@ -182,7 +158,7 @@ export const AdminIntegrations = () => {
   const createApiKey = () => {
     if (!newKeyName) return;
     const newKey: ApiKey = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name: newKeyName,
       key: `sk_${Math.random().toString(36).substring(2, 15)}_${Math.random().toString(36).substring(2, 15)}`,
       createdAt: new Date().toISOString().split("T")[0],
@@ -190,7 +166,23 @@ export const AdminIntegrations = () => {
       status: "active",
       permissions: ["read", "write"],
     };
-    setApiKeys([...apiKeys, newKey]);
+    setApiKeys([newKey, ...apiKeys]);
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return;
+      supabase
+        .from("admin_api_keys")
+        .insert({
+          id: newKey.id,
+          user_id: data.user.id,
+          name: newKey.name,
+          api_key: newKey.key,
+          status: newKey.status,
+          scopes: newKey.permissions,
+        })
+        .then(({ error }) => {
+          if (error) toast.error(error.message);
+        });
+    });
     setNewKeyName("");
     setIsAddKeyOpen(false);
     toast.success("API key created successfully");
@@ -198,7 +190,47 @@ export const AdminIntegrations = () => {
 
   const revokeApiKey = (id: string) => {
     setApiKeys(apiKeys.map((k) => (k.id === id ? { ...k, status: "revoked" as const } : k)));
+    supabase.from("admin_api_keys").update({ status: "revoked" }).eq("id", id).then(({ error }) => {
+      if (error) toast.error(error.message);
+    });
     toast.success("API key revoked");
+  };
+
+  const createWebhook = () => {
+    if (!newWebhook.name || !newWebhook.url) {
+      toast.error("Please provide name and URL");
+      return;
+    }
+    const record: Webhook = {
+      id: crypto.randomUUID(),
+      name: newWebhook.name,
+      url: newWebhook.url,
+      events: newWebhook.events,
+      status: "active",
+      lastTriggered: null,
+      successRate: 100,
+    };
+    setWebhooks([record, ...webhooks]);
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return;
+      supabase
+        .from("admin_webhooks")
+        .insert({
+          id: record.id,
+          user_id: data.user.id,
+          name: record.name,
+          url: record.url,
+          status: record.status,
+          events: record.events,
+          success_rate: record.successRate,
+        })
+        .then(({ error }) => {
+          if (error) toast.error(error.message);
+        });
+    });
+    setNewWebhook({ name: "", url: "", events: [] });
+    setIsAddWebhookOpen(false);
+    toast.success("Webhook created");
   };
 
   const getStatusColor = (status: string) => {
@@ -217,42 +249,6 @@ export const AdminIntegrations = () => {
         return "bg-muted text-muted-foreground";
     }
   };
-
-  const handleBiometricSuccess = () => {
-    setIsUnlocked(true);
-    setShowBiometricModal(false);
-  };
-
-  if (!isUnlocked) {
-    return (
-      <>
-        <BiometricVerificationModal
-          isOpen={showBiometricModal}
-          onClose={() => setShowBiometricModal(false)}
-          onSuccess={handleBiometricSuccess}
-          title="Access Integrations"
-          subtitle="Verify identity to view API keys and credentials"
-          moduleName="INTEGRATIONS"
-        />
-        <div className="flex flex-col items-center justify-center h-96 space-y-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-600/20 flex items-center justify-center border border-violet-500/30">
-            <Key className="w-10 h-10 text-violet-500" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground">Integrations Protected</h2>
-          <p className="text-muted-foreground text-center max-w-md">
-            Secure access enabled for sensitive API keys and credentials
-          </p>
-          <Button
-            onClick={() => setShowBiometricModal(true)}
-            className="bg-gradient-to-r from-violet-500 to-purple-600"
-          >
-            <Shield className="w-4 h-4 mr-2" />
-            Verify Identity
-          </Button>
-        </div>
-      </>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -444,10 +440,58 @@ export const AdminIntegrations = () => {
         <TabsContent value="webhooks" className="space-y-4">
           <div className="flex justify-between items-center">
             <p className="text-sm text-muted-foreground">Configure webhooks for real-time event notifications</p>
-            <Button className="bg-gradient-to-r from-emerald-500 to-teal-600">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Webhook
-            </Button>
+            <Dialog open={isAddWebhookOpen} onOpenChange={setIsAddWebhookOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Webhook
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-card border-border">
+                <DialogHeader>
+                  <DialogTitle className="text-foreground">Create Webhook</DialogTitle>
+                  <DialogDescription>Set up a webhook endpoint to receive events</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div>
+                    <Label>Name</Label>
+                    <Input
+                      value={newWebhook.name}
+                      onChange={(e) => setNewWebhook({ ...newWebhook, name: e.target.value })}
+                      placeholder="e.g., Payments Webhook"
+                      className="bg-muted/50 border-border"
+                    />
+                  </div>
+                  <div>
+                    <Label>URL</Label>
+                    <Input
+                      value={newWebhook.url}
+                      onChange={(e) => setNewWebhook({ ...newWebhook, url: e.target.value })}
+                      placeholder="https://example.com/webhooks/payments"
+                      className="bg-muted/50 border-border"
+                    />
+                  </div>
+                  <div>
+                    <Label>Events (comma-separated)</Label>
+                    <Input
+                      value={newWebhook.events.join(", ")}
+                      onChange={(e) =>
+                        setNewWebhook({
+                          ...newWebhook,
+                          events: e.target.value.split(",").map((v) => v.trim()).filter(Boolean),
+                        })
+                      }
+                      placeholder="payment.success, payment.failed"
+                      className="bg-muted/50 border-border"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsAddWebhookOpen(false)}>Cancel</Button>
+                  <Button onClick={createWebhook}>Create Webhook</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="space-y-3">

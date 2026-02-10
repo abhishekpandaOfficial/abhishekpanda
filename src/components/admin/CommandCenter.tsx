@@ -34,6 +34,7 @@ import {
   Lock,
   ArrowRight,
   Rocket,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,7 +62,6 @@ interface Module {
   path?: string;
   gradient: string;
   iconBg: string;
-  requiresBiometric?: boolean; // Modules that require WebAuthn re-authentication
 }
 
 // All modules configuration
@@ -79,7 +79,6 @@ const modules: Module[] = [
     path: "/admin/workflows",
     gradient: "from-violet-500 via-purple-500 to-fuchsia-500",
     iconBg: "bg-violet-500/20",
-    requiresBiometric: true, // Secured with WebAuthn
   },
   // Content
   {
@@ -94,7 +93,6 @@ const modules: Module[] = [
     path: "/admin/blog",
     gradient: "from-blue-500 via-cyan-500 to-teal-500",
     iconBg: "bg-blue-500/20",
-    requiresBiometric: true, // Secured with WebAuthn
   },
   // Learning
   {
@@ -109,7 +107,19 @@ const modules: Module[] = [
     path: "/admin/courses",
     gradient: "from-emerald-500 via-green-500 to-lime-500",
     iconBg: "bg-emerald-500/20",
-    requiresBiometric: true, // Secured with WebAuthn
+  },
+  {
+    id: "ebook-studio",
+    name: "Ebook Studio",
+    description: "Create, publish, and distribute ebooks (PDF/EPUB)",
+    icon: BookOpen,
+    status: "active",
+    category: "learning",
+    importance: "high",
+    dependencies: [],
+    path: "/admin/ebooks",
+    gradient: "from-indigo-500 via-purple-500 to-fuchsia-500",
+    iconBg: "bg-indigo-500/20",
   },
   // Marketplace
   {
@@ -152,7 +162,6 @@ const modules: Module[] = [
     path: "/admin/drive",
     gradient: "from-slate-500 via-gray-500 to-zinc-500",
     iconBg: "bg-slate-500/20",
-    requiresBiometric: true, // Secured with WebAuthn
   },
   // Knowledge
   {
@@ -160,10 +169,11 @@ const modules: Module[] = [
     name: "Nimbus Desk",
     description: "Notes & Knowledge OS — Documents, idea vault, book drafts",
     icon: StickyNote,
-    status: "pending",
+    status: "active",
     category: "personal",
     importance: "medium",
     dependencies: [],
+    path: "/admin/nimbus",
     gradient: "from-indigo-500 via-blue-500 to-sky-500",
     iconBg: "bg-indigo-500/20",
   },
@@ -208,7 +218,6 @@ const modules: Module[] = [
     path: "/admin/payments",
     gradient: "from-green-500 via-emerald-500 to-teal-500",
     iconBg: "bg-green-500/20",
-    requiresBiometric: true, // Secured with WebAuthn
   },
   // Personal OS
   {
@@ -223,7 +232,6 @@ const modules: Module[] = [
     path: "/admin/lifemap",
     gradient: "from-rose-500 via-pink-500 to-fuchsia-500",
     iconBg: "bg-rose-500/20",
-    requiresBiometric: true, // Secured with WebAuthn
   },
   // Analytics
   {
@@ -252,7 +260,6 @@ const modules: Module[] = [
     path: "/admin/integrations",
     gradient: "from-teal-500 via-cyan-500 to-sky-500",
     iconBg: "bg-teal-500/20",
-    requiresBiometric: true, // Secured with WebAuthn
   },
   // Security
   {
@@ -281,7 +288,6 @@ const modules: Module[] = [
     path: "/admin/settings",
     gradient: "from-gray-500 via-slate-500 to-zinc-500",
     iconBg: "bg-gray-500/20",
-    requiresBiometric: true, // Secured with WebAuthn
   },
 ];
 
@@ -408,20 +414,8 @@ const ModuleCard = ({ module, index }: ModuleCardProps) => {
                 module.status === "active" ? "text-primary" : "text-muted-foreground"
               )} />
             </div>
-            {/* WebAuthn Security Lock Badge */}
-            {module.requiresBiometric && (
-              <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-amber-500/90 border-2 border-background flex items-center justify-center shadow-lg">
-                <Lock className="w-2.5 h-2.5 text-white" />
-              </div>
-            )}
           </div>
           <div className="flex items-center gap-1.5">
-            {module.requiresBiometric && (
-              <Badge variant="outline" className="text-[9px] gap-0.5 px-1.5 py-0 h-5 bg-amber-500/10 text-amber-400 border-amber-500/30">
-                <Shield className="w-2.5 h-2.5" />
-                Secured
-              </Badge>
-            )}
             <Badge variant="outline" className={cn("text-[10px] gap-1", statusConfig[module.status].color)}>
               <StatusIcon className="w-3 h-3" />
               {statusConfig[module.status].label}
@@ -445,7 +439,6 @@ const ModuleCard = ({ module, index }: ModuleCardProps) => {
           {module.path && module.status !== "future" && module.status !== "locked" ? (
             <Link to={module.path}>
               <Button size="sm" variant="ghost" className="h-8 text-xs gap-1 hover:bg-primary/10 hover:text-primary">
-                {module.requiresBiometric && <Lock className="w-3 h-3" />}
                 Open
                 <ChevronRight className="w-3 h-3" />
               </Button>
@@ -466,15 +459,6 @@ const ModuleCard = ({ module, index }: ModuleCardProps) => {
           </div>
         )}
 
-        {/* WebAuthn Security Notice */}
-        {module.requiresBiometric && (
-          <div className="mt-3 pt-3 border-t border-amber-500/20">
-            <p className="text-[10px] text-amber-400/80 flex items-center gap-1">
-              <Shield className="w-3 h-3" />
-              Requires biometric re-authentication
-            </p>
-          </div>
-        )}
       </div>
     </motion.div>
   );
@@ -578,7 +562,7 @@ export const CommandCenter = () => {
               <Rocket className="w-5 h-5 text-amber-400" />
               <div>
                 <p className="font-medium text-amber-400">Complete Your Setup</p>
-                <p className="text-xs text-amber-400/70">Set up biometric authentication for enhanced security</p>
+                <p className="text-xs text-amber-400/70">Set up a passkey for secure access</p>
               </div>
             </div>
             <Button

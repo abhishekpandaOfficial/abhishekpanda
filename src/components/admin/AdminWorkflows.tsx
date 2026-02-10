@@ -18,8 +18,6 @@ import {
   RefreshCw,
   ChevronRight,
   MoreVertical,
-  Shield,
-  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +48,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { BiometricVerificationModal } from "./BiometricVerificationModal";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface WorkflowStep {
   id: string;
@@ -148,7 +146,8 @@ const DEFAULT_WORKFLOWS: WorkflowItem[] = [
 ];
 
 export const AdminWorkflows = () => {
-  const [workflows, setWorkflows] = useState<WorkflowItem[]>(DEFAULT_WORKFLOWS);
+  const qc = useQueryClient();
+  const [workflows, setWorkflows] = useState<WorkflowItem[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowItem | null>(null);
   const [newWorkflow, setNewWorkflow] = useState({
@@ -156,8 +155,67 @@ export const AdminWorkflows = () => {
     description: "",
     trigger: "",
   });
-  const [showBiometricModal, setShowBiometricModal] = useState(true);
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  const { data: workflowRows = [] } = useQuery({
+    queryKey: ["automation_workflows"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("automation_workflows")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  useEffect(() => {
+    if (workflowRows.length) {
+      const mapped = workflowRows.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        description: row.description || "",
+        trigger: row.trigger,
+        isActive: row.is_active,
+        lastRun: row.last_run,
+        runCount: row.run_count,
+        status: row.status,
+        steps: row.steps || [],
+      }));
+      setWorkflows(mapped);
+    } else {
+      setWorkflows(DEFAULT_WORKFLOWS);
+    }
+  }, [workflowRows]);
+
+  const upsertWorkflow = useMutation({
+    mutationFn: async (workflow: WorkflowItem) => {
+      const { data, error } = await supabase
+        .from("automation_workflows")
+        .upsert({
+          id: workflow.id,
+          name: workflow.name,
+          description: workflow.description,
+          trigger: workflow.trigger,
+          is_active: workflow.isActive,
+          status: workflow.status,
+          run_count: workflow.runCount,
+          last_run: workflow.lastRun,
+          steps: workflow.steps,
+        })
+        .select("*")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["automation_workflows"] }),
+  });
+
+  const deleteWorkflow = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("automation_workflows").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["automation_workflows"] }),
+  });
 
   // Real-time subscription for workflow executions
   useEffect(() => {
@@ -188,6 +246,8 @@ export const AdminWorkflows = () => {
     setWorkflows((prev) =>
       prev.map((w) => (w.id === id ? { ...w, isActive } : w))
     );
+    const wf = workflows.find((w) => w.id === id);
+    if (wf) upsertWorkflow.mutate({ ...wf, isActive });
     toast.success(isActive ? "Workflow activated" : "Workflow paused");
   };
 
@@ -206,12 +266,22 @@ export const AdminWorkflows = () => {
             : w
         )
       );
+      const wf = workflows.find((w) => w.id === id);
+      if (wf) {
+        upsertWorkflow.mutate({
+          ...wf,
+          status: "success",
+          lastRun: new Date().toISOString(),
+          runCount: wf.runCount + 1,
+        });
+      }
       toast.success("Workflow executed successfully");
     }, 2000);
   };
 
   const handleDeleteWorkflow = (id: string) => {
     setWorkflows((prev) => prev.filter((w) => w.id !== id));
+    deleteWorkflow.mutate(id);
     toast.success("Workflow deleted");
   };
 
@@ -222,20 +292,22 @@ export const AdminWorkflows = () => {
     }
 
     const workflow: WorkflowItem = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name: newWorkflow.name,
       description: newWorkflow.description,
       trigger: newWorkflow.trigger,
-      isActive: false,
+      isActive: true,
       lastRun: null,
       runCount: 0,
       status: "idle",
       steps: [
         { id: "s1", type: "trigger", name: TRIGGER_OPTIONS.find((t) => t.value === newWorkflow.trigger)?.label || "", config: {} },
+        { id: "s2", type: "action", name: ACTION_OPTIONS[0].label, config: {} },
       ],
     };
 
-    setWorkflows((prev) => [...prev, workflow]);
+    setWorkflows((prev) => [workflow, ...prev]);
+    upsertWorkflow.mutate(workflow);
     setIsCreateOpen(false);
     setNewWorkflow({ name: "", description: "", trigger: "" });
     toast.success("Workflow created successfully");
@@ -258,42 +330,6 @@ export const AdminWorkflows = () => {
     const option = TRIGGER_OPTIONS.find((t) => t.value === trigger);
     return option ? option.icon : Zap;
   };
-
-  const handleBiometricSuccess = () => {
-    setIsUnlocked(true);
-    setShowBiometricModal(false);
-  };
-
-  if (!isUnlocked) {
-    return (
-      <>
-        <BiometricVerificationModal
-          isOpen={showBiometricModal}
-          onClose={() => setShowBiometricModal(false)}
-          onSuccess={handleBiometricSuccess}
-          title="Access AETHERGRID"
-          subtitle="Verify identity to manage automation workflows"
-          moduleName="AETHERGRID"
-        />
-        <div className="flex flex-col items-center justify-center h-96 space-y-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 flex items-center justify-center border border-cyan-500/30">
-            <Workflow className="w-10 h-10 text-cyan-500" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground">AETHERGRID Protected</h2>
-          <p className="text-muted-foreground text-center max-w-md">
-            Secure access enabled for automation workflows
-          </p>
-          <Button
-            onClick={() => setShowBiometricModal(true)}
-            className="bg-gradient-to-r from-cyan-500 to-blue-600"
-          >
-            <Shield className="w-4 h-4 mr-2" />
-            Verify Identity
-          </Button>
-        </div>
-      </>
-    );
-  }
 
   return (
     <div className="space-y-6">

@@ -27,8 +27,6 @@ import {
   RefreshCw,
   Save,
   Loader2,
-  Lock,
-  Shield,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,7 +45,6 @@ import {
 } from "@/components/ui/dialog";
 import { FamilyTreeDAG } from "./FamilyTreeDAG";
 import { useFamilyMembers, FamilyMember } from "@/hooks/useFamilyMembers";
-import { BiometricVerificationModal } from "./BiometricVerificationModal";
 
 const getGenerationColor = (generation: number) => {
   switch (generation) {
@@ -75,8 +72,6 @@ export const AdminLifeMap = () => {
   const [editForm, setEditForm] = useState<FamilyMember | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [showBiometricModal, setShowBiometricModal] = useState(true);
-  const [isUnlocked, setIsUnlocked] = useState(false);
 
   const openEdit = (member: FamilyMember) => {
     setSelectedMember(member);
@@ -119,42 +114,6 @@ export const AdminLifeMap = () => {
     generation: gen,
     label: gen === 1 ? "Grandparents" : gen === 2 ? "Parents" : gen === 3 ? "Self & Spouse" : "Children",
   }));
-
-  const handleBiometricSuccess = () => {
-    setIsUnlocked(true);
-    setShowBiometricModal(false);
-  };
-
-  if (!isUnlocked) {
-    return (
-      <>
-        <BiometricVerificationModal
-          isOpen={showBiometricModal}
-          onClose={() => setShowBiometricModal(false)}
-          onSuccess={handleBiometricSuccess}
-          title="Access LifeMap"
-          subtitle="Verify identity to view personal & family data"
-          moduleName="LIFEMAP"
-        />
-        <div className="flex flex-col items-center justify-center h-96 space-y-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-pink-500/20 to-rose-600/20 flex items-center justify-center border border-pink-500/30">
-            <Heart className="w-10 h-10 text-pink-500" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground">LifeMap Protected</h2>
-          <p className="text-muted-foreground text-center max-w-md">
-            Secure access enabled for personal and family information
-          </p>
-          <Button
-            onClick={() => setShowBiometricModal(true)}
-            className="bg-gradient-to-r from-pink-500 to-rose-600"
-          >
-            <Shield className="w-4 h-4 mr-2" />
-            Verify Identity
-          </Button>
-        </div>
-      </>
-    );
-  }
 
   if (loading) {
     return (

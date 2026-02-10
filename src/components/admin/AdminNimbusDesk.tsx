@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   BookOpen,
@@ -47,6 +47,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface Note {
   id: string;
@@ -60,64 +62,6 @@ interface Note {
   updatedAt: string;
 }
 
-const mockNotes: Note[] = [
-  {
-    id: "1",
-    title: "LLM Galaxy Vision",
-    content: "The next evolution of LLM Galaxy should include real-time model updates, community benchmarks, and API integration testing...",
-    category: "strategy",
-    tags: ["product", "roadmap", "AI"],
-    isPinned: true,
-    isArchived: false,
-    createdAt: "2024-12-10",
-    updatedAt: "2024-12-11",
-  },
-  {
-    id: "2",
-    title: "Book Chapter: The AI Revolution",
-    content: "Chapter 3 Draft: How artificial intelligence is reshaping industries from healthcare to finance...",
-    category: "draft",
-    tags: ["book", "writing", "AI"],
-    isPinned: true,
-    isArchived: false,
-    createdAt: "2024-12-05",
-    updatedAt: "2024-12-10",
-  },
-  {
-    id: "3",
-    title: "Microservices Architecture Research",
-    content: "Key findings from analyzing top tech companies' microservices implementations...",
-    category: "research",
-    tags: ["architecture", "tech", "research"],
-    isPinned: false,
-    isArchived: false,
-    createdAt: "2024-12-01",
-    updatedAt: "2024-12-08",
-  },
-  {
-    id: "4",
-    title: "Course Module Ideas",
-    content: "Brainstorming session: New course modules for System Design Masterclass...",
-    category: "idea",
-    tags: ["courses", "education", "product"],
-    isPinned: false,
-    isArchived: false,
-    createdAt: "2024-11-28",
-    updatedAt: "2024-12-05",
-  },
-  {
-    id: "5",
-    title: "Weekly Standup Notes",
-    content: "Team sync: Progress on AETHERGRID integration, blockers, and next steps...",
-    category: "note",
-    tags: ["meetings", "team", "weekly"],
-    isPinned: false,
-    isArchived: false,
-    createdAt: "2024-12-09",
-    updatedAt: "2024-12-09",
-  },
-];
-
 const categoryConfig = {
   note: { icon: FileText, color: "from-slate-500 to-slate-600", label: "Notes" },
   idea: { icon: Lightbulb, color: "from-amber-500 to-orange-600", label: "Ideas" },
@@ -126,17 +70,14 @@ const categoryConfig = {
   strategy: { icon: Sparkles, color: "from-indigo-500 to-violet-600", label: "Strategy" },
 };
 
-const folders = [
-  { name: "All Notes", icon: FolderOpen, count: 23 },
-  { name: "Ideas Vault", icon: Lightbulb, count: 8 },
-  { name: "Book Drafts", icon: BookMarked, count: 5 },
-  { name: "R&D Documents", icon: Brain, count: 12 },
-  { name: "Strategy Logs", icon: Sparkles, count: 6 },
-  { name: "Meeting Notes", icon: FileText, count: 15 },
-];
+const isMissingTableError = (err: unknown) => {
+  if (!err || typeof err !== "object") return false;
+  return (err as { code?: unknown }).code === "PGRST205";
+};
 
 export const AdminNimbusDesk = () => {
-  const [notes, setNotes] = useState<Note[]>(mockNotes);
+  const qc = useQueryClient();
+  const [notes, setNotes] = useState<Note[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
@@ -144,9 +85,88 @@ export const AdminNimbusDesk = () => {
   const [activeFolder, setActiveFolder] = useState("All Notes");
   const [editForm, setEditForm] = useState({ title: "", content: "", category: "note" as Note["category"], tags: "" });
 
+  const { data: noteRows = [], isLoading } = useQuery({
+    queryKey: ["nimbus_notes"],
+    queryFn: async () => {
+      const res = await supabase
+        .from("nimbus_notes")
+        .select("*")
+        .order("updated_at", { ascending: false });
+      if (!res.error) return res.data || [];
+      if (isMissingTableError(res.error)) return [];
+      throw res.error;
+    },
+  });
+
+  useEffect(() => {
+    const mapped = noteRows.map((row: any) => ({
+      id: row.id,
+      title: row.title,
+      content: row.content || "",
+      category: row.category || "note",
+      tags: row.tags || [],
+      isPinned: !!row.is_pinned,
+      isArchived: !!row.is_archived,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }));
+    setNotes(mapped);
+  }, [noteRows]);
+
+  const upsertNote = useMutation({
+    mutationFn: async (note: Note) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+      const { data, error } = await supabase
+        .from("nimbus_notes")
+        .upsert({
+          id: note.id,
+          user_id: user.id,
+          title: note.title,
+          content: note.content,
+          category: note.category,
+          tags: note.tags,
+          is_pinned: note.isPinned,
+          is_archived: note.isArchived,
+        })
+        .select("*")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["nimbus_notes"] }),
+  });
+
+  const deleteNoteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("nimbus_notes").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["nimbus_notes"] }),
+  });
+
+  const folderCategories: Record<string, Note["category"] | "all"> = {
+    "All Notes": "all",
+    "Ideas Vault": "idea",
+    "Book Drafts": "draft",
+    "R&D Documents": "research",
+    "Strategy Logs": "strategy",
+    "Meeting Notes": "note",
+  };
+
+  const folders = [
+    { name: "All Notes", icon: FolderOpen, count: notes.filter((n) => !n.isArchived).length },
+    { name: "Ideas Vault", icon: Lightbulb, count: notes.filter((n) => !n.isArchived && n.category === "idea").length },
+    { name: "Book Drafts", icon: BookMarked, count: notes.filter((n) => !n.isArchived && n.category === "draft").length },
+    { name: "R&D Documents", icon: Brain, count: notes.filter((n) => !n.isArchived && n.category === "research").length },
+    { name: "Strategy Logs", icon: Sparkles, count: notes.filter((n) => !n.isArchived && n.category === "strategy").length },
+    { name: "Meeting Notes", icon: FileText, count: notes.filter((n) => !n.isArchived && n.category === "note").length },
+  ];
+
   const filteredNotes = notes.filter(
     (note) =>
       !note.isArchived &&
+      (folderCategories[activeFolder] === "all" || note.category === folderCategories[activeFolder]) &&
       (note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
         note.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())))
@@ -179,18 +199,16 @@ export const AdminNimbusDesk = () => {
     }
 
     const tags = editForm.tags.split(",").map((t) => t.trim()).filter(Boolean);
-    const now = new Date().toISOString().split("T")[0];
+    const now = new Date().toISOString();
 
     if (selectedNote) {
-      setNotes(notes.map((n) =>
-        n.id === selectedNote.id
-          ? { ...n, ...editForm, tags, updatedAt: now }
-          : n
-      ));
+      const next = { ...selectedNote, ...editForm, tags, updatedAt: now };
+      setNotes(notes.map((n) => (n.id === selectedNote.id ? next : n)));
+      upsertNote.mutate(next);
       toast.success("Note updated successfully");
     } else {
       const newNote: Note = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         title: editForm.title,
         content: editForm.content,
         category: editForm.category,
@@ -201,23 +219,31 @@ export const AdminNimbusDesk = () => {
         updatedAt: now,
       };
       setNotes([newNote, ...notes]);
+      upsertNote.mutate(newNote);
       toast.success("Note created successfully");
     }
     setIsEditorOpen(false);
   };
 
   const togglePin = (id: string) => {
-    setNotes(notes.map((n) => (n.id === id ? { ...n, isPinned: !n.isPinned } : n)));
+    const next = notes.map((n) => (n.id === id ? { ...n, isPinned: !n.isPinned } : n));
+    setNotes(next);
+    const updated = next.find((n) => n.id === id);
+    if (updated) upsertNote.mutate(updated);
     toast.success("Pin status updated");
   };
 
   const archiveNote = (id: string) => {
-    setNotes(notes.map((n) => (n.id === id ? { ...n, isArchived: true } : n)));
+    const next = notes.map((n) => (n.id === id ? { ...n, isArchived: true } : n));
+    setNotes(next);
+    const updated = next.find((n) => n.id === id);
+    if (updated) upsertNote.mutate(updated);
     toast.success("Note archived");
   };
 
   const deleteNote = (id: string) => {
     setNotes(notes.filter((n) => n.id !== id));
+    deleteNoteMutation.mutate(id);
     toast.success("Note deleted");
   };
 
@@ -301,18 +327,21 @@ export const AdminNimbusDesk = () => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <BookOpen className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                  <BookOpen className="w-5 h-5 text-white" />
+                </div>
+                Nimbus Desk
+              </h1>
+              <p className="text-muted-foreground mt-1">Your personal knowledge OS — notes, ideas, drafts & research</p>
             </div>
-            Nimbus Desk
-          </h1>
-          <p className="text-muted-foreground mt-1">Your personal knowledge OS — notes, ideas, drafts & research</p>
-        </div>
         <Button onClick={openNewNote} className="bg-gradient-to-r from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30">
           <Plus className="w-4 h-4 mr-2" />
           New Note
         </Button>
       </div>
+      {isLoading ? (
+        <div className="text-sm text-muted-foreground">Loading notes...</div>
+      ) : null}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

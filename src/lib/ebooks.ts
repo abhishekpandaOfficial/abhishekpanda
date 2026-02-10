@@ -8,6 +8,41 @@ export type EbookCategory =
 
 export type EbookLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "ARCHITECT";
 
+export type EbookRow = {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+  category: string | null;
+  level: string | null;
+  is_free: boolean;
+  is_coming_soon: boolean;
+  is_featured?: boolean | null;
+  is_published?: boolean | null;
+  price_in_inr: number | null;
+  cover_image_url: string | null;
+  preview_pdf_url: string | null;
+  epub_url: string | null;
+  pdf_url: string | null;
+  toc_json?: unknown;
+  tech_stack?: string[] | null;
+  libraries?: string[] | null;
+  sections?: ("featured" | "interview" | "architect")[] | null;
+  bundle?: "architect-pro" | "interview-mastery" | null;
+};
+
+export type EbookBundleRow = {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  discount_label: string | null;
+  price_label: string | null;
+  is_active?: boolean | null;
+  sort_order?: number | null;
+};
+
 export type Ebook = {
   id: string;
   slug: string;
@@ -30,6 +65,53 @@ export type Ebook = {
   bundle?: "architect-pro" | "interview-mastery";
 };
 
+const CATEGORY_VALUES: EbookCategory[] = [
+  "DOTNET_ARCHITECT",
+  "SOLID_DESIGN_PATTERNS",
+  "INTERVIEW",
+  "KAFKA",
+  "AI_LLM",
+  "ROADMAP",
+];
+
+const LEVEL_VALUES: EbookLevel[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED", "ARCHITECT"];
+
+const normalizeCategory = (value?: string | null): EbookCategory =>
+  CATEGORY_VALUES.includes(value as EbookCategory) ? (value as EbookCategory) : "AI_LLM";
+
+const normalizeLevel = (value?: string | null): EbookLevel =>
+  LEVEL_VALUES.includes(value as EbookLevel) ? (value as EbookLevel) : "BEGINNER";
+
+const deriveSections = (row: EbookRow) => {
+  const sections: ("featured" | "interview" | "architect")[] = [];
+  if (row.is_featured) sections.push("featured");
+  if (row.category === "INTERVIEW") sections.push("interview");
+  if (row.category === "DOTNET_ARCHITECT" || row.category === "SOLID_DESIGN_PATTERNS") sections.push("architect");
+  return sections;
+};
+
+export const mapEbookRowToEbook = (row: EbookRow): Ebook => ({
+  id: row.id,
+  slug: row.slug,
+  title: row.title,
+  subtitle: row.subtitle || "",
+  description: row.description || "",
+  category: normalizeCategory(row.category),
+  level: normalizeLevel(row.level),
+  isFree: !!row.is_free,
+  isComingSoon: !!row.is_coming_soon,
+  priceInINR: row.price_in_inr ?? null,
+  coverImageUrl: row.cover_image_url || "/placeholder.svg",
+  previewPdfUrl: row.preview_pdf_url || row.pdf_url || null,
+  epubUrl: row.epub_url || null,
+  pdfUrl: row.pdf_url || null,
+  toc: Array.isArray(row.toc_json) ? row.toc_json.map((t) => String(t)) : [],
+  techStack: Array.isArray(row.tech_stack) ? row.tech_stack : [],
+  libraries: Array.isArray(row.libraries) ? row.libraries : [],
+  sections: Array.isArray(row.sections) && row.sections.length ? row.sections : deriveSections(row),
+  bundle: row.bundle || undefined,
+});
+
 export const ebookBundles = [
   {
     id: "architect-pro",
@@ -46,6 +128,8 @@ export const ebookBundles = [
     priceLabel: "₹1,999",
   },
 ] as const;
+
+export const fallbackBundles = ebookBundles;
 
 export const ebooks: Ebook[] = [
   {

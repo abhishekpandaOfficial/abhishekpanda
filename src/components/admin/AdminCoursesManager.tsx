@@ -18,9 +18,7 @@ import {
   Image,
   Video,
   FileText,
-  BookOpen,
-  Shield,
-  Lock
+  BookOpen
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -35,7 +33,6 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { BiometricVerificationModal } from "./BiometricVerificationModal";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Module {
@@ -71,48 +68,6 @@ interface Course {
   oneToOneEndHourIst?: number | null;
   oneToOnePayAfterSchedule?: boolean | null;
 }
-
-const mockCourses: Course[] = [
-  {
-    id: "1",
-    title: "Advanced .NET Architecture Patterns",
-    slug: "dotnet-architecture-patterns",
-    description: "Master enterprise-level .NET architecture with DDD, CQRS, and microservices.",
-    thumbnail: "/placeholder.svg",
-    level: "Advanced",
-    duration: "12 hours",
-    price: 4999,
-    isPremium: true,
-    isPublished: true,
-    studentsCount: 1250,
-    rating: 4.8,
-    modules: [
-      {
-        id: "m1",
-        title: "Introduction to Architecture",
-        lessons: [
-          { id: "l1", title: "What is Software Architecture?", duration: "15:00", isFree: true, type: "video" },
-          { id: "l2", title: "Architecture Principles", duration: "20:00", isFree: false, type: "video" },
-        ]
-      }
-    ]
-  },
-  {
-    id: "2",
-    title: "AI/ML Fundamentals with Python",
-    slug: "ai-ml-fundamentals",
-    description: "Learn the foundations of artificial intelligence and machine learning.",
-    thumbnail: "/placeholder.svg",
-    level: "Beginner",
-    duration: "8 hours",
-    price: 0,
-    isPremium: false,
-    isPublished: true,
-    studentsCount: 3200,
-    rating: 4.9,
-    modules: []
-  }
-];
 
 const mapFromDb = (row: any): Course => ({
   id: row.id,
@@ -177,10 +132,6 @@ export const AdminCoursesManager = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [expandedModule, setExpandedModule] = useState<string | null>(null);
-  const [showBiometricModal, setShowBiometricModal] = useState(true);
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [showPublishBiometric, setShowPublishBiometric] = useState(false);
-  const [pendingPublish, setPendingPublish] = useState(false);
 
   const loadCourses = async () => {
     setIsLoading(true);
@@ -201,8 +152,8 @@ export const AdminCoursesManager = () => {
   };
 
   useEffect(() => {
-    if (isUnlocked) loadCourses();
-  }, [isUnlocked]);
+    loadCourses();
+  }, []);
 
   const filteredCourses = useMemo(() => {
     const q = searchQuery.toLowerCase();
@@ -314,14 +265,8 @@ export const AdminCoursesManager = () => {
     setSelectedCourse({ ...selectedCourse, modules: updatedModules });
   };
 
-  const handleBiometricSuccess = () => {
-    setIsUnlocked(true);
-    setShowBiometricModal(false);
-  };
-
-  const handlePublishBiometricSuccess = () => {
-    setShowPublishBiometric(false);
-    if (selectedCourse && pendingPublish) {
+  const handlePublishToggle = (checked: boolean) => {
+    if (checked && !selectedCourse?.isPublished) {
       setSelectedCourse({ ...selectedCourse, isPublished: true });
       supabase
         .from("courses")
@@ -331,14 +276,6 @@ export const AdminCoursesManager = () => {
           if (error) toast.error("Failed to publish course.");
           else loadCourses();
         });
-      setPendingPublish(false);
-    }
-  };
-
-  const handlePublishToggle = (checked: boolean) => {
-    if (checked && !selectedCourse?.isPublished) {
-      setPendingPublish(true);
-      setShowPublishBiometric(true);
       return;
     }
     if (!selectedCourse) return;
@@ -353,47 +290,7 @@ export const AdminCoursesManager = () => {
       });
   };
 
-  if (!isUnlocked) {
-    return (
-      <>
-        <BiometricVerificationModal
-          isOpen={showBiometricModal}
-          onClose={() => setShowBiometricModal(false)}
-          onSuccess={handleBiometricSuccess}
-          title="Access LMS Studio"
-          subtitle="Verify identity to manage courses"
-          moduleName="LMS STUDIO"
-        />
-        <div className="flex flex-col items-center justify-center h-96 space-y-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-600/20 flex items-center justify-center border border-yellow-500/30">
-            <GraduationCap className="w-10 h-10 text-yellow-500" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground">LMS Studio Protected</h2>
-          <p className="text-muted-foreground text-center max-w-md">
-            Secure access enabled for courses
-          </p>
-          <Button
-            onClick={() => setShowBiometricModal(true)}
-            className="bg-gradient-to-r from-yellow-500 to-orange-600"
-          >
-            <Shield className="w-4 h-4 mr-2" />
-            Verify Identity
-          </Button>
-        </div>
-      </>
-    );
-  }
-
   return (
-    <>
-      <BiometricVerificationModal
-        isOpen={showPublishBiometric}
-        onClose={() => { setShowPublishBiometric(false); setPendingPublish(false); }}
-        onSuccess={handlePublishBiometricSuccess}
-        title="Publish Course"
-        subtitle="Verify identity to publish this course"
-        moduleName="PUBLISH"
-      />
     <div className="space-y-6">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -852,6 +749,5 @@ export const AdminCoursesManager = () => {
         </div>
       </div>
     </div>
-    </>
   );
 };

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -7,33 +7,38 @@ import {
   Trash2, 
   Eye, 
   FileText,
-  Calendar,
   Tag,
   Image as ImageIcon,
-  Save,
   X,
-  Bold,
-  Italic,
-  List,
-  Link2,
-  Code,
-  Quote,
-  Heading1,
-  Heading2,
-  AlignLeft,
+  Lock,
   Globe,
   Clock,
   TrendingUp,
   Crown,
-  Shield,
-  Lock
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  ChevronDown,
+  Layers,
+  Maximize2,
+  Minimize2
 } from "lucide-react";
+import { getDefaultReactSlashMenuItems, useCreateBlockNote } from "@blocknote/react";
+import { BlockNoteView } from "@blocknote/shadcn";
+import "@blocknote/core/style.css";
+import "@blocknote/shadcn/style.css";
+import "@blocknote/core/fonts/inter.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { BiometricVerificationModal } from "./BiometricVerificationModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -46,15 +51,45 @@ type BlogPost = {
   excerpt: string | null;
   content: string | null;
   hero_image: string | null;
+  section_id: string | null;
   tags: string[] | null;
   meta_title: string | null;
   meta_description: string | null;
   is_published: boolean | null;
   is_premium: boolean | null;
+  is_locked: boolean | null;
+  code_theme: string | null;
+  color: string | null;
   views: number | null;
   created_at: string;
   published_at: string | null;
   updated_at: string;
+  sort_order?: number | null;
+};
+
+type BlogSection = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  color: string | null;
+  sort_order?: number | null;
+};
+
+type BlogPostVersion = {
+  id: string;
+  created_at: string;
+  title: string | null;
+  excerpt: string | null;
+  content: string | null;
+  hero_image: string | null;
+  tags: string[] | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  section_id: string | null;
+  color: string | null;
+  code_theme: string | null;
+  is_locked: boolean | null;
 };
 
 const slugify = (input: string) =>
@@ -67,48 +102,110 @@ const slugify = (input: string) =>
 
 export const AdminBlogManager = () => {
   const qc = useQueryClient();
+  const codeLanguages = useMemo(
+    () => ({
+      text: { name: "Plain Text" },
+      javascript: { name: "JavaScript", aliases: ["js"] },
+      typescript: { name: "TypeScript", aliases: ["ts"] },
+      jsx: { name: "JSX" },
+      tsx: { name: "TSX" },
+      python: { name: "Python", aliases: ["py"] },
+      java: { name: "Java" },
+      c: { name: "C" },
+      cpp: { name: "C++" },
+      csharp: { name: "C#" },
+      go: { name: "Go" },
+      rust: { name: "Rust" },
+      bash: { name: "Bash" },
+      json: { name: "JSON" },
+      yaml: { name: "YAML" },
+      markdown: { name: "Markdown", aliases: ["md"] },
+      html: { name: "HTML" },
+      css: { name: "CSS" },
+      sql: { name: "SQL" },
+    }),
+    [],
+  );
+  const codeThemes = useMemo(
+    () => [
+      { id: "github-light", label: "GitHub Light" },
+      { id: "github-light-default", label: "GitHub Light Default" },
+      { id: "github-light-high-contrast", label: "GitHub Light High Contrast" },
+      { id: "github-dark", label: "GitHub Dark" },
+      { id: "github-dark-default", label: "GitHub Dark Default" },
+      { id: "github-dark-dimmed", label: "GitHub Dark Dimmed" },
+      { id: "github-dark-high-contrast", label: "GitHub Dark High Contrast" },
+    ],
+    [],
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<"content" | "seo" | "settings">("content");
+  const [selectedSection, setSelectedSection] = useState<string>("all");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isFocusMode, setIsFocusMode] = useState(false);
   const [newTag, setNewTag] = useState("");
-  const [showBiometricModal, setShowBiometricModal] = useState(true);
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [showPublishBiometric, setShowPublishBiometric] = useState(false);
-  const [pendingPublish, setPendingPublish] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
+  const [heroPreviewOpen, setHeroPreviewOpen] = useState(false);
+  const [publishPreviewOpen, setPublishPreviewOpen] = useState(false);
+  const [diffOpen, setDiffOpen] = useState(false);
+  const [diffVersion, setDiffVersion] = useState<BlogPostVersion | null>(null);
+  const [isAutosaving, setIsAutosaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [uploadingHero, setUploadingHero] = useState(false);
   const [uploadingInline, setUploadingInline] = useState(false);
-  const contentRef = useRef<HTMLTextAreaElement | null>(null);
+  const heroFileRef = useRef<HTMLInputElement | null>(null);
+  const exportRef = useRef<HTMLDivElement | null>(null);
+  const [dragSectionId, setDragSectionId] = useState<string | null>(null);
+  const [dragPostId, setDragPostId] = useState<string | null>(null);
+  const autosaveRef = useRef<NodeJS.Timeout | null>(null);
+  const sectionErrorRef = useRef(false);
+  const [sectionsError, setSectionsError] = useState<string | null>(null);
 
   const errMsg = (err: unknown, fallback: string) =>
     err instanceof Error ? err.message : fallback;
 
-  const handleBiometricSuccess = () => {
-    setIsUnlocked(true);
-    setShowBiometricModal(false);
+  const handlePublishApprove = async () => {
+    if (!selectedPost) return;
+    await upsertPost.mutateAsync({
+      ...selectedPost,
+      is_published: true,
+      published_at: selectedPost.published_at || new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+    setPublishPreviewOpen(false);
   };
 
-  const handlePublishBiometricSuccess = () => {
-    setShowPublishBiometric(false);
-    if (selectedPost && pendingPublish) {
-      setSelectedPost({
-        ...selectedPost,
-        is_published: true,
-        published_at: selectedPost.published_at || new Date().toISOString(),
-      });
-      setPendingPublish(false);
-    }
-  };
-
-  const handlePublishToggle = (checked: boolean) => {
-    if (checked && !selectedPost?.is_published) {
-      // Require biometric verification to publish
-      setPendingPublish(true);
-      setShowPublishBiometric(true);
-    } else {
-      setSelectedPost({ ...selectedPost!, is_published: checked });
-    }
+  const handleExportPdf = () => {
+    if (!selectedPost || !exportRef.current) return;
+    const html = exportRef.current.innerHTML;
+    const win = window.open("", "_blank", "width=1200,height=900");
+    if (!win) return;
+    win.document.write(`
+      <html>
+        <head>
+          <title>${selectedPost.title}</title>
+          <style>
+            body { font-family: Inter, ui-sans-serif, system-ui; padding: 32px; color: #0f172a; }
+            h1 { font-size: 32px; margin-bottom: 8px; }
+            .excerpt { color: #475569; margin-bottom: 24px; }
+            pre { background: #f1f5f9; padding: 12px; border-radius: 10px; overflow-x: auto; }
+            code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+            img { max-width: 100%; border-radius: 12px; }
+            table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+            th, td { border: 1px solid #e2e8f0; padding: 8px; }
+            a { color: #2563eb; }
+          </style>
+        </head>
+        <body>
+          ${html}
+        </body>
+      </html>
+    `);
+    win.document.close();
+    win.focus();
+    win.print();
   };
 
   const { data: posts = [], isLoading: postsLoading } = useQuery({
@@ -117,9 +214,47 @@ export const AdminBlogManager = () => {
       const { data, error } = await supabase
         .from("blog_posts")
         .select("*")
+        .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as BlogPost[];
+    },
+  });
+
+  const { data: sectionsData = [] } = useQuery({
+    queryKey: ["admin-blog-sections"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_sections")
+        .select("*")
+        .order("sort_order", { ascending: true })
+        .order("name", { ascending: true });
+      if (error) {
+        if (!sectionErrorRef.current) {
+          sectionErrorRef.current = true;
+          setSectionsError(error.message || "Blog sections table missing.");
+          toast.error("Blog sections table missing. Run `supabase db push`.");
+        }
+        return [];
+      }
+      return (data ?? []) as BlogSection[];
+    },
+    retry: false,
+  });
+
+  const { data: versions = [] } = useQuery({
+    queryKey: ["admin-blog-versions", selectedPost?.id],
+    enabled: !!selectedPost?.id,
+    queryFn: async () => {
+      if (!selectedPost?.id) return [];
+      const { data, error } = await supabase
+        .from("blog_post_versions")
+        .select("*")
+        .eq("post_id", selectedPost.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return (data ?? []) as BlogPostVersion[];
     },
   });
 
@@ -133,6 +268,54 @@ export const AdminBlogManager = () => {
     });
   }, [posts, searchQuery]);
 
+  const sections = useMemo(() => {
+    return [{ id: "all", name: "All", color: "#94a3b8" }, ...sectionsData];
+  }, [sectionsData]);
+
+  const postsBySection = useMemo(() => {
+    if (selectedSection === "all") return filteredPosts;
+    return filteredPosts.filter((p) => p.section_id === selectedSection);
+  }, [filteredPosts, selectedSection]);
+
+  const diffPairs = useMemo(() => {
+    if (!diffVersion || !selectedPost) return [];
+    const before = (diffVersion.content || "").split("\n");
+    const after = (selectedPost.content || "").split("\n");
+    const max = Math.max(before.length, after.length);
+    const rows = [];
+    for (let i = 0; i < max; i += 1) {
+      rows.push({
+        before: before[i] ?? "",
+        after: after[i] ?? "",
+        changed: (before[i] ?? "") !== (after[i] ?? ""),
+      });
+    }
+    return rows;
+  }, [diffVersion, selectedPost]);
+
+  useEffect(() => {
+    if (!selectedPost) return;
+    if (selectedSection === "all") return;
+    if (selectedPost.section_id === selectedSection) return;
+    if (postsBySection.length > 0) {
+      setSelectedPost(postsBySection[0]);
+      setIsEditing(false);
+      setActiveTab("content");
+    }
+  }, [selectedSection, postsBySection, selectedPost]);
+
+  useEffect(() => {
+    if (!selectedPost) return;
+    const isPersisted = posts.some((p) => p.id === selectedPost.id);
+    if (isPersisted) {
+      setLastSavedAt(selectedPost.updated_at || null);
+      setHasUnsavedChanges(false);
+    } else {
+      setLastSavedAt(null);
+      setHasUnsavedChanges(true);
+    }
+  }, [selectedPost?.id, posts]);
+
   const stats = {
     total: posts.length,
     published: posts.filter((p) => !!p.is_published).length,
@@ -142,6 +325,12 @@ export const AdminBlogManager = () => {
 
   const handleCreatePost = () => {
     const now = new Date().toISOString();
+    const defaultSectionId =
+      selectedSection !== "all"
+        ? selectedSection
+        : sectionsData[0]?.id || null;
+    const defaultSectionColor =
+      sectionsData.find((s) => s.id === defaultSectionId)?.color || null;
     const newPost: BlogPost = {
       id: crypto.randomUUID(),
       title: "Untitled Post",
@@ -149,37 +338,167 @@ export const AdminBlogManager = () => {
       excerpt: "",
       content: "",
       hero_image: null,
+      section_id: defaultSectionId,
       tags: [],
       meta_title: "",
       meta_description: "",
       is_published: false,
       is_premium: false,
+      is_locked: false,
+      code_theme: "github-light",
+      color: defaultSectionColor,
       views: 0,
       created_at: now,
       published_at: null,
       updated_at: now,
+      sort_order: posts.length + 1,
     };
     setSelectedPost(newPost);
     setIsEditing(true);
-    setPreviewMode(false);
+    setHasUnsavedChanges(true);
+    setSelectedSection("all");
+    setIsFocusMode(false);
+    setIsSidebarCollapsed(false);
+  };
+
+  const handleRenameSection = async (section: BlogSection) => {
+    const name = window.prompt("Rename section", section.name);
+    if (!name || name.trim() === section.name) return;
+    const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const { error } = await supabase
+      .from("blog_sections")
+      .update({ name: name.trim(), slug })
+      .eq("id", section.id);
+    if (error) {
+      toast.error(error.message || "Failed to rename section");
+      return;
+    }
+    qc.invalidateQueries({ queryKey: ["admin-blog-sections"] });
+    toast.success("Section renamed");
+  };
+
+  const handleDeleteSection = async (section: BlogSection) => {
+    const ok = window.confirm(`Delete section "${section.name}"? Posts will be unassigned.`);
+    if (!ok) return;
+    const { error: clearErr } = await supabase
+      .from("blog_posts")
+      .update({ section_id: null })
+      .eq("section_id", section.id);
+    if (clearErr) {
+      toast.error(clearErr.message || "Failed to unassign posts");
+      return;
+    }
+    const { error } = await supabase.from("blog_sections").delete().eq("id", section.id);
+    if (error) {
+      toast.error(error.message || "Failed to delete section");
+      return;
+    }
+    if (selectedSection === section.id) {
+      setSelectedSection("all");
+    }
+    qc.invalidateQueries({ queryKey: ["admin-blog-sections"] });
+    qc.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+    toast.success("Section deleted");
+  };
+
+  const restoreVersion = async (version: BlogPostVersion) => {
+    if (!selectedPost) return;
+    const restored: BlogPost = {
+      ...selectedPost,
+      title: version.title || selectedPost.title,
+      excerpt: version.excerpt || "",
+      content: version.content || "",
+      hero_image: version.hero_image || null,
+      tags: version.tags || [],
+      meta_title: version.meta_title || "",
+      meta_description: version.meta_description || "",
+      section_id: version.section_id || null,
+      color: version.color || null,
+      code_theme: version.code_theme || "github-light",
+      is_locked: version.is_locked ?? selectedPost?.is_locked ?? false,
+    };
+    setSelectedPost(restored);
+    setIsEditing(true);
+    setActiveTab("content");
+    setHasUnsavedChanges(true);
+    try {
+      const blocks = await editor.tryParseMarkdownToBlocks(restored.content || "");
+      editor.replaceBlocks(editor.document, blocks);
+    } catch {
+      // ignore
+    }
+  };
+
+  const persistSectionOrder = async (ordered: BlogSection[]) => {
+    const updates = ordered.map((s, idx) => ({ id: s.id, sort_order: idx + 1 }));
+    await supabase.from("blog_sections").upsert(updates);
+    qc.invalidateQueries({ queryKey: ["admin-blog-sections"] });
+  };
+
+  const moveSection = async (sectionId: string, direction: "up" | "down") => {
+    const current = sectionsData
+      .filter((s) => s.id !== "all")
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    const index = current.findIndex((s) => s.id === sectionId);
+    if (index === -1) return;
+    const swapWith = direction === "up" ? index - 1 : index + 1;
+    if (swapWith < 0 || swapWith >= current.length) return;
+    const next = [...current];
+    const temp = next[index];
+    next[index] = next[swapWith];
+    next[swapWith] = temp;
+    await persistSectionOrder(next);
+  };
+
+  const persistPostOrder = async (ordered: BlogPost[]) => {
+    const updates = ordered.map((p, idx) => ({ id: p.id, sort_order: idx + 1 }));
+    await supabase.from("blog_posts").upsert(updates);
+    qc.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+  };
+
+  const movePostToSection = async (postId: string, sectionId: string | null) => {
+    const post = posts.find((p) => p.id === postId) || null;
+    if (!post) {
+      if (selectedPost?.id === postId) {
+        setSelectedPost({ ...selectedPost, section_id: sectionId === "all" ? null : sectionId });
+      }
+      return;
+    }
+    const nextSectionId = sectionId === "all" ? null : sectionId;
+    setSelectedPost((prev) => (prev?.id === postId ? { ...prev, section_id: nextSectionId } : prev));
+    const { error } = await supabase
+      .from("blog_posts")
+      .update({ section_id: nextSectionId })
+      .eq("id", postId);
+    if (error) {
+      toast.error(error.message || "Failed to move page.");
+      return;
+    }
+    qc.invalidateQueries({ queryKey: ["admin-blog-posts"] });
   };
 
   const handleAddTag = () => {
     if (newTag && selectedPost && !(selectedPost.tags ?? []).includes(newTag)) {
-      setSelectedPost({
+      const nextPost = {
         ...selectedPost,
         tags: [...(selectedPost.tags ?? []), newTag],
-      });
+      };
+      setSelectedPost(nextPost);
+      setHasUnsavedChanges(true);
+      scheduleAutosave(nextPost);
       setNewTag("");
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
     if (selectedPost) {
-      setSelectedPost({
+      const nextPost = {
         ...selectedPost,
         tags: (selectedPost.tags ?? []).filter((t) => t !== tagToRemove),
-      });
+      };
+      setSelectedPost(nextPost);
+      setHasUnsavedChanges(true);
+      scheduleAutosave(nextPost);
     }
   };
 
@@ -206,12 +525,17 @@ export const AdminBlogManager = () => {
         excerpt: post.excerpt,
         content: post.content,
         hero_image: post.hero_image,
+        section_id: post.section_id,
         tags: post.tags,
         meta_title: post.meta_title,
         meta_description: post.meta_description,
         is_published: !!post.is_published,
         is_premium: !!post.is_premium,
+        is_locked: !!post.is_locked,
+        code_theme: post.code_theme || "github-light",
         published_at: post.is_published ? (post.published_at || new Date().toISOString()) : post.published_at,
+        sort_order: post.sort_order ?? 0,
+        color: post.color || null,
       };
 
       const { data, error } = await supabase
@@ -225,10 +549,69 @@ export const AdminBlogManager = () => {
     onSuccess: (saved) => {
       toast.success("Post saved.");
       qc.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+      qc.invalidateQueries({ queryKey: ["admin-blog-versions", saved.id] });
       setSelectedPost(saved);
-      setIsEditing(false);
+      setLastSavedAt(new Date().toISOString());
+      setHasUnsavedChanges(false);
     },
     onError: (err: unknown) => toast.error(errMsg(err, "Failed to save post.")),
+  });
+
+  const autosavePost = useMutation({
+    mutationFn: async (post: BlogPost) => {
+      const payload = {
+        id: post.id,
+        title: post.title,
+        slug: slugify(post.slug || post.title || "post"),
+        excerpt: post.excerpt,
+        content: post.content,
+        hero_image: post.hero_image,
+        section_id: post.section_id,
+        tags: post.tags,
+        meta_title: post.meta_title,
+        meta_description: post.meta_description,
+        is_published: !!post.is_published,
+        is_premium: !!post.is_premium,
+        is_locked: !!post.is_locked,
+        code_theme: post.code_theme || "github-light",
+        published_at: post.is_published ? (post.published_at || new Date().toISOString()) : post.published_at,
+        sort_order: post.sort_order ?? 0,
+        color: post.color || null,
+      };
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .upsert(payload)
+        .select("*")
+        .single();
+      if (error) throw error;
+      await supabase.from("blog_post_versions").insert({
+        post_id: payload.id,
+        title: payload.title,
+        excerpt: payload.excerpt,
+        content: payload.content,
+        hero_image: payload.hero_image,
+        tags: payload.tags,
+        meta_title: payload.meta_title,
+        meta_description: payload.meta_description,
+        section_id: payload.section_id,
+        color: payload.color,
+        code_theme: payload.code_theme,
+        is_locked: payload.is_locked,
+      });
+      return data as BlogPost;
+    },
+    onMutate: () => {
+      setIsAutosaving(true);
+    },
+    onSuccess: (saved) => {
+      setIsAutosaving(false);
+      setLastSavedAt(new Date().toISOString());
+      setHasUnsavedChanges(false);
+      setSelectedPost(saved);
+    },
+    onError: () => {
+      setIsAutosaving(false);
+    },
   });
 
   const deletePost = useMutation({
@@ -241,7 +624,6 @@ export const AdminBlogManager = () => {
       qc.invalidateQueries({ queryKey: ["admin-blog-posts"] });
       setSelectedPost(null);
       setIsEditing(false);
-      setPreviewMode(false);
     },
     onError: (err: unknown) => toast.error(errMsg(err, "Failed to delete post.")),
   });
@@ -257,7 +639,12 @@ export const AdminBlogManager = () => {
         .upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("blog-assets").getPublicUrl(path);
-      setSelectedPost((p) => (p ? { ...p, hero_image: data.publicUrl } : p));
+      if (selectedPost) {
+        const nextPost = { ...selectedPost, hero_image: data.publicUrl };
+        setSelectedPost(nextPost);
+        setHasUnsavedChanges(true);
+        scheduleAutosave(nextPost);
+      }
       toast.success("Hero image uploaded.");
     } catch (err: unknown) {
       toast.error(errMsg(err, "Failed to upload image."));
@@ -277,135 +664,102 @@ export const AdminBlogManager = () => {
         .upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("blog-assets").getPublicUrl(path);
-
-      const md = `\n\n![](${data.publicUrl})\n`;
-      setSelectedPost((p) => {
-        if (!p) return p;
-        const current = p.content || "";
-        const el = contentRef.current;
-        if (el && typeof el.selectionStart === "number") {
-          const start = el.selectionStart;
-          const end = el.selectionEnd;
-          const next =
-            current.slice(0, start) + md + current.slice(end);
-          // Move cursor after inserted markdown.
-          requestAnimationFrame(() => {
-            try {
-              el.focus();
-              el.selectionStart = el.selectionEnd = start + md.length;
-            } catch {
-              // ignore
-            }
-          });
-          return { ...p, content: next };
-        }
-        return { ...p, content: current + md };
-      });
-
       toast.success("Inline image uploaded.");
+      return data.publicUrl;
     } catch (err: unknown) {
       toast.error(errMsg(err, "Failed to upload inline image."));
+      return null;
     } finally {
       setUploadingInline(false);
     }
   };
 
-  const EditorToolbar = () => (
-    <div className="flex items-center gap-1 p-2 bg-muted rounded-lg mb-2">
-      {[
-        { icon: Bold, label: "Bold" },
-        { icon: Italic, label: "Italic" },
-        { icon: Heading1, label: "H1" },
-        { icon: Heading2, label: "H2" },
-        { icon: List, label: "List" },
-        { icon: Quote, label: "Quote" },
-        { icon: Code, label: "Code" },
-        { icon: Link2, label: "Link" },
-        { icon: ImageIcon, label: "Image" },
-        { icon: AlignLeft, label: "Align" },
-      ].map((tool, index) => (
-        <Button 
-          key={index} 
-          variant="ghost" 
-          size="sm" 
-          className="h-8 w-8 p-0 hover:bg-background" 
-          title={tool.label}
-        >
-          <tool.icon className="w-4 h-4" />
-        </Button>
-      ))}
-      <label className="inline-flex ml-auto">
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          disabled={!isEditing || uploadingInline}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) uploadInlineImage(f);
-          }}
-        />
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="h-8 px-2 hover:bg-background"
-          disabled={!isEditing || uploadingInline}
-          title="Upload inline image"
-        >
-          <ImageIcon className="w-4 h-4 mr-2" />
-          {uploadingInline ? "Uploading..." : "Inline"}
-        </Button>
-      </label>
-    </div>
-  );
+  const codeTheme = selectedPost?.code_theme || "github-light";
+  const editor = useCreateBlockNote({
+    uploadFile: async (file) => {
+      const url = await uploadInlineImage(file);
+      if (!url) throw new Error("Upload failed");
+      return url;
+    },
+    tables: {
+      headers: true,
+      splitCells: true,
+      cellBackgroundColor: true,
+      cellTextColor: true,
+    },
+    codeBlock: {
+      defaultLanguage: "text",
+      supportedLanguages: codeLanguages,
+      createHighlighter: async () => {
+        const { getHighlighter } = await import("shiki");
+        return getHighlighter({
+          themes: [codeTheme],
+          langs: Object.keys(codeLanguages),
+        });
+      },
+    },
+  }, [codeTheme]);
 
-  if (!isUnlocked) {
-    return (
-      <>
-        <BiometricVerificationModal
-          isOpen={showBiometricModal}
-          onClose={() => setShowBiometricModal(false)}
-          onSuccess={handleBiometricSuccess}
-          title="Access CMS Studio"
-          subtitle="Verify identity to manage blog content"
-          moduleName="CMS STUDIO"
-        />
-        <div className="flex flex-col items-center justify-center h-96 space-y-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-600/20 flex items-center justify-center border border-purple-500/30">
-            <FileText className="w-10 h-10 text-purple-500" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground">CMS Studio Protected</h2>
-          <p className="text-muted-foreground text-center max-w-md">
-            Secure access enabled for blog content
-          </p>
-          <Button
-            onClick={() => setShowBiometricModal(true)}
-            className="bg-gradient-to-r from-purple-500 to-pink-600"
-          >
-            <Shield className="w-4 h-4 mr-2" />
-            Verify Identity
-          </Button>
-        </div>
-      </>
-    );
-  }
+  useEffect(() => {
+    if (!selectedPost) return;
+    (async () => {
+      try {
+        const blocks = await editor.tryParseMarkdownToBlocks(selectedPost.content || "");
+        editor.replaceBlocks(editor.document, blocks);
+      } catch {
+        // ignore
+      }
+    })();
+  }, [selectedPost?.id, selectedPost?.content, editor]);
+
+  useEffect(() => {
+    if (!isEditing || !selectedPost) return;
+    const update = async () => {
+      try {
+        const md = await editor.blocksToMarkdownLossy(editor.document);
+        setSelectedPost((prev) => {
+          if (!prev) return prev;
+          if ((prev.content || "") === md) return prev;
+          return { ...prev, content: md };
+        });
+      } catch {
+        // ignore
+      }
+    };
+    update();
+  }, [editor, isEditing, selectedPost?.id, selectedPost?.content]);
+
+  const scheduleAutosave = (post: BlogPost) => {
+    if (!isEditing) return;
+    if (autosaveRef.current) clearTimeout(autosaveRef.current);
+    autosaveRef.current = setTimeout(async () => {
+      try {
+        await autosavePost.mutateAsync({
+          ...post,
+          updated_at: new Date().toISOString(),
+        });
+      } catch {
+        // ignore autosave errors
+      }
+    }, 2000);
+  };
+
+  const handleEditorChange = async () => {
+    if (!isEditing || !selectedPost) return;
+    try {
+      const md = await editor.blocksToMarkdownLossy(editor.document);
+      if ((selectedPost.content || "") === md) return;
+      const nextPost = { ...selectedPost, content: md };
+      setSelectedPost(nextPost);
+      setHasUnsavedChanges(true);
+      scheduleAutosave(nextPost);
+    } catch {
+      // ignore
+    }
+  };
 
   return (
     <>
-      {/* Publish Biometric Modal */}
-      <BiometricVerificationModal
-        isOpen={showPublishBiometric}
-        onClose={() => {
-          setShowPublishBiometric(false);
-          setPendingPublish(false);
-        }}
-        onSuccess={handlePublishBiometricSuccess}
-        title="Publish Content"
-        subtitle="Verify identity to publish this post"
-        moduleName="PUBLISH"
-      />
-      
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -452,55 +806,275 @@ export const AdminBlogManager = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Posts List */}
-        <div className="lg:col-span-1 space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">All Posts</h3>
-          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-            {postsLoading ? (
-              <div className="text-sm text-muted-foreground">Loading posts...</div>
-            ) : null}
-            {filteredPosts.map((post) => (
-              <motion.div
-                key={post.id}
-                whileHover={{ scale: 1.02 }}
-                onClick={() => { setSelectedPost(post); setIsEditing(false); setActiveTab("content"); }}
-                className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                  selectedPost?.id === post.id
-                    ? "bg-primary/10 border-primary"
-                    : "bg-card border-border hover:border-primary/50"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h4 className="font-semibold text-foreground text-sm line-clamp-2">{post.title}</h4>
-                  {post.is_premium && <Crown className="w-4 h-4 text-amber-500 flex-shrink-0" />}
+      <div
+        className={`grid grid-cols-1 gap-6 ${
+          isFocusMode
+            ? "lg:grid-cols-1"
+            : isSidebarCollapsed
+            ? "lg:grid-cols-[320px_1fr]"
+            : "lg:grid-cols-[260px_320px_1fr]"
+        }`}
+      >
+        {/* Sections */}
+        {!isSidebarCollapsed && !isFocusMode ? (
+          <div className="space-y-4 pr-4 border-r border-border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-primary" />
+                <h3 className="text-sm font-semibold text-foreground">Sections</h3>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  onClick={async () => {
+                    const name = window.prompt("New section name");
+                    if (!name) return;
+                    const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+                    const color = "#2563eb";
+                    const { data, error } = await supabase
+                      .from("blog_sections")
+                      .insert({ name, slug, color })
+                      .select("*")
+                      .single();
+                    if (error) {
+                      toast.error(error.message || "Failed to create section");
+                      return;
+                    }
+                    qc.invalidateQueries({ queryKey: ["admin-blog-sections"] });
+                    if (data?.id) setSelectedSection(data.id);
+                  }}
+                  title="New section"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+                <Button type="button" size="icon" variant="ghost" onClick={() => setIsSidebarCollapsed(true)}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2 max-h-[620px] overflow-y-auto pr-2">
+              {sectionsError ? (
+                <div className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-2">
+                  {sectionsError}
                 </div>
-                <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{post.excerpt}</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {post.is_published ? (
-                    <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-0">Published</Badge>
-                  ) : (
-                    <Badge className="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-0">Draft</Badge>
-                  )}
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Eye className="w-3 h-3" />{post.views ?? 0}
-                  </span>
-                </div>
-                <div className="flex gap-1 mt-2 flex-wrap">
-                  {(post.tags ?? []).slice(0, 2).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
-                  ))}
-                  {(post.tags ?? []).length > 2 && (
-                    <Badge variant="secondary" className="text-xs">+{(post.tags ?? []).length - 2}</Badge>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+              ) : null}
+              {sections.map((section) => (
+                <button
+                  key={section.id}
+                  draggable={section.id !== "all"}
+                  onDragStart={() => setDragSectionId(section.id)}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    if (dragPostId) return;
+                    if (!dragSectionId || dragSectionId === section.id || section.id === "all") return;
+                    const current = sections.filter((s) => s.id !== "all");
+                    const from = current.findIndex((s) => s.id === dragSectionId);
+                    const to = current.findIndex((s) => s.id === section.id);
+                    if (from === -1 || to === -1) return;
+                    const next = [...current];
+                    const [moved] = next.splice(from, 1);
+                    next.splice(to, 0, moved);
+                    persistSectionOrder(next);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (!dragPostId) return;
+                    movePostToSection(dragPostId, section.id);
+                    setDragPostId(null);
+                  }}
+                  onDragEnd={() => setDragSectionId(null)}
+                  onClick={() => setSelectedSection(section.id)}
+                  className={`w-full text-left px-3 py-2 rounded-xl text-sm border transition ${
+                    selectedSection === section.id
+                      ? "bg-primary/10 border-primary text-primary"
+                      : "border-border hover:border-primary/40 text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="inline-block h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: (section as BlogSection).color || "#2563eb" }}
+                      />
+                      <span>{section.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {section.id === "all"
+                          ? posts.length
+                          : posts.filter((p) => p.section_id === section.id).length}
+                      </span>
+                      {section.id !== "all" ? (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              moveSection(section.id, "up");
+                            }}
+                          >
+                            <ChevronUp className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              moveSection(section.id, "down");
+                            }}
+                          >
+                            <ChevronDown className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRenameSection(section as BlogSection);
+                            }}
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <input
+                            type="color"
+                            value={(section as BlogSection).color || "#2563eb"}
+                            className="h-6 w-6 rounded border border-border bg-transparent p-0"
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={async (e) => {
+                              e.stopPropagation();
+                              const { error } = await supabase
+                                .from("blog_sections")
+                                .update({ color: e.target.value })
+                                .eq("id", section.id);
+                              if (error) {
+                                toast.error(error.message || "Failed to update color");
+                                return;
+                              }
+                              qc.invalidateQueries({ queryKey: ["admin-blog-sections"] });
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6 text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteSection(section as BlogSection);
+                            }}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
+
+        {/* Pages */}
+        {!isFocusMode ? (
+          <div className={`space-y-4 ${!isSidebarCollapsed ? "pl-4 pr-4 border-r border-border" : ""}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-primary" />
+                <h3 className="text-sm font-semibold text-foreground">Pages</h3>
+              </div>
+              {isSidebarCollapsed ? (
+                <Button type="button" size="icon" variant="ghost" onClick={() => setIsSidebarCollapsed(false)}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              ) : null}
+            </div>
+            <div className="space-y-3 max-h-[620px] overflow-y-auto pr-2">
+              {postsLoading ? (
+                <div className="text-sm text-muted-foreground">Loading posts...</div>
+              ) : null}
+              {selectedPost && !posts.find((p) => p.id === selectedPost.id) ? (
+                <div className="p-4 rounded-2xl border border-dashed border-primary/40 bg-primary/5">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <h4 className="font-semibold text-foreground text-sm line-clamp-2">{selectedPost.title}</h4>
+                    <Badge className="text-xs bg-amber-100 text-amber-700 border-0">Unsaved</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{selectedPost.excerpt}</p>
+                </div>
+              ) : null}
+              {postsBySection.map((post) => (
+                <motion.div
+                  key={post.id}
+                  draggable
+                  onDragStart={() => setDragPostId(post.id)}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    if (!dragPostId || dragPostId === post.id) return;
+                    const from = postsBySection.findIndex((p) => p.id === dragPostId);
+                    const to = postsBySection.findIndex((p) => p.id === post.id);
+                    if (from === -1 || to === -1) return;
+                    const next = [...postsBySection];
+                    const [moved] = next.splice(from, 1);
+                    next.splice(to, 0, moved);
+                    persistPostOrder(next);
+                  }}
+                  onDragEnd={() => setDragPostId(null)}
+                  whileHover={{ scale: 1.02 }}
+                  onClick={() => {
+                    setSelectedPost(post);
+                    setIsEditing(false);
+                    setActiveTab("content");
+                  }}
+                  className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                    selectedPost?.id === post.id
+                      ? "bg-primary/10 border-primary"
+                      : "bg-card border-border hover:border-primary/40"
+                  }`}
+                  style={{
+                    borderLeftWidth: "4px",
+                    borderLeftColor:
+                      post.color ||
+                      sectionsData.find((s) => s.id === post.section_id)?.color ||
+                      "#94a3b8",
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h4 className="font-semibold text-foreground text-sm line-clamp-2">{post.title}</h4>
+                    {post.is_premium && <Crown className="w-4 h-4 text-amber-500 flex-shrink-0" />}
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{post.excerpt}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {post.is_published ? (
+                      <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-0">Published</Badge>
+                    ) : (
+                      <Badge className="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-0">Draft</Badge>
+                    )}
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Eye className="w-3 h-3" />{post.views ?? 0}
+                    </span>
+                  </div>
+                  <div className="flex gap-1 mt-2 flex-wrap">
+                    {(post.tags ?? []).map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {/* Post Editor */}
-        <div className="lg:col-span-2">
+        <div className={isFocusMode ? "col-span-full w-full" : "lg:col-span-1"}>
           <AnimatePresence mode="wait">
             {selectedPost ? (
               <motion.div
@@ -508,10 +1082,10 @@ export const AdminBlogManager = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="bg-card border border-border rounded-xl p-6 shadow-sm"
+                className={`bg-card border border-border rounded-xl p-6 shadow-sm ${isFocusMode ? "w-full" : ""}`}
               >
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                   <div className="flex gap-2">
                     {(["content", "seo", "settings"] as const).map(tab => (
                       <Button
@@ -526,18 +1100,55 @@ export const AdminBlogManager = () => {
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
+                    <div className="text-xs text-muted-foreground">
+                      {isAutosaving
+                        ? "Autosaving..."
+                        : hasUnsavedChanges
+                        ? "Unsaved changes"
+                        : lastSavedAt
+                        ? `Saved ${new Date(lastSavedAt).toLocaleTimeString()}`
+                        : "Autosave on"}
+                    </div>
                     {!isEditing ? (
                       <>
-                        <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (selectedPost.is_locked) return;
+                            setIsEditing(true);
+                          }}
+                          disabled={!!selectedPost.is_locked}
+                        >
                           <Edit className="w-4 h-4 mr-2" />
                           Edit
                         </Button>
+                        {selectedPost.is_locked ? (
+                          <Badge className="bg-amber-100 text-amber-700 border-0">Locked</Badge>
+                        ) : null}
+                        {selectedPost.is_locked ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const nextPost = { ...selectedPost, is_locked: false };
+                              setSelectedPost(nextPost);
+                              setHasUnsavedChanges(true);
+                              scheduleAutosave(nextPost);
+                            }}
+                          >
+                            Unlock
+                          </Button>
+                        ) : null}
                         <Button
                           variant="destructive"
                           size="sm"
                           onClick={() => selectedPost && deletePost.mutate(selectedPost.id)}
                         >
                           <Trash2 className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleExportPdf}>
+                          Export PDF
                         </Button>
                       </>
                     ) : (
@@ -549,11 +1160,31 @@ export const AdminBlogManager = () => {
                         <Button
                           size="sm"
                           className="bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                          onClick={() => selectedPost && upsertPost.mutate(selectedPost)}
-                          disabled={upsertPost.isPending}
+                          onClick={() => setPublishPreviewOpen(true)}
+                          disabled={!selectedPost}
                         >
-                          <Save className="w-4 h-4 mr-2" />
-                          {upsertPost.isPending ? "Saving..." : "Save"}
+                          Publish
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setIsFocusMode((v) => !v)}
+                        >
+                          {isFocusMode ? (
+                            <>
+                              <Minimize2 className="w-4 h-4 mr-2" />
+                              Exit Focus
+                            </>
+                          ) : (
+                            <>
+                              <Maximize2 className="w-4 h-4 mr-2" />
+                              Focus
+                            </>
+                          )}
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleExportPdf}>
+                          Export PDF
                         </Button>
                       </>
                     )}
@@ -568,48 +1199,72 @@ export const AdminBlogManager = () => {
                       <Input
                         value={selectedPost.title}
                         disabled={!isEditing}
-                        onChange={(e) => setSelectedPost({ ...selectedPost, title: e.target.value })}
+                        onChange={(e) => {
+                          const nextPost = { ...selectedPost, title: e.target.value };
+                          setSelectedPost(nextPost);
+                          setHasUnsavedChanges(true);
+                          scheduleAutosave(nextPost);
+                        }}
                         className="bg-background text-lg font-semibold"
                       />
                     </div>
 
                     <div>
                       <label className="text-sm font-medium text-foreground mb-2 block">Hero Image</label>
-                      <div className="flex items-center gap-4">
-                        <div className="w-32 h-20 rounded-lg bg-muted flex items-center justify-center overflow-hidden border border-border">
-                          {selectedPost.hero_image ? (
-                            <img src={selectedPost.hero_image} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                          )}
-                        </div>
-                        {isEditing && (
-                          <label className="inline-flex">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              disabled={uploadingHero}
-                              onChange={(e) => {
-                                const f = e.target.files?.[0];
-                                if (f) uploadHeroImage(f);
-                              }}
-                            />
-                            <Button variant="outline" size="sm" disabled={uploadingHero}>
+                    <div className="flex items-center gap-4">
+                      <div className="w-32 h-20 rounded-lg bg-muted flex items-center justify-center overflow-hidden border border-border">
+                        {selectedPost.hero_image ? (
+                          <img src={selectedPost.hero_image} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                        )}
+                      </div>
+                      {isEditing && (
+                        <div className="flex items-center gap-2">
+                          <input
+                            ref={heroFileRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={uploadingHero}
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) uploadHeroImage(f);
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={uploadingHero}
+                            onClick={() => heroFileRef.current?.click()}
+                          >
                             <ImageIcon className="w-4 h-4 mr-2" />
                             {uploadingHero ? "Uploading..." : "Upload Image"}
                           </Button>
-                          </label>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
+                    {selectedPost.hero_image ? (
+                      <div className="mt-3">
+                        <Button type="button" variant="ghost" size="sm" onClick={() => setHeroPreviewOpen(true)}>
+                          Preview Hero
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
 
                     <div>
                       <label className="text-sm font-medium text-foreground mb-2 block">Excerpt</label>
                       <Textarea
                         value={selectedPost.excerpt}
                         disabled={!isEditing}
-                        onChange={(e) => setSelectedPost({ ...selectedPost, excerpt: e.target.value })}
+                        onChange={(e) => {
+                          const nextPost = { ...selectedPost, excerpt: e.target.value };
+                          setSelectedPost(nextPost);
+                          setHasUnsavedChanges(true);
+                          scheduleAutosave(nextPost);
+                        }}
                         className="bg-background min-h-[80px]"
                         placeholder="Brief summary of the post..."
                       />
@@ -618,35 +1273,20 @@ export const AdminBlogManager = () => {
                     <div>
                       <label className="text-sm font-medium text-foreground mb-2 block">Content</label>
                       {isEditing ? (
-                        <>
-                          <div className="flex items-center justify-between gap-2 mb-2">
-                            <EditorToolbar />
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setPreviewMode((v) => !v)}
-                            >
-                              {previewMode ? "Edit" : "Preview"}
-                            </Button>
-                          </div>
-                          {previewMode ? (
-                            <div className="rounded-xl border border-border bg-background p-4 min-h-[300px]">
-                              <Markdown value={selectedPost.content || ""} />
+                        <div className="rounded-xl border border-border bg-white text-slate-900 p-2 min-h-[75vh] w-full notion-editor">
+                          <BlockNoteView
+                            editor={editor}
+                            editable={isEditing && !selectedPost.is_locked}
+                            onChange={handleEditorChange}
+                            theme="light"
+                            slashMenuItems={getDefaultReactSlashMenuItems(editor)}
+                          />
+                          {selectedPost.is_locked ? (
+                            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+                              This post is locked. Unlock it in Settings to edit.
                             </div>
-                          ) : (
-                            <Textarea
-                              value={selectedPost.content || ""}
-                              onChange={(e) => setSelectedPost({ ...selectedPost, content: e.target.value })}
-                              ref={(el) => {
-                                // shadcn Textarea forwards ref to the DOM element.
-                                contentRef.current = el;
-                              }}
-                              className="bg-background min-h-[300px] font-mono text-sm"
-                              placeholder="Write your post content in Markdown..."
-                            />
-                          )}
-                        </>
+                          ) : null}
+                        </div>
                       ) : (
                         <div className="rounded-xl border border-border bg-background p-4 min-h-[300px]">
                           <Markdown value={selectedPost.content || ""} />
@@ -657,7 +1297,7 @@ export const AdminBlogManager = () => {
                     <div>
                       <label className="text-sm font-medium text-foreground mb-2 block">Tags</label>
                       <div className="flex flex-wrap gap-2 mb-2">
-                        {selectedPost.tags.map(tag => (
+                        {(selectedPost.tags ?? []).map(tag => (
                           <Badge key={tag} variant="secondary" className="gap-1">
                             {tag}
                             {isEditing && (
@@ -694,7 +1334,12 @@ export const AdminBlogManager = () => {
                         <Input
                           value={selectedPost.slug}
                           disabled={!isEditing}
-                          onChange={(e) => setSelectedPost({ ...selectedPost, slug: e.target.value })}
+                          onChange={(e) => {
+                            const nextPost = { ...selectedPost, slug: e.target.value };
+                            setSelectedPost(nextPost);
+                            setHasUnsavedChanges(true);
+                            scheduleAutosave(nextPost);
+                          }}
                           className="bg-background flex-1"
                         />
                       </div>
@@ -705,7 +1350,12 @@ export const AdminBlogManager = () => {
                         <Input
                           value={selectedPost.meta_title || ""}
                           disabled={!isEditing}
-                          onChange={(e) => setSelectedPost({ ...selectedPost, meta_title: e.target.value })}
+                          onChange={(e) => {
+                            const nextPost = { ...selectedPost, meta_title: e.target.value };
+                            setSelectedPost(nextPost);
+                            setHasUnsavedChanges(true);
+                            scheduleAutosave(nextPost);
+                          }}
                           className="bg-background"
                           placeholder="SEO-optimized title (60 chars max)"
                         />
@@ -717,7 +1367,12 @@ export const AdminBlogManager = () => {
                       <Textarea
                         value={selectedPost.meta_description || ""}
                         disabled={!isEditing}
-                        onChange={(e) => setSelectedPost({ ...selectedPost, meta_description: e.target.value })}
+                        onChange={(e) => {
+                          const nextPost = { ...selectedPost, meta_description: e.target.value };
+                          setSelectedPost(nextPost);
+                          setHasUnsavedChanges(true);
+                          scheduleAutosave(nextPost);
+                        }}
                         className="bg-background min-h-[100px]"
                         placeholder="SEO description (160 chars max)"
                       />
@@ -743,6 +1398,30 @@ export const AdminBlogManager = () => {
                 {/* Settings Tab */}
                 {activeTab === "settings" && (
                   <div className="space-y-6">
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border">
+                      <div>
+                        <p className="font-medium text-foreground">Section</p>
+                        <p className="text-sm text-muted-foreground">Group this post under a main topic</p>
+                      </div>
+                      <select
+                        className="h-10 rounded-md border border-border bg-background px-3 text-sm"
+                        value={selectedPost.section_id || ""}
+                        disabled={!isEditing}
+                        onChange={(e) => {
+                          const nextPost = { ...selectedPost, section_id: e.target.value || null };
+                          setSelectedPost(nextPost);
+                          setHasUnsavedChanges(true);
+                          scheduleAutosave(nextPost);
+                        }}
+                      >
+                        <option value="">No section</option>
+                        {sectionsData.map((section) => (
+                          <option key={section.id} value={section.id}>
+                            {section.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     <div className="flex items-center justify-between p-4 bg-muted rounded-lg border border-emerald-500/20">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
@@ -750,14 +1429,22 @@ export const AdminBlogManager = () => {
                         </div>
                         <div>
                           <p className="font-medium text-foreground">Publish Status</p>
-                          <p className="text-sm text-muted-foreground">Requires biometric verification to publish</p>
+                          <p className="text-sm text-muted-foreground">Preview before publishing</p>
                         </div>
                       </div>
-                      <Switch
-                        checked={!!selectedPost.is_published}
-                        disabled={!isEditing}
-                        onCheckedChange={handlePublishToggle}
-                      />
+                      <div className="flex items-center gap-2">
+                        <Badge className={selectedPost.is_published ? "bg-emerald-100 text-emerald-700 border-0" : "bg-amber-100 text-amber-700 border-0"}>
+                          {selectedPost.is_published ? "Published" : "Draft"}
+                        </Badge>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => setPublishPreviewOpen(true)}
+                          disabled={!isEditing}
+                        >
+                          Preview & Publish
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
@@ -768,8 +1455,73 @@ export const AdminBlogManager = () => {
                       <Switch
                         checked={!!selectedPost.is_premium}
                         disabled={!isEditing}
-                        onCheckedChange={(checked) => setSelectedPost({ ...selectedPost, is_premium: checked })}
+                        onCheckedChange={(checked) => {
+                          const nextPost = { ...selectedPost, is_premium: checked };
+                          setSelectedPost(nextPost);
+                          setHasUnsavedChanges(true);
+                          scheduleAutosave(nextPost);
+                        }}
                       />
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg border border-amber-500/20">
+                      <div>
+                        <p className="font-medium text-foreground">Lock Post</p>
+                        <p className="text-sm text-muted-foreground">Make this post read-only</p>
+                      </div>
+                      <Switch
+                        checked={!!selectedPost.is_locked}
+                        disabled={!isEditing && !selectedPost.is_locked}
+                        onCheckedChange={(checked) => {
+                          const nextPost = { ...selectedPost, is_locked: checked };
+                          setSelectedPost(nextPost);
+                          setHasUnsavedChanges(true);
+                          scheduleAutosave(nextPost);
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                      <div>
+                        <p className="font-medium text-foreground">Page Color</p>
+                        <p className="text-sm text-muted-foreground">Color for this page card</p>
+                      </div>
+                      <input
+                        type="color"
+                        value={selectedPost.color || "#2563eb"}
+                        disabled={!isEditing}
+                        className="h-10 w-12 rounded border border-border bg-transparent p-0"
+                        onChange={(e) => {
+                          const nextPost = { ...selectedPost, color: e.target.value };
+                          setSelectedPost(nextPost);
+                          setHasUnsavedChanges(true);
+                          scheduleAutosave(nextPost);
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                      <div>
+                        <p className="font-medium text-foreground">Code Theme</p>
+                        <p className="text-sm text-muted-foreground">Syntax highlighting style for this post</p>
+                      </div>
+                      <select
+                        className="h-10 rounded-md border border-border bg-background px-3 text-sm"
+                        value={selectedPost.code_theme || "github-light"}
+                        disabled={!isEditing}
+                        onChange={(e) => {
+                          const nextPost = { ...selectedPost, code_theme: e.target.value };
+                          setSelectedPost(nextPost);
+                          setHasUnsavedChanges(true);
+                          scheduleAutosave(nextPost);
+                        }}
+                      >
+                        {codeThemes.map((theme) => (
+                          <option key={theme.id} value={theme.id}>
+                            {theme.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
                     <div className="p-4 bg-muted rounded-lg">
@@ -792,6 +1544,39 @@ export const AdminBlogManager = () => {
                           <p className="text-foreground font-medium font-mono text-xs">{selectedPost.id}</p>
                         </div>
                       </div>
+                    </div>
+
+                    <div className="p-4 bg-muted rounded-lg">
+                      <p className="font-medium text-foreground mb-3">Version History</p>
+                      {versions.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No versions yet.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {versions.map((v) => (
+                            <div key={v.id} className="flex items-center justify-between gap-2 text-sm">
+                              <span className="text-muted-foreground">
+                                {new Date(v.created_at).toLocaleString()}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setDiffVersion(v);
+                                    setDiffOpen(true);
+                                  }}
+                                >
+                                  Diff
+                                </Button>
+                                <Button type="button" size="sm" variant="outline" onClick={() => restoreVersion(v)}>
+                                  Restore
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {isEditing && (
@@ -826,6 +1611,111 @@ export const AdminBlogManager = () => {
             )}
           </AnimatePresence>
         </div>
+      </div>
+    </div>
+    <Dialog open={heroPreviewOpen} onOpenChange={setHeroPreviewOpen}>
+      <DialogContent className="max-w-3xl bg-background border-border">
+        <DialogHeader>
+          <DialogTitle>Hero Preview</DialogTitle>
+        </DialogHeader>
+        {selectedPost?.hero_image ? (
+          <div className="rounded-xl overflow-hidden border border-border">
+            <img src={selectedPost.hero_image} alt="" className="w-full h-80 object-cover" />
+          </div>
+        ) : (
+          <div className="text-sm text-muted-foreground">No hero image selected.</div>
+        )}
+      </DialogContent>
+    </Dialog>
+
+    <Dialog open={publishPreviewOpen} onOpenChange={setPublishPreviewOpen}>
+      <DialogContent className="max-w-4xl bg-background border-border">
+        <DialogHeader>
+          <DialogTitle>Preview Before Publish</DialogTitle>
+        </DialogHeader>
+        {selectedPost ? (
+          <div className="space-y-4">
+            {selectedPost.hero_image ? (
+              <div className="rounded-xl overflow-hidden border border-border">
+                <img src={selectedPost.hero_image} alt="" className="w-full h-56 object-cover" />
+              </div>
+            ) : null}
+            <div>
+              <h2 className="text-2xl font-bold">{selectedPost.title}</h2>
+              {selectedPost.excerpt ? (
+                <p className="text-muted-foreground mt-2">{selectedPost.excerpt}</p>
+              ) : null}
+            </div>
+            <div className="rounded-xl border border-border bg-background p-4 max-h-[60vh] overflow-auto">
+              <Markdown value={selectedPost.content || ""} />
+            </div>
+            <div className="flex items-center justify-end gap-2">
+              <Button variant="outline" onClick={() => setPublishPreviewOpen(false)}>
+                Edit
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                onClick={handlePublishApprove}
+                disabled={upsertPost.isPending}
+              >
+                {upsertPost.isPending ? "Publishing..." : "Approve & Publish"}
+              </Button>
+            </div>
+          </div>
+        ) : null}
+      </DialogContent>
+    </Dialog>
+
+    <Dialog open={diffOpen} onOpenChange={setDiffOpen}>
+      <DialogContent className="max-w-5xl bg-background border-border">
+        <DialogHeader>
+          <DialogTitle>Version Diff</DialogTitle>
+        </DialogHeader>
+        {diffVersion && selectedPost ? (
+          <div className="space-y-4">
+            <div className="text-xs text-muted-foreground">
+              Comparing version from {new Date(diffVersion.created_at).toLocaleString()} to current draft
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-xl border border-border bg-muted/30 p-3 max-h-[60vh] overflow-auto">
+                <div className="text-xs font-semibold text-muted-foreground mb-2">Version</div>
+                <pre className="text-xs whitespace-pre-wrap">
+                  {diffPairs.map((row, idx) => (
+                    <div
+                      key={`v-${idx}`}
+                      className={row.changed ? "bg-red-500/10 text-red-700 dark:text-red-300" : ""}
+                    >
+                      {row.before || " "}
+                    </div>
+                  ))}
+                </pre>
+              </div>
+              <div className="rounded-xl border border-border bg-muted/30 p-3 max-h-[60vh] overflow-auto">
+                <div className="text-xs font-semibold text-muted-foreground mb-2">Current</div>
+                <pre className="text-xs whitespace-pre-wrap">
+                  {diffPairs.map((row, idx) => (
+                    <div
+                      key={`c-${idx}`}
+                      className={row.changed ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : ""}
+                    >
+                      {row.after || " "}
+                    </div>
+                  ))}
+                </pre>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </DialogContent>
+    </Dialog>
+    <div className="hidden">
+      <div ref={exportRef} className="prose prose-neutral max-w-none">
+        {selectedPost?.hero_image ? (
+          <img src={selectedPost.hero_image} alt="" />
+        ) : null}
+        <h1>{selectedPost?.title}</h1>
+        {selectedPost?.excerpt ? <p className="excerpt">{selectedPost.excerpt}</p> : null}
+        <Markdown value={selectedPost?.content || ""} />
       </div>
     </div>
     </>

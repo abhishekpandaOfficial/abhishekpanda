@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Folder,
@@ -44,7 +44,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BiometricVerificationModal } from "./BiometricVerificationModal";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DriveItem {
   id: string;
@@ -74,23 +74,6 @@ const folderColors: Record<string, string> = {
   Confidential: "from-gray-700 to-gray-900",
 };
 
-const mockItems: DriveItem[] = [
-  { id: "f1", name: "Personal", type: "folder", modified: "2024-02-01", color: folderColors.Personal, isEncrypted: true, parentId: null },
-  { id: "f2", name: "Work History", type: "folder", modified: "2024-01-28", color: folderColors["Work History"], isEncrypted: true, parentId: null },
-  { id: "f3", name: "Baby Photos", type: "folder", modified: "2024-02-05", color: folderColors["Baby Photos"], isEncrypted: true, parentId: null },
-  { id: "f4", name: "Family Photos", type: "folder", modified: "2024-01-15", color: folderColors["Family Photos"], isEncrypted: true, parentId: null },
-  { id: "f5", name: "Certificates", type: "folder", modified: "2024-01-10", color: folderColors.Certificates, isEncrypted: true, parentId: null },
-  { id: "f6", name: "Research Notes", type: "folder", modified: "2024-02-03", color: folderColors["Research Notes"], isEncrypted: true, parentId: null },
-  { id: "f7", name: "Documents", type: "folder", modified: "2024-01-20", color: folderColors.Documents, isEncrypted: true, parentId: null },
-  { id: "f8", name: "Legal", type: "folder", modified: "2024-01-05", color: folderColors.Legal, isEncrypted: true, parentId: null },
-  { id: "f9", name: "Health Records", type: "folder", modified: "2024-01-25", color: folderColors["Health Records"], isEncrypted: true, parentId: null },
-  { id: "f10", name: "Ideas", type: "folder", modified: "2024-02-04", color: folderColors.Ideas, isEncrypted: true, parentId: null },
-  { id: "f11", name: "Confidential", type: "folder", modified: "2024-01-01", color: folderColors.Confidential, isEncrypted: true, parentId: null },
-  { id: "d1", name: "Resume_2024.pdf", type: "document", size: "2.4 MB", modified: "2024-02-01", isEncrypted: true, parentId: null, tags: ["important"] },
-  { id: "i1", name: "Profile_Photo.jpg", type: "image", size: "1.2 MB", modified: "2024-01-15", isEncrypted: true, parentId: null, isStarred: true },
-  { id: "v1", name: "Conference_Talk.mp4", type: "video", size: "450 MB", modified: "2024-01-20", isEncrypted: true, parentId: null },
-];
-
 const getFileIcon = (type: DriveItem["type"]) => {
   switch (type) {
     case "folder": return Folder;
@@ -104,7 +87,7 @@ const getFileIcon = (type: DriveItem["type"]) => {
 };
 
 export const AdminEncryptedDrive = () => {
-  const [items, setItems] = useState<DriveItem[]>(mockItems);
+  const [items, setItems] = useState<DriveItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [currentPath, setCurrentPath] = useState<string[]>(["Home"]);
@@ -113,8 +96,7 @@ export const AdminEncryptedDrive = () => {
   const [secureArchiveMode, setSecureArchiveMode] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [sortBy, setSortBy] = useState<"name" | "modified" | "size">("name");
-  const [showBiometricModal, setShowBiometricModal] = useState(true);
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const currentParentId = currentPath.length === 1 ? null : currentPath[currentPath.length - 1];
   
@@ -142,13 +124,55 @@ export const AdminEncryptedDrive = () => {
     setIsDragging(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    // Handle file upload
     const files = Array.from(e.dataTransfer.files);
-    console.log("Files dropped:", files);
-  }, []);
+    if (!files.length) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const newItems: DriveItem[] = [];
+
+    for (const file of files) {
+      const path = `${user.id}/${currentParentId ?? "root"}/${Date.now()}-${file.name}`;
+      const { error: upErr } = await supabase.storage
+        .from("astra-vault")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) continue;
+
+      const { data, error } = await supabase.from("drive_items").insert({
+        user_id: user.id,
+        name: file.name,
+        type: file.type.startsWith("image") ? "image" :
+          file.type.startsWith("video") ? "video" :
+          file.type.startsWith("audio") ? "audio" :
+          file.type.includes("pdf") || file.type.includes("text") ? "document" : "other",
+        size_bytes: file.size,
+        mime_type: file.type,
+        storage_path: path,
+        parent_id: currentParentId,
+        is_encrypted: true,
+      }).select("*").single();
+      if (error) continue;
+
+      newItems.push({
+        id: data.id,
+        name: data.name,
+        type: data.type,
+        size: data.size_bytes ? `${(data.size_bytes / 1024 / 1024).toFixed(1)} MB` : undefined,
+        modified: data.updated_at?.slice(0, 10) || data.created_at?.slice(0, 10) || "",
+        color: data.type === "folder" ? folderColors.Personal : undefined,
+        tags: data.tags || [],
+        isStarred: data.is_starred || false,
+        isEncrypted: data.is_encrypted ?? true,
+        parentId: data.parent_id,
+      });
+    }
+
+    if (newItems.length) {
+      setItems((prev) => [...newItems, ...prev]);
+    }
+  }, [currentParentId]);
 
   const handleFolderClick = (folder: DriveItem) => {
     if (folder.type === "folder") {
@@ -176,42 +200,6 @@ export const AdminEncryptedDrive = () => {
     totalSize: "2.4 GB",
     encrypted: items.filter(i => i.isEncrypted).length
   };
-
-  const handleBiometricSuccess = () => {
-    setIsUnlocked(true);
-    setShowBiometricModal(false);
-  };
-
-  if (!isUnlocked) {
-    return (
-      <>
-        <BiometricVerificationModal
-          isOpen={showBiometricModal}
-          onClose={() => setShowBiometricModal(false)}
-          onSuccess={handleBiometricSuccess}
-          title="Unlock Astra Vault"
-          subtitle="Verify identity to access encrypted files"
-          moduleName="ASTRA VAULT"
-        />
-        <div className="flex flex-col items-center justify-center h-96 space-y-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border border-primary/30">
-            <Lock className="w-10 h-10 text-primary" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground">Astra Vault Locked</h2>
-          <p className="text-muted-foreground text-center max-w-md">
-            Secure access enabled for encrypted personal files
-          </p>
-          <Button
-            onClick={() => setShowBiometricModal(true)}
-            className="bg-gradient-to-r from-primary to-secondary"
-          >
-            <Shield className="w-4 h-4 mr-2" />
-            Verify Identity
-          </Button>
-        </div>
-      </>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -602,3 +590,35 @@ export const AdminEncryptedDrive = () => {
     </div>
   );
 };
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data, error } = await supabase
+          .from("drive_items")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        const mapped = (data ?? []).map((row: any) => ({
+          id: row.id,
+          name: row.name,
+          type: row.type,
+          size: row.size_bytes ? `${(row.size_bytes / 1024 / 1024).toFixed(1)} MB` : undefined,
+          modified: row.updated_at?.slice(0, 10) || row.created_at?.slice(0, 10) || "",
+          color: row.type === "folder" ? folderColors.Personal : undefined,
+          tags: row.tags || [],
+          isStarred: row.is_starred || false,
+          isEncrypted: row.is_encrypted ?? true,
+          parentId: row.parent_id,
+        }));
+        setItems(mapped);
+      } catch {
+        // ignore
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+  }, []);

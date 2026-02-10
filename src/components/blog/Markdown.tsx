@@ -4,6 +4,7 @@ import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeHighlight from "rehype-highlight";
+import rehypeRaw from "rehype-raw";
 
 type MarkdownProps = {
   value: string;
@@ -15,6 +16,7 @@ export const Markdown = ({ value }: MarkdownProps) => {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[
+          rehypeRaw,
           // Adds id=... to headings based on content
           rehypeSlug,
           // Adds anchor links to headings
@@ -26,6 +28,18 @@ export const Markdown = ({ value }: MarkdownProps) => {
           pre: ({ children }) => (
             <CodeBlockWrapper>{children}</CodeBlockWrapper>
           ),
+          a: ({ node, ...props }) => {
+            const isCta = typeof (node as any)?.properties?.dataCta !== "undefined";
+            if (isCta) {
+              return (
+                <a
+                  {...props}
+                  className="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold no-underline"
+                />
+              );
+            }
+            return <a {...props} />;
+          },
         }}
       >
         {value}

@@ -214,11 +214,12 @@ const BlogPost = () => {
     const idx = allPosts.findIndex((p) => p.slug === meta.slug);
     const prev = idx > 0 ? allPosts[idx - 1] : null; // newer
     const next = idx >= 0 && idx < allPosts.length - 1 ? allPosts[idx + 1] : null; // older
-    const tag = meta.tags?.[0];
+    const tags = meta.tags || [];
+    const tagSet = new Set(tags);
     const related =
-      tag
+      tags.length
         ? allPosts
-            .filter((p) => p.slug !== meta.slug && (p.tags?.[0] === tag || (p.tags ?? []).includes(tag)))
+            .filter((p) => p.slug !== meta.slug && (p.tags || []).some((t) => tagSet.has(t)))
             .slice(0, 3)
         : [];
     return { prev, next, related };
@@ -312,10 +313,12 @@ const BlogPost = () => {
             <article className="min-w-0">
               <header className="mb-8">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
-                  {meta.tags?.[0] ? (
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold border bg-primary/20 text-primary border-primary/30">
-                      {meta.tags[0]}
-                    </span>
+                  {meta.tags?.length ? (
+                    meta.tags.map((tag) => (
+                      <span key={tag} className="px-3 py-1 rounded-full text-xs font-semibold border bg-primary/20 text-primary border-primary/30">
+                        {tag}
+                      </span>
+                    ))
                   ) : null}
                   {meta.is_premium ? (
                     <span className="badge-premium">

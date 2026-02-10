@@ -75,6 +75,7 @@ const sidebarGroups: SidebarGroup[] = [
       { name: "Nimbus Desk", icon: BookOpen, path: "/admin/nimbus", badge: null, color: "text-indigo-500" },
       { name: "LMS Studio", icon: GraduationCap, path: "/admin/courses", badge: null, color: "text-amber-500" },
       { name: "Digital Products", icon: Package, path: "/admin/products", badge: null, color: "text-cyan-500" },
+      { name: "Ebook Studio", icon: BookOpen, path: "/admin/ebooks", badge: "NEW", color: "text-emerald-400" },
     ],
   },
   {

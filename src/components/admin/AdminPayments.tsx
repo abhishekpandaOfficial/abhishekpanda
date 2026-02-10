@@ -13,13 +13,10 @@ import {
   XCircle,
   Clock,
   FileText,
-  Lock,
-  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { BiometricVerificationModal } from "./BiometricVerificationModal";
 
 export const AdminPayments = () => {
   const [payments, setPayments] = useState<any[]>([]);
@@ -27,8 +24,6 @@ export const AdminPayments = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [showBiometricModal, setShowBiometricModal] = useState(true);
-  const [isUnlocked, setIsUnlocked] = useState(false);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -87,42 +82,6 @@ export const AdminPayments = () => {
     pending: payments.filter(p => p.status === "created" || p.status === "pending").length,
     totalAmount: payments.filter(p => p.status === "completed").reduce((sum, p) => sum + (p.amount || 0), 0),
   };
-
-  const handleBiometricSuccess = () => {
-    setIsUnlocked(true);
-    setShowBiometricModal(false);
-  };
-
-  if (!isUnlocked) {
-    return (
-      <>
-        <BiometricVerificationModal
-          isOpen={showBiometricModal}
-          onClose={() => setShowBiometricModal(false)}
-          onSuccess={handleBiometricSuccess}
-          title="Access FinCore"
-          subtitle="Verify identity to view financial data"
-          moduleName="FINCORE"
-        />
-        <div className="flex flex-col items-center justify-center h-96 space-y-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-600/20 flex items-center justify-center border border-amber-500/30">
-            <CreditCard className="w-10 h-10 text-amber-500" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground">FinCore Protected</h2>
-          <p className="text-muted-foreground text-center max-w-md">
-            Secure access enabled for payment and financial information
-          </p>
-          <Button
-            onClick={() => setShowBiometricModal(true)}
-            className="bg-gradient-to-r from-amber-500 to-orange-600"
-          >
-            <Shield className="w-4 h-4 mr-2" />
-            Verify Identity
-          </Button>
-        </div>
-      </>
-    );
-  }
 
   return (
     <div className="space-y-6">

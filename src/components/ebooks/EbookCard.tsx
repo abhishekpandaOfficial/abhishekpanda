@@ -11,6 +11,7 @@ type Props = {
 
 export function EbookCard({ ebook }: Props) {
   const tag = ebook.isComingSoon ? "Coming Soon" : ebook.isFree ? "Free" : "Premium";
+  const hasPreview = !!ebook.previewPdfUrl || !!ebook.pdfUrl;
 
   return (
     <motion.article
@@ -35,7 +36,7 @@ export function EbookCard({ ebook }: Props) {
         <div className="flex flex-wrap items-center gap-2 gap-y-1.5 min-w-0">
           <span className={`${ebook.isFree ? "badge-free" : ebook.isComingSoon ? "badge-free" : "badge-premium"} whitespace-nowrap leading-none`}>{tag}</span>
           <span className="px-2 py-1 rounded-md bg-muted text-xs font-semibold text-foreground whitespace-nowrap leading-none">{ebook.level}</span>
-          {!ebook.isComingSoon ? (
+          {!ebook.isComingSoon && hasPreview ? (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap"><Clock className="h-3.5 w-3.5" />Preview ready</span>
           ) : null}
         </div>

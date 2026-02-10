@@ -13,8 +13,6 @@ import {
   CreditCard,
   Plus,
   Trash2,
-  Shield,
-  Lock,
   Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,7 +33,6 @@ import { toast } from "sonner";
 import { useSoundNotification } from "@/hooks/useSoundNotification";
 import { supabase } from "@/integrations/supabase/client";
 import EmailTemplateBuilder, { EmailBlock } from "./EmailTemplateBuilder";
-import { BiometricVerificationModal } from "./BiometricVerificationModal";
 
 interface EmailTemplate {
   id: string;
@@ -182,8 +179,6 @@ export const AdminSettings = () => {
   const [currentVariables, setCurrentVariables] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [showBiometricModal, setShowBiometricModal] = useState(true);
-  const [isUnlocked, setIsUnlocked] = useState(false);
 
   useEffect(() => {
     fetchTemplates();
@@ -338,42 +333,6 @@ export const AdminSettings = () => {
       color: "text-yellow-500",
     },
   ];
-
-  const handleBiometricSuccess = () => {
-    setIsUnlocked(true);
-    setShowBiometricModal(false);
-  };
-
-  if (!isUnlocked) {
-    return (
-      <>
-        <BiometricVerificationModal
-          isOpen={showBiometricModal}
-          onClose={() => setShowBiometricModal(false)}
-          onSuccess={handleBiometricSuccess}
-          title="Access System Settings"
-          subtitle="Verify identity to modify system configuration"
-          moduleName="SYSTEM SETTINGS"
-        />
-        <div className="flex flex-col items-center justify-center h-96 space-y-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-500/20 to-gray-600/20 flex items-center justify-center border border-slate-500/30">
-            <Settings className="w-10 h-10 text-slate-500" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground">System Settings Protected</h2>
-          <p className="text-muted-foreground text-center max-w-md">
-            Secure access enabled for system configuration
-          </p>
-          <Button
-            onClick={() => setShowBiometricModal(true)}
-            className="bg-gradient-to-r from-slate-500 to-gray-600"
-          >
-            <Shield className="w-4 h-4 mr-2" />
-            Verify Identity
-          </Button>
-        </div>
-      </>
-    );
-  }
 
   return (
     <div className="space-y-6">
