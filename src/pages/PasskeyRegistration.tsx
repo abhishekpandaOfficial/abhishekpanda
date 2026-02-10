@@ -79,16 +79,9 @@ const PasskeyRegistration = () => {
     setStep('authenticating');
     setError(null);
     
-    console.log('=== Starting Passkey Creation ===');
-    console.log('Device info:', deviceInfo);
-    console.log('WebAuthn supported:', isSupported);
-    console.log('Available methods:', availableMethods);
-    console.log('Is in iframe:', window !== window.top);
-    
     // Check iframe first - this is a common blocker
     const isInIframe = window !== window.top;
     if (isInIframe) {
-      console.log('Detected iframe - blocking passkey registration');
       setError('unsupported');
       setStep('create');
       toast.error('Cannot register passkey in preview iframe. Open the deployed URL directly.');
@@ -107,21 +100,15 @@ const PasskeyRegistration = () => {
     await new Promise(resolve => setTimeout(resolve, 300));
     
     try {
-      console.log('Calling registerCredential()...');
       const success = await registerCredential();
-      console.log('registerCredential() returned:', success);
-      console.log('WebAuthn error state:', webAuthnError);
       
       toast.dismiss('touchid-hint');
       
       if (success) {
-        console.log('Passkey registration successful!');
         await new Promise(resolve => setTimeout(resolve, 800));
         setStep('success');
         toast.success('Passkey registered successfully!');
       } else {
-        console.log('Passkey registration returned false, webAuthnError:', webAuthnError);
-        
         // Check the actual error from the hook to determine the right error type
         if (webAuthnError) {
           if (webAuthnError.includes('iframe') || webAuthnError.includes('preview')) {
@@ -142,10 +129,6 @@ const PasskeyRegistration = () => {
         setStep('create');
       }
     } catch (err: any) {
-      console.error('=== Passkey Registration Error ===');
-      console.error('Error object:', err);
-      console.error('Error name:', err?.name);
-      console.error('Error message:', err?.message);
       toast.dismiss('touchid-hint');
       
       if (err?.name === 'NotAllowedError') {

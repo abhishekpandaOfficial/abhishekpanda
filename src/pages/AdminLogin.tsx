@@ -355,9 +355,7 @@ const AdminLogin = () => {
       // Small delay to let the toast appear first
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      console.log('Calling registerCredential()...');
       const success = await registerCredential();
-      console.log('registerCredential() returned:', success, 'webAuthnError:', webAuthnError);
       
       toast.dismiss('touchid-setup-hint');
 
@@ -375,7 +373,6 @@ const AdminLogin = () => {
       }
     } catch (err: any) {
       toast.dismiss('touchid-setup-hint');
-      console.error('Passkey setup error:', err);
       
       if (err?.name === 'NotAllowedError') {
         setError('Touch the Touch ID sensor when the system prompts you.');

@@ -44,297 +44,302 @@ const stringToUint8 = (v: string) => new TextEncoder().encode(v);
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  if (!supabaseUrl || !serviceRoleKey) return json(500, { error: "Missing Supabase env." });
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    if (!supabaseUrl || !serviceRoleKey) return json(500, { error: "Missing Supabase env." });
 
-  const token = getBearerToken(req);
-  if (!token) return json(401, { error: "Missing Authorization bearer token." });
+    const token = getBearerToken(req);
+    if (!token) return json(401, { error: "Missing Authorization bearer token." });
 
-  const sbAdmin = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-
-  const { data: userRes, error: userErr } = await sbAdmin.auth.getUser(token);
-  if (userErr || !userRes?.user) return json(401, { error: "Invalid token." });
-  const user = userRes.user;
-
-  // Admin only
-  const { data: roleRow } = await sbAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("role", "admin")
-    .maybeSingle();
-  if (!roleRow) return json(403, { error: "Admin role required." });
-
-  const origin = req.headers.get("origin") || "";
-  if (!origin) return json(400, { error: "Missing Origin header." });
-  const originUrl = new URL(origin);
-  const rpID = originUrl.hostname;
-  const expectedOrigin = originUrl.origin;
-
-  const { action, step, response } = await req.json().catch(() => ({}));
-  if (!action) return json(400, { error: "Missing action." });
-
-  const now = new Date();
-  const expiresAt = new Date(now.getTime() + 5 * 60 * 1000); // 5 min
-
-  const log = async (status: string, failure_reason: string | null = null) => {
-    try {
-      await sbAdmin.from("login_audit_logs").insert({
-        email: user.email ?? "unknown",
-        status,
-        failure_reason,
-        user_agent: req.headers.get("user-agent"),
-        ip_address:
-          req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-          req.headers.get("cf-connecting-ip") ??
-          null,
-      });
-    } catch {
-      // ignore audit failures
-    }
-  };
-
-  if (action === "registration_options") {
-    const { data: existingCreds } = await sbAdmin
-      .from("passkey_credentials")
-      .select("credential_id")
-      .eq("user_id", user.id)
-      .eq("is_active", true);
-
-    const opts = await generateRegistrationOptions({
-      rpName: "Abhishek Panda Admin",
-      rpID,
-      userID: stringToUint8(user.id),
-      userName: user.email ?? user.id,
-      timeout: 120000,
-      attestationType: "none",
-      authenticatorSelection: {
-        authenticatorAttachment: "platform",
-        userVerification: "preferred",
-        residentKey: "preferred",
-      },
-      supportedAlgorithmIDs: [-7, -257], // ES256, RS256
-      excludeCredentials: (existingCreds ?? []).map((c) => ({
-        id: base64urlToUint8(c.credential_id),
-        type: "public-key" as const,
-      })),
+    const sbAdmin = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    await sbAdmin.from("webauthn_challenges").insert({
-      user_id: user.id,
-      challenge: opts.challenge,
-      kind: "registration",
-      rp_id: rpID,
-      origin: expectedOrigin,
-      expires_at: expiresAt.toISOString(),
-    });
+    const { data: userRes, error: userErr } = await sbAdmin.auth.getUser(token);
+    if (userErr || !userRes?.user) return json(401, { error: "Invalid token." });
+    const user = userRes.user;
 
-    await log("webauthn_reg_options");
-    return json(200, { options: opts });
-  }
-
-  if (action === "registration_verify") {
-    if (!response) return json(400, { error: "Missing response." });
-
-    const { data: row, error } = await sbAdmin
-      .from("webauthn_challenges")
-      .select("*")
+    // Admin only
+    const { data: roleRow } = await sbAdmin
+      .from("user_roles")
+      .select("role")
       .eq("user_id", user.id)
-      .eq("kind", "registration")
-      .eq("used", false)
-      .gt("expires_at", now.toISOString())
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
-    if (error || !row) return json(400, { error: "No active registration challenge." });
-
-    let verification;
-    try {
-      verification = await verifyRegistrationResponse({
-        response,
-        expectedChallenge: row.challenge,
-        expectedOrigin: row.origin,
-        expectedRPID: row.rp_id,
-        requireUserVerification: false,
-      });
-    } catch (e) {
-      await log("webauthn_reg_failed", e instanceof Error ? e.message : String(e));
-      return json(400, { verified: false, error: "Registration verification failed." });
-    }
-
-    if (!verification.verified || !verification.registrationInfo) {
-      await log("webauthn_reg_failed", "Not verified.");
-      return json(400, { verified: false, error: "Not verified." });
-    }
-
-    const info = verification.registrationInfo;
-    await sbAdmin.from("passkey_credentials").upsert(
-      {
-        user_id: user.id,
-        credential_id: uint8ToBase64url(info.credentialID),
-        public_key: uint8ToBase64url(info.credentialPublicKey),
-        counter: info.counter,
-        device_name: "Admin Device",
-        device_type: "platform",
-        transports: (response?.response?.transports ?? null) as string[] | null,
-        is_active: true,
-      },
-      { onConflict: "credential_id" },
-    );
-
-    await sbAdmin.from("webauthn_challenges").update({ used: true }).eq("id", row.id);
-
-    await log("webauthn_reg_verified");
-    return json(200, { verified: true });
-  }
-
-  if (action === "authentication_options") {
-    const { data: creds } = await sbAdmin
-      .from("passkey_credentials")
-      .select("credential_id, transports")
-      .eq("user_id", user.id)
-      .eq("is_active", true);
-
-    if (!creds || creds.length === 0) {
-      return json(400, { error: "No passkey registered." });
-    }
-
-    const opts = await generateAuthenticationOptions({
-      rpID,
-      timeout: 60000,
-      userVerification: "preferred",
-      allowCredentials: creds.map((c) => ({
-        id: base64urlToUint8(c.credential_id),
-        type: "public-key" as const,
-        transports: (c.transports ?? undefined) as any,
-      })),
-    });
-
-    await sbAdmin.from("webauthn_challenges").insert({
-      user_id: user.id,
-      challenge: opts.challenge,
-      kind: "authentication",
-      rp_id: rpID,
-      origin: expectedOrigin,
-      expires_at: expiresAt.toISOString(),
-    });
-
-    await log("webauthn_auth_options");
-    return json(200, { options: opts });
-  }
-
-  if (action === "authentication_verify") {
-    if (!response) return json(400, { error: "Missing response." });
-
-    const { data: chal, error: chalErr } = await sbAdmin
-      .from("webauthn_challenges")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("kind", "authentication")
-      .eq("used", false)
-      .gt("expires_at", now.toISOString())
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
-    if (chalErr || !chal) return json(400, { error: "No active authentication challenge." });
-
-    const credentialID: string = response?.id;
-    if (!credentialID) return json(400, { error: "Missing credential id." });
-
-    // Normalize ID to base64url without padding (simplewebauthn uses base64url strings).
-    const normId = String(credentialID).replace(/=+$/g, "");
-
-    const { data: cred } = await sbAdmin
-      .from("passkey_credentials")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("credential_id", normId)
-      .eq("is_active", true)
+      .eq("role", "admin")
       .maybeSingle();
-    if (!cred) return json(400, { error: "Credential not found." });
+    if (!roleRow) return json(403, { error: "Admin role required." });
 
-    let verification;
-    try {
-      verification = await verifyAuthenticationResponse({
-        response,
-        expectedChallenge: chal.challenge,
-        expectedOrigin: chal.origin,
-        expectedRPID: chal.rp_id,
-        authenticator: {
-          credentialID: base64urlToUint8(cred.credential_id),
-          credentialPublicKey: base64urlToUint8(cred.public_key),
-          counter: cred.counter,
-          transports: (cred.transports ?? undefined) as any,
-        },
-        requireUserVerification: false,
-      });
-    } catch (e) {
-      await log("webauthn_auth_failed", e instanceof Error ? e.message : String(e));
-      return json(400, { verified: false, error: "Authentication verification failed." });
-    }
+    const origin = req.headers.get("origin") || "";
+    if (!origin) return json(400, { error: "Missing Origin header." });
+    const originUrl = new URL(origin);
+    const rpID = originUrl.hostname;
+    const expectedOrigin = originUrl.origin;
 
-    if (!verification.verified) {
-      await log("webauthn_auth_failed", "Not verified.");
-      return json(400, { verified: false, error: "Not verified." });
-    }
+    const { action, step, response } = await req.json().catch(() => ({}));
+    if (!action) return json(400, { error: "Missing action." });
 
-    // Update counter + last_used.
-    await sbAdmin
-      .from("passkey_credentials")
-      .update({
-        counter: verification.authenticationInfo.newCounter,
-        last_used_at: now.toISOString(),
-      })
-      .eq("id", cred.id);
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 5 * 60 * 1000); // 5 min
 
-    await sbAdmin.from("webauthn_challenges").update({ used: true }).eq("id", chal.id);
-
-    // Track steps server-side (4h)
-    const sessionExpires = new Date(now.getTime() + 4 * 60 * 60 * 1000);
-    const stepCol =
-      step === 4 ? "webauthn_step4_verified_at" : step === 5 ? "webauthn_step5_verified_at" : null;
-
-    const patch: Record<string, unknown> = {
-      user_id: user.id,
-      expires_at: sessionExpires.toISOString(),
-      updated_at: now.toISOString(),
+    const log = async (status: string, failure_reason: string | null = null) => {
+      try {
+        await sbAdmin.from("login_audit_logs").insert({
+          email: user.email ?? "unknown",
+          status,
+          failure_reason,
+          user_agent: req.headers.get("user-agent"),
+          ip_address:
+            req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+            req.headers.get("cf-connecting-ip") ??
+            null,
+        });
+      } catch {
+        // ignore audit failures
+      }
     };
-    if (stepCol) patch[stepCol] = now.toISOString();
 
-    // If both webauthn steps + OTP done, mark fully verified.
-    const { data: existing } = await sbAdmin
-      .from("admin_mfa_sessions")
-      .select("*")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    if (action === "registration_options") {
+      const { data: existingCreds } = await sbAdmin
+        .from("passkey_credentials")
+        .select("credential_id")
+        .eq("user_id", user.id)
+        .eq("is_active", true);
 
-    const otpOk = !!existing?.otp_verified_at;
-    const s4Ok = step === 4 ? true : !!existing?.webauthn_step4_verified_at;
-    const s5Ok = step === 5 ? true : !!existing?.webauthn_step5_verified_at;
-    if (otpOk && s4Ok && s5Ok) {
-      patch.fully_verified_at = now.toISOString();
+      const opts = await generateRegistrationOptions({
+        rpName: "Abhishek Panda Admin",
+        rpID,
+        userID: stringToUint8(user.id),
+        userName: user.email ?? user.id,
+        timeout: 120000,
+        attestationType: "none",
+        authenticatorSelection: {
+          authenticatorAttachment: "platform",
+          userVerification: "preferred",
+          residentKey: "preferred",
+        },
+        supportedAlgorithmIDs: [-7, -257], // ES256, RS256
+        excludeCredentials: (existingCreds ?? []).map((c) => ({
+          id: base64urlToUint8(c.credential_id),
+          type: "public-key" as const,
+        })),
+      });
+
+      await sbAdmin.from("webauthn_challenges").insert({
+        user_id: user.id,
+        challenge: opts.challenge,
+        kind: "registration",
+        rp_id: rpID,
+        origin: expectedOrigin,
+        expires_at: expiresAt.toISOString(),
+      });
+
+      await log("webauthn_reg_options");
+      return json(200, { options: opts });
     }
 
-    await sbAdmin.from("admin_mfa_sessions").upsert(patch, { onConflict: "user_id" });
+    if (action === "registration_verify") {
+      if (!response) return json(400, { error: "Missing response." });
 
-    await log("webauthn_auth_verified");
-    return json(200, { verified: true });
+      const { data: row, error } = await sbAdmin
+        .from("webauthn_challenges")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("kind", "registration")
+        .eq("used", false)
+        .gt("expires_at", now.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+      if (error || !row) return json(400, { error: "No active registration challenge." });
+
+      let verification;
+      try {
+        verification = await verifyRegistrationResponse({
+          response,
+          expectedChallenge: row.challenge,
+          expectedOrigin: row.origin,
+          expectedRPID: row.rp_id,
+          requireUserVerification: false,
+        });
+      } catch (e) {
+        await log("webauthn_reg_failed", e instanceof Error ? e.message : String(e));
+        return json(400, { verified: false, error: "Registration verification failed." });
+      }
+
+      if (!verification.verified || !verification.registrationInfo) {
+        await log("webauthn_reg_failed", "Not verified.");
+        return json(400, { verified: false, error: "Not verified." });
+      }
+
+      const info = verification.registrationInfo;
+      await sbAdmin.from("passkey_credentials").upsert(
+        {
+          user_id: user.id,
+          credential_id: uint8ToBase64url(info.credentialID),
+          public_key: uint8ToBase64url(info.credentialPublicKey),
+          counter: info.counter,
+          device_name: "Admin Device",
+          device_type: "platform",
+          transports: (response?.response?.transports ?? null) as string[] | null,
+          is_active: true,
+        },
+        { onConflict: "credential_id" },
+      );
+
+      await sbAdmin.from("webauthn_challenges").update({ used: true }).eq("id", row.id);
+
+      await log("webauthn_reg_verified");
+      return json(200, { verified: true });
+    }
+
+    if (action === "authentication_options") {
+      const { data: creds } = await sbAdmin
+        .from("passkey_credentials")
+        .select("credential_id, transports")
+        .eq("user_id", user.id)
+        .eq("is_active", true);
+
+      if (!creds || creds.length === 0) {
+        return json(400, { error: "No passkey registered." });
+      }
+
+      const opts = await generateAuthenticationOptions({
+        rpID,
+        timeout: 60000,
+        userVerification: "preferred",
+        allowCredentials: creds.map((c) => ({
+          id: base64urlToUint8(c.credential_id),
+          type: "public-key" as const,
+          transports: (c.transports ?? undefined) as any,
+        })),
+      });
+
+      await sbAdmin.from("webauthn_challenges").insert({
+        user_id: user.id,
+        challenge: opts.challenge,
+        kind: "authentication",
+        rp_id: rpID,
+        origin: expectedOrigin,
+        expires_at: expiresAt.toISOString(),
+      });
+
+      await log("webauthn_auth_options");
+      return json(200, { options: opts });
+    }
+
+    if (action === "authentication_verify") {
+      if (!response) return json(400, { error: "Missing response." });
+
+      const { data: chal, error: chalErr } = await sbAdmin
+        .from("webauthn_challenges")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("kind", "authentication")
+        .eq("used", false)
+        .gt("expires_at", now.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+      if (chalErr || !chal) return json(400, { error: "No active authentication challenge." });
+
+      const credentialID: string = response?.id;
+      if (!credentialID) return json(400, { error: "Missing credential id." });
+
+      // Normalize ID to base64url without padding (simplewebauthn uses base64url strings).
+      const normId = String(credentialID).replace(/=+$/g, "");
+
+      const { data: cred } = await sbAdmin
+        .from("passkey_credentials")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("credential_id", normId)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (!cred) return json(400, { error: "Credential not found." });
+
+      let verification;
+      try {
+        verification = await verifyAuthenticationResponse({
+          response,
+          expectedChallenge: chal.challenge,
+          expectedOrigin: chal.origin,
+          expectedRPID: chal.rp_id,
+          authenticator: {
+            credentialID: base64urlToUint8(cred.credential_id),
+            credentialPublicKey: base64urlToUint8(cred.public_key),
+            counter: cred.counter,
+            transports: (cred.transports ?? undefined) as any,
+          },
+          requireUserVerification: false,
+        });
+      } catch (e) {
+        await log("webauthn_auth_failed", e instanceof Error ? e.message : String(e));
+        return json(400, { verified: false, error: "Authentication verification failed." });
+      }
+
+      if (!verification.verified) {
+        await log("webauthn_auth_failed", "Not verified.");
+        return json(400, { verified: false, error: "Not verified." });
+      }
+
+      // Update counter + last_used.
+      await sbAdmin
+        .from("passkey_credentials")
+        .update({
+          counter: verification.authenticationInfo.newCounter,
+          last_used_at: now.toISOString(),
+        })
+        .eq("id", cred.id);
+
+      await sbAdmin.from("webauthn_challenges").update({ used: true }).eq("id", chal.id);
+
+      // Track steps server-side (4h)
+      const sessionExpires = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+      const stepCol =
+        step === 4 ? "webauthn_step4_verified_at" : step === 5 ? "webauthn_step5_verified_at" : null;
+
+      const patch: Record<string, unknown> = {
+        user_id: user.id,
+        expires_at: sessionExpires.toISOString(),
+        updated_at: now.toISOString(),
+      };
+      if (stepCol) patch[stepCol] = now.toISOString();
+
+      // If both webauthn steps + OTP done, mark fully verified.
+      const { data: existing } = await sbAdmin
+        .from("admin_mfa_sessions")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const otpOk = !!existing?.otp_verified_at;
+      const s4Ok = step === 4 ? true : !!existing?.webauthn_step4_verified_at;
+      const s5Ok = step === 5 ? true : !!existing?.webauthn_step5_verified_at;
+      if (otpOk && s4Ok && s5Ok) {
+        patch.fully_verified_at = now.toISOString();
+      }
+
+      await sbAdmin.from("admin_mfa_sessions").upsert(patch, { onConflict: "user_id" });
+
+      await log("webauthn_auth_verified");
+      return json(200, { verified: true });
+    }
+
+    if (action === "mfa_status") {
+      const { data: s } = await sbAdmin
+        .from("admin_mfa_sessions")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const ok = !!s?.fully_verified_at && new Date(s.expires_at).getTime() > Date.now();
+      return json(200, { ok, session: s ?? null });
+    }
+
+    return json(400, { error: "Unknown action." });
+  } catch (e) {
+    console.error("admin-webauthn handler error", e);
+    return json(500, { error: "Internal Server Error" });
   }
-
-  if (action === "mfa_status") {
-    const { data: s } = await sbAdmin
-      .from("admin_mfa_sessions")
-      .select("*")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    const ok = !!s?.fully_verified_at && new Date(s.expires_at).getTime() > Date.now();
-    return json(200, { ok, session: s ?? null });
-  }
-
-  return json(400, { error: "Unknown action." });
 };
 
 serve(handler);
