@@ -33,7 +33,6 @@ import {
   Mail,
   Inbox,
   Loader2,
-  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -41,12 +40,6 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { AdminNotifications } from "./AdminNotifications";
 import { CommandPalette } from "./CommandPalette";
 import { SecurityAlertPanel } from "./SecurityAlertPanel";
-import { SessionLockOverlay } from "./SessionLockOverlay";
-import { SessionLockSettings, addLockEvent } from "./SessionLockSettings";
-import { useSessionLock } from "@/hooks/useSessionLock";
-import { useBiometricSounds } from "@/hooks/useBiometricSounds";
-import { useHapticFeedback } from "@/hooks/useHapticFeedback";
-import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useActiveSession } from "@/hooks/useActiveSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -129,21 +122,11 @@ export const AdminLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [requireBiometricOnLoad, setRequireBiometricOnLoad] = useState(true);
   
   const location = useLocation();
   const navigate = useNavigate();
-  const sounds = useBiometricSounds();
-  const haptic = useHapticFeedback();
   
   // Use database-backed settings
-  const { 
-    settings, 
-    updateInactivityTimeout, 
-    updateSoundEnabled, 
-    updateHapticEnabled, 
-    updateVolume 
-  } = useAdminSettings();
   
   // Register session for cross-device tracking
   const { 
@@ -156,37 +139,8 @@ export const AdminLayout = () => {
     refreshSessions 
   } = useActiveSession();
 
-  // Session lock for inactivity and tab switching
-  const { isLocked, lockReason, lock, unlock } = useSessionLock({
-    inactivityTimeout: settings.inactivityTimeout,
-    enabled: isAuthenticated,
-    lockOnLoad: requireBiometricOnLoad, // Lock on page refresh
-    onLock: (reason) => {
-      sounds.playLock();
-      if (settings.hapticEnabled) haptic.triggerWarning();
-      addLockEvent('lock', reason);
-    },
-    onUnlock: () => {
-      sounds.playUnlock();
-      if (settings.hapticEnabled) haptic.triggerSuccess();
-      addLockEvent('unlock', 'biometric');
-      setRequireBiometricOnLoad(false); // Don't lock again until next refresh
-    },
-  });
+  // Session lock disabled for passkey-only flow
 
-  // Handle timeout change - save to database
-  const handleTimeoutChange = (timeout: number) => {
-    updateInactivityTimeout(timeout);
-  };
-
-  const handleHapticToggle = (enabled: boolean) => {
-    updateHapticEnabled(enabled);
-  };
-
-  const handleManualLock = () => {
-    lock('manual');
-    toast.info('Command Center locked');
-  };
 
   // Check authentication status
   useEffect(() => {
@@ -460,14 +414,6 @@ export const AdminLayout = () => {
   return (
     <>
       <CommandPalette />
-      {isLocked && (
-        <SessionLockOverlay
-          isLocked={isLocked}
-          lockReason={lockReason}
-          onUnlock={unlock}
-        />
-      )}
-      
       <div className="min-h-screen bg-background text-foreground flex w-full relative">
         {/* Desktop Sidebar - ensure it's always clickable */}
         <aside
@@ -559,25 +505,7 @@ export const AdminLayout = () => {
                 onKillAllOtherSessions={killAllOtherSessions}
                 onRefresh={refreshSessions}
               />
-              <SessionLockSettings
-                inactivityTimeout={settings.inactivityTimeout}
-                onTimeoutChange={handleTimeoutChange}
-                soundEnabled={sounds.soundEnabled}
-                onSoundToggle={updateSoundEnabled}
-                hapticEnabled={settings.hapticEnabled}
-                onHapticToggle={handleHapticToggle}
-                volume={sounds.volume}
-                onVolumeChange={updateVolume}
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleManualLock}
-                className="text-muted-foreground hover:text-amber-400 hover:bg-amber-500/10"
-                title="Lock Command Center"
-              >
-                <Lock className="w-4 h-4" />
-              </Button>
+              
               <SecurityAlertPanel />
               <ThemeToggle />
               <AdminNotifications />
