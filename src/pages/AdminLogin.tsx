@@ -84,6 +84,7 @@ const AdminLogin = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [lockCountdown, setLockCountdown] = useState(0);
   const [fingerprintStatus, setFingerprintStatus] = useState<'idle' | 'scanning' | 'success' | 'error'>('idle');
+  const [showRegisterOnDevice, setShowRegisterOnDevice] = useState(false);
   const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
   const [showPWAPrompt, setShowPWAPrompt] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -376,6 +377,7 @@ const AdminLogin = () => {
 
     setFingerprintStatus('scanning');
     setError("");
+    setShowRegisterOnDevice(false);
 
     try {
       const hasExistingPasskey = localStorage.getItem('admin_passkey_registered') === 'true';
@@ -401,7 +403,16 @@ const AdminLogin = () => {
         toast.success("Passkey verified! Access granted.");
         setPhase("success");
       } else {
-        await handleFingerprintFailure();
+        if (webAuthnError?.toLowerCase().includes("credential not found")) {
+          const attempts = await handleFingerprintFailure(
+            "Passkey not found on this device. Register it here.",
+          );
+          if (attempts >= 1) {
+            setShowRegisterOnDevice(true);
+          }
+          return;
+        }
+        await handleFingerprintFailure(webAuthnError || undefined);
       }
     } catch (error: any) {
       console.error('Fingerprint error:', error);
@@ -433,6 +444,7 @@ const AdminLogin = () => {
     }
 
     setTimeout(() => setFingerprintStatus('idle'), 2500);
+    return newAttempts;
   };
 
   const handleEnterCommandCenter = async () => {
@@ -923,6 +935,35 @@ const AdminLogin = () => {
                     >
                       Try again
                     </Button>
+                  )}
+
+                  {showRegisterOnDevice && (
+                    <div className="space-y-2">
+                      <Button
+                        onClick={async () => {
+                          setShowRegisterOnDevice(false);
+                          setFingerprintStatus('scanning');
+                          const regOk = await registerCredential({ passkeyOnly: true });
+                          if (regOk) {
+                            localStorage.setItem('admin_passkey_registered', 'true');
+                            sessionStorage.setItem('admin_2fa_verified', 'true');
+                            sessionStorage.setItem('admin_2fa_timestamp', Date.now().toString());
+                            sessionStorage.setItem('biometric_verified', Date.now().toString());
+                            toast.success("Passkey registered! Access granted.");
+                            setPhase("success");
+                          } else {
+                            setFingerprintStatus('error');
+                            toast.error(webAuthnError || "Failed to register passkey on this device.");
+                          }
+                        }}
+                        className="w-full bg-gradient-to-r from-cyan-600 to-emerald-500 hover:from-cyan-500 hover:to-emerald-400 text-white h-12 shadow-lg shadow-cyan-500/25"
+                      >
+                        Register passkey on this device
+                      </Button>
+                      <p className="text-xs text-gray-500 text-center">
+                        You logged in with a passkey from another device.
+                      </p>
+                    </div>
                   )}
                 </motion.div>
               )}
