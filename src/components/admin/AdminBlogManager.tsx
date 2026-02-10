@@ -377,7 +377,7 @@ export const AdminBlogManager = () => {
           </div>
           <h2 className="text-xl font-bold text-foreground">CMS Studio Protected</h2>
           <p className="text-muted-foreground text-center max-w-md">
-            Biometric verification required to manage blog content
+            Secure access enabled for blog content
           </p>
           <Button
             onClick={() => setShowBiometricModal(true)}

@@ -414,11 +414,16 @@ export const AdminLayout = () => {
   return (
     <>
       <CommandPalette />
-      <div className="min-h-screen bg-background text-foreground flex w-full relative">
+      <div
+        className={cn(
+          "min-h-screen bg-background text-foreground flex w-full relative",
+          collapsed ? "lg:pl-20" : "lg:pl-[280px]"
+        )}
+      >
         {/* Desktop Sidebar - ensure it's always clickable */}
         <aside
           className={cn(
-            "hidden lg:flex flex-col border-r border-border/30 bg-card/50 backdrop-blur-xl h-screen sticky top-0 shrink-0 transition-[width] duration-300 ease-in-out z-30 pointer-events-auto",
+            "hidden lg:flex flex-col border-r border-border/30 bg-card/60 backdrop-blur-xl h-screen fixed left-0 top-0 shrink-0 transition-[width] duration-300 ease-in-out z-40 pointer-events-auto",
             collapsed ? "w-20" : "w-[280px]"
           )}
         >

@@ -361,7 +361,7 @@ export const AdminSettings = () => {
           </div>
           <h2 className="text-xl font-bold text-foreground">System Settings Protected</h2>
           <p className="text-muted-foreground text-center max-w-md">
-            Biometric verification required to access system configuration
+            Secure access enabled for system configuration
           </p>
           <Button
             onClick={() => setShowBiometricModal(true)}

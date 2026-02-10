@@ -142,7 +142,7 @@ export const AdminLifeMap = () => {
           </div>
           <h2 className="text-xl font-bold text-foreground">LifeMap Protected</h2>
           <p className="text-muted-foreground text-center max-w-md">
-            Biometric verification required to access personal and family information
+            Secure access enabled for personal and family information
           </p>
           <Button
             onClick={() => setShowBiometricModal(true)}

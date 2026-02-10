@@ -110,7 +110,7 @@ export const AdminPayments = () => {
           </div>
           <h2 className="text-xl font-bold text-foreground">FinCore Protected</h2>
           <p className="text-muted-foreground text-center max-w-md">
-            Biometric verification required to access payment and financial information
+            Secure access enabled for payment and financial information
           </p>
           <Button
             onClick={() => setShowBiometricModal(true)}

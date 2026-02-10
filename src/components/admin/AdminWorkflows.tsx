@@ -281,7 +281,7 @@ export const AdminWorkflows = () => {
           </div>
           <h2 className="text-xl font-bold text-foreground">AETHERGRID Protected</h2>
           <p className="text-muted-foreground text-center max-w-md">
-            Biometric verification required to access automation workflows
+            Secure access enabled for automation workflows
           </p>
           <Button
             onClick={() => setShowBiometricModal(true)}

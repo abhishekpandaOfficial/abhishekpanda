@@ -775,23 +775,6 @@ const AdminLogin = () => {
                     </Button>
                   </div>
 
-                  <div className="rounded-xl border border-gray-700/60 bg-gray-900/40 p-4 text-xs text-gray-300">
-                    <div className="text-gray-400 font-semibold mb-2">WebAuthn Debug</div>
-                    <div>Supported: {isSupported ? "true" : "false"}</div>
-                    <div>Methods: {availableMethods.length ? availableMethods.join(", ") : "none"}</div>
-                    <div>Last Action: {webAuthnDebug.lastAction ?? "none"}</div>
-                    <div>Hook Error: {webAuthnError ?? "none"}</div>
-                    <div>
-                      WebAuthn Error: {webAuthnDebug.lastWebAuthnError ? `${webAuthnDebug.lastWebAuthnError.name ?? "Error"}: ${webAuthnDebug.lastWebAuthnError.message ?? ""}` : "none"}
-                    </div>
-                    <div>
-                      Edge Error: {webAuthnDebug.lastEdgeError ? `${webAuthnDebug.lastEdgeError.name ?? "Error"}: ${webAuthnDebug.lastEdgeError.message ?? ""}` : "none"}
-                    </div>
-                    <div className="mt-2 text-gray-400">Edge Response:</div>
-                    <pre className="mt-1 max-h-40 overflow-auto rounded-lg bg-black/40 p-2 text-[10px] text-gray-200">
-                      {JSON.stringify(webAuthnDebug.lastEdgeResponse ?? {}, null, 2)}
-                    </pre>
-                  </div>
                 </motion.div>
               )}
 

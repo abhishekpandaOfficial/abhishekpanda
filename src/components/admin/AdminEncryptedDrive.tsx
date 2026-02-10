@@ -199,7 +199,7 @@ export const AdminEncryptedDrive = () => {
           </div>
           <h2 className="text-xl font-bold text-foreground">Astra Vault Locked</h2>
           <p className="text-muted-foreground text-center max-w-md">
-            Biometric verification required to access encrypted personal files
+            Secure access enabled for encrypted personal files
           </p>
           <Button
             onClick={() => setShowBiometricModal(true)}

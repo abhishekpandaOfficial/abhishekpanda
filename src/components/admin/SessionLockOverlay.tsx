@@ -59,7 +59,7 @@ export const SessionLockOverlay = ({ isLocked, lockReason, onUnlock }: SessionLo
       case 'manual':
         return 'Session manually locked';
       case 'page_refresh':
-        return 'Biometric verification required';
+        return 'Verification required';
       default:
         return 'Session locked for security';
     }

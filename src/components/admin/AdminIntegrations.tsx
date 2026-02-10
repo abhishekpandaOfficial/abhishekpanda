@@ -240,7 +240,7 @@ export const AdminIntegrations = () => {
           </div>
           <h2 className="text-xl font-bold text-foreground">Integrations Protected</h2>
           <p className="text-muted-foreground text-center max-w-md">
-            Biometric verification required to access sensitive API keys and credentials
+            Secure access enabled for sensitive API keys and credentials
           </p>
           <Button
             onClick={() => setShowBiometricModal(true)}

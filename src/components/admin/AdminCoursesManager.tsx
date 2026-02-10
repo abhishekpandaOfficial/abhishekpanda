@@ -370,7 +370,7 @@ export const AdminCoursesManager = () => {
           </div>
           <h2 className="text-xl font-bold text-foreground">LMS Studio Protected</h2>
           <p className="text-muted-foreground text-center max-w-md">
-            Biometric verification required to manage courses
+            Secure access enabled for courses
           </p>
           <Button
             onClick={() => setShowBiometricModal(true)}
