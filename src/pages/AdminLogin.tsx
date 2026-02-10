@@ -3,15 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Shield, Lock, Mail, Eye, EyeOff, KeyRound, Loader2, AlertCircle, 
-  AlertTriangle, Skull, Fingerprint, ScanFace, CheckCircle2, ArrowRight,
+  AlertTriangle, Skull, Fingerprint, CheckCircle2, ArrowRight,
   ShieldCheck, Sparkles, ChevronRight, MapPin, Globe, Smartphone
 } from "lucide-react";
-import FaceIDVerification from "@/components/admin/FaceIDVerification";
 import { ActiveSessionModal } from "@/components/admin/ActiveSessionModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -59,7 +57,7 @@ const logLoginAttempt = async (email: string, status: string, failureReason?: st
   }
 };
 
-type AuthPhase = "password" | "passkey_setup" | "otp" | "fingerprint" | "faceid" | "success";
+type AuthPhase = "password" | "passkey_setup" | "fingerprint" | "success";
 
 // Detect if running as PWA
 const isPWA = () => {
@@ -79,17 +77,13 @@ const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(0);
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockCountdown, setLockCountdown] = useState(0);
-  const [otpAttempts, setOtpAttempts] = useState(0);
   const [fingerprintStatus, setFingerprintStatus] = useState<'idle' | 'scanning' | 'success' | 'error'>('idle');
-  const [faceIdStatus, setFaceIdStatus] = useState<'idle' | 'scanning' | 'success' | 'error'>('idle');
   const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
   const [showPWAPrompt, setShowPWAPrompt] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -112,7 +106,6 @@ const AdminLogin = () => {
   const { hasOtherActiveSessions, otherSessionDevice, registerSession, killAllOtherSessions, refreshSessions } = useActiveSession();
   
   const [fingerprintAttempts, setFingerprintAttempts] = useState(0);
-  const [faceIdAttempts, setFaceIdAttempts] = useState(0);
   const [geoWarnings, setGeoWarnings] = useState<string[]>([]);
   const [isGeoBlocked, setIsGeoBlocked] = useState(false);
   const [showSessionModal, setShowSessionModal] = useState(false);
@@ -158,14 +151,6 @@ const AdminLogin = () => {
     detectCapabilities();
     loadCredentials();
   }, [detectCapabilities, loadCredentials]);
-
-  // Countdown timer for OTP resend
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [countdown]);
 
   // Lock countdown timer
   useEffect(() => {
@@ -310,30 +295,7 @@ const AdminLogin = () => {
     }
   };
 
-  // Helper function to send OTP and proceed
-  const sendOTPAndProceed = async (userId: string, email: string) => {
-    try {
-      const { data, error: otpError } = await supabase.functions.invoke('admin-otp', {
-        body: { action: 'send', userId, email }
-      });
-
-      if (otpError) throw new Error("Failed to send verification code");
-      
-      // Check for rate limiting response
-      if (data?.lockedUntil) {
-        toast.error(data.error);
-        return;
-      }
-
-      setPhase("otp");
-      setCountdown(60);
-      toast.success("Verification code sent to your email");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to send OTP");
-    }
-  };
-
-  // PASSKEY SETUP PHASE - After password, before OTP
+  // PASSKEY SETUP PHASE - After password
   const handlePasskeySetup = async () => {
     setError("");
     setIsLoading(true);
@@ -382,8 +344,11 @@ const AdminLogin = () => {
       } else if (err?.name === 'InvalidStateError') {
         // Passkey already exists - proceed anyway
         localStorage.setItem('admin_passkey_registered', 'true');
-        toast.success('Passkey already registered! Sending OTP...');
-        await sendOTPAndProceed(userId!, email);
+        sessionStorage.setItem('admin_2fa_verified', 'true');
+        sessionStorage.setItem('admin_2fa_timestamp', Date.now().toString());
+        sessionStorage.setItem('biometric_verified', Date.now().toString());
+        toast.success('Passkey already registered! Access granted.');
+        setPhase("success");
       } else {
         setError(err.message || 'Failed to register passkey');
       }
@@ -401,43 +366,7 @@ const AdminLogin = () => {
     }
   };
 
-  // PHASE 2: OTP verification
-  const handleOTPSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    try {
-      if (otp.length !== 6) {
-        throw new Error("Please enter a valid 6-digit code");
-      }
-
-      if (otpAttempts >= 5) {
-        throw new Error("Too many attempts. Please restart the login process.");
-      }
-
-      const { data, error: verifyError } = await supabase.functions.invoke('admin-otp', {
-        body: { action: 'verify', userId, otp }
-      });
-
-      if (verifyError || !data?.success) {
-        setOtpAttempts(prev => prev + 1);
-        await logLoginAttempt(email, 'failed', 'Invalid OTP');
-        throw new Error(data?.error || "Invalid or expired verification code");
-      }
-
-      await logLoginAttempt(email, 'otp_verified');
-      toast.success("OTP verified! Now verify your fingerprint.");
-      setPhase("fingerprint");
-
-    } catch (err: any) {
-      setError(err.message || "Verification failed");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // PHASE 3: Fingerprint verification
+  // PHASE 2: Passkey verification
   const handleFingerprintAuth = async () => {
     if (fingerprintAttempts >= 5) {
       setError("Too many failed attempts. Account locked.");
@@ -464,7 +393,7 @@ const AdminLogin = () => {
       if (success) {
         setFingerprintStatus('success');
         setFingerprintAttempts(0);
-        resetAttempts(email, 'Fingerprint');
+        resetAttempts(email, 'Passkey');
         await new Promise(resolve => setTimeout(resolve, 1500));
         sessionStorage.setItem('admin_2fa_verified', 'true');
         sessionStorage.setItem('admin_2fa_timestamp', Date.now().toString());
@@ -488,15 +417,15 @@ const AdminLogin = () => {
     // Send security alert for failed fingerprint (triggers after 2+ attempts)
     const { attemptCount, alertSent } = await sendSecurityAlert(
       email,
-      'Fingerprint Verification',
+      'Passkey Verification',
       'failed_biometric'
     );
 
     if (alertSent) {
-      setError(`Fingerprint failed. Security alert sent (Attempt ${attemptCount})`);
-      toast.error(`Security alert triggered after ${attemptCount} failed fingerprint attempts`);
+      setError(`Passkey failed. Security alert sent (Attempt ${attemptCount})`);
+      toast.error(`Security alert triggered after ${attemptCount} failed passkey attempts`);
     } else {
-      setError(customError || "Fingerprint not recognized. Try again.");
+      setError(customError || "Passkey not recognized. Try again.");
     }
 
     if (newAttempts >= 5) {
@@ -504,69 +433,6 @@ const AdminLogin = () => {
     }
 
     setTimeout(() => setFingerprintStatus('idle'), 2500);
-  };
-
-  // PHASE 4: FaceID verification
-  const handleFaceIdAuth = async () => {
-    if (faceIdAttempts >= 5) {
-      setError("Too many failed attempts. Account locked.");
-      toast.error("Account temporarily locked due to multiple failed attempts");
-      return;
-    }
-
-    setFaceIdStatus('scanning');
-    setError("");
-
-    try {
-      // Server-verified WebAuthn step 5
-      const success = await authenticateWithCredential({ step: 5 });
-
-      if (success) {
-        setFaceIdStatus('success');
-        setFaceIdAttempts(0);
-        resetAttempts(email, 'Face ID');
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Mark all verification complete
-        sessionStorage.setItem('admin_2fa_verified', 'true');
-        sessionStorage.setItem('admin_2fa_timestamp', Date.now().toString());
-        sessionStorage.setItem('biometric_verified', Date.now().toString());
-        
-        toast.success("Identity verified! All security layers validated.");
-        setPhase("success");
-      } else {
-        await handleFaceIdFailure();
-      }
-    } catch (error: any) {
-      console.error('FaceID error:', error);
-      await handleFaceIdFailure(error.message);
-    }
-  };
-
-  const handleFaceIdFailure = async (customError?: string) => {
-    const newAttempts = faceIdAttempts + 1;
-    setFaceIdAttempts(newAttempts);
-    setFaceIdStatus('error');
-
-    // Send security alert for failed Face ID (triggers after 2+ attempts)
-    const { attemptCount, alertSent } = await sendSecurityAlert(
-      email,
-      'Face ID Verification',
-      'failed_biometric'
-    );
-
-    if (alertSent) {
-      setError(`Face ID failed. Security alert sent (Attempt ${attemptCount})`);
-      toast.error(`Security alert triggered after ${attemptCount} failed Face ID attempts`);
-    } else {
-      setError(customError || "Face not recognized. Try again.");
-    }
-
-    if (newAttempts >= 5) {
-      setError("Account temporarily locked due to multiple failed attempts");
-    }
-
-    setTimeout(() => setFaceIdStatus('idle'), 2500);
   };
 
   const handleEnterCommandCenter = async () => {
@@ -599,44 +465,19 @@ const AdminLogin = () => {
     setPhase('password');
   };
 
-  const handleResendOTP = async () => {
-    if (countdown > 0 || !userId) return;
-    
-    setIsLoading(true);
-    try {
-      const { error: otpError } = await supabase.functions.invoke('admin-otp', {
-        body: { action: 'send', userId, email }
-      });
-
-      if (otpError) throw new Error("Failed to resend code");
-
-      setCountdown(60);
-      toast.success("New verification code sent");
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const getPhaseNumber = () => {
     switch (phase) {
       case 'password': return 1;
       case 'passkey_setup': return 2;
-      case 'otp': return 3;
-      case 'fingerprint': return 4;
-      case 'faceid': return 5;
-      case 'success': return 6;
+      case 'fingerprint': return 2;
+      case 'success': return 3;
       default: return 1;
     }
   };
 
   const renderProgressBar = () => {
-    const hasPasskey = localStorage.getItem('admin_passkey_registered') === 'true';
-    const totalSteps = hasPasskey ? 4 : 5; // 5 steps if no passkey, 4 if already registered
-    const currentStep = hasPasskey ? 
-      (phase === 'password' ? 1 : phase === 'otp' ? 2 : phase === 'fingerprint' ? 3 : phase === 'faceid' ? 4 : 5) :
-      getPhaseNumber();
+    const totalSteps = 3;
+    const currentStep = getPhaseNumber();
     
     return (
       <div className="mb-8">
@@ -742,7 +583,7 @@ const AdminLogin = () => {
                     <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 flex items-center justify-center mb-4">
                       <Lock className="w-8 h-8 text-emerald-400" />
                     </div>
-                    <h2 className="text-xl font-bold text-white">Secure Login — Step 1 of 4</h2>
+                    <h2 className="text-xl font-bold text-white">Secure Login — Step 1 of 3</h2>
                     <p className="text-gray-400 text-sm mt-1">Enter your administrator credentials.</p>
                   </div>
 
@@ -854,7 +695,7 @@ const AdminLogin = () => {
                     <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 flex items-center justify-center mb-4">
                       <KeyRound className="w-8 h-8 text-emerald-400" />
                     </div>
-                    <h2 className="text-xl font-bold text-white">Register Passkey — Step 2 of 5</h2>
+                    <h2 className="text-xl font-bold text-white">Register Passkey — Step 2 of 3</h2>
                     <p className="text-gray-400 text-sm mt-1">Set up biometric authentication for secure access.</p>
                   </div>
 
@@ -862,7 +703,7 @@ const AdminLogin = () => {
                   <div className="space-y-3">
                     {[
                       { icon: Shield, text: 'Military-grade encryption' },
-                      { icon: Fingerprint, text: 'Uses Touch ID / Face ID' },
+                      { icon: Fingerprint, text: 'Uses device biometrics for passkeys' },
                       { icon: Lock, text: 'Biometrics never leave your device' },
                     ].map((feature, i) => (
                       <div
@@ -942,95 +783,7 @@ const AdminLogin = () => {
                 </motion.div>
               )}
 
-              {/* PHASE 3: OTP Verification */}
-              {phase === "otp" && (
-                <motion.div
-                  key="otp"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-6"
-                >
-                  <div className="text-center">
-                    <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 flex items-center justify-center mb-4">
-                      <Mail className="w-8 h-8 text-emerald-400" />
-                    </div>
-                    <h2 className="text-xl font-bold text-white">
-                      Two-Factor Authentication — Step {localStorage.getItem('admin_passkey_registered') === 'true' ? '2 of 4' : '3 of 5'}
-                    </h2>
-                    <p className="text-gray-400 text-sm mt-1">An OTP has been sent to your registered email.</p>
-                  </div>
-
-                  <form onSubmit={handleOTPSubmit} className="space-y-6">
-                    <div className="flex justify-center">
-                      <InputOTP
-                        value={otp}
-                        onChange={setOtp}
-                        maxLength={6}
-                        disabled={isLoading}
-                      >
-                        <InputOTPGroup className="gap-2">
-                          {[0, 1, 2, 3, 4, 5].map((index) => (
-                            <InputOTPSlot
-                              key={index}
-                              index={index}
-                              className="w-12 h-14 text-xl bg-gray-800/50 border-gray-700 text-white focus:border-emerald-500 rounded-lg"
-                            />
-                          ))}
-                        </InputOTPGroup>
-                      </InputOTP>
-                    </div>
-
-                    {error && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
-                      >
-                        <AlertCircle className="w-4 h-4 shrink-0" />
-                        <span>{error}</span>
-                      </motion.div>
-                    )}
-
-                    <div className="text-center">
-                      <p className="text-gray-500 text-sm">
-                        Attempts: {otpAttempts}/5
-                      </p>
-                    </div>
-
-                    <Button
-                      type="submit"
-                      disabled={isLoading || otp.length !== 6}
-                      className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white h-12 shadow-lg shadow-emerald-500/25"
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Verifying...
-                        </>
-                      ) : (
-                        <>
-                          Verify OTP
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </>
-                      )}
-                    </Button>
-
-                    <div className="text-center">
-                      <button
-                        type="button"
-                        onClick={handleResendOTP}
-                        disabled={countdown > 0 || isLoading}
-                        className={`text-sm ${countdown > 0 ? 'text-gray-600' : 'text-emerald-400 hover:text-emerald-300'}`}
-                      >
-                        {countdown > 0 ? `Resend OTP in ${countdown}s` : 'Resend OTP'}
-                      </button>
-                    </div>
-                  </form>
-                </motion.div>
-              )}
-
-              {/* PHASE 3: Fingerprint Verification */}
+              {/* PHASE 2: Passkey Verification */}
               {phase === "fingerprint" && (
                 <motion.div
                   key="fingerprint"
@@ -1040,10 +793,8 @@ const AdminLogin = () => {
                   className="space-y-6"
                 >
                   <div className="text-center">
-                    <h2 className="text-xl font-bold text-white">
-                      Fingerprint Verification — Step {localStorage.getItem('admin_passkey_registered') === 'true' ? '3 of 4' : '4 of 5'}
-                    </h2>
-                    <p className="text-gray-400 text-sm mt-1">Authenticate with your Fingerprint to continue.</p>
+                    <h2 className="text-xl font-bold text-white">Passkey Verification — Step 2 of 3</h2>
+                    <p className="text-gray-400 text-sm mt-1">Authenticate with your Passkey to continue.</p>
                   </div>
 
                   {/* Fingerprint Scanner */}
@@ -1147,10 +898,10 @@ const AdminLogin = () => {
                       </div>
                     )}
                     {fingerprintStatus === 'success' && (
-                      <p className="text-green-400 text-sm font-medium">Fingerprint verified!</p>
+                      <p className="text-green-400 text-sm font-medium">Passkey verified!</p>
                     )}
                     {fingerprintStatus === 'error' && (
-                      <p className="text-red-400 text-sm">{error || "Fingerprint not recognized"}</p>
+                      <p className="text-red-400 text-sm">{error || "Passkey not recognized"}</p>
                     )}
                   </div>
 
@@ -1160,7 +911,7 @@ const AdminLogin = () => {
                       className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white h-12 shadow-lg shadow-emerald-500/25"
                     >
                       <Fingerprint className="w-5 h-5 mr-2" />
-                      Use Fingerprint
+                      Use Passkey
                     </Button>
                   )}
 
@@ -1174,39 +925,6 @@ const AdminLogin = () => {
                     </Button>
                   )}
                 </motion.div>
-              )}
-
-              {/* PHASE 4: Face ID Verification - Premium iPhone FaceID */}
-              {phase === "faceid" && (
-                <FaceIDVerification
-                  onSuccess={() => {
-                    setFaceIdAttempts(0);
-                    resetAttempts(email, 'Face ID');
-                    sessionStorage.setItem('admin_2fa_verified', 'true');
-                    sessionStorage.setItem('admin_2fa_timestamp', Date.now().toString());
-                    sessionStorage.setItem('biometric_verified', Date.now().toString());
-                    toast.success("Identity verified! All security layers validated.");
-                    setPhase("success");
-                  }}
-                  onError={async (errorMessage) => {
-                    const newAttempts = faceIdAttempts + 1;
-                    setFaceIdAttempts(newAttempts);
-                    
-                    const { attemptCount, alertSent } = await sendSecurityAlert(
-                      email,
-                      'Face ID Verification',
-                      'failed_biometric'
-                    );
-
-                    if (alertSent) {
-                      toast.error(`Security alert triggered after ${attemptCount} failed Face ID attempts`);
-                    }
-                    
-                    setError(errorMessage);
-                  }}
-                  attempts={faceIdAttempts}
-                  maxAttempts={5}
-                />
               )}
 
               {/* FINAL SUCCESS: All Verified */}
@@ -1262,9 +980,7 @@ const AdminLogin = () => {
                   >
                     {[
                       { icon: Lock, label: 'Password', color: 'emerald' },
-                      { icon: Mail, label: 'OTP', color: 'emerald' },
-                      { icon: Fingerprint, label: 'Fingerprint', color: 'emerald' },
-                      { icon: ScanFace, label: 'Face ID', color: 'cyan' },
+                      { icon: Fingerprint, label: 'Passkey', color: 'emerald' },
                     ].map((item, i) => (
                       <motion.div
                         key={item.label}
@@ -1322,7 +1038,7 @@ const AdminLogin = () => {
               className="text-emerald-500/70 hover:text-emerald-400 text-xs"
             >
               <Smartphone className="w-3 h-3 mr-1" />
-              Install PWA for FaceID
+              Install PWA for Passkeys
             </Button>
             <Button
               variant="link"
@@ -1365,14 +1081,14 @@ const AdminLogin = () => {
                   Install Admin App
                 </h3>
                 <p className="text-gray-400 text-sm">
-                  For the best FaceID/TouchID experience and secure admin access, install this app on your device.
+                  For the best passkey experience and secure admin access, install this app on your device.
                 </p>
               </div>
 
               {/* Benefits */}
               <div className="px-6 pb-4 space-y-2">
                 {[
-                  { icon: ScanFace, text: 'Native FaceID/TouchID Support' },
+                  { icon: Fingerprint, text: 'Native passkey support' },
                   { icon: Shield, text: 'Enhanced Security Features' },
                   { icon: Sparkles, text: 'Faster, App-Like Experience' },
                 ].map((item, i) => (
