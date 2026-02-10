@@ -39,6 +39,8 @@ const uint8ToBase64url = (bytes: Uint8Array) => {
   return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 };
 
+const stringToUint8 = (v: string) => new TextEncoder().encode(v);
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -105,7 +107,7 @@ const handler = async (req: Request): Promise<Response> => {
     const opts = await generateRegistrationOptions({
       rpName: "Abhishek Panda Admin",
       rpID,
-      userID: user.id,
+      userID: stringToUint8(user.id),
       userName: user.email ?? user.id,
       timeout: 120000,
       attestationType: "none",
