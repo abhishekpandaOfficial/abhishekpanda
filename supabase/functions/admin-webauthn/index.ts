@@ -118,10 +118,10 @@ const handler = async (req: Request): Promise<Response> => {
           residentKey: "preferred",
         },
         supportedAlgorithmIDs: [-7, -257], // ES256, RS256
-        excludeCredentials: (existingCreds ?? []).map((c) => ({
-          id: base64urlToUint8(c.credential_id),
-          type: "public-key" as const,
-        })),
+      excludeCredentials: (existingCreds ?? []).map((c) => ({
+        id: c.credential_id,
+        type: "public-key" as const,
+      })),
       });
 
       await sbAdmin.from("webauthn_challenges").insert({
@@ -207,11 +207,11 @@ const handler = async (req: Request): Promise<Response> => {
         rpID,
         timeout: 60000,
         userVerification: "preferred",
-        allowCredentials: creds.map((c) => ({
-          id: base64urlToUint8(c.credential_id),
-          type: "public-key" as const,
-          transports: (c.transports ?? undefined) as any,
-        })),
+      allowCredentials: creds.map((c) => ({
+        id: c.credential_id,
+        type: "public-key" as const,
+        transports: (c.transports ?? undefined) as any,
+      })),
       });
 
       await sbAdmin.from("webauthn_challenges").insert({
