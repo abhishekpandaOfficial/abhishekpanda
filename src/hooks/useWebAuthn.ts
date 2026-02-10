@@ -1,6 +1,80 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+const base64urlToBuffer = (base64url: string): ArrayBuffer => {
+  const pad = "=".repeat((4 - (base64url.length % 4)) % 4);
+  const base64 = (base64url + pad).replace(/-/g, "+").replace(/_/g, "/");
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+};
+
+const bufferToBase64url = (buffer: ArrayBuffer): string => {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 1) binary += String.fromCharCode(bytes[i]);
+  const base64 = btoa(binary);
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+};
+
+const normalizeCreationOptions = (options: any): PublicKeyCredentialCreationOptions => ({
+  ...options,
+  challenge: base64urlToBuffer(options.challenge),
+  user: {
+    ...options.user,
+    id: base64urlToBuffer(options.user.id),
+  },
+  excludeCredentials: (options.excludeCredentials ?? []).map((cred: any) => ({
+    ...cred,
+    id: base64urlToBuffer(cred.id),
+  })),
+});
+
+const normalizeRequestOptions = (options: any): PublicKeyCredentialRequestOptions => ({
+  ...options,
+  challenge: base64urlToBuffer(options.challenge),
+  allowCredentials: (options.allowCredentials ?? []).map((cred: any) => ({
+    ...cred,
+    id: base64urlToBuffer(cred.id),
+  })),
+});
+
+const credentialToJSON = (cred: PublicKeyCredential) => {
+  const rawId = bufferToBase64url(cred.rawId);
+  const response = cred.response as AuthenticatorResponse;
+  const clientExtensionResults = cred.getClientExtensionResults?.() ?? {};
+
+  if ("attestationObject" in response) {
+    const attRes = response as AuthenticatorAttestationResponse;
+    return {
+      id: cred.id,
+      rawId,
+      type: cred.type,
+      response: {
+        clientDataJSON: bufferToBase64url(attRes.clientDataJSON),
+        attestationObject: bufferToBase64url(attRes.attestationObject),
+        transports: attRes.getTransports ? attRes.getTransports() : undefined,
+      },
+      clientExtensionResults,
+    };
+  }
+
+  const asrRes = response as AuthenticatorAssertionResponse;
+  return {
+    id: cred.id,
+    rawId,
+    type: cred.type,
+    response: {
+      clientDataJSON: bufferToBase64url(asrRes.clientDataJSON),
+      authenticatorData: bufferToBase64url(asrRes.authenticatorData),
+      signature: bufferToBase64url(asrRes.signature),
+      userHandle: asrRes.userHandle ? bufferToBase64url(asrRes.userHandle) : null,
+    },
+    clientExtensionResults,
+  };
+};
+
 interface WebAuthnCredential {
   id: string;
   deviceName: string;
@@ -114,12 +188,12 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
       if (!options) throw new Error("Missing registration options.");
 
       const cred = (await navigator.credentials.create({
-        publicKey: options,
+        publicKey: normalizeCreationOptions(options),
       })) as PublicKeyCredential | null;
       if (!cred) throw new Error("No credential returned.");
 
       const { data: verifyData, error: verifyErr } = await supabase.functions.invoke("admin-webauthn", {
-        body: { action: "registration_verify", response: cred },
+        body: { action: "registration_verify", response: credentialToJSON(cred) },
       });
       if (verifyErr) throw verifyErr;
       if (!verifyData?.verified) throw new Error("Passkey verification failed.");
@@ -154,12 +228,12 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
         if (!options) throw new Error("Missing authentication options.");
 
         const assertion = (await navigator.credentials.get({
-          publicKey: options,
+          publicKey: normalizeRequestOptions(options),
         })) as PublicKeyCredential | null;
         if (!assertion) throw new Error("No assertion returned.");
 
         const { data: verifyData, error: verifyErr } = await supabase.functions.invoke("admin-webauthn", {
-          body: { action: "authentication_verify", step: opts?.step ?? null, response: assertion },
+          body: { action: "authentication_verify", step: opts?.step ?? null, response: credentialToJSON(assertion) },
         });
         if (verifyErr) throw verifyErr;
         if (!verifyData?.verified) throw new Error("Authentication verification failed.");
@@ -209,4 +283,3 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
     loadCredentials,
   };
 };
-
