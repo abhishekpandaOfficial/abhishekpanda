@@ -328,7 +328,7 @@ const BlogPost = () => {
   const description = meta?.meta_description || meta?.excerpt || "Blog post";
   const canonical = slug ? `${SITE_URL}/blog/${slug}` : `${SITE_URL}/blog`;
   const robots = meta?.is_premium ? "noindex,follow" : "index,follow";
-  const showPaywall = meta.is_premium && !canReadPremium;
+  const showPaywall = !!meta?.is_premium && !canReadPremium;
   const canDownload = !showPaywall && !!post?.content;
 
   const openSharePopup = (url: string) => {
@@ -341,6 +341,8 @@ const BlogPost = () => {
       key: "x",
       label: "X",
       icon: AtSign,
+      className:
+        "border-zinc-300 hover:border-black hover:bg-black hover:text-white dark:hover:border-zinc-100 dark:hover:bg-zinc-100 dark:hover:text-black",
       action: () =>
         openSharePopup(
           `https://twitter.com/intent/tweet?url=${encodeURIComponent(canonical)}&text=${encodeURIComponent(
@@ -352,6 +354,8 @@ const BlogPost = () => {
       key: "linkedin",
       label: "LinkedIn",
       icon: Linkedin,
+      className:
+        "border-sky-300 hover:border-[#0A66C2] hover:bg-[#0A66C2] hover:text-white",
       action: () =>
         openSharePopup(
           `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonical)}`,
@@ -361,6 +365,8 @@ const BlogPost = () => {
       key: "facebook",
       label: "Facebook",
       icon: Facebook,
+      className:
+        "border-blue-300 hover:border-[#1877F2] hover:bg-[#1877F2] hover:text-white",
       action: () =>
         openSharePopup(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonical)}`),
     },
@@ -368,12 +374,16 @@ const BlogPost = () => {
       key: "whatsapp",
       label: "WhatsApp",
       icon: MessageCircle,
+      className:
+        "border-emerald-300 hover:border-[#25D366] hover:bg-[#25D366] hover:text-white",
       action: () => openSharePopup(`https://wa.me/?text=${encodeURIComponent(shareText)}`),
     },
     {
       key: "telegram",
       label: "Telegram",
       icon: Send,
+      className:
+        "border-cyan-300 hover:border-[#229ED9] hover:bg-[#229ED9] hover:text-white",
       action: () =>
         openSharePopup(
           `https://t.me/share/url?url=${encodeURIComponent(canonical)}&text=${encodeURIComponent(
@@ -385,6 +395,8 @@ const BlogPost = () => {
       key: "email",
       label: "Email",
       icon: Mail,
+      className:
+        "border-slate-300 hover:border-slate-700 hover:bg-slate-700 hover:text-white dark:hover:border-slate-200 dark:hover:bg-slate-200 dark:hover:text-slate-900",
       action: () =>
         (window.location.href = `mailto:?subject=${encodeURIComponent(
           meta?.title || "Blog post",
@@ -899,7 +911,7 @@ const BlogPost = () => {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="justify-start"
+                  className={`justify-start transition-colors ${target.className}`}
                   onClick={target.action}
                 >
                   <target.icon className="w-4 h-4 mr-2" />
