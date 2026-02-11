@@ -83,7 +83,7 @@ export const ActiveSessionIndicator = ({
           <Users className="w-4 h-4" />
           <span className="text-sm font-medium">{sessionCount}</span>
           {hasOtherSessions && (
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full" />
           )}
         </Button>
       </PopoverTrigger>

@@ -100,6 +100,21 @@ const slugify = (input: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
+const LEGACY_CODE_THEMES = new Set([
+  "github-light",
+  "github-light-default",
+  "github-light-high-contrast",
+  "github-dark",
+  "github-dark-default",
+  "github-dark-dimmed",
+  "github-dark-high-contrast",
+]);
+
+const normalizePersistedCodeTheme = (theme: string | null | undefined) => {
+  if (!theme) return "github-light";
+  return LEGACY_CODE_THEMES.has(theme) ? theme : "github-light";
+};
+
 export const AdminBlogManager = () => {
   const qc = useQueryClient();
   const codeLanguages = useMemo(
@@ -135,6 +150,21 @@ export const AdminBlogManager = () => {
       { id: "github-dark-default", label: "GitHub Dark Default" },
       { id: "github-dark-dimmed", label: "GitHub Dark Dimmed" },
       { id: "github-dark-high-contrast", label: "GitHub Dark High Contrast" },
+      { id: "one-dark-pro", label: "One Dark Pro" },
+      { id: "dracula", label: "Dracula" },
+      { id: "dracula-soft", label: "Dracula Soft" },
+      { id: "tokyo-night", label: "Tokyo Night" },
+      { id: "nord", label: "Nord" },
+      { id: "material-theme", label: "Material Theme" },
+      { id: "material-theme-darker", label: "Material Theme Darker" },
+      { id: "material-theme-ocean", label: "Material Theme Ocean" },
+      { id: "material-theme-palenight", label: "Material Theme Palenight" },
+      { id: "vitesse-dark", label: "Vitesse Dark" },
+      { id: "vitesse-light", label: "Vitesse Light" },
+      { id: "catppuccin-latte", label: "Catppuccin Latte" },
+      { id: "catppuccin-frappe", label: "Catppuccin Frappe" },
+      { id: "catppuccin-macchiato", label: "Catppuccin Macchiato" },
+      { id: "catppuccin-mocha", label: "Catppuccin Mocha" },
     ],
     [],
   );
@@ -160,11 +190,17 @@ export const AdminBlogManager = () => {
   const [dragSectionId, setDragSectionId] = useState<string | null>(null);
   const [dragPostId, setDragPostId] = useState<string | null>(null);
   const autosaveRef = useRef<NodeJS.Timeout | null>(null);
+  const editorHydrationKeyRef = useRef<string | null>(null);
   const sectionErrorRef = useRef(false);
   const [sectionsError, setSectionsError] = useState<string | null>(null);
 
-  const errMsg = (err: unknown, fallback: string) =>
-    err instanceof Error ? err.message : fallback;
+  const errMsg = (err: unknown, fallback: string) => {
+    if (err instanceof Error && err.message) return err.message;
+    if (typeof err === "object" && err !== null && "message" in err && typeof (err as any).message === "string") {
+      return (err as any).message;
+    }
+    return fallback;
+  };
 
   const handlePublishApprove = async () => {
     if (!selectedPost) return;
@@ -599,17 +635,45 @@ export const AdminBlogManager = () => {
         is_published: !!post.is_published,
         is_premium: !!post.is_premium,
         is_locked: !!post.is_locked,
-        code_theme: post.code_theme || "github-light",
+        code_theme: normalizePersistedCodeTheme(post.code_theme),
         published_at: post.is_published ? (post.published_at || new Date().toISOString()) : post.published_at,
         sort_order: post.sort_order ?? 0,
         color: post.color || null,
       };
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from("blog_posts")
         .upsert(payload)
         .select("*")
         .single();
+      if (error) {
+        const isColumnMismatch =
+          (error as any)?.code === "42703" ||
+          /column .* does not exist/i.test(error.message || "");
+        if (isColumnMismatch) {
+          const legacyPayload = {
+            id: post.id,
+            title: post.title,
+            slug: nextSlug,
+            excerpt: post.excerpt,
+            content: post.content,
+            hero_image: post.hero_image,
+            tags: post.tags,
+            meta_title: post.meta_title,
+            meta_description: post.meta_description,
+            is_published: !!post.is_published,
+            is_premium: !!post.is_premium,
+            published_at: post.is_published ? (post.published_at || new Date().toISOString()) : post.published_at,
+          };
+          const retry = await supabase
+            .from("blog_posts")
+            .upsert(legacyPayload)
+            .select("*")
+            .single();
+          data = retry.data;
+          error = retry.error;
+        }
+      }
       if (error) throw error;
       return data as BlogPost;
     },
@@ -640,16 +704,44 @@ export const AdminBlogManager = () => {
         is_published: !!post.is_published,
         is_premium: !!post.is_premium,
         is_locked: !!post.is_locked,
-        code_theme: post.code_theme || "github-light",
+        code_theme: normalizePersistedCodeTheme(post.code_theme),
         published_at: post.is_published ? (post.published_at || new Date().toISOString()) : post.published_at,
         sort_order: post.sort_order ?? 0,
         color: post.color || null,
       };
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from("blog_posts")
         .upsert(payload)
         .select("*")
         .single();
+      if (error) {
+        const isColumnMismatch =
+          (error as any)?.code === "42703" ||
+          /column .* does not exist/i.test(error.message || "");
+        if (isColumnMismatch) {
+          const legacyPayload = {
+            id: post.id,
+            title: post.title,
+            slug: slugify(post.slug || post.title || "post"),
+            excerpt: post.excerpt,
+            content: post.content,
+            hero_image: post.hero_image,
+            tags: post.tags,
+            meta_title: post.meta_title,
+            meta_description: post.meta_description,
+            is_published: !!post.is_published,
+            is_premium: !!post.is_premium,
+            published_at: post.is_published ? (post.published_at || new Date().toISOString()) : post.published_at,
+          };
+          const retry = await supabase
+            .from("blog_posts")
+            .upsert(legacyPayload)
+            .select("*")
+            .single();
+          data = retry.data;
+          error = retry.error;
+        }
+      }
       if (error) throw error;
       await supabase.from("blog_post_versions").insert({
         post_id: payload.id,
@@ -769,32 +861,18 @@ export const AdminBlogManager = () => {
 
   useEffect(() => {
     if (!selectedPost) return;
+    const hydrationKey = `${selectedPost.id}:${codeTheme}`;
+    if (editorHydrationKeyRef.current === hydrationKey) return;
     (async () => {
       try {
         const blocks = await editor.tryParseMarkdownToBlocks(selectedPost.content || "");
         editor.replaceBlocks(editor.document, blocks);
+        editorHydrationKeyRef.current = hydrationKey;
       } catch {
         // ignore
       }
     })();
-  }, [selectedPost?.id, selectedPost?.content, editor]);
-
-  useEffect(() => {
-    if (!isEditing || !selectedPost) return;
-    const update = async () => {
-      try {
-        const md = await editor.blocksToMarkdownLossy(editor.document);
-        setSelectedPost((prev) => {
-          if (!prev) return prev;
-          if ((prev.content || "") === md) return prev;
-          return { ...prev, content: md };
-        });
-      } catch {
-        // ignore
-      }
-    };
-    update();
-  }, [editor, isEditing, selectedPost?.id, selectedPost?.content]);
+  }, [selectedPost?.id, codeTheme, editor]);
 
   const scheduleAutosave = (post: BlogPost) => {
     if (!isEditing) return;
@@ -1362,7 +1440,10 @@ export const AdminBlogManager = () => {
                         </div>
                       ) : (
                         <div className="rounded-xl border border-border bg-background p-4 min-h-[300px]">
-                          <Markdown value={selectedPost.content || ""} />
+                          <Markdown
+                            value={selectedPost.content || ""}
+                            codeTheme={selectedPost.code_theme || "github-light"}
+                          />
                         </div>
                       )}
                     </div>
@@ -1720,7 +1801,10 @@ export const AdminBlogManager = () => {
               ) : null}
             </div>
             <div className="rounded-xl border border-border bg-background p-4 max-h-[60vh] overflow-auto">
-              <Markdown value={selectedPost.content || ""} />
+              <Markdown
+                value={selectedPost.content || ""}
+                codeTheme={selectedPost.code_theme || "github-light"}
+              />
             </div>
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={() => setPublishPreviewOpen(false)}>
@@ -1788,7 +1872,10 @@ export const AdminBlogManager = () => {
         ) : null}
         <h1>{selectedPost?.title}</h1>
         {selectedPost?.excerpt ? <p className="excerpt">{selectedPost.excerpt}</p> : null}
-        <Markdown value={selectedPost?.content || ""} />
+        <Markdown
+          value={selectedPost?.content || ""}
+          codeTheme={selectedPost?.code_theme || "github-light"}
+        />
       </div>
     </div>
     </>

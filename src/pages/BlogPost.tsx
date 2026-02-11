@@ -42,6 +42,7 @@ type PostRow = {
   meta_title: string | null;
   meta_description: string | null;
   views: number | null;
+  code_theme: string | null;
   updated_at: string;
 };
 
@@ -436,7 +437,10 @@ const BlogPost = () => {
                 </div>
               ) : (
                 <>
-                  <Markdown value={post?.content || ""} />
+                  <Markdown
+                    value={post?.content || ""}
+                    codeTheme={post?.code_theme || "github-light"}
+                  />
 
                   {(nav.prev || nav.next || nav.related.length > 0) ? (
                     <div className="mt-12 pt-8 border-t border-border space-y-6">

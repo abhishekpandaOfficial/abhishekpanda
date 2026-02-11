@@ -1,16 +1,95 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import hljs from "highlight.js/lib/common";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import rehypeHighlight from "rehype-highlight";
 import rehypeRaw from "rehype-raw";
 
 type MarkdownProps = {
   value: string;
+  codeTheme?: string;
 };
 
-export const Markdown = ({ value }: MarkdownProps) => {
+const DEFAULT_CODE_THEME = "github-light";
+const SHIKI_LANGS = [
+  "plaintext",
+  "text",
+  "javascript",
+  "typescript",
+  "jsx",
+  "tsx",
+  "python",
+  "java",
+  "c",
+  "cpp",
+  "csharp",
+  "go",
+  "rust",
+  "bash",
+  "json",
+  "yaml",
+  "markdown",
+  "html",
+  "css",
+  "sql",
+  "xml",
+] as const;
+
+const LANGUAGE_ALIASES: Record<string, string> = {
+  txt: "text",
+  js: "javascript",
+  mjs: "javascript",
+  cjs: "javascript",
+  ts: "typescript",
+  py: "python",
+  sh: "bash",
+  shell: "bash",
+  zsh: "bash",
+  yml: "yaml",
+  md: "markdown",
+  htm: "html",
+  cxx: "cpp",
+  cc: "cpp",
+  "c++": "cpp",
+  cs: "csharp",
+  "c#": "csharp",
+};
+
+const highlighterByTheme = new Map<string, Promise<any>>();
+
+const normalizeCodeLanguage = (language?: string) => {
+  if (!language) return "text";
+  const normalized = language.trim().toLowerCase();
+  return LANGUAGE_ALIASES[normalized] || normalized;
+};
+
+const detectLanguage = (code: string) => {
+  try {
+    const detected = hljs.highlightAuto(code).language;
+    if (!detected) return "text";
+    return normalizeCodeLanguage(detected);
+  } catch {
+    return "text";
+  }
+};
+
+const getHighlighterForTheme = async (theme: string) => {
+  const nextTheme = theme || DEFAULT_CODE_THEME;
+  const cached = highlighterByTheme.get(nextTheme);
+  if (cached) return cached;
+
+  const promise = import("shiki").then(({ getHighlighter }) =>
+    getHighlighter({
+      themes: [nextTheme],
+      langs: [...SHIKI_LANGS],
+    }),
+  );
+  highlighterByTheme.set(nextTheme, promise);
+  return promise;
+};
+
+export const Markdown = ({ value, codeTheme = DEFAULT_CODE_THEME }: MarkdownProps) => {
   return (
     <div className="prose prose-neutral dark:prose-invert max-w-none prose-pre:p-0 prose-pre:bg-transparent">
       <ReactMarkdown
@@ -21,13 +100,30 @@ export const Markdown = ({ value }: MarkdownProps) => {
           rehypeSlug,
           // Adds anchor links to headings
           [rehypeAutolinkHeadings, { behavior: "wrap" }],
-          // Basic code highlighting (client-side)
-          rehypeHighlight,
         ]}
         components={{
           pre: ({ children }) => (
-            <CodeBlockWrapper>{children}</CodeBlockWrapper>
+            <>{children}</>
           ),
+          code: ({ className, inline, children, ...props }: any) => {
+            const isInline = !!inline;
+            if (isInline) {
+              return (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            }
+            const language = className?.replace("language-", "").trim();
+            const textToCopy = String(children ?? "").replace(/\n$/, "");
+            return (
+              <CodeBlockWrapper
+                code={textToCopy}
+                language={language}
+                codeTheme={codeTheme}
+              />
+            );
+          },
           a: ({ node, ...props }) => {
             const isCta = typeof (node as any)?.properties?.dataCta !== "undefined";
             if (isCta) {
@@ -48,14 +144,45 @@ export const Markdown = ({ value }: MarkdownProps) => {
   );
 };
 
-const CodeBlockWrapper = ({ children }: { children: React.ReactNode }) => {
+const CodeBlockWrapper = ({
+  code,
+  language,
+  codeTheme,
+}: {
+  code: string;
+  language?: string;
+  codeTheme: string;
+}) => {
   const [copied, setCopied] = useState(false);
-  const textToCopy = useMemo(() => {
-    // Attempt to grab text from <code> inside <pre>.
-    const codeEl = Array.isArray(children) ? children[0] : children;
-    const raw = codeEl?.props?.children;
-    return typeof raw === "string" ? raw : Array.isArray(raw) ? raw.join("") : "";
-  }, [children]);
+  const [highlightedHtml, setHighlightedHtml] = useState<string>("");
+  const textToCopy = useMemo(() => code, [code]);
+  const normalizedLanguage = useMemo(() => {
+    const explicit = normalizeCodeLanguage(language);
+    if (explicit !== "text") return explicit;
+    return detectLanguage(textToCopy);
+  }, [language, textToCopy]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const highlight = async () => {
+      try {
+        const highlighter = await getHighlighterForTheme(codeTheme);
+        const html = highlighter.codeToHtml(textToCopy, {
+          lang: normalizedLanguage,
+          theme: codeTheme || DEFAULT_CODE_THEME,
+        });
+        if (!cancelled) setHighlightedHtml(html);
+      } catch {
+        if (!cancelled) setHighlightedHtml("");
+      }
+    };
+
+    void highlight();
+    return () => {
+      cancelled = true;
+    };
+  }, [textToCopy, normalizedLanguage, codeTheme]);
 
   const onCopy = async () => {
     try {
@@ -76,7 +203,16 @@ const CodeBlockWrapper = ({ children }: { children: React.ReactNode }) => {
       >
         {copied ? "Copied" : "Copy"}
       </button>
-      <pre className="m-0 overflow-x-auto p-4">{children}</pre>
+      {highlightedHtml ? (
+        <div
+          className="overflow-x-auto p-4 shiki-wrapper"
+          dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+        />
+      ) : (
+        <pre className="m-0 overflow-x-auto p-4">
+          <code>{textToCopy}</code>
+        </pre>
+      )}
     </div>
   );
 };
