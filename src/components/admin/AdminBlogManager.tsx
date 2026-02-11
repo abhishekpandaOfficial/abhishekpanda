@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -115,6 +115,98 @@ const normalizePersistedCodeTheme = (theme: string | null | undefined) => {
   return LEGACY_CODE_THEMES.has(theme) ? theme : "github-light";
 };
 
+const escapeXml = (input: string) =>
+  input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+
+const sanitizeId = (input: string, fallback: string) => {
+  const v = input
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return v || fallback;
+};
+
+type EpubChapter = {
+  id: string;
+  title: string;
+  fileName: string;
+  htmlBody: string;
+};
+
+const splitIntoEpubChapters = (htmlBody: string, fallbackTitle: string): EpubChapter[] => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(`<div id="epub-root">${htmlBody}</div>`, "text/html");
+  const root = doc.getElementById("epub-root");
+  if (!root) {
+    return [
+      {
+        id: "chapter-1",
+        title: fallbackTitle,
+        fileName: "chapter-001.xhtml",
+        htmlBody,
+      },
+    ];
+  }
+
+  const nodes = Array.from(root.childNodes);
+  const chapters: EpubChapter[] = [];
+  let currentTitle = fallbackTitle;
+  let currentNodes: Node[] = [];
+
+  const flush = () => {
+    if (currentNodes.length === 0) return;
+    const holder = doc.createElement("div");
+    currentNodes.forEach((n) => holder.appendChild(n.cloneNode(true)));
+    const idx = chapters.length + 1;
+    const base = sanitizeId(currentTitle, `chapter-${idx}`);
+    chapters.push({
+      id: `${base}-${idx}`,
+      title: currentTitle,
+      fileName: `chapter-${String(idx).padStart(3, "0")}.xhtml`,
+      htmlBody: holder.innerHTML || "<p></p>",
+    });
+    currentNodes = [];
+  };
+
+  for (const n of nodes) {
+    const isHeading =
+      n.nodeType === Node.ELEMENT_NODE &&
+      ["H1", "H2"].includes((n as HTMLElement).tagName);
+
+    if (isHeading) {
+      const headingText = (n.textContent || "").trim();
+      if (currentNodes.length > 0) {
+        flush();
+      }
+      currentTitle = headingText || `Chapter ${chapters.length + 1}`;
+      currentNodes.push(n.cloneNode(true));
+      continue;
+    }
+
+    currentNodes.push(n.cloneNode(true));
+  }
+
+  flush();
+
+  if (chapters.length === 0) {
+    return [
+      {
+        id: "chapter-1",
+        title: fallbackTitle,
+        fileName: "chapter-001.xhtml",
+        htmlBody,
+      },
+    ];
+  }
+
+  return chapters;
+};
+
 export const AdminBlogManager = () => {
   const qc = useQueryClient();
   const codeLanguages = useMemo(
@@ -178,6 +270,9 @@ export const AdminBlogManager = () => {
   const [newTag, setNewTag] = useState("");
   const [heroPreviewOpen, setHeroPreviewOpen] = useState(false);
   const [publishPreviewOpen, setPublishPreviewOpen] = useState(false);
+  const [epubPreviewOpen, setEpubPreviewOpen] = useState(false);
+  const [epubPreviewError, setEpubPreviewError] = useState<string | null>(null);
+  const [epubPreviewLoading, setEpubPreviewLoading] = useState(false);
   const [diffOpen, setDiffOpen] = useState(false);
   const [diffVersion, setDiffVersion] = useState<BlogPostVersion | null>(null);
   const [isAutosaving, setIsAutosaving] = useState(false);
@@ -187,6 +282,10 @@ export const AdminBlogManager = () => {
   const [uploadingInline, setUploadingInline] = useState(false);
   const heroFileRef = useRef<HTMLInputElement | null>(null);
   const exportRef = useRef<HTMLDivElement | null>(null);
+  const epubPreviewContainerRef = useRef<HTMLDivElement | null>(null);
+  const epubPreviewBookRef = useRef<any>(null);
+  const epubPreviewRenditionRef = useRef<any>(null);
+  const epubPreviewObjectUrlRef = useRef<string | null>(null);
   const [dragSectionId, setDragSectionId] = useState<string | null>(null);
   const [dragPostId, setDragPostId] = useState<string | null>(null);
   const autosaveRef = useRef<NodeJS.Timeout | null>(null);
@@ -194,13 +293,13 @@ export const AdminBlogManager = () => {
   const sectionErrorRef = useRef(false);
   const [sectionsError, setSectionsError] = useState<string | null>(null);
 
-  const errMsg = (err: unknown, fallback: string) => {
+  const errMsg = useCallback((err: unknown, fallback: string) => {
     if (err instanceof Error && err.message) return err.message;
     if (typeof err === "object" && err !== null && "message" in err && typeof (err as any).message === "string") {
       return (err as any).message;
     }
     return fallback;
-  };
+  }, []);
 
   const handlePublishApprove = async () => {
     if (!selectedPost) return;
@@ -244,11 +343,35 @@ export const AdminBlogManager = () => {
     win.print();
   };
 
-  const handleExportEpub = async () => {
+  const buildEpubBlob = useCallback(async () => {
     if (!selectedPost || !exportRef.current) return;
     const { default: JSZip } = await import("jszip");
     const htmlBody = exportRef.current.innerHTML;
     const title = selectedPost.title || "Untitled";
+    const author = "Abhishek Panda";
+    const language = "en";
+    const nowIso = new Date().toISOString();
+    const chapters = splitIntoEpubChapters(htmlBody, title);
+    const navItems = chapters
+      .map((c) => `<li><a href="${c.fileName}">${escapeXml(c.title)}</a></li>`)
+      .join("\n");
+    const manifestChapterItems = chapters
+      .map(
+        (c) =>
+          `<item id="${c.id}" href="${c.fileName}" media-type="application/xhtml+xml"/>`,
+      )
+      .join("\n");
+    const spineItems = chapters
+      .map((c) => `<itemref idref="${c.id}"/>`)
+      .join("\n");
+    const ncxPoints = chapters
+      .map(
+        (c, idx) => `<navPoint id="navPoint-${idx + 1}" playOrder="${idx + 1}">
+  <navLabel><text>${escapeXml(c.title)}</text></navLabel>
+  <content src="${c.fileName}"/>
+</navPoint>`,
+      )
+      .join("\n");
 
     const zip = new JSZip();
     zip.file("mimetype", "application/epub+zip", { compression: "STORE" });
@@ -267,49 +390,193 @@ export const AdminBlogManager = () => {
       `<?xml version="1.0" encoding="UTF-8"?>
       <package version="3.0" xmlns="http://www.idpf.org/2007/opf" unique-identifier="book-id">
         <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-          <dc:identifier id="book-id">${selectedPost.id}</dc:identifier>
-          <dc:title>${title}</dc:title>
-          <dc:language>en</dc:language>
+          <dc:identifier id="book-id">${escapeXml(selectedPost.id)}</dc:identifier>
+          <dc:title>${escapeXml(title)}</dc:title>
+          <dc:creator>${escapeXml(author)}</dc:creator>
+          <dc:language>${language}</dc:language>
+          <meta property="dcterms:modified">${nowIso}</meta>
         </metadata>
         <manifest>
-          <item id="content" href="content.xhtml" media-type="application/xhtml+xml"/>
+          <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+          <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
           <item id="style" href="styles.css" media-type="text/css"/>
+          ${manifestChapterItems}
         </manifest>
-        <spine>
-          <itemref idref="content"/>
+        <spine toc="ncx">
+          ${spineItems}
         </spine>
       </package>`
     );
     oebps?.file(
-      "styles.css",
-      `body { font-family: "Georgia", "Times New Roman", serif; color: #111827; line-height: 1.7; padding: 24px; }
-      h1 { font-size: 28px; margin-bottom: 12px; }
-      .excerpt { color: #6b7280; margin-bottom: 20px; }
-      pre { background: #f3f4f6; padding: 12px; border-radius: 10px; overflow-x: auto; }
-      code { font-family: "SF Mono", Menlo, Consolas, monospace; }
-      img { max-width: 100%; border-radius: 12px; }`
-    );
-    oebps?.file(
-      "content.xhtml",
+      "nav.xhtml",
       `<?xml version="1.0" encoding="UTF-8"?>
-      <html xmlns="http://www.w3.org/1999/xhtml">
+      <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
         <head>
-          <title>${title}</title>
+          <title>${escapeXml(title)} - Table of Contents</title>
           <link rel="stylesheet" type="text/css" href="styles.css"/>
         </head>
         <body>
-          ${htmlBody}
+          <nav epub:type="toc" id="toc">
+            <h1>Table of Contents</h1>
+            <ol>
+              ${navItems}
+            </ol>
+          </nav>
         </body>
-      </html>`
+      </html>`,
     );
+    oebps?.file(
+      "toc.ncx",
+      `<?xml version="1.0" encoding="UTF-8"?>
+      <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+        <head>
+          <meta name="dtb:uid" content="${escapeXml(selectedPost.id)}"/>
+          <meta name="dtb:depth" content="1"/>
+          <meta name="dtb:totalPageCount" content="0"/>
+          <meta name="dtb:maxPageNumber" content="0"/>
+        </head>
+        <docTitle><text>${escapeXml(title)}</text></docTitle>
+        <navMap>
+          ${ncxPoints}
+        </navMap>
+      </ncx>`,
+    );
+    oebps?.file(
+      "styles.css",
+      `html, body { margin: 0; padding: 0; }
+      body { font-family: -apple-system, "SF Pro Text", "Georgia", "Times New Roman", serif; color: #111827; line-height: 1.65; }
+      .chapter { padding: 1.2em 1.4em; }
+      h1, h2, h3 { line-height: 1.25; page-break-after: avoid; break-after: avoid-page; }
+      h1 { font-size: 1.8em; margin: 0 0 0.8em; }
+      h2 { font-size: 1.45em; margin: 1.2em 0 0.6em; }
+      p { margin: 0 0 0.9em; }
+      .excerpt { color: #6b7280; margin-bottom: 1em; }
+      pre { background: #f3f4f6; padding: 0.8em; border-radius: 0.6em; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+      code { font-family: "SF Mono", "Menlo", "Consolas", monospace; }
+      img { max-width: 100%; height: auto; border-radius: 0.5em; page-break-inside: avoid; break-inside: avoid; }
+      table { width: 100%; border-collapse: collapse; margin: 1em 0; }
+      th, td { border: 1px solid #d1d5db; padding: 0.45em; text-align: left; }
+      blockquote { border-left: 0.25em solid #94a3b8; margin: 0.8em 0; padding: 0.4em 0 0.4em 0.8em; color: #334155; }
+      a { color: #1d4ed8; text-decoration: underline; }`
+    );
+    chapters.forEach((chapter) => {
+      oebps?.file(
+        chapter.fileName,
+        `<?xml version="1.0" encoding="UTF-8"?>
+        <html xmlns="http://www.w3.org/1999/xhtml">
+          <head>
+            <title>${escapeXml(chapter.title)}</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <link rel="stylesheet" type="text/css" href="styles.css"/>
+          </head>
+          <body>
+            <section class="chapter">
+              ${chapter.htmlBody}
+            </section>
+          </body>
+        </html>`,
+      );
+    });
     const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
-    const url = URL.createObjectURL(blob);
+    return { blob, title };
+  }, [selectedPost]);
+
+  const handleExportEpub = async () => {
+    const epub = await buildEpubBlob();
+    if (!epub) return;
+    const url = URL.createObjectURL(epub.blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${slugify(title)}.epub`;
+    a.download = `${slugify(epub.title)}.epub`;
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
   };
+
+  const disposeEpubPreview = useCallback(() => {
+    try {
+      epubPreviewRenditionRef.current?.destroy?.();
+    } catch {
+      // Ignore preview renderer cleanup errors.
+    } finally {
+      epubPreviewRenditionRef.current = null;
+    }
+    try {
+      epubPreviewBookRef.current?.destroy?.();
+    } catch {
+      // Ignore preview book cleanup errors.
+    } finally {
+      epubPreviewBookRef.current = null;
+    }
+    if (epubPreviewObjectUrlRef.current) {
+      URL.revokeObjectURL(epubPreviewObjectUrlRef.current);
+      epubPreviewObjectUrlRef.current = null;
+    }
+    if (epubPreviewContainerRef.current) {
+      epubPreviewContainerRef.current.innerHTML = "";
+    }
+  }, []);
+
+  const handlePreviewEpubPrev = () => {
+    epubPreviewRenditionRef.current?.prev?.();
+  };
+
+  const handlePreviewEpubNext = () => {
+    epubPreviewRenditionRef.current?.next?.();
+  };
+
+  useEffect(() => {
+    if (!epubPreviewOpen) {
+      disposeEpubPreview();
+      setEpubPreviewError(null);
+      setEpubPreviewLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadPreview = async () => {
+      if (!selectedPost || !exportRef.current || !epubPreviewContainerRef.current) {
+        setEpubPreviewError("Select a post first to preview EPUB.");
+        return;
+      }
+      setEpubPreviewLoading(true);
+      setEpubPreviewError(null);
+      disposeEpubPreview();
+      try {
+        const [{ default: ePub }, epub] = await Promise.all([import("epubjs"), buildEpubBlob()]);
+        if (!epub) {
+          setEpubPreviewError("Unable to generate EPUB preview.");
+          return;
+        }
+        if (cancelled) return;
+        const url = URL.createObjectURL(epub.blob);
+        epubPreviewObjectUrlRef.current = url;
+        const book = ePub(url, { openAs: "epub" });
+        epubPreviewBookRef.current = book;
+        const rendition = book.renderTo(epubPreviewContainerRef.current, {
+          width: "100%",
+          height: "100%",
+          spread: "auto",
+          flow: "paginated",
+        });
+        epubPreviewRenditionRef.current = rendition;
+        await rendition.display();
+      } catch (error) {
+        if (!cancelled) {
+          setEpubPreviewError(errMsg(error, "Failed to load EPUB preview."));
+        }
+      } finally {
+        if (!cancelled) setEpubPreviewLoading(false);
+      }
+    };
+
+    loadPreview();
+
+    return () => {
+      cancelled = true;
+      disposeEpubPreview();
+    };
+  }, [buildEpubBlob, disposeEpubPreview, epubPreviewOpen, errMsg, selectedPost?.id, selectedPost?.updated_at]);
 
   const { data: posts = [], isLoading: postsLoading } = useQuery({
     queryKey: ["admin-blog-posts"],
@@ -1295,6 +1562,9 @@ export const AdminBlogManager = () => {
                         <Button variant="outline" size="sm" onClick={handleExportPdf}>
                           Export PDF
                         </Button>
+                        <Button variant="outline" size="sm" onClick={() => setEpubPreviewOpen(true)}>
+                          Preview EPUB
+                        </Button>
                         <Button variant="outline" size="sm" onClick={handleExportEpub}>
                           Export EPUB
                         </Button>
@@ -1333,6 +1603,9 @@ export const AdminBlogManager = () => {
                         </Button>
                         <Button variant="outline" size="sm" onClick={handleExportPdf}>
                           Export PDF
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => setEpubPreviewOpen(true)}>
+                          Preview EPUB
                         </Button>
                         <Button variant="outline" size="sm" onClick={handleExportEpub}>
                           Export EPUB
@@ -1820,6 +2093,43 @@ export const AdminBlogManager = () => {
             </div>
           </div>
         ) : null}
+      </DialogContent>
+    </Dialog>
+
+    <Dialog open={epubPreviewOpen} onOpenChange={setEpubPreviewOpen}>
+      <DialogContent className="max-w-6xl bg-background border-border">
+        <DialogHeader>
+          <DialogTitle>EPUB Preview</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-sm text-muted-foreground">
+              {selectedPost ? selectedPost.title : "No post selected"}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handlePreviewEpubPrev} disabled={epubPreviewLoading}>
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Previous
+              </Button>
+              <Button variant="outline" size="sm" onClick={handlePreviewEpubNext} disabled={epubPreviewLoading}>
+                Next
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportEpub} disabled={epubPreviewLoading}>
+                Export EPUB
+              </Button>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/20 overflow-hidden">
+            {epubPreviewError ? (
+              <div className="p-4 text-sm text-destructive">{epubPreviewError}</div>
+            ) : null}
+            {epubPreviewLoading ? (
+              <div className="p-4 text-sm text-muted-foreground">Preparing EPUB preview...</div>
+            ) : null}
+            <div ref={epubPreviewContainerRef} className="w-full h-[70vh]" />
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
 
