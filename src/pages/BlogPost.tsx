@@ -24,6 +24,8 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowLeft,
+  ChevronRight,
+  House,
   Link as LinkIcon,
   Download,
   Share2,
@@ -88,6 +90,10 @@ type TagStyleRow = {
 const SITE_URL =
   (import.meta.env.VITE_SITE_URL as string | undefined) ||
   "https://www.abhishekpanda.com";
+const titleCaseLevel = (level: string | null | undefined) => {
+  if (!level) return "General";
+  return level.charAt(0).toUpperCase() + level.slice(1);
+};
 
 type EpubChapter = {
   id: string;
@@ -889,8 +895,17 @@ const BlogPost = () => {
               ref={articleScrollRef}
               className="min-w-0 lg:h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-4 lg:overscroll-contain lg:scroll-smooth"
             >
-              <header className="mb-8">
-                <div className="flex flex-wrap items-center gap-3 mb-4">
+              <header className="mb-8 rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-6 md:p-10 text-white">
+                <div className="inline-flex items-center gap-2 rounded-full border border-slate-700/70 bg-slate-900/60 px-3 py-1 text-xs text-slate-300">
+                  <House className="w-3.5 h-3.5" />
+                  <Link to="/" className="hover:text-white">Home</Link>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                  <Link to="/blog" className="hover:text-white">Blog</Link>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                  <span className="max-w-[18rem] truncate text-slate-100">{meta.title}</span>
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-center gap-2">
                   {meta.tags?.length ? (
                     meta.tags.map((tag) => (
                       <span
@@ -898,9 +913,19 @@ const BlogPost = () => {
                         className="px-3 py-1 rounded-full text-xs font-semibold border"
                         style={getTagStyle(tag)}
                       >
-                        {tag}
+                        #{tag}
                       </span>
                     ))
+                  ) : null}
+                  {meta.level ? (
+                    <span className="px-2 py-1 rounded-full text-xs font-semibold border border-emerald-400/40 bg-emerald-500/20 text-emerald-300">
+                      {titleCaseLevel(meta.level)}
+                    </span>
+                  ) : null}
+                  {hasUpdatedDate ? (
+                    <span className="px-2 py-1 rounded-full text-xs font-semibold border border-blue-400/40 bg-blue-500/20 text-blue-300">
+                      Updated
+                    </span>
                   ) : null}
                   {meta.is_premium ? (
                     <span className="badge-premium">
@@ -910,55 +935,56 @@ const BlogPost = () => {
                   ) : null}
                 </div>
 
-                <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground">
+                <h1 className="mt-5 text-3xl md:text-5xl font-black tracking-tight text-white leading-tight">
                   {meta.title}
                 </h1>
 
-                <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-slate-300">
+                  <span className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-indigo-300" />
+                    {Math.max(1, meta.reading_time_minutes || 0)} min read
+                  </span>
                   {effectiveOriginalPublished ? (
                     <span className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-primary" />
-                      {new Date(effectiveOriginalPublished).toLocaleString("en-US", {
+                      <Calendar className="w-4 h-4 text-indigo-300" />
+                      {new Date(effectiveOriginalPublished).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
-                        hour: "numeric",
-                        minute: "2-digit",
                       })}
                     </span>
                   ) : null}
-                  {meta.level ? (
-                    <span className="px-2 py-1 rounded-full text-xs font-semibold border border-primary/30 bg-primary/15 text-primary">
-                      {meta.level.charAt(0).toUpperCase() + meta.level.slice(1)}
+                  {hasUpdatedDate ? (
+                    <span className="text-emerald-300">
+                      Updated{" "}
+                      {new Date(meta.updated_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
                     </span>
                   ) : null}
                   <span className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-primary" />
-                    {Math.max(1, meta.reading_time_minutes || 0)} min read
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-primary" />
+                    <Eye className="w-4 h-4 text-indigo-300" />
                     {(meta.views ?? 0).toLocaleString()} views
                   </span>
-                  <span className="px-2 py-1 rounded-full border border-border bg-muted text-xs font-medium text-foreground">
+                  <span className="px-2 py-1 rounded-full border border-slate-700 bg-slate-900/70 text-xs font-medium text-slate-200">
                     {minutesRemaining} min remaining
                   </span>
-                  <span className="px-2 py-1 rounded-full border border-border bg-muted text-xs font-medium text-foreground">
+                  <span className="px-2 py-1 rounded-full border border-slate-700 bg-slate-900/70 text-xs font-medium text-slate-200">
                     {minutesRead} min read already
                   </span>
                 </div>
-                {hasUpdatedDate ? (
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Last updated{" "}
-                    {new Date(meta.updated_at).toLocaleString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                ) : null}
+
+                <div className="mt-4 inline-flex items-center gap-3 rounded-full border border-slate-700 bg-slate-900/70 px-3 py-2">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-400 to-cyan-400 text-slate-950 grid place-items-center font-bold">
+                    AP
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-white">Abhishek Panda</p>
+                    <p className="text-xs text-slate-300">Software Engineer</p>
+                  </div>
+                </div>
 
                 <div className="mt-5 flex flex-wrap items-center gap-2">
                   <Button

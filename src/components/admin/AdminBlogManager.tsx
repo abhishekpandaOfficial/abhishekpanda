@@ -19,6 +19,7 @@ import {
   ChevronRight,
   ChevronUp,
   ChevronDown,
+  CheckCircle2,
   Layers,
   Maximize2,
   Minimize2
@@ -111,6 +112,31 @@ type BlogTagStyle = {
   text_color: string;
   border_color: string;
 };
+const REQUIRED_POST_STRUCTURE_HEADINGS = [
+  "Why This Guide Exists",
+  "Who This Is For",
+  "What You Will Build",
+  "Step-by-Step Implementation",
+  "FAQs",
+  "Final Thoughts",
+];
+const LANDING_BACKLOG_TASKS = [
+  {
+    title: "Polish Stackcraft Tracks content hierarchy",
+    description: "Ensure landing block copy and spacing are polished and aligned with brand voice.",
+    priority: "high" as const,
+  },
+  {
+    title: "Polish Latest from the Blog section",
+    description: "Refine typography, card hierarchy, and responsive spacing for featured blog block.",
+    priority: "high" as const,
+  },
+  {
+    title: "Polish Premium learning tracks block",
+    description: "Improve copy clarity and visual rhythm for architecture/cloud/data/AI messaging.",
+    priority: "medium" as const,
+  },
+];
 
 const slugify = (input: string) =>
   input
@@ -133,6 +159,12 @@ const LEGACY_CODE_THEMES = new Set([
 const normalizePersistedCodeTheme = (theme: string | null | undefined) => {
   if (!theme) return "github-light";
   return LEGACY_CODE_THEMES.has(theme) ? theme : "github-light";
+};
+const getMissingStructureHeadings = (content: string | null | undefined) => {
+  const normalized = (content || "").toLowerCase();
+  return REQUIRED_POST_STRUCTURE_HEADINGS.filter(
+    (heading) => !normalized.includes(`## ${heading}`.toLowerCase()),
+  );
 };
 
 const escapeXml = (input: string) =>
@@ -227,6 +259,179 @@ const splitIntoEpubChapters = (htmlBody: string, fallbackTitle: string): EpubCha
   return chapters;
 };
 
+const buildFullCourseStructureTemplate = (title: string) => `## Why This Guide Exists
+
+If you are serious about building production-ready APIs, this guide gives you a complete, practical path from fundamentals to deployable architecture.
+
+## Who This Is For
+
+- Developers starting with ASP.NET Core Web API
+- Engineers moving from CRUD-only APIs to scalable systems
+- Teams standardizing API architecture and coding standards
+
+## What You Will Build
+
+By the end of this guide, you will build a clean API foundation with:
+
+- Layered architecture
+- Entity Framework Core data access
+- Authentication and authorization
+- Validation and error handling
+- Logging, health checks, and deployment readiness
+
+## Prerequisites
+
+- Basic C# and .NET knowledge
+- .NET SDK installed
+- Any SQL database (SQL Server / PostgreSQL / MySQL)
+- VS Code / Visual Studio
+
+## Architecture Blueprint
+
+### 1. Solution Layout
+
+\`\`\`text
+src/
+  Api/
+  Application/
+  Domain/
+  Infrastructure/
+tests/
+  UnitTests/
+  IntegrationTests/
+\`\`\`
+
+### 2. Responsibility Boundaries
+
+- **Api**: Controllers, request/response contracts, middleware
+- **Application**: Business rules, use-cases, validation
+- **Domain**: Entities, value objects, domain invariants
+- **Infrastructure**: EF Core, repositories, external integrations
+
+## Step-by-Step Implementation
+
+### Step 1: Project Bootstrap
+
+Create the solution and baseline projects, configure dependency injection, and keep startup minimal.
+
+### Step 2: Domain Modeling
+
+Define entities and relationships first. Keep behavior close to entities instead of pushing everything into controllers.
+
+### Step 3: Database + EF Core
+
+- Configure DbContext
+- Add entity configurations
+- Create and apply migrations
+- Seed local dev data
+
+### Step 4: CRUD Endpoints
+
+Implement create/read/update/delete with:
+
+- DTO separation
+- model validation
+- consistent API responses
+- pagination and filtering
+
+### Step 5: Authentication + Authorization
+
+Add JWT auth and policy-based authorization. Protect sensitive endpoints and keep permission checks explicit.
+
+### Step 6: Error Handling + Logging
+
+Use centralized exception middleware with structured logs.
+
+### Step 7: Production Readiness
+
+- health endpoints
+- rate limiting
+- response compression
+- secure headers
+- environment-based configuration
+
+## Screenshots & Visual Walkthrough
+
+> Add your own screenshots in this section from your actual implementation.
+
+### API Response Example
+
+\`\`\`json
+{
+  "success": true,
+  "message": "Resource created",
+  "data": {
+    "id": "d87e9b0b-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "name": "Sample Item"
+  }
+}
+\`\`\`
+
+### Error Response Example
+
+\`\`\`json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": [
+    "Name is required"
+  ]
+}
+\`\`\`
+
+## Testing Strategy
+
+- Unit tests for application rules
+- Integration tests for API + DB
+- Contract tests for critical endpoints
+
+## API Checklist
+
+- [ ] DTOs are not leaking entity models
+- [ ] Input validation in place
+- [ ] Auth applied correctly
+- [ ] Logging + correlation IDs enabled
+- [ ] Migrations versioned and reviewed
+- [ ] Swagger docs accurate
+
+## Performance Notes
+
+- Add indexes for frequent query filters
+- Use projection for read endpoints
+- Use caching where response shape is stable
+
+## Deployment Notes
+
+- Configure secrets via environment variables
+- Run migrations in controlled release step
+- Add smoke tests after deployment
+
+## FAQs
+
+### Should I use Repository Pattern with EF Core?
+
+Use it when it adds abstraction value for your team. Avoid unnecessary layers if your use-cases are simple.
+
+### Where should validation live?
+
+Keep basic contract validation at API boundary and business validation in application/domain layers.
+
+### How do I version APIs?
+
+Start with URL or header versioning strategy and define deprecation policy early.
+
+## Related Learning
+
+- Clean Architecture fundamentals
+- EF Core advanced mappings
+- API security hardening
+- CI/CD for ASP.NET services
+
+## Final Thoughts
+
+${title} should be treated as a practical blueprint, not just a tutorial. Keep iterating from your production feedback and scale with clear standards.
+`;
+
 export const AdminBlogManager = () => {
   const qc = useQueryClient();
   const codeLanguages = useMemo(
@@ -291,6 +496,7 @@ export const AdminBlogManager = () => {
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [taskPriority, setTaskPriority] = useState<"low" | "medium" | "high">("medium");
+  const [taskPanelOpen, setTaskPanelOpen] = useState(true);
   const [heroPreviewOpen, setHeroPreviewOpen] = useState(false);
   const [publishPreviewOpen, setPublishPreviewOpen] = useState(false);
   const [epubPreviewOpen, setEpubPreviewOpen] = useState(false);
@@ -314,6 +520,7 @@ export const AdminBlogManager = () => {
   const autosaveRef = useRef<NodeJS.Timeout | null>(null);
   const editorHydrationKeyRef = useRef<string | null>(null);
   const sectionErrorRef = useRef(false);
+  const seededLandingTasksRef = useRef(false);
   const [sectionsError, setSectionsError] = useState<string | null>(null);
 
   const errMsg = useCallback((err: unknown, fallback: string) => {
@@ -326,6 +533,11 @@ export const AdminBlogManager = () => {
 
   const handlePublishApprove = async () => {
     if (!selectedPost) return;
+    const missing = getMissingStructureHeadings(selectedPost.content);
+    if (missing.length > 0) {
+      toast.error(`Missing required sections: ${missing.join(", ")}`);
+      return;
+    }
     const nowIso = new Date().toISOString();
     const firstPublishedAt = selectedPost.original_published_at || selectedPost.published_at || nowIso;
     await upsertPost.mutateAsync({
@@ -693,6 +905,24 @@ export const AdminBlogManager = () => {
       return inTitle || inTags;
     });
   }, [posts, searchQuery]);
+  useEffect(() => {
+    if (seededLandingTasksRef.current) return;
+    seededLandingTasksRef.current = true;
+    const existing = new Set(tasks.map((t) => t.title));
+    const missingSeeds = LANDING_BACKLOG_TASKS.filter((seed) => !existing.has(seed.title));
+    if (missingSeeds.length === 0) return;
+    (async () => {
+      await supabase.from("blog_tasks").insert(
+        missingSeeds.map((seed) => ({
+          title: seed.title,
+          description: seed.description,
+          priority: seed.priority,
+          status: "pending" as const,
+        })),
+      );
+      qc.invalidateQueries({ queryKey: ["admin-blog-tasks"] });
+    })();
+  }, [tasks, qc]);
 
   const sections = useMemo(() => {
     return [{ id: "all", name: "All", color: "#94a3b8" }, ...sectionsData];
@@ -750,6 +980,9 @@ export const AdminBlogManager = () => {
   };
   const selectedPersistedPostId =
     selectedPost && posts.some((p) => p.id === selectedPost.id) ? selectedPost.id : null;
+  const pendingTasks = tasks.filter((t) => t.status === "pending");
+  const inProgressTasks = tasks.filter((t) => t.status === "in_progress");
+  const doneTasks = tasks.filter((t) => t.status === "done");
   const tagStyleMap = useMemo(
     () => new Map(tagStyles.map((style) => [style.tag.toLowerCase(), style])),
     [tagStyles],
@@ -956,6 +1189,41 @@ export const AdminBlogManager = () => {
       setHasUnsavedChanges(true);
       scheduleAutosave(nextPost);
     }
+  };
+
+  const applyFullCourseTemplate = () => {
+    if (!selectedPost) return;
+    const nextTitle =
+      selectedPost.title && selectedPost.title !== "Untitled Post"
+        ? selectedPost.title
+        : "ASP.NET Core Web API: Complete Engineering Guide";
+    const nextPost: BlogPost = {
+      ...selectedPost,
+      title: nextTitle,
+      excerpt:
+        "A complete, production-focused blueprint for building ASP.NET Core Web APIs with clean architecture, EF Core, auth, validation, testing, and deployment.",
+      tags: ["aspnet-core", "web-api", "entity-framework", "clean-architecture", "backend"],
+      meta_title: `${nextTitle} | Abhishek Panda`,
+      meta_description:
+        "Build production-grade ASP.NET Core Web APIs with clean architecture, EF Core, authentication, validation, and deployment best practices.",
+      content: buildFullCourseStructureTemplate(nextTitle),
+      level: selectedPost.level || "fundamentals",
+    };
+    setSelectedPost(nextPost);
+    setIsEditing(true);
+    setHasUnsavedChanges(true);
+    scheduleAutosave(nextPost);
+    nextPost.tags?.forEach((tag) => {
+      if (!tagStyleMap.has(tag.toLowerCase())) {
+        upsertTagStyle.mutate({
+          tag,
+          bg_color: "#EEF2FF",
+          text_color: "#3730A3",
+          border_color: "#C7D2FE",
+        });
+      }
+    });
+    toast.success("Full course structure template applied. Customize and publish.");
   };
 
   const upsertPost = useMutation({
@@ -1389,110 +1657,200 @@ export const AdminBlogManager = () => {
       </div>
 
       <div className="rounded-xl border border-border bg-card p-5">
-        <div className="flex flex-col lg:flex-row gap-4 lg:items-start lg:justify-between">
-          <div className="min-w-0">
+        <button
+          type="button"
+          className="w-full flex items-center justify-between text-left"
+          onClick={() => setTaskPanelOpen((v) => !v)}
+        >
+          <div>
             <h3 className="text-sm font-semibold text-foreground">Pending Blog Tasks</h3>
-            <p className="text-xs text-muted-foreground mt-1">Track UI/content backlog directly inside CMS Studio.</p>
-            <div className="mt-3 grid gap-2 max-h-56 overflow-auto pr-1">
-              {tasks.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No tasks yet.</p>
-              ) : (
-                tasks.map((task) => (
-                  <div key={task.id} className="rounded-lg border border-border p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm text-foreground">{task.title}</p>
-                        {task.description ? (
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
-                        ) : null}
-                        <div className="mt-2 flex items-center gap-2 text-[11px]">
-                          <span className="px-2 py-1 rounded-full border border-border text-muted-foreground">
-                            {task.priority}
-                          </span>
-                          <span className="px-2 py-1 rounded-full border border-border text-muted-foreground">
-                            {task.status.replace("_", " ")}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          className="h-7 px-2 text-xs"
-                          onClick={() => updateTask.mutate({ id: task.id, patch: { status: "in_progress" } })}
-                          disabled={task.status === "in_progress"}
-                        >
-                          In progress
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          className="h-7 px-2 text-xs"
-                          onClick={() => updateTask.mutate({ id: task.id, patch: { status: "done" } })}
-                          disabled={task.status === "done"}
-                        >
-                          Mark done
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          className="h-7 px-2 text-xs"
-                          onClick={() =>
-                            selectedPersistedPostId
-                              ? updateTask.mutate({ id: task.id, patch: { related_post_id: selectedPersistedPostId } })
-                              : toast.error("Save/select a published or draft post first.")
-                          }
-                        >
-                          Link post
-                        </Button>
+            <p className="text-xs text-muted-foreground mt-1">
+              Plan blog writing in a structured way. Status colors: ToDo red, In Progress blue, Done green.
+            </p>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {taskPanelOpen ? "Collapse" : "Expand"} ({tasks.length})
+          </span>
+        </button>
+
+        {taskPanelOpen ? (
+          <div className="mt-4 flex flex-col lg:flex-row gap-4 lg:items-start lg:justify-between">
+            <div className="min-w-0 w-full">
+              <div className="grid gap-3 max-h-80 overflow-auto pr-1">
+                {tasks.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No tasks yet.</p>
+                ) : (
+                  <>
+                    <div>
+                      <p className="text-sm font-semibold text-red-600">ToDo ({pendingTasks.length})</p>
+                      <div className="mt-2 grid gap-2">
+                        {pendingTasks.map((task) => (
+                          <div key={task.id} className="rounded-lg border border-red-200/70 bg-red-50/30 p-3 dark:border-red-900/40 dark:bg-red-950/10">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="font-medium text-sm text-red-700 dark:text-red-300">{task.title}</p>
+                                {task.description ? (
+                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
+                                ) : null}
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => updateTask.mutate({ id: task.id, patch: { status: "in_progress" } })}>
+                                  In progress
+                                </Button>
+                                <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => updateTask.mutate({ id: task.id, patch: { status: "done" } })}>
+                                  Mark done
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 px-2 text-xs"
+                                  onClick={() =>
+                                    selectedPersistedPostId
+                                      ? updateTask.mutate({ id: task.id, patch: { related_post_id: selectedPersistedPostId } })
+                                      : toast.error("Save/select a post first.")
+                                  }
+                                >
+                                  Link post
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
 
-          <div className="w-full lg:w-96 rounded-lg border border-border p-3">
-            <p className="text-xs font-semibold text-foreground mb-2">Add Task</p>
-            <div className="space-y-2">
-              <Input
-                value={newTaskTitle}
-                onChange={(e) => setNewTaskTitle(e.target.value)}
-                placeholder="Task title"
-                className="h-9"
-              />
-              <Textarea
-                value={newTaskDescription}
-                onChange={(e) => setNewTaskDescription(e.target.value)}
-                placeholder="Short description"
-                className="min-h-[72px]"
-              />
-              <div className="flex items-center justify-between gap-2">
-                <select
-                  value={taskPriority}
-                  onChange={(e) => setTaskPriority(e.target.value as "low" | "medium" | "high")}
-                  className="h-9 rounded-md border border-border bg-background px-3 text-sm"
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
+                    <div>
+                      <p className="text-sm font-semibold text-blue-600">In Progress ({inProgressTasks.length})</p>
+                      <div className="mt-2 grid gap-2">
+                        {inProgressTasks.map((task) => (
+                          <div key={task.id} className="rounded-lg border border-blue-200/70 bg-blue-50/30 p-3 dark:border-blue-900/40 dark:bg-blue-950/10">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="font-medium text-sm text-blue-700 dark:text-blue-300">{task.title}</p>
+                                {task.description ? (
+                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
+                                ) : null}
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => updateTask.mutate({ id: task.id, patch: { status: "pending" } })}>
+                                  Move to ToDo
+                                </Button>
+                                <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => updateTask.mutate({ id: task.id, patch: { status: "done" } })}>
+                                  Mark done
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 px-2 text-xs"
+                                  onClick={() =>
+                                    selectedPersistedPostId
+                                      ? updateTask.mutate({ id: task.id, patch: { related_post_id: selectedPersistedPostId } })
+                                      : toast.error("Save/select a post first.")
+                                  }
+                                >
+                                  Link post
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-semibold text-emerald-600">Done ({doneTasks.length})</p>
+                      <div className="mt-2 grid gap-2">
+                        {doneTasks.map((task) => (
+                          <div key={task.id} className="rounded-lg border border-emerald-200/70 bg-emerald-50/30 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/10">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="font-medium text-sm text-emerald-700 dark:text-emerald-300 inline-flex items-center gap-1">
+                                  <CheckCircle2 className="w-4 h-4" />
+                                  {task.title}
+                                </p>
+                                {task.description ? (
+                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
+                                ) : null}
+                              </div>
+                              <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => updateTask.mutate({ id: task.id, patch: { status: "in_progress" } })}>
+                                Re-open
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="w-full lg:w-96 rounded-lg border border-border p-3">
+              <p className="text-xs font-semibold text-foreground mb-2">Add Task</p>
+              <div className="space-y-2">
+                <Input
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                  placeholder="Task title"
+                  className="h-9"
+                />
+                <Textarea
+                  value={newTaskDescription}
+                  onChange={(e) => setNewTaskDescription(e.target.value)}
+                  placeholder="Short description"
+                  className="min-h-[72px]"
+                />
+                <div className="flex items-center justify-between gap-2">
+                  <select
+                    value={taskPriority}
+                    onChange={(e) => setTaskPriority(e.target.value as "low" | "medium" | "high")}
+                    className="h-9 rounded-md border border-border bg-background px-3 text-sm"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => createTask.mutate()}
+                    disabled={createTask.isPending || !newTaskTitle.trim()}
+                  >
+                    {createTask.isPending ? "Adding..." : "Add task"}
+                  </Button>
+                </div>
                 <Button
                   type="button"
+                  variant="outline"
                   size="sm"
-                  onClick={() => createTask.mutate()}
-                  disabled={createTask.isPending || !newTaskTitle.trim()}
+                  className="w-full"
+                  onClick={async () => {
+                    const existing = new Set(tasks.map((t) => t.title));
+                    const missingSeeds = LANDING_BACKLOG_TASKS.filter((seed) => !existing.has(seed.title));
+                    if (missingSeeds.length === 0) {
+                      toast.success("Landing backlog already synced.");
+                      return;
+                    }
+                    await supabase.from("blog_tasks").insert(
+                      missingSeeds.map((seed) => ({
+                        title: seed.title,
+                        description: seed.description,
+                        priority: seed.priority,
+                        status: "pending" as const,
+                      })),
+                    );
+                    await qc.invalidateQueries({ queryKey: ["admin-blog-tasks"] });
+                    toast.success("Landing backlog tasks synced.");
+                  }}
                 >
-                  {createTask.isPending ? "Adding..." : "Add task"}
+                  Sync Landing Tasks
                 </Button>
               </div>
             </div>
           </div>
-        </div>
+        ) : null}
       </div>
 
       <div
@@ -1913,6 +2271,30 @@ export const AdminBlogManager = () => {
                         }}
                         className="bg-background text-lg font-semibold"
                       />
+                    </div>
+
+                    {isEditing ? (
+                      <div className="rounded-lg border border-border bg-muted/30 p-3">
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Need a full long-form structure (like a complete course/article page)?
+                        </p>
+                        <Button type="button" variant="outline" size="sm" onClick={applyFullCourseTemplate}>
+                          Apply Full Course Structure
+                        </Button>
+                      </div>
+                    ) : null}
+                    <div className="rounded-lg border border-border bg-background p-3">
+                      <p className="text-xs font-semibold text-foreground mb-2">Required Structure Checklist</p>
+                      <div className="grid gap-1">
+                        {REQUIRED_POST_STRUCTURE_HEADINGS.map((heading) => {
+                          const ok = (selectedPost.content || "").toLowerCase().includes(`## ${heading}`.toLowerCase());
+                          return (
+                            <p key={heading} className={`text-xs ${ok ? "text-emerald-600" : "text-red-600"}`}>
+                              {ok ? "✓" : "•"} {heading}
+                            </p>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     <div>
