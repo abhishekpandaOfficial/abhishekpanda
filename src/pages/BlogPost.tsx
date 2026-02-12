@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
+import { useTheme } from "@/components/ThemeProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { Markdown } from "@/components/blog/Markdown";
@@ -32,7 +33,6 @@ import {
   Printer,
   Share2,
   FileText,
-  BookOpen,
   AtSign,
   Linkedin,
   Facebook,
@@ -107,37 +107,6 @@ const titleCaseLevel = (level: string | null | undefined) => {
   return level.charAt(0).toUpperCase() + level.slice(1);
 };
 
-type EpubChapter = {
-  id: string;
-  title: string;
-  fileName: string;
-  htmlBody: string;
-};
-
-const slugify = (input: string) =>
-  input
-    .toLowerCase()
-    .trim()
-    .replace(/['"]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-const escapeXml = (input: string) =>
-  input
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-
-const sanitizeId = (input: string, fallback: string) => {
-  const v = input
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return v || fallback;
-};
-
 const findSeriesTag = (tags: string[] | null | undefined) => {
   const list = tags || [];
   const explicit = list.find((t) => /series/i.test(t));
@@ -146,64 +115,18 @@ const findSeriesTag = (tags: string[] | null | undefined) => {
   return levelSeries || null;
 };
 
-const splitIntoEpubChapters = (htmlBody: string, fallbackTitle: string): EpubChapter[] => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(`<div id="epub-root">${htmlBody}</div>`, "text/html");
-  const root = doc.getElementById("epub-root");
-  if (!root) {
-    return [{ id: "chapter-1", title: fallbackTitle, fileName: "chapter-001.xhtml", htmlBody }];
-  }
-  const nodes = Array.from(root.childNodes);
-  const chapters: EpubChapter[] = [];
-  let currentTitle = fallbackTitle;
-  let currentNodes: Node[] = [];
-
-  const flush = () => {
-    if (currentNodes.length === 0) return;
-    const holder = doc.createElement("div");
-    currentNodes.forEach((n) => holder.appendChild(n.cloneNode(true)));
-    const idx = chapters.length + 1;
-    const base = sanitizeId(currentTitle, `chapter-${idx}`);
-    chapters.push({
-      id: `${base}-${idx}`,
-      title: currentTitle,
-      fileName: `chapter-${String(idx).padStart(3, "0")}.xhtml`,
-      htmlBody: holder.innerHTML || "<p></p>",
-    });
-    currentNodes = [];
-  };
-
-  for (const n of nodes) {
-    const isHeading =
-      n.nodeType === Node.ELEMENT_NODE && ["H1", "H2"].includes((n as HTMLElement).tagName);
-    if (isHeading) {
-      const headingText = (n.textContent || "").trim();
-      if (currentNodes.length > 0) flush();
-      currentTitle = headingText || `Chapter ${chapters.length + 1}`;
-      currentNodes.push(n.cloneNode(true));
-      continue;
-    }
-    currentNodes.push(n.cloneNode(true));
-  }
-
-  flush();
-  if (chapters.length === 0) {
-    return [{ id: "chapter-1", title: fallbackTitle, fileName: "chapter-001.xhtml", htmlBody }];
-  }
-  return chapters;
-};
-
 const BlogPost = () => {
   const { slug } = useParams();
   const { user } = useUserAuth();
+  const { theme } = useTheme();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [supportDialogOpen, setSupportDialogOpen] = useState(false);
   const [supportQrBroken, setSupportQrBroken] = useState(false);
-  const [downloadingEpub, setDownloadingEpub] = useState(false);
-  const [desktopLayout, setDesktopLayout] = useState(false);
+  const [completionFxActive, setCompletionFxActive] = useState(false);
+  const [completionFxPlayed, setCompletionFxPlayed] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const exportRef = useRef<HTMLDivElement | null>(null);
   const articleBodyRef = useRef<HTMLDivElement | null>(null);
@@ -287,6 +210,7 @@ const BlogPost = () => {
 
   const canReadPremium = !!user && entitlementOk;
   const shouldFetchFull = !!meta && (!meta.is_premium || canReadPremium);
+  const isPaywalled = !!meta?.is_premium && !canReadPremium;
 
   const { data: allPosts = [] } = useQuery({
     queryKey: ["blog-posts-cache-nav"],
@@ -421,24 +345,7 @@ const BlogPost = () => {
   }, [slug, post, shouldFetchFull]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const media = window.matchMedia("(min-width: 1024px)");
-    const sync = () => setDesktopLayout(media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
-
-  useEffect(() => {
     const computeProgress = () => {
-      if (desktopLayout && articleScrollRef.current) {
-        const scrollTop = articleScrollRef.current.scrollTop;
-        const scrollHeight =
-          articleScrollRef.current.scrollHeight - articleScrollRef.current.clientHeight;
-        const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-        setScrollProgress(Math.max(0, Math.min(100, pct)));
-        return;
-      }
       const el = document.documentElement;
       const scrollTop = el.scrollTop || document.body.scrollTop;
       const scrollHeight = el.scrollHeight - el.clientHeight;
@@ -446,16 +353,24 @@ const BlogPost = () => {
       setScrollProgress(Math.max(0, Math.min(100, pct)));
     };
     computeProgress();
-
-    if (desktopLayout && articleScrollRef.current) {
-      const el = articleScrollRef.current;
-      el.addEventListener("scroll", computeProgress, { passive: true });
-      return () => el.removeEventListener("scroll", computeProgress);
-    }
-
     window.addEventListener("scroll", computeProgress, { passive: true });
     return () => window.removeEventListener("scroll", computeProgress);
-  }, [desktopLayout, post?.id]);
+  }, [post?.id]);
+
+  useEffect(() => {
+    if (isPaywalled) return;
+    if (completionFxPlayed) return;
+    if (scrollProgress < 99.8) return;
+    setCompletionFxPlayed(true);
+    setCompletionFxActive(true);
+    const timeout = window.setTimeout(() => setCompletionFxActive(false), 2500);
+    return () => window.clearTimeout(timeout);
+  }, [scrollProgress, completionFxPlayed, isPaywalled]);
+
+  useEffect(() => {
+    setCompletionFxPlayed(false);
+    setCompletionFxActive(false);
+  }, [slug]);
 
   useEffect(() => {
     if (!contextMenu) return;
@@ -472,6 +387,16 @@ const BlogPost = () => {
       window.removeEventListener("resize", onGlobalClose);
     };
   }, [contextMenu, closeContextMenu]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("giscus")) return;
+    url.searchParams.delete("giscus");
+    const qs = url.searchParams.toString();
+    const nextUrl = `${url.pathname}${qs ? `?${qs}` : ""}${url.hash || ""}`;
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }, []);
 
   const toc = useMemo(() => {
     const md = post?.content || "";
@@ -518,7 +443,7 @@ const BlogPost = () => {
         }
       },
       {
-        root: desktopLayout ? articleScrollRef.current : null,
+        root: null,
         rootMargin: "0px 0px -60% 0px",
         threshold: [0, 1],
       },
@@ -526,7 +451,7 @@ const BlogPost = () => {
 
     filtered.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [toc, post?.updated_at, meta?.is_premium, canReadPremium, desktopLayout]);
+  }, [toc, post?.updated_at, meta?.is_premium, canReadPremium]);
 
   const nav = useMemo(() => {
     if (!meta) return { prev: null as any, next: null as any, related: [] as any[], series: null as any };
@@ -581,7 +506,7 @@ const BlogPost = () => {
   const description = meta?.meta_description || meta?.excerpt || "Blog post";
   const canonical = slug ? `${SITE_URL}/blog/${slug}` : `${SITE_URL}/blog`;
   const robots = meta?.is_premium ? "noindex,follow" : "index,follow";
-  const showPaywall = !!meta?.is_premium && !canReadPremium;
+  const showPaywall = isPaywalled;
   const canDownload = !showPaywall && !!post?.content;
   const effectiveOriginalPublished = meta?.original_published_at || meta?.published_at;
   const hasUpdatedDate =
@@ -644,22 +569,22 @@ const BlogPost = () => {
       y: Math.min(contextMenu.y, window.innerHeight - 220),
     };
   }, [contextMenu]);
+  const celebrationPieces = useMemo(
+    () =>
+      Array.from({ length: 26 }, (_, i) => ({
+        id: i,
+        angle: (360 / 26) * i,
+        distance: 90 + ((i * 17) % 130),
+        delay: (i % 7) * 0.04,
+        emoji: i % 4 === 0 ? "🌸" : i % 3 === 0 ? "✨" : "🎉",
+      })),
+    [],
+  );
 
   const scrollToTop = () => {
-    if (desktopLayout && articleScrollRef.current) {
-      articleScrollRef.current.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const scrollToBottom = () => {
-    if (desktopLayout && articleScrollRef.current) {
-      articleScrollRef.current.scrollTo({
-        top: articleScrollRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-      return;
-    }
     window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
   };
   const jumpToHeading = (id: string) => {
@@ -771,141 +696,6 @@ const BlogPost = () => {
     win.print();
   };
 
-  const handleDownloadEpub = async () => {
-    if (!canDownload || !exportRef.current || !meta) return;
-    setDownloadingEpub(true);
-    try {
-      const { default: JSZip } = await import("jszip");
-      const htmlBody = exportRef.current.innerHTML;
-      const docTitle = meta.title || "Untitled";
-      const nowIso = new Date().toISOString();
-      const chapters = splitIntoEpubChapters(htmlBody, docTitle);
-      const navItems = chapters
-        .map((c) => `<li><a href="${c.fileName}">${escapeXml(c.title)}</a></li>`)
-        .join("\n");
-      const manifestChapterItems = chapters
-        .map((c) => `<item id="${c.id}" href="${c.fileName}" media-type="application/xhtml+xml"/>`)
-        .join("\n");
-      const spineItems = chapters.map((c) => `<itemref idref="${c.id}"/>`).join("\n");
-      const ncxPoints = chapters
-        .map(
-          (c, idx) => `<navPoint id="navPoint-${idx + 1}" playOrder="${idx + 1}">
-  <navLabel><text>${escapeXml(c.title)}</text></navLabel>
-  <content src="${c.fileName}"/>
-</navPoint>`,
-        )
-        .join("\n");
-
-      const zip = new JSZip();
-      zip.file("mimetype", "application/epub+zip", { compression: "STORE" });
-      zip.folder("META-INF")?.file(
-        "container.xml",
-        `<?xml version="1.0" encoding="UTF-8"?>
-        <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
-          <rootfiles>
-            <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
-          </rootfiles>
-        </container>`,
-      );
-      const oebps = zip.folder("OEBPS");
-      oebps?.file(
-        "content.opf",
-        `<?xml version="1.0" encoding="UTF-8"?>
-        <package version="3.0" xmlns="http://www.idpf.org/2007/opf" unique-identifier="book-id">
-          <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-            <dc:identifier id="book-id">${escapeXml(meta.id)}</dc:identifier>
-            <dc:title>${escapeXml(docTitle)}</dc:title>
-            <dc:creator>Abhishek Panda</dc:creator>
-            <dc:language>en</dc:language>
-            <meta property="dcterms:modified">${nowIso}</meta>
-          </metadata>
-          <manifest>
-            <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
-            <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
-            <item id="style" href="styles.css" media-type="text/css"/>
-            ${manifestChapterItems}
-          </manifest>
-          <spine toc="ncx">
-            ${spineItems}
-          </spine>
-        </package>`,
-      );
-      oebps?.file(
-        "nav.xhtml",
-        `<?xml version="1.0" encoding="UTF-8"?>
-        <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
-          <head>
-            <title>${escapeXml(docTitle)} - Table of Contents</title>
-            <link rel="stylesheet" type="text/css" href="styles.css"/>
-          </head>
-          <body>
-            <nav epub:type="toc" id="toc">
-              <h1>Table of Contents</h1>
-              <ol>${navItems}</ol>
-            </nav>
-          </body>
-        </html>`,
-      );
-      oebps?.file(
-        "toc.ncx",
-        `<?xml version="1.0" encoding="UTF-8"?>
-        <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
-          <head>
-            <meta name="dtb:uid" content="${escapeXml(meta.id)}"/>
-            <meta name="dtb:depth" content="1"/>
-            <meta name="dtb:totalPageCount" content="0"/>
-            <meta name="dtb:maxPageNumber" content="0"/>
-          </head>
-          <docTitle><text>${escapeXml(docTitle)}</text></docTitle>
-          <navMap>${ncxPoints}</navMap>
-        </ncx>`,
-      );
-      oebps?.file(
-        "styles.css",
-        `html, body { margin: 0; padding: 0; }
-        body { font-family: -apple-system, "SF Pro Text", "Georgia", "Times New Roman", serif; color: #111827; line-height: 1.65; }
-        .chapter { padding: 1.2em 1.4em; }
-        h1, h2, h3 { line-height: 1.25; page-break-after: avoid; break-after: avoid-page; }
-        h1 { font-size: 1.8em; margin: 0 0 0.8em; }
-        h2 { font-size: 1.45em; margin: 1.2em 0 0.6em; }
-        p { margin: 0 0 0.9em; }
-        .excerpt { color: #6b7280; margin-bottom: 1em; }
-        pre { background: #f3f4f6; padding: 0.8em; border-radius: 0.6em; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
-        code { font-family: "SF Mono", "Menlo", "Consolas", monospace; }
-        img { max-width: 100%; height: auto; border-radius: 0.5em; page-break-inside: avoid; break-inside: avoid; }
-        table { width: 100%; border-collapse: collapse; margin: 1em 0; }
-        th, td { border: 1px solid #d1d5db; padding: 0.45em; text-align: left; }
-        blockquote { border-left: 0.25em solid #94a3b8; margin: 0.8em 0; padding: 0.4em 0 0.4em 0.8em; color: #334155; }
-        a { color: #1d4ed8; text-decoration: underline; }`,
-      );
-      chapters.forEach((chapter) => {
-        oebps?.file(
-          chapter.fileName,
-          `<?xml version="1.0" encoding="UTF-8"?>
-          <html xmlns="http://www.w3.org/1999/xhtml">
-            <head>
-              <title>${escapeXml(chapter.title)}</title>
-              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-              <link rel="stylesheet" type="text/css" href="styles.css"/>
-            </head>
-            <body>
-              <section class="chapter">${chapter.htmlBody}</section>
-            </body>
-          </html>`,
-        );
-      });
-      const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${slugify(docTitle)}.epub`;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 3000);
-    } finally {
-      setDownloadingEpub(false);
-    }
-  };
-
   if (metaLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -955,6 +745,28 @@ const BlogPost = () => {
           />
         </div>
       ) : null}
+      {completionFxActive ? (
+        <div className="pointer-events-none fixed inset-0 z-[70] overflow-hidden">
+          <div className="completion-boom">Boom! 100%</div>
+          {celebrationPieces.map((piece) => (
+            <span
+              key={piece.id}
+              className="completion-burst-piece"
+              style={
+                {
+                  left: "50%",
+                  top: "52%",
+                  "--burst-angle": `${piece.angle}deg`,
+                  "--burst-distance": `${piece.distance}px`,
+                  "--burst-delay": `${piece.delay}s`,
+                } as CSSProperties
+              }
+            >
+              {piece.emoji}
+            </span>
+          ))}
+        </div>
+      ) : null}
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -973,33 +785,27 @@ const BlogPost = () => {
 
       <Navigation />
       <main className="pt-24 pb-20">
-        <section className="container mx-auto px-4 max-w-6xl">
-          <div className="mb-6">
-            <Button asChild variant="outline" size="sm">
-              <Link to="/blog">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Link>
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-8 items-start">
+        <section className="container mx-auto px-4 max-w-[1320px]">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
             <article
               ref={articleScrollRef}
               onContextMenu={handleArticleContextMenu}
-              className="min-w-0 lg:h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-4 lg:overscroll-contain lg:scroll-smooth"
+              className="min-w-0 lg:pr-2"
             >
-              <header className="mb-8 rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-6 md:p-10 text-white">
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-700/70 bg-slate-900/60 px-3 py-1 text-xs text-slate-300">
+              <header className="relative mb-8 overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-background via-muted/40 to-background p-6 md:p-12 text-foreground dark:border-indigo-500/25 dark:from-slate-950 dark:via-blue-950 dark:to-slate-950 dark:text-white">
+                <div className="absolute inset-0 pointer-events-none hidden dark:block bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.20),transparent_60%)]" />
+                <div className="absolute -right-16 top-[-30px] h-40 w-40 rounded-full bg-blue-500/20 blur-2xl hidden dark:block" />
+                <div className="absolute -left-12 bottom-[-40px] h-36 w-36 rounded-full bg-indigo-500/20 blur-2xl hidden dark:block" />
+                <div className="relative inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1 text-xs text-muted-foreground mx-auto dark:border-slate-700/70 dark:bg-slate-900/60 dark:text-slate-300">
                   <House className="w-3.5 h-3.5" />
-                  <Link to="/" className="hover:text-white">Home</Link>
+                  <Link to="/" className="hover:text-foreground dark:hover:text-white">Home</Link>
                   <ChevronRight className="w-3.5 h-3.5" />
-                  <Link to="/blog" className="hover:text-white">Blog</Link>
+                  <Link to="/blog" className="hover:text-foreground dark:hover:text-white">Blog</Link>
                   <ChevronRight className="w-3.5 h-3.5" />
-                  <span className="max-w-[18rem] truncate text-slate-100">{meta.title}</span>
+                  <span className="max-w-[18rem] truncate text-foreground dark:text-slate-100">{meta.title}</span>
                 </div>
 
-                <div className="mt-4 flex flex-wrap items-center gap-2">
+                <div className="relative mt-4 flex flex-wrap items-center justify-center gap-2">
                   {meta.tags?.length ? (
                     meta.tags.map((tag) => (
                       <span
@@ -1034,18 +840,18 @@ const BlogPost = () => {
                   ) : null}
                 </div>
 
-                <h1 className="mt-5 text-3xl md:text-5xl font-black tracking-tight text-white leading-tight">
+                <h1 className="relative mt-6 text-center text-3xl md:text-6xl font-black tracking-tight text-foreground dark:text-white leading-tight max-w-5xl mx-auto">
                   {meta.title}
                 </h1>
 
-                <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-slate-300">
+                <div className="relative mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground dark:text-slate-300">
                   <span className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-indigo-300" />
+                    <Clock className="w-4 h-4 text-indigo-500 dark:text-indigo-300" />
                     {Math.max(1, meta.reading_time_minutes || 0)} min read
                   </span>
                   {effectiveOriginalPublished ? (
                     <span className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-indigo-300" />
+                      <Calendar className="w-4 h-4 text-indigo-500 dark:text-indigo-300" />
                       {new Date(effectiveOriginalPublished).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
@@ -1064,28 +870,49 @@ const BlogPost = () => {
                     </span>
                   ) : null}
                   <span className="flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-indigo-300" />
+                    <Eye className="w-4 h-4 text-indigo-500 dark:text-indigo-300" />
                     {(meta.views ?? 0).toLocaleString()} views
                   </span>
-                  <span className="px-2 py-1 rounded-full border border-slate-700 bg-slate-900/70 text-xs font-medium text-slate-200">
+                  <span className="px-2 py-1 rounded-full border border-border bg-background/70 text-xs font-medium text-foreground dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200">
                     {minutesRemaining} min remaining
                   </span>
-                  <span className="px-2 py-1 rounded-full border border-slate-700 bg-slate-900/70 text-xs font-medium text-slate-200">
+                  <span className="px-2 py-1 rounded-full border border-border bg-background/70 text-xs font-medium text-foreground dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200">
                     {minutesRead} min read already
                   </span>
                 </div>
 
-                <div className="mt-4 inline-flex items-center gap-3 rounded-full border border-slate-700 bg-slate-900/70 px-3 py-2">
+                <div className="relative mt-5 inline-flex items-center gap-3 rounded-full border border-border bg-background/80 px-3 py-2 mx-auto dark:border-slate-700 dark:bg-slate-900/70">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-400 to-cyan-400 text-slate-950 grid place-items-center font-bold">
                     AP
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-white">Abhishek Panda</p>
-                    <p className="text-xs text-slate-300">Software Engineer</p>
+                    <p className="text-sm font-semibold text-foreground dark:text-white">Abhishek Panda</p>
+                    <p className="text-xs text-muted-foreground dark:text-slate-300">Admin, Founder, Author</p>
                   </div>
                 </div>
 
-                <div className="mt-5 flex flex-wrap items-center gap-2">
+                <div className="relative mt-5 flex flex-wrap items-center justify-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadPdf}
+                    disabled={!canDownload}
+                    className="border-border/80 bg-background/80 text-foreground hover:bg-muted dark:border-slate-600 dark:bg-slate-900/60 dark:text-slate-100 dark:hover:bg-slate-800"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Preview & Download PDF
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShareDialogOpen(true)}
+                    className="border-border/80 bg-background/80 text-foreground hover:bg-muted dark:border-slate-600 dark:bg-slate-900/60 dark:text-slate-100 dark:hover:bg-slate-800"
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
+                  </Button>
                   <Button
                     type="button"
                     variant="outline"
@@ -1099,47 +926,12 @@ const BlogPost = () => {
                         // ignore
                       }
                     }}
+                    className="border-border/80 bg-background/80 text-foreground hover:bg-muted dark:border-slate-600 dark:bg-slate-900/60 dark:text-slate-100 dark:hover:bg-slate-800"
                   >
                     <LinkIcon className="w-4 h-4 mr-2" />
                     {shareCopied ? "Copied" : "Copy Link"}
                   </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => setShareDialogOpen(true)}>
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                  </Button>
                 </div>
-
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 lg:hidden">
-                  <Button type="button" variant="outline" size="sm" onClick={handleDownloadPdf} disabled={!canDownload}>
-                    <FileText className="w-4 h-4 mr-2" />
-                    PDF
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleDownloadEpub}
-                    disabled={!canDownload || downloadingEpub}
-                  >
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    {downloadingEpub ? "Preparing..." : "EPUB"}
-                  </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={() => setShareDialogOpen(true)}>
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                  </Button>
-                </div>
-
-                {meta.hero_image ? (
-                  <div className="mt-8 rounded-3xl overflow-hidden border border-border bg-card">
-                    <img
-                      src={meta.hero_image}
-                      alt={meta.title}
-                      className="w-full h-auto max-h-[420px] object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                ) : null}
               </header>
 
               {showPaywall ? (
@@ -1187,7 +979,10 @@ const BlogPost = () => {
                   <div ref={articleBodyRef}>
                     <Markdown
                       value={post?.content || ""}
-                      codeTheme={post?.code_theme || "github-light"}
+                      codeTheme={
+                        post?.code_theme ||
+                        (theme === "dark" ? "github-dark-default" : "github-light-default")
+                      }
                     />
                   </div>
 
@@ -1408,7 +1203,7 @@ const BlogPost = () => {
                   ) : null}
 
                   <div className="lg:hidden mt-10 space-y-4">
-                    <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-slate-100 p-5 dark:border-indigo-500/25 dark:from-slate-950 dark:to-slate-900">
+                    <div className="rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
                       <div className="inline-flex items-center gap-2 mb-4">
                         <span className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center">
                           <Flame className="w-4 h-4" />
@@ -1421,25 +1216,25 @@ const BlogPost = () => {
                             <Link
                               key={p.slug}
                               to={`/blog/${p.slug}`}
-                              className="flex items-start gap-3 rounded-lg px-2 py-2 hover:bg-slate-800/60 transition-colors"
+                              className="flex items-start gap-3 rounded-lg px-2 py-2 hover:bg-muted transition-colors"
                             >
-                              <span className="w-6 h-6 rounded-md bg-slate-200 text-slate-700 text-xs font-semibold inline-flex items-center justify-center dark:bg-slate-800 dark:text-slate-300">
+                              <span className="w-6 h-6 rounded-md bg-muted text-foreground text-xs font-semibold inline-flex items-center justify-center">
                                 {idx + 1}
                               </span>
-                              <span className="text-sm text-slate-700 line-clamp-2 dark:text-slate-300">{p.title}</span>
+                              <span className="text-sm text-foreground line-clamp-2">{p.title}</span>
                             </Link>
                           ))
                         ) : (
-                          <p className="text-sm text-slate-500 dark:text-slate-400">No popular articles yet.</p>
+                          <p className="text-sm text-muted-foreground">No popular articles yet.</p>
                         )}
                       </div>
-                      <Button asChild size="sm" variant="outline" className="w-full border-slate-300 bg-slate-200/70 text-slate-700 hover:bg-slate-300/80 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-700/70">
+                      <Button asChild size="sm" variant="outline" className="w-full">
                         <Link to="/blog">View all articles</Link>
                       </Button>
                     </div>
 
                     {toc.length > 0 && !showPaywall ? (
-                      <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-slate-100 p-5 dark:border-indigo-500/25 dark:from-slate-950 dark:to-slate-900">
+                      <div className="rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
                         <div className="flex items-center justify-between mb-4">
                           <div className="inline-flex items-center gap-2">
                             <span className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center">
@@ -1462,7 +1257,7 @@ const BlogPost = () => {
                               {Math.round(scrollProgress)}%
                             </div>
                           </div>
-                          <div className="text-xs text-slate-600 space-y-1 dark:text-slate-300">
+                          <div className="text-xs text-muted-foreground space-y-1">
                             <p>{totalReadMinutes} min total</p>
                             <p>{minutesRead} min read</p>
                             <p>{minutesRemaining} min pending</p>
@@ -1481,8 +1276,8 @@ const BlogPost = () => {
                                 }}
                                 className={`block text-sm rounded-lg px-2 py-2 transition-colors ${
                                   active
-                                    ? "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-slate-100"
-                                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60"
+                                    ? "bg-muted text-foreground"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                                 } ${h.depth === 3 ? "ml-4" : ""}`}
                               >
                                 <span className="text-xs text-slate-500 dark:text-slate-500 mr-2">{String(idx + 1).padStart(2, "0")}</span>
@@ -1492,11 +1287,11 @@ const BlogPost = () => {
                           })}
                         </nav>
                         <div className="grid grid-cols-2 gap-2 mt-4">
-                          <Button type="button" size="sm" variant="outline" className="border-slate-300 bg-slate-200/70 text-slate-700 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200" onClick={scrollToTop}>
+                          <Button type="button" size="sm" variant="outline" onClick={scrollToTop}>
                             <ArrowUp className="w-4 h-4 mr-1" />
                             Top
                           </Button>
-                          <Button type="button" size="sm" variant="outline" className="border-slate-300 bg-slate-200/70 text-slate-700 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200" onClick={scrollToBottom}>
+                          <Button type="button" size="sm" variant="outline" onClick={scrollToBottom}>
                             <ArrowDown className="w-4 h-4 mr-1" />
                             Bottom
                           </Button>
@@ -1512,7 +1307,13 @@ const BlogPost = () => {
                         <p className="text-sm text-white/90 mb-3">
                           Enjoyed this? Buy me a coffee to keep the content coming.
                         </p>
-                        <Button type="button" size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={() => setSupportDialogOpen(true)}>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="bg-white text-slate-900 hover:bg-slate-100 border border-white/70 font-semibold shadow"
+                          onClick={() => setSupportDialogOpen(true)}
+                        >
                           <Coffee className="w-4 h-4 mr-1" />
                           Buy me a coffee
                         </Button>
@@ -1523,13 +1324,13 @@ const BlogPost = () => {
               )}
             </article>
 
-            <aside className="hidden lg:flex lg:flex-col sticky top-24 h-[calc(100vh-7rem)] overflow-y-auto pr-1 space-y-4">
-              <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-slate-100 p-5 dark:border-indigo-500/25 dark:from-slate-950 dark:to-slate-900">
+            <aside className="hidden lg:flex lg:flex-col lg:sticky lg:top-24 lg:self-start pr-1 space-y-4">
+              <div className="rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
                 <div className="inline-flex items-center gap-2 mb-4">
                   <span className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center">
                     <Flame className="w-4 h-4" />
                   </span>
-                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Popular Articles</p>
+                  <p className="text-sm font-semibold text-foreground">Popular Articles</p>
                 </div>
                 <div className="space-y-2 mb-4">
                   {popularPosts.length > 0 ? (
@@ -1537,31 +1338,31 @@ const BlogPost = () => {
                       <Link
                         key={p.slug}
                         to={`/blog/${p.slug}`}
-                        className="flex items-start gap-3 rounded-lg px-2 py-2 hover:bg-slate-800/60 transition-colors"
+                        className="flex items-start gap-3 rounded-lg px-2 py-2 hover:bg-muted transition-colors"
                       >
-                        <span className="w-6 h-6 rounded-md bg-slate-200 text-slate-700 text-xs font-semibold inline-flex items-center justify-center dark:bg-slate-800 dark:text-slate-300">
+                        <span className="w-6 h-6 rounded-md bg-muted text-foreground text-xs font-semibold inline-flex items-center justify-center">
                           {idx + 1}
                         </span>
-                        <span className="text-sm text-slate-700 line-clamp-2 dark:text-slate-300">{p.title}</span>
+                        <span className="text-sm text-foreground line-clamp-2">{p.title}</span>
                       </Link>
                     ))
                   ) : (
-                    <p className="text-sm text-slate-500 dark:text-slate-400">No popular articles yet.</p>
+                    <p className="text-sm text-muted-foreground">No popular articles yet.</p>
                   )}
                 </div>
-                <Button asChild size="sm" variant="outline" className="w-full border-slate-300 bg-slate-200/70 text-slate-700 hover:bg-slate-300/80 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-700/70">
+                <Button asChild size="sm" variant="outline" className="w-full">
                   <Link to="/blog">View all articles</Link>
                 </Button>
               </div>
 
               {toc.length > 0 && !showPaywall ? (
-                <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-slate-100 p-5 dark:border-indigo-500/25 dark:from-slate-950 dark:to-slate-900">
+                      <div className="rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
                   <div className="flex items-center justify-between mb-4">
                     <div className="inline-flex items-center gap-2">
                       <span className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center">
                         <ListOrdered className="w-4 h-4" />
                       </span>
-                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">On This Page</p>
+                            <p className="text-sm font-semibold text-foreground">On This Page</p>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       {activeTocIndex >= 0 ? activeTocIndex + 1 : 1} / {toc.length}
@@ -1578,7 +1379,7 @@ const BlogPost = () => {
                         {Math.round(scrollProgress)}%
                       </div>
                     </div>
-                    <div className="text-xs text-slate-600 space-y-1 dark:text-slate-300">
+                  <div className="text-xs text-muted-foreground space-y-1">
                       <p>{totalReadMinutes} min total</p>
                       <p>{minutesRead} min read</p>
                       <p>{minutesRemaining} min pending</p>
@@ -1597,8 +1398,8 @@ const BlogPost = () => {
                           }}
                           className={`block text-sm rounded-lg px-2 py-2 transition-colors ${
                             active
-                              ? "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-slate-100"
-                              : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/60"
+                              ? "bg-muted text-foreground"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
                           } ${h.depth === 3 ? "ml-4" : ""}`}
                         >
                           <span className="text-xs text-slate-500 mr-2">{String(idx + 1).padStart(2, "0")}</span>
@@ -1608,11 +1409,11 @@ const BlogPost = () => {
                     })}
                   </nav>
                   <div className="grid grid-cols-2 gap-2 mt-4">
-                    <Button type="button" size="sm" variant="outline" className="border-slate-300 bg-slate-200/70 text-slate-700 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200" onClick={scrollToTop}>
+                    <Button type="button" size="sm" variant="outline" onClick={scrollToTop}>
                       <ArrowUp className="w-4 h-4 mr-1" />
                       Top
                     </Button>
-                    <Button type="button" size="sm" variant="outline" className="border-slate-300 bg-slate-200/70 text-slate-700 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200" onClick={scrollToBottom}>
+                    <Button type="button" size="sm" variant="outline" onClick={scrollToBottom}>
                       <ArrowDown className="w-4 h-4 mr-1" />
                       Bottom
                     </Button>
@@ -1628,37 +1429,19 @@ const BlogPost = () => {
                   <p className="text-sm text-white/90 mb-3">
                     Enjoyed this? Buy me a coffee to keep the content coming.
                   </p>
-                  <Button type="button" size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={() => setSupportDialogOpen(true)}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    className="bg-white text-slate-900 hover:bg-slate-100 border border-white/70 font-semibold shadow"
+                    onClick={() => setSupportDialogOpen(true)}
+                  >
                     <Coffee className="w-4 h-4 mr-1" />
                     Buy me a coffee
                   </Button>
                 </div>
               ) : null}
 
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <p className="text-sm font-semibold text-foreground mb-3">Actions</p>
-                <div className="space-y-2">
-                  <Button type="button" variant="outline" size="sm" className="w-full justify-start" onClick={handleDownloadPdf} disabled={!canDownload}>
-                    <FileText className="w-4 h-4 mr-2" />
-                    Download PDF
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                    onClick={handleDownloadEpub}
-                    disabled={!canDownload || downloadingEpub}
-                  >
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    {downloadingEpub ? "Preparing EPUB..." : "Download EPUB"}
-                  </Button>
-                  <Button type="button" variant="outline" size="sm" className="w-full justify-start" onClick={() => setShareDialogOpen(true)}>
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                  </Button>
-                </div>
-              </div>
             </aside>
           </div>
         </section>
