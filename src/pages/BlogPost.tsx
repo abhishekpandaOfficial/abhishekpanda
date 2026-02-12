@@ -208,6 +208,9 @@ const BlogPost = () => {
   const exportRef = useRef<HTMLDivElement | null>(null);
   const articleBodyRef = useRef<HTMLDivElement | null>(null);
   const articleScrollRef = useRef<HTMLElement | null>(null);
+  const closeContextMenu = useCallback(() => {
+    setContextMenu(null);
+  }, []);
 
   const { data: meta, isLoading: metaLoading, error: metaError } = useQuery({
     queryKey: ["blog-post-meta", slug],
@@ -628,10 +631,6 @@ const BlogPost = () => {
     const explicit = (post?.source_code_url || meta?.source_code_url || "").trim();
     return explicit || DEFAULT_GITHUB_SOURCE_URL;
   }, [post?.source_code_url, meta?.source_code_url]);
-
-  const closeContextMenu = useCallback(() => {
-    setContextMenu(null);
-  }, []);
 
   const handleArticleContextMenu = (event: ReactMouseEvent<HTMLElement>) => {
     event.preventDefault();
