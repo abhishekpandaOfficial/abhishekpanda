@@ -4,9 +4,6 @@ import {
   Linkedin,
   Github,
   Globe,
-  Hash,
-  BookOpen,
-  Layers,
   Twitter,
   Facebook,
   MessageCircle,
@@ -15,6 +12,7 @@ import {
   Music2,
   Bookmark,
 } from "lucide-react";
+import { SiHashnode, SiMedium, SiStackexchange, SiSubstack } from "react-icons/si";
 import { StackcraftIcon } from "@/components/icons/StackcraftIcon";
 
 export type SocialIconKey =
@@ -52,13 +50,13 @@ export function iconForKey(key: string) {
     case "x":
       return Twitter; // lucide "Twitter" glyph; link label says X.
     case "medium":
-      return BookOpen;
+      return SiMedium;
     case "substack":
-      return Layers;
+      return SiSubstack;
     case "hashnode":
-      return Hash;
+      return SiHashnode;
     case "stackexchange":
-      return Layers;
+      return SiStackexchange;
     case "stackcraft":
       return StackcraftIcon as any;
     case "website":

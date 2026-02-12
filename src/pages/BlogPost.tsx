@@ -1324,7 +1324,8 @@ const BlogPost = () => {
               )}
             </article>
 
-            <aside className="hidden lg:flex lg:flex-col lg:sticky lg:top-24 lg:self-start pr-1 space-y-4">
+            <aside className="hidden lg:block lg:self-start">
+              <div className="lg:fixed lg:top-24 lg:right-[max(1rem,calc((100vw-1320px)/2+1rem))] lg:w-[340px] max-h-[calc(100vh-6.5rem)] overflow-y-auto pr-1 space-y-4">
               <div className="rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
                 <div className="inline-flex items-center gap-2 mb-4">
                   <span className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center">
@@ -1441,6 +1442,7 @@ const BlogPost = () => {
                   </Button>
                 </div>
               ) : null}
+              </div>
 
             </aside>
           </div>

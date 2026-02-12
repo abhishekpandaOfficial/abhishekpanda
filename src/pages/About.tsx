@@ -14,7 +14,13 @@ import { BookNewsletterPopup } from "@/components/BookNewsletterPopup";
 import {
   Download, 
   Award,
-  Phone
+  Phone,
+  Briefcase,
+  Landmark,
+  Compass,
+  Sun,
+  Palette,
+  Heart,
 } from "lucide-react";
 
 // Import hero images
@@ -26,12 +32,60 @@ import artistic from "@/assets/about/artistic.jpg";
 import family from "@/assets/about/family.jpg";
 
 const heroImages = [
-  { src: professional, alt: "Professional" },
-  { src: traditional, alt: "Traditional" },
-  { src: casual, alt: "Explorer" },
-  { src: lifestyle, alt: "Lifestyle" },
-  { src: artistic, alt: "Artistic" },
-  { src: family, alt: "Family" },
+  {
+    src: professional,
+    alt: "Professional",
+    title: "Professional",
+    caption: "Leadership & Architecture",
+    borderGradient: "linear-gradient(135deg, #22d3ee, #3b82f6, #6366f1)",
+    badgeColor: "bg-cyan-500/85 text-white",
+    icon: Briefcase,
+  },
+  {
+    src: traditional,
+    alt: "Traditional",
+    title: "Traditional",
+    caption: "Culture & Roots",
+    borderGradient: "linear-gradient(135deg, #f59e0b, #f97316, #ef4444)",
+    badgeColor: "bg-amber-500/85 text-white",
+    icon: Landmark,
+  },
+  {
+    src: casual,
+    alt: "Explorer",
+    title: "Explorer",
+    caption: "Curious & Grounded",
+    borderGradient: "linear-gradient(135deg, #10b981, #14b8a6, #06b6d4)",
+    badgeColor: "bg-emerald-500/85 text-white",
+    icon: Compass,
+  },
+  {
+    src: lifestyle,
+    alt: "Lifestyle",
+    title: "Lifestyle",
+    caption: "Balanced Momentum",
+    borderGradient: "linear-gradient(135deg, #f43f5e, #ec4899, #a855f7)",
+    badgeColor: "bg-pink-500/85 text-white",
+    icon: Sun,
+  },
+  {
+    src: artistic,
+    alt: "Artistic",
+    title: "Artistic",
+    caption: "Creativity in Motion",
+    borderGradient: "linear-gradient(135deg, #8b5cf6, #6366f1, #3b82f6)",
+    badgeColor: "bg-violet-500/85 text-white",
+    icon: Palette,
+  },
+  {
+    src: family,
+    alt: "Family",
+    title: "Family",
+    caption: "Values First",
+    borderGradient: "linear-gradient(135deg, #ef4444, #f97316, #f59e0b)",
+    badgeColor: "bg-rose-500/85 text-white",
+    icon: Heart,
+  },
 ];
 
 
@@ -51,6 +105,7 @@ const About = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const constraintsRef = useRef(null);
+  const activeImage = heroImages[currentImageIndex];
 
   // Auto-rotate images
   useEffect(() => {
@@ -151,7 +206,27 @@ const About = () => {
                   className="relative w-72 h-80 sm:w-80 sm:h-96 md:w-[400px] md:h-[480px] mx-auto"
                 >
                   {/* Glow effect */}
-                  <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary/30 via-secondary/20 to-purple/30 blur-2xl animate-pulse-glow" />
+                  <motion.div
+                    key={`glow-${currentImageIndex}`}
+                    className="absolute -inset-5 rounded-[2rem] blur-2xl"
+                    style={{
+                      backgroundImage: activeImage.borderGradient,
+                      opacity: 0.35,
+                    }}
+                    initial={{ opacity: 0.1, scale: 0.95 }}
+                    animate={{ opacity: 0.35, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  />
+                  <motion.div
+                    key={`frame-${currentImageIndex}`}
+                    className="absolute -inset-1 rounded-[1.8rem] p-[2px]"
+                    style={{ backgroundImage: activeImage.borderGradient }}
+                    initial={{ opacity: 0.5, rotate: -2 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    transition={{ duration: 0.45 }}
+                  >
+                    <div className="h-full w-full rounded-[1.65rem] bg-background/65 backdrop-blur-[1px]" />
+                  </motion.div>
                   
                   {/* Main image container with swipe */}
                   <motion.div 
@@ -188,6 +263,27 @@ const About = () => {
                     
                     {/* Subtle gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent pointer-events-none" />
+
+                    <motion.div
+                      key={`icon-badge-${currentImageIndex}`}
+                      initial={{ opacity: 0, y: -8, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ duration: 0.35 }}
+                      className={`absolute top-4 left-4 md:top-5 md:left-5 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold backdrop-blur-sm shadow-lg ${activeImage.badgeColor}`}
+                    >
+                      <activeImage.icon className="w-3.5 h-3.5" />
+                      {activeImage.title}
+                    </motion.div>
+
+                    <motion.div
+                      key={`caption-badge-${currentImageIndex}`}
+                      initial={{ opacity: 0, y: 8, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ duration: 0.4, delay: 0.1 }}
+                      className="absolute right-4 bottom-4 md:right-5 md:bottom-5 rounded-full bg-black/45 text-white text-[11px] md:text-xs px-3 py-1.5 backdrop-blur-sm"
+                    >
+                      {activeImage.caption}
+                    </motion.div>
                     
                     {/* Swipe hint on mobile */}
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:hidden">
@@ -204,15 +300,20 @@ const About = () => {
 
                   {/* Thumbnail dots */}
                   <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
-                    {heroImages.map((_, index) => (
+                    {heroImages.map((image, index) => (
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
                         className={`w-2 h-2 rounded-full transition-all duration-300 ${
                           currentImageIndex === index
-                            ? "bg-primary w-6"
+                            ? "w-7"
                             : "bg-muted-foreground/40 hover:bg-muted-foreground/60"
                         }`}
+                        style={
+                          currentImageIndex === index
+                            ? { backgroundImage: image.borderGradient }
+                            : undefined
+                        }
                       />
                     ))}
                   </div>

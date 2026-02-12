@@ -18,26 +18,13 @@ import {
   ArrowRight,
   Rss
 } from "lucide-react";
+import { SiHashnode, SiMedium, SiSubstack } from "react-icons/si";
 import { StackcraftIcon } from "@/components/icons/StackcraftIcon";
 
 // Platform icons
-const MediumIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-    <path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/>
-  </svg>
-);
-
-const SubstackIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-    <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/>
-  </svg>
-);
-
-const HashnodeIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-    <path d="M22.351 8.019l-6.37-6.37a5.63 5.63 0 00-7.962 0l-6.37 6.37a5.63 5.63 0 000 7.962l6.37 6.37a5.63 5.63 0 007.962 0l6.37-6.37a5.63 5.63 0 000-7.962zM12 15.953a3.953 3.953 0 110-7.906 3.953 3.953 0 010 7.906z"/>
-  </svg>
-);
+const MediumIcon = ({ className = "w-5 h-5" }: { className?: string }) => <SiMedium className={className} />;
+const SubstackIcon = ({ className = "w-5 h-5" }: { className?: string }) => <SiSubstack className={className} />;
+const HashnodeIcon = ({ className = "w-5 h-5" }: { className?: string }) => <SiHashnode className={className} />;
 
 interface BlogPost {
   id: string;
