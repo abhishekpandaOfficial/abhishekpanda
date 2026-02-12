@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       activity_log: {
@@ -68,6 +43,39 @@ export type Database = {
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      admin_api_keys: {
+        Row: {
+          api_key: string
+          created_at: string
+          id: string
+          last_used: string | null
+          name: string
+          scopes: string[]
+          status: string
+          user_id: string
+        }
+        Insert: {
+          api_key: string
+          created_at?: string
+          id?: string
+          last_used?: string | null
+          name: string
+          scopes?: string[]
+          status?: string
+          user_id: string
+        }
+        Update: {
+          api_key?: string
+          created_at?: string
+          id?: string
+          last_used?: string | null
+          name?: string
+          scopes?: string[]
+          status?: string
           user_id?: string
         }
         Relationships: []
@@ -210,6 +218,146 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_webhooks: {
+        Row: {
+          created_at: string
+          events: Json
+          id: string
+          last_triggered: string | null
+          name: string
+          status: string
+          success_rate: number
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          events?: Json
+          id?: string
+          last_triggered?: string | null
+          name: string
+          status?: string
+          success_rate?: number
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          events?: Json
+          id?: string
+          last_triggered?: string | null
+          name?: string
+          status?: string
+          success_rate?: number
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      automation_workflows: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          last_run: string | null
+          name: string
+          run_count: number
+          status: string
+          steps: Json
+          trigger: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_run?: string | null
+          name: string
+          run_count?: number
+          status?: string
+          steps?: Json
+          trigger: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_run?: string | null
+          name?: string
+          run_count?: number
+          status?: string
+          steps?: Json
+          trigger?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      blog_post_versions: {
+        Row: {
+          code_theme: string | null
+          color: string | null
+          content: string | null
+          created_at: string
+          excerpt: string | null
+          hero_image: string | null
+          id: string
+          is_locked: boolean | null
+          meta_description: string | null
+          meta_title: string | null
+          post_id: string | null
+          section_id: string | null
+          tags: string[] | null
+          title: string | null
+        }
+        Insert: {
+          code_theme?: string | null
+          color?: string | null
+          content?: string | null
+          created_at?: string
+          excerpt?: string | null
+          hero_image?: string | null
+          id?: string
+          is_locked?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          post_id?: string | null
+          section_id?: string | null
+          tags?: string[] | null
+          title?: string | null
+        }
+        Update: {
+          code_theme?: string | null
+          color?: string | null
+          content?: string | null
+          created_at?: string
+          excerpt?: string | null
+          hero_image?: string | null
+          id?: string
+          is_locked?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          post_id?: string | null
+          section_id?: string | null
+          tags?: string[] | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_post_versions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author_id: string | null
@@ -230,7 +378,7 @@ export type Database = {
           published_at: string | null
           section_id: string | null
           slug: string
-          sort_order: number | null
+          sort_order: number
           tags: string[] | null
           title: string
           updated_at: string
@@ -255,7 +403,7 @@ export type Database = {
           published_at?: string | null
           section_id?: string | null
           slug: string
-          sort_order?: number | null
+          sort_order?: number
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -280,84 +428,21 @@ export type Database = {
           published_at?: string | null
           section_id?: string | null
           slug?: string
-          sort_order?: number | null
+          sort_order?: number
           tags?: string[] | null
           title?: string
           updated_at?: string
           views?: number | null
         }
-        Relationships: []
-      }
-      blog_tasks: {
-        Row: {
-          created_at: string
-          description: string | null
-          due_at: string | null
-          id: string
-          priority: string
-          related_post_id: string | null
-          status: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          due_at?: string | null
-          id?: string
-          priority?: string
-          related_post_id?: string | null
-          status?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          due_at?: string | null
-          id?: string
-          priority?: string
-          related_post_id?: string | null
-          status?: string
-          title?: string
-          updated_at?: string
-        }
         Relationships: [
           {
-            foreignKeyName: "blog_tasks_related_post_id_fkey"
-            columns: ["related_post_id"]
+            foreignKeyName: "blog_posts_section_id_fkey"
+            columns: ["section_id"]
             isOneToOne: false
-            referencedRelation: "blog_posts"
+            referencedRelation: "blog_sections"
             referencedColumns: ["id"]
           },
         ]
-      }
-      blog_tag_styles: {
-        Row: {
-          bg_color: string
-          border_color: string
-          created_at: string
-          tag: string
-          text_color: string
-          updated_at: string
-        }
-        Insert: {
-          bg_color?: string
-          border_color?: string
-          created_at?: string
-          tag: string
-          text_color?: string
-          updated_at?: string
-        }
-        Update: {
-          bg_color?: string
-          border_color?: string
-          created_at?: string
-          tag?: string
-          text_color?: string
-          updated_at?: string
-        }
-        Relationships: []
       }
       blog_posts_public_cache: {
         Row: {
@@ -440,6 +525,107 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_sections: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      blog_tag_styles: {
+        Row: {
+          bg_color: string
+          border_color: string
+          created_at: string
+          tag: string
+          text_color: string
+          updated_at: string
+        }
+        Insert: {
+          bg_color?: string
+          border_color?: string
+          created_at?: string
+          tag: string
+          text_color?: string
+          updated_at?: string
+        }
+        Update: {
+          bg_color?: string
+          border_color?: string
+          created_at?: string
+          tag?: string
+          text_color?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      blog_tasks: {
+        Row: {
+          created_at: string
+          description: string | null
+          due_at: string | null
+          id: string
+          priority: string
+          related_post_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          priority?: string
+          related_post_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          priority?: string
+          related_post_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_tasks_related_post_id_fkey"
+            columns: ["related_post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_requests: {
         Row: {
           created_at: string
@@ -484,6 +670,12 @@ export type Database = {
           level: string | null
           long_description: string | null
           modules: Json | null
+          one_to_one_duration_minutes: number | null
+          one_to_one_enabled: boolean | null
+          one_to_one_end_hour_ist: number | null
+          one_to_one_pay_after_schedule: boolean | null
+          one_to_one_price_inr: number | null
+          one_to_one_start_hour_ist: number | null
           outcomes: string[] | null
           price_amount: number | null
           price_currency: string | null
@@ -507,6 +699,12 @@ export type Database = {
           level?: string | null
           long_description?: string | null
           modules?: Json | null
+          one_to_one_duration_minutes?: number | null
+          one_to_one_enabled?: boolean | null
+          one_to_one_end_hour_ist?: number | null
+          one_to_one_pay_after_schedule?: boolean | null
+          one_to_one_price_inr?: number | null
+          one_to_one_start_hour_ist?: number | null
           outcomes?: string[] | null
           price_amount?: number | null
           price_currency?: string | null
@@ -530,6 +728,12 @@ export type Database = {
           level?: string | null
           long_description?: string | null
           modules?: Json | null
+          one_to_one_duration_minutes?: number | null
+          one_to_one_enabled?: boolean | null
+          one_to_one_end_hour_ist?: number | null
+          one_to_one_pay_after_schedule?: boolean | null
+          one_to_one_price_inr?: number | null
+          one_to_one_start_hour_ist?: number | null
           outcomes?: string[] | null
           price_amount?: number | null
           price_currency?: string | null
@@ -629,6 +833,293 @@ export type Database = {
           widget_config?: Json | null
           widget_type?: string
           width?: number | null
+        }
+        Relationships: []
+      }
+      drive_items: {
+        Row: {
+          created_at: string
+          id: string
+          is_encrypted: boolean
+          is_starred: boolean
+          mime_type: string | null
+          name: string
+          parent_id: string | null
+          size_bytes: number | null
+          storage_path: string | null
+          tags: string[]
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_encrypted?: boolean
+          is_starred?: boolean
+          mime_type?: string | null
+          name: string
+          parent_id?: string | null
+          size_bytes?: number | null
+          storage_path?: string | null
+          tags?: string[]
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_encrypted?: boolean
+          is_starred?: boolean
+          mime_type?: string | null
+          name?: string
+          parent_id?: string | null
+          size_bytes?: number | null
+          storage_path?: string | null
+          tags?: string[]
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drive_items_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "drive_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ebook_bundles: {
+        Row: {
+          created_at: string
+          discount_label: string | null
+          id: string
+          is_active: boolean
+          price_label: string | null
+          slug: string
+          sort_order: number
+          subtitle: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          discount_label?: string | null
+          id?: string
+          is_active?: boolean
+          price_label?: string | null
+          slug: string
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          discount_label?: string | null
+          id?: string
+          is_active?: boolean
+          price_label?: string | null
+          slug?: string
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      ebook_download_sessions: {
+        Row: {
+          created_at: string
+          ebook_slug: string
+          email: string
+          expires_at: string
+          id: string
+          token_jti: string
+        }
+        Insert: {
+          created_at?: string
+          ebook_slug: string
+          email: string
+          expires_at: string
+          id?: string
+          token_jti: string
+        }
+        Update: {
+          created_at?: string
+          ebook_slug?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          token_jti?: string
+        }
+        Relationships: []
+      }
+      ebook_lead_captures: {
+        Row: {
+          created_at: string
+          ebook_slug: string
+          email: string
+          id: string
+          mobile: string
+          name: string
+          request_ip: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          ebook_slug: string
+          email: string
+          id?: string
+          mobile: string
+          name: string
+          request_ip?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          ebook_slug?: string
+          email?: string
+          id?: string
+          mobile?: string
+          name?: string
+          request_ip?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      ebook_otp_codes: {
+        Row: {
+          attempts: number
+          code_hash: string
+          created_at: string
+          ebook_slug: string
+          email: string
+          expires_at: string
+          id: string
+          request_ip: string | null
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          created_at?: string
+          ebook_slug: string
+          email: string
+          expires_at: string
+          id?: string
+          request_ip?: string | null
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          created_at?: string
+          ebook_slug?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          request_ip?: string | null
+        }
+        Relationships: []
+      }
+      ebook_purchases: {
+        Row: {
+          created_at: string
+          ebook_slug: string
+          id: string
+          provider_ref: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          ebook_slug: string
+          id?: string
+          provider_ref?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          ebook_slug?: string
+          id?: string
+          provider_ref?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      ebooks: {
+        Row: {
+          category: Database["public"]["Enums"]["ebook_category"]
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          epub_url: string | null
+          id: string
+          is_coming_soon: boolean
+          is_featured: boolean
+          is_free: boolean
+          is_published: boolean
+          level: Database["public"]["Enums"]["ebook_level"]
+          libraries: string[]
+          pdf_url: string | null
+          preview_pdf_url: string | null
+          price_in_inr: number | null
+          sections: string[]
+          slug: string
+          subtitle: string | null
+          tech_stack: string[]
+          title: string
+          toc_json: Json | null
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["ebook_category"]
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          epub_url?: string | null
+          id?: string
+          is_coming_soon?: boolean
+          is_featured?: boolean
+          is_free?: boolean
+          is_published?: boolean
+          level: Database["public"]["Enums"]["ebook_level"]
+          libraries?: string[]
+          pdf_url?: string | null
+          preview_pdf_url?: string | null
+          price_in_inr?: number | null
+          sections?: string[]
+          slug: string
+          subtitle?: string | null
+          tech_stack?: string[]
+          title: string
+          toc_json?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["ebook_category"]
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          epub_url?: string | null
+          id?: string
+          is_coming_soon?: boolean
+          is_featured?: boolean
+          is_free?: boolean
+          is_published?: boolean
+          level?: Database["public"]["Enums"]["ebook_level"]
+          libraries?: string[]
+          pdf_url?: string | null
+          preview_pdf_url?: string | null
+          price_in_inr?: number | null
+          sections?: string[]
+          slug?: string
+          subtitle?: string | null
+          tech_stack?: string[]
+          title?: string
+          toc_json?: Json | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1209,6 +1700,90 @@ export type Database = {
         }
         Relationships: []
       }
+      llm_news_updates: {
+        Row: {
+          article_url: string
+          created_at: string
+          id: string
+          is_active: boolean
+          published_at: string
+          scraped_at: string
+          source_domain: string | null
+          source_logo_url: string | null
+          source_name: string
+          source_url: string | null
+          summary: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          article_url: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          published_at: string
+          scraped_at?: string
+          source_domain?: string | null
+          source_logo_url?: string | null
+          source_name: string
+          source_url?: string | null
+          summary?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          article_url?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          published_at?: string
+          scraped_at?: string
+          source_domain?: string | null
+          source_logo_url?: string | null
+          source_name?: string
+          source_url?: string | null
+          summary?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      llm_source_updates: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          source_name: string
+          source_updated_on: string | null
+          source_url: string
+          synced_at: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          source_name: string
+          source_updated_on?: string | null
+          source_url: string
+          synced_at?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          source_name?: string
+          source_updated_on?: string | null
+          source_url?: string
+          synced_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       loans: {
         Row: {
           created_at: string
@@ -1413,6 +1988,45 @@ export type Database = {
         }
         Relationships: []
       }
+      nimbus_notes: {
+        Row: {
+          category: string
+          content: string | null
+          created_at: string
+          id: string
+          is_archived: boolean
+          is_pinned: boolean
+          tags: string[]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          is_pinned?: boolean
+          tags?: string[]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          is_pinned?: boolean
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notification_settings: {
         Row: {
           created_at: string
@@ -1452,6 +2066,203 @@ export type Database = {
           sound_volume?: number | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      omniflow_post_variants: {
+        Row: {
+          ai_score: number
+          approval_status: string
+          approved_at: string | null
+          compressed_url: string | null
+          created_at: string
+          generated_content: string
+          hashtags: string[]
+          id: string
+          last_error: string | null
+          platform: string
+          post_id: string
+          preview_payload: Json | null
+          publish_status: string
+          published_at: string | null
+          quality_notes: string[]
+          seo_score: number
+          updated_at: string
+        }
+        Insert: {
+          ai_score?: number
+          approval_status?: string
+          approved_at?: string | null
+          compressed_url?: string | null
+          created_at?: string
+          generated_content: string
+          hashtags?: string[]
+          id?: string
+          last_error?: string | null
+          platform: string
+          post_id: string
+          preview_payload?: Json | null
+          publish_status?: string
+          published_at?: string | null
+          quality_notes?: string[]
+          seo_score?: number
+          updated_at?: string
+        }
+        Update: {
+          ai_score?: number
+          approval_status?: string
+          approved_at?: string | null
+          compressed_url?: string | null
+          created_at?: string
+          generated_content?: string
+          hashtags?: string[]
+          id?: string
+          last_error?: string | null
+          platform?: string
+          post_id?: string
+          preview_payload?: Json | null
+          publish_status?: string
+          published_at?: string | null
+          quality_notes?: string[]
+          seo_score?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "omniflow_post_variants_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "omniflow_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      omniflow_posts: {
+        Row: {
+          base_content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          published_at: string | null
+          selected_platforms: string[]
+          source_type: string
+          source_url: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          base_content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          selected_platforms?: string[]
+          source_type?: string
+          source_url?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          base_content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          selected_platforms?: string[]
+          source_type?: string
+          source_url?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      omniflow_publish_logs: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          platform: string
+          post_id: string
+          request_payload: Json | null
+          response_payload: Json | null
+          status: string
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          platform: string
+          post_id: string
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status: string
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          platform?: string
+          post_id?: string
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "omniflow_publish_logs_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "omniflow_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "omniflow_publish_logs_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "omniflow_post_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      originx_updates: {
+        Row: {
+          created_at: string
+          id: string
+          is_published: boolean
+          published_at: string
+          summary: string
+          tag: string | null
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string
+          summary: string
+          tag?: string | null
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string
+          summary?: string
+          tag?: string | null
+          title?: string
+          updated_at?: string
+          url?: string | null
         }
         Relationships: []
       }
@@ -1800,6 +2611,39 @@ export type Database = {
         }
         Relationships: []
       }
+      site_knowledge_base: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          priority: number
+          route: string | null
+          summary: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          priority?: number
+          route?: string | null
+          summary: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          priority?: number
+          route?: string | null
+          summary?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_metrics: {
         Row: {
           slug: string
@@ -1877,167 +2721,6 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
-      }
-      omniflow_posts: {
-        Row: {
-          base_content: string
-          created_at: string
-          created_by: string | null
-          id: string
-          published_at: string | null
-          selected_platforms: string[]
-          source_type: string
-          source_url: string | null
-          status: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          base_content: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          published_at?: string | null
-          selected_platforms?: string[]
-          source_type?: string
-          source_url?: string | null
-          status?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          base_content?: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          published_at?: string | null
-          selected_platforms?: string[]
-          source_type?: string
-          source_url?: string | null
-          status?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      omniflow_post_variants: {
-        Row: {
-          ai_score: number
-          approval_status: string
-          approved_at: string | null
-          compressed_url: string | null
-          created_at: string
-          generated_content: string
-          hashtags: string[]
-          id: string
-          last_error: string | null
-          platform: string
-          post_id: string
-          preview_payload: Json | null
-          publish_status: string
-          published_at: string | null
-          quality_notes: string[]
-          seo_score: number
-          updated_at: string
-        }
-        Insert: {
-          ai_score?: number
-          approval_status?: string
-          approved_at?: string | null
-          compressed_url?: string | null
-          created_at?: string
-          generated_content: string
-          hashtags?: string[]
-          id?: string
-          last_error?: string | null
-          platform: string
-          post_id: string
-          preview_payload?: Json | null
-          publish_status?: string
-          published_at?: string | null
-          quality_notes?: string[]
-          seo_score?: number
-          updated_at?: string
-        }
-        Update: {
-          ai_score?: number
-          approval_status?: string
-          approved_at?: string | null
-          compressed_url?: string | null
-          created_at?: string
-          generated_content?: string
-          hashtags?: string[]
-          id?: string
-          last_error?: string | null
-          platform?: string
-          post_id?: string
-          preview_payload?: Json | null
-          publish_status?: string
-          published_at?: string | null
-          quality_notes?: string[]
-          seo_score?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "omniflow_post_variants_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "omniflow_posts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      omniflow_publish_logs: {
-        Row: {
-          created_at: string
-          error: string | null
-          id: string
-          platform: string
-          post_id: string
-          request_payload: Json | null
-          response_payload: Json | null
-          status: string
-          variant_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          error?: string | null
-          id?: string
-          platform: string
-          post_id: string
-          request_payload?: Json | null
-          response_payload?: Json | null
-          status: string
-          variant_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          error?: string | null
-          id?: string
-          platform?: string
-          post_id?: string
-          request_payload?: Json | null
-          response_payload?: Json | null
-          status?: string
-          variant_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "omniflow_publish_logs_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "omniflow_posts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "omniflow_publish_logs_variant_id_fkey"
-            columns: ["variant_id"]
-            isOneToOne: false
-            referencedRelation: "omniflow_post_variants"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       study_sessions: {
         Row: {
@@ -2219,6 +2902,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      ebook_category:
+        | "DOTNET_ARCHITECT"
+        | "SOLID_DESIGN_PATTERNS"
+        | "INTERVIEW"
+        | "KAFKA"
+        | "AI_LLM"
+        | "ROADMAP"
+      ebook_level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "ARCHITECT"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2344,12 +3035,18 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      ebook_category: [
+        "DOTNET_ARCHITECT",
+        "SOLID_DESIGN_PATTERNS",
+        "INTERVIEW",
+        "KAFKA",
+        "AI_LLM",
+        "ROADMAP",
+      ],
+      ebook_level: ["BEGINNER", "INTERMEDIATE", "ADVANCED", "ARCHITECT"],
     },
   },
 } as const

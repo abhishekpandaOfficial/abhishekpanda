@@ -46,6 +46,31 @@ supabase functions deploy ebooks-verify-otp --project-ref qayywyddbprlhkqcqllf
 supabase functions deploy ebooks-download --project-ref qayywyddbprlhkqcqllf
 ```
 
+## Supabase Migration Workflow (Always Up To Date)
+
+Use the helper script to detect and push new schema changes safely:
+
+```sh
+# 1) Check pending migrations (local vs remote + dry-run)
+npm run supabase:status
+
+# 2) Create a new migration file
+npm run supabase:migration:new -- add_feature_name
+
+# 3) Apply pending migrations to linked project (with confirmation)
+npm run supabase:push
+
+# 4) Regenerate TS types only (optional)
+npm run supabase:types
+```
+
+If CLI auth/link is missing:
+
+```sh
+supabase login
+supabase link --project-ref qayywyddbprlhkqcqllf
+```
+
 ## Validation
 
 ```sh
