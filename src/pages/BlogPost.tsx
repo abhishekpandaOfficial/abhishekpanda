@@ -78,6 +78,12 @@ type PostRow = {
   code_theme: string | null;
   updated_at: string;
 };
+type TagStyleRow = {
+  tag: string;
+  bg_color: string;
+  text_color: string;
+  border_color: string;
+};
 
 const SITE_URL =
   (import.meta.env.VITE_SITE_URL as string | undefined) ||
@@ -323,6 +329,16 @@ const BlogPost = () => {
       return fallback.data ?? [];
     },
   });
+  const { data: tagStyles = [] } = useQuery({
+    queryKey: ["blog-tag-styles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_tag_styles")
+        .select("tag,bg_color,text_color,border_color");
+      if (error) return [];
+      return (data ?? []) as TagStyleRow[];
+    },
+  });
   const { data: originxUpdates = [] } = useOriginXUpdates(6);
   const { data: llmNews = [] } = useLLMNews(8);
 
@@ -516,6 +532,19 @@ const BlogPost = () => {
     });
     return (matched.length > 0 ? matched : llmNews).slice(0, 3);
   }, [llmNews, meta?.tags]);
+  const tagStyleMap = useMemo(
+    () => new Map(tagStyles.map((s) => [s.tag.toLowerCase(), s])),
+    [tagStyles],
+  );
+  const getTagStyle = (tag: string) => {
+    const style = tagStyleMap.get(tag.toLowerCase());
+    if (!style) return undefined;
+    return {
+      backgroundColor: style.bg_color,
+      color: style.text_color,
+      borderColor: style.border_color,
+    };
+  };
 
   const scrollToTop = () => {
     if (desktopLayout && articleScrollRef.current) {
@@ -864,7 +893,11 @@ const BlogPost = () => {
                 <div className="flex flex-wrap items-center gap-3 mb-4">
                   {meta.tags?.length ? (
                     meta.tags.map((tag) => (
-                      <span key={tag} className="px-3 py-1 rounded-full text-xs font-semibold border bg-primary/20 text-primary border-primary/30">
+                      <span
+                        key={tag}
+                        className="px-3 py-1 rounded-full text-xs font-semibold border"
+                        style={getTagStyle(tag)}
+                      >
                         {tag}
                       </span>
                     ))

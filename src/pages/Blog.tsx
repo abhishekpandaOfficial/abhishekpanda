@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
@@ -20,6 +20,12 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 const LEVELS = ["beginner", "fundamentals", "intermediate", "general", "architect"] as const;
+type TagStyleRow = {
+  tag: string;
+  bg_color: string;
+  text_color: string;
+  border_color: string;
+};
 
 const isMissingTableError = (err: unknown) => {
   if (!err || typeof err !== "object") return false;
@@ -61,6 +67,22 @@ const Blog = () => {
       throw res.error;
     },
   });
+
+  const { data: tagStyles = [] } = useQuery({
+    queryKey: ["blog-tag-styles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_tag_styles")
+        .select("tag,bg_color,text_color,border_color");
+      if (error) return [];
+      return (data ?? []) as TagStyleRow[];
+    },
+  });
+
+  const tagStyleMap = useMemo(
+    () => new Map(tagStyles.map((s) => [s.tag.toLowerCase(), s])),
+    [tagStyles],
+  );
 
   const categories = [
     { name: "All", count: posts.length },
@@ -110,6 +132,16 @@ const Blog = () => {
     if (!row || typeof row !== "object") return null;
     const v = (row as { updated_at?: unknown }).updated_at;
     return typeof v === "string" ? v : null;
+  };
+
+  const getTagStyle = (tag: string) => {
+    const style = tagStyleMap.get(tag.toLowerCase());
+    if (!style) return undefined;
+    return {
+      backgroundColor: style.bg_color,
+      color: style.text_color,
+      borderColor: style.border_color,
+    };
   };
 
   const originalPublishedAtFromRow = (row: unknown) => {
@@ -231,7 +263,7 @@ const Blog = () => {
 
             <div className="flex-1">
               {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="glass-card rounded-2xl overflow-hidden">
                       <Skeleton className="aspect-video w-full" />
@@ -255,7 +287,7 @@ const Blog = () => {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {filteredPosts.map((post, index) => {
                     const level = titleCaseLevel((post as { level?: string | null }).level || "general");
                     const originalPublishedAt = originalPublishedAtFromRow(post);
@@ -273,7 +305,7 @@ const Blog = () => {
                         transition={{ duration: 0.5, delay: index * 0.08 }}
                       >
                         <Link to={`/blog/${post.slug}`} className="block group">
-                          <div className={`glass-card-hover rounded-2xl overflow-hidden h-full ${post.is_premium ? "relative" : ""}`}>
+                          <div className={`glass-card-hover rounded-2xl overflow-hidden h-full border border-border/70 hover:border-primary/35 ${post.is_premium ? "relative" : ""}`}>
                             <div className="aspect-video bg-gradient-to-br from-primary/20 via-secondary/20 to-purple/20 relative overflow-hidden">
                               {post.hero_image ? (
                                 <img src={post.hero_image} alt={post.title} className="w-full h-full object-cover" />
@@ -297,29 +329,33 @@ const Blog = () => {
                               </div>
                             </div>
 
-                            <div className="p-6">
+                            <div className="p-5 md:p-6">
                               {post.tags?.length ? (
                                 <div className="flex flex-wrap gap-2">
                                   {post.tags.map((tag: string) => (
-                                    <span key={tag} className="text-primary text-xs font-semibold">
+                                    <span
+                                      key={tag}
+                                      className="px-2 py-1 rounded-full border text-xs font-semibold"
+                                      style={getTagStyle(tag)}
+                                    >
                                       {tag}
                                     </span>
                                   ))}
                                 </div>
                               ) : null}
 
-                              <h2 className="font-bold text-xl text-foreground mt-2 mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                              <h2 className="font-bold text-lg md:text-xl text-foreground mt-2 mb-3 group-hover:text-primary transition-colors line-clamp-2 min-h-[3.3rem]">
                                 {post.title}
                               </h2>
 
                               {post.excerpt ? (
-                                <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{post.excerpt}</p>
+                                <p className="text-muted-foreground text-sm mb-4 line-clamp-3 min-h-[3.8rem]">{post.excerpt}</p>
                               ) : null}
 
                               <div className="space-y-2 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-4 flex-wrap">
+                                <div className="flex items-center gap-3 flex-wrap">
                                   {originalPublishedAt ? (
-                                    <span className="flex items-center gap-1">
+                                    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-1 text-xs">
                                       <Calendar className="w-4 h-4" />
                                       {new Date(originalPublishedAt).toLocaleString("en-US", {
                                         month: "short",
@@ -330,11 +366,11 @@ const Blog = () => {
                                       })}
                                     </span>
                                   ) : null}
-                                  <span className="flex items-center gap-1">
+                                  <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-1 text-xs">
                                     <Clock className="w-4 h-4" />
                                     {getReadTime(readMinutesFromRow(post))} read
                                   </span>
-                                  <span className="flex items-center gap-1">
+                                  <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-1 text-xs">
                                     <Eye className="w-4 h-4" />
                                     {viewCountFromRow(post).toLocaleString()}
                                   </span>

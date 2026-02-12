@@ -105,6 +105,12 @@ type BlogTask = {
   created_at: string;
   updated_at: string;
 };
+type BlogTagStyle = {
+  tag: string;
+  bg_color: string;
+  text_color: string;
+  border_color: string;
+};
 
 const slugify = (input: string) =>
   input
@@ -666,6 +672,17 @@ export const AdminBlogManager = () => {
       return (data ?? []) as BlogTask[];
     },
   });
+  const { data: tagStyles = [] } = useQuery({
+    queryKey: ["admin-blog-tag-styles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_tag_styles")
+        .select("tag,bg_color,text_color,border_color")
+        .order("tag", { ascending: true });
+      if (error) return [];
+      return (data ?? []) as BlogTagStyle[];
+    },
+  });
 
   const filteredPosts = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -733,6 +750,19 @@ export const AdminBlogManager = () => {
   };
   const selectedPersistedPostId =
     selectedPost && posts.some((p) => p.id === selectedPost.id) ? selectedPost.id : null;
+  const tagStyleMap = useMemo(
+    () => new Map(tagStyles.map((style) => [style.tag.toLowerCase(), style])),
+    [tagStyles],
+  );
+  const getTagStyle = (tag: string) => {
+    const style = tagStyleMap.get(tag.toLowerCase());
+    if (!style) return undefined;
+    return {
+      backgroundColor: style.bg_color,
+      color: style.text_color,
+      borderColor: style.border_color,
+    };
+  };
 
   const estimateReadMinutes = (content: string | null) => {
     const wc = (content || "").split(/\s+/).filter(Boolean).length;
@@ -904,6 +934,14 @@ export const AdminBlogManager = () => {
       setSelectedPost(nextPost);
       setHasUnsavedChanges(true);
       scheduleAutosave(nextPost);
+      if (!tagStyleMap.has(newTag.toLowerCase())) {
+        upsertTagStyle.mutate({
+          tag: newTag,
+          bg_color: "#EEF2FF",
+          text_color: "#3730A3",
+          border_color: "#C7D2FE",
+        });
+      }
       setNewTag("");
     }
   };
@@ -1147,6 +1185,34 @@ export const AdminBlogManager = () => {
     },
     onError: (err: unknown) => toast.error(errMsg(err, "Failed to update task.")),
   });
+  const upsertTagStyle = useMutation({
+    mutationFn: async ({
+      tag,
+      bg_color,
+      text_color,
+      border_color,
+    }: {
+      tag: string;
+      bg_color: string;
+      text_color: string;
+      border_color: string;
+    }) => {
+      const payload = {
+        tag: tag.trim().toLowerCase(),
+        bg_color,
+        text_color,
+        border_color,
+      };
+      const { error } = await supabase.from("blog_tag_styles").upsert(payload);
+      if (error) throw error;
+      return true;
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["admin-blog-tag-styles"] });
+      await qc.invalidateQueries({ queryKey: ["blog-tag-styles"] });
+    },
+    onError: (err: unknown) => toast.error(errMsg(err, "Failed to save tag style.")),
+  });
 
   const uploadHeroImage = async (file: File) => {
     if (!selectedPost) return;
@@ -1306,10 +1372,20 @@ export const AdminBlogManager = () => {
             className="pl-10 bg-background border-input"
           />
         </div>
-        <Button onClick={handleCreatePost} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          New Post
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => window.open("/admin/social", "_blank", "noopener,noreferrer")}
+          >
+            <Globe className="w-4 h-4 mr-2" />
+            Open OmniFlow Social
+          </Button>
+          <Button onClick={handleCreatePost} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
+            <Plus className="w-4 h-4 mr-2" />
+            New Post
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card p-5">
@@ -1680,7 +1756,9 @@ export const AdminBlogManager = () => {
                   </div>
                   <div className="flex gap-1 mt-2 flex-wrap">
                     {(post.tags ?? []).map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                      <Badge key={tag} variant="secondary" className="text-xs border" style={getTagStyle(tag)}>
+                        {tag}
+                      </Badge>
                     ))}
                   </div>
                 </motion.div>
@@ -1927,15 +2005,72 @@ export const AdminBlogManager = () => {
 
                     <div>
                       <label className="text-sm font-medium text-foreground mb-2 block">Tags</label>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {(selectedPost.tags ?? []).map(tag => (
-                          <Badge key={tag} variant="secondary" className="gap-1">
-                            {tag}
-                            {isEditing && (
-                              <X className="w-3 h-3 cursor-pointer hover:text-destructive" onClick={() => handleRemoveTag(tag)} />
-                            )}
-                          </Badge>
-                        ))}
+                      <div className="space-y-2 mb-2">
+                        {(selectedPost.tags ?? []).map((tag) => {
+                          const currentStyle = tagStyleMap.get(tag.toLowerCase());
+                          return (
+                            <div key={tag} className="flex flex-wrap items-center gap-2 rounded-lg border border-border p-2">
+                              <Badge variant="secondary" className="gap-1 border" style={getTagStyle(tag)}>
+                                {tag}
+                                {isEditing && (
+                                  <X className="w-3 h-3 cursor-pointer hover:text-destructive" onClick={() => handleRemoveTag(tag)} />
+                                )}
+                              </Badge>
+                              {isEditing ? (
+                                <div className="flex flex-wrap items-center gap-2 text-xs">
+                                  <label className="inline-flex items-center gap-1 text-muted-foreground">
+                                    BG
+                                    <input
+                                      type="color"
+                                      value={currentStyle?.bg_color || "#EEF2FF"}
+                                      onChange={(e) =>
+                                        upsertTagStyle.mutate({
+                                          tag,
+                                          bg_color: e.target.value,
+                                          text_color: currentStyle?.text_color || "#3730A3",
+                                          border_color: currentStyle?.border_color || "#C7D2FE",
+                                        })
+                                      }
+                                      className="h-6 w-8 rounded border border-border bg-transparent"
+                                    />
+                                  </label>
+                                  <label className="inline-flex items-center gap-1 text-muted-foreground">
+                                    Text
+                                    <input
+                                      type="color"
+                                      value={currentStyle?.text_color || "#3730A3"}
+                                      onChange={(e) =>
+                                        upsertTagStyle.mutate({
+                                          tag,
+                                          bg_color: currentStyle?.bg_color || "#EEF2FF",
+                                          text_color: e.target.value,
+                                          border_color: currentStyle?.border_color || "#C7D2FE",
+                                        })
+                                      }
+                                      className="h-6 w-8 rounded border border-border bg-transparent"
+                                    />
+                                  </label>
+                                  <label className="inline-flex items-center gap-1 text-muted-foreground">
+                                    Border
+                                    <input
+                                      type="color"
+                                      value={currentStyle?.border_color || "#C7D2FE"}
+                                      onChange={(e) =>
+                                        upsertTagStyle.mutate({
+                                          tag,
+                                          bg_color: currentStyle?.bg_color || "#EEF2FF",
+                                          text_color: currentStyle?.text_color || "#3730A3",
+                                          border_color: e.target.value,
+                                        })
+                                      }
+                                      className="h-6 w-8 rounded border border-border bg-transparent"
+                                    />
+                                  </label>
+                                </div>
+                              ) : null}
+                            </div>
+                          );
+                        })}
                       </div>
                       {isEditing && (
                         <div className="flex gap-2">

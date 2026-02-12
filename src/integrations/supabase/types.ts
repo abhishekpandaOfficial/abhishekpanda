@@ -332,6 +332,33 @@ export type Database = {
           },
         ]
       }
+      blog_tag_styles: {
+        Row: {
+          bg_color: string
+          border_color: string
+          created_at: string
+          tag: string
+          text_color: string
+          updated_at: string
+        }
+        Insert: {
+          bg_color?: string
+          border_color?: string
+          created_at?: string
+          tag: string
+          text_color?: string
+          updated_at?: string
+        }
+        Update: {
+          bg_color?: string
+          border_color?: string
+          created_at?: string
+          tag?: string
+          text_color?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_posts_public_cache: {
         Row: {
           code_theme: string | null
