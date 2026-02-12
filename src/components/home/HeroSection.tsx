@@ -14,11 +14,11 @@ const badges = [
 ];
 
 const taglines = [
-  "Building the future, one commit at a time 🚀",
-  "Turning coffee into code & dreams into reality ☕",
-  "Where innovation meets architecture ✨",
-  "Code. Create. Conquer. 💡",
-  "Engineering excellence, delivered. 🎯",
+  "Designing systems that stay reliable as teams and traffic grow.",
+  "Turning product goals into maintainable engineering architecture.",
+  "Architecture-first thinking for cloud, data, and AI platforms.",
+  "Building practical software that ships and scales.",
+  "Engineering clarity from idea to production.",
 ];
 
 export const HeroSection = () => {
@@ -166,7 +166,7 @@ export const HeroSection = () => {
               <span className="gradient-text">Abhishek Panda</span>
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-6 font-medium">
-              .NET Architect • AI/ML Engineer • Cloud-Native Specialist
+              Architecting production-ready .NET, Cloud, and AI systems
             </p>
           </motion.div>
 
@@ -177,8 +177,7 @@ export const HeroSection = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="text-lg md:text-xl text-foreground/80 mb-8 max-w-2xl mx-auto"
           >
-            "Engineering ideas into reality,{" "}
-            <span className="gradient-text font-semibold">one clean build at a time.</span>"
+            Building reliable products with clear architecture, strong execution, and measurable outcomes.
           </motion.p>
 
           {/* Identity Badges */}

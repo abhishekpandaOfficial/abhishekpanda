@@ -552,12 +552,26 @@ const CourseDetail = () => {
           </div>
         </section>
 
-        {/* Course Curriculum */}
+        {/* Course Content */}
         <section className="container mx-auto px-4 mb-16">
-          <h2 className="text-3xl font-black mb-2">Course Curriculum</h2>
-          <p className="text-muted-foreground mb-8">
-            {course.modules.length} modules • {totalLessons} lessons • {freeLessons} free previews
+          <h2 className="text-3xl font-black mb-2">Course Content</h2>
+          <p className="text-muted-foreground mb-6">
+            Organized modules with clear lesson flow, locked segments, and preview lessons.
           </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Modules</p>
+              <p className="text-2xl font-black text-foreground">{course.modules.length}</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Lessons</p>
+              <p className="text-2xl font-black text-foreground">{totalLessons}</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Free Preview</p>
+              <p className="text-2xl font-black text-foreground">{freeLessons}</p>
+            </div>
+          </div>
 
           <div className="space-y-4">
             {course.modules.map((module, moduleIndex) => (
@@ -597,7 +611,9 @@ const CourseDetail = () => {
                         {module.lessons.map((lesson, lessonIndex) => (
                           <div
                             key={lessonIndex}
-                            className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors"
+                            className={`flex items-center justify-between p-3 rounded-xl transition-colors ${
+                              lesson.isFree ? "bg-emerald-500/5 border border-emerald-500/20" : "hover:bg-muted/50"
+                            }`}
                           >
                             <div className="flex items-center gap-3">
                               {lesson.isFree ? (

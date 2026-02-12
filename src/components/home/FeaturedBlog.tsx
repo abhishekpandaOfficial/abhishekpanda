@@ -17,15 +17,15 @@ export const FeaturedBlog = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-2 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-2 text-sm font-semibold mb-6">
             <Sparkles className="w-4 h-4" />
             Stackcraft Tracks
           </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-3 tracking-tight">
             Latest from the <span className="gradient-text">Blog</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Premium learning tracks and deep dives across architecture, cloud, data, and AI.
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+            Premium learning tracks and deep dives across architecture, cloud, data, and AI. Follow a structured path from fundamentals to architect-level depth.
           </p>
         </motion.div>
 

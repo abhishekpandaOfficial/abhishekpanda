@@ -145,16 +145,29 @@ const injectOrReplace = (html, { title, description, canonical, ogImage, robots,
 };
 
 const fetchPublishedPosts = async () => {
+  const selectV2 =
+    "title,slug,excerpt,hero_image,tags,is_premium,level,original_published_at,published_at,views,meta_title,meta_description,updated_at,is_published";
+  const selectLegacy =
+    "title,slug,excerpt,hero_image,tags,is_premium,published_at,meta_title,meta_description,updated_at,is_published";
+
   // Prefer the public cache table (supports premium metadata without exposing content).
   const cacheRes = await supabase
     .from("blog_posts_public_cache")
-    .select(
-      "title,slug,excerpt,hero_image,tags,is_premium,published_at,meta_title,meta_description,updated_at,is_published"
-    )
+    .select(selectV2)
     .eq("is_published", true)
     .order("published_at", { ascending: false });
 
   if (!cacheRes.error) return cacheRes.data ?? [];
+
+  const isSchemaDrift = cacheRes.error.code === "42703";
+  if (isSchemaDrift) {
+    const cacheLegacy = await supabase
+      .from("blog_posts_public_cache")
+      .select(selectLegacy)
+      .eq("is_published", true)
+      .order("published_at", { ascending: false });
+    if (!cacheLegacy.error) return cacheLegacy.data ?? [];
+  }
 
   // If migrations haven't been applied yet, fall back to blog_posts.
   if (cacheRes.error.code === "PGRST205") {
@@ -163,11 +176,22 @@ const fetchPublishedPosts = async () => {
     );
     const postsRes = await supabase
       .from("blog_posts")
-      .select(
-        "title,slug,excerpt,hero_image,tags,is_premium,published_at,meta_title,meta_description,updated_at,is_published"
-      )
+      .select(selectV2)
       .eq("is_published", true)
       .order("published_at", { ascending: false });
+
+    if (postsRes.error?.code === "42703") {
+      const legacy = await supabase
+        .from("blog_posts")
+        .select(selectLegacy)
+        .eq("is_published", true)
+        .order("published_at", { ascending: false });
+      if (legacy.error) {
+        console.warn("Warning: blog_posts fallback query failed:", legacy.error);
+        return [];
+      }
+      return legacy.data ?? [];
+    }
 
     if (postsRes.error) {
       console.warn("Warning: blog_posts fallback query failed:", postsRes.error);

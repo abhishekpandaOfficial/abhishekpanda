@@ -58,10 +58,12 @@ type BlogPost = {
   is_published: boolean | null;
   is_premium: boolean | null;
   is_locked: boolean | null;
+  level: "beginner" | "fundamentals" | "intermediate" | "general" | "architect" | null;
   code_theme: string | null;
   color: string | null;
   views: number | null;
   created_at: string;
+  original_published_at: string | null;
   published_at: string | null;
   updated_at: string;
   sort_order?: number | null;
@@ -90,6 +92,18 @@ type BlogPostVersion = {
   color: string | null;
   code_theme: string | null;
   is_locked: boolean | null;
+};
+
+type BlogTask = {
+  id: string;
+  title: string;
+  description: string | null;
+  status: "pending" | "in_progress" | "done";
+  priority: "low" | "medium" | "high";
+  related_post_id: string | null;
+  due_at: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 const slugify = (input: string) =>
@@ -268,6 +282,9 @@ export const AdminBlogManager = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [newTag, setNewTag] = useState("");
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [taskPriority, setTaskPriority] = useState<"low" | "medium" | "high">("medium");
   const [heroPreviewOpen, setHeroPreviewOpen] = useState(false);
   const [publishPreviewOpen, setPublishPreviewOpen] = useState(false);
   const [epubPreviewOpen, setEpubPreviewOpen] = useState(false);
@@ -303,12 +320,20 @@ export const AdminBlogManager = () => {
 
   const handlePublishApprove = async () => {
     if (!selectedPost) return;
+    const nowIso = new Date().toISOString();
+    const firstPublishedAt = selectedPost.original_published_at || selectedPost.published_at || nowIso;
     await upsertPost.mutateAsync({
       ...selectedPost,
       is_published: true,
-      published_at: selectedPost.published_at || new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      original_published_at: firstPublishedAt,
+      published_at: selectedPost.published_at || nowIso,
+      updated_at: nowIso,
     });
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["published-blog-posts"] }),
+      qc.invalidateQueries({ queryKey: ["blog-post-meta", selectedPost.slug] }),
+      qc.invalidateQueries({ queryKey: ["blog-posts-cache-nav"] }),
+    ]);
     setPublishPreviewOpen(false);
   };
 
@@ -628,6 +653,20 @@ export const AdminBlogManager = () => {
     },
   });
 
+  const { data: tasks = [] } = useQuery({
+    queryKey: ["admin-blog-tasks"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_tasks")
+        .select("*")
+        .order("status", { ascending: true })
+        .order("priority", { ascending: false })
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as BlogTask[];
+    },
+  });
+
   const filteredPosts = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return posts;
@@ -692,6 +731,13 @@ export const AdminBlogManager = () => {
     drafts: posts.filter((p) => !p.is_published).length,
     totalViews: posts.reduce((sum, p) => sum + (p.views ?? 0), 0),
   };
+  const selectedPersistedPostId =
+    selectedPost && posts.some((p) => p.id === selectedPost.id) ? selectedPost.id : null;
+
+  const estimateReadMinutes = (content: string | null) => {
+    const wc = (content || "").split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.ceil(wc / 200));
+  };
 
   const handleCreatePost = () => {
     const now = new Date().toISOString();
@@ -715,10 +761,12 @@ export const AdminBlogManager = () => {
       is_published: false,
       is_premium: false,
       is_locked: false,
+      level: "general",
       code_theme: "github-light",
       color: defaultSectionColor,
       views: 0,
       created_at: now,
+      original_published_at: null,
       published_at: null,
       updated_at: now,
       sort_order: posts.length + 1,
@@ -902,7 +950,9 @@ export const AdminBlogManager = () => {
         is_published: !!post.is_published,
         is_premium: !!post.is_premium,
         is_locked: !!post.is_locked,
+        level: post.level ?? "general",
         code_theme: normalizePersistedCodeTheme(post.code_theme),
+        original_published_at: post.original_published_at,
         published_at: post.is_published ? (post.published_at || new Date().toISOString()) : post.published_at,
         sort_order: post.sort_order ?? 0,
         color: post.color || null,
@@ -971,7 +1021,9 @@ export const AdminBlogManager = () => {
         is_published: !!post.is_published,
         is_premium: !!post.is_premium,
         is_locked: !!post.is_locked,
+        level: post.level ?? "general",
         code_theme: normalizePersistedCodeTheme(post.code_theme),
+        original_published_at: post.original_published_at,
         published_at: post.is_published ? (post.published_at || new Date().toISOString()) : post.published_at,
         sort_order: post.sort_order ?? 0,
         color: post.color || null,
@@ -1052,6 +1104,48 @@ export const AdminBlogManager = () => {
       setIsEditing(false);
     },
     onError: (err: unknown) => toast.error(errMsg(err, "Failed to delete post.")),
+  });
+
+  const createTask = useMutation({
+    mutationFn: async () => {
+      if (!newTaskTitle.trim()) throw new Error("Task title is required.");
+      const payload = {
+        title: newTaskTitle.trim(),
+        description: newTaskDescription.trim() || null,
+        status: "pending" as const,
+        priority: taskPriority,
+        related_post_id: selectedPersistedPostId,
+      };
+      const { data, error } = await supabase.from("blog_tasks").insert(payload).select("*").single();
+      if (error) throw error;
+      return data as BlogTask;
+    },
+    onSuccess: async () => {
+      setNewTaskTitle("");
+      setNewTaskDescription("");
+      setTaskPriority("medium");
+      await qc.invalidateQueries({ queryKey: ["admin-blog-tasks"] });
+      toast.success("Task added.");
+    },
+    onError: (err: unknown) => toast.error(errMsg(err, "Failed to create task.")),
+  });
+
+  const updateTask = useMutation({
+    mutationFn: async ({
+      id,
+      patch,
+    }: {
+      id: string;
+      patch: Partial<Pick<BlogTask, "status" | "related_post_id" | "title" | "description" | "priority">>;
+    }) => {
+      const { error } = await supabase.from("blog_tasks").update(patch).eq("id", id);
+      if (error) throw error;
+      return true;
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["admin-blog-tasks"] });
+    },
+    onError: (err: unknown) => toast.error(errMsg(err, "Failed to update task.")),
   });
 
   const uploadHeroImage = async (file: File) => {
@@ -1216,6 +1310,113 @@ export const AdminBlogManager = () => {
           <Plus className="w-4 h-4 mr-2" />
           New Post
         </Button>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-5">
+        <div className="flex flex-col lg:flex-row gap-4 lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-foreground">Pending Blog Tasks</h3>
+            <p className="text-xs text-muted-foreground mt-1">Track UI/content backlog directly inside CMS Studio.</p>
+            <div className="mt-3 grid gap-2 max-h-56 overflow-auto pr-1">
+              {tasks.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No tasks yet.</p>
+              ) : (
+                tasks.map((task) => (
+                  <div key={task.id} className="rounded-lg border border-border p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm text-foreground">{task.title}</p>
+                        {task.description ? (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
+                        ) : null}
+                        <div className="mt-2 flex items-center gap-2 text-[11px]">
+                          <span className="px-2 py-1 rounded-full border border-border text-muted-foreground">
+                            {task.priority}
+                          </span>
+                          <span className="px-2 py-1 rounded-full border border-border text-muted-foreground">
+                            {task.status.replace("_", " ")}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => updateTask.mutate({ id: task.id, patch: { status: "in_progress" } })}
+                          disabled={task.status === "in_progress"}
+                        >
+                          In progress
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => updateTask.mutate({ id: task.id, patch: { status: "done" } })}
+                          disabled={task.status === "done"}
+                        >
+                          Mark done
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="h-7 px-2 text-xs"
+                          onClick={() =>
+                            selectedPersistedPostId
+                              ? updateTask.mutate({ id: task.id, patch: { related_post_id: selectedPersistedPostId } })
+                              : toast.error("Save/select a published or draft post first.")
+                          }
+                        >
+                          Link post
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="w-full lg:w-96 rounded-lg border border-border p-3">
+            <p className="text-xs font-semibold text-foreground mb-2">Add Task</p>
+            <div className="space-y-2">
+              <Input
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                placeholder="Task title"
+                className="h-9"
+              />
+              <Textarea
+                value={newTaskDescription}
+                onChange={(e) => setNewTaskDescription(e.target.value)}
+                placeholder="Short description"
+                className="min-h-[72px]"
+              />
+              <div className="flex items-center justify-between gap-2">
+                <select
+                  value={taskPriority}
+                  onChange={(e) => setTaskPriority(e.target.value as "low" | "medium" | "high")}
+                  className="h-9 rounded-md border border-border bg-background px-3 text-sm"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => createTask.mutate()}
+                  disabled={createTask.isPending || !newTaskTitle.trim()}
+                >
+                  {createTask.isPending ? "Adding..." : "Add task"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div
@@ -1470,6 +1671,9 @@ export const AdminBlogManager = () => {
                     ) : (
                       <Badge className="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-0">Draft</Badge>
                     )}
+                    <Badge variant="secondary" className="text-xs">
+                      {post.level ? `${post.level}` : "general"}
+                    </Badge>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Eye className="w-3 h-3" />{post.views ?? 0}
                     </span>
@@ -1874,6 +2078,30 @@ export const AdminBlogManager = () => {
                       </div>
                     </div>
 
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border">
+                      <div>
+                        <p className="font-medium text-foreground">Content Level</p>
+                        <p className="text-sm text-muted-foreground">Beginner to architect journey classification</p>
+                      </div>
+                      <select
+                        className="h-10 rounded-md border border-border bg-background px-3 text-sm"
+                        value={selectedPost.level || "general"}
+                        disabled={!isEditing}
+                        onChange={(e) => {
+                          const nextPost = { ...selectedPost, level: e.target.value as BlogPost["level"] };
+                          setSelectedPost(nextPost);
+                          setHasUnsavedChanges(true);
+                          scheduleAutosave(nextPost);
+                        }}
+                      >
+                        <option value="beginner">Beginner</option>
+                        <option value="fundamentals">Fundamentals</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="general">General</option>
+                        <option value="architect">Architect</option>
+                      </select>
+                    </div>
+
                     <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                       <div>
                         <p className="font-medium text-foreground">Premium Content</p>
@@ -1956,11 +2184,25 @@ export const AdminBlogManager = () => {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <p className="text-muted-foreground">Created</p>
-                          <p className="text-foreground font-medium">{new Date(selectedPost.created_at).toLocaleDateString()}</p>
+                          <p className="text-foreground font-medium">{new Date(selectedPost.created_at).toLocaleString()}</p>
                         </div>
                         <div>
-                          <p className="text-muted-foreground">Published</p>
-                          <p className="text-foreground font-medium">{selectedPost.published_at ? new Date(selectedPost.published_at).toLocaleDateString() : "Not published"}</p>
+                          <p className="text-muted-foreground">Original Published</p>
+                          <p className="text-foreground font-medium">
+                            {selectedPost.original_published_at ? new Date(selectedPost.original_published_at).toLocaleString() : "Not published"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Current Published</p>
+                          <p className="text-foreground font-medium">{selectedPost.published_at ? new Date(selectedPost.published_at).toLocaleString() : "Not published"}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Last Updated</p>
+                          <p className="text-foreground font-medium">{new Date(selectedPost.updated_at).toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Read Time</p>
+                          <p className="text-foreground font-medium">{estimateReadMinutes(selectedPost.content)} min</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Views</p>
