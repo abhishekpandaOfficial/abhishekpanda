@@ -146,7 +146,7 @@ const injectOrReplace = (html, { title, description, canonical, ogImage, robots,
 
 const fetchPublishedPosts = async () => {
   const selectV2 =
-    "title,slug,excerpt,hero_image,tags,is_premium,level,original_published_at,published_at,views,meta_title,meta_description,updated_at,is_published";
+    "title,slug,excerpt,hero_image,tags,is_premium,level,original_published_at,published_at,views,meta_title,meta_description,updated_at,is_published,source_code_url,series_name,series_order";
   const selectLegacy =
     "title,slug,excerpt,hero_image,tags,is_premium,published_at,meta_title,meta_description,updated_at,is_published";
 

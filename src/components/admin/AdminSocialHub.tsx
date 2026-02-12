@@ -72,10 +72,28 @@ type PublishLog = {
   created_at: string;
 };
 
+type AccountSummary = {
+  key: string;
+  platform: string;
+  connected: boolean;
+  username: string;
+  profileUrl: string;
+  followers: number;
+  icon: any;
+  bgColor: string;
+};
+
 const PLATFORM_LIMITS: Record<string, number> = {
   x: 280,
   linkedin: 3000,
   instagram: 2200,
+  facebook: 63206,
+  threads: 500,
+  reddit: 40000,
+  telegram: 4096,
+  discord: 2000,
+  tiktok: 2200,
+  pinterest: 500,
   youtube: 5000,
   medium: 4000,
   substack: 4000,
@@ -83,6 +101,42 @@ const PLATFORM_LIMITS: Record<string, number> = {
   github: 4000,
   website: 6000,
 };
+
+const PLATFORM_LABELS: Record<string, string> = {
+  x: "X",
+  linkedin: "LinkedIn",
+  instagram: "Instagram",
+  facebook: "Facebook",
+  threads: "Threads",
+  reddit: "Reddit",
+  telegram: "Telegram",
+  discord: "Discord",
+  tiktok: "TikTok",
+  pinterest: "Pinterest",
+  youtube: "YouTube",
+  medium: "Medium",
+  substack: "Substack",
+  hashnode: "Hashnode",
+  github: "GitHub",
+  website: "Website",
+};
+
+const OMNIFLOW_CORE_PLATFORMS = [
+  "x",
+  "linkedin",
+  "instagram",
+  "facebook",
+  "youtube",
+  "threads",
+  "reddit",
+  "telegram",
+  "discord",
+  "tiktok",
+  "pinterest",
+] as const;
+
+const BRAND_SIGNATURE = "Abhishek Panda | OriginX Labs Pvt. Ltd.";
+const BRAND_DOMAIN = "www.originxlabs.com";
 
 const stripTrackingParams = (url: string) => {
   try {
@@ -104,6 +158,11 @@ const extractHashtags = (input: string) => {
     .filter((w) => w.length >= 4)
     .slice(0, 5);
   return Array.from(new Set(words.map((w) => ensureHash(w.toLowerCase()))));
+};
+
+const buildBrandHashtags = (platform: string) => {
+  const base = ["#AbhishekPanda", "#OriginXLabs", "#OriginXLabsPvtLtd", "#CloudAI", "#EngineeringLeadership"];
+  return platform === "x" || platform === "threads" ? base.slice(0, 3) : base;
 };
 
 const qualityChecks = (content: string, hashtags: string[], hasLink: boolean) => {
@@ -134,37 +193,94 @@ const qualityChecks = (content: string, hashtags: string[], hasLink: boolean) =>
   } else {
     notes.push("Add a clear CTA (learn/read/build/explore).");
   }
+  if (/originx labs|originxlabs/i.test(content)) {
+    seo += 5;
+    ai += 5;
+  } else {
+    notes.push("Branding missing: include OriginX Labs mention.");
+  }
   return { seo: Math.min(100, seo), ai: Math.min(100, ai), notes };
 };
 
 const generatePlatformVariant = (base: { title: string; content: string; url?: string | null }, platform: string) => {
   const maxLen = PLATFORM_LIMITS[platform] ?? 2800;
   const compressedUrl = base.url ? stripTrackingParams(base.url) : null;
-  const hashtags = extractHashtags(`${base.title} ${base.content}`);
+  const hashtags = Array.from(
+    new Set([...extractHashtags(`${base.title} ${base.content}`), ...buildBrandHashtags(platform)]),
+  );
 
   const hooks: Record<string, string> = {
-    x: "Quick insight:",
-    linkedin: "Professional update:",
-    instagram: "Behind the build:",
-    youtube: "New release:",
-    medium: "New article:",
-    substack: "Newsletter update:",
-    hashnode: "Dev write-up:",
-    github: "Engineering note:",
+    x: "Shipping update from OriginX Labs:",
+    linkedin: "Professional update from OriginX Labs:",
+    instagram: "Creator update from OriginX Labs:",
+    facebook: "Community update from OriginX Labs:",
+    threads: "Thread drop from OriginX Labs:",
+    reddit: "Engineering breakdown from OriginX Labs:",
+    telegram: "Quick community drop from OriginX Labs:",
+    discord: "Builder update from OriginX Labs:",
+    tiktok: "Short-form update from OriginX Labs:",
+    pinterest: "Pinned insight from OriginX Labs:",
+    youtube: "New release from OriginX Labs:",
+    medium: "New article from OriginX Labs:",
+    substack: "Newsletter update from OriginX Labs:",
+    hashnode: "Dev write-up from OriginX Labs:",
+    github: "Engineering note from OriginX Labs:",
     website: "From OriginX Labs:",
   };
 
-  const prefix = hooks[platform] || "Update:";
+  const ctaByPlatform: Record<string, string> = {
+    x: "Read full details:",
+    linkedin: "Read the full post:",
+    instagram: "Read full details in bio/link:",
+    facebook: "Read the full write-up:",
+    threads: "Open full context:",
+    reddit: "Full deep-dive:",
+    telegram: "Open full post:",
+    discord: "Full context:",
+    tiktok: "Read full context:",
+    pinterest: "Explore full post:",
+    youtube: "Read full article and resources:",
+    medium: "Continue reading:",
+    substack: "Read full newsletter:",
+    hashnode: "Read full dev article:",
+    github: "Full engineering context:",
+    website: "Read more:",
+  };
+
+  const bodyByPlatform: Record<string, string> = {
+    x: `${base.title}\n${base.content}`,
+    linkedin: `${base.title}\n\n${base.content}\n\nBuilt for practitioners shipping real systems.`,
+    instagram: `${base.title}\n\n${base.content}\n\nSave this for your next implementation sprint.`,
+    facebook: `${base.title}\n\n${base.content}\n\nIf this helps your team, share it with your network.`,
+    threads: `${base.title}\n${base.content}`,
+    reddit: `${base.title}\n\n${base.content}\n\nHappy to answer implementation questions in comments.`,
+    telegram: `${base.title}\n\n${base.content}`,
+    discord: `${base.title}\n\n${base.content}`,
+    tiktok: `${base.title}\n\n${base.content}`,
+    pinterest: `${base.title}\n\n${base.content}`,
+    youtube: `${base.title}\n\n${base.content}\n\nIncludes architecture notes and implementation details.`,
+    medium: `${base.title}\n\n${base.content}`,
+    substack: `${base.title}\n\n${base.content}`,
+    hashnode: `${base.title}\n\n${base.content}`,
+    github: `${base.title}\n\n${base.content}`,
+    website: `${base.title}\n\n${base.content}`,
+  };
+
+  const prefix = hooks[platform] || "Update from OriginX Labs:";
+  const hashLimit = platform === "x" ? 2 : platform === "threads" ? 3 : 5;
   const suffix = [
-    hashtags.slice(0, platform === "x" ? 2 : 4).join(" "),
-    compressedUrl || "",
+    `${BRAND_SIGNATURE} | ${BRAND_DOMAIN}`,
+    hashtags.slice(0, hashLimit).join(" "),
+    compressedUrl ? `${ctaByPlatform[platform] || "Read more:"} ${compressedUrl}` : "",
   ]
     .filter(Boolean)
-    .join(" ");
+    .join("\n");
 
-  let generated = `${prefix} ${base.title}\n\n${base.content}\n\n${suffix}`.trim();
+  let generated = `${prefix}\n\n${bodyByPlatform[platform] || `${base.title}\n\n${base.content}`}\n\n${suffix}`.trim();
   if (generated.length > maxLen) {
-    generated = `${generated.slice(0, maxLen - 3)}...`;
+    const reserve = Math.min(maxLen - 10, Math.max(80, suffix.length + 20));
+    const trimmedBody = (bodyByPlatform[platform] || `${base.title}\n\n${base.content}`).slice(0, maxLen - reserve);
+    generated = `${prefix}\n\n${trimmedBody}\n\n${suffix}`.slice(0, maxLen - 3).trim() + "...";
   }
 
   const { seo, ai, notes } = qualityChecks(generated, hashtags, !!compressedUrl);
@@ -177,6 +293,18 @@ const generatePlatformVariant = (base: { title: string; content: string; url?: s
     quality_notes: notes,
   };
 };
+
+const getPendingIntegrations = (accounts: AccountSummary[]) => {
+  const byKey = new Set(accounts.map((a) => a.key));
+  return OMNIFLOW_CORE_PLATFORMS.filter((key) => !byKey.has(key)).map((key) => ({
+    key,
+    label: PLATFORM_LABELS[key] || key,
+    status: "missing_profile" as const,
+  }));
+};
+
+const getDisconnectedIntegrations = (accounts: AccountSummary[]) =>
+  accounts.filter((a) => !a.connected).map((a) => ({ key: a.key, label: a.platform, status: "disconnected" as const }));
 
 export const AdminSocialHub = () => {
   const qc = useQueryClient();
@@ -195,19 +323,17 @@ export const AdminSocialHub = () => {
 
   const { data: socialRows = [] } = useAdminSocialProfiles();
 
-  const accounts = useMemo(() => {
-    return socialRows
-      .filter((r) => !!r.profile_url)
-      .map((r) => ({
-        key: r.platform,
-        platform: r.display_name,
-        connected: r.connected,
-        username: r.username || "",
-        profileUrl: r.profile_url || "",
-        followers: r.followers ?? 0,
-        icon: iconForKey(r.icon_key),
-        bgColor: r.brand_bg || "bg-muted",
-      }));
+  const accounts = useMemo<AccountSummary[]>(() => {
+    return socialRows.map((r) => ({
+      key: r.platform,
+      platform: r.display_name,
+      connected: r.connected,
+      username: r.username || "",
+      profileUrl: r.profile_url || "",
+      followers: r.followers ?? 0,
+      icon: iconForKey(r.icon_key),
+      bgColor: r.brand_bg || "bg-muted",
+    }));
   }, [socialRows]);
 
   const { data: blogSourceRows = [] } = useQuery({
@@ -400,6 +526,9 @@ export const AdminSocialHub = () => {
   });
 
   const connectedAccounts = accounts.filter((a) => a.connected);
+  const composerAccounts = accounts.filter((a) => a.connected && !!a.profileUrl);
+  const pendingIntegrations = getPendingIntegrations(accounts);
+  const disconnectedIntegrations = getDisconnectedIntegrations(accounts);
   const totalFollowers = connectedAccounts.reduce((sum, a) => sum + a.followers, 0);
   const publishedVariants = variants.filter((v) => v.publish_status === "published");
   const avgSeo = publishedVariants.length
@@ -461,8 +590,9 @@ export const AdminSocialHub = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
         <Card><CardContent className="pt-4"><div className="text-2xl font-bold">{connectedAccounts.length}</div><p className="text-sm text-muted-foreground">Connected</p></CardContent></Card>
+        <Card><CardContent className="pt-4"><div className="text-2xl font-bold">{pendingIntegrations.length + disconnectedIntegrations.length}</div><p className="text-sm text-muted-foreground">Pending Integrations</p></CardContent></Card>
         <Card><CardContent className="pt-4"><div className="text-2xl font-bold">{totalFollowers.toLocaleString()}</div><p className="text-sm text-muted-foreground">Followers</p></CardContent></Card>
         <Card><CardContent className="pt-4"><div className="text-2xl font-bold">{posts.length}</div><p className="text-sm text-muted-foreground">Campaigns</p></CardContent></Card>
         <Card><CardContent className="pt-4"><div className="text-2xl font-bold">{publishedVariants.length}</div><p className="text-sm text-muted-foreground">Published Variants</p></CardContent></Card>
@@ -542,6 +672,50 @@ export const AdminSocialHub = () => {
         </TabsContent>
 
         <TabsContent value="accounts" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Integration Readiness</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="rounded-xl border border-emerald-300/40 bg-emerald-500/10 p-3">
+                <p className="text-sm font-medium">Branding Lock</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  OmniFlow now auto-injects <span className="font-medium">{BRAND_SIGNATURE}</span> and{" "}
+                  <span className="font-medium">{BRAND_DOMAIN}</span> in generated variants.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="rounded-xl border border-border p-3">
+                  <p className="text-sm font-semibold mb-2">Missing Platform Profiles</p>
+                  {pendingIntegrations.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">None. Core platform profiles are configured.</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {pendingIntegrations.map((item) => (
+                        <Badge key={item.key} variant="outline" className="border-red-400/50 text-red-500">
+                          {item.label}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="rounded-xl border border-border p-3">
+                  <p className="text-sm font-semibold mb-2">Configured But Disconnected</p>
+                  {disconnectedIntegrations.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">All configured profiles are connected.</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {disconnectedIntegrations.map((item) => (
+                        <Badge key={item.key} variant="outline" className="border-amber-400/50 text-amber-500">
+                          {item.label}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           <AdminSocialProfilesManager />
         </TabsContent>
 
@@ -598,7 +772,7 @@ export const AdminSocialHub = () => {
           <DialogHeader>
             <DialogTitle>Create OmniFlow Campaign Post</DialogTitle>
             <DialogDescription>
-              Write once, preview per platform, run approval checks, then publish all or selected channels.
+              Write once, preview per platform, run approval checks, then publish all or selected channels with OriginX Labs branding.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
@@ -660,7 +834,7 @@ export const AdminSocialHub = () => {
               <Label>Platforms</Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {accounts
-                  .filter((a) => a.connected)
+                  .filter((a) => composerAccounts.some((c) => c.key === a.key))
                   .map((account) => (
                     <Button
                       key={account.key}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent as ReactDragEvent, type ClipboardEvent as ReactClipboardEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -34,6 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Markdown } from "@/components/blog/Markdown";
+import { useTheme } from "@/components/ThemeProvider";
 
 type BlogPost = {
   id: string;
@@ -62,6 +64,9 @@ type BlogPost = {
   level: "beginner" | "fundamentals" | "intermediate" | "general" | "architect" | null;
   code_theme: string | null;
   color: string | null;
+  source_code_url: string | null;
+  series_name: string | null;
+  series_order: number | null;
   views: number | null;
   created_at: string;
   original_published_at: string | null;
@@ -117,6 +122,8 @@ const REQUIRED_POST_STRUCTURE_HEADINGS = [
   "Who This Is For",
   "What You Will Build",
   "Step-by-Step Implementation",
+  "Interview Questions",
+  "Interview Questions and Answers",
   "FAQs",
   "Final Thoughts",
 ];
@@ -146,6 +153,30 @@ const slugify = (input: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
+const isDuplicateSlugError = (err: unknown) => {
+  const code = typeof err === "object" && err !== null ? (err as { code?: unknown }).code : undefined;
+  const message =
+    typeof err === "object" && err !== null && "message" in err
+      ? String((err as { message?: unknown }).message ?? "")
+      : "";
+  return code === "23505" || /duplicate key|blog_posts_slug_key/i.test(message);
+};
+const isSchemaColumnMismatchError = (err: unknown) => {
+  const code = typeof err === "object" && err !== null ? (err as { code?: unknown }).code : undefined;
+  const message =
+    typeof err === "object" && err !== null && "message" in err
+      ? String((err as { message?: unknown }).message ?? "")
+      : "";
+  return (
+    code === "42703" ||
+    code === "PGRST204" ||
+    /column .* does not exist/i.test(message) ||
+    /could not find the '.*' column/i.test(message)
+  );
+};
+
+const toHeadingAnchorId = (heading: string) => slugify(heading);
+
 const LEGACY_CODE_THEMES = new Set([
   "github-light",
   "github-light-default",
@@ -155,9 +186,34 @@ const LEGACY_CODE_THEMES = new Set([
   "github-dark-dimmed",
   "github-dark-high-contrast",
 ]);
+const SUPPORTED_CODE_THEMES = new Set([
+  "github-light",
+  "github-light-default",
+  "github-light-high-contrast",
+  "github-dark",
+  "github-dark-default",
+  "github-dark-dimmed",
+  "github-dark-high-contrast",
+  "one-dark-pro",
+  "dracula",
+  "dracula-soft",
+  "tokyo-night",
+  "nord",
+  "material-theme",
+  "material-theme-darker",
+  "material-theme-ocean",
+  "material-theme-palenight",
+  "vitesse-dark",
+  "vitesse-light",
+  "catppuccin-latte",
+  "catppuccin-frappe",
+  "catppuccin-macchiato",
+  "catppuccin-mocha",
+]);
 
 const normalizePersistedCodeTheme = (theme: string | null | undefined) => {
   if (!theme) return "github-light";
+  if (SUPPORTED_CODE_THEMES.has(theme)) return theme;
   return LEGACY_CODE_THEMES.has(theme) ? theme : "github-light";
 };
 const getMissingStructureHeadings = (content: string | null | undefined) => {
@@ -181,6 +237,59 @@ const sanitizeId = (input: string, fallback: string) => {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
   return v || fallback;
+};
+
+const readFileAsDataUrl = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+
+const processImageForUpload = async (
+  file: File,
+  opts?: { maxWidth?: number; maxHeight?: number; quality?: number },
+) => {
+  const maxWidth = opts?.maxWidth ?? 2200;
+  const maxHeight = opts?.maxHeight ?? 2200;
+  const quality = opts?.quality ?? 0.9;
+  const dataUrl = await readFileAsDataUrl(file);
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const el = new Image();
+    el.onload = () => resolve(el);
+    el.onerror = () => reject(new Error("Failed to load image"));
+    el.src = dataUrl;
+  });
+
+  let targetW = img.width;
+  let targetH = img.height;
+  const ratio = Math.min(maxWidth / targetW, maxHeight / targetH, 1);
+  targetW = Math.max(1, Math.round(targetW * ratio));
+  targetH = Math.max(1, Math.round(targetH * ratio));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = targetW;
+  canvas.height = targetH;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Image canvas unavailable");
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, 0, 0, targetW, targetH);
+
+  const preferPng = file.type === "image/png";
+  const outputType = preferPng ? "image/png" : "image/webp";
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob((b) => resolve(b), outputType, preferPng ? undefined : quality),
+  );
+  if (!blob) throw new Error("Failed to process image");
+
+  const ext = preferPng ? "png" : "webp";
+  return {
+    blob,
+    ext,
+    contentType: outputType,
+  };
 };
 
 type EpubChapter = {
@@ -434,6 +543,7 @@ ${title} should be treated as a practical blueprint, not just a tutorial. Keep i
 
 export const AdminBlogManager = () => {
   const qc = useQueryClient();
+  const { theme } = useTheme();
   const codeLanguages = useMemo(
     () => ({
       text: { name: "Plain Text" },
@@ -497,7 +607,20 @@ export const AdminBlogManager = () => {
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [taskPriority, setTaskPriority] = useState<"low" | "medium" | "high">("medium");
   const [taskPanelOpen, setTaskPanelOpen] = useState(true);
+  const [createSectionOpen, setCreateSectionOpen] = useState(false);
+  const [newSectionName, setNewSectionName] = useState("");
+  const [newSectionColor, setNewSectionColor] = useState("#2563eb");
+  const [createPageOpen, setCreatePageOpen] = useState(false);
+  const [newPageTitle, setNewPageTitle] = useState("");
+  const [newPageSectionId, setNewPageSectionId] = useState<string>("all");
+  const [newPageColor, setNewPageColor] = useState("#2563eb");
   const [heroPreviewOpen, setHeroPreviewOpen] = useState(false);
+  const [heroCropOpen, setHeroCropOpen] = useState(false);
+  const [heroCropPreviewUrl, setHeroCropPreviewUrl] = useState<string | null>(null);
+  const [heroCropZoom, setHeroCropZoom] = useState(1);
+  const [heroCropPosition, setHeroCropPosition] = useState({ x: 0, y: 0 });
+  const [heroCropDragging, setHeroCropDragging] = useState(false);
+  const [heroCropDragStart, setHeroCropDragStart] = useState({ x: 0, y: 0 });
   const [publishPreviewOpen, setPublishPreviewOpen] = useState(false);
   const [epubPreviewOpen, setEpubPreviewOpen] = useState(false);
   const [epubPreviewError, setEpubPreviewError] = useState<string | null>(null);
@@ -510,6 +633,9 @@ export const AdminBlogManager = () => {
   const [uploadingHero, setUploadingHero] = useState(false);
   const [uploadingInline, setUploadingInline] = useState(false);
   const heroFileRef = useRef<HTMLInputElement | null>(null);
+  const inlineFileRef = useRef<HTMLInputElement | null>(null);
+  const heroCropCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const contentPreviewRef = useRef<HTMLDivElement | null>(null);
   const exportRef = useRef<HTMLDivElement | null>(null);
   const epubPreviewContainerRef = useRef<HTMLDivElement | null>(null);
   const epubPreviewBookRef = useRef<any>(null);
@@ -520,8 +646,15 @@ export const AdminBlogManager = () => {
   const autosaveRef = useRef<NodeJS.Timeout | null>(null);
   const editorHydrationKeyRef = useRef<string | null>(null);
   const sectionErrorRef = useRef(false);
-  const seededLandingTasksRef = useRef(false);
   const [sectionsError, setSectionsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (heroCropPreviewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(heroCropPreviewUrl);
+      }
+    };
+  }, [heroCropPreviewUrl]);
 
   const errMsg = useCallback((err: unknown, fallback: string) => {
     if (err instanceof Error && err.message) return err.message;
@@ -833,6 +966,18 @@ export const AdminBlogManager = () => {
       return (data ?? []) as BlogPost[];
     },
   });
+  const { data: supportsSeriesColumns = false } = useQuery({
+    queryKey: ["admin-blog-supports-series-columns"],
+    queryFn: async () => {
+      const { error } = await supabase
+        .from("blog_posts")
+        .select("id,series_name,series_order")
+        .limit(1);
+      if (!error) return true;
+      if (isSchemaColumnMismatchError(error)) return false;
+      return true;
+    },
+  });
 
   const { data: sectionsData = [] } = useQuery({
     queryKey: ["admin-blog-sections"],
@@ -905,25 +1050,6 @@ export const AdminBlogManager = () => {
       return inTitle || inTags;
     });
   }, [posts, searchQuery]);
-  useEffect(() => {
-    if (seededLandingTasksRef.current) return;
-    seededLandingTasksRef.current = true;
-    const existing = new Set(tasks.map((t) => t.title));
-    const missingSeeds = LANDING_BACKLOG_TASKS.filter((seed) => !existing.has(seed.title));
-    if (missingSeeds.length === 0) return;
-    (async () => {
-      await supabase.from("blog_tasks").insert(
-        missingSeeds.map((seed) => ({
-          title: seed.title,
-          description: seed.description,
-          priority: seed.priority,
-          status: "pending" as const,
-        })),
-      );
-      qc.invalidateQueries({ queryKey: ["admin-blog-tasks"] });
-    })();
-  }, [tasks, qc]);
-
   const sections = useMemo(() => {
     return [{ id: "all", name: "All", color: "#94a3b8" }, ...sectionsData];
   }, [sectionsData]);
@@ -953,12 +1079,13 @@ export const AdminBlogManager = () => {
     if (!selectedPost) return;
     if (selectedSection === "all") return;
     if (selectedPost.section_id === selectedSection) return;
+    if (isEditing || hasUnsavedChanges) return;
     if (postsBySection.length > 0) {
       setSelectedPost(postsBySection[0]);
       setIsEditing(false);
       setActiveTab("content");
     }
-  }, [selectedSection, postsBySection, selectedPost]);
+  }, [selectedSection, postsBySection, selectedPost, isEditing, hasUnsavedChanges]);
 
   useEffect(() => {
     if (!selectedPost) return;
@@ -983,6 +1110,11 @@ export const AdminBlogManager = () => {
   const pendingTasks = tasks.filter((t) => t.status === "pending");
   const inProgressTasks = tasks.filter((t) => t.status === "in_progress");
   const doneTasks = tasks.filter((t) => t.status === "done");
+  const taskPriorityClass = (priority: BlogTask["priority"]) => {
+    if (priority === "high") return "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300";
+    if (priority === "medium") return "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300";
+    return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+  };
   const tagStyleMap = useMemo(
     () => new Map(tagStyles.map((style) => [style.tag.toLowerCase(), style])),
     [tagStyles],
@@ -1002,8 +1134,46 @@ export const AdminBlogManager = () => {
     return Math.max(1, Math.ceil(wc / 200));
   };
 
+  const navigateToRequiredHeading = async (heading: string) => {
+    if (!selectedPost) return;
+    const content = selectedPost.content || "";
+    const headingPattern = new RegExp(`^##\\s+${heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`, "im");
+    const exists = headingPattern.test(content);
+
+    if (!exists) {
+      const nextContent = `${content.trim()}\n\n## ${heading}\n\nAdd details here.\n`;
+      const nextPost = { ...selectedPost, content: nextContent };
+      setSelectedPost(nextPost);
+      setHasUnsavedChanges(true);
+      scheduleAutosave(nextPost);
+      if (isEditing) {
+        try {
+          const blocks = await editor.tryParseMarkdownToBlocks(nextContent);
+          editor.replaceBlocks(editor.document, blocks);
+        } catch {
+          // ignore parser sync errors
+        }
+      }
+      toast.success(`Added missing section: ${heading}`);
+      return;
+    }
+
+    if (isEditing) {
+      setIsEditing(false);
+    }
+    setActiveTab("content");
+    setTimeout(() => {
+      const targetId = toHeadingAnchorId(heading);
+      const el =
+        contentPreviewRef.current?.querySelector<HTMLElement>(`#${CSS.escape(targetId)}`) ||
+        contentPreviewRef.current?.querySelector<HTMLElement>(`h2[id],h3[id]`);
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+  };
+
   const handleCreatePost = () => {
     const now = new Date().toISOString();
+    const uniqueSeed = Date.now().toString().slice(-6);
     const defaultSectionId =
       selectedSection !== "all"
         ? selectedSection
@@ -1013,7 +1183,7 @@ export const AdminBlogManager = () => {
     const newPost: BlogPost = {
       id: crypto.randomUUID(),
       title: "Untitled Post",
-      slug: "untitled-post",
+      slug: `untitled-post-${uniqueSeed}`,
       excerpt: "",
       content: "",
       hero_image: null,
@@ -1025,8 +1195,11 @@ export const AdminBlogManager = () => {
       is_premium: false,
       is_locked: false,
       level: "general",
-      code_theme: "github-light",
+      code_theme: theme === "dark" ? "github-dark-default" : "github-light-default",
       color: defaultSectionColor,
+      source_code_url: null,
+      series_name: null,
+      series_order: null,
       views: 0,
       created_at: now,
       original_published_at: null,
@@ -1040,6 +1213,83 @@ export const AdminBlogManager = () => {
     setSelectedSection("all");
     setIsFocusMode(false);
     setIsSidebarCollapsed(false);
+  };
+
+  const handleCreateSectionFromModal = async () => {
+    const name = newSectionName.trim();
+    if (!name) {
+      toast.error("Section name is required.");
+      return;
+    }
+    const slug = slugify(name);
+    const { data, error } = await supabase
+      .from("blog_sections")
+      .insert({ name, slug, color: newSectionColor || "#2563eb" })
+      .select("*")
+      .single();
+    if (error) {
+      toast.error(error.message || "Failed to create section.");
+      return;
+    }
+    await qc.invalidateQueries({ queryKey: ["admin-blog-sections"] });
+    if (data?.id) {
+      setSelectedSection(data.id);
+      setNewPageSectionId(data.id);
+    }
+    setCreateSectionOpen(false);
+    setNewSectionName("");
+    setNewSectionColor("#2563eb");
+    toast.success("Section created.");
+  };
+
+  const handleOpenCreatePageModal = () => {
+    const sectionId = selectedSection !== "all" ? selectedSection : sectionsData[0]?.id || "all";
+    const sectionColor = sectionsData.find((s) => s.id === sectionId)?.color || "#2563eb";
+    setNewPageTitle("");
+    setNewPageSectionId(sectionId);
+    setNewPageColor(sectionColor);
+    setCreatePageOpen(true);
+  };
+
+  const handleCreatePageFromModal = () => {
+    const now = new Date().toISOString();
+    const title = newPageTitle.trim() || "Untitled Post";
+    const nextSectionId = newPageSectionId === "all" ? null : newPageSectionId;
+    const newPost: BlogPost = {
+      id: crypto.randomUUID(),
+      title,
+      slug: slugify(`${title}-${Date.now().toString().slice(-6)}`),
+      excerpt: "",
+      content: "",
+      hero_image: null,
+      section_id: nextSectionId,
+      tags: [],
+      meta_title: "",
+      meta_description: "",
+      is_published: false,
+      is_premium: false,
+      is_locked: false,
+      level: "general",
+      code_theme: theme === "dark" ? "github-dark-default" : "github-light-default",
+      color: newPageColor || sectionsData.find((s) => s.id === nextSectionId)?.color || null,
+      source_code_url: null,
+      series_name: null,
+      series_order: null,
+      views: 0,
+      created_at: now,
+      original_published_at: null,
+      published_at: null,
+      updated_at: now,
+      sort_order: posts.length + 1,
+    };
+    setSelectedPost(newPost);
+    setIsEditing(true);
+    setHasUnsavedChanges(true);
+    setActiveTab("content");
+    setSelectedSection(nextSectionId || "all");
+    setIsFocusMode(false);
+    setIsSidebarCollapsed(false);
+    setCreatePageOpen(false);
   };
 
   const handleRenameSection = async (section: BlogSection) => {
@@ -1208,6 +1458,8 @@ export const AdminBlogManager = () => {
         "Build production-grade ASP.NET Core Web APIs with clean architecture, EF Core, authentication, validation, and deployment best practices.",
       content: buildFullCourseStructureTemplate(nextTitle),
       level: selectedPost.level || "fundamentals",
+      series_name: selectedPost.series_name || null,
+      series_order: selectedPost.series_order || null,
     };
     setSelectedPost(nextPost);
     setIsEditing(true);
@@ -1262,6 +1514,13 @@ export const AdminBlogManager = () => {
         published_at: post.is_published ? (post.published_at || new Date().toISOString()) : post.published_at,
         sort_order: post.sort_order ?? 0,
         color: post.color || null,
+        source_code_url: post.source_code_url || null,
+        ...(supportsSeriesColumns
+          ? {
+              series_name: post.series_name || null,
+              series_order: post.series_order ?? null,
+            }
+          : {}),
       };
 
       let { data, error } = await supabase
@@ -1270,10 +1529,7 @@ export const AdminBlogManager = () => {
         .select("*")
         .single();
       if (error) {
-        const isColumnMismatch =
-          (error as any)?.code === "42703" ||
-          /column .* does not exist/i.test(error.message || "");
-        if (isColumnMismatch) {
+        if (isSchemaColumnMismatchError(error)) {
           const legacyPayload = {
             id: post.id,
             title: post.title,
@@ -1304,7 +1560,7 @@ export const AdminBlogManager = () => {
       toast.success("Post saved.");
       qc.invalidateQueries({ queryKey: ["admin-blog-posts"] });
       qc.invalidateQueries({ queryKey: ["admin-blog-versions", saved.id] });
-      setSelectedPost(saved);
+      setSelectedPost((prev) => (prev?.id === saved.id ? { ...prev, ...saved } : prev));
       setLastSavedAt(new Date().toISOString());
       setHasUnsavedChanges(false);
     },
@@ -1313,10 +1569,11 @@ export const AdminBlogManager = () => {
 
   const autosavePost = useMutation({
     mutationFn: async (post: BlogPost) => {
+      let nextSlug = slugify(post.slug || post.title || "post");
       const payload = {
         id: post.id,
         title: post.title,
-        slug: slugify(post.slug || post.title || "post"),
+        slug: nextSlug,
         excerpt: post.excerpt,
         content: post.content,
         hero_image: post.hero_image,
@@ -1333,21 +1590,35 @@ export const AdminBlogManager = () => {
         published_at: post.is_published ? (post.published_at || new Date().toISOString()) : post.published_at,
         sort_order: post.sort_order ?? 0,
         color: post.color || null,
+        source_code_url: post.source_code_url || null,
+        ...(supportsSeriesColumns
+          ? {
+              series_name: post.series_name || null,
+              series_order: post.series_order ?? null,
+            }
+          : {}),
       };
       let { data, error } = await supabase
         .from("blog_posts")
         .upsert(payload)
         .select("*")
         .single();
+      if (error && isDuplicateSlugError(error)) {
+        nextSlug = `${nextSlug}-${post.id.slice(0, 8)}`;
+        const retry = await supabase
+          .from("blog_posts")
+          .upsert({ ...payload, slug: nextSlug })
+          .select("*")
+          .single();
+        data = retry.data;
+        error = retry.error;
+      }
       if (error) {
-        const isColumnMismatch =
-          (error as any)?.code === "42703" ||
-          /column .* does not exist/i.test(error.message || "");
-        if (isColumnMismatch) {
+        if (isSchemaColumnMismatchError(error)) {
           const legacyPayload = {
             id: post.id,
             title: post.title,
-            slug: slugify(post.slug || post.title || "post"),
+            slug: nextSlug,
             excerpt: post.excerpt,
             content: post.content,
             hero_image: post.hero_image,
@@ -1365,6 +1636,15 @@ export const AdminBlogManager = () => {
             .single();
           data = retry.data;
           error = retry.error;
+          if (error && isDuplicateSlugError(error)) {
+            const legacyRetry = await supabase
+              .from("blog_posts")
+              .upsert({ ...legacyPayload, slug: `${nextSlug}-${post.id.slice(0, 8)}` })
+              .select("*")
+              .single();
+            data = legacyRetry.data;
+            error = legacyRetry.error;
+          }
         }
       }
       if (error) throw error;
@@ -1391,10 +1671,11 @@ export const AdminBlogManager = () => {
       setIsAutosaving(false);
       setLastSavedAt(new Date().toISOString());
       setHasUnsavedChanges(false);
-      setSelectedPost(saved);
+      setSelectedPost((prev) => (prev?.id === saved.id ? { ...prev, ...saved } : prev));
     },
-    onError: () => {
+    onError: (err: unknown) => {
       setIsAutosaving(false);
+      toast.error(errMsg(err, "Autosave failed. Please click Save or check required fields."));
     },
   });
 
@@ -1453,6 +1734,30 @@ export const AdminBlogManager = () => {
     },
     onError: (err: unknown) => toast.error(errMsg(err, "Failed to update task.")),
   });
+  const deleteTask = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("blog_tasks").delete().eq("id", id);
+      if (error) throw error;
+      return true;
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["admin-blog-tasks"] });
+      toast.success("Task deleted.");
+    },
+    onError: (err: unknown) => toast.error(errMsg(err, "Failed to delete task.")),
+  });
+  const clearAllTasks = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("blog_tasks").delete().not("id", "is", null);
+      if (error) throw error;
+      return true;
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["admin-blog-tasks"] });
+      toast.success("All tasks cleared.");
+    },
+    onError: (err: unknown) => toast.error(errMsg(err, "Failed to clear tasks.")),
+  });
   const upsertTagStyle = useMutation({
     mutationFn: async ({
       tag,
@@ -1482,23 +1787,41 @@ export const AdminBlogManager = () => {
     onError: (err: unknown) => toast.error(errMsg(err, "Failed to save tag style.")),
   });
 
+  const uploadImageToBlogAssets = async (
+    fileOrBlob: File | Blob,
+    options: { prefix: "hero" | "inline"; ext?: string; contentType?: string },
+  ) => {
+    if (!selectedPost) throw new Error("Select a post first.");
+    const fallbackExt =
+      options.ext || ("type" in fileOrBlob && fileOrBlob.type?.includes("png") ? "png" : "webp");
+    const path = `${options.prefix}/${selectedPost.slug || selectedPost.id}/${Date.now()}.${fallbackExt}`;
+    const { error: upErr } = await supabase.storage.from("blog-assets").upload(path, fileOrBlob, {
+      upsert: true,
+      contentType: options.contentType || ("type" in fileOrBlob ? fileOrBlob.type : "image/webp"),
+    });
+    if (upErr) throw upErr;
+    const { data } = supabase.storage.from("blog-assets").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
   const uploadHeroImage = async (file: File) => {
     if (!selectedPost) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file.");
+      return;
+    }
     setUploadingHero(true);
     try {
-      const ext = file.name.split(".").pop() || "png";
-      const path = `hero/${selectedPost.slug || selectedPost.id}/${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("blog-assets")
-        .upload(path, file, { upsert: true, contentType: file.type });
-      if (upErr) throw upErr;
-      const { data } = supabase.storage.from("blog-assets").getPublicUrl(path);
-      if (selectedPost) {
-        const nextPost = { ...selectedPost, hero_image: data.publicUrl };
-        setSelectedPost(nextPost);
-        setHasUnsavedChanges(true);
-        scheduleAutosave(nextPost);
-      }
+      const processed = await processImageForUpload(file, { maxWidth: 2400, maxHeight: 1350, quality: 0.9 });
+      const url = await uploadImageToBlogAssets(processed.blob, {
+        prefix: "hero",
+        ext: processed.ext,
+        contentType: processed.contentType,
+      });
+      const nextPost = { ...selectedPost, hero_image: url };
+      setSelectedPost(nextPost);
+      setHasUnsavedChanges(true);
+      scheduleAutosave(nextPost);
       toast.success("Hero image uploaded.");
     } catch (err: unknown) {
       toast.error(errMsg(err, "Failed to upload image."));
@@ -1508,18 +1831,21 @@ export const AdminBlogManager = () => {
   };
 
   const uploadInlineImage = async (file: File) => {
-    if (!selectedPost) return;
+    if (!selectedPost) return null;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Only image files are supported.");
+      return null;
+    }
     setUploadingInline(true);
     try {
-      const ext = file.name.split(".").pop() || "png";
-      const path = `inline/${selectedPost.slug || selectedPost.id}/${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("blog-assets")
-        .upload(path, file, { upsert: true, contentType: file.type });
-      if (upErr) throw upErr;
-      const { data } = supabase.storage.from("blog-assets").getPublicUrl(path);
+      const processed = await processImageForUpload(file, { maxWidth: 2200, maxHeight: 2200, quality: 0.88 });
+      const url = await uploadImageToBlogAssets(processed.blob, {
+        prefix: "inline",
+        ext: processed.ext,
+        contentType: processed.contentType,
+      });
       toast.success("Inline image uploaded.");
-      return data.publicUrl;
+      return url;
     } catch (err: unknown) {
       toast.error(errMsg(err, "Failed to upload inline image."));
       return null;
@@ -1528,7 +1854,120 @@ export const AdminBlogManager = () => {
     }
   };
 
-  const codeTheme = selectedPost?.code_theme || "github-light";
+  const appendInlineImageToContent = async (file: File) => {
+    if (!selectedPost) return;
+    const url = await uploadInlineImage(file);
+    if (!url) return;
+    const nextContent = `${selectedPost.content || ""}\n\n![${file.name || "image"}](${url})\n`;
+    const nextPost = { ...selectedPost, content: nextContent };
+    setSelectedPost(nextPost);
+    setHasUnsavedChanges(true);
+    scheduleAutosave(nextPost);
+    try {
+      const blocks = await editor.tryParseMarkdownToBlocks(nextContent);
+      editor.replaceBlocks(editor.document, blocks);
+      editorHydrationKeyRef.current = `${selectedPost.id}:${selectedPost.code_theme || "github-light"}`;
+    } catch {
+      // Ignore editor sync errors.
+    }
+  };
+
+  const openHeroCropper = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file.");
+      return;
+    }
+    const objectUrl = URL.createObjectURL(file);
+    setHeroCropPreviewUrl(objectUrl);
+    setHeroCropZoom(1);
+    setHeroCropPosition({ x: 0, y: 0 });
+    setHeroCropOpen(true);
+  };
+
+  const closeHeroCropper = () => {
+    if (heroCropPreviewUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(heroCropPreviewUrl);
+    }
+    setHeroCropOpen(false);
+    setHeroCropPreviewUrl(null);
+    setHeroCropZoom(1);
+    setHeroCropPosition({ x: 0, y: 0 });
+    setHeroCropDragging(false);
+  };
+
+  const processHeroCropAndUpload = async () => {
+    if (!heroCropPreviewUrl || !selectedPost) return;
+    setUploadingHero(true);
+    try {
+      const canvas = heroCropCanvasRef.current;
+      if (!canvas) throw new Error("Crop canvas unavailable");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Failed to prepare crop context");
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const el = new Image();
+        el.onload = () => resolve(el);
+        el.onerror = () => reject(new Error("Failed to load selected image"));
+        el.src = heroCropPreviewUrl;
+      });
+      const outW = 1600;
+      const outH = 900;
+      canvas.width = outW;
+      canvas.height = outH;
+      ctx.fillStyle = "#0b1220";
+      ctx.fillRect(0, 0, outW, outH);
+      ctx.save();
+      ctx.translate(outW / 2, outH / 2);
+      const baseScale = Math.max(outW / img.width, outH / img.height);
+      const scale = baseScale * heroCropZoom;
+      ctx.scale(scale, scale);
+      ctx.drawImage(
+        img,
+        -img.width / 2 + heroCropPosition.x / scale,
+        -img.height / 2 + heroCropPosition.y / scale,
+      );
+      ctx.restore();
+      const croppedBlob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob((blob) => resolve(blob), "image/webp", 0.92),
+      );
+      if (!croppedBlob) throw new Error("Failed to generate cropped image");
+      const url = await uploadImageToBlogAssets(croppedBlob, {
+        prefix: "hero",
+        ext: "webp",
+        contentType: "image/webp",
+      });
+      const nextPost = { ...selectedPost, hero_image: url };
+      setSelectedPost(nextPost);
+      setHasUnsavedChanges(true);
+      scheduleAutosave(nextPost);
+      toast.success("Hero image cropped and uploaded.");
+      closeHeroCropper();
+    } catch (err: unknown) {
+      toast.error(errMsg(err, "Failed to crop and upload hero image."));
+    } finally {
+      setUploadingHero(false);
+    }
+  };
+
+  const handleHeroCropMouseDown = (e: ReactMouseEvent<HTMLDivElement>) => {
+    setHeroCropDragging(true);
+    setHeroCropDragStart({
+      x: e.clientX - heroCropPosition.x,
+      y: e.clientY - heroCropPosition.y,
+    });
+  };
+
+  const handleHeroCropMouseMove = (e: ReactMouseEvent<HTMLDivElement>) => {
+    if (!heroCropDragging) return;
+    setHeroCropPosition({
+      x: e.clientX - heroCropDragStart.x,
+      y: e.clientY - heroCropDragStart.y,
+    });
+  };
+
+  const handleHeroCropMouseUp = () => setHeroCropDragging(false);
+
+  const codeTheme =
+    selectedPost?.code_theme || (theme === "dark" ? "github-dark-default" : "github-light-default");
   const editor = useCreateBlockNote({
     uploadFile: async (file) => {
       const url = await uploadInlineImage(file);
@@ -1541,18 +1980,25 @@ export const AdminBlogManager = () => {
       cellBackgroundColor: true,
       cellTextColor: true,
     },
-    codeBlock: {
-      defaultLanguage: "text",
-      supportedLanguages: codeLanguages,
-      createHighlighter: async () => {
-        const { getHighlighter } = await import("shiki");
-        return getHighlighter({
-          themes: [codeTheme],
-          langs: Object.keys(codeLanguages),
-        });
-      },
-    },
-  }, [codeTheme]);
+	    codeBlock: {
+	      defaultLanguage: "typescript",
+	      supportedLanguages: codeLanguages,
+	      createHighlighter: async () => {
+	        const { getHighlighter } = await import("shiki");
+	        try {
+	          return await getHighlighter({
+	            themes: [codeTheme],
+	            langs: Array.from(new Set(["text", "plaintext", ...Object.keys(codeLanguages)])),
+	          });
+	        } catch {
+	          return getHighlighter({
+	            themes: ["github-light"],
+	            langs: Array.from(new Set(["text", "plaintext", ...Object.keys(codeLanguages)])),
+	          });
+	        }
+	      },
+	    },
+	  }, [codeTheme]);
 
   useEffect(() => {
     if (!selectedPost) return;
@@ -1596,6 +2042,25 @@ export const AdminBlogManager = () => {
     } catch {
       // ignore
     }
+  };
+
+  const handleEditorDrop = async (e: ReactDragEvent<HTMLDivElement>) => {
+    if (!isEditing || !selectedPost) return;
+    const files = Array.from(e.dataTransfer?.files || []).filter((f) => f.type.startsWith("image/"));
+    if (files.length === 0) return;
+    e.preventDefault();
+    await appendInlineImageToContent(files[0]);
+  };
+
+  const handleEditorPaste = async (e: ReactClipboardEvent<HTMLDivElement>) => {
+    if (!isEditing || !selectedPost) return;
+    const items = Array.from(e.clipboardData?.items || []);
+    const imageItem = items.find((item) => item.type.startsWith("image/"));
+    if (!imageItem) return;
+    const file = imageItem.getAsFile();
+    if (!file) return;
+    e.preventDefault();
+    await appendInlineImageToContent(file);
   };
 
   return (
@@ -1676,6 +2141,25 @@ export const AdminBlogManager = () => {
         {taskPanelOpen ? (
           <div className="mt-4 flex flex-col lg:flex-row gap-4 lg:items-start lg:justify-between">
             <div className="min-w-0 w-full">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <Badge className="bg-red-100 text-red-700 border-0">ToDo</Badge>
+                <Badge className="bg-blue-100 text-blue-700 border-0">In Progress</Badge>
+                <Badge className="bg-emerald-100 text-emerald-700 border-0">Done</Badge>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="ml-auto text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-950/30"
+                  onClick={async () => {
+                    const ok = window.confirm("Clear all blog tasks?");
+                    if (!ok) return;
+                    await clearAllTasks.mutateAsync();
+                  }}
+                  disabled={clearAllTasks.isPending || tasks.length === 0}
+                >
+                  {clearAllTasks.isPending ? "Clearing..." : "Clear All"}
+                </Button>
+              </div>
               <div className="grid gap-3 max-h-80 overflow-auto pr-1">
                 {tasks.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No tasks yet.</p>
@@ -1692,6 +2176,10 @@ export const AdminBlogManager = () => {
                                 {task.description ? (
                                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
                                 ) : null}
+                                <div className="mt-2 flex flex-wrap items-center gap-2">
+                                  <Badge className={`border-0 ${taskPriorityClass(task.priority)}`}>{task.priority}</Badge>
+                                  <Badge variant="outline">{task.related_post_id ? "Linked" : "Unlinked"}</Badge>
+                                </div>
                               </div>
                               <div className="flex flex-col gap-1">
                                 <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => updateTask.mutate({ id: task.id, patch: { status: "in_progress" } })}>
@@ -1713,6 +2201,20 @@ export const AdminBlogManager = () => {
                                 >
                                   Link post
                                 </Button>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-950/30"
+                                  onClick={async () => {
+                                    const ok = window.confirm("Delete this task?");
+                                    if (!ok) return;
+                                    await deleteTask.mutateAsync(task.id);
+                                  }}
+                                  title="Delete task"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -1731,6 +2233,10 @@ export const AdminBlogManager = () => {
                                 {task.description ? (
                                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
                                 ) : null}
+                                <div className="mt-2 flex flex-wrap items-center gap-2">
+                                  <Badge className={`border-0 ${taskPriorityClass(task.priority)}`}>{task.priority}</Badge>
+                                  <Badge variant="outline">{task.related_post_id ? "Linked" : "Unlinked"}</Badge>
+                                </div>
                               </div>
                               <div className="flex flex-col gap-1">
                                 <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => updateTask.mutate({ id: task.id, patch: { status: "pending" } })}>
@@ -1751,6 +2257,20 @@ export const AdminBlogManager = () => {
                                   }
                                 >
                                   Link post
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-950/30"
+                                  onClick={async () => {
+                                    const ok = window.confirm("Delete this task?");
+                                    if (!ok) return;
+                                    await deleteTask.mutateAsync(task.id);
+                                  }}
+                                  title="Delete task"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
                                 </Button>
                               </div>
                             </div>
@@ -1773,10 +2293,30 @@ export const AdminBlogManager = () => {
                                 {task.description ? (
                                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
                                 ) : null}
+                                <div className="mt-2 flex flex-wrap items-center gap-2">
+                                  <Badge className={`border-0 ${taskPriorityClass(task.priority)}`}>{task.priority}</Badge>
+                                  <Badge variant="outline">{task.related_post_id ? "Linked" : "Unlinked"}</Badge>
+                                </div>
                               </div>
-                              <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => updateTask.mutate({ id: task.id, patch: { status: "in_progress" } })}>
-                                Re-open
-                              </Button>
+                              <div className="flex flex-col gap-1">
+                                <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => updateTask.mutate({ id: task.id, patch: { status: "in_progress" } })}>
+                                  Re-open
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-950/30"
+                                  onClick={async () => {
+                                    const ok = window.confirm("Delete this task?");
+                                    if (!ok) return;
+                                    await deleteTask.mutateAsync(task.id);
+                                  }}
+                                  title="Delete task"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -1864,9 +2404,9 @@ export const AdminBlogManager = () => {
       >
         {/* Sections */}
         {!isSidebarCollapsed && !isFocusMode ? (
-          <div className="space-y-4 pr-4 border-r border-border">
+          <div className="space-y-4 pr-4 border-r border-border lg:sticky lg:top-24 lg:self-start lg:h-[calc(100vh-8.5rem)] flex flex-col">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+	                  <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-semibold text-foreground">Sections</h3>
               </div>
@@ -1875,23 +2415,7 @@ export const AdminBlogManager = () => {
                   type="button"
                   size="icon"
                   variant="ghost"
-                  onClick={async () => {
-                    const name = window.prompt("New section name");
-                    if (!name) return;
-                    const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-                    const color = "#2563eb";
-                    const { data, error } = await supabase
-                      .from("blog_sections")
-                      .insert({ name, slug, color })
-                      .select("*")
-                      .single();
-                    if (error) {
-                      toast.error(error.message || "Failed to create section");
-                      return;
-                    }
-                    qc.invalidateQueries({ queryKey: ["admin-blog-sections"] });
-                    if (data?.id) setSelectedSection(data.id);
-                  }}
+                  onClick={() => setCreateSectionOpen(true)}
                   title="New section"
                 >
                   <Plus className="w-4 h-4" />
@@ -1901,7 +2425,7 @@ export const AdminBlogManager = () => {
                 </Button>
               </div>
             </div>
-            <div className="space-y-2 max-h-[620px] overflow-y-auto pr-2">
+            <div className="space-y-2 overflow-y-auto pr-2 flex-1 min-h-0">
               {sectionsError ? (
                 <div className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-2">
                   {sectionsError}
@@ -2033,19 +2557,24 @@ export const AdminBlogManager = () => {
 
         {/* Pages */}
         {!isFocusMode ? (
-          <div className={`space-y-4 ${!isSidebarCollapsed ? "pl-4 pr-4 border-r border-border" : ""}`}>
+          <div className={`space-y-4 ${!isSidebarCollapsed ? "pl-4 pr-4 border-r border-border" : ""} lg:sticky lg:top-24 lg:self-start lg:h-[calc(100vh-8.5rem)] flex flex-col`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-semibold text-foreground">Pages</h3>
               </div>
-              {isSidebarCollapsed ? (
-                <Button type="button" size="icon" variant="ghost" onClick={() => setIsSidebarCollapsed(false)}>
-                  <ChevronRight className="w-4 h-4" />
+              <div className="flex items-center gap-1">
+                <Button type="button" size="icon" variant="ghost" onClick={handleOpenCreatePageModal} title="New page">
+                  <Plus className="w-4 h-4" />
                 </Button>
-              ) : null}
+                {isSidebarCollapsed ? (
+                  <Button type="button" size="icon" variant="ghost" onClick={() => setIsSidebarCollapsed(false)}>
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                ) : null}
+              </div>
             </div>
-            <div className="space-y-3 max-h-[620px] overflow-y-auto pr-2">
+            <div className="space-y-3 overflow-y-auto pr-2 flex-1 min-h-0">
               {postsLoading ? (
                 <div className="text-sm text-muted-foreground">Loading posts...</div>
               ) : null}
@@ -2137,7 +2666,8 @@ export const AdminBlogManager = () => {
                 className={`bg-card border border-border rounded-xl p-6 shadow-sm ${isFocusMode ? "w-full" : ""}`}
               >
                 {/* Header */}
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <div className="sticky top-3 z-20 mb-6 rounded-xl border border-border/70 bg-card/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-card/85">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex gap-2">
                     {(["content", "seo", "settings"] as const).map(tab => (
                       <Button
@@ -2161,11 +2691,18 @@ export const AdminBlogManager = () => {
                         ? `Saved ${new Date(lastSavedAt).toLocaleTimeString()}`
                         : "Autosave on"}
                     </div>
-                    {!isEditing ? (
-                      <>
+	                    {!isEditing ? (
+	                      <>
                         <Button
-                          variant="outline"
                           size="sm"
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                          onClick={() => setPublishPreviewOpen(true)}
+                        >
+                          Preview & Publish
+                        </Button>
+	                        <Button
+	                          variant="outline"
+	                          size="sm"
                           onClick={() => {
                             if (selectedPost.is_locked) return;
                             setIsEditing(true);
@@ -2202,27 +2739,21 @@ export const AdminBlogManager = () => {
                         <Button variant="outline" size="sm" onClick={handleExportPdf}>
                           Export PDF
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => setEpubPreviewOpen(true)}>
-                          Preview EPUB
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={handleExportEpub}>
-                          Export EPUB
-                        </Button>
                       </>
-                    ) : (
-                      <>
+	                    ) : (
+	                      <>
                         <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
                           <X className="w-4 h-4 mr-2" />
                           Cancel
                         </Button>
-                        <Button
-                          size="sm"
-                          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                          onClick={() => setPublishPreviewOpen(true)}
-                          disabled={!selectedPost}
-                        >
-                          Publish
-                        </Button>
+	                        <Button
+	                          size="sm"
+	                          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+	                          onClick={() => setPublishPreviewOpen(true)}
+	                          disabled={!selectedPost}
+	                        >
+	                          Preview & Publish
+	                        </Button>
                         <Button
                           type="button"
                           size="sm"
@@ -2244,14 +2775,9 @@ export const AdminBlogManager = () => {
                         <Button variant="outline" size="sm" onClick={handleExportPdf}>
                           Export PDF
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => setEpubPreviewOpen(true)}>
-                          Preview EPUB
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={handleExportEpub}>
-                          Export EPUB
-                        </Button>
                       </>
                     )}
+                  </div>
                   </div>
                 </div>
 
@@ -2289,17 +2815,27 @@ export const AdminBlogManager = () => {
                         {REQUIRED_POST_STRUCTURE_HEADINGS.map((heading) => {
                           const ok = (selectedPost.content || "").toLowerCase().includes(`## ${heading}`.toLowerCase());
                           return (
-                            <p key={heading} className={`text-xs ${ok ? "text-emerald-600" : "text-red-600"}`}>
-                              {ok ? "✓" : "•"} {heading}
-                            </p>
+                            <button
+                              key={heading}
+                              type="button"
+                              onClick={() => navigateToRequiredHeading(heading)}
+                              className={`text-xs inline-flex items-center justify-between rounded-md px-2 py-1 border transition ${
+                                ok
+                                  ? "text-emerald-700 border-emerald-300 bg-emerald-50 dark:text-emerald-300 dark:border-emerald-900/50 dark:bg-emerald-950/20"
+                                  : "text-red-700 border-red-300 bg-red-50 dark:text-red-300 dark:border-red-900/50 dark:bg-red-950/20"
+                              }`}
+                            >
+                              <span>{ok ? "✓" : "•"} {heading}</span>
+                              <span className="text-[10px] opacity-80">{ok ? "Go to section" : "Add section"}</span>
+                            </button>
                           );
                         })}
                       </div>
                     </div>
 
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">Hero Image</label>
-                    <div className="flex items-center gap-4">
+	                    <div>
+	                      <label className="text-sm font-medium text-foreground mb-2 block">Hero Image</label>
+	                    <div className="flex items-center gap-4">
                       <div className="w-32 h-20 rounded-lg bg-muted flex items-center justify-center overflow-hidden border border-border">
                         {selectedPost.hero_image ? (
                           <img src={selectedPost.hero_image} alt="" className="w-full h-full object-cover" />
@@ -2309,18 +2845,19 @@ export const AdminBlogManager = () => {
                       </div>
                       {isEditing && (
                         <div className="flex items-center gap-2">
-                          <input
-                            ref={heroFileRef}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            disabled={uploadingHero}
-                            onChange={(e) => {
-                              const f = e.target.files?.[0];
-                              if (f) uploadHeroImage(f);
-                            }}
-                          />
-                          <Button
+	                          <input
+	                            ref={heroFileRef}
+	                            type="file"
+	                            accept="image/*"
+	                            className="hidden"
+	                            disabled={uploadingHero}
+	                            onChange={(e) => {
+	                              const f = e.target.files?.[0];
+	                              if (f) openHeroCropper(f);
+                              e.currentTarget.value = "";
+	                            }}
+	                          />
+	                          <Button
                             type="button"
                             variant="outline"
                             size="sm"
@@ -2328,11 +2865,11 @@ export const AdminBlogManager = () => {
                             onClick={() => heroFileRef.current?.click()}
                           >
                             <ImageIcon className="w-4 h-4 mr-2" />
-                            {uploadingHero ? "Uploading..." : "Upload Image"}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+	                            {uploadingHero ? "Uploading..." : "Upload & Crop"}
+	                          </Button>
+	                        </div>
+	                      )}
+	                    </div>
                     {selectedPost.hero_image ? (
                       <div className="mt-3">
                         <Button type="button" variant="ghost" size="sm" onClick={() => setHeroPreviewOpen(true)}>
@@ -2358,25 +2895,79 @@ export const AdminBlogManager = () => {
                       />
                     </div>
 
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">Content</label>
-                      {isEditing ? (
-                        <div className="rounded-xl border border-border bg-white text-slate-900 p-2 min-h-[75vh] w-full notion-editor">
-                          <BlockNoteView
-                            editor={editor}
-                            editable={isEditing && !selectedPost.is_locked}
-                            onChange={handleEditorChange}
-                            theme="light"
-                            slashMenuItems={getDefaultReactSlashMenuItems(editor)}
-                          />
-                          {selectedPost.is_locked ? (
-                            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+	                    <div>
+	                      <div className="flex items-center justify-between gap-2 mb-2">
+                          <label className="text-sm font-medium text-foreground block">Content</label>
+                          {isEditing ? (
+                            <div className="flex items-center gap-2">
+                              <select
+                                className="h-9 rounded-md border border-border bg-background px-2 text-xs"
+                                value={selectedPost.code_theme || (theme === "dark" ? "github-dark-default" : "github-light-default")}
+                                onChange={(e) => {
+                                  const nextPost = { ...selectedPost, code_theme: e.target.value };
+                                  setSelectedPost(nextPost);
+                                  setHasUnsavedChanges(true);
+                                  scheduleAutosave(nextPost);
+                                }}
+                                title="Code highlight theme"
+                              >
+                                {codeThemes.map((themeItem) => (
+                                  <option key={themeItem.id} value={themeItem.id}>
+                                    {themeItem.label}
+                                  </option>
+                                ))}
+                              </select>
+                              <input
+                                ref={inlineFileRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                disabled={uploadingInline}
+                                onChange={async (e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) await appendInlineImageToContent(f);
+                                  e.currentTarget.value = "";
+                                }}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={uploadingInline}
+                                onClick={() => inlineFileRef.current?.click()}
+                              >
+                                {uploadingInline ? "Uploading..." : "Add Image"}
+                              </Button>
+                            </div>
+                          ) : null}
+                        </div>
+	                      {isEditing ? (
+		                        <div
+                            className={`rounded-xl border border-border p-2 min-h-[75vh] max-h-[78vh] overflow-auto w-full notion-editor ${
+                              theme === "dark" ? "bg-slate-950 text-slate-100" : "bg-white text-slate-900"
+                            }`}
+                            onDrop={handleEditorDrop}
+                            onDragOver={(e) => e.preventDefault()}
+                            onPaste={handleEditorPaste}
+                          >
+		                          <BlockNoteView
+	                            editor={editor}
+	                            editable={isEditing && !selectedPost.is_locked}
+	                            onChange={handleEditorChange}
+		                            theme={theme === "dark" ? "dark" : "light"}
+		                            slashMenuItems={getDefaultReactSlashMenuItems(editor)}
+		                          />
+                            <p className="mt-2 text-[11px] text-slate-500">
+                              Drag & drop an image here, paste from clipboard, or use "Add Image".
+                            </p>
+	                          {selectedPost.is_locked ? (
+	                            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
                               This post is locked. Unlock it in Settings to edit.
                             </div>
                           ) : null}
                         </div>
                       ) : (
-                        <div className="rounded-xl border border-border bg-background p-4 min-h-[300px]">
+                        <div ref={contentPreviewRef} className="rounded-xl border border-border bg-background p-4 min-h-[300px]">
                           <Markdown
                             value={selectedPost.content || ""}
                             codeTheme={selectedPost.code_theme || "github-light"}
@@ -2584,22 +3175,22 @@ export const AdminBlogManager = () => {
                         <Badge className={selectedPost.is_published ? "bg-emerald-100 text-emerald-700 border-0" : "bg-amber-100 text-amber-700 border-0"}>
                           {selectedPost.is_published ? "Published" : "Draft"}
                         </Badge>
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => setPublishPreviewOpen(true)}
-                          disabled={!isEditing}
-                        >
-                          Preview & Publish
-                        </Button>
+	                        <Button
+	                          type="button"
+	                          size="sm"
+	                          onClick={() => setPublishPreviewOpen(true)}
+	                          disabled={!selectedPost}
+	                        >
+	                          Preview & Publish
+	                        </Button>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border">
-                      <div>
-                        <p className="font-medium text-foreground">Content Level</p>
-                        <p className="text-sm text-muted-foreground">Beginner to architect journey classification</p>
-                      </div>
+	                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border">
+	                      <div>
+	                        <p className="font-medium text-foreground">Content Level</p>
+	                        <p className="text-sm text-muted-foreground">Beginner to architect journey classification</p>
+	                      </div>
                       <select
                         className="h-10 rounded-md border border-border bg-background px-3 text-sm"
                         value={selectedPost.level || "general"}
@@ -2616,7 +3207,88 @@ export const AdminBlogManager = () => {
                         <option value="intermediate">Intermediate</option>
                         <option value="general">General</option>
                         <option value="architect">Architect</option>
-                      </select>
+	                      </select>
+	                    </div>
+
+                    <div className="p-4 bg-muted rounded-lg border border-emerald-500/25 space-y-3">
+                      <p className="font-medium text-foreground">GitHub Repository</p>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Source Code URL</label>
+                        <Input
+                          value={selectedPost.source_code_url || ""}
+                          disabled={!isEditing}
+                          placeholder="https://github.com/abhishekpandaOfficial/your-repo"
+                          onChange={(e) => {
+                            const nextPost = { ...selectedPost, source_code_url: e.target.value || null };
+                            setSelectedPost(nextPost);
+                            setHasUnsavedChanges(true);
+                            scheduleAutosave(nextPost);
+                          }}
+                          className="bg-background"
+                        />
+                        <p className="mt-2 text-[11px] text-muted-foreground">
+                          If empty, post page falls back to `https://github.com/abhishekpandaOfficial?tab=repositories`.
+                        </p>
+                        {(selectedPost.source_code_url || "").trim() ? (
+                          <a
+                            href={selectedPost.source_code_url as string}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-2 inline-flex items-center text-xs text-emerald-600 hover:text-emerald-500 dark:text-emerald-300 dark:hover:text-emerald-200"
+                          >
+                            Preview repository link
+                          </a>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-muted rounded-lg border border-border space-y-3">
+                      <p className="font-medium text-foreground">Series Controls</p>
+                      {!supportsSeriesColumns ? (
+                        <p className="text-[11px] text-amber-600 dark:text-amber-300">
+                          Series fields are disabled because your connected Supabase project does not have
+                          `series_name` / `series_order` columns yet.
+                        </p>
+                      ) : null}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Series Name</label>
+                          <Input
+                            value={selectedPost.series_name || ""}
+                            disabled={!isEditing || !supportsSeriesColumns}
+                            placeholder="ASP.NET Core Mastery Series"
+                            onChange={(e) => {
+                              const nextPost = { ...selectedPost, series_name: e.target.value || null };
+                              setSelectedPost(nextPost);
+                              setHasUnsavedChanges(true);
+                              scheduleAutosave(nextPost);
+                            }}
+                            className="bg-background"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Series Order</label>
+                          <Input
+                            type="number"
+                            min={1}
+                            value={selectedPost.series_order ?? ""}
+                            disabled={!isEditing || !supportsSeriesColumns}
+                            placeholder="1"
+                            onChange={(e) => {
+                              const raw = e.target.value.trim();
+                              const parsed = raw === "" ? null : Number(raw);
+                              const nextPost = {
+                                ...selectedPost,
+                                series_order: parsed !== null && Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : null,
+                              };
+                              setSelectedPost(nextPost);
+                              setHasUnsavedChanges(true);
+                              scheduleAutosave(nextPost);
+                            }}
+                            className="bg-background"
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
@@ -2799,8 +3471,95 @@ export const AdminBlogManager = () => {
         </div>
       </div>
     </div>
-    <Dialog open={heroPreviewOpen} onOpenChange={setHeroPreviewOpen}>
-      <DialogContent className="max-w-3xl bg-background border-border">
+    <Dialog open={createSectionOpen} onOpenChange={setCreateSectionOpen}>
+      <DialogContent className="max-w-md bg-background border-border">
+        <DialogHeader>
+          <DialogTitle>Create New Section</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1 block">Section Name</label>
+            <Input
+              value={newSectionName}
+              onChange={(e) => setNewSectionName(e.target.value)}
+              placeholder="Backend Engineering"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1 block">Section Color</label>
+            <input
+              type="color"
+              value={newSectionColor}
+              onChange={(e) => setNewSectionColor(e.target.value)}
+              className="h-10 w-14 rounded border border-border bg-transparent p-0"
+            />
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <Button variant="outline" onClick={() => setCreateSectionOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateSectionFromModal} disabled={!newSectionName.trim()}>
+              Create Section
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <Dialog open={createPageOpen} onOpenChange={setCreatePageOpen}>
+      <DialogContent className="max-w-md bg-background border-border">
+        <DialogHeader>
+          <DialogTitle>Create New Page</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1 block">Page Title</label>
+            <Input
+              value={newPageTitle}
+              onChange={(e) => setNewPageTitle(e.target.value)}
+              placeholder="ASP.NET Core API Basics"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1 block">Associated Section</label>
+            <select
+              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm"
+              value={newPageSectionId}
+              onChange={(e) => {
+                const nextSectionId = e.target.value;
+                setNewPageSectionId(nextSectionId);
+                const nextColor = sectionsData.find((s) => s.id === nextSectionId)?.color || "#2563eb";
+                setNewPageColor(nextColor);
+              }}
+            >
+              <option value="all">No section</option>
+              {sectionsData.map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1 block">Page Border Color</label>
+            <input
+              type="color"
+              value={newPageColor}
+              onChange={(e) => setNewPageColor(e.target.value)}
+              className="h-10 w-14 rounded border border-border bg-transparent p-0"
+            />
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <Button variant="outline" onClick={() => setCreatePageOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreatePageFromModal}>Create Page</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+	    <Dialog open={heroPreviewOpen} onOpenChange={setHeroPreviewOpen}>
+	      <DialogContent className="max-w-3xl bg-background border-border">
         <DialogHeader>
           <DialogTitle>Hero Preview</DialogTitle>
         </DialogHeader>
@@ -2811,16 +3570,77 @@ export const AdminBlogManager = () => {
         ) : (
           <div className="text-sm text-muted-foreground">No hero image selected.</div>
         )}
-      </DialogContent>
-    </Dialog>
+	      </DialogContent>
+	    </Dialog>
 
-    <Dialog open={publishPreviewOpen} onOpenChange={setPublishPreviewOpen}>
-      <DialogContent className="max-w-4xl bg-background border-border">
+      <Dialog open={heroCropOpen} onOpenChange={(open) => (!open ? closeHeroCropper() : setHeroCropOpen(true))}>
+        <DialogContent className="max-w-4xl bg-background border-border">
+          <DialogHeader>
+            <DialogTitle>Crop Hero Image</DialogTitle>
+          </DialogHeader>
+          <canvas ref={heroCropCanvasRef} className="hidden" />
+          {heroCropPreviewUrl ? (
+            <div className="space-y-4">
+              <div
+                className="relative w-full aspect-[16/9] rounded-xl overflow-hidden border border-border bg-muted cursor-move"
+                onMouseDown={handleHeroCropMouseDown}
+                onMouseMove={handleHeroCropMouseMove}
+                onMouseUp={handleHeroCropMouseUp}
+                onMouseLeave={handleHeroCropMouseUp}
+              >
+                <img
+                  src={heroCropPreviewUrl}
+                  alt="Hero crop preview"
+                  draggable={false}
+                  style={{
+                    position: "absolute",
+                    left: "50%",
+                    top: "50%",
+                    transform: `translate(calc(-50% + ${heroCropPosition.x}px), calc(-50% + ${heroCropPosition.y}px)) scale(${heroCropZoom})`,
+                    transformOrigin: "center center",
+                    maxWidth: "none",
+                    width: "100%",
+                    height: "auto",
+                    userSelect: "none",
+                  }}
+                />
+                <div className="absolute inset-0 border-2 border-white/70 pointer-events-none" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">Zoom and drag image to frame your hero. Output ratio is 16:9.</p>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground w-12">Zoom</span>
+                  <Slider
+                    value={[heroCropZoom]}
+                    min={1}
+                    max={2.5}
+                    step={0.01}
+                    onValueChange={(v) => setHeroCropZoom(v[0] ?? 1)}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <Button variant="outline" onClick={closeHeroCropper} disabled={uploadingHero}>
+                  Cancel
+                </Button>
+                <Button onClick={processHeroCropAndUpload} disabled={uploadingHero}>
+                  {uploadingHero ? "Uploading..." : "Crop & Use Hero"}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">Choose an image to crop.</div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+	    <Dialog open={publishPreviewOpen} onOpenChange={setPublishPreviewOpen}>
+      <DialogContent className="max-w-5xl h-[92vh] max-h-[92vh] bg-background border-border overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Preview Before Publish</DialogTitle>
         </DialogHeader>
         {selectedPost ? (
-          <div className="space-y-4">
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
             {selectedPost.hero_image ? (
               <div className="rounded-xl overflow-hidden border border-border">
                 <img src={selectedPost.hero_image} alt="" className="w-full h-56 object-cover" />
@@ -2832,13 +3652,13 @@ export const AdminBlogManager = () => {
                 <p className="text-muted-foreground mt-2">{selectedPost.excerpt}</p>
               ) : null}
             </div>
-            <div className="rounded-xl border border-border bg-background p-4 max-h-[60vh] overflow-auto">
+            <div className="rounded-xl border border-border bg-background p-4 flex-1 min-h-0 overflow-auto">
               <Markdown
                 value={selectedPost.content || ""}
                 codeTheme={selectedPost.code_theme || "github-light"}
               />
             </div>
-            <div className="flex items-center justify-end gap-2">
+            <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-border bg-background/95 px-1 pt-3 backdrop-blur">
               <Button variant="outline" onClick={() => setPublishPreviewOpen(false)}>
                 Edit
               </Button>
@@ -2852,43 +3672,6 @@ export const AdminBlogManager = () => {
             </div>
           </div>
         ) : null}
-      </DialogContent>
-    </Dialog>
-
-    <Dialog open={epubPreviewOpen} onOpenChange={setEpubPreviewOpen}>
-      <DialogContent className="max-w-6xl bg-background border-border">
-        <DialogHeader>
-          <DialogTitle>EPUB Preview</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-sm text-muted-foreground">
-              {selectedPost ? selectedPost.title : "No post selected"}
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handlePreviewEpubPrev} disabled={epubPreviewLoading}>
-                <ChevronLeft className="w-4 h-4 mr-1" />
-                Previous
-              </Button>
-              <Button variant="outline" size="sm" onClick={handlePreviewEpubNext} disabled={epubPreviewLoading}>
-                Next
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleExportEpub} disabled={epubPreviewLoading}>
-                Export EPUB
-              </Button>
-            </div>
-          </div>
-          <div className="rounded-xl border border-border bg-muted/20 overflow-hidden">
-            {epubPreviewError ? (
-              <div className="p-4 text-sm text-destructive">{epubPreviewError}</div>
-            ) : null}
-            {epubPreviewLoading ? (
-              <div className="p-4 text-sm text-muted-foreground">Preparing EPUB preview...</div>
-            ) : null}
-            <div ref={epubPreviewContainerRef} className="w-full h-[70vh]" />
-          </div>
-        </div>
       </DialogContent>
     </Dialog>
 

@@ -385,6 +385,19 @@
   padding: 0.15rem 0.35rem;
   background: hsl(var(--muted));
 }
+.prose :where(strong):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  color: hsl(var(--primary));
+}
+.prose :where(em):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  color: hsl(var(--secondary));
+}
+.prose :where(a):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  color: hsl(var(--primary));
+  text-decoration-thickness: 1.5px;
+}
+.prose :where(ul > li):not(:where([class~="not-prose"],[class~="not-prose"] *))::marker {
+  color: #f59e0b;
+}
 .prose :where(pre code):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
   background: transparent;
   padding: 0;
@@ -405,11 +418,27 @@
   font-size: 13px;
   line-height: 1.6;
 }
+.shiki-wrapper .shiki code .line {
+  display: block;
+  min-height: 1.6em;
+}
+.shiki-wrapper .shiki code .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2.2rem;
+  margin-right: 0.9rem;
+  color: #64748b;
+  opacity: 0.85;
+  user-select: none;
+}
+.shiki-wrapper .shiki code {
+  counter-reset: line;
+}
 
 /* BlockNote code blocks (Notion-like) */
 .notion-editor .bn-block-content[data-content-type="codeBlock"] {
   background: var(--prosemirror-highlight-bg, #f7f6f3);
-  color: var(--prosemirror-highlight, #0f172a);
   border: 1px solid #e7e5e4;
   border-radius: 10px;
   overflow: hidden;
@@ -441,12 +470,23 @@
 }
 .notion-editor .bn-block-content[data-content-type="codeBlock"] > pre {
   background: var(--prosemirror-highlight-bg, #f7f6f3);
-  color: var(--prosemirror-highlight, #0f172a);
   border-radius: 0;
   padding: 14px 16px 16px 16px;
   font-size: 13px;
   line-height: 1.6;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+.dark .notion-editor .bn-block-content[data-content-type="codeBlock"] {
+  background: #0b1220;
+  border-color: #1e293b;
+  box-shadow: 0 1px 0 rgba(148, 163, 184, 0.12);
+}
+.dark .notion-editor .bn-block-content[data-content-type="codeBlock"] > div {
+  background: #0f172a;
+  border-bottom-color: #1e293b;
+}
+.dark .notion-editor .bn-block-content[data-content-type="codeBlock"] > pre {
+  background: #0b1220;
 }
 .notion-editor .bn-block-content[data-content-type="codeBlock"] > div > select {
   background: #ffffff;
@@ -461,6 +501,80 @@
 }
 .notion-editor .bn-block-content[data-content-type="codeBlock"] .shiki {
   background: transparent !important;
+}
+.notion-editor .bn-block-content[data-content-type="codeBlock"] .shiki code {
+  counter-reset: line;
+}
+.notion-editor .bn-block-content[data-content-type="codeBlock"] .shiki code .line {
+  display: block;
+  min-height: 1.6em;
+}
+.notion-editor .bn-block-content[data-content-type="codeBlock"] .shiki code .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2rem;
+  margin-right: 0.8rem;
+  color: #64748b;
+  opacity: 0.78;
+  user-select: none;
+}
+.dark .notion-editor .bn-block-content[data-content-type="codeBlock"] .shiki code .line::before {
+  color: #94a3b8;
+  opacity: 0.9;
+}
+.notion-editor .bn-inline-content code {
+  border-radius: 0.45rem;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  background: rgba(99, 102, 241, 0.12);
+  color: #4338ca;
+  padding: 0.1rem 0.45rem;
+  font-weight: 600;
+}
+.dark .notion-editor .bn-inline-content code {
+  border-color: rgba(129, 140, 248, 0.55);
+  background: rgba(79, 70, 229, 0.28);
+  color: #c7d2fe;
+}
+.notion-editor button {
+  color: #0f172a !important;
+}
+.dark .notion-editor button {
+  color: #e2e8f0 !important;
+}
+.notion-editor button svg {
+  opacity: 1 !important;
+  stroke: currentColor !important;
+  stroke-width: 2.1 !important;
+}
+.notion-editor [role="toolbar"],
+.notion-editor [data-bn-toolbar],
+.notion-editor [data-content-type="formattingToolbar"] {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid #d4d4d8 !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+.dark .notion-editor [role="toolbar"],
+.dark .notion-editor [data-bn-toolbar],
+.dark .notion-editor [data-content-type="formattingToolbar"] {
+  background: rgba(2, 6, 23, 0.92) !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.55);
+}
+.notion-editor [role="toolbar"] button,
+.notion-editor [data-bn-toolbar] button,
+.notion-editor [data-content-type="formattingToolbar"] button {
+  border-radius: 8px !important;
+}
+.notion-editor [role="toolbar"] button:hover,
+.notion-editor [data-bn-toolbar] button:hover,
+.notion-editor [data-content-type="formattingToolbar"] button:hover {
+  background: rgba(59, 130, 246, 0.12) !important;
+}
+.dark .notion-editor [role="toolbar"] button:hover,
+.dark .notion-editor [data-bn-toolbar] button:hover,
+.dark .notion-editor [data-content-type="formattingToolbar"] button:hover {
+  background: rgba(59, 130, 246, 0.24) !important;
 }
 
 /* Global responsive hardening for all routes/components */

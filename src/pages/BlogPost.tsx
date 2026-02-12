@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
@@ -27,7 +27,9 @@ import {
   ChevronRight,
   House,
   Link as LinkIcon,
-  Download,
+  Copy,
+  ExternalLink,
+  Printer,
   Share2,
   FileText,
   BookOpen,
@@ -37,6 +39,8 @@ import {
   MessageCircle,
   Send,
   Mail,
+  Github,
+  ArrowRight,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import GithubSlugger from "github-slugger";
@@ -59,6 +63,9 @@ type CacheRow = {
   reading_time_minutes: number;
   views: number;
   updated_at: string;
+  source_code_url: string | null;
+  series_name: string | null;
+  series_order: number | null;
 };
 
 type PostRow = {
@@ -79,6 +86,9 @@ type PostRow = {
   views: number | null;
   code_theme: string | null;
   updated_at: string;
+  source_code_url: string | null;
+  series_name: string | null;
+  series_order: number | null;
 };
 type TagStyleRow = {
   tag: string;
@@ -90,6 +100,8 @@ type TagStyleRow = {
 const SITE_URL =
   (import.meta.env.VITE_SITE_URL as string | undefined) ||
   "https://www.abhishekpanda.com";
+const DEFAULT_GITHUB_SOURCE_URL =
+  "https://github.com/abhishekpandaOfficial?tab=repositories";
 const titleCaseLevel = (level: string | null | undefined) => {
   if (!level) return "General";
   return level.charAt(0).toUpperCase() + level.slice(1);
@@ -124,6 +136,14 @@ const sanitizeId = (input: string, fallback: string) => {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
   return v || fallback;
+};
+
+const findSeriesTag = (tags: string[] | null | undefined) => {
+  const list = tags || [];
+  const explicit = list.find((t) => /series/i.test(t));
+  if (explicit) return explicit;
+  const levelSeries = list.find((t) => /(fundamentals|architect|beginner|intermediate)\s*series/i.test(t));
+  return levelSeries || null;
 };
 
 const splitIntoEpubChapters = (htmlBody: string, fallbackTitle: string): EpubChapter[] => {
@@ -184,6 +204,7 @@ const BlogPost = () => {
   const [supportQrBroken, setSupportQrBroken] = useState(false);
   const [downloadingEpub, setDownloadingEpub] = useState(false);
   const [desktopLayout, setDesktopLayout] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const exportRef = useRef<HTMLDivElement | null>(null);
   const articleBodyRef = useRef<HTMLDivElement | null>(null);
   const articleScrollRef = useRef<HTMLElement | null>(null);
@@ -206,7 +227,7 @@ const BlogPost = () => {
         const fb = await supabase
           .from("blog_posts")
           .select(
-            "id,title,slug,excerpt,hero_image,tags,is_premium,is_published,level,original_published_at,published_at,meta_title,meta_description,updated_at,content,views"
+            "id,title,slug,excerpt,hero_image,tags,is_premium,is_published,level,original_published_at,published_at,meta_title,meta_description,updated_at,content,views,source_code_url,series_name,series_order"
           )
           .eq("slug", slug!)
           .eq("is_published", true)
@@ -233,6 +254,9 @@ const BlogPost = () => {
           updated_at: row.updated_at,
           reading_time_minutes: rt,
           views: row.views ?? 0,
+          source_code_url: row.source_code_url,
+          series_name: row.series_name,
+          series_order: row.series_order,
         } as CacheRow;
       }
 
@@ -267,16 +291,16 @@ const BlogPost = () => {
     queryFn: async () => {
       const res = await supabase
         .from("blog_posts_public_cache")
-        .select("title,slug,excerpt,hero_image,tags,is_premium,published_at,updated_at,is_published")
+        .select("title,slug,excerpt,hero_image,tags,is_premium,published_at,updated_at,is_published,series_name,series_order")
         .eq("is_published", true)
         .order("published_at", { ascending: false })
         .limit(200);
-      if (!res.error) return (res.data ?? []) as Array<Pick<CacheRow, "title" | "slug" | "excerpt" | "hero_image" | "tags" | "is_premium" | "published_at" | "updated_at">>;
+      if (!res.error) return (res.data ?? []) as Array<Pick<CacheRow, "title" | "slug" | "excerpt" | "hero_image" | "tags" | "is_premium" | "published_at" | "updated_at" | "series_name" | "series_order">>;
 
       if ((res.error as { code?: unknown }).code === "PGRST205") {
         const fb = await supabase
           .from("blog_posts")
-          .select("title,slug,excerpt,hero_image,tags,is_premium,published_at,updated_at,is_published")
+          .select("title,slug,excerpt,hero_image,tags,is_premium,published_at,updated_at,is_published,series_name,series_order")
           .eq("is_published", true)
           .order("published_at", { ascending: false })
           .limit(200);
@@ -430,6 +454,22 @@ const BlogPost = () => {
     return () => window.removeEventListener("scroll", computeProgress);
   }, [desktopLayout, post?.id]);
 
+  useEffect(() => {
+    if (!contextMenu) return;
+    const onEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeContextMenu();
+    };
+    const onGlobalClose = () => closeContextMenu();
+    window.addEventListener("keydown", onEsc);
+    window.addEventListener("scroll", onGlobalClose, { passive: true });
+    window.addEventListener("resize", onGlobalClose);
+    return () => {
+      window.removeEventListener("keydown", onEsc);
+      window.removeEventListener("scroll", onGlobalClose);
+      window.removeEventListener("resize", onGlobalClose);
+    };
+  }, [contextMenu, closeContextMenu]);
+
   const toc = useMemo(() => {
     const md = post?.content || "";
     if (!md) return [];
@@ -486,7 +526,7 @@ const BlogPost = () => {
   }, [toc, post?.updated_at, meta?.is_premium, canReadPremium, desktopLayout]);
 
   const nav = useMemo(() => {
-    if (!meta) return { prev: null as any, next: null as any, related: [] as any[] };
+    if (!meta) return { prev: null as any, next: null as any, related: [] as any[], series: null as any };
     const idx = allPosts.findIndex((p) => p.slug === meta.slug);
     const prev = idx > 0 ? allPosts[idx - 1] : null; // newer
     const next = idx >= 0 && idx < allPosts.length - 1 ? allPosts[idx + 1] : null; // older
@@ -498,7 +538,40 @@ const BlogPost = () => {
             .filter((p) => p.slug !== meta.slug && (p.tags || []).some((t) => tagSet.has(t)))
             .slice(0, 3)
         : [];
-    return { prev, next, related };
+    const explicitSeriesName = (meta.series_name || "").trim();
+    let series: {
+      name: string;
+      items: any[];
+      currentIndex: number;
+      total: number;
+      prev: any | null;
+      next: any | null;
+      progressPct: number;
+    } | null = null;
+    if (explicitSeriesName) {
+      const seriesItems = allPosts
+        .filter((p: any) => (p.series_name || "").trim().toLowerCase() === explicitSeriesName.toLowerCase())
+        .slice()
+        .sort((a: any, b: any) => {
+          const ao = Number(a.series_order ?? 0);
+          const bo = Number(b.series_order ?? 0);
+          if (ao && bo && ao !== bo) return ao - bo;
+          return new Date(a.published_at || a.updated_at || 0).getTime() - new Date(b.published_at || b.updated_at || 0).getTime();
+        });
+      const currentIndex = seriesItems.findIndex((p) => p.slug === meta.slug);
+      if (currentIndex >= 0 && seriesItems.length > 1) {
+        series = {
+          name: explicitSeriesName,
+          items: seriesItems,
+          currentIndex,
+          total: seriesItems.length,
+          prev: currentIndex > 0 ? seriesItems[currentIndex - 1] : null,
+          next: currentIndex < seriesItems.length - 1 ? seriesItems[currentIndex + 1] : null,
+          progressPct: Math.round(((currentIndex + 1) / seriesItems.length) * 100),
+        };
+      }
+    }
+    return { prev, next, related, series };
   }, [allPosts, meta]);
 
   const title = meta?.meta_title || meta?.title || "Blog";
@@ -551,6 +624,27 @@ const BlogPost = () => {
       borderColor: style.border_color,
     };
   };
+  const sourceCodeUrl = useMemo(() => {
+    const explicit = (post?.source_code_url || meta?.source_code_url || "").trim();
+    return explicit || DEFAULT_GITHUB_SOURCE_URL;
+  }, [post?.source_code_url, meta?.source_code_url]);
+
+  const closeContextMenu = useCallback(() => {
+    setContextMenu(null);
+  }, []);
+
+  const handleArticleContextMenu = (event: ReactMouseEvent<HTMLElement>) => {
+    event.preventDefault();
+    setContextMenu({ x: event.clientX, y: event.clientY });
+  };
+  const contextMenuPosition = useMemo(() => {
+    if (!contextMenu) return null;
+    if (typeof window === "undefined") return contextMenu;
+    return {
+      x: Math.min(contextMenu.x, window.innerWidth - 240),
+      y: Math.min(contextMenu.y, window.innerHeight - 220),
+    };
+  }, [contextMenu]);
 
   const scrollToTop = () => {
     if (desktopLayout && articleScrollRef.current) {
@@ -893,6 +987,7 @@ const BlogPost = () => {
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-8 items-start">
             <article
               ref={articleScrollRef}
+              onContextMenu={handleArticleContextMenu}
               className="min-w-0 lg:h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-4 lg:overscroll-contain lg:scroll-smooth"
             >
               <header className="mb-8 rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-6 md:p-10 text-white">
@@ -920,6 +1015,11 @@ const BlogPost = () => {
                   {meta.level ? (
                     <span className="px-2 py-1 rounded-full text-xs font-semibold border border-emerald-400/40 bg-emerald-500/20 text-emerald-300">
                       {titleCaseLevel(meta.level)}
+                    </span>
+                  ) : null}
+                  {meta.series_name ? (
+                    <span className="px-2 py-1 rounded-full text-xs font-semibold border border-blue-400/40 bg-blue-500/20 text-blue-200">
+                      Series: {meta.series_name}
                     </span>
                   ) : null}
                   {hasUpdatedDate ? (
@@ -1091,6 +1191,73 @@ const BlogPost = () => {
                       codeTheme={post?.code_theme || "github-light"}
                     />
                   </div>
+
+                  <div
+                    className="group mt-8 relative overflow-hidden rounded-2xl border border-emerald-400/25 bg-gradient-to-r from-emerald-950/80 via-teal-900/70 to-cyan-950/70 p-6 text-white brand-square-glow"
+                    style={{ "--brand-rgb": "16 185 129" } as CSSProperties}
+                  >
+                    <div className="absolute -left-10 bottom-0 h-20 w-20 rounded-full bg-emerald-400/15 blur-sm" />
+                    <div className="absolute right-4 top-4 hidden w-64 rounded-xl border border-emerald-300/35 bg-slate-950/95 p-3 text-xs text-emerald-100 opacity-0 shadow-xl transition-all duration-300 group-hover:translate-y-1 group-hover:opacity-100 lg:block">
+                      <p className="font-semibold text-emerald-300">Repository Preview</p>
+                      <p className="mt-1 truncate">{sourceCodeUrl}</p>
+                      <p className="mt-1 text-[11px] text-emerald-200/80">Open link in a new tab to view project files.</p>
+                    </div>
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-3xl font-black tracking-tight">Grab the Source Code ✨</p>
+                        <p className="text-sm text-emerald-100/90 mt-2">
+                          Access the full implementation on GitHub. Clone it, fork it, or star it to support my work.
+                        </p>
+                        <Button asChild className="mt-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold">
+                          <a href={sourceCodeUrl} target="_blank" rel="noopener noreferrer">
+                            <Github className="w-4 h-4 mr-2" />
+                            View Repository
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </a>
+                        </Button>
+                      </div>
+                      <a
+                        href={sourceCodeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hidden sm:grid place-items-center w-16 h-16 rounded-2xl bg-white/20 border border-white/20 hover:bg-white/30 transition-colors"
+                        aria-label="Open source code repository"
+                      >
+                        <Github className="w-8 h-8" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {nav.series ? (
+                    <div className="mt-8 rounded-2xl border border-blue-500/25 bg-gradient-to-r from-slate-900 via-blue-950/60 to-slate-900 p-5 text-white">
+                      <div className="flex flex-wrap items-center gap-3 text-sm">
+                        <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 font-semibold">
+                          Series
+                        </span>
+                        <span className="text-slate-300">Part {nav.series.currentIndex + 1} of {nav.series.total}</span>
+                        <span className="px-2 py-1 rounded-full border border-blue-400/40 bg-blue-500/20 text-blue-200">
+                          {nav.series.name}
+                        </span>
+                        <div className="ml-auto w-32 h-2 rounded-full bg-white/20 overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-indigo-400 to-violet-400" style={{ width: `${nav.series.progressPct}%` }} />
+                        </div>
+                      </div>
+                      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {nav.series.prev ? (
+                          <Link to={`/blog/${nav.series.prev.slug}`} className="block rounded-xl border border-slate-700 bg-slate-900/80 p-4 hover:border-blue-400/60 transition-colors">
+                            <p className="text-xs text-slate-400">Previous</p>
+                            <p className="font-semibold text-slate-100 line-clamp-2">{nav.series.prev.title}</p>
+                          </Link>
+                        ) : <div />}
+                        {nav.series.next ? (
+                          <Link to={`/blog/${nav.series.next.slug}`} className="block rounded-xl border border-slate-700 bg-slate-900/80 p-4 hover:border-blue-400/60 transition-colors">
+                            <p className="text-xs text-slate-400 text-right">Next</p>
+                            <p className="font-semibold text-slate-100 line-clamp-2 text-right">{nav.series.next.title}</p>
+                          </Link>
+                        ) : <div />}
+                      </div>
+                    </div>
+                  ) : null}
 
                   {(nav.prev || nav.next || nav.related.length > 0) ? (
                     <div className="mt-12 pt-8 border-t border-border space-y-6">
@@ -1605,6 +1772,76 @@ const BlogPost = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {contextMenu && contextMenuPosition ? (
+        <div className="fixed inset-0 z-50" onClick={closeContextMenu}>
+          <div
+            className="absolute w-56 rounded-xl border border-border bg-card p-2 shadow-2xl"
+            style={{ left: contextMenuPosition.x, top: contextMenuPosition.y }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-muted"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(canonical);
+                } catch {
+                  // ignore clipboard errors
+                }
+                closeContextMenu();
+              }}
+            >
+              <Copy className="w-4 h-4" />
+              Copy article link
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-muted"
+              onClick={() => {
+                window.open(sourceCodeUrl, "_blank", "noopener,noreferrer");
+                closeContextMenu();
+              }}
+            >
+              <Github className="w-4 h-4" />
+              Open source repository
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-muted"
+              onClick={() => {
+                setShareDialogOpen(true);
+                closeContextMenu();
+              }}
+            >
+              <ExternalLink className="w-4 h-4" />
+              Share options
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-muted"
+              onClick={() => {
+                window.print();
+                closeContextMenu();
+              }}
+            >
+              <Printer className="w-4 h-4" />
+              Print article
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-muted"
+              onClick={() => {
+                scrollToTop();
+                closeContextMenu();
+              }}
+            >
+              <ArrowUp className="w-4 h-4" />
+              Back to top
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="hidden">
         <div ref={exportRef} className="prose prose-neutral max-w-none">

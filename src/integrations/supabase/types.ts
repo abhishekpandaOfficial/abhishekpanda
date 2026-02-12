@@ -377,8 +377,11 @@ export type Database = {
           original_published_at: string | null
           published_at: string | null
           section_id: string | null
+          series_name: string | null
+          series_order: number | null
           slug: string
           sort_order: number
+          source_code_url: string | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -402,8 +405,11 @@ export type Database = {
           original_published_at?: string | null
           published_at?: string | null
           section_id?: string | null
+          series_name?: string | null
+          series_order?: number | null
           slug: string
           sort_order?: number
+          source_code_url?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -427,8 +433,11 @@ export type Database = {
           original_published_at?: string | null
           published_at?: string | null
           section_id?: string | null
+          series_name?: string | null
+          series_order?: number | null
           slug?: string
           sort_order?: number
+          source_code_url?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
@@ -463,8 +472,11 @@ export type Database = {
           published_at: string | null
           reading_time_minutes: number
           section_id: string | null
+          series_name: string | null
+          series_order: number | null
           slug: string
           sort_order: number | null
+          source_code_url: string | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -489,8 +501,11 @@ export type Database = {
           published_at?: string | null
           reading_time_minutes?: number
           section_id?: string | null
+          series_name?: string | null
+          series_order?: number | null
           slug: string
           sort_order?: number | null
+          source_code_url?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -515,8 +530,11 @@ export type Database = {
           published_at?: string | null
           reading_time_minutes?: number
           section_id?: string | null
+          series_name?: string | null
+          series_order?: number | null
           slug?: string
           sort_order?: number | null
+          source_code_url?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string

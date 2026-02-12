@@ -9,6 +9,11 @@ import {
   Layers,
   Twitter,
   Facebook,
+  MessageCircle,
+  Send,
+  MessageSquare,
+  Music2,
+  Bookmark,
 } from "lucide-react";
 import { StackcraftIcon } from "@/components/icons/StackcraftIcon";
 
@@ -24,7 +29,13 @@ export type SocialIconKey =
   | "hashnode"
   | "stackexchange"
   | "stackcraft"
-  | "website";
+  | "website"
+  | "threads"
+  | "reddit"
+  | "telegram"
+  | "discord"
+  | "tiktok"
+  | "pinterest";
 
 export function iconForKey(key: string) {
   switch (key) {
@@ -52,6 +63,18 @@ export function iconForKey(key: string) {
       return StackcraftIcon as any;
     case "website":
       return Globe;
+    case "threads":
+      return MessageCircle;
+    case "reddit":
+      return MessageSquare;
+    case "telegram":
+      return Send;
+    case "discord":
+      return MessageCircle;
+    case "tiktok":
+      return Music2;
+    case "pinterest":
+      return Bookmark;
     default:
       return LinkFallback;
   }
@@ -65,4 +88,3 @@ function LinkFallback(props: { className?: string }) {
     </svg>
   );
 }
-

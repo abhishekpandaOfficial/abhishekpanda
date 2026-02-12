@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import hljs from "highlight.js/lib/common";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeRaw from "rehype-raw";
+import { useTheme } from "@/components/ThemeProvider";
 
 type MarkdownProps = {
   value: string;
@@ -90,6 +92,7 @@ const getHighlighterForTheme = async (theme: string) => {
 };
 
 export const Markdown = ({ value, codeTheme = DEFAULT_CODE_THEME }: MarkdownProps) => {
+  const { theme } = useTheme();
   return (
     <div className="prose prose-neutral dark:prose-invert max-w-none prose-pre:p-0 prose-pre:bg-transparent">
       <ReactMarkdown
@@ -102,30 +105,52 @@ export const Markdown = ({ value, codeTheme = DEFAULT_CODE_THEME }: MarkdownProp
           [rehypeAutolinkHeadings, { behavior: "wrap" }],
         ]}
         components={{
+          p: ({ node, children, ...props }: any) => {
+            const childNodes = Array.isArray((node as any)?.children) ? (node as any).children : [];
+            const onlyChild = childNodes.length === 1 ? childNodes[0] : null;
+            const onlyChildClass = String((onlyChild as any)?.properties?.className || "");
+            const looksLikeBlockCode =
+              (onlyChild as any)?.tagName === "code" &&
+              /language-/.test(onlyChildClass);
+            if (looksLikeBlockCode) {
+              return <>{children as ReactNode}</>;
+            }
+            return <p {...props}>{children}</p>;
+          },
           pre: ({ children }) => (
             <>{children}</>
           ),
           code: ({ className, inline, children, ...props }: any) => {
             const isInline = !!inline;
-            if (isInline) {
+            const textToCopy = String(children ?? "").replace(/\n$/, "");
+            const normalizedClass = (className || "").trim();
+            const hasLanguageClass = /language-/.test(normalizedClass);
+            const looksLikeBlockCode = !isInline && (hasLanguageClass || textToCopy.includes("\n"));
+
+            if (!looksLikeBlockCode) {
               return (
-                <code className={className} {...props}>
+                <code
+                  className={`px-2 py-0.5 rounded-md border border-violet-400/35 bg-violet-500/10 text-violet-700 dark:text-violet-300 font-medium ${className || ""}`}
+                  {...props}
+                >
                   {children}
                 </code>
               );
             }
-            const language = className?.replace("language-", "").trim();
-            const textToCopy = String(children ?? "").replace(/\n$/, "");
+            const language = normalizedClass.replace("language-", "").trim();
             return (
               <CodeBlockWrapper
                 code={textToCopy}
                 language={language}
                 codeTheme={codeTheme}
+                themeMode={theme}
               />
             );
           },
           a: ({ node, ...props }) => {
             const isCta = typeof (node as any)?.properties?.dataCta !== "undefined";
+            const href = typeof props.href === "string" ? props.href : "";
+            const isExternal = /^https?:\/\//i.test(href);
             if (isCta) {
               return (
                 <a
@@ -134,7 +159,15 @@ export const Markdown = ({ value, codeTheme = DEFAULT_CODE_THEME }: MarkdownProp
                 />
               );
             }
-            return <a {...props} />;
+            return (
+              <a
+                {...props}
+                title={href}
+                target={isExternal ? "_blank" : props.target}
+                rel={isExternal ? "noopener noreferrer" : props.rel}
+                className={`underline decoration-dotted underline-offset-4 hover:decoration-solid hover:text-primary transition-colors ${props.className || ""}`}
+              />
+            );
           },
         }}
       >
@@ -148,10 +181,12 @@ const CodeBlockWrapper = ({
   code,
   language,
   codeTheme,
+  themeMode,
 }: {
   code: string;
   language?: string;
   codeTheme: string;
+  themeMode?: "light" | "dark" | "system";
 }) => {
   const [copied, setCopied] = useState(false);
   const [highlightedHtml, setHighlightedHtml] = useState<string>("");
@@ -194,12 +229,33 @@ const CodeBlockWrapper = ({
     }
   };
 
+  const isDark = themeMode !== "light";
+
   return (
-    <div className="relative rounded-xl border border-border bg-card overflow-hidden">
+    <div
+      className={`relative rounded-xl overflow-hidden ${
+        isDark
+          ? "border border-cyan-400/25 bg-gradient-to-br from-slate-950 to-blue-950/80 shadow-[0_8px_30px_rgba(2,132,199,0.18)]"
+          : "border border-slate-200 bg-gradient-to-br from-slate-50 to-blue-50/70 shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
+      }`}
+    >
+      <span
+        className={`absolute top-2 left-3 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wide ${
+          isDark
+            ? "border border-cyan-300/30 bg-cyan-500/20 text-cyan-100"
+            : "border border-sky-300/60 bg-sky-100 text-sky-700"
+        }`}
+      >
+        {normalizedLanguage}
+      </span>
       <button
         type="button"
         onClick={onCopy}
-        className="absolute top-2 right-2 text-xs px-2 py-1 rounded-md border border-border bg-background/80 hover:bg-background"
+        className={`absolute top-2 right-2 text-xs px-2 py-1 rounded-md ${
+          isDark
+            ? "border border-slate-600 bg-slate-900/80 text-slate-100 hover:bg-slate-800"
+            : "border border-slate-300 bg-white/90 text-slate-700 hover:bg-slate-100"
+        }`}
       >
         {copied ? "Copied" : "Copy"}
       </button>
