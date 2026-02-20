@@ -54,6 +54,7 @@ const galaxySubLinks = [
 const blogSubLinks = [
   { name: "Personal Blog", path: "/blog", icon: Pen, description: "My articles & tutorials" },
   { name: "Blog Aggregator", path: "/blogs", icon: Rss, description: "Medium, Substack, Hashnode & more" },
+  { name: "TechHub", path: "/blog/techhub", icon: Layers, description: "Modular tech learning hub" },
 ];
 
 export const Navigation = () => {
@@ -74,7 +75,10 @@ export const Navigation = () => {
   }, [location.pathname]);
 
   const isGalaxyActive = location.pathname.startsWith("/llm-galaxy");
-  const isBlogActive = location.pathname.startsWith("/blog") || location.pathname === "/blogs";
+  const isBlogActive =
+    location.pathname.startsWith("/blog") ||
+    location.pathname === "/blogs" ||
+    location.pathname.startsWith("/tech");
   const isCoursesActive = location.pathname === "/courses" || location.pathname.startsWith("/courses/");
   const isEbooksActive = location.pathname === "/ebooks" || location.pathname.startsWith("/ebooks/");
 

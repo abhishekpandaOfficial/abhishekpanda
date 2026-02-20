@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import type { LucideIcon } from "lucide-react";
+import { Blocks, Component, Route, Waypoints } from "lucide-react";
 import type { IconType } from "react-icons";
+import { useNavigate } from "react-router-dom";
 import {
+  SiArgo,
   SiAmazonwebservices,
   SiAngular,
   SiApachekafka,
@@ -32,6 +36,7 @@ import {
   SiTypescript,
   SiVuedotjs,
 } from "react-icons/si";
+import { TECH_PLAYBOOK_MAP } from "@/lib/techPlaybook";
 
 type Category =
   | "backend"
@@ -47,6 +52,7 @@ type Tier = "primary" | "secondary";
 interface TechItem {
   name: string;
   icon?: IconType;
+  conceptIcon?: LucideIcon;
   logoPath?: string;
   color: string;
   tier: Tier;
@@ -65,7 +71,15 @@ const categories: Array<{ id: "all" | Category; label: string }> = [
 ];
 
 const techStack: TechItem[] = [
-  { name: ".NET", icon: SiDotnet, color: "#512BD4", tier: "primary", categories: ["backend"] },
+  { name: ".NET Core API (.NET 10)", icon: SiDotnet, color: "#512BD4", tier: "primary", categories: ["backend"] },
+  { name: "Microservices", conceptIcon: Route, color: "#0EA5E9", tier: "primary", categories: ["backend", "devops"] },
+  { name: "GitHub", icon: SiGithub, color: "#181717", tier: "primary", categories: ["devops"] },
+  { name: "GitHub Actions", icon: SiGithubactions, color: "#2088FF", tier: "primary", categories: ["devops"] },
+  { name: "Argo CD", icon: SiArgo, color: "#EF7B4D", tier: "primary", categories: ["cloud", "devops"] },
+  { name: "Design Patterns", conceptIcon: Component, color: "#7C3AED", tier: "primary", categories: ["backend"] },
+  { name: "SOLID Principles", conceptIcon: Blocks, color: "#059669", tier: "primary", categories: ["backend"] },
+  { name: "Microservices Architecture", conceptIcon: Waypoints, color: "#2563EB", tier: "primary", categories: ["backend", "devops"] },
+
   { name: "C#", icon: SiSharp, color: "#239120", tier: "primary", categories: ["backend"] },
   { name: "Azure", logoPath: "/brand-logos/stacks/microsoftazure.svg", color: "#0078D4", tier: "primary", categories: ["cloud"] },
   { name: "AWS", icon: SiAmazonwebservices, color: "#FF9900", tier: "primary", categories: ["cloud"] },
@@ -81,7 +95,6 @@ const techStack: TechItem[] = [
   { name: "Python", icon: SiPython, color: "#3776AB", tier: "primary", categories: ["backend", "aiml"] },
   { name: "TensorFlow", icon: SiTensorflow, color: "#FF6F00", tier: "primary", categories: ["aiml"] },
   { name: "PyTorch", icon: SiPytorch, color: "#EE4C2C", tier: "primary", categories: ["aiml"] },
-  { name: "GitHub Actions", icon: SiGithubactions, color: "#2088FF", tier: "primary", categories: ["devops"] },
   { name: "Jenkins", icon: SiJenkins, color: "#D24939", tier: "primary", categories: ["devops"] },
 
   { name: "React", icon: SiReact, color: "#61DAFB", tier: "secondary", categories: ["frontend"] },
@@ -96,17 +109,29 @@ const techStack: TechItem[] = [
   { name: "Hugging Face", icon: SiHuggingface, color: "#FF9D00", tier: "secondary", categories: ["aiml"] },
   { name: "LangChain", icon: SiLangchain, color: "#1C3C3C", tier: "secondary", categories: ["aiml"] },
   { name: "Git", icon: SiGit, color: "#F05032", tier: "secondary", categories: ["devops"] },
-  { name: "GitHub", icon: SiGithub, color: "#181717", tier: "secondary", categories: ["devops"] },
 ];
 
 const Tile = ({ item }: { item: TechItem }) => {
   const Icon = item.icon;
+  const ConceptIcon = item.conceptIcon;
+  const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
+  const playbook = TECH_PLAYBOOK_MAP.get(item.name);
+  const isClickable = !!playbook;
 
   return (
     <motion.div
       whileHover={{ y: -6, scale: 1.03 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="group relative rounded-2xl border border-border/60 bg-card/70 p-4 backdrop-blur-sm"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={() => {
+        if (!playbook) return;
+        navigate(`/blog/techhub?focus=${encodeURIComponent(playbook.slug)}`);
+      }}
+      className={`group relative rounded-2xl border border-border/60 bg-card/70 p-4 backdrop-blur-sm ${
+        isClickable ? "cursor-pointer" : "cursor-default"
+      }`}
       style={{ boxShadow: `0 10px 30px ${item.color}1A` }}
     >
       <div className="absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={{ background: `linear-gradient(135deg, ${item.color}1F, transparent 55%)` }} />
@@ -114,6 +139,8 @@ const Tile = ({ item }: { item: TechItem }) => {
         <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: `${item.color}1A` }}>
           {Icon ? (
             <Icon size={22} color={item.color} aria-hidden="true" />
+          ) : ConceptIcon ? (
+            <ConceptIcon size={22} color={item.color} aria-hidden="true" />
           ) : (
             <img src={item.logoPath} alt={`${item.name} logo`} className="h-6 w-6 object-contain" loading="lazy" />
           )}
@@ -122,6 +149,15 @@ const Tile = ({ item }: { item: TechItem }) => {
           {item.name}
         </span>
       </div>
+
+      {playbook && isHovered ? (
+        <div className="pointer-events-none absolute left-3 right-3 top-[calc(100%+8px)] z-50 rounded-xl border border-border/60 bg-popover p-3 shadow-xl">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">What</p>
+          <p className="mt-1 text-xs text-foreground">{playbook.what}</p>
+          <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Why</p>
+          <p className="mt-1 text-xs text-muted-foreground">{playbook.why}</p>
+        </div>
+      ) : null}
     </motion.div>
   );
 };
@@ -138,7 +174,7 @@ export const TechStackShowcase = () => {
   const secondary = filtered.filter((item) => item.tier === "secondary");
 
   return (
-    <section className="overflow-hidden bg-muted/30 py-12 md:py-16">
+    <section className="bg-muted/30 py-12 md:py-16">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 16 }}

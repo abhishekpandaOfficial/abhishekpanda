@@ -32,6 +32,8 @@ const PasskeyRegistration = lazy(() => import("./pages/PasskeyRegistration"));
 const Login = lazy(() => import("./pages/Login"));
 const Account = lazy(() => import("./pages/Account"));
 const Chronyx = lazy(() => import("./pages/Chronyx"));
+const TechHub = lazy(() => import("./pages/TechHub"));
+const FoundationalModelsGuide = lazy(() => import("./pages/FoundationalModelsGuide"));
 const ABHIBot = lazy(() => import("@/components/home/ABHIBot").then((m) => ({ default: m.ABHIBot })));
 
 const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
@@ -133,7 +135,12 @@ const App = () => {
                 <Route path="/llm-galaxy" element={<LLMGalaxy />} />
                 <Route path="/llm-galaxy/model/:modelId" element={<ModelDetail />} />
                 <Route path="/blogs" element={<BlogAggregator />} />
+                <Route path="/blog/techhub" element={<TechHub />} />
+                <Route path="/blog/building-your-own-foundational-ai-models-from-scratch" element={<FoundationalModelsGuide />} />
+                <Route path="/blog/techstacks" element={<Navigate to="/blog/techhub" replace />} />
                 <Route path="/chronyx" element={<Chronyx />} />
+                <Route path="/tech" element={<Navigate to="/blog/techhub" replace />} />
+                <Route path="/tech/:slug" element={<Navigate to="/blog/techhub" replace />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/account" element={<Account />} />
 

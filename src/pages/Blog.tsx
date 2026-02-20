@@ -37,6 +37,13 @@ const titleCaseLevel = (level: string | null | undefined) => {
   return level.charAt(0).toUpperCase() + level.slice(1);
 };
 
+const getPublishingChannel = (tags: string[] | null | undefined): "personal" | "techhub" => {
+  const hit = (tags || []).find((t) => t.toLowerCase().startsWith("channel:"));
+  if (!hit) return "personal";
+  const raw = hit.split(":")[1]?.toLowerCase();
+  return raw === "techhub" ? "techhub" : "personal";
+};
+
 const Blog = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -84,23 +91,28 @@ const Blog = () => {
     [tagStyles],
   );
 
+  const personalPosts = useMemo(
+    () => posts.filter((p) => getPublishingChannel(p.tags || []) === "personal"),
+    [posts]
+  );
+
   const categories = [
-    { name: "All", count: posts.length },
-    ...Array.from(new Set(posts.flatMap((p) => p.tags || []).filter(Boolean))).map((cat) => ({
+    { name: "All", count: personalPosts.length },
+    ...Array.from(new Set(personalPosts.flatMap((p) => p.tags || []).filter(Boolean))).map((cat) => ({
       name: cat as string,
-      count: posts.filter((p) => (p.tags || []).includes(cat as string)).length,
+      count: personalPosts.filter((p) => (p.tags || []).includes(cat as string)).length,
     })),
   ];
 
   const levelCounts = [
-    { name: "All", count: posts.length },
+    { name: "All", count: personalPosts.length },
     ...LEVELS.map((level) => ({
       name: titleCaseLevel(level),
-      count: posts.filter((p) => (p as { level?: string | null }).level === level).length,
+      count: personalPosts.filter((p) => (p as { level?: string | null }).level === level).length,
     })),
   ];
 
-  const filteredPosts = posts.filter((post) => {
+  const filteredPosts = personalPosts.filter((post) => {
     const matchesSearch =
       post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -192,6 +204,33 @@ const Blog = () => {
         </section>
 
         <section className="container mx-auto px-4">
+          <div className="mb-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-cyan-500/10 p-5">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-primary">Featured AI/ML Documentation</p>
+            <h2 className="mt-1 text-xl font-black tracking-tight text-foreground">
+              Building Your Own Foundational AI Models From Scratch
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Architectures, datasets, distributed training, alignment, cost and production serving with a real-world finance assistant example.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link
+                to="/blog/building-your-own-foundational-ai-models-from-scratch"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+              >
+                Open Documentation Guide
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <a
+                href="https://originxcloud.com"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-background/70 px-3 py-1.5 text-xs font-semibold text-foreground"
+              >
+                OriginX Cloud
+              </a>
+            </div>
+          </div>
+
           <div className="flex flex-col lg:flex-row gap-8">
             <motion.aside
               initial={{ opacity: 0, x: -20 }}

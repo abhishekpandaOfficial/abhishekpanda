@@ -94,7 +94,7 @@ const getHighlighterForTheme = async (theme: string) => {
 export const Markdown = ({ value, codeTheme = DEFAULT_CODE_THEME }: MarkdownProps) => {
   const { theme } = useTheme();
   return (
-    <div className="prose prose-neutral dark:prose-invert max-w-none prose-pre:p-0 prose-pre:bg-transparent">
+    <div className="prose prose-neutral dark:prose-invert max-w-none prose-pre:p-0 prose-pre:bg-transparent prose-headings:scroll-mt-28 prose-h2:mt-12 prose-h2:border-b prose-h2:border-border/70 prose-h2:pb-2 prose-h2:text-2xl prose-h2:font-black prose-h3:mt-8 prose-h3:text-xl prose-h3:font-bold prose-p:leading-7 prose-li:leading-7 prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-img:border prose-img:border-border/70 prose-img:bg-card prose-img:p-1 dark:prose-img:bg-slate-900">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[

@@ -46,6 +46,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Markdown } from "@/components/blog/Markdown";
 import { useTheme } from "@/components/ThemeProvider";
+import foundationalModelsSeedMarkdown from "@/content/blog/building-foundational-models.md?raw";
 
 type BlogPost = {
   id: string;
@@ -127,6 +128,41 @@ const REQUIRED_POST_STRUCTURE_HEADINGS = [
   "FAQs",
   "Final Thoughts",
 ];
+const FOUNDATIONAL_GUIDE_TITLE = "Building Your Own Foundational AI Models From Scratch";
+const FOUNDATIONAL_GUIDE_SLUG = "building-your-own-foundational-ai-models-from-scratch";
+const FOUNDATIONAL_GUIDE_TAGS = [
+  "ai-ml",
+  "foundational-models",
+  "llm",
+  "distributed-training",
+  "mlops",
+  "originx-cloud",
+];
+type TechHubDomainSlug =
+  | "dotnet"
+  | "microservices"
+  | "devops"
+  | "cloud"
+  | "ai-ml"
+  | "recent-unboxing"
+  | "others";
+type PublishChannel = "personal" | "techhub";
+
+const TECHHUB_TAG_PREFIX = "techhub:";
+const CHANNEL_TAG_PREFIX = "channel:";
+const CHANNEL_OPTIONS: Array<{ value: PublishChannel; label: string }> = [
+  { value: "personal", label: "Personal Blog Post" },
+  { value: "techhub", label: "TechHub Module" },
+];
+const TECHHUB_DOMAIN_OPTIONS: Array<{ value: TechHubDomainSlug; label: string }> = [
+  { value: "dotnet", label: ".NET Blogs" },
+  { value: "microservices", label: "Microservices Blogs" },
+  { value: "devops", label: "DevOps Blogs" },
+  { value: "cloud", label: "Cloud Blogs" },
+  { value: "ai-ml", label: "AI/ML Blogs" },
+  { value: "recent-unboxing", label: "Recent Tech Blogs (Unboxing)" },
+  { value: "others", label: "Other Blogs" },
+];
 const LANDING_BACKLOG_TASKS = [
   {
     title: "Polish Stackcraft Tracks content hierarchy",
@@ -152,6 +188,38 @@ const slugify = (input: string) =>
     .replace(/['"]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+
+const getTechHubDomainFromTags = (tags: string[] | null | undefined): TechHubDomainSlug | "" => {
+  const hit = (tags || []).find((t) => t.toLowerCase().startsWith(TECHHUB_TAG_PREFIX));
+  if (!hit) return "";
+  const raw = hit.slice(TECHHUB_TAG_PREFIX.length).toLowerCase() as TechHubDomainSlug;
+  return TECHHUB_DOMAIN_OPTIONS.some((d) => d.value === raw) ? raw : "";
+};
+
+const getPublishingChannelFromTags = (tags: string[] | null | undefined): PublishChannel | "" => {
+  const hit = (tags || []).find((t) => t.toLowerCase().startsWith(CHANNEL_TAG_PREFIX));
+  if (!hit) return "";
+  const raw = hit.slice(CHANNEL_TAG_PREFIX.length).toLowerCase();
+  return raw === "personal" || raw === "techhub" ? (raw as PublishChannel) : "";
+};
+
+const withTechHubDomainTag = (
+  tags: string[] | null | undefined,
+  domain: TechHubDomainSlug | ""
+) => {
+  const next = (tags || []).filter((t) => !t.toLowerCase().startsWith(TECHHUB_TAG_PREFIX));
+  if (domain) next.push(`${TECHHUB_TAG_PREFIX}${domain}`);
+  return next;
+};
+
+const withPublishingChannelTag = (
+  tags: string[] | null | undefined,
+  channel: PublishChannel | ""
+) => {
+  const next = (tags || []).filter((t) => !t.toLowerCase().startsWith(CHANNEL_TAG_PREFIX));
+  if (channel) next.push(`${CHANNEL_TAG_PREFIX}${channel}`);
+  return next;
+};
 
 const isDuplicateSlugError = (err: unknown) => {
   const code = typeof err === "object" && err !== null ? (err as { code?: unknown }).code : undefined;
@@ -666,6 +734,15 @@ export const AdminBlogManager = () => {
 
   const handlePublishApprove = async () => {
     if (!selectedPost) return;
+    const channel = getPublishingChannelFromTags(selectedPost.tags);
+    if (!channel) {
+      toast.error("Select publishing destination: Personal Blog or TechHub.");
+      return;
+    }
+    if (channel === "techhub" && !getTechHubDomainFromTags(selectedPost.tags)) {
+      toast.error("Select a TechHub domain before publishing.");
+      return;
+    }
     const missing = getMissingStructureHeadings(selectedPost.content);
     if (missing.length > 0) {
       toast.error(`Missing required sections: ${missing.join(", ")}`);
@@ -1476,6 +1553,78 @@ export const AdminBlogManager = () => {
       }
     });
     toast.success("Full course structure template applied. Customize and publish.");
+  };
+
+  const applyFoundationalAiMlSeed = () => {
+    const existing = posts.find((p) => p.slug === FOUNDATIONAL_GUIDE_SLUG);
+    if (existing) {
+      const mergedTags = Array.from(new Set([...(existing.tags || []), ...FOUNDATIONAL_GUIDE_TAGS]));
+      const nextPost: BlogPost = {
+        ...existing,
+        title: FOUNDATIONAL_GUIDE_TITLE,
+        slug: FOUNDATIONAL_GUIDE_SLUG,
+        excerpt:
+          existing.excerpt ||
+          "A practical engineering guide for building domain-specific foundational AI models from zero to production.",
+        tags: withTechHubDomainTag(
+          withPublishingChannelTag(mergedTags, "techhub"),
+          "ai-ml",
+        ),
+        meta_title: `${FOUNDATIONAL_GUIDE_TITLE} | Abhishek Panda`,
+        meta_description:
+          "Step-by-step guide for architectures, datasets, training, distributed infra, alignment, inference, and production deployment.",
+        content: existing.content || foundationalModelsSeedMarkdown,
+        level: existing.level || "architect",
+      };
+      setSelectedPost(nextPost);
+      setIsEditing(true);
+      setActiveTab("content");
+      setSelectedSection("all");
+      setHasUnsavedChanges(true);
+      scheduleAutosave(nextPost);
+      toast.success("Loaded existing AI/ML foundational guide into CMS editor.");
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const aiMlSectionId =
+      sectionsData.find((s) => /ai|ml|machine learning/i.test(s.name))?.id || null;
+    const newPost: BlogPost = {
+      id: crypto.randomUUID(),
+      title: FOUNDATIONAL_GUIDE_TITLE,
+      slug: FOUNDATIONAL_GUIDE_SLUG,
+      excerpt:
+        "A practical engineering guide for building domain-specific foundational AI models from zero to production.",
+      content: foundationalModelsSeedMarkdown,
+      hero_image: "/images/blog/foundation-models/lifecycle.svg",
+      section_id: aiMlSectionId,
+      tags: withTechHubDomainTag(withPublishingChannelTag(FOUNDATIONAL_GUIDE_TAGS, "techhub"), "ai-ml"),
+      meta_title: `${FOUNDATIONAL_GUIDE_TITLE} | Abhishek Panda`,
+      meta_description:
+        "Step-by-step guide for architectures, datasets, training, distributed infra, alignment, inference, and production deployment.",
+      is_published: false,
+      is_premium: false,
+      is_locked: false,
+      level: "architect",
+      code_theme: theme === "dark" ? "github-dark-default" : "github-light-default",
+      color: sectionsData.find((s) => s.id === aiMlSectionId)?.color || "#0891b2",
+      source_code_url: "https://originxcloud.com",
+      series_name: "AI/ML Foundational Series",
+      series_order: 1,
+      views: 0,
+      created_at: now,
+      original_published_at: null,
+      published_at: null,
+      updated_at: now,
+      sort_order: posts.length + 1,
+    };
+    setSelectedPost(newPost);
+    setIsEditing(true);
+    setActiveTab("content");
+    setSelectedSection("all");
+    setHasUnsavedChanges(true);
+    scheduleAutosave(newPost);
+    toast.success("AI/ML foundational guide seed created in CMS. Review and publish.");
   };
 
   const upsertPost = useMutation({
@@ -2804,9 +2953,14 @@ export const AdminBlogManager = () => {
                         <p className="text-xs text-muted-foreground mb-2">
                           Need a full long-form structure (like a complete course/article page)?
                         </p>
-                        <Button type="button" variant="outline" size="sm" onClick={applyFullCourseTemplate}>
-                          Apply Full Course Structure
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                          <Button type="button" variant="outline" size="sm" onClick={applyFullCourseTemplate}>
+                            Apply Full Course Structure
+                          </Button>
+                          <Button type="button" size="sm" onClick={applyFoundationalAiMlSeed}>
+                            Create AI/ML Foundation Seed
+                          </Button>
+                        </div>
                       </div>
                     ) : null}
                     <div className="rounded-lg border border-border bg-background p-3">
@@ -3157,6 +3311,68 @@ export const AdminBlogManager = () => {
                         {sectionsData.map((section) => (
                           <option key={section.id} value={section.id}>
                             {section.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg border border-violet-500/20">
+                      <div>
+                        <p className="font-medium text-foreground">Publishing Destination</p>
+                        <p className="text-sm text-muted-foreground">Choose where this post should appear when published</p>
+                      </div>
+                      <select
+                        className="h-10 rounded-md border border-border bg-background px-3 text-sm min-w-[220px]"
+                        value={getPublishingChannelFromTags(selectedPost.tags)}
+                        disabled={!isEditing}
+                        onChange={(e) => {
+                          const channel = e.target.value as PublishChannel | "";
+                          const currentDomain = getTechHubDomainFromTags(selectedPost.tags);
+                          let nextTags = withPublishingChannelTag(selectedPost.tags, channel);
+                          if (channel !== "techhub") {
+                            nextTags = withTechHubDomainTag(nextTags, "");
+                          } else if (currentDomain) {
+                            nextTags = withTechHubDomainTag(nextTags, currentDomain);
+                          }
+                          const nextPost = { ...selectedPost, tags: nextTags };
+                          setSelectedPost(nextPost);
+                          setHasUnsavedChanges(true);
+                          scheduleAutosave(nextPost);
+                        }}
+                      >
+                        <option value="">Select destination</option>
+                        {CHANNEL_OPTIONS.map((c) => (
+                          <option key={c.value} value={c.value}>
+                            {c.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg border border-sky-500/20">
+                      <div>
+                        <p className="font-medium text-foreground">TechHub Domain</p>
+                        <p className="text-sm text-muted-foreground">Controls TechHub module stream and sidebar grouping</p>
+                      </div>
+                      <select
+                        className="h-10 rounded-md border border-border bg-background px-3 text-sm min-w-[220px]"
+                        value={getTechHubDomainFromTags(selectedPost.tags)}
+                        disabled={!isEditing || getPublishingChannelFromTags(selectedPost.tags) !== "techhub"}
+                        onChange={(e) => {
+                          const domain = e.target.value as TechHubDomainSlug | "";
+                          const nextPost = {
+                            ...selectedPost,
+                            tags: withTechHubDomainTag(selectedPost.tags, domain),
+                          };
+                          setSelectedPost(nextPost);
+                          setHasUnsavedChanges(true);
+                          scheduleAutosave(nextPost);
+                        }}
+                      >
+                        <option value="">No TechHub Domain</option>
+                        {TECHHUB_DOMAIN_OPTIONS.map((d) => (
+                          <option key={d.value} value={d.value}>
+                            {d.label}
                           </option>
                         ))}
                       </select>

@@ -41,6 +41,10 @@ import {
   Mail,
   Github,
   ArrowRight,
+  LibraryBig,
+  Network,
+  Boxes,
+  BookMarked,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import GithubSlugger from "github-slugger";
@@ -113,6 +117,50 @@ const findSeriesTag = (tags: string[] | null | undefined) => {
   if (explicit) return explicit;
   const levelSeries = list.find((t) => /(fundamentals|architect|beginner|intermediate)\s*series/i.test(t));
   return levelSeries || null;
+};
+
+type MindMapNode = {
+  id: string;
+  text: string;
+  children: Array<{ id: string; text: string }>;
+};
+
+const buildMindMap = (toc: Array<{ depth: number; text: string; id: string }>): MindMapNode[] => {
+  const nodes: MindMapNode[] = [];
+  let current: MindMapNode | null = null;
+  for (const item of toc) {
+    if (item.depth === 2) {
+      current = { id: item.id, text: item.text, children: [] };
+      nodes.push(current);
+      continue;
+    }
+    if (item.depth === 3 && current) {
+      current.children.push({ id: item.id, text: item.text });
+    }
+  }
+  return nodes;
+};
+
+const extractIntroduction = (content: string | null | undefined, fallback: string) => {
+  if (!content || !content.trim()) return fallback;
+  const lines = content.split("\n");
+  const picked: string[] = [];
+  let inCodeBlock = false;
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (line.startsWith("```")) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (inCodeBlock || !line) continue;
+    if (line.startsWith("#")) {
+      if (picked.length > 0) break;
+      continue;
+    }
+    picked.push(line.replace(/^>\s*/, ""));
+    if (picked.length >= 2) break;
+  }
+  return picked.join(" ").trim() || fallback;
 };
 
 const BlogPost = () => {
@@ -416,6 +464,7 @@ const BlogPost = () => {
     }
     return out;
   }, [post?.content]);
+  const docsMindMap = useMemo(() => buildMindMap(toc), [toc]);
 
   useEffect(() => {
     if (!!meta?.is_premium && !canReadPremium) return;
@@ -556,6 +605,18 @@ const BlogPost = () => {
     const explicit = (post?.source_code_url || meta?.source_code_url || "").trim();
     return explicit || DEFAULT_GITHUB_SOURCE_URL;
   }, [post?.source_code_url, meta?.source_code_url]);
+  const introduction = useMemo(
+    () =>
+      extractIntroduction(
+        post?.content,
+        meta?.excerpt || "This documentation page introduces the topic, flow, and implementation details.",
+      ),
+    [post?.content, meta?.excerpt],
+  );
+  const docsSeriesName = useMemo(
+    () => nav.series?.name || findSeriesTag(meta?.tags) || "Standalone learning article",
+    [nav.series?.name, meta?.tags],
+  );
 
   const handleArticleContextMenu = (event: ReactMouseEvent<HTMLElement>) => {
     event.preventDefault();
@@ -933,6 +994,107 @@ const BlogPost = () => {
                   </Button>
                 </div>
               </header>
+
+              <section className="mb-8 rounded-3xl border border-border/80 bg-gradient-to-br from-card via-background to-muted/40 p-5 md:p-6 dark:border-cyan-500/30 dark:from-slate-950 dark:via-blue-950/70 dark:to-slate-950">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary">
+                    <LibraryBig className="h-3.5 w-3.5" />
+                    Documentation
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-indigo-400/35 bg-indigo-500/10 px-3 py-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-300">
+                    <BookMarked className="h-3.5 w-3.5" />
+                    {docsSeriesName}
+                  </span>
+                  <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
+                    Modules: {Math.max(docsMindMap.length, toc.length > 0 ? 1 : 0)}
+                  </span>
+                  <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
+                    Topics: {toc.length}
+                  </span>
+                </div>
+
+                <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+                  <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
+                    <h2 className="flex items-center gap-2 text-base font-black tracking-tight text-foreground">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      Introduction
+                    </h2>
+                    <p className="mt-2 text-sm leading-7 text-muted-foreground">{introduction}</p>
+
+                    {toc.length > 0 ? (
+                      <div className="mt-4">
+                        <p className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-primary">Table of Contents</p>
+                        <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2">
+                          {toc.slice(0, 14).map((item, idx) => (
+                            <a
+                              key={item.id}
+                              href={`#${item.id}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                jumpToHeading(item.id);
+                              }}
+                              className={`rounded-lg border px-2.5 py-2 text-xs transition-colors ${
+                                item.depth === 3 ? "ml-3" : ""
+                              } ${
+                                activeHeadingId === item.id
+                                  ? "border-primary/50 bg-primary/10 text-primary"
+                                  : "border-border/70 bg-background/70 text-muted-foreground hover:border-primary/35 hover:text-foreground"
+                              }`}
+                            >
+                              <span className="mr-1 font-semibold text-[10px]">{String(idx + 1).padStart(2, "0")}.</span>
+                              {item.text}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
+                    <h2 className="flex items-center gap-2 text-base font-black tracking-tight text-foreground">
+                      <Network className="h-4 w-4 text-primary" />
+                      Mind Map View
+                    </h2>
+                    {docsMindMap.length > 0 ? (
+                      <div className="mt-3 space-y-2">
+                        {docsMindMap.slice(0, 7).map((node) => (
+                          <div key={node.id} className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+                            <button
+                              type="button"
+                              onClick={() => jumpToHeading(node.id)}
+                              className="flex w-full items-center justify-between text-left"
+                            >
+                              <span className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+                                <Boxes className="h-3.5 w-3.5 text-primary" />
+                                {node.text}
+                              </span>
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            </button>
+                            {node.children.length > 0 ? (
+                              <div className="mt-2 space-y-1 pl-4">
+                                {node.children.map((child) => (
+                                  <button
+                                    key={child.id}
+                                    type="button"
+                                    onClick={() => jumpToHeading(child.id)}
+                                    className="block w-full rounded-md border border-border/60 bg-background/70 px-2 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:border-primary/35 hover:text-foreground"
+                                  >
+                                    {child.text}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-3 text-sm text-muted-foreground">
+                        Add `##` and `###` headings in the markdown to generate module/topic mind map nodes automatically.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </section>
 
               {showPaywall ? (
                 <div className="rounded-2xl border border-border bg-card p-8">
