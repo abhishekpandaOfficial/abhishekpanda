@@ -18,7 +18,7 @@ export function BrandIntro() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-6"
         >
-          <BurningLogo size="xl" animate />
+          <BurningLogo size="xl" animate variant="image" />
         </motion.div>
 
         <div className="flex flex-wrap items-center justify-center gap-[0.15rem] text-xl sm:text-2xl md:text-3xl font-black tracking-[0.2em] text-white">

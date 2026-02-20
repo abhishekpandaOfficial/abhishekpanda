@@ -5,6 +5,7 @@ interface BurningLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   animate?: boolean;
+  variant?: 'image' | 'monogram';
 }
 
 const sizeClasses = {
@@ -14,7 +15,7 @@ const sizeClasses = {
   xl: 'w-24 h-24',
 };
 
-export const BurningLogo = ({ size = 'md', className, animate = true }: BurningLogoProps) => {
+export const BurningLogo = ({ size = 'md', className, animate = true, variant = 'image' }: BurningLogoProps) => {
   return (
     <div className={cn('relative', sizeClasses[size], className)} aria-label="Abhishek Panda logo">
       {/* Glow aura */}
@@ -31,14 +32,62 @@ export const BurningLogo = ({ size = 'md', className, animate = true }: BurningL
         />
       ) : null}
 
-      <div className="relative w-full h-full rounded-xl overflow-hidden border border-border/60 bg-background shadow-sm">
-        <img
-          src="/favicon.png"
-          alt="Abhishek Panda"
-          className="w-full h-full object-cover"
-          loading="eager"
-          decoding="async"
+      {animate ? (
+        <motion.div
+          className="absolute -inset-1.5 rounded-2xl border border-amber-200/30"
+          animate={{ opacity: [0.3, 0.55, 0.3], scale: [1, 1.018, 1] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
         />
+      ) : null}
+
+      <div className="relative w-full h-full rounded-xl overflow-hidden border border-border/60 bg-background shadow-sm">
+        {variant === "image" ? (
+          <>
+            <motion.img
+              src="/Abhishek.PNG"
+              alt="Abhishek Panda"
+              className="w-full h-full object-cover"
+              loading="eager"
+              decoding="async"
+              animate={animate ? { scale: [1.0, 1.05, 1.0], rotate: [0, 0.35, -0.35, 0] } : undefined}
+              transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 35%, rgba(255,98,0,0.08) 65%, rgba(0,0,0,0.15) 100%)",
+              }}
+              animate={animate ? { opacity: [0.5, 0.72, 0.5] } : undefined}
+              transition={{ duration: 2.1, repeat: Infinity, ease: "easeInOut" }}
+            />
+            {animate ? (
+              <motion.div
+                className="absolute -left-[140%] top-0 h-full w-[50%] -skew-x-12"
+                style={{
+                  background: "linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.55), rgba(255,255,255,0))",
+                }}
+                animate={{ x: ["0%", "420%"] }}
+                transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 1.2, ease: "easeInOut" }}
+              />
+            ) : null}
+          </>
+        ) : (
+          <div className="relative w-full h-full bg-[radial-gradient(circle_at_50%_18%,rgba(255,219,128,0.26),rgba(15,23,42,0.95)_55%)]">
+            <motion.span
+              className="absolute inset-0 grid place-items-center font-black text-[58%] leading-none text-transparent bg-clip-text select-none"
+              style={{
+                backgroundImage:
+                  "linear-gradient(180deg, rgba(255,248,220,0.98) 0%, rgba(255,191,92,0.96) 42%, rgba(239,92,35,0.94) 76%, rgba(167,28,12,0.92) 100%)",
+                textShadow: "0 0 20px rgba(255,128,0,0.22)",
+              }}
+              animate={animate ? { scale: [1, 1.03, 1], y: [0, -1, 0] } : undefined}
+              transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+            >
+              A
+            </motion.span>
+          </div>
+        )}
 
         {/* Flames */}
         {animate ? (
@@ -51,11 +100,11 @@ export const BurningLogo = ({ size = 'md', className, animate = true }: BurningL
               }}
               animate={{
                 // Subtle flicker
-                y: [-1, -3, -2, -3.5, -1],
-                scale: [1, 1.03, 1.01, 1.04, 1],
-                opacity: [0.22, 0.35, 0.26, 0.32, 0.22],
+                y: [-1, -4, -2, -4.5, -1],
+                scale: [1, 1.05, 1.02, 1.06, 1],
+                opacity: [0.26, 0.44, 0.3, 0.4, 0.26],
               }}
-              transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 1.0, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
               className="absolute -top-1 left-[32%] w-[32%] h-[42%] rounded-full blur-md mix-blend-screen"
