@@ -376,62 +376,88 @@ export const useActiveSession = (): UseActiveSessionReturn => {
   useEffect(() => {
     if (!hashedToken) return;
 
-    const channel = supabase
-      .channel('admin-sessions-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'admin_sessions'
-        },
-        async (payload) => {
-          console.log('Session change detected:', payload);
-          
-          // If another session was added or updated, refresh
-          if (payload.eventType === 'INSERT' && payload.new) {
-            const newSession = payload.new as any;
-            if (newSession.session_token !== hashedToken) {
-              // New session from another device
-              await showSecurityNotification({
-                title: '⚠️ New Login Detected',
-                message: `New login from ${newSession.device_name} (${newSession.browser}). If this wasn't you, take action immediately!`,
-                type: 'warning',
-                data: {
-                  deviceName: newSession.device_name,
-                  browser: newSession.browser,
-                  sessionId: newSession.id,
-                }
-              });
+    let isMounted = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    const initChannel = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !isMounted) return;
+
+      channel = supabase
+        .channel('admin-sessions-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'admin_sessions',
+            filter: `user_id=eq.${user.id}`,
+          },
+          async (payload) => {
+            console.log('Session change detected:', payload);
+
+            const row = (payload.new || payload.old) as any;
+            const token = row?.session_token as string | undefined;
+            const isCurrentSessionEvent = token === hashedToken;
+
+            if (payload.eventType === 'INSERT' && payload.new) {
+              const newSession = payload.new as any;
+              if (!isCurrentSessionEvent) {
+                await showSecurityNotification({
+                  title: '⚠️ New Login Detected',
+                  message: `New login from ${newSession.device_name} (${newSession.browser}). If this wasn't you, take action immediately!`,
+                  type: 'warning',
+                  data: {
+                    deviceName: newSession.device_name,
+                    browser: newSession.browser,
+                    sessionId: newSession.id,
+                  }
+                });
+                await refreshSessions();
+              }
+              return;
+            }
+
+            if (payload.eventType === 'UPDATE' && payload.new) {
+              const updatedSession = payload.new as any;
+              if (isCurrentSessionEvent) {
+                // Ignore our own heartbeat updates to prevent periodic UI "refresh".
+                if (updatedSession.is_active) return;
+
+                await showSecurityNotification({
+                  title: '🚨 Session Terminated',
+                  message: 'Your session was terminated from another device. You will be logged out.',
+                  type: 'error',
+                  data: {}
+                });
+                setTimeout(async () => {
+                  sessionStorage.removeItem(SESSION_STORAGE_KEY);
+                  await supabase.auth.signOut();
+                  window.location.href = '/admin/login';
+                }, 2000);
+                return;
+              }
+
+              await refreshSessions();
+              return;
+            }
+
+            // DELETE and any other non-current events.
+            if (!isCurrentSessionEvent) {
+              await refreshSessions();
             }
           }
+        )
+        .subscribe();
+    };
 
-          // If current session was killed, force logout
-          if (payload.eventType === 'UPDATE' && payload.new) {
-            const updatedSession = payload.new as any;
-            if (updatedSession.session_token === hashedToken && !updatedSession.is_active) {
-              await showSecurityNotification({
-                title: '🚨 Session Terminated',
-                message: 'Your session was terminated from another device. You will be logged out.',
-                type: 'error',
-                data: {}
-              });
-              // Force logout after a short delay
-              setTimeout(async () => {
-                sessionStorage.removeItem(SESSION_STORAGE_KEY);
-                await supabase.auth.signOut();
-                window.location.href = '/admin/login';
-              }, 2000);
-            }
-          }
-
-          await refreshSessions();
-        }
-      )
-      .subscribe();
+    initChannel();
 
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [hashedToken, refreshSessions]);
 

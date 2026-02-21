@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import { Blocks, Component, Route, Waypoints } from "lucide-react";
 import type { IconType } from "react-icons";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@/components/ThemeProvider";
 import {
   SiArgo,
   SiAmazonwebservices,
@@ -111,11 +112,29 @@ const techStack: TechItem[] = [
   { name: "Git", icon: SiGit, color: "#F05032", tier: "secondary", categories: ["devops"] },
 ];
 
+function getDarkSafeIconColor(color: string, isDark: boolean): string {
+  if (!isDark) return color;
+  const hex = color.replace("#", "");
+  if (!(hex.length === 6 || hex.length === 3)) return color;
+  const fullHex =
+    hex.length === 3
+      ? `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`
+      : hex;
+  const r = parseInt(fullHex.slice(0, 2), 16);
+  const g = parseInt(fullHex.slice(2, 4), 16);
+  const b = parseInt(fullHex.slice(4, 6), 16);
+  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  return luminance < 0.36 ? "#E2E8F0" : color;
+}
+
 const Tile = ({ item }: { item: TechItem }) => {
   const Icon = item.icon;
   const ConceptIcon = item.conceptIcon;
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const iconColor = getDarkSafeIconColor(item.color, isDark);
   const playbook = TECH_PLAYBOOK_MAP.get(item.name);
   const isClickable = !!playbook;
 
@@ -136,13 +155,21 @@ const Tile = ({ item }: { item: TechItem }) => {
     >
       <div className="absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={{ background: `linear-gradient(135deg, ${item.color}1F, transparent 55%)` }} />
       <div className="relative flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: `${item.color}1A` }}>
+        <div
+          className="flex h-11 w-11 items-center justify-center rounded-xl"
+          style={{ backgroundColor: isDark ? "rgba(255,255,255,0.09)" : `${item.color}1A` }}
+        >
           {Icon ? (
-            <Icon size={22} color={item.color} aria-hidden="true" />
+            <Icon size={22} color={iconColor} aria-hidden="true" />
           ) : ConceptIcon ? (
-            <ConceptIcon size={22} color={item.color} aria-hidden="true" />
+            <ConceptIcon size={22} color={iconColor} aria-hidden="true" />
           ) : (
-            <img src={item.logoPath} alt={`${item.name} logo`} className="h-6 w-6 object-contain" loading="lazy" />
+            <img
+              src={item.logoPath}
+              alt={`${item.name} logo`}
+              className="h-6 w-6 rounded bg-white p-0.5 object-contain shadow-sm"
+              loading="lazy"
+            />
           )}
         </div>
         <span className="text-sm font-semibold text-foreground">

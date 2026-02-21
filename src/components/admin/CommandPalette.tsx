@@ -34,6 +34,7 @@ import {
   Briefcase,
   Mail,
   Globe,
+  Building2,
 } from "lucide-react";
 
 interface CommandItem {
@@ -47,6 +48,7 @@ interface CommandItem {
 const commandItems: CommandItem[] = [
   // Core
   { name: "Command Center", icon: LayoutDashboard, path: "/admin", category: "Core", keywords: ["dashboard", "home", "main"] },
+  { name: "Business", icon: Building2, path: "/admin/business", category: "Core", keywords: ["originx", "company", "products", "documents", "credentials"] },
   { name: "CV Downloads", icon: Download, path: "/admin/cv-downloads", category: "Core", keywords: ["resume", "download"] },
   { name: "Contact Requests", icon: Inbox, path: "/admin/contacts", category: "Core", keywords: ["messages", "email", "inbox"] },
   

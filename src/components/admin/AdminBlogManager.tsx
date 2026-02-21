@@ -22,7 +22,12 @@ import {
   CheckCircle2,
   Layers,
   Maximize2,
-  Minimize2
+  Minimize2,
+  PanelRightOpen,
+  PanelRightClose,
+  Film,
+  Copy,
+  ExternalLink,
 } from "lucide-react";
 import { getDefaultReactSlashMenuItems, useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
@@ -111,6 +116,14 @@ type BlogTask = {
   due_at: string | null;
   created_at: string;
   updated_at: string;
+};
+
+type MediaItem = {
+  id: string;
+  type: "image" | "video";
+  url: string;
+  label: string;
+  source: "storage" | "content" | "recent";
 };
 type BlogTagStyle = {
   tag: string;
@@ -305,6 +318,24 @@ const sanitizeId = (input: string, fallback: string) => {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
   return v || fallback;
+};
+
+const RECENT_VIDEO_EMBEDS_KEY = "cms_recent_video_embeds_v1";
+
+const isImageUrl = (url: string) => /\.(png|jpe?g|webp|gif|svg|avif)$/i.test(url.split("?")[0] || "");
+
+const extractImageUrlsFromContent = (content: string) => {
+  const matches = content.matchAll(/!\[[^\]]*\]\((https?:\/\/[^)\s]+)\)/g);
+  return Array.from(matches, (m) => m[1]).filter(Boolean);
+};
+
+const extractVideoEmbedUrlsFromContent = (content: string) => {
+  const iframeMatches = content.matchAll(/<iframe[^>]+src=["'](https?:\/\/[^"']+)["']/g);
+  const markdownVideoLinks = content.matchAll(/\[[^\]]*\]\((https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be|vimeo\.com|loom\.com)[^)]+)\)/gi);
+  return [
+    ...Array.from(iframeMatches, (m) => m[1]),
+    ...Array.from(markdownVideoLinks, (m) => m[1]),
+  ].filter(Boolean);
 };
 
 const readFileAsDataUrl = (file: File) =>
@@ -670,6 +701,13 @@ export const AdminBlogManager = () => {
   const [selectedSection, setSelectedSection] = useState<string>("all");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const [editorViewMode, setEditorViewMode] = useState<"editor" | "split" | "preview">("split");
+  const [videoUrlInput, setVideoUrlInput] = useState("");
+  const [mediaTrayOpen, setMediaTrayOpen] = useState(true);
+  const [mediaFilter, setMediaFilter] = useState<"all" | "image" | "video">("all");
+  const [mediaLoading, setMediaLoading] = useState(false);
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [recentVideoEmbeds, setRecentVideoEmbeds] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
@@ -723,6 +761,24 @@ export const AdminBlogManager = () => {
       }
     };
   }, [heroCropPreviewUrl]);
+
+  useEffect(() => {
+    setVideoUrlInput("");
+    setEditorViewMode("split");
+  }, [selectedPost?.id]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(RECENT_VIDEO_EMBEDS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        setRecentVideoEmbeds(parsed.filter((v) => typeof v === "string").slice(0, 24));
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const errMsg = useCallback((err: unknown, fallback: string) => {
     if (err instanceof Error && err.message) return err.message;
@@ -1205,6 +1261,10 @@ export const AdminBlogManager = () => {
       borderColor: style.border_color,
     };
   };
+  const filteredMediaItems = useMemo(() => {
+    if (mediaFilter === "all") return mediaItems;
+    return mediaItems.filter((item) => item.type === mediaFilter);
+  }, [mediaItems, mediaFilter]);
 
   const estimateReadMinutes = (content: string | null) => {
     const wc = (content || "").split(/\s+/).filter(Boolean).length;
@@ -2021,6 +2081,182 @@ export const AdminBlogManager = () => {
     }
   };
 
+  const appendSnippetToContent = async (snippet: string) => {
+    if (!selectedPost) return;
+    const nextContent = `${selectedPost.content || ""}\n\n${snippet}\n`;
+    const nextPost = { ...selectedPost, content: nextContent };
+    setSelectedPost(nextPost);
+    setHasUnsavedChanges(true);
+    scheduleAutosave(nextPost);
+    try {
+      const blocks = await editor.tryParseMarkdownToBlocks(nextContent);
+      editor.replaceBlocks(editor.document, blocks);
+      editorHydrationKeyRef.current = `${selectedPost.id}:${selectedPost.code_theme || "github-light"}`;
+    } catch {
+      // Ignore editor sync errors.
+    }
+  };
+
+  const toEmbeddableVideoUrl = (raw: string) => {
+    const url = raw.trim();
+    if (!url) return null;
+    try {
+      const parsed = new URL(url);
+      const host = parsed.hostname.replace(/^www\./, "").toLowerCase();
+      if (host.includes("youtube.com")) {
+        const id = parsed.searchParams.get("v");
+        return id ? `https://www.youtube.com/embed/${id}` : null;
+      }
+      if (host === "youtu.be") {
+        const id = parsed.pathname.replace("/", "");
+        return id ? `https://www.youtube.com/embed/${id}` : null;
+      }
+      if (host.includes("vimeo.com")) {
+        const id = parsed.pathname.split("/").filter(Boolean)[0];
+        return id ? `https://player.vimeo.com/video/${id}` : null;
+      }
+      if (host.includes("loom.com")) {
+        const parts = parsed.pathname.split("/").filter(Boolean);
+        const id = parts[parts.length - 1];
+        return id ? `https://www.loom.com/embed/${id}` : null;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const insertVideoBlock = async () => {
+    const embed = toEmbeddableVideoUrl(videoUrlInput);
+    if (!videoUrlInput.trim()) {
+      toast.error("Paste a video URL first.");
+      return;
+    }
+    if (!embed) {
+      toast.error("Only YouTube, Vimeo, and Loom links are supported for embeds.");
+      return;
+    }
+    const snippet = `<iframe src="${embed}" title="Embedded video" width="100%" height="420" frameborder="0" allowfullscreen></iframe>`;
+    await appendSnippetToContent(snippet);
+    setRecentVideoEmbeds((prev) => {
+      const next = [embed, ...prev.filter((item) => item !== embed)].slice(0, 24);
+      try {
+        localStorage.setItem(RECENT_VIDEO_EMBEDS_KEY, JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+    toast.success("Video embed block added.");
+  };
+
+  const copyMediaUrl = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("URL copied.");
+    } catch {
+      toast.error("Failed to copy URL.");
+    }
+  };
+
+  const appendImageFromTray = async (url: string) => {
+    await appendSnippetToContent(`![image](${url})`);
+    toast.success("Image inserted.");
+  };
+
+  const appendVideoFromTray = async (url: string) => {
+    await appendSnippetToContent(`<iframe src="${url}" title="Embedded video" width="100%" height="420" frameborder="0" allowfullscreen></iframe>`);
+    toast.success("Video block inserted.");
+  };
+
+  const loadMediaTray = useCallback(async () => {
+    if (!selectedPost) {
+      setMediaItems([]);
+      return;
+    }
+    setMediaLoading(true);
+    try {
+      const slugOrId = selectedPost.slug || selectedPost.id;
+      const [heroList, inlineList] = await Promise.all([
+        supabase.storage.from("blog-assets").list(`hero/${slugOrId}`, { limit: 200, sortBy: { column: "created_at", order: "desc" } }),
+        supabase.storage.from("blog-assets").list(`inline/${slugOrId}`, { limit: 200, sortBy: { column: "created_at", order: "desc" } }),
+      ]);
+
+      const storageItems: MediaItem[] = [];
+      const toUrl = (path: string) => supabase.storage.from("blog-assets").getPublicUrl(path).data.publicUrl;
+      (heroList.data || []).forEach((item) => {
+        if (!item.name) return;
+        const path = `hero/${slugOrId}/${item.name}`;
+        const url = toUrl(path);
+        storageItems.push({
+          id: `hero-${item.name}`,
+          type: isImageUrl(url) ? "image" : "video",
+          url,
+          label: item.name,
+          source: "storage",
+        });
+      });
+      (inlineList.data || []).forEach((item) => {
+        if (!item.name) return;
+        const path = `inline/${slugOrId}/${item.name}`;
+        const url = toUrl(path);
+        storageItems.push({
+          id: `inline-${item.name}`,
+          type: isImageUrl(url) ? "image" : "video",
+          url,
+          label: item.name,
+          source: "storage",
+        });
+      });
+
+      const content = selectedPost.content || "";
+      const contentImages = extractImageUrlsFromContent(content).map((url, idx) => ({
+        id: `content-image-${idx}-${url}`,
+        type: "image" as const,
+        url,
+        label: `Content image ${idx + 1}`,
+        source: "content" as const,
+      }));
+      const contentVideos = extractVideoEmbedUrlsFromContent(content).map((url, idx) => ({
+        id: `content-video-${idx}-${url}`,
+        type: "video" as const,
+        url,
+        label: `Content video ${idx + 1}`,
+        source: "content" as const,
+      }));
+      const recentVideos = recentVideoEmbeds.map((url, idx) => ({
+        id: `recent-video-${idx}-${url}`,
+        type: "video" as const,
+        url,
+        label: `Recent embed ${idx + 1}`,
+        source: "recent" as const,
+      }));
+
+      const map = new Map<string, MediaItem>();
+      [...storageItems, ...contentImages, ...contentVideos, ...recentVideos].forEach((item) => {
+        if (!map.has(item.url)) map.set(item.url, item);
+      });
+      if (selectedPost.hero_image && !map.has(selectedPost.hero_image)) {
+        map.set(selectedPost.hero_image, {
+          id: `hero-direct-${selectedPost.hero_image}`,
+          type: "image",
+          url: selectedPost.hero_image,
+          label: "Current hero image",
+          source: "content",
+        });
+      }
+      setMediaItems(Array.from(map.values()));
+    } catch {
+      setMediaItems([]);
+    } finally {
+      setMediaLoading(false);
+    }
+  }, [selectedPost, recentVideoEmbeds]);
+
+  useEffect(() => {
+    loadMediaTray();
+  }, [loadMediaTray]);
+
   const openHeroCropper = (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast.error("Please select a valid image file.");
@@ -2557,7 +2793,7 @@ export const AdminBlogManager = () => {
             <div className="flex items-center justify-between">
 	                  <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-primary" />
-                <h3 className="text-sm font-semibold text-foreground">Sections</h3>
+                <h3 className="text-sm font-semibold text-foreground">Notebook Sections</h3>
               </div>
               <div className="flex items-center gap-1">
                 <Button
@@ -2710,7 +2946,7 @@ export const AdminBlogManager = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-primary" />
-                <h3 className="text-sm font-semibold text-foreground">Pages</h3>
+                <h3 className="text-sm font-semibold text-foreground">Section Pages</h3>
               </div>
               <div className="flex items-center gap-1">
                 <Button type="button" size="icon" variant="ghost" onClick={handleOpenCreatePageModal} title="New page">
@@ -2816,6 +3052,10 @@ export const AdminBlogManager = () => {
               >
                 {/* Header */}
                 <div className="sticky top-3 z-20 mb-6 rounded-xl border border-border/70 bg-card/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-card/85">
+                  <div className="mb-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span>Page Canvas: {selectedPost.title}</span>
+                    <span>Workflow: Section -&gt; Page -&gt; Content -&gt; Preview -&gt; Publish</span>
+                  </div>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex gap-2">
                     {(["content", "seo", "settings"] as const).map(tab => (
@@ -3054,6 +3294,30 @@ export const AdminBlogManager = () => {
                           <label className="text-sm font-medium text-foreground block">Content</label>
                           {isEditing ? (
                             <div className="flex items-center gap-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant={editorViewMode === "editor" ? "default" : "outline"}
+                                onClick={() => setEditorViewMode("editor")}
+                              >
+                                Editor
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant={editorViewMode === "split" ? "default" : "outline"}
+                                onClick={() => setEditorViewMode("split")}
+                              >
+                                Split
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant={editorViewMode === "preview" ? "default" : "outline"}
+                                onClick={() => setEditorViewMode("preview")}
+                              >
+                                Preview
+                              </Button>
                               <select
                                 className="h-9 rounded-md border border-border bg-background px-2 text-xs"
                                 value={selectedPost.code_theme || (theme === "dark" ? "github-dark-default" : "github-light-default")}
@@ -3092,34 +3356,81 @@ export const AdminBlogManager = () => {
                               >
                                 {uploadingInline ? "Uploading..." : "Add Image"}
                               </Button>
+                              <Button type="button" variant="outline" size="sm" onClick={() => appendSnippetToContent("```ts\\n// write your code here\\n```")}>
+                                Code Block
+                              </Button>
+                              <Button type="button" variant="outline" size="sm" onClick={() => appendSnippetToContent("> Important: Add your key learning point here.")}>
+                                Callout
+                              </Button>
+                              <Button type="button" variant="outline" size="sm" onClick={() => appendSnippetToContent("| Column A | Column B |\\n| --- | --- |\\n| Value | Value |")}>
+                                Table
+                              </Button>
                             </div>
                           ) : null}
                         </div>
+                        {isEditing ? (
+                          <div className="mb-3 rounded-lg border border-border bg-muted/30 p-2">
+                            <div className="grid gap-2 md:grid-cols-[1fr_auto]">
+                              <Input
+                                value={videoUrlInput}
+                                onChange={(e) => setVideoUrlInput(e.target.value)}
+                                placeholder="Paste YouTube / Vimeo / Loom URL"
+                                className="h-9"
+                              />
+                              <Button type="button" size="sm" onClick={insertVideoBlock}>
+                                Insert Video Embed
+                              </Button>
+                            </div>
+                            {toEmbeddableVideoUrl(videoUrlInput) ? (
+                              <div className="mt-2 overflow-hidden rounded-lg border border-border bg-black">
+                                <iframe
+                                  src={toEmbeddableVideoUrl(videoUrlInput) as string}
+                                  title="Video preview"
+                                  className="h-52 w-full"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                />
+                              </div>
+                            ) : null}
+                          </div>
+                        ) : null}
 	                      {isEditing ? (
-		                        <div
-                            className={`rounded-xl border border-border p-2 min-h-[75vh] max-h-[78vh] overflow-auto w-full notion-editor ${
-                              theme === "dark" ? "bg-slate-950 text-slate-100" : "bg-white text-slate-900"
-                            }`}
-                            onDrop={handleEditorDrop}
-                            onDragOver={(e) => e.preventDefault()}
-                            onPaste={handleEditorPaste}
-                          >
-		                          <BlockNoteView
-	                            editor={editor}
-	                            editable={isEditing && !selectedPost.is_locked}
-	                            onChange={handleEditorChange}
-		                            theme={theme === "dark" ? "dark" : "light"}
-		                            slashMenuItems={getDefaultReactSlashMenuItems(editor)}
-		                          />
-                            <p className="mt-2 text-[11px] text-slate-500">
-                              Drag & drop an image here, paste from clipboard, or use "Add Image".
-                            </p>
-	                          {selectedPost.is_locked ? (
-	                            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
-                              This post is locked. Unlock it in Settings to edit.
+		                        <div className={editorViewMode === "split" ? "grid gap-3 xl:grid-cols-2" : ""}>
+                              {editorViewMode !== "preview" ? (
+                                <div
+                                  className={`rounded-xl border border-border p-2 min-h-[68vh] max-h-[75vh] overflow-auto w-full notion-editor ${
+                                    theme === "dark" ? "bg-slate-950 text-slate-100" : "bg-white text-slate-900"
+                                  }`}
+                                  onDrop={handleEditorDrop}
+                                  onDragOver={(e) => e.preventDefault()}
+                                  onPaste={handleEditorPaste}
+                                >
+                                  <BlockNoteView
+                                    editor={editor}
+                                    editable={isEditing && !selectedPost.is_locked}
+                                    onChange={handleEditorChange}
+                                    theme={theme === "dark" ? "dark" : "light"}
+                                    slashMenuItems={getDefaultReactSlashMenuItems(editor)}
+                                  />
+                                  <p className="mt-2 text-[11px] text-slate-500">
+                                    Drag & drop image, paste image, or use quick insert tools.
+                                  </p>
+                                  {selectedPost.is_locked ? (
+                                    <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+                                      This post is locked. Unlock it in Settings to edit.
+                                    </div>
+                                  ) : null}
+                                </div>
+                              ) : null}
+                              {editorViewMode !== "editor" ? (
+                                <div className="rounded-xl border border-border bg-background p-4 min-h-[68vh] max-h-[75vh] overflow-auto">
+                                  <Markdown
+                                    value={selectedPost.content || ""}
+                                    codeTheme={selectedPost.code_theme || "github-light"}
+                                  />
+                                </div>
+                              ) : null}
                             </div>
-                          ) : null}
-                        </div>
                       ) : (
                         <div ref={contentPreviewRef} className="rounded-xl border border-border bg-background p-4 min-h-[300px]">
                           <Markdown
@@ -3129,6 +3440,81 @@ export const AdminBlogManager = () => {
                         </div>
                       )}
                     </div>
+
+                    {isEditing ? (
+                      <div className="rounded-xl border border-border bg-muted/20 p-3">
+                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <Film className="h-4 w-4 text-primary" />
+                            <p className="text-sm font-semibold">Media Tray</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button type="button" size="sm" variant="outline" onClick={loadMediaTray}>
+                              Refresh
+                            </Button>
+                            <Button type="button" size="icon" variant="ghost" onClick={() => setMediaTrayOpen((v) => !v)}>
+                              {mediaTrayOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                        </div>
+                        {mediaTrayOpen ? (
+                          <>
+                            <div className="mb-3 flex items-center gap-2">
+                              <Button size="sm" variant={mediaFilter === "all" ? "default" : "outline"} onClick={() => setMediaFilter("all")}>
+                                All
+                              </Button>
+                              <Button size="sm" variant={mediaFilter === "image" ? "default" : "outline"} onClick={() => setMediaFilter("image")}>
+                                Images
+                              </Button>
+                              <Button size="sm" variant={mediaFilter === "video" ? "default" : "outline"} onClick={() => setMediaFilter("video")}>
+                                Videos
+                              </Button>
+                              <span className="text-xs text-muted-foreground">{filteredMediaItems.length} items</span>
+                            </div>
+                            {mediaLoading ? (
+                              <p className="text-xs text-muted-foreground">Loading media...</p>
+                            ) : (
+                              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                                {filteredMediaItems.map((item) => (
+                                  <div key={item.id} className="overflow-hidden rounded-lg border border-border bg-background/70">
+                                    {item.type === "image" ? (
+                                      <img src={item.url} alt={item.label} className="h-32 w-full object-cover" />
+                                    ) : (
+                                      <div className="flex h-32 w-full items-center justify-center bg-slate-900/80 text-slate-100">
+                                        <Film className="h-6 w-6" />
+                                      </div>
+                                    )}
+                                    <div className="space-y-2 p-2">
+                                      <p className="truncate text-xs font-medium">{item.label}</p>
+                                      <p className="text-[11px] text-muted-foreground">{item.source}</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => (item.type === "image" ? appendImageFromTray(item.url) : appendVideoFromTray(item.url))}
+                                        >
+                                          Insert
+                                        </Button>
+                                        <Button type="button" size="icon" variant="ghost" onClick={() => copyMediaUrl(item.url)}>
+                                          <Copy className="h-3.5 w-3.5" />
+                                        </Button>
+                                        <Button type="button" size="icon" variant="ghost" onClick={() => window.open(item.url, "_blank", "noopener,noreferrer")}>
+                                          <ExternalLink className="h-3.5 w-3.5" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                                {!filteredMediaItems.length ? (
+                                  <p className="text-xs text-muted-foreground">No media found for this page yet.</p>
+                                ) : null}
+                              </div>
+                            )}
+                          </>
+                        ) : null}
+                      </div>
+                    ) : null}
 
                     <div>
                       <label className="text-sm font-medium text-foreground mb-2 block">Tags</label>

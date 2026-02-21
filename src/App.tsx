@@ -39,6 +39,7 @@ const ABHIBot = lazy(() => import("@/components/home/ABHIBot").then((m) => ({ de
 const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
 const AdminDashboard = lazy(() => import("@/components/admin/AdminDashboard"));
 const AdminCVDownloads = lazy(() => import("@/components/admin/AdminCVDownloads"));
+const AdminBusinessHub = lazy(() => import("@/components/admin/AdminBusinessHub"));
 const AdminPayments = lazy(() => import("@/components/admin/AdminPayments"));
 const AdminCoursesManager = lazy(() => import("@/components/admin/AdminCoursesManager").then((m) => ({ default: m.AdminCoursesManager })));
 const AdminBlogManager = lazy(() => import("@/components/admin/AdminBlogManager").then((m) => ({ default: m.AdminBlogManager })));
@@ -152,6 +153,7 @@ const App = () => {
                 {/* Admin Routes - Protected */}
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
+                  <Route path="business" element={<AdminBusinessHub />} />
                   <Route path="ip-management" element={<AdminIPManagement />} />
                   <Route path="cv-downloads" element={<AdminCVDownloads />} />
                   <Route path="contacts" element={<AdminContactRequests />} />

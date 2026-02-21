@@ -40,13 +40,13 @@ export const BurningLogo = ({ size = 'md', className, animate = true, variant = 
         />
       ) : null}
 
-      <div className="relative w-full h-full rounded-xl overflow-hidden border border-border/60 bg-background shadow-sm">
+      <div className="relative w-full h-full rounded-xl overflow-hidden border border-border/60 bg-background shadow-sm dark:border-slate-500/60 dark:bg-slate-900">
         {variant === "image" ? (
           <>
             <motion.img
               src="/Abhishek.PNG"
               alt="Abhishek Panda"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover dark:brightness-110 dark:contrast-110"
               loading="eager"
               decoding="async"
               animate={animate ? { scale: [1.0, 1.05, 1.0], rotate: [0, 0.35, -0.35, 0] } : undefined}
@@ -56,7 +56,7 @@ export const BurningLogo = ({ size = 'md', className, animate = true, variant = 
               className="absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 35%, rgba(255,98,0,0.08) 65%, rgba(0,0,0,0.15) 100%)",
+                  "linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 35%, rgba(255,98,0,0.08) 65%, rgba(0,0,0,0.08) 100%)",
               }}
               animate={animate ? { opacity: [0.5, 0.72, 0.5] } : undefined}
               transition={{ duration: 2.1, repeat: Infinity, ease: "easeInOut" }}

@@ -33,6 +33,7 @@ import {
   Mail,
   Inbox,
   Loader2,
+  Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -57,25 +58,52 @@ interface SidebarGroup {
   items: SidebarItem[];
 }
 
+const getBadgeClassName = (badge: string) => {
+  const key = badge.toLowerCase();
+  if (["security", "ip track", "protection"].includes(key)) {
+    return "bg-red-500/15 text-red-300 border border-red-500/30";
+  }
+  if (["ai", "galaxycore", "automation"].includes(key)) {
+    return "bg-violet-500/20 text-violet-300 border border-violet-500/30";
+  }
+  if (["content", "publishing", "courses", "knowledge"].includes(key)) {
+    return "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
+  }
+  if (["operations", "overview", "insights", "config"].includes(key)) {
+    return "bg-sky-500/20 text-sky-300 border border-sky-500/30";
+  }
+  if (["revenue", "leads", "inbox", "calls"].includes(key)) {
+    return "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+  }
+  if (["api", "connectors", "catalog"].includes(key)) {
+    return "bg-amber-500/20 text-amber-300 border border-amber-500/30";
+  }
+  if (["encrypted", "family"].includes(key)) {
+    return "bg-purple-500/20 text-purple-300 border border-purple-500/30";
+  }
+  return "bg-muted/40 text-muted-foreground border border-border/60";
+};
+
 const sidebarGroups: SidebarGroup[] = [
   {
     title: "CORE",
     items: [
-      { name: "Command Center", icon: LayoutDashboard, path: "/admin", badge: null, color: "text-blue-500" },
+      { name: "Command Center", icon: LayoutDashboard, path: "/admin", badge: "Overview", color: "text-blue-500" },
+      { name: "Business", icon: Building2, path: "/admin/business", badge: "Operations", color: "text-indigo-500" },
       { name: "IP Access Control", icon: Shield, path: "/admin/ip-management", badge: "Security", color: "text-red-500" },
-      { name: "CV Downloads", icon: Download, path: "/admin/cv-downloads", badge: null, color: "text-slate-400" },
-      { name: "Contact Requests", icon: Inbox, path: "/admin/contacts", badge: null, color: "text-sky-500" },
-      { name: "Mentorship", icon: Users, path: "/admin/mentorship", badge: null, color: "text-emerald-400" },
+      { name: "CV Downloads", icon: Download, path: "/admin/cv-downloads", badge: "Leads", color: "text-slate-400" },
+      { name: "Contact Requests", icon: Inbox, path: "/admin/contacts", badge: "Inbox", color: "text-sky-500" },
+      { name: "Mentorship", icon: Users, path: "/admin/mentorship", badge: "Calls", color: "text-emerald-400" },
     ],
   },
   {
     title: "CREATOR SUITE",
     items: [
-      { name: "CMS Studio", icon: FileText, path: "/admin/blog", badge: null, color: "text-violet-500" },
-      { name: "Nimbus Desk", icon: BookOpen, path: "/admin/nimbus", badge: null, color: "text-indigo-500" },
-      { name: "LMS Studio", icon: GraduationCap, path: "/admin/courses", badge: null, color: "text-amber-500" },
-      { name: "Digital Products", icon: Package, path: "/admin/products", badge: null, color: "text-cyan-500" },
-      { name: "Ebook Studio", icon: BookOpen, path: "/admin/ebooks", badge: "NEW", color: "text-emerald-400" },
+      { name: "CMS Studio", icon: FileText, path: "/admin/blog", badge: "Content", color: "text-violet-500" },
+      { name: "Nimbus Desk", icon: BookOpen, path: "/admin/nimbus", badge: "Knowledge", color: "text-indigo-500" },
+      { name: "LMS Studio", icon: GraduationCap, path: "/admin/courses", badge: "Courses", color: "text-amber-500" },
+      { name: "Digital Products", icon: Package, path: "/admin/products", badge: "Catalog", color: "text-cyan-500" },
+      { name: "Ebook Studio", icon: BookOpen, path: "/admin/ebooks", badge: "Publishing", color: "text-emerald-400" },
     ],
   },
   {
@@ -90,13 +118,13 @@ const sidebarGroups: SidebarGroup[] = [
   {
     title: "INTELLIGENCE",
     items: [
-      { name: "Observatory", icon: BarChart3, path: "/admin/analytics", badge: null, color: "text-emerald-500" },
+      { name: "Observatory", icon: BarChart3, path: "/admin/analytics", badge: "Insights", color: "text-emerald-500" },
     ],
   },
   {
     title: "FINANCE",
     items: [
-      { name: "FINCORE", icon: CreditCard, path: "/admin/payments", badge: null, color: "text-teal-500" },
+      { name: "FINCORE", icon: CreditCard, path: "/admin/payments", badge: "Revenue", color: "text-teal-500" },
     ],
   },
   {
@@ -109,11 +137,11 @@ const sidebarGroups: SidebarGroup[] = [
   {
     title: "SYSTEM",
     items: [
-      { name: "Integrations Hub", icon: Link2, path: "/admin/integrations", badge: null, color: "text-blue-500" },
+      { name: "Integrations Hub", icon: Link2, path: "/admin/integrations", badge: "Connectors", color: "text-blue-500" },
       { name: "Ops Docs", icon: Command, path: "/admin/ops", badge: "API", color: "text-slate-300" },
       { name: "Audit Logs", icon: Shield, path: "/admin/audit-logs", badge: "IP Track", color: "text-red-500" },
-      { name: "Sentinel", icon: Shield, path: "/admin/security", badge: null, color: "text-orange-500" },
-      { name: "System Settings", icon: Settings, path: "/admin/settings", badge: null, color: "text-slate-500" },
+      { name: "Sentinel", icon: Shield, path: "/admin/security", badge: "Protection", color: "text-orange-500" },
+      { name: "System Settings", icon: Settings, path: "/admin/settings", badge: "Config", color: "text-slate-500" },
     ],
   },
 ];
@@ -133,8 +161,10 @@ export const AdminLayout = () => {
   const navigate = useNavigate();
   const desktopNavRef = useRef<HTMLElement | null>(null);
   const mobileNavRef = useRef<HTMLElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const SIDEBAR_SCROLL_KEY_DESKTOP = "admin_sidebar_scroll_desktop";
   const SIDEBAR_SCROLL_KEY_MOBILE = "admin_sidebar_scroll_mobile";
+  const CONTENT_SCROLL_KEY_PREFIX = "admin_content_scroll_";
   
   // Use database-backed settings
   
@@ -271,6 +301,29 @@ export const AdminLayout = () => {
     );
   };
 
+  const persistSidebarScroll = (isMobile: boolean) => {
+    const ref = isMobile ? mobileNavRef : desktopNavRef;
+    if (!ref.current) return;
+    sessionStorage.setItem(
+      isMobile ? SIDEBAR_SCROLL_KEY_MOBILE : SIDEBAR_SCROLL_KEY_DESKTOP,
+      String(ref.current.scrollTop),
+    );
+  };
+
+  useEffect(() => {
+    const key = `${CONTENT_SCROLL_KEY_PREFIX}${location.pathname}`;
+    const saved = Number(sessionStorage.getItem(key) || "0");
+    if (contentRef.current) {
+      contentRef.current.scrollTop = saved;
+    }
+  }, [location.pathname]);
+
+  const handleContentScroll = () => {
+    if (!contentRef.current) return;
+    const key = `${CONTENT_SCROLL_KEY_PREFIX}${location.pathname}`;
+    sessionStorage.setItem(key, String(contentRef.current.scrollTop));
+  };
+
   // Loading state
   if (isLoading) {
     return (
@@ -357,7 +410,11 @@ export const AdminLayout = () => {
                     <Link
                       key={item.path}
                       to={item.path}
-                      onClick={() => isMobile && setMobileMenuOpen(false)}
+                      onClick={() => {
+                        // Persist current sidebar position before route transition.
+                        persistSidebarScroll(isMobile);
+                        if (isMobile) setMobileMenuOpen(false);
+                      }}
                       className={cn(
                         "relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
                         isActive
@@ -387,13 +444,7 @@ export const AdminLayout = () => {
                           {item.badge && (
                             <span className={cn(
                               "px-1.5 py-0.5 text-[9px] font-medium rounded",
-                              item.badge === "AI" 
-                                ? "bg-gradient-to-r from-violet-500/30 to-blue-500/30 text-violet-300 border border-violet-500/30"
-                                : item.badge === "GALAXYCORE"
-                                ? "bg-violet-500/20 text-violet-300 border border-violet-500/30"
-                                : item.badge === "Encrypted"
-                                ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                                : "bg-pink-500/20 text-pink-300 border border-pink-500/30"
+                              getBadgeClassName(item.badge)
                             )}>
                               {item.badge}
                             </span>
@@ -408,22 +459,6 @@ export const AdminLayout = () => {
           ))}
         </div>
       </nav>
-
-      {/* AETHERGRID Status */}
-      {(!collapsed || isMobile) && (
-        <div className="px-4 pb-4">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-violet-500/10 via-purple-500/10 to-blue-500/10 border border-violet-500/20 backdrop-blur-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <Zap className="w-4 h-4 text-violet-400" />
-              <span className="text-xs font-medium text-violet-400">AETHERGRID</span>
-              <span className="ml-auto w-2 h-2 rounded-full bg-emerald-400" />
-            </div>
-            <p className="text-[10px] text-muted-foreground">
-              AI Engine Online • 3 active workflows
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* User Section */}
       <div className="p-4 border-t border-border/30">
@@ -461,7 +496,7 @@ export const AdminLayout = () => {
       <CommandPalette />
       <div
         className={cn(
-          "min-h-screen bg-background text-foreground flex w-full relative",
+          "h-screen overflow-hidden bg-background text-foreground flex w-full relative",
           collapsed ? "lg:pl-20" : "lg:pl-[280px]"
         )}
       >
@@ -529,9 +564,9 @@ export const AdminLayout = () => {
         </AnimatePresence>
 
         {/* Main Content */}
-        <main className="flex-1 min-w-0 flex flex-col relative z-10">
+        <main className="flex-1 min-w-0 flex h-screen flex-col relative z-10">
           {/* Top Bar */}
-          <header className="hidden lg:flex h-16 items-center justify-between px-6 border-b border-border/30 bg-card/30 backdrop-blur-xl sticky top-0 z-20">
+          <header className="hidden lg:flex h-16 items-center justify-between px-6 border-b border-border/30 bg-card/30 backdrop-blur-xl z-20">
             <div className="flex items-center gap-4">
               <Button
                 variant="outline"
@@ -563,7 +598,11 @@ export const AdminLayout = () => {
           </header>
 
           {/* Page Content */}
-          <div className="flex-1 p-4 md:p-6 pt-20 lg:pt-6">
+          <div
+            ref={contentRef}
+            onScroll={handleContentScroll}
+            className="flex-1 overflow-y-auto p-4 md:p-6 pt-20 lg:pt-6"
+          >
             <Outlet />
           </div>
         </main>

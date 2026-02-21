@@ -24,7 +24,7 @@ export const HeroSocialIcons = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.05 }}
             whileHover={{ scale: 1.15, y: -2 }}
-            className="group relative w-9 h-9 rounded-lg bg-muted/50 backdrop-blur-sm border border-border/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/10 transition-all duration-300"
+            className="group relative w-9 h-9 rounded-lg bg-muted/50 backdrop-blur-sm border border-border/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/10 transition-all duration-300 dark:bg-slate-900/70 dark:border-slate-700/70 dark:text-slate-300 dark:hover:text-sky-300 dark:hover:border-sky-400/40 dark:hover:bg-sky-500/10"
             title={p.display_name}
           >
             <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary to-secondary opacity-0 group-hover:opacity-20 blur transition-opacity" />
