@@ -34,6 +34,7 @@ import {
   Inbox,
   Loader2,
   Building2,
+  Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -90,6 +91,7 @@ const sidebarGroups: SidebarGroup[] = [
     items: [
       { name: "Command Center", icon: LayoutDashboard, path: "/admin", badge: "Overview", color: "text-blue-500" },
       { name: "Business", icon: Building2, path: "/admin/business", badge: "Operations", color: "text-indigo-500" },
+      { name: "OpenOwl", icon: Bot, path: "/openowl/admin", badge: "AI", color: "text-cyan-500" },
       { name: "IP Access Control", icon: Shield, path: "/admin/ip-management", badge: "Security", color: "text-red-500" },
       { name: "CV Downloads", icon: Download, path: "/admin/cv-downloads", badge: "Leads", color: "text-slate-400" },
       { name: "Contact Requests", icon: Inbox, path: "/admin/contacts", badge: "Inbox", color: "text-sky-500" },

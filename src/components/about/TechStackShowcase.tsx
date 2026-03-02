@@ -1,260 +1,197 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
-import { Blocks, Component, Route, Waypoints } from "lucide-react";
-import type { IconType } from "react-icons";
-import { useNavigate } from "react-router-dom";
-import { useTheme } from "@/components/ThemeProvider";
-import {
-  SiArgo,
-  SiAmazonwebservices,
-  SiAngular,
-  SiApachekafka,
-  SiDatadog,
-  SiDocker,
-  SiDotnet,
-  SiGit,
-  SiGithub,
-  SiGithubactions,
-  SiGooglecloud,
-  SiGrafana,
-  SiHuggingface,
-  SiJenkins,
-  SiKubernetes,
-  SiLangchain,
-  SiMongodb,
-  SiNextdotjs,
-  SiOpenai,
-  SiPostgresql,
-  SiPrometheus,
-  SiPython,
-  SiPytorch,
-  SiReact,
-  SiRedis,
-  SiSharp,
-  SiTensorflow,
-  SiTerraform,
-  SiTypescript,
-  SiVuedotjs,
-} from "react-icons/si";
-import { TECH_PLAYBOOK_MAP } from "@/lib/techPlaybook";
+import { cn } from "@/lib/utils";
 
-type Category =
-  | "backend"
-  | "frontend"
-  | "cloud"
-  | "devops"
-  | "database"
-  | "aiml"
-  | "observability";
+type CategoryId = "all" | "backend" | "frontend" | "cloud" | "devops" | "database" | "aiml" | "observability";
 
-type Tier = "primary" | "secondary";
-
-interface TechItem {
+type TechLogo = {
+  id: string;
   name: string;
-  icon?: IconType;
-  conceptIcon?: LucideIcon;
-  logoPath?: string;
-  color: string;
-  tier: Tier;
-  categories: Category[];
-}
+  src: string;
+  categories: Exclude<CategoryId, "all">[];
+  imgClassName?: string;
+};
 
-const categories: Array<{ id: "all" | Category; label: string }> = [
+const categories: { id: CategoryId; label: string }[] = [
   { id: "all", label: "All" },
   { id: "backend", label: "Backend" },
   { id: "frontend", label: "Frontend" },
   { id: "cloud", label: "Cloud" },
   { id: "devops", label: "DevOps" },
   { id: "database", label: "Database" },
-  { id: "aiml", label: "AI/ML" },
+  { id: "aiml", label: "AI / ML" },
   { id: "observability", label: "Monitoring" },
 ];
 
-const techStack: TechItem[] = [
-  { name: ".NET Core API (.NET 10)", icon: SiDotnet, color: "#512BD4", tier: "primary", categories: ["backend"] },
-  { name: "Microservices", conceptIcon: Route, color: "#0EA5E9", tier: "primary", categories: ["backend", "devops"] },
-  { name: "GitHub", icon: SiGithub, color: "#181717", tier: "primary", categories: ["devops"] },
-  { name: "GitHub Actions", icon: SiGithubactions, color: "#2088FF", tier: "primary", categories: ["devops"] },
-  { name: "Argo CD", icon: SiArgo, color: "#EF7B4D", tier: "primary", categories: ["cloud", "devops"] },
-  { name: "Design Patterns", conceptIcon: Component, color: "#7C3AED", tier: "primary", categories: ["backend"] },
-  { name: "SOLID Principles", conceptIcon: Blocks, color: "#059669", tier: "primary", categories: ["backend"] },
-  { name: "Microservices Architecture", conceptIcon: Waypoints, color: "#2563EB", tier: "primary", categories: ["backend", "devops"] },
-
-  { name: "C#", icon: SiSharp, color: "#239120", tier: "primary", categories: ["backend"] },
-  { name: "Azure", logoPath: "/brand-logos/stacks/microsoftazure.svg", color: "#0078D4", tier: "primary", categories: ["cloud"] },
-  { name: "AWS", icon: SiAmazonwebservices, color: "#FF9900", tier: "primary", categories: ["cloud"] },
-  { name: "Kubernetes", icon: SiKubernetes, color: "#326CE5", tier: "primary", categories: ["cloud", "devops"] },
-  { name: "Docker", icon: SiDocker, color: "#2496ED", tier: "primary", categories: ["cloud", "devops"] },
-  { name: "Terraform", icon: SiTerraform, color: "#7B42BC", tier: "primary", categories: ["cloud", "devops"] },
-  { name: "Angular", icon: SiAngular, color: "#DD0031", tier: "primary", categories: ["frontend"] },
-  { name: "TypeScript", icon: SiTypescript, color: "#3178C6", tier: "primary", categories: ["frontend", "backend"] },
-  { name: "PostgreSQL", icon: SiPostgresql, color: "#4169E1", tier: "primary", categories: ["database"] },
-  { name: "SQL Server", logoPath: "/brand-logos/stacks/microsoftsqlserver.svg", color: "#CC2927", tier: "primary", categories: ["database"] },
-  { name: "Redis", icon: SiRedis, color: "#DC382D", tier: "primary", categories: ["database"] },
-  { name: "Apache Kafka", icon: SiApachekafka, color: "#231F20", tier: "primary", categories: ["backend", "devops"] },
-  { name: "Python", icon: SiPython, color: "#3776AB", tier: "primary", categories: ["backend", "aiml"] },
-  { name: "TensorFlow", icon: SiTensorflow, color: "#FF6F00", tier: "primary", categories: ["aiml"] },
-  { name: "PyTorch", icon: SiPytorch, color: "#EE4C2C", tier: "primary", categories: ["aiml"] },
-  { name: "Jenkins", icon: SiJenkins, color: "#D24939", tier: "primary", categories: ["devops"] },
-
-  { name: "React", icon: SiReact, color: "#61DAFB", tier: "secondary", categories: ["frontend"] },
-  { name: "Next.js", icon: SiNextdotjs, color: "#000000", tier: "secondary", categories: ["frontend"] },
-  { name: "Vue.js", icon: SiVuedotjs, color: "#4FC08D", tier: "secondary", categories: ["frontend"] },
-  { name: "GCP", icon: SiGooglecloud, color: "#4285F4", tier: "secondary", categories: ["cloud"] },
-  { name: "MongoDB", icon: SiMongodb, color: "#47A248", tier: "secondary", categories: ["database"] },
-  { name: "Grafana", icon: SiGrafana, color: "#F46800", tier: "secondary", categories: ["observability"] },
-  { name: "Prometheus", icon: SiPrometheus, color: "#E6522C", tier: "secondary", categories: ["observability"] },
-  { name: "Datadog", icon: SiDatadog, color: "#632CA6", tier: "secondary", categories: ["observability"] },
-  { name: "OpenAI", icon: SiOpenai, color: "#412991", tier: "secondary", categories: ["aiml"] },
-  { name: "Hugging Face", icon: SiHuggingface, color: "#FF9D00", tier: "secondary", categories: ["aiml"] },
-  { name: "LangChain", icon: SiLangchain, color: "#1C3C3C", tier: "secondary", categories: ["aiml"] },
-  { name: "Git", icon: SiGit, color: "#F05032", tier: "secondary", categories: ["devops"] },
+const techLogos: TechLogo[] = [
+  { id: "csharp", name: "C#", src: "/brand-logos/stacks/csharp.svg", categories: ["backend"] },
+  { id: "dotnet", name: ".NET", src: "/brand-logos/stacks/dotnet.svg", categories: ["backend"] },
+  { id: "python", name: "Python", src: "/brand-logos/stacks/python.svg", categories: ["backend", "aiml"] },
+  { id: "javascript", name: "JavaScript", src: "/brand-logos/stacks/javascript.svg", categories: ["backend", "frontend"] },
+  { id: "typescript", name: "TypeScript", src: "/brand-logos/stacks/typescript.svg", categories: ["backend", "frontend"] },
+  { id: "react", name: "React", src: "/brand-logos/stacks/react.svg", categories: ["frontend"] },
+  { id: "angular", name: "Angular", src: "/brand-logos/stacks/angular.svg", categories: ["frontend"] },
+  { id: "vue", name: "Vue", src: "/brand-logos/stacks/vue.svg", categories: ["frontend"] },
+  { id: "nextjs", name: "Next.js", src: "/brand-logos/stacks/nextjs.svg", categories: ["frontend"] },
+  {
+    id: "aws",
+    name: "AWS",
+    src: "/brand-logos/stacks/aws.svg",
+    categories: ["cloud"],
+    imgClassName: "h-7 w-14 object-contain",
+  },
+  { id: "azure", name: "Azure", src: "/brand-logos/stacks/microsoftazure.svg", categories: ["cloud"] },
+  { id: "gcp", name: "Google Cloud", src: "/brand-logos/stacks/gcp.svg", categories: ["cloud"] },
+  { id: "docker", name: "Docker", src: "/brand-logos/stacks/docker.svg", categories: ["cloud", "devops"] },
+  { id: "kubernetes", name: "Kubernetes", src: "/brand-logos/stacks/kubernetes.svg", categories: ["cloud", "devops"] },
+  { id: "terraform", name: "Terraform", src: "/brand-logos/stacks/terraform.svg", categories: ["cloud", "devops"] },
+  { id: "jenkins", name: "Jenkins", src: "/brand-logos/stacks/jenkins.svg", categories: ["devops"] },
+  { id: "git", name: "Git", src: "/brand-logos/stacks/git.svg", categories: ["devops"] },
+  { id: "github", name: "GitHub", src: "/brand-logos/stacks/github.svg", categories: ["devops"] },
+  { id: "postgresql", name: "PostgreSQL", src: "/brand-logos/stacks/postgresql.svg", categories: ["database"] },
+  { id: "mongodb", name: "MongoDB", src: "/brand-logos/stacks/mongodb.svg", categories: ["database"] },
+  { id: "redis", name: "Redis", src: "/brand-logos/stacks/redis.svg", categories: ["database"] },
+  { id: "tensorflow", name: "TensorFlow", src: "/brand-logos/stacks/tensorflow.svg", categories: ["aiml"] },
+  { id: "pytorch", name: "PyTorch", src: "/brand-logos/stacks/pytorch.svg", categories: ["aiml"] },
+  {
+    id: "openai",
+    name: "OpenAI",
+    src: "/llm-logos/openai.png",
+    categories: ["aiml"],
+    imgClassName: "h-10 w-10 object-contain",
+  },
+  { id: "huggingface", name: "Hugging Face", src: "/brand-logos/stacks/huggingface.svg", categories: ["aiml"] },
+  { id: "langchain", name: "LangChain", src: "/brand-logos/stacks/langchain.svg", categories: ["aiml"] },
+  { id: "scikitlearn", name: "Scikit-learn", src: "/brand-logos/stacks/scikitlearn.svg", categories: ["aiml"] },
+  { id: "grafana", name: "Grafana", src: "/brand-logos/stacks/grafana.svg", categories: ["observability"] },
+  { id: "prometheus", name: "Prometheus", src: "/brand-logos/stacks/prometheus.svg", categories: ["observability"] },
+  { id: "datadog", name: "Datadog", src: "/brand-logos/stacks/datadog.svg", categories: ["observability"] },
 ];
 
-function getDarkSafeIconColor(color: string, isDark: boolean): string {
-  if (!isDark) return color;
-  const hex = color.replace("#", "");
-  if (!(hex.length === 6 || hex.length === 3)) return color;
-  const fullHex =
-    hex.length === 3
-      ? `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`
-      : hex;
-  const r = parseInt(fullHex.slice(0, 2), 16);
-  const g = parseInt(fullHex.slice(2, 4), 16);
-  const b = parseInt(fullHex.slice(4, 6), 16);
-  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-  return luminance < 0.36 ? "#E2E8F0" : color;
+function TechLogoCard({ tech, isDimmed }: { tech: TechLogo; isDimmed: boolean }) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: isDimmed ? 0.45 : 1, y: 0 }}
+      whileHover={{ y: -6, scale: 1.02 }}
+      transition={{ duration: 0.25 }}
+      className={cn(
+        "group flex h-[120px] w-[122px] shrink-0 flex-col items-center justify-center rounded-2xl border px-3 py-3 text-center",
+        "border-border/60 bg-background/70 shadow-sm backdrop-blur",
+      )}
+      aria-label={`${tech.name} technology`}
+    >
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-black/10 bg-white shadow-sm dark:border-white/15 dark:bg-zinc-100">
+        <img
+          src={tech.src}
+          alt={`${tech.name} logo`}
+          loading="lazy"
+          className={cn("h-10 w-10 object-contain", tech.imgClassName)}
+          onError={(event) => {
+            const target = event.currentTarget;
+            target.style.display = "none";
+          }}
+        />
+      </div>
+      <p className="mt-2 line-clamp-1 text-[11px] font-semibold text-foreground/90 sm:text-xs">{tech.name}</p>
+    </motion.article>
+  );
 }
 
-const Tile = ({ item }: { item: TechItem }) => {
-  const Icon = item.icon;
-  const ConceptIcon = item.conceptIcon;
-  const [isHovered, setIsHovered] = useState(false);
-  const navigate = useNavigate();
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-  const iconColor = getDarkSafeIconColor(item.color, isDark);
-  const playbook = TECH_PLAYBOOK_MAP.get(item.name);
-  const isClickable = !!playbook;
+function InfiniteScrollRow({
+  items,
+  direction,
+  speed,
+  activeCategory,
+}: {
+  items: TechLogo[];
+  direction: "left" | "right";
+  speed: number;
+  activeCategory: CategoryId;
+}) {
+  const [paused, setPaused] = useState(false);
+  const looped = [...items, ...items, ...items];
 
   return (
-    <motion.div
-      whileHover={{ y: -6, scale: 1.03 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={() => {
-        if (!playbook) return;
-        navigate(`/blog/techhub?focus=${encodeURIComponent(playbook.slug)}`);
-      }}
-      className={`group relative rounded-2xl border border-border/60 bg-card/70 p-4 backdrop-blur-sm ${
-        isClickable ? "cursor-pointer" : "cursor-default"
-      }`}
-      style={{ boxShadow: `0 10px 30px ${item.color}1A` }}
+    <div
+      className="relative overflow-hidden py-2"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
     >
-      <div className="absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={{ background: `linear-gradient(135deg, ${item.color}1F, transparent 55%)` }} />
-      <div className="relative flex items-center gap-3">
-        <div
-          className="flex h-11 w-11 items-center justify-center rounded-xl"
-          style={{ backgroundColor: isDark ? "rgba(255,255,255,0.09)" : `${item.color}1A` }}
-        >
-          {Icon ? (
-            <Icon size={22} color={iconColor} aria-hidden="true" />
-          ) : ConceptIcon ? (
-            <ConceptIcon size={22} color={iconColor} aria-hidden="true" />
-          ) : (
-            <img
-              src={item.logoPath}
-              alt={`${item.name} logo`}
-              className="h-6 w-6 rounded bg-white p-0.5 object-contain shadow-sm"
-              loading="lazy"
-            />
-          )}
-        </div>
-        <span className="text-sm font-semibold text-foreground">
-          {item.name}
-        </span>
-      </div>
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-16 bg-gradient-to-r from-background to-transparent md:w-24" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-16 bg-gradient-to-l from-background to-transparent md:w-24" />
 
-      {playbook && isHovered ? (
-        <div className="pointer-events-none absolute left-3 right-3 top-[calc(100%+8px)] z-50 rounded-xl border border-border/60 bg-popover p-3 shadow-xl">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">What</p>
-          <p className="mt-1 text-xs text-foreground">{playbook.what}</p>
-          <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Why</p>
-          <p className="mt-1 text-xs text-muted-foreground">{playbook.why}</p>
-        </div>
-      ) : null}
-    </motion.div>
+      <motion.div
+        className="flex gap-3 sm:gap-4"
+        animate={{ x: direction === "left" ? ["0%", "-33.33%"] : ["-33.33%", "0%"] }}
+        transition={{ x: { duration: speed, ease: "linear", repeat: Infinity } }}
+        style={{ animationPlayState: paused ? "paused" : "running" }}
+      >
+        {looped.map((tech, idx) => {
+          const isDimmed = activeCategory !== "all" && !tech.categories.includes(activeCategory as Exclude<CategoryId, "all">);
+          return <TechLogoCard key={`${tech.id}-${idx}`} tech={tech} isDimmed={isDimmed} />;
+        })}
+      </motion.div>
+    </div>
   );
-};
+}
 
-export const TechStackShowcase = () => {
-  const [activeCategory, setActiveCategory] = useState<"all" | Category>("all");
+export function TechStackShowcase() {
+  const [activeCategory, setActiveCategory] = useState<CategoryId>("all");
 
-  const filtered = useMemo(() => {
-    if (activeCategory === "all") return techStack;
-    return techStack.filter((item) => item.categories.includes(activeCategory));
+  const visibleTechs = useMemo(() => {
+    if (activeCategory === "all") return techLogos;
+    return techLogos.filter((tech) => tech.categories.includes(activeCategory as Exclude<CategoryId, "all">));
   }, [activeCategory]);
 
-  const primary = filtered.filter((item) => item.tier === "primary");
-  const secondary = filtered.filter((item) => item.tier === "secondary");
+  const [rowA, rowB] = useMemo(() => {
+    const first = visibleTechs.filter((_, idx) => idx % 2 === 0);
+    const second = visibleTechs.filter((_, idx) => idx % 2 === 1);
+    return [first.length ? first : visibleTechs, second.length ? second : visibleTechs];
+  }, [visibleTechs]);
 
   return (
-    <section className="bg-muted/30 py-12 md:py-16">
+    <section className="overflow-hidden bg-muted/30 py-12 md:py-16">
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mb-8 text-center"
+          className="mb-6 text-center"
         >
           <h2 className="mb-2 text-2xl font-black tracking-tight md:text-3xl lg:text-4xl">
             Technical <span className="gradient-text">Expertise</span>
           </h2>
-          <p className="mx-auto mb-6 max-w-2xl text-sm text-muted-foreground">
-            Official brand icons. Primary stack reflects technologies used across CV projects and architecture roles; secondary stack covers the wider ecosystem.
+          <p className="mx-auto mb-5 max-w-2xl text-sm text-muted-foreground md:text-base">
+            Clear and recognizable stack logos with high-contrast rendering for both light and dark themes.
           </p>
 
           <div className="flex flex-wrap justify-center gap-2">
-            {categories.map((cat) => (
+            {categories.map((category) => (
               <motion.button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
+                key={category.id}
+                type="button"
+                onClick={() => setActiveCategory(category.id)}
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-300 ${
-                  activeCategory === cat.id
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                    : "border border-border/50 bg-background/50 text-muted-foreground hover:bg-background hover:text-foreground"
-                }`}
+                className={cn(
+                  "rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-200 md:text-sm",
+                  activeCategory === category.id
+                    ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                    : "border-border/60 bg-background/70 text-muted-foreground hover:text-foreground",
+                )}
               >
-                {cat.label}
+                {category.label}
               </motion.button>
             ))}
           </div>
         </motion.div>
 
-        <div className="space-y-8">
-          <div>
-            <h3 className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-primary">Primary (From CV)</h3>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {primary.map((item) => (
-                <Tile key={item.name} item={item} />
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground">Secondary (Extended Stack)</h3>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {secondary.map((item) => (
-                <Tile key={item.name} item={item} />
-              ))}
-            </div>
-          </div>
+        <div className="space-y-1">
+          <InfiniteScrollRow items={rowA} direction="left" speed={34} activeCategory={activeCategory} />
+          <InfiniteScrollRow items={rowB} direction="right" speed={38} activeCategory={activeCategory} />
         </div>
       </div>
     </section>
   );
-};
+}

@@ -5,65 +5,26 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   Mail, 
   MapPin, 
   Send,
-  Linkedin,
-  Github,
-  Youtube,
-  Instagram,
   MessageSquare,
   ExternalLink
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
-import { iconForKey } from "@/lib/social/iconMap";
 import { supabase } from "@/integrations/supabase/client";
-import originxLabsLogo from "@/assets/originxlabs.png";
-
-type PublicProfile = {
-  platform: string;
-  display_name: string;
-  category: string;
-  profile_url: string | null;
-  icon_key: string;
-  brand_bg: string | null;
-};
-
-function ProfileIconLink(props: { p: PublicProfile }) {
-  const Icon: any = iconForKey(props.p.icon_key);
-  const bg = props.p.brand_bg || "bg-primary";
-  return (
-    <Tooltip key={props.p.platform}>
-      <TooltipTrigger asChild>
-        <a
-          href={props.p.profile_url || "#"}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group relative w-12 h-12 rounded-xl bg-muted flex items-center justify-center transition-all duration-300 hover:text-primary-foreground hover:scale-110 hover:shadow-glow"
-          aria-label={props.p.display_name}
-        >
-          <span className={`absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity ${bg}`} />
-          <Icon className="relative w-5 h-5 text-muted-foreground group-hover:text-white" />
-        </a>
-      </TooltipTrigger>
-      <TooltipContent>{props.p.display_name}</TooltipContent>
-    </Tooltip>
-  );
-}
+import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
+import { resolveSocialProfiles } from "@/lib/social/resolveProfiles";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 const Contact = () => {
   const { toast } = useToast();
   const { data: profiles } = usePublicSocialProfiles();
-  const { social, blog, platform } = useMemo(() => {
+  const visibleProfiles = useMemo(() => {
     const rows = (profiles ?? []) as any[];
-    return {
-      social: rows.filter((r) => r.category === "social" && r.profile_url),
-      blog: rows.filter((r) => r.category === "blog" && r.profile_url),
-      platform: rows.filter((r) => (r.category === "platform" || r.category === "website") && r.profile_url),
-    };
+    return resolveSocialProfiles(rows as any);
   }, [profiles]);
 
   const [formData, setFormData] = useState({
@@ -201,47 +162,15 @@ const Contact = () => {
                     </div>
                   </div>
 
-                  {/* Social Links with Tooltips */}
                   <div className="mb-6">
-                    <p className="text-sm text-muted-foreground mb-4">Connect on social</p>
-                    <div className="flex gap-3">
-                      {social.map((p: any) => (
-                        <ProfileIconLink key={p.platform} p={p} />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Blog Platforms with Icons */}
-                  <div className="mb-6">
-                    <p className="text-sm text-muted-foreground mb-4">Read my blogs</p>
-                    <div className="flex gap-3">
-                      {blog.map((p: any) => (
-                        <ProfileIconLink key={p.platform} p={p} />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Other Platforms with Icons */}
-                  <div className="mb-6">
-                    <p className="text-sm text-muted-foreground mb-4">Other platforms</p>
-                    <div className="flex gap-3">
-                      {platform.map((p: any) => (
-                        <ProfileIconLink key={p.platform} p={p} />
-                      ))}
-                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">All Social & Publishing Channels</p>
+                    <HeroSocialIcons profiles={visibleProfiles} className="justify-start" />
                   </div>
 
                   {/* Attribution */}
                   <div className="p-4 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl border border-primary/10">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="h-8 rounded-lg bg-white/95 px-2 py-1 ring-1 ring-border/40 shadow-sm">
-                        <img
-                          src={originxLabsLogo}
-                          alt="OriginX Labs"
-                          className="h-6 w-auto object-contain"
-                          loading="lazy"
-                        />
-                      </div>
+                      <BrandLogo variant="originx" size="sm" />
                       <span className="text-sm font-medium text-foreground">OriginX Labs</span>
                     </div>
                     <p className="text-xs text-muted-foreground">

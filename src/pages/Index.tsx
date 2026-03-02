@@ -4,7 +4,6 @@ import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
 
 // Lazy load below-the-fold components for faster initial render
-const SocialSection = lazy(() => import("@/components/home/SocialSection").then(m => ({ default: m.SocialSection })));
 const FeaturedCourses = lazy(() => import("@/components/home/FeaturedCourses").then(m => ({ default: m.FeaturedCourses })));
 const FeaturedBlog = lazy(() => import("@/components/home/FeaturedBlog").then(m => ({ default: m.FeaturedBlog })));
 const TrustSection = lazy(() => import("@/components/home/TrustSection").then(m => ({ default: m.TrustSection })));
@@ -28,9 +27,6 @@ const Index = () => {
         <HeroSection />
         
         {/* Below-the-fold content loads lazily */}
-        <Suspense fallback={<SectionLoader />}>
-          <SocialSection />
-        </Suspense>
         <Suspense fallback={<SectionLoader />}>
           <FeaturedCourses />
         </Suspense>

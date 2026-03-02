@@ -1,18 +1,24 @@
 import {
-  Instagram,
-  Youtube,
-  Linkedin,
-  Github,
   Globe,
-  Twitter,
-  Facebook,
-  MessageCircle,
-  Send,
-  MessageSquare,
-  Music2,
-  Bookmark,
 } from "lucide-react";
-import { SiHashnode, SiMedium, SiStackexchange, SiSubstack } from "react-icons/si";
+import {
+  SiDiscord,
+  SiFacebook,
+  SiGithub,
+  SiHashnode,
+  SiInstagram,
+  SiLinkedin,
+  SiMedium,
+  SiPinterest,
+  SiReddit,
+  SiStackexchange,
+  SiSubstack,
+  SiTelegram,
+  SiThreads,
+  SiTiktok,
+  SiX,
+  SiYoutube,
+} from "react-icons/si";
 import { StackcraftIcon } from "@/components/icons/StackcraftIcon";
 
 export type SocialIconKey =
@@ -36,19 +42,20 @@ export type SocialIconKey =
   | "pinterest";
 
 export function iconForKey(key: string) {
-  switch (key) {
+  const normalized = key?.toLowerCase().replace(/\s+/g, "").replace(/[_-]/g, "") || "";
+  switch (normalized) {
     case "instagram":
-      return Instagram;
+      return SiInstagram;
     case "facebook":
-      return Facebook;
+      return SiFacebook;
     case "youtube":
-      return Youtube;
+      return SiYoutube;
     case "linkedin":
-      return Linkedin;
+      return SiLinkedin;
     case "github":
-      return Github;
+      return SiGithub;
     case "x":
-      return Twitter; // lucide "Twitter" glyph; link label says X.
+      return SiX;
     case "medium":
       return SiMedium;
     case "substack":
@@ -56,23 +63,24 @@ export function iconForKey(key: string) {
     case "hashnode":
       return SiHashnode;
     case "stackexchange":
+    case "stackoverflow":
       return SiStackexchange;
     case "stackcraft":
       return StackcraftIcon as any;
     case "website":
       return Globe;
     case "threads":
-      return MessageCircle;
+      return SiThreads;
     case "reddit":
-      return MessageSquare;
+      return SiReddit;
     case "telegram":
-      return Send;
+      return SiTelegram;
     case "discord":
-      return MessageCircle;
+      return SiDiscord;
     case "tiktok":
-      return Music2;
+      return SiTiktok;
     case "pinterest":
-      return Bookmark;
+      return SiPinterest;
     default:
       return LinkFallback;
   }

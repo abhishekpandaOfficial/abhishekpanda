@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { MotionPathPlugin } from "gsap/MotionPathPlugin";
 import {
   Baby,
   Award,
@@ -26,13 +29,15 @@ import {
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
+
 // Import company logos
 import xeroxLogo from "@/assets/company-logos/xerox.png";
 import conduentLogo from "@/assets/company-logos/conduent.png";
 import virtusaLogo from "@/assets/company-logos/virtusa.png";
 import wellsfargoLogo from "@/assets/company-logos/wellsfargo.png";
 import soleraLogo from "@/assets/company-logos/solera.png";
-import originxLogo from "@/assets/originxlabs.png";
+import originxLogo from "@/assets/company-logos/originxlabs.png";
 
 interface TimelineProject {
   title: string;
@@ -470,7 +475,9 @@ const TimelineCard = ({ item, index, onMobileClick }: { item: TimelineItem; inde
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className={`relative flex items-center w-full ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} flex-row`}
+      className={`relative z-10 flex w-full items-center ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} flex-row`}
+      data-waypoint-card="true"
+      data-waypoint-index={index}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -576,7 +583,8 @@ const TimelineCard = ({ item, index, onMobileClick }: { item: TimelineItem; inde
         <motion.div
           animate={isHovered ? { scale: 1.2, rotate: 360 } : { scale: 1, rotate: 0 }}
           transition={{ duration: 0.3 }}
-          className={`w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br ${getTypeColor()} flex items-center justify-center shadow-lg border-4 border-background`}
+          className={`timeline-waypoint h-10 w-10 rounded-full border-4 border-background bg-gradient-to-br ${getTypeColor()} flex items-center justify-center shadow-lg md:h-12 md:w-12`}
+          data-waypoint-year={item.year}
         >
           <Icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
         </motion.div>
@@ -701,14 +709,101 @@ const TimelineCard = ({ item, index, onMobileClick }: { item: TimelineItem; inde
 export const CareerTimeline = () => {
   const [selectedItem, setSelectedItem] = useState<TimelineItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const timelineRef = useRef<HTMLDivElement | null>(null);
+  const pathRef = useRef<SVGPathElement | null>(null);
+  const orbRef = useRef<HTMLDivElement | null>(null);
 
   const handleMobileClick = (item: TimelineItem) => {
     setSelectedItem(item);
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    const section = sectionRef.current;
+    const timeline = timelineRef.current;
+    const path = pathRef.current;
+    const orb = orbRef.current;
+    if (!section || !timeline || !path || !orb) return;
+
+    const ctx = gsap.context(() => {
+      const updatePath = () => {
+        const totalHeight = timeline.scrollHeight;
+        const totalWidth = timeline.clientWidth;
+        const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+        const x = isDesktop ? totalWidth / 2 : 20;
+        const curveOffset = isDesktop ? 26 : 14;
+
+        const d = [
+          `M ${x} 0`,
+          `C ${x + curveOffset} ${totalHeight * 0.18}, ${x - curveOffset} ${totalHeight * 0.36}, ${x} ${totalHeight * 0.52}`,
+          `C ${x + curveOffset} ${totalHeight * 0.7}, ${x - curveOffset} ${totalHeight * 0.88}, ${x} ${totalHeight}`,
+        ].join(" ");
+
+        path.setAttribute("d", d);
+      };
+
+      updatePath();
+      gsap.set(orb, { xPercent: -50, yPercent: -50 });
+
+      gsap.to(orb, {
+        ease: "none",
+        motionPath: {
+          path,
+          align: path,
+          alignOrigin: [0.5, 0.5],
+          start: 0.02,
+          end: 0.98,
+        },
+        scrollTrigger: {
+          trigger: timeline,
+          start: "top 74%",
+          end: "bottom 40%",
+          scrub: 1.1,
+          invalidateOnRefresh: true,
+          onRefresh: updatePath,
+        },
+      });
+
+      const waypoints = gsap.utils.toArray<HTMLElement>(".timeline-waypoint", timeline);
+      waypoints.forEach((point) => {
+        gsap.fromTo(
+          point,
+          { scale: 1, boxShadow: "0 0 0 rgba(0,0,0,0)" },
+          {
+            scale: 1.14,
+            boxShadow: "0 0 22px rgba(56,189,248,0.55)",
+            duration: 0.34,
+            yoyo: true,
+            repeat: 1,
+            ease: "power1.out",
+            scrollTrigger: {
+              trigger: point,
+              start: "top 72%",
+              toggleActions: "play none none none",
+            },
+          },
+        );
+      });
+
+      const resizeObserver = new ResizeObserver(() => {
+        updatePath();
+        ScrollTrigger.refresh();
+      });
+      resizeObserver.observe(timeline);
+      window.addEventListener("resize", updatePath);
+
+      return () => {
+        resizeObserver.disconnect();
+        window.removeEventListener("resize", updatePath);
+      };
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="py-16 md:py-20 relative overflow-hidden">
+    <section ref={sectionRef} className="py-16 md:py-20 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 mesh-gradient opacity-30" />
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
@@ -734,12 +829,34 @@ export const CareerTimeline = () => {
         </motion.div>
 
         {/* Timeline */}
-        <div className="relative">
-          {/* Center Line */}
-          <div className="absolute left-5 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-secondary to-purple md:-translate-x-1/2" />
+        <div ref={timelineRef} className="relative">
+          <div className="pointer-events-none absolute inset-0 z-0">
+            <svg className="h-full w-full overflow-visible" aria-hidden="true">
+              <defs>
+                <linearGradient id="career-path-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.95" />
+                  <stop offset="50%" stopColor="hsl(var(--secondary))" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.8" />
+                </linearGradient>
+              </defs>
+              <path
+                ref={pathRef}
+                fill="none"
+                stroke="url(#career-path-gradient)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeDasharray="4 4"
+                opacity="0.9"
+              />
+            </svg>
+            <div
+              ref={orbRef}
+              className="absolute left-0 top-0 h-4 w-4 rounded-full border border-background bg-primary shadow-[0_0_20px_rgba(59,130,246,0.75)]"
+            />
+          </div>
 
           {/* Timeline Items */}
-          <div className="space-y-8 md:space-y-12">
+          <div className="relative z-10 space-y-8 md:space-y-12">
             {timelineData.map((item, index) => (
               <TimelineCard 
                 key={`${item.year}-${index}`} 

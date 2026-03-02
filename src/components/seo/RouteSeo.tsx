@@ -7,6 +7,7 @@ const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
 type SeoData = {
   title: string;
   description: string;
+  keywords?: string;
   robots?: string;
 };
 
@@ -17,6 +18,8 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "Abhishek Panda | AI Architect, Technical Architect, Founder",
       description:
         "Official website of Abhishek Panda featuring engineering blog posts, Stackcraft learning tracks, CHRONYX, mentorship, and LLM Galaxy insights.",
+      keywords:
+        "Abhishek Panda, Abhishek, AI Architect, Technical Architect, OriginX Labs, OpenOwl, Chronyx, LLM Galaxy, software architecture blog",
     },
   },
   {
@@ -25,6 +28,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "About Abhishek Panda | Technical Architect & AI Leader",
       description:
         "Learn about Abhishek Panda’s background, architecture experience, AI work, leadership journey, and OriginX Labs mission.",
+      keywords: "about Abhishek Panda, Abhishek Panda profile, AI leader, Technical Architect India",
     },
   },
   {
@@ -33,6 +37,8 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "Abhishek Panda Blog | .NET, Azure, AI/ML, NLP, Agentic AI",
       description:
         "Read Abhishek Panda blog posts and Stackcraft learning tracks covering .NET, Azure, SQL, AI/ML, deep learning, NLP, Agentic AI, and Web3.",
+      keywords:
+        "Abhishek Panda blog, .NET blog, Azure blog, AI blog, software architecture articles, stackcraft",
     },
   },
   {
@@ -41,6 +47,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "Blog Aggregator | Abhishek Panda + Stackcraft + Social Writing",
       description:
         "Discover content from Abhishek Panda across Stackcraft, Medium, Substack, Hashnode, and other official channels.",
+      keywords: "Stackcraft, Medium, Substack, Hashnode, Abhishek Panda writing",
     },
   },
   {
@@ -111,6 +118,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "LLM Galaxy | AI Model Intelligence Hub by OriginX",
       description:
         "Explore LLM Galaxy for model discovery, categories, capabilities, comparisons, and AI model insights across open and closed ecosystems.",
+      keywords: "LLM Galaxy, AI models, OpenAI, Anthropic, Gemini, model routing, LLM comparison",
     },
   },
   {
@@ -127,6 +135,33 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "CHRONYX | Personal Intelligence Space",
       description:
         "Explore CHRONYX, the personal intelligence and productivity space by Abhishek Panda with focused tools and guided workflows.",
+      keywords: "Chronyx, personal command center, productivity, Abhishek Panda",
+    },
+  },
+  {
+    pattern: "/openowl",
+    data: {
+      title: "OpenOwl | Intelligent Assistant by Abhishek Panda",
+      description:
+        "Discover OpenOwl, the AI assistant experience by Abhishek Panda for contextual answers, model intelligence, and ecosystem guidance.",
+      keywords: "OpenOwl, AbhishekPanda Assistant, AI assistant, LLM assistant, task automation",
+    },
+  },
+  {
+    pattern: "/openowl/assistant",
+    data: {
+      title: "OpenOwl Assistant | AbhishekPanda Assistant",
+      description:
+        "Chat with AbhishekPanda Assistant in a focused full-screen experience with source-aware, approval-safe guidance.",
+    },
+  },
+  {
+    pattern: "/openowl/admin/*",
+    data: {
+      title: "OpenOwl Admin Center | Abhishek Panda",
+      description:
+        "OpenOwl Admin Center for overview dashboards, content studio, publish pipeline, delivery tracking, and settings.",
+      robots: "noindex,nofollow",
     },
   },
   {
@@ -159,6 +194,8 @@ const defaultSeo: SeoData = {
   title: "Abhishek Panda | Engineering, AI, and Stackcraft",
   description:
     "Official website of Abhishek Panda with blog posts, Stackcraft learning tracks, CHRONYX, LLM Galaxy, and engineering insights.",
+  keywords:
+    "Abhishek Panda, engineering, AI, cloud architecture, OpenOwl, Chronyx, Stackcraft",
 };
 
 export function RouteSeo() {
@@ -173,24 +210,106 @@ export function RouteSeo() {
   const seo = matched?.data || defaultSeo;
   const canonical = `${SITE_URL}${pathname === "/" ? "" : pathname}`;
   const robots = seo.robots || "index,follow";
+  const keywords = seo.keywords || defaultSeo.keywords;
+
+  const schemaGraph = buildSchemaGraph(pathname, canonical, seo.title, seo.description);
 
   return (
     <Helmet>
       <title>{seo.title}</title>
       <meta name="description" content={seo.description} />
+      {keywords ? <meta name="keywords" content={keywords} /> : null}
       <meta name="robots" content={robots} />
       <link rel="canonical" href={canonical} />
+      <link rel="alternate" type="application/rss+xml" title="Abhishek Panda Blog RSS" href={`${SITE_URL}/rss.xml`} />
+      <link rel="alternate" type="text/plain" title="LLMs.txt" href={`${SITE_URL}/llms.txt`} />
 
       <meta property="og:type" content="website" />
       <meta property="og:title" content={seo.title} />
       <meta property="og:description" content={seo.description} />
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+      <meta property="og:site_name" content="Abhishek Panda" />
+      <meta property="og:locale" content="en_US" />
 
       <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@Panda_Abhishek8" />
       <meta name="twitter:title" content={seo.title} />
       <meta name="twitter:description" content={seo.description} />
       <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
+
+      <script type="application/ld+json">{JSON.stringify(schemaGraph)}</script>
     </Helmet>
   );
+}
+
+function buildSchemaGraph(pathname: string, canonical: string, title: string, description: string) {
+  const person = {
+    "@type": "Person",
+    "@id": "https://www.abhishekpanda.com/#person",
+    name: "Abhishek Panda",
+    url: "https://www.abhishekpanda.com",
+    jobTitle: "Technical Architect, AI Architect",
+    sameAs: [
+      "https://www.linkedin.com/in/abhishekpandaofficial/",
+      "https://github.com/abhishekpandaOfficial",
+      "https://www.youtube.com/@abhishekpanda_official",
+      "https://x.com/Panda_Abhishek8",
+      "https://medium.com/@official.abhishekpanda",
+      "https://substack.com/@abhishekpanda08",
+      "https://hashnode.com/@abhishekpanda",
+      "https://writing.stackexchange.com/users/82639/abhishek-official",
+      "https://www.stackcraft.io/",
+    ],
+  };
+
+  const website = {
+    "@type": "WebSite",
+    "@id": "https://www.abhishekpanda.com/#website",
+    name: "Abhishek Panda",
+    url: "https://www.abhishekpanda.com",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://www.abhishekpanda.com/blog?query={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  const webpage = {
+    "@type": "WebPage",
+    "@id": `${canonical}#webpage`,
+    url: canonical,
+    name: title,
+    description,
+    isPartOf: { "@id": "https://www.abhishekpanda.com/#website" },
+  };
+
+  const graph: Array<Record<string, unknown>> = [person, website, webpage];
+
+  if (pathname.startsWith("/openowl")) {
+    graph.push({
+      "@type": "SoftwareApplication",
+      name: "OpenOwl",
+      applicationCategory: "AIApplication",
+      operatingSystem: "Web",
+      creator: { "@id": "https://www.abhishekpanda.com/#person" },
+      url: "https://www.abhishekpanda.com/openowl",
+      description: "OpenOwl is the AbhishekPanda Assistant for knowledge Q&A, task drafts, and safe action planning.",
+    });
+  }
+
+  if (pathname === "/blog" || pathname === "/blogs") {
+    graph.push({
+      "@type": "Blog",
+      name: "Abhishek Panda Blog",
+      url: "https://www.abhishekpanda.com/blog",
+      publisher: { "@id": "https://www.abhishekpanda.com/#person" },
+      description: "Engineering blog and AI architecture insights by Abhishek Panda.",
+    });
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": graph,
+  };
 }

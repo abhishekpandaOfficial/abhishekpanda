@@ -12,11 +12,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { BurningLogo } from "@/components/ui/BurningLogo";
+import { AbhishekAnimatedLogo } from "@/components/ui/AbhishekAnimatedLogo";
 import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
 import { iconForKey } from "@/lib/social/iconMap";
 import { supabase } from "@/integrations/supabase/client";
-import originxLabsLogo from "@/assets/originxlabs.png";
+import { resolveSocialProfiles } from "@/lib/social/resolveProfiles";
+import { OriginXAnimatedLogo } from "@/components/ui/OriginXAnimatedLogo";
 
 const footerLinks = {
   explore: [
@@ -40,7 +41,7 @@ const footerLinks = {
     { name: "Notion Press", url: "https://notionpress.com/in/read/awake-while-alive/", external: true },
   ],
   ecosystem: [
-    { name: "Stackcraft.io", url: "https://stackcraft.io", external: true, note: "Engineering blog" },
+    { name: "Stackcraft.io", url: "https://www.stackcraft.io/", external: true, note: "Platform · Coming Soon" },
     { name: "NEWSTACK.LIVE", url: "https://newstack.live", external: true, note: "All global news at one place" },
     { name: "CHRONYX", url: "https://www.getchronyx.com", external: true, note: "Personal one-place destination" },
   ],
@@ -88,7 +89,7 @@ export const Footer = () => {
   const [visitCount, setVisitCount] = useState<number | null>(null);
 
   const { social, blogAndPlatforms } = useMemo(() => {
-    const rows = (profiles ?? []) as any[];
+    const rows = resolveSocialProfiles((profiles ?? []) as any[]);
     const social = rows.filter((r) => r.category === "social" && r.profile_url);
     const blog = rows.filter((r) => r.category === "blog" && r.profile_url);
     const platform = rows.filter((r) => r.category === "platform" && r.profile_url);
@@ -118,7 +119,7 @@ export const Footer = () => {
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <BurningLogo size="md" animate={false} />
+              <AbhishekAnimatedLogo size="md" animate />
               <span className="font-bold text-xl">
                 <span className="text-foreground">abhishek</span>
                 <span className="gradient-text">panda</span>
@@ -133,14 +134,7 @@ export const Footer = () => {
             <p className="text-xs text-muted-foreground mb-6">
               Founder,{" "}
               <span className="inline-flex items-center gap-2">
-                <span className="h-6 rounded-md bg-white/95 px-2 py-1 ring-1 ring-border/40 shadow-sm">
-                  <img
-                    src={originxLabsLogo}
-                    alt="OriginX Labs"
-                    className="h-4 w-auto object-contain"
-                    loading="lazy"
-                  />
-                </span>
+                <OriginXAnimatedLogo size="sm" />
                 <span className="text-secondary">OriginX Labs</span>
               </span>
             </p>
@@ -287,14 +281,7 @@ export const Footer = () => {
                 className="text-sm font-semibold text-primary hover:underline underline-offset-4"
               >
                 <span className="inline-flex items-center gap-2">
-                  <span className="h-6 rounded-md bg-white/95 px-2 py-1 ring-1 ring-border/40 shadow-sm">
-                    <img
-                      src={originxLabsLogo}
-                      alt="OriginX Labs"
-                      className="h-4 w-auto object-contain"
-                      loading="lazy"
-                    />
-                  </span>
+                  <OriginXAnimatedLogo size="sm" />
                   <span>OriginX Labs (www.originxlabs.com)</span>
                 </span>
               </a>

@@ -158,8 +158,8 @@ const InstallPWA = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-amber-500/20 via-orange-500/30 to-red-500/20 flex items-center justify-center shadow-2xl shadow-orange-500/30">
-            <img src="/favicon.png" alt="Abhishek Panda" className="w-14 h-14 object-contain" />
+          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl border border-slate-500/40 bg-[#0b1220] flex items-center justify-center shadow-2xl shadow-slate-950/50 overflow-hidden">
+            <img src="/favicon.png" alt="Abhishek Panda" className="w-16 h-16 object-cover rounded-2xl" />
           </div>
           <h1 className="text-3xl font-black mb-2 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
             Abhishek Panda App
@@ -364,14 +364,14 @@ const InstallPWA = () => {
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              <img src="/favicon.png" alt="Abhishek Panda" className="h-8 w-8 object-contain" />
+              <img src="/favicon.png" alt="Abhishek Panda" className="h-8 w-8 object-cover rounded-md border border-border/50 bg-[#0b1220]" />
               Preview the App
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="rounded-2xl border border-border bg-muted/30 p-4">
               <div className="text-sm text-muted-foreground">
-                A quick look before installing. Your app icon uses the Burning A logo.
+                A quick look before installing. Your app icon uses the Abhishek Panda logo.
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

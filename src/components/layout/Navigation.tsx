@@ -23,8 +23,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { BurningLogo } from "@/components/ui/BurningLogo";
-import { ChronyxLogo } from "@/components/ui/ChronyxLogo";
+import { OpenOwlLogo } from "@/components/ui/OpenOwlLogo";
+import { AbhishekAnimatedLogo } from "@/components/ui/AbhishekAnimatedLogo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   NavigationMenu,
@@ -99,7 +99,7 @@ export const Navigation = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 group">
               <div className="group-hover:scale-110 transition-transform duration-300">
-                <BurningLogo size="md" animate={true} />
+                <AbhishekAnimatedLogo size="md" animate />
               </div>
               <span className="font-bold text-lg hidden sm:block">
                 <span className="text-foreground">abhishek</span>
@@ -296,14 +296,19 @@ export const Navigation = () => {
               <ThemeToggle />
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="hero-outline" size="sm" className="chronyx-animated-border relative overflow-hidden" asChild>
-                    <Link to="/chronyx">
-                      <ChronyxLogo compact size="sm" imageClassName="h-5 w-5" className="ring-slate-200/45" />
-                      <span className="font-bold tracking-wide">CHRONYX</span>
+                  <Button
+                    variant="hero-outline"
+                    size="sm"
+                    className="relative overflow-hidden rounded-full border-white/45 bg-white/65 px-2.5 dark:border-white/20 dark:bg-black/60 backdrop-blur-xl hover:shadow-[0_0_20px_rgba(148,163,184,0.4)] transition-all duration-300"
+                    asChild
+                  >
+                    <Link to="/openowl">
+                      <OpenOwlLogo compact size="sm" animate className="ring-border/50" />
+                      <span className="font-bold tracking-wide">OpenOwl</span>
                     </Link>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Personal Quiet Space for Life, Please explore freely</TooltipContent>
+                <TooltipContent>OpenOwl AI assistant with live context and guided answers</TooltipContent>
               </Tooltip>
             </div>
 
@@ -473,10 +478,15 @@ export const Navigation = () => {
                 transition={{ delay: 0.4 }}
                 className="mt-4"
               >
-                <Button variant="hero-outline" size="lg" className="w-full chronyx-animated-border relative overflow-hidden mb-2" asChild>
-                  <Link to="/chronyx">
-                    <ChronyxLogo compact size="sm" imageClassName="h-5 w-5" className="ring-slate-200/45" />
-                    CHRONYX
+                <Button
+                  variant="hero-outline"
+                  size="lg"
+                  className="mb-2 w-full rounded-full border-white/45 bg-white/65 dark:border-white/20 dark:bg-black/60 backdrop-blur-xl hover:shadow-[0_0_20px_rgba(148,163,184,0.4)] transition-all duration-300"
+                  asChild
+                >
+                  <Link to="/openowl">
+                    <OpenOwlLogo compact size="sm" animate className="ring-border/60" />
+                    OpenOwl
                   </Link>
                 </Button>
                 <Button variant="hero" size="lg" className="w-full" asChild>

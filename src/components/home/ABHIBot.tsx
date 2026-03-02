@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useSiteKnowledge } from "@/hooks/useSiteKnowledge";
 import { useOriginXUpdates } from "@/hooks/useOriginXUpdates";
 import { useLLMModels } from "@/hooks/useLLMModels";
-import { ChronyxLogo } from "@/components/ui/ChronyxLogo";
+import { OpenOwlLogo } from "@/components/ui/OpenOwlLogo";
 import { supabase } from "@/integrations/supabase/client";
 
 type Message = {
@@ -18,9 +18,9 @@ type Message = {
 };
 
 const welcomeText =
-  "I am ABHIBOT. Ask me anything about this website, CHRONYX, OriginX updates, or LLM Galaxy models.";
+  "I am OpenOwl. Ask me anything about this website, CHRONYX, OpenOwl, OriginX updates, or LLM Galaxy models.";
 
-export const ABHIBot = () => {
+export const OpenOwlBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +38,7 @@ export const ABHIBot = () => {
       "Show open source models",
       "Show closed source models",
       "Tell me about CHRONYX",
+      "What is OpenOwl?",
     ],
     []
   );
@@ -77,6 +78,10 @@ export const ABHIBot = () => {
       return chronyxInfo || "CHRONYX is the personal system for notes, planning, and finance workflows.";
     }
 
+    if (q.includes("openowl") || q.includes("open owl")) {
+      return "OpenOwl is your AI assistant layer for this website. It can answer context-aware questions, summarize latest OriginX updates, and guide model discovery in LLM Galaxy.";
+    }
+
     if (q.includes("website") || q.includes("site") || q.includes("about")) {
       return knowledge
         .slice(0, 5)
@@ -84,7 +89,7 @@ export const ABHIBot = () => {
         .join("\n");
     }
 
-    return "I can answer website info, CHRONYX, OriginX latest updates, and LLM Galaxy open/closed model details.";
+    return "I can answer website info, CHRONYX, OpenOwl details, OriginX latest updates, and LLM Galaxy open/closed model details.";
   };
 
   const sendPrompt = async (prompt: string) => {
@@ -160,12 +165,12 @@ export const ABHIBot = () => {
     <div className="fixed z-[80] w-[min(92vw,390px)] right-[max(1rem,env(safe-area-inset-right))] bottom-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="flex justify-end mb-3">
         <button
-          aria-label="Toggle ABHIBOT"
+          aria-label="Toggle OpenOwl"
           onClick={() => setIsOpen((s) => !s)}
           className="group relative"
         >
           <div className="rounded-full p-1.5 bg-slate-950/80 border border-slate-200/30 shadow-[0_0_28px_rgba(226,232,240,0.28)] group-hover:scale-105 transition-transform">
-            <ChronyxLogo size="lg" imageClassName="h-12 w-12" className="ring-slate-200/55 shadow-[0_0_22px_rgba(226,232,240,0.35)]" />
+            <OpenOwlLogo size="lg" animate imageClassName="h-12 w-12" className="ring-sky-300/45 shadow-[0_0_24px_rgba(56,189,248,0.35)]" />
           </div>
           <span className="absolute -bottom-2 -right-1 rounded-full bg-primary text-primary-foreground px-1.5 py-0.5 text-[10px] font-semibold">
             AI
@@ -183,13 +188,13 @@ export const ABHIBot = () => {
           >
             <div className="flex items-center justify-between gap-3 border-b border-border/60 p-4">
               <div className="flex items-center gap-3 min-w-0">
-                <ChronyxLogo compact size="md" imageClassName="h-8 w-8" className="ring-slate-200/55" />
+                <OpenOwlLogo compact size="md" animate imageClassName="h-8 w-8" className="ring-sky-300/45" />
                 <div className="min-w-0">
-                  <div className="text-sm font-bold tracking-wide text-foreground truncate">ABHIBOT</div>
-                  <div className="text-xs text-muted-foreground truncate">CHRONYX AI Personal Assistant</div>
+                  <div className="text-sm font-bold tracking-wide text-foreground truncate">OpenOwl</div>
+                  <div className="text-xs text-muted-foreground truncate">Intelligent AI Assistant</div>
                 </div>
               </div>
-              <button aria-label="Close ABHIBOT" onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <button aria-label="Close OpenOwl" onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -232,7 +237,7 @@ export const ABHIBot = () => {
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask ABHIBOT anything..."
+                  placeholder="Ask OpenOwl anything..."
                   className="h-10"
                   disabled={isLoading}
                 />
@@ -243,9 +248,12 @@ export const ABHIBot = () => {
               <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
                 <span className="inline-flex items-center gap-1">
                   <Bot className="h-3 w-3" />
-                  Open-source LLM + Supabase
+                  OpenOwl • LLM + Supabase
                 </span>
-                <Link to="/llm-galaxy" className="hover:text-primary">Open LLM Galaxy</Link>
+                <div className="flex items-center gap-3">
+                  <Link to="/openowl" className="hover:text-primary">OpenOwl Page</Link>
+                  <Link to="/llm-galaxy" className="hover:text-primary">LLM Galaxy</Link>
+                </div>
               </div>
             </form>
           </motion.div>
@@ -254,3 +262,6 @@ export const ABHIBot = () => {
     </div>
   );
 };
+
+// Backward compatibility for existing lazy import paths.
+export const ABHIBot = OpenOwlBot;

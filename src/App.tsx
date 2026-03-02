@@ -34,7 +34,9 @@ const Account = lazy(() => import("./pages/Account"));
 const Chronyx = lazy(() => import("./pages/Chronyx"));
 const TechHub = lazy(() => import("./pages/TechHub"));
 const FoundationalModelsGuide = lazy(() => import("./pages/FoundationalModelsGuide"));
-const ABHIBot = lazy(() => import("@/components/home/ABHIBot").then((m) => ({ default: m.ABHIBot })));
+const OpenOwlLanding = lazy(() => import("./pages/OpenOwlLanding"));
+const OpenOwlAssistant = lazy(() => import("./pages/OpenOwlAssistant"));
+const OpenOwlWidget = lazy(() => import("@/components/openowl-widget/OpenOwlWidget").then((m) => ({ default: m.OpenOwlWidget })));
 
 const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
 const AdminDashboard = lazy(() => import("@/components/admin/AdminDashboard"));
@@ -61,6 +63,13 @@ const AdminIPManagement = lazy(() => import("@/components/admin/AdminIPManagemen
 const AdminMentorshipBookings = lazy(() => import("@/components/admin/AdminMentorshipBookings"));
 const AdminOpsDocs = lazy(() => import("@/components/admin/AdminOpsDocs"));
 const AdminEbooksManager = lazy(() => import("@/components/admin/AdminEbooksManager"));
+const OpenOwlAdminLayout = lazy(() => import("./pages/openowl-admin/OpenOwlAdminLayout"));
+const OpenOwlAdminOverview = lazy(() => import("./pages/openowl-admin/OverviewPage"));
+const OpenOwlAdminStudio = lazy(() => import("./pages/openowl-admin/StudioPage"));
+const OpenOwlAdminPublish = lazy(() => import("./pages/openowl-admin/PublishPage"));
+const OpenOwlAdminDelivery = lazy(() => import("./pages/openowl-admin/DeliveryPage"));
+const OpenOwlAdminRuns = lazy(() => import("./pages/openowl-admin/RunsPage"));
+const OpenOwlAdminSettings = lazy(() => import("./pages/openowl-admin/SettingsPage"));
 
 const queryClient = new QueryClient();
 
@@ -77,11 +86,11 @@ const RouteLoader = () => (
 
 const AssistantMount = () => {
   const { pathname } = useLocation();
-  if (pathname.startsWith("/admin")) return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/openowl")) return null;
 
   return (
     <Suspense fallback={null}>
-      <ABHIBot />
+      <OpenOwlWidget />
     </Suspense>
   );
 };
@@ -142,6 +151,9 @@ const App = () => {
                 <Route path="/chronyx" element={<Chronyx />} />
                 <Route path="/tech" element={<Navigate to="/blog/techhub" replace />} />
                 <Route path="/tech/:slug" element={<Navigate to="/blog/techhub" replace />} />
+                <Route path="/openowl" element={<OpenOwlLanding />} />
+                <Route path="/openowl/assistant" element={<OpenOwlAssistant />} />
+                <Route path="/open-owl" element={<Navigate to="/openowl" replace />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/account" element={<Account />} />
 
@@ -171,11 +183,21 @@ const App = () => {
                   <Route path="payments" element={<AdminPayments />} />
                   <Route path="drive" element={<AdminEncryptedDrive />} />
                   <Route path="lifemap" element={<AdminLifeMap />} />
+                  <Route path="open-owl" element={<Navigate to="/openowl/admin" replace />} />
                   <Route path="integrations" element={<AdminIntegrations />} />
                   <Route path="ops" element={<AdminOpsDocs />} />
                   <Route path="settings" element={<AdminSettings />} />
                   <Route path="security" element={<AdminSecurity />} />
                   <Route path="audit-logs" element={<AdminAuditLogs />} />
+                </Route>
+
+                <Route path="/openowl/admin" element={<OpenOwlAdminLayout />}>
+                  <Route index element={<OpenOwlAdminOverview />} />
+                  <Route path="studio" element={<OpenOwlAdminStudio />} />
+                  <Route path="publish" element={<OpenOwlAdminPublish />} />
+                  <Route path="delivery" element={<OpenOwlAdminDelivery />} />
+                  <Route path="runs" element={<OpenOwlAdminRuns />} />
+                  <Route path="settings" element={<OpenOwlAdminSettings />} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />

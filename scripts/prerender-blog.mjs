@@ -211,11 +211,27 @@ const writeFile = (p, content) => {
 
 const buildSitemap = (posts) => {
   const urls = [
-    { loc: `${SITE_URL}/`, changefreq: "weekly" },
-    { loc: `${SITE_URL}/blog`, changefreq: "daily" },
+    { loc: `${SITE_URL}/`, changefreq: "weekly", priority: "1.0" },
+    { loc: `${SITE_URL}/about`, changefreq: "monthly", priority: "0.9" },
+    { loc: `${SITE_URL}/blog`, changefreq: "daily", priority: "0.95" },
+    { loc: `${SITE_URL}/blogs`, changefreq: "weekly", priority: "0.8" },
+    { loc: `${SITE_URL}/products`, changefreq: "weekly", priority: "0.85" },
+    { loc: `${SITE_URL}/courses`, changefreq: "weekly", priority: "0.85" },
+    { loc: `${SITE_URL}/ebooks`, changefreq: "weekly", priority: "0.85" },
+    { loc: `${SITE_URL}/mentorship`, changefreq: "monthly", priority: "0.75" },
+    { loc: `${SITE_URL}/contact`, changefreq: "monthly", priority: "0.75" },
+    { loc: `${SITE_URL}/llm-galaxy`, changefreq: "weekly", priority: "0.9" },
+    { loc: `${SITE_URL}/chronyx`, changefreq: "weekly", priority: "0.8" },
+    { loc: `${SITE_URL}/openowl`, changefreq: "weekly", priority: "0.9" },
+    { loc: `${SITE_URL}/openowl/assistant`, changefreq: "weekly", priority: "0.8" },
   ];
   for (const p of posts) {
-    urls.push({ loc: `${SITE_URL}/blog/${p.slug}`, changefreq: "monthly" });
+    urls.push({
+      loc: `${SITE_URL}/blog/${p.slug}`,
+      changefreq: "monthly",
+      priority: p.is_premium ? "0.25" : "0.8",
+      lastmod: p.updated_at || p.published_at,
+    });
   }
 
   const body = urls
@@ -223,7 +239,9 @@ const buildSitemap = (posts) => {
       return (
         "  <url>\n" +
         `    <loc>${escapeXml(u.loc)}</loc>\n` +
+        (u.lastmod ? `    <lastmod>${escapeXml(new Date(u.lastmod).toISOString())}</lastmod>\n` : "") +
         `    <changefreq>${u.changefreq}</changefreq>\n` +
+        `    <priority>${u.priority}</priority>\n` +
         "  </url>"
       );
     })
@@ -321,6 +339,15 @@ const main = async () => {
   }
 
   writeFile(path.join(DIST, "sitemap.xml"), buildSitemap(posts));
+  writeFile(
+    path.join(DIST, "sitemaps.xml"),
+    `<?xml version="1.0" encoding="UTF-8"?>\n` +
+      `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+      `  <sitemap>\n` +
+      `    <loc>${escapeXml(`${SITE_URL}/sitemap.xml`)}</loc>\n` +
+      `  </sitemap>\n` +
+      `</sitemapindex>\n`
+  );
   writeFile(path.join(DIST, "rss.xml"), buildRss(posts));
 
   console.log(`Prerendered ${posts.length} blog posts.`);

@@ -1,39 +1,98 @@
 import { motion } from "framer-motion";
 import { useMemo } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
 import { iconForKey } from "@/lib/social/iconMap";
+import { cn } from "@/lib/utils";
+import type { SocialProfileRow } from "@/hooks/useSocialProfiles";
+import { resolveSocialProfiles, type ResolvedSocialProfile } from "@/lib/social/resolveProfiles";
+import { useTheme } from "@/components/ThemeProvider";
 
-export const HeroSocialIcons = () => {
-  const { data: profiles } = usePublicSocialProfiles();
+type HeroSocialIconsProps = {
+  profiles?: Array<SocialProfileRow | ResolvedSocialProfile>;
+  className?: string;
+};
+
+export const HeroSocialIcons = ({ profiles: providedProfiles, className }: HeroSocialIconsProps) => {
+  const { data: queriedProfiles } = usePublicSocialProfiles();
+  const { theme } = useTheme();
   const visible = useMemo(() => {
-    const rows = (profiles ?? []) as any[];
-    return rows.filter((r) => r.profile_url).slice(0, 12);
-  }, [profiles]);
+    const rows = (providedProfiles ?? queriedProfiles ?? []) as SocialProfileRow[];
+    return resolveSocialProfiles(rows);
+  }, [providedProfiles, queriedProfiles]);
+
+  const resolvedIconColor = (brandColor?: string | null) => {
+    if (!brandColor) return "hsl(var(--foreground))";
+    if (theme === "dark" && isVeryDark(brandColor)) return "#e2e8f0";
+    if (theme === "light" && isVeryLight(brandColor)) return "#0f172a";
+    return brandColor;
+  };
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {visible.map((p: any, index: number) => {
+    <div className={cn("flex flex-wrap items-center justify-start gap-2", className)}>
+      {visible.map((p, index: number) => {
         const Icon: any = iconForKey(p.icon_key);
+        const iconColor = resolvedIconColor(p.brand_color);
         return (
-          <motion.a
-            key={p.platform}
-            href={p.profile_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.05 }}
-            whileHover={{ scale: 1.15, y: -2 }}
-            className="group relative w-9 h-9 rounded-lg bg-muted/50 backdrop-blur-sm border border-border/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/10 transition-all duration-300 dark:bg-slate-900/70 dark:border-slate-700/70 dark:text-slate-300 dark:hover:text-sky-300 dark:hover:border-sky-400/40 dark:hover:bg-sky-500/10"
-            title={p.display_name}
-          >
-            <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary to-secondary opacity-0 group-hover:opacity-20 blur transition-opacity" />
-            <span className="relative">
-              <Icon className="w-4 h-4" />
-            </span>
-          </motion.a>
+          <Tooltip key={p.platform}>
+            <TooltipTrigger asChild>
+              <motion.a
+                href={p.profile_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={p.display_name}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.04 }}
+                whileHover={{ scale: 1.08, y: -3 }}
+                className="group relative h-11 w-11 rounded-xl border border-white/55 bg-white/65 backdrop-blur-lg flex items-center justify-center shadow-[0_8px_20px_rgba(15,23,42,0.12)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(59,130,246,0.35)] dark:border-white/20 dark:bg-slate-900/65 dark:shadow-[0_8px_22px_rgba(2,6,23,0.55)]"
+                title={p.display_name}
+              >
+                <span className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/15 via-transparent to-secondary/15 opacity-70 group-hover:opacity-100 transition-opacity" />
+                <Icon className="relative h-5 w-5 transition-transform group-hover:scale-110" style={{ color: iconColor }} />
+              </motion.a>
+            </TooltipTrigger>
+            <TooltipContent>{p.display_name}</TooltipContent>
+          </Tooltip>
         );
       })}
     </div>
   );
 };
+
+function isVeryDark(color: string): boolean {
+  const hex = normalizeHex(color);
+  if (!hex) return false;
+  const [r, g, b] = hexToRgb(hex);
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance < 58;
+}
+
+function isVeryLight(color: string): boolean {
+  const hex = normalizeHex(color);
+  if (!hex) return false;
+  const [r, g, b] = hexToRgb(hex);
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance > 225;
+}
+
+function normalizeHex(color: string): string | null {
+  const value = color.trim();
+  if (!value.startsWith("#")) return null;
+  if (value.length === 4) {
+    const r = value[1];
+    const g = value[2];
+    const b = value[3];
+    return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+  }
+  if (value.length === 7) return value.toLowerCase();
+  return null;
+}
+
+function hexToRgb(hex: string): [number, number, number] {
+  return [
+    Number.parseInt(hex.slice(1, 3), 16),
+    Number.parseInt(hex.slice(3, 5), 16),
+    Number.parseInt(hex.slice(5, 7), 16),
+  ];
+}

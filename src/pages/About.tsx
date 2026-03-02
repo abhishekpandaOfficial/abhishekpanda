@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { CVDownloadModal } from "@/components/cv/CVDownloadModal";
 import { CareerTimeline } from "@/components/about/CareerTimeline";
 import { TechStackShowcase } from "@/components/about/TechStackShowcase";
+import { GsapInfinitePhotoSlider } from "@/components/about/GsapInfinitePhotoSlider";
 
 import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
 import { ContactIntentModal } from "@/components/about/ContactIntentModal";
@@ -103,27 +104,6 @@ const certifications = [
 const About = () => {
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const constraintsRef = useRef(null);
-  const activeImage = heroImages[currentImageIndex];
-
-  // Auto-rotate images
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000); // Longer for Ken Burns effect
-    return () => clearInterval(interval);
-  }, []);
-
-  // Handle swipe gestures
-  const handleDragEnd = (_: any, info: PanInfo) => {
-    const threshold = 50;
-    if (info.offset.x > threshold) {
-      setCurrentImageIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length);
-    } else if (info.offset.x < -threshold) {
-      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -194,130 +174,14 @@ const About = () => {
                 </motion.button>
               </motion.div>
 
-              {/* Apple-style Image Gallery with Swipe & Ken Burns */}
+              {/* GSAP Infinite Card Slider */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="relative"
               >
-                <div 
-                  ref={constraintsRef}
-                  className="relative w-72 h-80 sm:w-80 sm:h-96 md:w-[400px] md:h-[480px] mx-auto"
-                >
-                  {/* Glow effect */}
-                  <motion.div
-                    key={`glow-${currentImageIndex}`}
-                    className="absolute -inset-5 rounded-[2rem] blur-2xl"
-                    style={{
-                      backgroundImage: activeImage.borderGradient,
-                      opacity: 0.35,
-                    }}
-                    initial={{ opacity: 0.1, scale: 0.95 }}
-                    animate={{ opacity: 0.35, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                  />
-                  <motion.div
-                    key={`frame-${currentImageIndex}`}
-                    className="absolute -inset-1 rounded-[1.8rem] p-[2px]"
-                    style={{ backgroundImage: activeImage.borderGradient }}
-                    initial={{ opacity: 0.5, rotate: -2 }}
-                    animate={{ opacity: 1, rotate: 0 }}
-                    transition={{ duration: 0.45 }}
-                  >
-                    <div className="h-full w-full rounded-[1.65rem] bg-background/65 backdrop-blur-[1px]" />
-                  </motion.div>
-                  
-                  {/* Main image container with swipe */}
-                  <motion.div 
-                    className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl ring-1 ring-border/20 cursor-grab active:cursor-grabbing touch-pan-y"
-                    drag="x"
-                    dragConstraints={constraintsRef}
-                    dragElastic={0.1}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentImageIndex}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="absolute inset-0 overflow-hidden"
-                      >
-                        {/* Ken Burns Effect - slow zoom animation */}
-                        <motion.img
-                          src={heroImages[currentImageIndex].src}
-                          alt={heroImages[currentImageIndex].alt}
-                          initial={{ scale: 1 }}
-                          animate={{ scale: 1.15 }}
-                          transition={{ 
-                            duration: 5, 
-                            ease: "linear"
-                          }}
-                          className="w-full h-full object-cover object-top"
-                          draggable={false}
-                        />
-                      </motion.div>
-                    </AnimatePresence>
-                    
-                    {/* Subtle gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent pointer-events-none" />
-
-                    <motion.div
-                      key={`icon-badge-${currentImageIndex}`}
-                      initial={{ opacity: 0, y: -8, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ duration: 0.35 }}
-                      className={`absolute top-4 left-4 md:top-5 md:left-5 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold backdrop-blur-sm shadow-lg ${activeImage.badgeColor}`}
-                    >
-                      <activeImage.icon className="w-3.5 h-3.5" />
-                      {activeImage.title}
-                    </motion.div>
-
-                    <motion.div
-                      key={`caption-badge-${currentImageIndex}`}
-                      initial={{ opacity: 0, y: 8, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ duration: 0.4, delay: 0.1 }}
-                      className="absolute right-4 bottom-4 md:right-5 md:bottom-5 rounded-full bg-black/45 text-white text-[11px] md:text-xs px-3 py-1.5 backdrop-blur-sm"
-                    >
-                      {activeImage.caption}
-                    </motion.div>
-                    
-                    {/* Swipe hint on mobile */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:hidden">
-                      <motion.div
-                        initial={{ opacity: 0.6 }}
-                        animate={{ opacity: [0.6, 1, 0.6] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="text-xs text-foreground/70 bg-background/50 backdrop-blur-sm px-3 py-1 rounded-full"
-                      >
-                        ← Swipe →
-                      </motion.div>
-                    </div>
-                  </motion.div>
-
-                  {/* Thumbnail dots */}
-                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
-                    {heroImages.map((image, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentImageIndex(index)}
-                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                          currentImageIndex === index
-                            ? "w-7"
-                            : "bg-muted-foreground/40 hover:bg-muted-foreground/60"
-                        }`}
-                        style={
-                          currentImageIndex === index
-                            ? { backgroundImage: image.borderGradient }
-                            : undefined
-                        }
-                      />
-                    ))}
-                  </div>
-                </div>
+                <GsapInfinitePhotoSlider items={heroImages} />
               </motion.div>
             </div>
           </div>
