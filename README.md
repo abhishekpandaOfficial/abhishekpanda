@@ -1,88 +1,180 @@
-# Abhishek Panda - Personal Brand Website
+<div align="center">
+  <img src="./public/Abhishek.PNG" alt="Abhishek Panda Logo" width="96" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="./public/openOwl-logo.PNG" alt="OpenOwl Logo" width="96" />
 
-A premium personal brand website for Abhishek Panda (.NET Architect | AI/ML Engineer | Cloud-Native Specialist).
+  <h1>Abhishek Panda Platform</h1>
+  <p>
+    Personal brand website, AI portfolio, OpenOwl assistant experience, and admin control center.
+  </p>
+</div>
+
+<p align="center">
+  <img alt="Vite" src="https://img.shields.io/badge/Vite-5.x-646CFF?logo=vite&logoColor=white" />
+  <img alt="React" src="https://img.shields.io/badge/React-18.x-61DAFB?logo=react&logoColor=0b0f19" />
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white" />
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind-3.x-06B6D4?logo=tailwindcss&logoColor=white" />
+  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-Backend-3ECF8E?logo=supabase&logoColor=white" />
+  <img alt="PWA" src="https://img.shields.io/badge/PWA-Enabled-5A0FC8?logo=pwa&logoColor=white" />
+</p>
+
+## Tags
+`#AbhishekPanda` `#OpenOwl` `#AI` `#AgenticAI` `#Portfolio` `#React` `#TypeScript` `#Vite` `#TailwindCSS` `#Supabase` `#PWA` `#SEO`
+
+## About
+This repository powers **abhishekpanda.com** with:
+- Public brand site (about, blog, courses, ebooks, products, mentorship, contact)
+- **OpenOwl** public assistant experience
+- **OpenOwl Admin Center** for content and delivery operations
+- Main admin command center for business, CMS, analytics, security, and workflow management
+
+## OpenOwl (In Development)
+**OpenOwl** is the AI assistant platform layer inside this project.
+
+Current implementation includes:
+- `/openowl` landing page
+- `/openowl/assistant` full-screen assistant UI
+- `/openowl/admin` and sub-pages (`studio`, `publish`, `delivery`, `runs`, `settings`)
+- Embeddable chat widget component (`OpenOwlWidget`)
+- Mock streaming responses and typed mock data
+- Mermaid preview component with strict rendering safeguards
+- Prompt pack + tool schema docs under `docs/openowl/`
+
+Roadmap direction:
+- Open-source LLM integrations
+- Production-grade tool execution + approvals
+- Deeper retrieval and source-grounded responses
+
+## Core Features
+- Modern, responsive UI (mobile, tablet, desktop)
+- Theme-aware branding and iconography
+- Rich blog and long-form content delivery
+- Ebooks with OTP and secure access flows
+- Admin center with role/security workflows
+- OpenOwl assistant and OpenOwl admin IA
+- Social links and profile integrations
+- SEO assets (`robots.txt`, sitemap files, llms.txt)
+- PWA support with service worker caching
 
 ## Tech Stack
 
-- **Frontend**: React, TypeScript, Vite, Tailwind CSS
-- **Backend**: Supabase (PostgreSQL, Edge Functions, Storage)
-- **UI**: shadcn/ui components
-- **PWA**: Offline support with service workers
+### Frontend
+- React 18
+- TypeScript
+- Vite
+- React Router
+- Tailwind CSS
+- shadcn/ui + Radix UI
+- Framer Motion + GSAP
 
-## Features
+### AI / Assistant UI
+- OpenOwl chat UI and widget
+- Mermaid rendering (`mermaid`)
+- Markdown rendering (`react-markdown`, `remark-gfm`)
 
-- 🎓 Academy - Course management and delivery
-- 📚 Ebooks - 3D covers, preview, OTP-gated free downloads, premium unlock flow
-- 📝 Blog - Content management with Markdown support
-- 🧠 LLM Galaxy - AI model comparison and insights
-- 👤 Admin Dashboard - Personal OS and command center
-- 🔐 Biometric Authentication - Passkey and Face ID support
+### Data / Backend
+- Supabase (Auth, Postgres, Storage)
+- TanStack Query
+- Edge-function compatible structure
 
-## Getting Started
+### Tooling
+- ESLint
+- Vite PWA plugin
+- Node scripts for build and prerender
 
-```sh
-# Install dependencies
+## Route Highlights
+
+### Public
+- `/`
+- `/about`
+- `/blog`, `/blog/:slug`
+- `/courses`, `/courses/:courseId`
+- `/ebooks`, `/ebooks/:slug`, `/ebooks/:slug/read`
+- `/products`
+- `/mentorship`
+- `/contact`
+- `/llm-galaxy`, `/llm-galaxy/model/:modelId`
+- `/chronyx`
+- `/openowl`, `/openowl/assistant`
+
+### Admin
+- `/admin` (main admin center)
+- `/admin/login`, `/admin/register-passkey`
+
+### OpenOwl Admin
+- `/openowl/admin`
+- `/openowl/admin/studio`
+- `/openowl/admin/publish`
+- `/openowl/admin/delivery`
+- `/openowl/admin/runs`
+- `/openowl/admin/settings`
+
+## Quick Start
+
+```bash
 npm install
-
-# Start development server
 npm run dev
 ```
 
-## Ebooks Module Setup (Supabase)
+Local dev server runs on:
+- `http://localhost:8080`
 
-```sh
-# Apply DB schema
-supabase db push
+## Build and Preview
 
-# Set required function secrets
-supabase secrets set RESEND_API_KEY=YOUR_KEY --project-ref qayywyddbprlhkqcqllf
-supabase secrets set EMAIL_FROM="Abhishek Panda <no-reply@abhishekpanda.com>" --project-ref qayywyddbprlhkqcqllf
-supabase secrets set JWT_DOWNLOAD_SECRET=YOUR_LONG_RANDOM_SECRET --project-ref qayywyddbprlhkqcqllf
-supabase secrets set SITE_URL=https://www.abhishekpanda.com --project-ref qayywyddbprlhkqcqllf
-
-# Deploy ebook edge functions
-supabase functions deploy ebooks-lead --project-ref qayywyddbprlhkqcqllf
-supabase functions deploy ebooks-verify-otp --project-ref qayywyddbprlhkqcqllf
-supabase functions deploy ebooks-download --project-ref qayywyddbprlhkqcqllf
-```
-
-## Supabase Migration Workflow (Always Up To Date)
-
-Use the helper script to detect and push new schema changes safely:
-
-```sh
-# 1) Check pending migrations (local vs remote + dry-run)
-npm run supabase:status
-
-# 2) Create a new migration file
-npm run supabase:migration:new -- add_feature_name
-
-# 3) Apply pending migrations to linked project (with confirmation)
-npm run supabase:push
-
-# 4) Regenerate TS types only (optional)
-npm run supabase:types
-```
-
-If CLI auth/link is missing:
-
-```sh
-supabase login
-supabase link --project-ref qayywyddbprlhkqcqllf
-```
-
-## Validation
-
-```sh
+```bash
 npm run build
-npm run test:ebooks-otp
+npm run preview
 ```
 
-## Admin URLs
+## Scripts
+- `npm run dev` - start development server
+- `npm run build` - production build + blog prerender
+- `npm run build:dev` - development-mode build
+- `npm run lint` - run lint checks
+- `npm run test:ebooks-otp` - run ebook OTP tests
+- `npm run supabase:status` - inspect migration state
+- `npm run supabase:migration:new -- <name>` - create migration
+- `npm run supabase:push` - push pending migrations
+- `npm run supabase:types` - regenerate Supabase types
 
-- Admin Login: `https://www.abhishekpanda.com/admin/login` (local: `http://localhost:8080/admin/login`)
-- Admin Dashboard (protected): `https://www.abhishekpanda.com/admin` (local: `http://localhost:8080/admin`)
+## SEO and Discoverability
+This project includes:
+- `public/robots.txt`
+- `public/sitemap.xml`
+- `public/sitemaps.xml`
+- `public/llms.txt`
+- Route-level metadata and structured schema support
+
+## Project Structure
+```text
+src/
+  components/
+    about/
+    layout/
+    openowl/
+    openowl-widget/
+    admin/
+  pages/
+    openowl-admin/
+  lib/
+    openowl/
+    social/
+  data/
+  types/
+docs/
+  openowl/
+public/
+  brand-logos/
+  llm-logos/
+  openOwl-logo.PNG
+  Abhishek.PNG
+```
+
+## Documentation
+OpenOwl prompt and tool-call references:
+- `docs/openowl/prompt-pack.md`
+- `docs/openowl/tool-calls.schema.json`
+- `docs/openowl/tool-call-examples.json`
 
 ## License
-
-© Abhishek Panda. All rights reserved.
+Copyright © Abhishek Panda. All rights reserved.
