@@ -101,7 +101,8 @@ const sidebarGroups: SidebarGroup[] = [
   {
     title: "CREATOR SUITE",
     items: [
-      { name: "CMS Studio", icon: FileText, path: "/admin/blog", badge: "Content", color: "text-violet-500" },
+      { name: "CMS Studio", icon: FileText, path: "/admin/cms", badge: "Content", color: "text-violet-500" },
+      { name: "Legacy Blog Studio", icon: FileText, path: "/admin/blog", badge: null, color: "text-slate-400" },
       { name: "Nimbus Desk", icon: BookOpen, path: "/admin/nimbus", badge: "Knowledge", color: "text-indigo-500" },
       { name: "LMS Studio", icon: GraduationCap, path: "/admin/courses", badge: "Courses", color: "text-amber-500" },
       { name: "Digital Products", icon: Package, path: "/admin/products", badge: "Catalog", color: "text-cyan-500" },

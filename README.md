@@ -27,6 +27,7 @@ This repository powers **abhishekpanda.com** with:
 - **OpenOwl** public assistant experience
 - **OpenOwl Admin Center** for content and delivery operations
 - Main admin command center for business, CMS, analytics, security, and workflow management
+- **Strapi v5 CMS engine** embedded in the admin studio at `/admin/cms`
 
 ## OpenOwl (In Development)
 **OpenOwl** is the AI assistant platform layer inside this project.
@@ -74,6 +75,7 @@ Roadmap direction:
 
 ### Data / Backend
 - Supabase (Auth, Postgres, Storage)
+- Strapi v5 CMS (`/cms` workspace, dynamic zones, custom fields)
 - TanStack Query
 - Edge-function compatible structure
 
@@ -100,6 +102,7 @@ Roadmap direction:
 ### Admin
 - `/admin` (main admin center)
 - `/admin/login`, `/admin/register-passkey`
+- `/admin/cms` (Strapi-powered CMS workspace + embedded Strapi admin)
 
 ### OpenOwl Admin
 - `/openowl/admin`
@@ -117,7 +120,30 @@ npm run dev
 ```
 
 Local dev server runs on:
-- `http://localhost:8080`
+- `http://localhost:8080` (Vite admin studio/public site)
+- `http://localhost:1337` (Strapi backend)
+
+### CMS Environment Setup
+1. Copy `cms/.env.example` to `cms/.env`.
+2. Keep `DATABASE_CLIENT=sqlite` for local development.
+3. For production with Supabase Postgres, switch `DATABASE_CLIENT=postgres` and fill the Postgres values in `cms/.env`.
+4. Optionally set `BUILD_HOOK_URL` in `cms/.env` to auto-trigger public site rebuilds on publish/update.
+
+Optional frontend env vars:
+- `VITE_CMS_ORIGIN` (default `http://localhost:1337`) for Vite proxy target.
+- `VITE_CMS_API_BASE` (default `/cms-api`) and `VITE_CMS_ADMIN_URL` (default `/cms-admin`).
+- `VITE_CMS_API_TOKEN` for authenticated CMS API indexing in `/admin/cms`.
+
+### Content Authoring Flow
+1. Sign into the existing Supabase admin login (`/admin/login`).
+2. Open `/admin/cms` to access:
+   - Embedded Strapi admin panel (iframe/proxy)
+   - Instant Fuse.js search over indexed `BlogPost` entries
+   - Preview pane with scroll-spy + reading progress
+3. Create/edit content in Strapi:
+   - `BlogPost`, `Course`, `InterviewPack`, `Tag`
+   - Dynamic zone blocks: `richText`, `codeBlock`, `mermaidDiagram`, `callout`, `imageBlock`, `embed`, `tabs`, `steps`, `checklist`
+4. Publish from Strapi. If `BUILD_HOOK_URL` is set, a rebuild webhook is triggered automatically.
 
 ## Build and Preview
 
@@ -128,7 +154,10 @@ npm run preview
 
 ## Scripts
 - `npm run dev` - start development server
+- `npm run dev:web` - start Vite only
+- `npm run dev:cms` - start Strapi CMS only (forced Node 24 runtime)
 - `npm run build` - production build + blog prerender
+- `npm run cms:build` - build Strapi admin
 - `npm run build:dev` - development-mode build
 - `npm run lint` - run lint checks
 - `npm run test:ebooks-otp` - run ebook OTP tests

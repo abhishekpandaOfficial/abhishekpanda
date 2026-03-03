@@ -45,6 +45,7 @@ const AdminBusinessHub = lazy(() => import("@/components/admin/AdminBusinessHub"
 const AdminPayments = lazy(() => import("@/components/admin/AdminPayments"));
 const AdminCoursesManager = lazy(() => import("@/components/admin/AdminCoursesManager").then((m) => ({ default: m.AdminCoursesManager })));
 const AdminBlogManager = lazy(() => import("@/components/admin/AdminBlogManager").then((m) => ({ default: m.AdminBlogManager })));
+const AdminCMSStudio = lazy(() => import("@/components/admin/AdminCMSStudio").then((m) => ({ default: m.AdminCMSStudio })));
 const AdminEncryptedDrive = lazy(() => import("@/components/admin/AdminEncryptedDrive").then((m) => ({ default: m.AdminEncryptedDrive })));
 const AdminContactRequests = lazy(() => import("@/components/admin/AdminContactRequests"));
 const AdminProductsManager = lazy(() => import("@/components/admin/AdminProductsManager"));
@@ -171,6 +172,7 @@ const App = () => {
                   <Route path="contacts" element={<AdminContactRequests />} />
                   <Route path="mentorship" element={<AdminMentorshipBookings />} />
                   <Route path="blog" element={<AdminBlogManager />} />
+                  <Route path="cms" element={<AdminCMSStudio />} />
                   <Route path="nimbus" element={<AdminNimbusDesk />} />
                   <Route path="courses" element={<AdminCoursesManager />} />
                   <Route path="products" element={<AdminProductsManager />} />

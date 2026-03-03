@@ -53,7 +53,8 @@ const commandItems: CommandItem[] = [
   { name: "Contact Requests", icon: Inbox, path: "/admin/contacts", category: "Core", keywords: ["messages", "email", "inbox"] },
   
   // Creator Suite
-  { name: "Content Studio", icon: FileText, path: "/admin/blog", category: "Creator Suite", keywords: ["blog", "posts", "articles", "write"] },
+  { name: "Content Studio", icon: FileText, path: "/admin/cms", category: "Creator Suite", keywords: ["cms", "strapi", "blog", "posts", "articles", "write"] },
+  { name: "Legacy Blog Studio", icon: FileText, path: "/admin/blog", category: "Creator Suite", keywords: ["legacy", "supabase", "blog"] },
   { name: "Nimbus Desk", icon: BookOpen, path: "/admin/nimbus", category: "Creator Suite", keywords: ["notes", "knowledge", "documents"] },
   { name: "Courses & Academy", icon: GraduationCap, path: "/admin/courses", category: "Creator Suite", keywords: ["courses", "learning", "education"] },
   { name: "Digital Products", icon: Package, path: "/admin/products", category: "Creator Suite", keywords: ["products", "digital", "marketplace"] },
