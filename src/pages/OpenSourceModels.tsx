@@ -18,7 +18,7 @@ const OpenSourceModels = () => {
   };
 
   const iframeSrc = useMemo(
-    () => `/open-source-models-march-2026.html?embedded=1&theme=${initialThemeRef.current}`,
+    () => `/embedded/open-source-models-march-2026.html?embedded=1&theme=${initialThemeRef.current}`,
     [],
   );
 

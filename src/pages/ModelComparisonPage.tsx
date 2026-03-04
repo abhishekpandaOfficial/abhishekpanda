@@ -18,7 +18,7 @@ const ModelComparisonPage = () => {
   };
 
   const iframeSrc = useMemo(
-    () => `/ai-model-comparison.html?embedded=1&theme=${initialThemeRef.current}`,
+    () => `/embedded/ai-model-comparison.html?embedded=1&theme=${initialThemeRef.current}`,
     [],
   );
 

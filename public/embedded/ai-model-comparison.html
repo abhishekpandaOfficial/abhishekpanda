@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Open vs Closed Source AI — Side-by-Side Comparison | abhishekpanda.com</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet"/>
+<script>
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const isEmbedded = params.get('embedded') === '1';
+    const queryTheme = params.get('theme');
+    const appTheme = localStorage.getItem('abhishekpanda-theme');
+    const legacyTheme = localStorage.getItem('ap-cmp-theme');
+
+    const resolvedTheme =
+      (queryTheme === 'light' || queryTheme === 'dark')
+        ? queryTheme
+        : ((appTheme === 'light' || appTheme === 'dark')
+          ? appTheme
+          : ((legacyTheme === 'light' || legacyTheme === 'dark') ? legacyTheme : 'light'));
+
+    document.documentElement.setAttribute('data-theme', resolvedTheme);
+
+    if (isEmbedded) {
+      document.documentElement.setAttribute('data-embedded', '1');
+
+      window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return;
+        const data = event.data || {};
+        if (data.type === 'parent-theme' && (data.theme === 'light' || data.theme === 'dark')) {
+          document.documentElement.setAttribute('data-theme', data.theme);
+        }
+      });
+    }
+  })();
+</script>
+<style>
+/* ══════════════════════════════════
+   THEME TOKENS
+══════════════════════════════════ */
+:root {
+  --open:       #10d990;
+  --open-dim:   rgba(16,217,144,.12);
+  --open-bdr:   rgba(16,217,144,.28);
+  --closed:     #f5a623;
+  --closed-dim: rgba(245,166,35,.10);
+  --closed-bdr: rgba(245,166,35,.28);
+  --both:       #7c6af5;
+  --trans: .22s ease;
+}
+[data-theme="dark"] {
+  --bg:      #070b12;
+  --bg1:     #0c1118;
+  --bg2:     #111820;
+  --bg3:     #171f2a;
+  --bgcard:  #0f1620;
+  --bghover: #151e2c;
+  --b0:      rgba(255,255,255,.05);
+  --b1:      rgba(255,255,255,.09);
+  --b2:      rgba(255,255,255,.15);
+  --t0:      #eef3fa;
+  --t1:      #95afc0;
+  --t2:      #526070;
+  --t3:      #303e4a;
+  --nav-bg:  rgba(7,11,18,.93);
+  --shadow:  0 8px 40px rgba(0,0,0,.55);
+  --sh-card: 0 2px 14px rgba(0,0,0,.45);
+}
+[data-theme="light"] {
+  --bg:      #f2f4f7;
+  --bg1:     #e8ecf1;
+  --bg2:     #ffffff;
+  --bg3:     #f9fafb;
+  --bgcard:  #ffffff;
+  --bghover: #f5f7fa;
+  --b0:      rgba(0,0,0,.06);
+  --b1:      rgba(0,0,0,.10);
+  --b2:      rgba(0,0,0,.16);
+  --t0:      #0d1117;
+  --t1:      #3a4a58;
+  --t2:      #6a7e8e;
+  --t3:      #aabbc8;
+  --nav-bg:  rgba(242,244,247,.93);
+  --shadow:  0 8px 40px rgba(0,0,0,.10);
+  --sh-card: 0 2px 14px rgba(0,0,0,.07);
+  --open:       #059669;
+  --open-dim:   rgba(5,150,105,.10);
+  --open-bdr:   rgba(5,150,105,.30);
+  --closed:     #d97706;
+  --closed-dim: rgba(217,119,6,.09);
+  --closed-bdr: rgba(217,119,6,.28);
+}
+
+/* ══════════════════════════════════
+   RESET & BASE
+══════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'IBM Plex Mono',monospace;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden;transition:background var(--trans),color var(--trans)}
+html[data-embedded="1"] .site-nav,
+html[data-embedded="1"] .hero,
+html[data-embedded="1"] footer,
+html[data-embedded="1"] #btt{display:none!important}
+::-webkit-scrollbar{width:5px;background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+a{color:var(--open);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font-family:inherit;cursor:pointer}
+
+/* ══════════════════════════════════
+   AMBIENT + NOISE
+══════════════════════════════════ */
+.amb{position:fixed;border-radius:50%;pointer-events:none;filter:blur(120px);z-index:0;transition:opacity var(--trans)}
+.amb-a{width:800px;height:600px;background:rgba(16,217,144,.07);top:-200px;left:-200px}
+.amb-b{width:600px;height:600px;background:rgba(245,166,35,.06);bottom:0;right:-100px}
+[data-theme="light"] .amb{opacity:.3}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");opacity:.3}
+
+/* ══════════════════════════════════
+   STICKY HEADER
+══════════════════════════════════ */
+.site-nav{
+  position:sticky;top:0;z-index:200;
+  background:var(--nav-bg);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--b0);
+}
+.site-nav-inner{
+  max-width:1400px;margin:0 auto;padding:0 24px;
+  display:flex;align-items:center;gap:16px;height:56px;
+}
+.nav-logo{
+  font-family:'Syne',sans-serif;font-size:14px;font-weight:800;
+  color:var(--t0);white-space:nowrap;
+  display:flex;align-items:center;gap:8px;
+}
+.nav-logo span{color:var(--open)}
+.nav-sep{width:1px;height:20px;background:var(--b1);flex-shrink:0}
+.nav-title{font-size:11px;color:var(--t2);letter-spacing:.08em;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-legend{display:flex;gap:12px;flex-shrink:0}
+.leg-pill{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.06em;padding:4px 10px;border-radius:100px;border:1px solid}
+.leg-open{color:var(--open);border-color:var(--open-bdr);background:var(--open-dim)}
+.leg-closed{color:var(--closed);border-color:var(--closed-bdr);background:var(--closed-dim)}
+.leg-dot{width:5px;height:5px;border-radius:50%}
+.leg-open .leg-dot{background:var(--open)}
+.leg-closed .leg-dot{background:var(--closed)}
+.theme-btn{
+  display:flex;align-items:center;gap:8px;
+  border:1px solid var(--b1);border-radius:100px;
+  background:var(--bg2);padding:7px 14px;
+  font-size:11px;color:var(--t1);font-family:inherit;
+  transition:all var(--trans);
+}
+.theme-btn:hover{border-color:var(--b2);color:var(--t0)}
+.toggle-track{width:30px;height:17px;border-radius:9px;background:var(--bg3);border:1px solid var(--b1);position:relative;transition:background var(--trans)}
+[data-theme="light"] .toggle-track{background:var(--open)}
+.toggle-thumb{position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:var(--t2);transition:transform var(--trans),background var(--trans)}
+[data-theme="light"] .toggle-thumb{transform:translateX(13px);background:#fff}
+
+/* ══════════════════════════════════
+   HERO
+══════════════════════════════════ */
+.hero{
+  max-width:1400px;margin:0 auto;padding:64px 24px 48px;
+  position:relative;z-index:10;border-bottom:1px solid var(--b0);
+}
+.hero-eyebrow{
+  display:flex;align-items:center;gap:10px;
+  font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--t2);
+  margin-bottom:20px;
+}
+.hero-eyebrow::before{content:'';width:28px;height:1px;background:var(--t3)}
+.hero-title{
+  font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,66px);
+  font-weight:800;line-height:1.06;letter-spacing:-.02em;color:var(--t0);
+  margin-bottom:20px;
+}
+.hero-title .hl-open{color:var(--open)}
+.hero-title .hl-closed{color:var(--closed)}
+.hero-sub{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:300;
+  font-size:clamp(15px,2vw,19px);color:var(--t2);max-width:640px;
+  margin-bottom:32px;line-height:1.7;
+}
+.hero-meta{display:flex;flex-wrap:wrap;gap:12px}
+.hm-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--bg2);border:1px solid var(--b1);
+  border-radius:100px;padding:6px 14px;font-size:11px;color:var(--t2);
+}
+.hm-pill b{color:var(--t0)}
+
+/* ══════════════════════════════════
+   CATEGORY OVERVIEW STRIP
+══════════════════════════════════ */
+.overview-section{
+  max-width:1400px;margin:0 auto;padding:40px 24px;
+  position:relative;z-index:10;
+}
+.section-label{
+  font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--t3);
+  display:flex;align-items:center;gap:12px;margin-bottom:28px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--b0)}
+.section-label b{color:var(--t2)}
+
+.ov-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;
+  margin-bottom:40px;
+}
+.ov-card{
+  background:var(--bgcard);border:1px solid var(--b0);border-radius:12px;
+  padding:16px;cursor:pointer;transition:all .2s;
+  box-shadow:var(--sh-card);
+}
+.ov-card:hover{border-color:var(--b2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.ov-card-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.ov-cat-icon{font-size:18px}
+.ov-cat-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--t0)}
+.ov-compare-row{display:flex;flex-direction:column;gap:6px}
+.ov-model-row{display:flex;align-items:center;gap:8px}
+.ov-type-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ov-dot-open{background:var(--open)}
+.ov-dot-closed{background:var(--closed)}
+.ov-model-info{flex:1;min-width:0}
+.ov-model-name{font-size:11px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ov-model-score{font-size:10px;color:var(--t2)}
+.ov-bar-wrap{width:100%;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:3px}
+.ov-bar{height:100%;border-radius:2px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.ov-bar-open{background:var(--open)}
+.ov-bar-closed{background:var(--closed)}
+.quick-compare-btn{
+  font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  background:none;border:1px solid var(--b1);border-radius:4px;
+  color:var(--t2);padding:4px 8px;margin-top:10px;width:100%;
+  transition:all var(--trans);font-family:inherit;
+}
+.quick-compare-btn:hover{border-color:var(--b2);color:var(--t0)}
+
+/* ══════════════════════════════════
+   COMPARISON BUILDER
+══════════════════════════════════ */
+.builder-section{
+  max-width:1400px;margin:0 auto;padding:0 24px 80px;
+  position:relative;z-index:10;
+}
+.builder-header{
+  background:var(--bg2);border:1px solid var(--b1);border-radius:16px;
+  padding:24px;margin-bottom:24px;
+}
+.bh-top{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.bh-title{
+  font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--t0);
+  flex:1;
+}
+.bh-subtitle{font-size:11px;color:var(--t2);margin-top:4px}
+.selected-count{
+  font-size:11px;color:var(--t2);
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg3);border:1px solid var(--b1);
+  border-radius:100px;padding:6px 14px;white-space:nowrap;
+}
+.sel-num{
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:800;
+  color:var(--open);
+}
+.clear-btn{
+  font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  background:none;border:1px solid var(--b1);border-radius:6px;
+  color:var(--t2);padding:6px 14px;transition:all var(--trans);font-family:inherit;
+}
+.clear-btn:hover{border-color:#e55;color:#e55}
+
+/* FILTERS */
+.pool-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pool-search{
+  flex:1;min-width:200px;
+  background:var(--bg3);border:1px solid var(--b1);border-radius:8px;
+  color:var(--t0);font-family:inherit;font-size:12px;padding:8px 12px;outline:none;
+  transition:border-color var(--trans);
+}
+.pool-search:focus{border-color:var(--open)}
+.pool-search::placeholder{color:var(--t3)}
+.filt-btn{
+  font-family:inherit;font-size:10px;letter-spacing:.05em;
+  background:var(--bg3);border:1px solid var(--b1);border-radius:6px;
+  color:var(--t2);padding:7px 12px;transition:all var(--trans);white-space:nowrap;
+}
+.filt-btn:hover{border-color:var(--b2);color:var(--t1)}
+.filt-btn.on{background:var(--bg2);border-color:var(--b2);color:var(--t0)}
+.filt-open.on{border-color:var(--open-bdr);color:var(--open);background:var(--open-dim)}
+.filt-closed.on{border-color:var(--closed-bdr);color:var(--closed);background:var(--closed-dim)}
+
+/* MODEL POOL */
+.pool-wrap{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;
+  max-height:360px;overflow-y:auto;padding:4px 2px;
+  scrollbar-width:thin;
+}
+.pool-card{
+  background:var(--bg3);border:1px solid var(--b0);border-radius:10px;
+  padding:12px;display:flex;align-items:center;gap:10px;
+  transition:all .18s;position:relative;
+}
+.pool-card:hover{border-color:var(--b2)}
+.pool-card.added{opacity:.4;pointer-events:none}
+.pool-card.hidden{display:none}
+.pool-logo{
+  width:36px;height:36px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,#fff,#e8eef7);border:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.pool-logo img{width:24px;height:24px;object-fit:contain}
+.pool-info{flex:1;min-width:0}
+.pool-name{font-size:12px;font-weight:600;color:var(--t0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Syne',sans-serif}
+.pool-meta{font-size:10px;color:var(--t2);margin-top:2px}
+.pool-type{
+  font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 7px;border-radius:4px;flex-shrink:0;
+}
+.pt-open{background:var(--open-dim);color:var(--open);border:1px solid var(--open-bdr)}
+.pt-closed{background:var(--closed-dim);color:var(--closed);border:1px solid var(--closed-bdr)}
+.pool-add-btn{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--b1);background:var(--bg2);
+  color:var(--t1);font-size:18px;line-height:1;
+  transition:all var(--trans);font-family:inherit;
+}
+.pool-add-btn:hover{border-color:var(--open-bdr);color:var(--open);background:var(--open-dim)}
+.pool-card.added .pool-add-btn{border-color:var(--t3);color:var(--t3)}
+
+/* ══════════════════════════════════
+   COMPARISON TABLE
+══════════════════════════════════ */
+.compare-area{overflow-x:auto;margin-top:24px;padding-bottom:8px}
+.compare-table{
+  display:grid;min-width:700px;
+  border:1px solid var(--b0);border-radius:16px;overflow:hidden;
+}
+/* dynamic columns set via JS */
+.compare-table .ct-row{
+  display:contents;
+}
+.ct-label{
+  background:var(--bg2);border-right:1px solid var(--b0);border-bottom:1px solid var(--b0);
+  padding:14px 18px;display:flex;align-items:center;
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);
+  position:sticky;left:0;z-index:5;
+  white-space:nowrap;
+}
+[data-theme="light"] .ct-label{background:var(--bg1)}
+.ct-cell{
+  border-right:1px solid var(--b0);border-bottom:1px solid var(--b0);
+  padding:14px 16px;background:var(--bgcard);
+  transition:background var(--trans);min-width:0;
+}
+.ct-cell:hover{background:var(--bghover)}
+.ct-cell.open-col{border-top:3px solid var(--open)}
+.ct-cell.closed-col{border-top:3px solid var(--closed)}
+.ct-cell.header-cell{
+  padding:14px 16px;background:var(--bg2);
+  border-top:none!important;position:sticky;top:56px;z-index:4;
+}
+html[data-embedded="1"] .ct-cell.header-cell{top:0}
+[data-theme="light"] .ct-cell.header-cell{background:var(--bg1)}
+.ct-cell.last-row{border-bottom:none}
+.ct-label.last-row{border-bottom:none}
+
+/* header cell content */
+.cth-type-bar{
+  height:3px;border-radius:0;margin:-14px -16px 12px;width:calc(100% + 32px);
+}
+.cth-logo-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cth-logo{
+  width:36px;height:36px;border-radius:9px;
+  background:linear-gradient(135deg,#fff,#e8eef7);border:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;
+}
+.cth-logo img{width:24px;height:24px;object-fit:contain}
+.cth-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--t0);line-height:1.3}
+.cth-maker{font-size:10px;color:var(--t2);margin-top:2px}
+.cth-remove-btn{
+  margin-left:auto;width:24px;height:24px;border-radius:50%;
+  border:1px solid var(--b1);background:var(--bg3);
+  color:var(--t2);font-size:14px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  transition:all var(--trans);font-family:inherit;flex-shrink:0;
+}
+.cth-remove-btn:hover{border-color:#e55;color:#e55;background:rgba(230,80,80,.1)}
+.type-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 9px;border-radius:4px;margin-top:8px;
+}
+.tb-open{background:var(--open-dim);color:var(--open);border:1px solid var(--open-bdr)}
+.tb-closed{background:var(--closed-dim);color:var(--closed);border:1px solid var(--closed-bdr)}
+
+/* score row */
+.score-display{
+  display:flex;align-items:center;gap:10px;
+}
+.score-num{
+  font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+  line-height:1;
+}
+.score-num.open-score{color:var(--open)}
+.score-num.closed-score{color:var(--closed)}
+.score-bar-wrap{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:2px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.score-bar-open{background:linear-gradient(90deg,var(--open),#60efbe)}
+.score-bar-closed{background:linear-gradient(90deg,var(--closed),#ffd580)}
+.score-label-sub{font-size:10px;color:var(--t3);margin-top:3px}
+
+/* benchmark cell */
+.bench-val{
+  font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--t0);
+}
+.bench-sub{font-size:10px;color:var(--t2);margin-top:2px}
+
+/* tags */
+.tag-list{display:flex;flex-wrap:wrap;gap:5px}
+.c-tag{
+  font-size:10px;padding:3px 8px;border-radius:4px;
+  background:var(--bg3);border:1px solid var(--b1);color:var(--t2);
+}
+.c-tag.open-tag{background:var(--open-dim);border-color:var(--open-bdr);color:var(--open)}
+.c-tag.closed-tag{background:var(--closed-dim);border-color:var(--closed-bdr);color:var(--closed)}
+
+/* detail cells */
+.detail-label{font-size:10px;color:var(--t3);margin-bottom:3px}
+.detail-val{font-size:12px;color:var(--t1);line-height:1.5}
+.detail-val a{color:var(--open)}
+.detail-val b{color:var(--t0)}
+
+/* why cell */
+.why-text{font-size:11px;color:var(--t1);line-height:1.65}
+.why-text::before{content:'"';color:var(--t3);font-size:20px;margin-right:3px;font-family:'Fraunces',serif}
+
+/* winner badge */
+.winner-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  background:rgba(255,215,0,.12);color:#ffd700;
+  border:1px solid rgba(255,215,0,.3);
+  border-radius:4px;padding:3px 7px;
+}
+
+/* empty state */
+.empty-compare{
+  grid-column:1 / -1;
+  text-align:center;padding:80px 24px;color:var(--t3);
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+}
+.empty-compare .ec-icon{font-size:48px;filter:grayscale(1);opacity:.4}
+.empty-compare .ec-text{font-size:13px;max-width:400px;line-height:1.7}
+.empty-compare .ec-hint{font-size:11px;color:var(--t3)}
+
+/* ══════════════════════════════════
+   VS BANNER (category view)
+══════════════════════════════════ */
+.vs-banner{
+  background:var(--bg2);border:1px solid var(--b1);border-radius:14px;
+  padding:20px 24px;display:flex;align-items:center;gap:16px;
+  margin-bottom:24px;flex-wrap:wrap;
+}
+.vs-side{flex:1;min-width:200px}
+.vs-side-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}
+.vs-open .vs-side-label{color:var(--open)}
+.vs-closed .vs-side-label{color:var(--closed)}
+.vs-model-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--t0)}
+.vs-score{font-size:13px;margin-top:2px}
+.vs-open .vs-score{color:var(--open)}
+.vs-closed .vs-score{color:var(--closed)}
+.vs-divider{
+  font-family:'Syne',sans-serif;font-size:24px;font-weight:800;
+  color:var(--t3);padding:0 8px;
+}
+.vs-winner-label{
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);
+  margin-top:4px;
+}
+
+/* ══════════════════════════════════
+   CATEGORY BREAKDOWN BARS
+══════════════════════════════════ */
+.cat-bars-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;
+  margin-bottom:40px;
+}
+.cat-bar-card{
+  background:var(--bgcard);border:1px solid var(--b0);border-radius:12px;
+  padding:16px;box-shadow:var(--sh-card);
+}
+.cbc-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--t0);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.cbc-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cbc-row:last-child{margin-bottom:0}
+.cbc-type{font-size:9px;letter-spacing:.06em;text-transform:uppercase;min-width:40px}
+.cbc-type-open{color:var(--open)}
+.cbc-type-closed{color:var(--closed)}
+.cbc-bar-bg{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.cbc-bar-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.cbc-fill-open{background:linear-gradient(90deg,var(--open),#60efbe)}
+.cbc-fill-closed{background:linear-gradient(90deg,var(--closed),#ffd580)}
+.cbc-val{font-size:11px;font-weight:600;min-width:36px;text-align:right}
+.cbc-val-open{color:var(--open)}
+.cbc-val-closed{color:var(--closed)}
+.cbc-model-name{font-size:10px;color:var(--t3);margin-left:50px;margin-bottom:4px}
+
+/* ══════════════════════════════════
+   FOOTER
+══════════════════════════════════ */
+footer{
+  border-top:1px solid var(--b0);padding:32px 24px 48px;
+  text-align:center;position:relative;z-index:10;
+}
+.footer-inner{max-width:1400px;margin:0 auto}
+.footer-logo{
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--t0);
+  margin-bottom:8px;
+}
+.footer-logo span{color:var(--open)}
+footer p{font-size:11px;color:var(--t3);margin-top:4px;line-height:1.7}
+
+/* ══════════════════════════════════
+   SCROLL TOP
+══════════════════════════════════ */
+#btt{
+  position:fixed;bottom:28px;right:28px;z-index:300;
+  width:42px;height:42px;border-radius:50%;
+  background:var(--bg2);border:1px solid var(--b1);
+  color:var(--t1);font-size:18px;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .3s,transform .3s;font-family:inherit;
+}
+#btt.vis{opacity:1;transform:translateY(0)}
+#btt:hover{border-color:var(--open-bdr);color:var(--open)}
+
+/* ══════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════ */
+@media(max-width:768px){
+  .nav-legend{display:none}
+  .bh-top{flex-direction:column}
+  .hero-title{font-size:clamp(26px,8vw,48px)}
+  .pool-wrap{max-height:280px}
+  .ov-grid{grid-template-columns:1fr 1fr}
+  .cat-bars-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .ov-grid{grid-template-columns:1fr}
+  .pool-filters{flex-direction:column}
+  .pool-search{min-width:100%}
+}
+
+/* animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp .35s ease both}
+
+/* pool section toggle */
+.pool-toggle-btn{
+  width:100%;background:none;border:1px dashed var(--b1);border-radius:8px;
+  padding:10px;color:var(--t2);font-size:11px;font-family:inherit;
+  transition:all var(--trans);margin-bottom:12px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.pool-toggle-btn:hover{border-color:var(--open-bdr);color:var(--open)}
+.pool-section{transition:all .3s}
+.pool-section.collapsed .pool-wrap{display:none}
+.pool-section.collapsed .pool-filters{display:none}
+</style>
+</head>
+<body>
+<div class="amb amb-a"></div>
+<div class="amb amb-b"></div>
+
+<!-- ═══ STICKY NAV ═══ -->
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <div class="nav-logo">abhishek<span>panda</span>.com</div>
+    <div class="nav-sep"></div>
+    <div class="nav-title">Open vs Closed Source AI Models — March 2026</div>
+    <div class="nav-legend">
+      <div class="leg-pill leg-open"><span class="leg-dot"></span>Open Source</div>
+      <div class="leg-pill leg-closed"><span class="leg-dot"></span>Closed Source</div>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()">
+      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+      <span id="theme-lbl">Light</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+  <div class="hero-eyebrow">abhishekpanda.com · AI Intelligence Report · March 2026</div>
+  <h1 class="hero-title">
+    <span class="hl-open">Open Source</span><br>
+    <em style="font-family:'Fraunces',serif;font-weight:300;font-style:italic;font-size:.7em;color:var(--t2)">versus</em><br>
+    <span class="hl-closed">Closed Source</span>
+  </h1>
+  <p class="hero-sub">The definitive side-by-side intelligence comparison across every AI category — from daily chat to medical diagnosis, verified benchmarks, real scores, and honest analysis.</p>
+  <div class="hero-meta">
+    <div class="hm-pill"><span class="leg-dot ov-dot-open" style="width:7px;height:7px;border-radius:50%;background:var(--open);flex-shrink:0"></span><b>40+</b>&nbsp;Open Source Models</div>
+    <div class="hm-pill"><span class="leg-dot ov-dot-closed" style="width:7px;height:7px;border-radius:50%;background:var(--closed);flex-shrink:0"></span><b>35+</b>&nbsp;Closed Source Models</div>
+    <div class="hm-pill">🔢 <b>10</b>&nbsp;Categories</div>
+    <div class="hm-pill">⚡ Compare up to <b>6</b>&nbsp;models in parallel</div>
+    <div class="hm-pill">📅 Verified March 2026</div>
+  </div>
+</header>
+
+<!-- ═══ OVERVIEW ═══ -->
+<section class="overview-section">
+  <div class="section-label"><b>Category Overview</b> — Best open vs best closed per task</div>
+  <div class="ov-grid" id="ovGrid"></div>
+
+  <div class="section-label" style="margin-top:8px"><b>Head-to-Head Performance</b> — Benchmark scores by category</div>
+  <div class="cat-bars-grid" id="catBarsGrid"></div>
+</section>
+
+<!-- ═══ BUILDER ═══ -->
+<section class="builder-section">
+  <div class="section-label"><b>Custom Parallel Comparison</b> — Build your own</div>
+
+  <div class="builder-header">
+    <div class="bh-top">
+      <div>
+        <div class="bh-title">⚖️ Model Comparison Builder</div>
+        <div class="bh-subtitle">Pick any mix of open &amp; closed source models — up to 6 — and compare side by side</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div class="selected-count"><span class="sel-num" id="selCount">0</span>&nbsp;/ 6 selected</div>
+        <button class="clear-btn" onclick="clearAll()">✕ Clear All</button>
+      </div>
+    </div>
+
+    <div class="pool-section" id="poolSection">
+      <button class="pool-toggle-btn" id="poolToggleBtn" onclick="togglePool()">
+        <span id="poolToggleIcon">▾</span>
+        <span id="poolToggleTxt">Browse &amp; Add Models (click to expand)</span>
+      </button>
+      <div class="pool-filters">
+        <input class="pool-search" id="poolSearch" type="text" placeholder="Search models by name, provider, category…" oninput="filterPool()"/>
+        <button class="filt-btn filt-all on" id="fb-all" onclick="setFilter('all',this)">All</button>
+        <button class="filt-btn filt-open" id="fb-open" onclick="setFilter('open',this)">🟢 Open Source</button>
+        <button class="filt-btn filt-closed" id="fb-closed" onclick="setFilter('closed',this)">🟡 Closed Source</button>
+        <button class="filt-btn" id="fb-daily" onclick="setFilter('daily',this)">💬 Daily</button>
+        <button class="filt-btn" id="fb-coding" onclick="setFilter('coding',this)">💻 Coding</button>
+        <button class="filt-btn" id="fb-thinking" onclick="setFilter('thinking',this)">🧠 Thinking</button>
+        <button class="filt-btn" id="fb-image" onclick="setFilter('image',this)">🎨 Image</button>
+        <button class="filt-btn" id="fb-video" onclick="setFilter('video',this)">🎬 Video</button>
+        <button class="filt-btn" id="fb-audio" onclick="setFilter('audio',this)">🎵 Audio</button>
+        <button class="filt-btn" id="fb-medical" onclick="setFilter('medical',this)">🏥 Medical</button>
+        <button class="filt-btn" id="fb-research" onclick="setFilter('research',this)">🔬 Research</button>
+        <button class="filt-btn" id="fb-document" onclick="setFilter('document',this)">📄 Docs</button>
+      </div>
+      <div style="height:12px"></div>
+      <div class="pool-wrap" id="poolWrap"></div>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="compare-area" id="compareArea">
+    <div id="compareTable"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">abhishek<span>panda</span>.com</div>
+    <p>Compiled &amp; verified for the AI community · March 2026</p>
+    <p>Data sources: Artificial Analysis, SWE-bench, AIME, MMLU, VBench, TTS Arena, HuggingFace Open LLM Leaderboard, and official provider benchmarks.</p>
+    <p style="margin-top:12px;color:var(--t3)">Scores are composite assessments. Always verify against latest benchmarks — the AI landscape evolves rapidly.</p>
+  </div>
+</footer>
+
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const EMBEDDED_MODE = document.documentElement.getAttribute('data-embedded') === '1';
+
+function reportEmbeddedHeight() {
+  if (!EMBEDDED_MODE) return;
+
+  const body = document.body;
+  const root = document.documentElement;
+  const height = Math.max(
+    body ? body.scrollHeight : 0,
+    body ? body.offsetHeight : 0,
+    root ? root.scrollHeight : 0,
+    root ? root.offsetHeight : 0,
+  );
+
+  window.parent.postMessage({ type: 'comparison-height', height }, window.location.origin);
+}
+
+if (EMBEDDED_MODE) {
+  window.addEventListener('load', reportEmbeddedHeight);
+  window.addEventListener('resize', reportEmbeddedHeight);
+  document.addEventListener('DOMContentLoaded', () => {
+    reportEmbeddedHeight();
+
+    if (typeof MutationObserver !== 'undefined') {
+      const observer = new MutationObserver(reportEmbeddedHeight);
+      observer.observe(document.documentElement, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+    }
+  });
+}
+
+// ════════════════════════════════════
+// DATA
+// ════════════════════════════════════
+
+const ALL_MODELS = [
+  // ─── OPEN SOURCE – DAILY / GENERAL ───
+  {id:'llama4-mav', name:'Llama 4 Maverick', version:'llama-4-maverick', maker:'Meta AI',
+   type:'open', cat:'daily', favicon:'meta.com',
+   score:92, benchLabel:'MMLU 89%', bench:'89% MMLU', context:'1M tokens',
+   params:'400B (17B active)', license:'Llama 4', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/meta-llama', accessUrl:'https://huggingface.co/meta-llama',
+   tags:['MoE 400B','1M Context','Multimodal','Best General'],
+   why:'Best balance of intelligence, context, and multimodal for daily use. Enormous open ecosystem.'},
+  {id:'qwen3-235b', name:'Qwen3-235B-A22B', version:'qwen3-235b', maker:'Alibaba',
+   type:'open', cat:'daily', favicon:'qwenlm.github.io',
+   score:91, benchLabel:'GPQA 88%', bench:'88% GPQA Diamond', context:'32K tokens',
+   params:'235B (22B active)', license:'Apache 2.0', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/Qwen', accessUrl:'https://huggingface.co/Qwen',
+   tags:['235B MoE','100+ Languages','Dual Mode','128 Experts'],
+   why:'Unmatched multilingual. Best for global deployments. Flexible thinking/non-thinking modes.'},
+  {id:'deepseek-v3', name:'DeepSeek-V3.2', version:'deepseek-v3-2', maker:'DeepSeek AI',
+   type:'open', cat:'daily', favicon:'deepseek.com',
+   score:90, benchLabel:'MMLU 94.2%', bench:'94.2% MMLU', context:'64K tokens',
+   params:'671B (37B active)', license:'MIT', pricing:'Free / Self-host',
+   apiUrl:'https://platform.deepseek.com', accessUrl:'https://platform.deepseek.com',
+   tags:['MIT License','MMLU 94.2%','Agentic','Best Free Tier'],
+   why:'Best MMLU open model. MIT license means zero restrictions for commercial use.'},
+  {id:'llama33-70b', name:'Llama 3.3 70B', version:'llama-3-3-70b', maker:'Meta AI',
+   type:'open', cat:'daily', favicon:'meta.com',
+   score:85, benchLabel:'GPT-4o parity', bench:'GPT-4o level', context:'128K tokens',
+   params:'70B dense', license:'Llama 3', pricing:'Free / Self-host',
+   apiUrl:'https://ollama.com/library/llama3.3', accessUrl:'https://ollama.com/library/llama3.3',
+   tags:['Single GPU','Ollama Ready','70B Dense'],
+   why:'Best single-GPU model. Runs on one A100. Ideal for local self-hosting.'},
+  // ─── OPEN SOURCE – CODING ───
+  {id:'glm-47', name:'GLM-4.7', version:'glm-4-7', maker:'Zhipu AI',
+   type:'open', cat:'coding', favicon:'zhipuai.cn',
+   score:95, benchLabel:'SWE-bench 91.2%', bench:'91.2% SWE-bench', context:'32K tokens',
+   params:'MoE', license:'GLM License', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/THUDM', accessUrl:'https://huggingface.co/THUDM',
+   tags:['SWE #1 91.2%','Repo-scale','Agentic','Reasoning Cache'],
+   why:'Highest SWE-bench of any open model. Best for multi-file agentic coding workflows.'},
+  {id:'deepseek-r1', name:'DeepSeek-R1', version:'deepseek-r1', maker:'DeepSeek AI',
+   type:'open', cat:'coding', favicon:'deepseek.com',
+   score:92, benchLabel:'AIME 88%', bench:'88% AIME 2025', context:'64K tokens',
+   params:'671B (37B active)', license:'MIT', pricing:'Free / Self-host',
+   apiUrl:'https://api.deepseek.com', accessUrl:'https://platform.deepseek.com',
+   tags:['CoT Reasoning','MIT License','Distilled Variants','AIME 88%'],
+   why:'Best open reasoning model for algorithmic problems. MIT license. CoT transparency for debugging.'},
+  {id:'phi4', name:'Phi-4 (14B)', version:'phi-4', maker:'Microsoft',
+   type:'open', cat:'coding', favicon:'microsoft.com',
+   score:84, benchLabel:'87% Math/Code', bench:'87% math & code', context:'16K tokens',
+   params:'14B dense', license:'MIT', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/microsoft/phi-4', accessUrl:'https://huggingface.co/microsoft/phi-4',
+   tags:['Consumer GPU','10GB VRAM','Edge Deploy','Best Small'],
+   why:'Best small coding model for consumer hardware. RTX 4090 gets frontier-class results.'},
+  // ─── OPEN SOURCE – THINKING ───
+  {id:'glm5-reason', name:'GLM-5 (Reasoning)', version:'glm-5', maker:'Zhipu / Z AI',
+   type:'open', cat:'thinking', favicon:'zhipuai.cn',
+   score:96, benchLabel:'QI 49.64 #1', bench:'QI 49.64 Artif. Analysis', context:'203K tokens',
+   params:'MoE', license:'Open License', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/THUDM', accessUrl:'https://huggingface.co/THUDM',
+   tags:['QI #1 Ranked','203K Context','Apache 2.0','LiveCode 93%'],
+   why:'Top of Artificial Analysis v4.0 intelligence index. Best combined reasoning+coding+knowledge.'},
+  {id:'kimi-k25', name:'Kimi K2.5 (Reasoning)', version:'kimi-k2-5', maker:'Moonshot AI',
+   type:'open', cat:'thinking', favicon:'kimi.moonshot.cn',
+   score:95, benchLabel:'AIME 96%', bench:'96% AIME 2025', context:'128K tokens',
+   params:'MoE', license:'Moonshot', pricing:'Free / Self-host',
+   apiUrl:'https://platform.moonshot.cn', accessUrl:'https://platform.moonshot.cn',
+   tags:['AIME 96%','Math Expert','Scientific','GPQA 92%'],
+   why:'Best pure math reasoning open model. Olympiad math, proofs, scientific reasoning.'},
+  {id:'qwq-32b', name:'QwQ-32B', version:'qwq-32b', maker:'Alibaba',
+   type:'open', cat:'thinking', favicon:'qwenlm.github.io',
+   score:88, benchLabel:'AIME 85%', bench:'85% AIME 2025', context:'32K tokens',
+   params:'32B dense', license:'Apache 2.0', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/Qwen/QwQ-32B', accessUrl:'https://huggingface.co/Qwen/QwQ-32B',
+   tags:['24GB VRAM','Consumer CoT','Apache 2.0','Extended CoT'],
+   why:'Only frontier thinking model running on a single consumer GPU (RTX 4090 24GB).'},
+  {id:'qwen3-thinking', name:'Qwen3-235B (Thinking)', version:'qwen3-235b-thinking', maker:'Alibaba',
+   type:'open', cat:'thinking', favicon:'qwenlm.github.io',
+   score:90, benchLabel:'MATH-500 97.8%', bench:'97.8% MATH-500', context:'32K tokens',
+   params:'235B (22B active)', license:'Apache 2.0', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/Qwen', accessUrl:'https://huggingface.co/Qwen',
+   tags:['MATH-500 97.8%','Thinking Mode','235B MoE','AIME 93%'],
+   why:'Highest MATH-500 accuracy ever from an open model. Best for academic research and proofs.'},
+  // ─── OPEN SOURCE – IMAGE ───
+  {id:'flux2', name:'FLUX.2 [dev]', version:'flux-2-dev', maker:'Black Forest Labs',
+   type:'open', cat:'image', favicon:'blackforestlabs.ai',
+   score:95, benchLabel:'4MP · 10 refs', bench:'4MP output, 10 refs', context:'—',
+   params:'32B', license:'FLUX Dev', pricing:'Free / Self-host',
+   apiUrl:'https://blackforestlabs.ai', accessUrl:'https://blackforestlabs.ai',
+   tags:['4MP Output','10 References','HEX Color Match','Image Editing'],
+   why:'State-of-the-art production quality. Multi-reference consistency, 4MP, HEX color matching.'},
+  {id:'sd35', name:'Stable Diffusion 3.5 L', version:'sd-3-5-large', maker:'Stability AI',
+   type:'open', cat:'image', favicon:'stability.ai',
+   score:87, benchLabel:'90K+ LoRAs', bench:'Largest ecosystem', context:'—',
+   params:'8B', license:'Stability AI', pricing:'Free / Self-host',
+   apiUrl:'https://stability.ai', accessUrl:'https://stability.ai',
+   tags:['90K+ LoRAs','ControlNet','ComfyUI','Apache 2.0 SD3'],
+   why:'Unbeatable ecosystem. Vast LoRA library and community tooling makes customization trivial.'},
+  {id:'flux1-schnell', name:'FLUX.1 [schnell]', version:'flux-1-schnell', maker:'Black Forest Labs',
+   type:'open', cat:'image', favicon:'blackforestlabs.ai',
+   score:82, benchLabel:'4-step / 4.5s', bench:'4-step inference', context:'—',
+   params:'12B', license:'Apache 2.0', pricing:'Free (Apache 2.0)',
+   apiUrl:'https://huggingface.co/black-forest-labs/FLUX.1-schnell', accessUrl:'https://huggingface.co/black-forest-labs',
+   tags:['Apache 2.0','4-step Fast','Commercial ✓','Sub-5s Gen'],
+   why:'Only FLUX with Apache 2.0 AND fast 4-step inference. Ideal for high-throughput pipelines.'},
+  // ─── OPEN SOURCE – VIDEO ───
+  {id:'wan22', name:'Wan2.2 (A14B)', version:'wan-2-2', maker:'Alibaba WaveSpeed',
+   type:'open', cat:'video', favicon:'wanxiang.aliyun.com',
+   score:94, benchLabel:'VBench 84.7%+', bench:'84.7%+ VBench', context:'—',
+   params:'14B active (MoE)', license:'Apache 2.0', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/Wan-AI', accessUrl:'https://huggingface.co/Wan-AI',
+   tags:['VBench #1','MoE Video','720p','8GB VRAM variant'],
+   why:'Highest VBench open model. MoE architecture with specialized per-noise-stage experts.'},
+  {id:'hunyuan15', name:'HunyuanVideo 1.5', version:'hunyuan-video-1-5', maker:'Tencent',
+   type:'open', cat:'video', favicon:'tencent.com',
+   score:91, benchLabel:'24fps 720p', bench:'24fps / 720p / 15s', context:'—',
+   params:'13B', license:'Hunyuan Comm.', pricing:'Free / Self-host',
+   apiUrl:'https://github.com/Tencent-Hunyuan/HunyuanVideo', accessUrl:'https://github.com/Tencent-Hunyuan/HunyuanVideo',
+   tags:['13B Params','24fps','Avatar Mode','Best Cinematic'],
+   why:'Best cinematic open video model. Most realistic human characters of any open video model.'},
+  {id:'ltxvideo', name:'LTX-Video 2.0', version:'ltx-video-2', maker:'Lightricks',
+   type:'open', cat:'video', favicon:'lightricks.com',
+   score:85, benchLabel:'12GB VRAM', bench:'12GB VRAM min', context:'—',
+   params:'2B', license:'Apache 2.0', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/Lightricks/LTX-Video', accessUrl:'https://huggingface.co/Lightricks',
+   tags:['12GB VRAM','Apache 2.0','Fast Iteration','T2V + I2V'],
+   why:'Best speed-to-quality ratio. 12GB VRAM makes it accessible for mid-range GPUs.'},
+  // ─── OPEN SOURCE – AUDIO ───
+  {id:'fishspeech', name:'Fish Speech V1.5', version:'fish-speech-1-5', maker:'Fish Audio',
+   type:'open', cat:'audio', favicon:'fish.audio',
+   score:93, benchLabel:'ELO 1339', bench:'TTS Arena ELO 1339', context:'—',
+   params:'DualAR', license:'Fish Audio', pricing:'Free / Self-host',
+   apiUrl:'https://fish.audio', accessUrl:'https://fish.audio',
+   tags:['ELO 1339 #1','Voice Clone','EN/CN/JP','3.5% WER'],
+   why:'Best TTS Arena ELO among open models. DualAR architecture, best naturalness.'},
+  {id:'kokoro', name:'Kokoro v1.0 (82M)', version:'kokoro-v1', maker:'hexgrad',
+   type:'open', cat:'audio', favicon:'github.com',
+   score:88, benchLabel:'210× realtime', bench:'210× realtime speed', context:'—',
+   params:'82M', license:'Apache 2.0', pricing:'Free (Apache 2.0)',
+   apiUrl:'https://github.com/hexgrad/kokoro', accessUrl:'https://github.com/hexgrad/kokoro',
+   tags:['Apache 2.0','82M Tiny','210× Speed','Edge Ready'],
+   why:'The "Stable Diffusion moment" for TTS. 82M params at enterprise quality is revolutionary.'},
+  {id:'cosyvoice2', name:'CosyVoice2-0.5B', version:'cosyvoice-2', maker:'Alibaba',
+   type:'open', cat:'audio', favicon:'alibabacloud.com',
+   score:87, benchLabel:'150ms latency', bench:'150ms first token', context:'—',
+   params:'0.5B', license:'Apache 2.0', pricing:'Free / Self-host',
+   apiUrl:'https://github.com/FunAudioLLM/CosyVoice', accessUrl:'https://github.com/FunAudioLLM/CosyVoice',
+   tags:['150ms Latency','Streaming','Emotion Control','Dialects'],
+   why:'Best latency for real-time conversational AI. Unique Chinese dialect control.'},
+  {id:'musicgen', name:'MusicGen Large', version:'musicgen-large', maker:'Meta AI',
+   type:'open', cat:'audio', favicon:'meta.com',
+   score:84, benchLabel:'All Genres', bench:'Text→Music all genres', context:'—',
+   params:'3.3B', license:'CC-BY-NC 4.0', pricing:'Free',
+   apiUrl:'https://huggingface.co/facebook/musicgen-large', accessUrl:'https://huggingface.co/facebook/musicgen-large',
+   tags:['CC-BY-NC 4.0','All Genres','Text→Music','HF Integration'],
+   why:'Most mature open music generation. Great for royalty-free background music.'},
+  // ─── OPEN SOURCE – MEDICAL ───
+  {id:'medgemma', name:'MedGemma 27B', version:'medgemma-27b', maker:'Google',
+   type:'open', cat:'medical', favicon:'google.com',
+   score:92, benchLabel:'CXR RadGraph 30.3', bench:'CXR RadGraph 30.3', context:'32K tokens',
+   params:'27B', license:'Gemma License', pricing:'Free / Self-host',
+   apiUrl:'https://developers.google.com/health-ai-developer-foundations/medgemma', accessUrl:'https://developers.google.com/health-ai-developer-foundations/medgemma',
+   tags:['Medical Imaging','FHIR Ready','SigLIP Encoder','Google·Gemma'],
+   why:'Only open model with dedicated medical imaging encoder. FHIR integration for healthcare systems.'},
+  {id:'openbiollm', name:'OpenBioLLM-70B', version:'openbiollm-70b', maker:'Saama AI',
+   type:'open', cat:'medical', favicon:'huggingface.co',
+   score:89, benchLabel:'BioMed 86.06%', bench:'86.06% avg 9 datasets', context:'8K tokens',
+   params:'70B', license:'Llama 3', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/aaditya/OpenBioLLM-Llama3-70B', accessUrl:'https://huggingface.co/aaditya/OpenBioLLM-Llama3-70B',
+   tags:['Beats GPT-4','9 Bio Datasets','Llama 3 Base','DPO Tuned'],
+   why:'Outperforms GPT-4 and Med-PaLM-2 on standard biomedical benchmarks.'},
+  {id:'meditron', name:'Meditron-70B', version:'meditron-70b', maker:'EPFL',
+   type:'open', cat:'medical', favicon:'epfl.ch',
+   score:85, benchLabel:'MedQA 82.3%', bench:'82.3% MedQA', context:'4K tokens',
+   params:'70B', license:'Llama 2', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/epfl-llm/meditron-70b', accessUrl:'https://huggingface.co/epfl-llm/meditron-70b',
+   tags:['Academic','PubMed','Clinical Guidelines','EPFL'],
+   why:'Most academically rigorous medical model. Trained on verified clinical guidelines.'},
+  // ─── OPEN SOURCE – RESEARCH ───
+  {id:'llama4-scout', name:'Llama 4 Scout', version:'llama-4-scout', maker:'Meta AI',
+   type:'open', cat:'research', favicon:'meta.com',
+   score:92, benchLabel:'10M context', bench:'10M token context', context:'10M tokens',
+   params:'109B (17B active)', license:'Llama 4', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/meta-llama', accessUrl:'https://huggingface.co/meta-llama',
+   tags:['10M Context 🏆','Multimodal','Library-Scale','MoE'],
+   why:'10M token context: process entire research libraries in one pass. Nothing comparable in open source.'},
+  // ─── OPEN SOURCE – DOCUMENT ───
+  {id:'qwen25-vl', name:'Qwen2.5-VL-72B', version:'qwen2-5-vl-72b', maker:'Alibaba',
+   type:'open', cat:'document', favicon:'qwenlm.github.io',
+   score:90, benchLabel:'DocVQA 94.5%', bench:'94.5% DocVQA', context:'32K tokens',
+   params:'72B', license:'Apache 2.0', pricing:'Free / Self-host',
+   apiUrl:'https://huggingface.co/Qwen/Qwen2.5-VL-72B-Instruct', accessUrl:'https://huggingface.co/Qwen/Qwen2.5-VL-72B-Instruct',
+   tags:['DocVQA #1','OCR Expert','JSON Extract','Chart QA 92%'],
+   why:'Best visual document understanding. 94.5% DocVQA, dynamic resolution, JSON extraction.'},
+
+  // ════ CLOSED SOURCE ════
+  // ─── DAILY / GENERAL ───
+  {id:'gpt52', name:'GPT-5.2', version:'gpt-5-2', maker:'OpenAI',
+   type:'closed', cat:'daily', favicon:'openai.com',
+   score:97, benchLabel:'MMLU 95.7%', bench:'95.7% MMLU', context:'256K tokens',
+   params:'~1.7T est.', license:'—', pricing:'$20/mo ChatGPT Plus · API $2–15/M tokens',
+   apiUrl:'https://platform.openai.com', accessUrl:'https://chat.openai.com',
+   tags:['MMLU 95.7%','Best Overall','Native Tools','Multimodal'],
+   why:'Highest scoring model across virtually every benchmark. The gold standard of AI quality.'},
+  {id:'gemini2pro', name:'Gemini 2.0 Pro', version:'gemini-2-0-pro', maker:'Google DeepMind',
+   type:'closed', cat:'daily', favicon:'google.com',
+   score:95, benchLabel:'GPQA 90.9%', bench:'90.9% GPQA Diamond', context:'1M tokens',
+   params:'Undisclosed', license:'—', pricing:'$19.99/mo Google One · API $1.25–5/M tokens',
+   apiUrl:'https://ai.google.dev', accessUrl:'https://gemini.google.com',
+   tags:['1M Context','GPQA 90.9%','Multimodal #1','Search Grounded'],
+   why:'1M context window + real-time search. Best for document-heavy, research-intensive tasks.'},
+  {id:'claude-opus', name:'Claude Opus 4.6', version:'claude-opus-4-6', maker:'Anthropic',
+   type:'closed', cat:'daily', favicon:'anthropic.com',
+   score:94, benchLabel:'DocBench #1', bench:'DocBench #1 · Safety #1', context:'200K tokens',
+   params:'Undisclosed', license:'—', pricing:'$17/mo Claude Pro · API $15/75 per M tokens',
+   apiUrl:'https://docs.anthropic.com', accessUrl:'https://claude.ai',
+   tags:['Safety #1','200K Context','Long-form King','Nuanced Reasoning'],
+   why:'Most safety-aligned + nuanced reasoning. Best for sensitive, high-stakes professional work.'},
+  {id:'grok420', name:'Grok 4.20', version:'grok-4-20', maker:'xAI',
+   type:'closed', cat:'daily', favicon:'x.ai',
+   score:90, benchLabel:'Real-time X data', bench:'Real-time X data', context:'128K tokens',
+   params:'Undisclosed', license:'—', pricing:'$8–16/mo X Premium+',
+   apiUrl:'https://x.ai/api', accessUrl:'https://grok.com',
+   tags:['Real-time X','Bold/Unfiltered','4-Agent Think','Fast Rising'],
+   why:'Only model with real-time social data. Best for trend analysis and unfiltered insights.'},
+  // ─── CLOSED – CODING ───
+  {id:'claude-sonnet', name:'Claude Sonnet 4.6', version:'claude-sonnet-4-6', maker:'Anthropic',
+   type:'closed', cat:'coding', favicon:'anthropic.com',
+   score:96, benchLabel:'SWE-bench 78%', bench:'78% SWE-bench', context:'200K tokens',
+   params:'Undisclosed', license:'—', pricing:'$3/M input · $15/M output tokens',
+   apiUrl:'https://docs.anthropic.com', accessUrl:'https://claude.ai',
+   tags:['SWE-bench 78%','Agentic Coding','Claude Code CLI','Auto Bug-Fix'],
+   why:'State-of-art agentic coding. Works autonomously for hours. Native Claude Code CLI.'},
+  {id:'gpt53codex', name:'GPT-5.3 Codex', version:'gpt-5-codex', maker:'OpenAI',
+   type:'closed', cat:'coding', favicon:'openai.com',
+   score:95, benchLabel:'HumanEval 97.1%', bench:'97.1% HumanEval', context:'128K tokens',
+   params:'Undisclosed', license:'—', pricing:'$10–19/mo GitHub Copilot',
+   apiUrl:'https://platform.openai.com', accessUrl:'https://github.com/features/copilot',
+   tags:['HumanEval 97.1%','GitHub Copilot','Terminal Native','41% of All Code'],
+   why:'Powers GitHub Copilot. 41% of all code written in 2025. Industry IDE standard.'},
+  // ─── CLOSED – THINKING ───
+  {id:'gemini-deepthink', name:'Gemini 2.0 Deep Think', version:'gemini-2-0-pro-deep-think', maker:'Google DeepMind',
+   type:'closed', cat:'thinking', favicon:'google.com',
+   score:98, benchLabel:'ARC-AGI-2 77.1%', bench:'77.1% ARC-AGI-2', context:'1M tokens',
+   params:'Undisclosed', license:'—', pricing:'$19.99/mo Google One AI Premium',
+   apiUrl:'https://ai.google.dev', accessUrl:'https://gemini.google.com',
+   tags:['ARC-AGI-2 #1','AIME 100%','Dynamic Compute','2.5× Boost'],
+   why:'Reasoning champion 2026. 77.1% ARC-AGI-2. Biggest reasoning leap in AI history.'},
+  {id:'gpt52-thinking', name:'GPT-5.2 (Thinking)', version:'gpt-5-2-thinking', maker:'OpenAI',
+   type:'closed', cat:'thinking', favicon:'openai.com',
+   score:97, benchLabel:'AIME 100%', bench:'100% AIME 2025', context:'256K tokens',
+   params:'Undisclosed', license:'—', pricing:'$200/mo ChatGPT Pro (extended)',
+   apiUrl:'https://platform.openai.com', accessUrl:'https://chat.openai.com',
+   tags:['AIME 100%','Auto-Escalate','STEM Champion','Most Accessible'],
+   why:'100% AIME 2025. Self-escalates hard queries automatically. Most accessible thinking model.'},
+  {id:'claude-extended', name:'Claude Opus Extended', version:'claude-opus-4-6-ext', maker:'Anthropic',
+   type:'closed', cat:'thinking', favicon:'anthropic.com',
+   score:93, benchLabel:'Transparent CoT', bench:'Visible thought chains', context:'200K tokens',
+   params:'Undisclosed', license:'—', pricing:'$17/mo Claude Pro',
+   apiUrl:'https://docs.anthropic.com', accessUrl:'https://claude.ai',
+   tags:['Visible CoT','Inspectable Steps','Scientific Depth','Safest Reasoner'],
+   why:'Visible inspectable thought chains. Best when understanding the reasoning process matters.'},
+  // ─── CLOSED – IMAGE ───
+  {id:'gpt-image', name:'GPT Image 1.5', version:'gpt-image-1-5', maker:'OpenAI',
+   type:'closed', cat:'image', favicon:'openai.com',
+   score:95, benchLabel:'ELO Arena #1', bench:'ELO Arena #1', context:'—',
+   params:'—', license:'—', pricing:'$20/mo ChatGPT Plus · API $0.04–0.19/img',
+   apiUrl:'https://platform.openai.com/docs/guides/images', accessUrl:'https://chat.openai.com',
+   tags:['ELO Arena #1','Text in Images','Iterative Editing','Context-Aware'],
+   why:'Best image-in-text rendering historically impossible for AI. Natural language iteration.'},
+  {id:'midjourney-v7', name:'Midjourney v7', version:'v7', maker:'Midjourney Inc.',
+   type:'closed', cat:'image', favicon:'midjourney.com',
+   score:96, benchLabel:'ELO Arena #2', bench:'Artistic quality champion', context:'—',
+   params:'—', license:'—', pricing:'Basic $10 · Standard $30 · Pro $60/mo',
+   apiUrl:'https://midjourney.com', accessUrl:'https://midjourney.com',
+   tags:['Artistic Excellence','Cinematic Quality','Style Reference','Creative Pro #1'],
+   why:'Undisputed artistic quality champion. Gold standard for agencies and creative professionals.'},
+  {id:'imagen4', name:'Google Imagen 4', version:'imagen-4', maker:'Google DeepMind',
+   type:'closed', cat:'image', favicon:'google.com',
+   score:92, benchLabel:'Photorealism #1', bench:'Photorealism #1', context:'—',
+   params:'—', license:'—', pricing:'Free via ImageFX · Vertex API $0.02/img',
+   apiUrl:'https://cloud.google.com/vertex-ai', accessUrl:'https://labs.google/genai-tools',
+   tags:['Photorealistic','Color Accuracy','40+ Languages','Fast Gen'],
+   why:'Photorealistic precision champion. Best color gradients and multilingual text rendering.'},
+  // ─── CLOSED – VIDEO ───
+  {id:'veo3', name:'Veo 3', version:'veo-3', maker:'Google DeepMind',
+   type:'closed', cat:'video', favicon:'google.com',
+   score:98, benchLabel:'VBench #1 2026', bench:'VBench #1 2026', context:'—',
+   params:'—', license:'—', pricing:'$19.99/mo Google One AI Premium',
+   apiUrl:'https://cloud.google.com/vertex-ai', accessUrl:'https://labs.google/genai-tools',
+   tags:['VBench #1 2026','Native Audio','Physics-Accurate','Built-in Speech'],
+   why:'Most realistic video AI 2026. Generates synchronized audio natively. Physics-aware motion.'},
+  {id:'sora2', name:'Sora 2', version:'sora-2', maker:'OpenAI',
+   type:'closed', cat:'video', favicon:'openai.com',
+   score:96, benchLabel:'Narrative Leader', bench:'Multi-scene coherence', context:'—',
+   params:'—', license:'—', pricing:'$20/mo Plus · $200/mo Pro (1080p)',
+   apiUrl:'https://platform.openai.com', accessUrl:'https://sora.com',
+   tags:['Narrative Coherence','Own Audio','Multi-Scene','Storyboard Mode'],
+   why:'Narrative storytelling powerhouse. Best for cinematic multi-scene storytelling.'},
+  {id:'runway-gen45', name:'Runway Gen-4.5', version:'gen-4-5', maker:'Runway ML',
+   type:'closed', cat:'video', favicon:'runwayml.com',
+   score:90, benchLabel:'Best Pro Workflow', bench:'Hollywood-used', context:'—',
+   params:'—', license:'—', pricing:'Standard $12 · Pro $28 · Unlimited $76/mo',
+   apiUrl:'https://docs.dev.runwayml.com', accessUrl:'https://runwayml.com',
+   tags:['Adobe Integration','Hollywood-Used','Inpainting','Style Transfer'],
+   why:'Filmmaker\'s professional toolkit. Deep Adobe/DaVinci integration for hybrid workflows.'},
+  // ─── CLOSED – AUDIO ───
+  {id:'elevenlabs-v3', name:'ElevenLabs v3', version:'elevenlabs-v3', maker:'ElevenLabs',
+   type:'closed', cat:'audio', favicon:'elevenlabs.io',
+   score:97, benchLabel:'MOS 4.8/5.0', bench:'MOS 4.8 / 5.0', context:'—',
+   params:'—', license:'—', pricing:'Free 10K chars · Creator $22 · Business $99/mo',
+   apiUrl:'https://elevenlabs.io/docs/api-reference/introduction', accessUrl:'https://elevenlabs.io',
+   tags:['Voice Clone #1','30+ Languages','MOS 4.8','10K+ Voices'],
+   why:'Gold standard for AI voice. 10K+ voices, instant cloning, Netflix/Spotify-grade.'},
+  {id:'openai-tts3', name:'OpenAI TTS-3', version:'tts-3', maker:'OpenAI',
+   type:'closed', cat:'audio', favicon:'openai.com',
+   score:88, benchLabel:'Fastest TTS', bench:'Fastest + cheapest API', context:'—',
+   params:'—', license:'—', pricing:'API $0.015/1K chars',
+   apiUrl:'https://platform.openai.com/docs/guides/text-to-speech', accessUrl:'https://chat.openai.com',
+   tags:['API-First','Fastest TTS','Cost-Efficient','6 Built-in Voices'],
+   why:'Most developer-friendly TTS. Fast inference, simple API, competitive pricing.'},
+  // ─── CLOSED – MEDICAL ───
+  {id:'gpt52-medical', name:'GPT-5.2 (Medical)', version:'gpt-5-2', maker:'OpenAI',
+   type:'closed', cat:'medical', favicon:'openai.com',
+   score:97, benchLabel:'GPQA Diamond 94.3%', bench:'94.3% GPQA Diamond', context:'256K tokens',
+   params:'Undisclosed', license:'—', pricing:'$20/mo ChatGPT Plus · Azure HIPAA available',
+   apiUrl:'https://platform.openai.com', accessUrl:'https://chat.openai.com',
+   tags:['GPQA 94.3%','Low Hallucination','HIPAA via Azure','Drug Interaction'],
+   why:'Highest closed-source medical accuracy. 6.2% hallucination rate — lowest in industry.'},
+  {id:'gemini-med', name:'Gemini 2.0 Pro (Med)', version:'gemini-2-0-pro', maker:'Google DeepMind',
+   type:'closed', cat:'medical', favicon:'google.com',
+   score:96, benchLabel:'GPQA 94.3%', bench:'94.3% GPQA + Multimodal', context:'1M tokens',
+   params:'Undisclosed', license:'—', pricing:'$19.99/mo · Healthcare via Google Cloud',
+   apiUrl:'https://ai.google.dev', accessUrl:'https://gemini.google.com',
+   tags:['Med-Gemini','Medical Imaging','Lab Report PDF','FDA-Level Accuracy'],
+   why:'Multimodal medical champion. Analyzes imaging, lab reports, and audio simultaneously.'},
+  // ─── CLOSED – RESEARCH ───
+  {id:'perplexity', name:'Perplexity Pro', version:'perplexity-pro-2026', maker:'Perplexity AI',
+   type:'closed', cat:'research', favicon:'perplexity.ai',
+   score:96, benchLabel:'Citation Accuracy #1', bench:'100% cited sources', context:'—',
+   params:'—', license:'—', pricing:'Free 5 Pro searches/day · Pro $20/mo',
+   apiUrl:'https://docs.perplexity.ai', accessUrl:'https://perplexity.ai',
+   tags:['Cited Every Claim','Real-time Web','Academic Search','Market Research'],
+   why:'Every claim is cited. Built for research from ground up. The only academically-grade AI tool.'},
+  {id:'notebooklm', name:'Google NotebookLM Plus', version:'notebooklm-plus', maker:'Google',
+   type:'closed', cat:'research', favicon:'google.com',
+   score:94, benchLabel:'50+ Sources #1', bench:'50+ simultaneous sources', context:'1M tokens',
+   params:'—', license:'—', pricing:'Free basic · $19.99/mo Google One',
+   apiUrl:'https://notebooklm.google.com', accessUrl:'https://notebooklm.google.com',
+   tags:['50+ Sources','Audio Summaries','Mind Maps','Students #1'],
+   why:'Upload 50+ sources at once. Best study tool for students and academics in 2026.'},
+  // ─── CLOSED – DOCUMENT ───
+  {id:'claude-docs', name:'Claude Opus 4.6 (Docs)', version:'claude-opus-4-6', maker:'Anthropic',
+   type:'closed', cat:'document', favicon:'anthropic.com',
+   score:96, benchLabel:'DocBench #1', bench:'DocBench #1', context:'200K tokens',
+   params:'Undisclosed', license:'—', pricing:'$17/mo Pro · API $15/75 per M tokens',
+   apiUrl:'https://docs.anthropic.com', accessUrl:'https://claude.ai',
+   tags:['DocBench #1','Legal Docs','Academic Papers','Precise Formatting'],
+   why:'Best for legal, academic, and technical long-form drafting. Extraordinary format precision.'},
+  {id:'gemini-docs', name:'Gemini 2.0 Pro (Docs)', version:'gemini-2-0-pro', maker:'Google DeepMind',
+   type:'closed', cat:'document', favicon:'google.com',
+   score:95, benchLabel:'1M Token Context', bench:'1M token context', context:'1M tokens',
+   params:'Undisclosed', license:'—', pricing:'$19.99/mo Google One',
+   apiUrl:'https://ai.google.dev', accessUrl:'https://workspace.google.com',
+   tags:['Google Slides AI','Gmail + Docs','1M Context','Drive Integrated'],
+   why:'Only model processing entire book-length documents. Native Google Workspace integration.'},
+  {id:'m365-copilot', name:'M365 Copilot (Word/PPT)', version:'m365-copilot', maker:'Microsoft+OpenAI',
+   type:'closed', cat:'document', favicon:'microsoft.com',
+   score:90, benchLabel:'Enterprise #1', bench:'Enterprise workflow champion', context:'128K tokens',
+   params:'—', license:'—', pricing:'$30/user/mo (requires M365)',
+   apiUrl:'https://azure.microsoft.com/en-us/products/ai-services/openai-service', accessUrl:'https://microsoft.com/copilot',
+   tags:['Word Native','PowerPoint AI','Outlook Smart','HIPAA Compliant'],
+   why:'GPT-5.2 embedded directly in Word, Excel, PowerPoint. Best for Microsoft ecosystem users.'},
+];
+
+// ════════════════════════════════════
+// CATEGORY DATA
+// ════════════════════════════════════
+const CAT_DATA = [
+  {key:'daily',   icon:'💬', name:'Daily & General', openId:'llama4-mav',  closedId:'gpt52',          openScore:92,  closedScore:97},
+  {key:'coding',  icon:'💻', name:'Coding',          openId:'glm-47',      closedId:'claude-sonnet',   openScore:95,  closedScore:96},
+  {key:'thinking',icon:'🧠', name:'Deep Thinking',   openId:'glm5-reason', closedId:'gemini-deepthink',openScore:96,  closedScore:98},
+  {key:'image',   icon:'🎨', name:'Image Gen',       openId:'flux2',       closedId:'midjourney-v7',   openScore:95,  closedScore:96},
+  {key:'video',   icon:'🎬', name:'Video Gen',       openId:'wan22',       closedId:'veo3',            openScore:94,  closedScore:98},
+  {key:'audio',   icon:'🎵', name:'Audio/TTS',       openId:'fishspeech',  closedId:'elevenlabs-v3',   openScore:93,  closedScore:97},
+  {key:'medical', icon:'🏥', name:'Medical',         openId:'openbiollm',  closedId:'gpt52-medical',   openScore:89,  closedScore:97},
+  {key:'research',icon:'🔬', name:'Research',        openId:'llama4-scout',closedId:'perplexity',      openScore:92,  closedScore:96},
+  {key:'document',icon:'📄', name:'Documents',       openId:'qwen25-vl',   closedId:'claude-docs',     openScore:90,  closedScore:96},
+];
+
+// ════════════════════════════════════
+// STATE
+// ════════════════════════════════════
+let selectedIds = [];
+let currentFilter = 'all';
+
+// ════════════════════════════════════
+// FAVICON HELPER
+// ════════════════════════════════════
+function faviconUrl(domain) {
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+}
+function logoHtml(domain, cls='') {
+  return `<div class="pool-logo"><img src="${faviconUrl(domain)}" alt="" onerror="this.parentNode.textContent='🤖'" ${cls?`class="${cls}"`:''}/></div>`;
+}
+
+// ════════════════════════════════════
+// BUILD OVERVIEW GRID
+// ════════════════════════════════════
+function buildOverview() {
+  const grid = document.getElementById('ovGrid');
+  grid.innerHTML = CAT_DATA.map(c => {
+    const open = ALL_MODELS.find(m => m.id === c.openId);
+    const closed = ALL_MODELS.find(m => m.id === c.closedId);
+    return `<div class="ov-card" onclick="quickCompare('${c.openId}','${c.closedId}')">
+      <div class="ov-card-header">
+        <div class="ov-cat-icon">${c.icon}</div>
+        <div class="ov-cat-name">${c.name}</div>
+      </div>
+      <div class="ov-compare-row">
+        <div class="ov-model-row">
+          <div class="ov-type-dot ov-dot-open"></div>
+          <div class="ov-model-info">
+            <div class="ov-model-name">${open ? open.name : '—'}</div>
+            <div class="ov-bar-wrap"><div class="ov-bar ov-bar-open" data-w="${c.openScore}" style="width:0%"></div></div>
+          </div>
+          <div class="ov-model-score" style="color:var(--open)">${c.openScore}</div>
+        </div>
+        <div class="ov-model-row">
+          <div class="ov-type-dot ov-dot-closed"></div>
+          <div class="ov-model-info">
+            <div class="ov-model-name">${closed ? closed.name : '—'}</div>
+            <div class="ov-bar-wrap"><div class="ov-bar ov-bar-closed" data-w="${c.closedScore}" style="width:0%"></div></div>
+          </div>
+          <div class="ov-model-score" style="color:var(--closed)">${c.closedScore}</div>
+        </div>
+      </div>
+      <button class="quick-compare-btn" onclick="event.stopPropagation();quickCompare('${c.openId}','${c.closedId}')">⚡ Quick Compare →</button>
+    </div>`;
+  }).join('');
+  // animate bars after build
+  setTimeout(() => {
+    document.querySelectorAll('.ov-bar[data-w]').forEach(b => {
+      b.style.width = b.getAttribute('data-w') + '%';
+    });
+  }, 300);
+}
+
+// ════════════════════════════════════
+// BUILD CAT BARS GRID
+// ════════════════════════════════════
+function buildCatBars() {
+  const grid = document.getElementById('catBarsGrid');
+  grid.innerHTML = CAT_DATA.map(c => {
+    const open = ALL_MODELS.find(m => m.id === c.openId);
+    const closed = ALL_MODELS.find(m => m.id === c.closedId);
+    const winnerOpen = c.openScore >= c.closedScore;
+    return `<div class="cat-bar-card">
+      <div class="cbc-name">${c.icon} ${c.name} ${winnerOpen ? '<span class="winner-badge">🟢 Open Leads</span>' : '<span class="winner-badge" style="background:rgba(245,166,35,.12);color:var(--closed);border-color:rgba(245,166,35,.3)">🟡 Closed Leads</span>'}</div>
+      <div class="cbc-model-name">${open ? open.name : '—'}</div>
+      <div class="cbc-row">
+        <div class="cbc-type cbc-type-open">Open</div>
+        <div class="cbc-bar-bg"><div class="cbc-bar-fill cbc-fill-open" data-w="${c.openScore}" style="width:0%"></div></div>
+        <div class="cbc-val cbc-val-open">${c.openScore}</div>
+      </div>
+      <div class="cbc-model-name" style="margin-top:4px">${closed ? closed.name : '—'}</div>
+      <div class="cbc-row">
+        <div class="cbc-type cbc-type-closed">Closed</div>
+        <div class="cbc-bar-bg"><div class="cbc-bar-fill cbc-fill-closed" data-w="${c.closedScore}" style="width:0%"></div></div>
+        <div class="cbc-val cbc-val-closed">${c.closedScore}</div>
+      </div>
+    </div>`;
+  }).join('');
+  setTimeout(() => {
+    document.querySelectorAll('.cbc-bar-fill[data-w]').forEach(b => {
+      b.style.width = b.getAttribute('data-w') + '%';
+    });
+  }, 400);
+}
+
+// ════════════════════════════════════
+// BUILD POOL
+// ════════════════════════════════════
+function buildPool() {
+  const wrap = document.getElementById('poolWrap');
+  wrap.innerHTML = ALL_MODELS.map(m => `
+    <div class="pool-card" id="pc-${m.id}" data-cat="${m.cat}" data-type="${m.type}" data-name="${m.name.toLowerCase()} ${m.maker.toLowerCase()} ${m.cat}">
+      ${logoHtml(m.favicon)}
+      <div class="pool-info">
+        <div class="pool-name">${m.name}</div>
+        <div class="pool-meta">${m.maker} · ${m.cat}</div>
+      </div>
+      <div class="pool-type pt-${m.type}">${m.type === 'open' ? '🟢 Open' : '🟡 Closed'}</div>
+      <button class="pool-add-btn" id="pab-${m.id}" onclick="addModel('${m.id}')">+</button>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════
+// POOL FILTER
+// ════════════════════════════════════
+function filterPool() {
+  const q = document.getElementById('poolSearch').value.toLowerCase();
+  document.querySelectorAll('.pool-card').forEach(card => {
+    const nameMatch = card.getAttribute('data-name').includes(q);
+    const cat = card.getAttribute('data-cat');
+    const type = card.getAttribute('data-type');
+    let filterMatch = currentFilter === 'all' ||
+      currentFilter === type ||
+      currentFilter === cat;
+    card.classList.toggle('hidden', !(nameMatch && filterMatch));
+  });
+}
+
+function setFilter(val, btn) {
+  currentFilter = val;
+  document.querySelectorAll('.filt-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  filterPool();
+}
+
+// ════════════════════════════════════
+// ADD / REMOVE MODEL
+// ════════════════════════════════════
+function addModel(id) {
+  if (selectedIds.includes(id) || selectedIds.length >= 6) return;
+  selectedIds.push(id);
+  const card = document.getElementById('pc-' + id);
+  if (card) card.classList.add('added');
+  updateSelCount();
+  renderCompare();
+  // scroll to comparison
+  setTimeout(() => {
+    document.getElementById('compareArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 200);
+}
+
+function removeModel(id) {
+  selectedIds = selectedIds.filter(x => x !== id);
+  const card = document.getElementById('pc-' + id);
+  if (card) card.classList.remove('added');
+  updateSelCount();
+  renderCompare();
+}
+
+function clearAll() {
+  selectedIds.forEach(id => {
+    const card = document.getElementById('pc-' + id);
+    if (card) card.classList.remove('added');
+  });
+  selectedIds = [];
+  updateSelCount();
+  renderCompare();
+}
+
+function quickCompare(openId, closedId) {
+  clearAll();
+  addModel(openId);
+  addModel(closedId);
+  // collapse pool and scroll
+  const poolSection = document.getElementById('poolSection');
+  poolSection.classList.add('collapsed');
+  document.getElementById('poolToggleIcon').textContent = '▸';
+  document.getElementById('poolToggleTxt').textContent = 'Browse & Add Models (click to expand)';
+  setTimeout(() => {
+    document.getElementById('compareArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 300);
+}
+
+function updateSelCount() {
+  document.getElementById('selCount').textContent = selectedIds.length;
+}
+
+function togglePool() {
+  const s = document.getElementById('poolSection');
+  const ic = document.getElementById('poolToggleIcon');
+  const tx = document.getElementById('poolToggleTxt');
+  const collapsed = s.classList.toggle('collapsed');
+  ic.textContent = collapsed ? '▸' : '▾';
+  tx.textContent = collapsed ? 'Browse & Add Models (click to expand)' : 'Browse & Add Models (click to collapse)';
+}
+
+// ════════════════════════════════════
+// RENDER COMPARISON TABLE
+// ════════════════════════════════════
+const ROW_DEFS = [
+  { label: 'Model',         key: 'header',     icon: '🏷' },
+  { label: 'Overall Score', key: 'score',      icon: '📊' },
+  { label: 'Key Benchmark', key: 'bench',      icon: '🏆' },
+  { label: 'Type',          key: 'type',       icon: '🔓' },
+  { label: 'Context',       key: 'context',    icon: '📏' },
+  { label: 'Parameters',    key: 'params',     icon: '⚙️' },
+  { label: 'License/Price', key: 'license',    icon: '💰' },
+  { label: 'Key Strengths', key: 'tags',       icon: '⚡' },
+  { label: 'Why This Model',key: 'why',        icon: '💡' },
+  { label: 'Category',      key: 'category',   icon: '📁' },
+  { label: 'API / Access',  key: 'api',        icon: '🔗' },
+];
+
+function renderCompare() {
+  const tbl = document.getElementById('compareTable');
+  if (selectedIds.length === 0) {
+    tbl.innerHTML = `<div class="empty-compare">
+      <div class="ec-icon">⚖️</div>
+      <div class="ec-text">Add models from the pool above to start comparing. Mix open-source and closed-source models freely — up to 6 at once.</div>
+      <div class="ec-hint">💡 Tip: Click "⚡ Quick Compare" in any category card above to instantly load the best open vs closed pair.</div>
+    </div>`;
+    tbl.style.display = 'block';
+    tbl.style.border = '1px solid var(--b0)';
+    tbl.style.borderRadius = '16px';
+    tbl.style.padding = '0';
+    return;
+  }
+
+  const cols = selectedIds.length;
+  tbl.style.display = 'grid';
+  tbl.style.border = '1px solid var(--b0)';
+  tbl.style.borderRadius = '16px';
+  tbl.style.overflow = 'hidden';
+  // 1 label col + N model cols
+  tbl.style.gridTemplateColumns = `140px repeat(${cols}, minmax(200px, 1fr))`;
+
+  const models = selectedIds.map(id => ALL_MODELS.find(m => m.id === id));
+  let html = '';
+
+  ROW_DEFS.forEach((row, rowIdx) => {
+    const isLast = rowIdx === ROW_DEFS.length - 1;
+    // Label cell
+    html += `<div class="ct-label${isLast?' last-row':''}">${row.icon} ${row.label}</div>`;
+
+    models.forEach((m, colIdx) => {
+      const isOpen = m.type === 'open';
+      const colClass = isOpen ? 'open-col' : 'closed-col';
+      const isLastCol = colIdx === models.length - 1;
+      const baseClass = `ct-cell${rowIdx===0?' header-cell':''}${isLast?' last-row':''}`;
+
+      if (row.key === 'header') {
+        html += `<div class="${baseClass} ${colClass}">
+          <div class="cth-logo-row">
+            <div class="cth-logo"><img src="${faviconUrl(m.favicon)}" alt="" onerror="this.parentNode.textContent='🤖'"/></div>
+            <div>
+              <div class="cth-name">${m.name}</div>
+              <div class="cth-maker">${m.maker}</div>
+            </div>
+            <button class="cth-remove-btn" onclick="removeModel('${m.id}')">✕</button>
+          </div>
+          <div class="type-badge tb-${m.type}">
+            ${isOpen ? '🟢 Open Source' : '🟡 Closed Source'}
+          </div>
+        </div>`;
+
+      } else if (row.key === 'score') {
+        const pct = Math.min(100, m.score);
+        html += `<div class="${baseClass}">
+          <div class="score-display">
+            <div class="score-num ${isOpen?'open-score':'closed-score'}">${m.score}</div>
+            <div class="score-bar-wrap"><div class="score-bar-fill ${isOpen?'score-bar-open':'score-bar-closed'}" style="width:${pct}%"></div></div>
+          </div>
+          <div class="score-label-sub">Composite 0–100 scale</div>
+        </div>`;
+
+      } else if (row.key === 'bench') {
+        html += `<div class="${baseClass}">
+          <div class="bench-val">${m.benchLabel}</div>
+          <div class="bench-sub">${m.bench}</div>
+        </div>`;
+
+      } else if (row.key === 'type') {
+        html += `<div class="${baseClass}">
+          <div class="type-badge tb-${m.type}" style="display:inline-flex">
+            ${isOpen ? '🟢 Open Source · Self-hostable · Open Weights' : '🟡 Closed Source · API/Subscription · Proprietary'}
+          </div>
+        </div>`;
+
+      } else if (row.key === 'context') {
+        html += `<div class="${baseClass}">
+          <div class="detail-val"><b>${m.context}</b></div>
+        </div>`;
+
+      } else if (row.key === 'params') {
+        html += `<div class="${baseClass}">
+          <div class="detail-val"><b>${m.params}</b></div>
+        </div>`;
+
+      } else if (row.key === 'license') {
+        html += `<div class="${baseClass}">
+          <div class="detail-val">${isOpen ? `<b style="color:var(--open)">${m.license}</b>` : `<span style="color:var(--closed)">${m.pricing}</span>`}</div>
+          ${isOpen ? `<div class="detail-label" style="margin-top:4px">Free to self-host & modify</div>` : `<div class="detail-label" style="margin-top:4px">Subscription / API pricing</div>`}
+        </div>`;
+
+      } else if (row.key === 'tags') {
+        html += `<div class="${baseClass}">
+          <div class="tag-list">
+            ${m.tags.map(t => `<div class="c-tag ${isOpen?'open-tag':'closed-tag'}">${t}</div>`).join('')}
+          </div>
+        </div>`;
+
+      } else if (row.key === 'why') {
+        html += `<div class="${baseClass}">
+          <div class="why-text">${m.why}</div>
+        </div>`;
+
+      } else if (row.key === 'category') {
+        const catObj = CAT_DATA.find(c => c.key === m.cat);
+        html += `<div class="${baseClass}">
+          <div class="detail-val">${catObj ? catObj.icon : ''} <b>${m.cat.charAt(0).toUpperCase()+m.cat.slice(1)}</b></div>
+        </div>`;
+
+      } else if (row.key === 'api') {
+        html += `<div class="${baseClass}">
+          <div class="detail-val"><a href="${m.apiUrl}" target="_blank" rel="noopener">↗ API / Docs</a></div>
+          <div class="detail-val" style="margin-top:4px"><a href="${m.accessUrl}" target="_blank" rel="noopener">↗ Access Model</a></div>
+        </div>`;
+      }
+    });
+  });
+
+  tbl.innerHTML = html;
+  // animate score bars
+  setTimeout(() => {
+    tbl.querySelectorAll('.score-bar-fill').forEach(b => {
+      const w = b.style.width;
+      b.style.width = '0';
+      requestAnimationFrame(() => { b.style.width = w; });
+    });
+  }, 100);
+}
+
+// ════════════════════════════════════
+// THEME
+// ════════════════════════════════════
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  const nextTheme = isDark ? 'light' : 'dark';
+  html.setAttribute('data-theme', nextTheme);
+  document.getElementById('theme-lbl').textContent = isDark ? 'Dark' : 'Light';
+  localStorage.setItem('ap-cmp-theme', nextTheme);
+  localStorage.setItem('abhishekpanda-theme', nextTheme);
+}
+(function(){
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('theme-lbl').textContent = isDark ? 'Light' : 'Dark';
+})();
+
+// ════════════════════════════════════
+// SCROLL TOP
+// ════════════════════════════════════
+window.addEventListener('scroll', () => {
+  document.getElementById('btt').classList.toggle('vis', window.scrollY > 400);
+});
+
+// ════════════════════════════════════
+// INTERSECTION OBSERVER (bar animations)
+// ════════════════════════════════════
+const ioOpts = { threshold: 0.15 };
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('[data-w]').forEach(el => {
+        el.style.width = el.getAttribute('data-w') + '%';
+      });
+      io.unobserve(e.target);
+    }
+  });
+}, ioOpts);
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+buildOverview();
+buildCatBars();
+buildPool();
+renderCompare();
+
+// Observe after build
+setTimeout(() => {
+  document.querySelectorAll('.ov-card, .cat-bar-card').forEach(el => io.observe(el));
+}, 100);
+
+// collapse pool initially  
+document.getElementById('poolSection').classList.add('collapsed');
+document.getElementById('poolToggleIcon').textContent = '▸';
+document.getElementById('poolToggleTxt').textContent = 'Browse & Add Models (click to expand)';
+
+reportEmbeddedHeight();
+</script>
+</body>
+</html>

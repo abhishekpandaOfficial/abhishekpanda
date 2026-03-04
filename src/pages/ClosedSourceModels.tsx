@@ -18,7 +18,7 @@ const ClosedSourceModels = () => {
   };
 
   const iframeSrc = useMemo(
-    () => `/ai-closed_models-2026-.html?embedded=1&theme=${initialThemeRef.current}`,
+    () => `/embedded/closed-source-models-2026.html?embedded=1&theme=${initialThemeRef.current}`,
     [],
   );
 
