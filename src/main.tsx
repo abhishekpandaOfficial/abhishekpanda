@@ -3,6 +3,41 @@ import App from "./App.tsx";
 import "./index.css";
 import { HelmetProvider } from "react-helmet-async";
 
+const swResetKey = "ap-sw-reset-2026-03-04";
+
+const resetLegacyServiceWorkers = async () => {
+  if (!("serviceWorker" in navigator)) return;
+
+  try {
+    if (localStorage.getItem(swResetKey) === "done") return;
+
+    const registrations = await navigator.serviceWorker.getRegistrations();
+
+    if (registrations.length === 0) {
+      localStorage.setItem(swResetKey, "done");
+      return;
+    }
+
+    await Promise.all(registrations.map((registration) => registration.unregister()));
+
+    if ("caches" in window) {
+      const cacheKeys = await caches.keys();
+      await Promise.all(cacheKeys.map((cacheKey) => caches.delete(cacheKey)));
+    }
+
+    localStorage.setItem(swResetKey, "done");
+    window.location.reload();
+  } catch {
+    try {
+      localStorage.setItem(swResetKey, "done");
+    } catch {
+      return;
+    }
+  }
+};
+
+void resetLegacyServiceWorkers();
+
 const shouldIgnorePromiseError = (reason: unknown) => {
   const msg = typeof reason === "string" ? reason : (reason as any)?.message;
   if (!msg) return false;
