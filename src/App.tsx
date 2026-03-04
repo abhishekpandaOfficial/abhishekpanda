@@ -24,6 +24,9 @@ const EbookDetail = lazy(() => import("./pages/EbookDetail"));
 const EbookReader = lazy(() => import("./pages/EbookReader"));
 const LLMGalaxy = lazy(() => import("./pages/LLMGalaxy"));
 const ModelDetail = lazy(() => import("./pages/ModelDetail"));
+const ClosedSourceModels = lazy(() => import("./pages/ClosedSourceModels"));
+const OpenSourceModels = lazy(() => import("./pages/OpenSourceModels"));
+const ModelComparisonPage = lazy(() => import("./pages/ModelComparisonPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const BlogAggregator = lazy(() => import("./pages/BlogAggregator"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
@@ -145,6 +148,9 @@ const App = () => {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/llm-galaxy" element={<LLMGalaxy />} />
                 <Route path="/llm-galaxy/model/:modelId" element={<ModelDetail />} />
+                <Route path="/ai-closed_models_2026.html" element={<ClosedSourceModels />} />
+                <Route path="/open-source-models-march-2026.html" element={<OpenSourceModels />} />
+                <Route path="/ai-model-comparison.html" element={<ModelComparisonPage />} />
                 <Route path="/blogs" element={<BlogAggregator />} />
                 <Route path="/blog/techhub" element={<TechHub />} />
                 <Route path="/blog/building-your-own-foundational-ai-models-from-scratch" element={<FoundationalModelsGuide />} />

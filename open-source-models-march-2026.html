@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Best Open Source AI Models — March 2026 | abhishekpanda.com</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,300;1,9..144,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script>
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const isEmbedded = params.get('embedded') === '1';
+    const queryTheme = params.get('theme');
+    const appTheme = localStorage.getItem('abhishekpanda-theme');
+
+    const resolvedTheme =
+      (queryTheme === 'light' || queryTheme === 'dark')
+        ? queryTheme
+        : ((appTheme === 'light' || appTheme === 'dark') ? appTheme : 'light');
+
+    document.documentElement.setAttribute('data-theme', resolvedTheme);
+
+    if (isEmbedded) {
+      document.documentElement.setAttribute('data-embedded', '1');
+
+      window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return;
+        const data = event.data || {};
+        if (data.type === 'parent-theme' && (data.theme === 'light' || data.theme === 'dark')) {
+          document.documentElement.setAttribute('data-theme', data.theme);
+        }
+      });
+    }
+  })();
+</script>
+<style>
+  :root,
+  [data-theme="dark"] {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --surface2: #131921;
+    --border: #1e2a38;
+    --border2: #243040;
+    --accent: #00e5a0;
+    --accent2: #00b8ff;
+    --accent3: #ff6b35;
+    --text: #e8edf2;
+    --muted: #6b7a8d;
+    --muted2: #4a5568;
+    --heading: #f0f4f8;
+    --gold: #ffd700;
+    --silver: #c0c8d4;
+    --bronze: #cd8b5a;
+    --tag-bg: rgba(0, 229, 160, 0.08);
+    --tag-border: rgba(0, 229, 160, 0.25);
+  }
+  [data-theme="light"] {
+    --bg: #f4f7fb;
+    --surface: #ffffff;
+    --surface2: #f7fafc;
+    --border: #d8e2ed;
+    --border2: #cdd8e6;
+    --accent: #059669;
+    --accent2: #0284c7;
+    --accent3: #ea580c;
+    --text: #1e2937;
+    --muted: #5b6b7f;
+    --muted2: #73859a;
+    --heading: #0b1220;
+    --gold: #b98600;
+    --silver: #66788f;
+    --bronze: #9a6337;
+    --tag-bg: rgba(5, 150, 105, 0.09);
+    --tag-border: rgba(5, 150, 105, 0.22);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  html[data-embedded="1"] header,
+  html[data-embedded="1"] footer,
+  html[data-embedded="1"] #scrollTop {
+    display: none !important;
+  }
+
+  /* ──── NOISE TEXTURE ──── */
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  /* ──── GRID BACKGROUND ──── */
+  body::after {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.18;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* ──── HEADER ──── */
+  header {
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .header-glow {
+    position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(0,229,160,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::before { content:''; display:inline-block; width:32px; height:1px; background: var(--accent); }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(36px, 5vw, 72px);
+    font-weight: 800; line-height: 1.05;
+    color: var(--heading); margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+  h1 span { color: var(--accent); }
+  .subtitle {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(15px, 2vw, 20px);
+    color: var(--muted);
+    line-height: 1.75;
+    max-width: 600px; margin-bottom: 32px;
+  }
+  .meta-row {
+    display: flex; gap: 24px; flex-wrap: wrap; align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--muted); letter-spacing: 0.1em;
+  }
+  .meta-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    padding: 5px 12px; border-radius: 100px;
+    font-size: 11px;
+  }
+  .meta-pill .dot { width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 6px var(--accent); animation: pulse 2s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ──── STATS BAR ──── */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px; background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    margin: 40px 0;
+  }
+  .stat-cell {
+    background: var(--surface); padding: 20px 24px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 28px; font-weight: 800;
+    color: var(--accent); display: block;
+  }
+  .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ──── PROVIDER LOGO TICKER ──── */
+  .logo-ticker-wrap {
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+    position: relative;
+    z-index: 90;
+  }
+  .logo-ticker-track {
+    display: flex; align-items: center; gap: 10px;
+    width: max-content;
+    padding: 10px 24px;
+    animation: tickerMove 36s linear infinite;
+  }
+  .logo-ticker-wrap:hover .logo-ticker-track { animation-play-state: paused; }
+  .logo-chip {
+    display: flex; align-items: center; gap: 8px;
+    border-radius: 999px;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    padding: 5px 11px;
+    white-space: nowrap;
+    font-size: 10.5px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    letter-spacing: .03em;
+  }
+  .logo-chip-icon {
+    width: 22px; height: 22px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg,#ffffff 0%,#eef2f7 100%);
+    border: 1px solid rgba(15,23,42,.16);
+    overflow: hidden;
+    flex-shrink: 0;
+    color: #0f172a;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .ticker-logo {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
+  @keyframes tickerMove {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ──── CONTROLS ──── */
+  .controls {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,12,16,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+  }
+  .controls-inner {
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+  }
+  .search-wrap {
+    position: relative; flex: 1; min-width: 240px;
+  }
+  .search-wrap svg {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); pointer-events: none;
+  }
+  #searchInput {
+    width: 100%;
+    background: var(--surface2); border: 1px solid var(--border2);
+    color: var(--text); font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; padding: 10px 14px 10px 38px;
+    border-radius: 8px; outline: none;
+    transition: border-color 0.2s;
+  }
+  #searchInput:focus { border-color: var(--accent); }
+  #searchInput::placeholder { color: var(--muted2); }
+
+  .filter-group {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .filter-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.05em;
+    padding: 8px 14px; border-radius: 6px;
+    border: 1px solid var(--border2);
+    background: var(--surface2); color: var(--muted);
+    cursor: pointer; transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active {
+    background: rgba(0,229,160,0.1);
+    border-color: var(--accent); color: var(--accent);
+    box-shadow: 0 0 12px rgba(0,229,160,0.15);
+  }
+  .sort-select {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; padding: 8px 12px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    color: var(--text); border-radius: 6px; cursor: pointer; outline: none;
+  }
+
+  /* ──── SECTION ──── */
+  .section { margin: 48px 0; }
+  .section-header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 28px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cat-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px; font-weight: 700;
+    color: var(--heading);
+  }
+  .section-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .model-count {
+    margin-left: auto;
+    font-size: 11px; color: var(--muted);
+    background: var(--surface2); border: 1px solid var(--border2);
+    padding: 3px 10px; border-radius: 100px;
+  }
+
+  /* ──── GRID ──── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+  }
+
+  /* ──── MODEL CARD ──── */
+  .model-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    cursor: default;
+    display: flex; flex-direction: column;
+  }
+  .model-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--border2);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,229,160,0.08);
+  }
+  .model-card.rank-1 { border-color: rgba(255,215,0,0.3); }
+  .model-card.rank-2 { border-color: rgba(192,200,212,0.25); }
+  .model-card.rank-3 { border-color: rgba(205,139,90,0.25); }
+  .model-card.rank-1:hover { border-color: rgba(255,215,0,0.5); box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 20px rgba(255,215,0,0.08); }
+
+  .card-top {
+    padding: 18px 20px 14px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .provider-logo {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; overflow: hidden; font-size: 20px;
+  }
+  .provider-logo img { width: 100%; height: 100%; object-fit: contain; padding: 6px; border-radius: 6px; }
+  .provider-logo .logo-fallback {
+    display: none;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--heading);
+  }
+  .logo-chip-icon .logo-fallback {
+    display: none;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+
+  .card-head-info { flex: 1; min-width: 0; }
+  .model-name {
+    font-family: 'Fraunces', serif;
+    font-size: 15px; font-weight: 700;
+    color: var(--heading); line-height: 1.3;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .provider-name { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .rank-badge {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 12px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .rank-1 .rank-badge { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid rgba(255,215,0,0.3); }
+  .rank-2 .rank-badge { background: rgba(192,200,212,0.1); color: var(--silver); border: 1px solid rgba(192,200,212,0.25); }
+  .rank-3 .rank-badge { background: rgba(205,139,90,0.1); color: var(--bronze); border: 1px solid rgba(205,139,90,0.25); }
+  .rank-4 .rank-badge, .rank-5 .rank-badge { background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
+
+  .card-body { padding: 0 20px 16px; flex: 1; }
+
+  .score-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+  .score-label { font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; min-width: 40px; }
+  .score-bar {
+    flex: 1; height: 4px; background: var(--surface2);
+    border-radius: 2px; overflow: hidden;
+  }
+  .score-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+  }
+  .score-val {
+    font-size: 11px; font-weight: 600;
+    color: var(--accent); min-width: 36px; text-align: right;
+  }
+
+  .desc {
+    font-size: 12px; color: #8a9bac; line-height: 1.65;
+    margin-bottom: 14px;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+  .tag {
+    font-size: 10px; letter-spacing: 0.05em;
+    padding: 3px 9px; border-radius: 4px;
+    background: var(--tag-bg); border: 1px solid var(--tag-border);
+    color: var(--accent); text-transform: uppercase;
+  }
+  .tag.blue { background: rgba(0,184,255,0.08); border-color: rgba(0,184,255,0.25); color: var(--accent2); }
+  .tag.orange { background: rgba(255,107,53,0.08); border-color: rgba(255,107,53,0.25); color: var(--accent3); }
+  .tag.purple { background: rgba(160,100,255,0.08); border-color: rgba(160,100,255,0.25); color: #b088ff; }
+  .tag.yellow { background: rgba(255,200,0,0.08); border-color: rgba(255,200,0,0.25); color: #ffc800; }
+
+  .card-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap;
+  }
+  .license-badge {
+    font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 4px;
+  }
+  .lic-apache { background: rgba(0,184,255,0.1); color: var(--accent2); border: 1px solid rgba(0,184,255,0.2); }
+  .lic-mit { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+  .lic-llama { background: rgba(255,107,53,0.1); color: var(--accent3); border: 1px solid rgba(255,107,53,0.2); }
+  .lic-custom { background: rgba(160,100,255,0.1); color: #b088ff; border: 1px solid rgba(160,100,255,0.2); }
+  .lic-cc { background: rgba(255,200,0,0.1); color: #ffc800; border: 1px solid rgba(255,200,0,0.2); }
+
+  .api-link {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--muted);
+    text-decoration: none; padding: 4px 10px;
+    border: 1px solid var(--border2); border-radius: 5px;
+    transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .api-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  .why-box {
+    margin: 0 20px 14px;
+    padding: 10px 12px;
+    background: rgba(0,229,160,0.04);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    font-size: 11px; color: #8fb0a0; line-height: 1.6;
+  }
+  .why-label { font-size: 9px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+
+  /* ──── HIDDEN ──── */
+  .model-card.hidden { display: none; }
+  .section.all-hidden { display: none; }
+
+  /* ──── DIVIDER ──── */
+  .section-divider {
+    border: none; border-top: 1px solid var(--border);
+    margin: 8px 0;
+  }
+
+  /* ──── COMPARISON TABLE ──── */
+  .table-section { margin: 60px 0; }
+  .table-title {
+    font-family: 'Fraunces', serif;
+    font-size: 28px; font-weight: 800;
+    color: var(--heading); margin-bottom: 8px;
+  }
+  .table-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 12px; min-width: 900px;
+  }
+  thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
+  th {
+    padding: 12px 16px; text-align: left;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); font-weight: 500; white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  td { padding: 12px 16px; }
+  td:first-child { font-weight: 600; color: var(--heading); }
+  .td-cat { font-size: 10px; }
+  .td-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600; font-size: 13px;
+  }
+  .s-high { color: var(--accent); }
+  .s-med { color: var(--gold); }
+  .s-low { color: var(--accent3); }
+
+  /* ──── FOOTER ──── */
+  footer {
+    margin-top: 80px; padding: 40px 0 60px;
+    border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--muted);
+    text-align: center;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  .footer-logo {
+    font-family: 'Fraunces', serif; font-size: 18px; font-weight: 800;
+    color: var(--heading); margin-bottom: 8px;
+  }
+
+  /* ──── NO RESULTS ──── */
+  #noResults {
+    display: none; text-align: center;
+    padding: 80px 40px; color: var(--muted);
+    font-size: 14px;
+  }
+  #noResults .emoji { font-size: 48px; display: block; margin-bottom: 16px; }
+
+  /* ──── SCROLL TOP ──── */
+  #scrollTop {
+    position: fixed; bottom: 32px; right: 32px; z-index: 200;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--surface2); border: 1px solid var(--border2);
+    color: var(--text); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.3s, transform 0.3s;
+    transform: translateY(20px);
+  }
+  #scrollTop.visible { opacity: 1; transform: translateY(0); }
+  #scrollTop:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ──── ANIMATIONS ──── */
+  @keyframes fadeInUp {
+    from { opacity:0; transform: translateY(20px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+  .model-card {
+    animation: fadeInUp 0.4s ease both;
+  }
+
+  @media (max-width: 768px) {
+    .cards-grid { grid-template-columns: 1fr; }
+    .controls-inner { flex-direction: column; align-items: stretch; }
+    .filter-group { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+    .logo-ticker-track { padding: 8px 16px; gap: 8px; animation-duration: 28s; }
+    .logo-chip { padding: 4px 8px; font-size: 10px; }
+    .logo-chip-icon { width: 20px; height: 20px; }
+    table { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="container">
+    <div class="header-glow"></div>
+    <div class="eyebrow">abhishekpanda.com · AI Research</div>
+    <h1>Best <span>Open Source</span><br>AI Models</h1>
+    <p class="subtitle">A curated intelligence atlas of the finest open-weight models across every category — verified, scored & ranked as of March 2026.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><span class="dot"></span> Last updated: March 2026</div>
+      <div class="meta-pill">10 Categories</div>
+      <div class="meta-pill">40+ Models Reviewed</div>
+      <div class="meta-pill">Open Weights Only</div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-cell"><span class="stat-num">40+</span><span class="stat-label">Models Reviewed</span></div>
+      <div class="stat-cell"><span class="stat-num">10</span><span class="stat-label">Categories</span></div>
+      <div class="stat-cell"><span class="stat-num">97%</span><span class="stat-label">Top Score (AIME)</span></div>
+      <div class="stat-cell"><span class="stat-num">91%</span><span class="stat-label">Top SWE-Bench</span></div>
+      <div class="stat-cell"><span class="stat-num">86%</span><span class="stat-label">Top Medical Score</span></div>
+      <div class="stat-cell"><span class="stat-num">Free</span><span class="stat-label">Self-Hostable</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="container">
+    <div class="controls-inner">
+      <div class="search-wrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Search models, providers, tasks…"/>
+      </div>
+      <div class="filter-group" id="filterGroup">
+        <button class="filter-btn active" data-cat="all">All</button>
+        <button class="filter-btn" data-cat="daily">💬 Daily Use</button>
+        <button class="filter-btn" data-cat="coding">💻 Coding</button>
+        <button class="filter-btn" data-cat="thinking">🧠 Thinking</button>
+        <button class="filter-btn" data-cat="image">🎨 Image Gen</button>
+        <button class="filter-btn" data-cat="video">🎬 Video Gen</button>
+        <button class="filter-btn" data-cat="audio">🎵 Audio</button>
+        <button class="filter-btn" data-cat="medical">🏥 Medical</button>
+        <button class="filter-btn" data-cat="research">🔬 Research</button>
+        <button class="filter-btn" data-cat="document">📄 Documents</button>
+        <button class="filter-btn" data-cat="multimodal">👁 Multimodal</button>
+      </div>
+      <select class="sort-select" id="sortSelect">
+        <option value="rank">Sort: Rank</option>
+        <option value="name">Sort: Name</option>
+        <option value="score">Sort: Score</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+  <div class="logo-ticker-wrap">
+    <div class="logo-ticker-track" id="logoTickerTrack"></div>
+  </div>
+
+<div class="container">
+
+<!-- ════════════ SECTION: DAILY USE ════════════ -->
+<div class="section" id="sec-daily" data-section="daily">
+  <div class="section-header">
+    <div class="cat-icon">💬</div>
+    <div>
+      <div class="section-title">Daily & General Use</div>
+      <div class="section-sub">Chat, Q&A, writing, reasoning, instruction-following — everyday tasks</div>
+    </div>
+    <span class="model-count">5 models</span>
+  </div>
+  <div class="cards-grid">
+
+    <div class="model-card rank-1" data-cat="daily" data-name="Llama 4 Maverick Meta general chat" data-score="92">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=meta.com&sz=64" alt="Meta" onerror="this.parentNode.textContent='🦙'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Llama 4 Maverick</div>
+          <div class="provider-name">Meta AI · 2025</div>
+        </div>
+        <div class="rank-badge">1</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Overall</span><div class="score-bar"><div class="score-fill" style="width:92%"></div></div><span class="score-val">92/100</span></div>
+        <div class="score-row"><span class="score-label">MMLU</span><div class="score-bar"><div class="score-fill" style="width:89%"></div></div><span class="score-val">89%</span></div>
+        <div class="desc">Meta's flagship multimodal model combines 400B total parameters (17B active via MoE) with a 1M token context window. Excels at complex instruction following, multilingual dialogue, and visual reasoning. Runs on A100 clusters.</div>
+        <div class="tags"><span class="tag">MoE 400B</span><span class="tag blue">1M Context</span><span class="tag purple">Multimodal</span><span class="tag yellow">Best General</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #1</div>Best balance of intelligence, context window, and multimodal capability. Strong MMLU, creative writing, and chat. Llama license allows broad commercial use. Community ecosystem is enormous.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-llama">Llama 4</span>
+        <a class="api-link" href="https://huggingface.co/meta-llama/Llama-4-Maverick" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-2" data-cat="daily" data-name="Qwen3 235B Alibaba MoE general" data-score="91">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=qwenlm.github.io&sz=64" alt="Alibaba" onerror="this.parentNode.textContent='🔮'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Qwen3-235B-A22B</div>
+          <div class="provider-name">Alibaba / Qwen Team · 2025</div>
+        </div>
+        <div class="rank-badge">2</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Overall</span><div class="score-bar"><div class="score-fill" style="width:91%"></div></div><span class="score-val">91/100</span></div>
+        <div class="score-row"><span class="score-label">GPQA</span><div class="score-bar"><div class="score-fill" style="width:88%"></div></div><span class="score-val">88%</span></div>
+        <div class="desc">235B total / 22B active via 128 experts MoE. Supports 100+ languages. Dual mode: non-thinking for speed, thinking mode for deep reasoning. Outperforms GPT-4o on multiple benchmarks.</div>
+        <div class="tags"><span class="tag">235B MoE</span><span class="tag blue">100+ Languages</span><span class="tag">Thinking Mode</span><span class="tag purple">128 Experts</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #2</div>Unmatched multilingual performance and dual-mode flexibility. Exceptional for global deployments. Best open-source choice for STEM + instruction following combined.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://huggingface.co/Qwen/Qwen3-235B-A22B" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-3" data-cat="daily" data-name="DeepSeek V3.2 general knowledge" data-score="90">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=deepseek.com&sz=64" alt="DeepSeek" onerror="this.parentNode.textContent='🌊'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">DeepSeek-V3.2</div>
+          <div class="provider-name">DeepSeek AI · 2025</div>
+        </div>
+        <div class="rank-badge">3</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Overall</span><div class="score-bar"><div class="score-fill" style="width:90%"></div></div><span class="score-val">90/100</span></div>
+        <div class="score-row"><span class="score-label">MMLU</span><div class="score-bar"><div class="score-fill" style="width:94%"></div></div><span class="score-val">94.2%</span></div>
+        <div class="desc">MoE architecture with DeepSeek Sparse Attention, trained on 85,000+ agentic tasks. Ties with proprietary models on MMLU. MIT license is fully commercial-friendly. Excellent general knowledge and reasoning.</div>
+        <div class="tags"><span class="tag yellow">MIT License</span><span class="tag">MMLU 94.2%</span><span class="tag blue">Agentic</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #3</div>MIT license makes it uniquely freedom-respecting. Best MMLU score among open models. Excellent for commercial deployments needing zero restrictions.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-mit">MIT</span>
+        <a class="api-link" href="https://huggingface.co/deepseek-ai/DeepSeek-V3" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-4" data-cat="daily" data-name="Llama 3.3 70B Meta versatile" data-score="85">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=meta.com&sz=64" alt="Meta" onerror="this.parentNode.textContent='🦙'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Llama 3.3 70B</div>
+          <div class="provider-name">Meta AI · 2024</div>
+        </div>
+        <div class="rank-badge">4</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Overall</span><div class="score-bar"><div class="score-fill" style="width:85%"></div></div><span class="score-val">85/100</span></div>
+        <div class="score-row"><span class="score-label">Practical</span><div class="score-bar"><div class="score-fill" style="width:88%"></div></div><span class="score-val">88%</span></div>
+        <div class="desc">Fits on a single A100 80GB, competes with GPT-4o on most benchmarks. Best consumer-deployable model. Extremely rich Ollama/vLLM ecosystem. Perfect for local self-hosting.</div>
+        <div class="tags"><span class="tag">70B Dense</span><span class="tag blue">Single GPU</span><span class="tag purple">Ollama Ready</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #4</div>Best "runs on one GPU" option. Ideal for developers wanting GPT-4-class quality on local hardware without massive infrastructure.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-llama">Llama 3</span>
+        <a class="api-link" href="https://ollama.com/library/llama3.3" target="_blank">↗ Ollama</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-5" data-cat="daily" data-name="Mistral Large 2 European multilingual" data-score="83">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=mistral.ai&sz=64" alt="Mistral" onerror="this.parentNode.textContent='🌀'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Mistral Large 2</div>
+          <div class="provider-name">Mistral AI · 2024</div>
+        </div>
+        <div class="rank-badge">5</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Overall</span><div class="score-bar"><div class="score-fill" style="width:83%"></div></div><span class="score-val">83/100</span></div>
+        <div class="score-row"><span class="score-label">Context</span><div class="score-bar"><div class="score-fill" style="width:80%"></div></div><span class="score-val">128K</span></div>
+        <div class="desc">128K context window, strong multilingual (EU languages), function calling, and code generation. European AI governance-friendly. Best pick for EU data residency requirements.</div>
+        <div class="tags"><span class="tag blue">128K Context</span><span class="tag">EU-Friendly</span><span class="tag purple">Function Call</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #5</div>Best for European compliance requirements and multilingual EU use cases. Strong 128K context and excellent function-calling capabilities.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-custom">MRL</span>
+        <a class="api-link" href="https://mistral.ai/models" target="_blank">↗ Mistral API</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ SECTION: CODING ════════════ -->
+<div class="section" id="sec-coding" data-section="coding">
+  <div class="section-header">
+    <div class="cat-icon">💻</div>
+    <div>
+      <div class="section-title">Coding & Software Engineering</div>
+      <div class="section-sub">Code generation, debugging, SWE-bench, agentic coding, terminal tasks</div>
+    </div>
+    <span class="model-count">5 models</span>
+  </div>
+  <div class="cards-grid">
+
+    <div class="model-card rank-1" data-cat="coding" data-name="GLM 4.7 ZhipuAI coding SWE-bench" data-score="95">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=zhipuai.cn&sz=64" alt="ZhipuAI" onerror="this.parentNode.textContent='⚡'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">GLM-4.7</div>
+          <div class="provider-name">Zhipu AI · 2026</div>
+        </div>
+        <div class="rank-badge">1</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Overall</span><div class="score-bar"><div class="score-fill" style="width:95%"></div></div><span class="score-val">95/100</span></div>
+        <div class="score-row"><span class="score-label">SWE-bench</span><div class="score-bar"><div class="score-fill" style="width:91%"></div></div><span class="score-val">91.2%</span></div>
+        <div class="score-row"><span class="score-label">LiveCode</span><div class="score-bar"><div class="score-fill" style="width:89%"></div></div><span class="score-val">89%</span></div>
+        <div class="desc">Tops SWE-bench at 91.2% — higher than any proprietary model at time of writing. Preserves reasoning cache for complex multi-file repositories. Optimized for agentic coding workflows.</div>
+        <div class="tags"><span class="tag yellow">SWE #1 91.2%</span><span class="tag">Repo-scale</span><span class="tag blue">Agentic</span><span class="tag purple">MoE</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #1</div>Highest SWE-bench score of any open-source model. The reasoning-cache preservation makes it uniquely powerful for large multi-file codebases. Best for production SWE agent workflows.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-custom">GLM License</span>
+        <a class="api-link" href="https://huggingface.co/THUDM/GLM-4" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-2" data-cat="coding" data-name="DeepSeek R1 reasoning coding math" data-score="92">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=deepseek.com&sz=64" alt="DeepSeek" onerror="this.parentNode.textContent='🌊'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">DeepSeek-R1</div>
+          <div class="provider-name">DeepSeek AI · 2025</div>
+        </div>
+        <div class="rank-badge">2</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Overall</span><div class="score-bar"><div class="score-fill" style="width:92%"></div></div><span class="score-val">92/100</span></div>
+        <div class="score-row"><span class="score-label">AIME</span><div class="score-bar"><div class="score-fill" style="width:88%"></div></div><span class="score-val">88%</span></div>
+        <div class="score-row"><span class="score-label">LiveCode</span><div class="score-bar"><div class="score-fill" style="width:85%"></div></div><span class="score-val">85%</span></div>
+        <div class="desc">Chain-of-thought reasoning before answering. Matches OpenAI o1 on math + coding benchmarks at a fraction of cost. MIT license. Distilled 14B/32B variants for consumer hardware. Full model needs 80GB+ VRAM.</div>
+        <div class="tags"><span class="tag">CoT Reasoning</span><span class="tag yellow">MIT License</span><span class="tag blue">Distilled</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #2</div>Best open reasoning model for algorithmic problems. MIT license means unrestricted use. CoT transparency is invaluable for debugging complex logic. Distilled versions democratize access.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-mit">MIT</span>
+        <a class="api-link" href="https://api.deepseek.com" target="_blank">↗ DeepSeek API</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-3" data-cat="coding" data-name="Qwen3 Coder coding specialized" data-score="88">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=qwenlm.github.io&sz=64" alt="Alibaba" onerror="this.parentNode.textContent='🔮'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Qwen3-235B (Code)</div>
+          <div class="provider-name">Alibaba / Qwen Team · 2025</div>
+        </div>
+        <div class="rank-badge">3</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Overall</span><div class="score-bar"><div class="score-fill" style="width:88%"></div></div><span class="score-val">88/100</span></div>
+        <div class="score-row"><span class="score-label">LiveCode</span><div class="score-bar"><div class="score-fill" style="width:86%"></div></div><span class="score-val">86%</span></div>
+        <div class="desc">Qwen3's large model excels at coding tasks when used with thinking mode. Supports 100+ programming languages. Strong at tool use and code generation for agentic pipelines.</div>
+        <div class="tags"><span class="tag">100+ Languages</span><span class="tag blue">Tool Use</span><span class="tag purple">Thinking Mode</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #3</div>Excellent multilingual code generation and tool-use API integration. The thinking mode provides deeper code reasoning than most competing models.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://huggingface.co/Qwen" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-4" data-cat="coding" data-name="Phi-4 Microsoft small coding" data-score="84">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=microsoft.com&sz=64" alt="Microsoft" onerror="this.parentNode.textContent='🔷'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Phi-4 (14B)</div>
+          <div class="provider-name">Microsoft · 2024</div>
+        </div>
+        <div class="rank-badge">4</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Overall</span><div class="score-bar"><div class="score-fill" style="width:84%"></div></div><span class="score-val">84/100</span></div>
+        <div class="score-row"><span class="score-label">Math/Code</span><div class="score-bar"><div class="score-fill" style="width:87%"></div></div><span class="score-val">87%</span></div>
+        <div class="desc">14B parameters that punch far above weight class. Runs on RTX 3090/4090. Best option for local inference on consumer hardware. Strong at reasoning, math, and structured code generation.</div>
+        <div class="tags"><span class="tag orange">Consumer GPU</span><span class="tag">10GB VRAM</span><span class="tag blue">Edge Deploy</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #4</div>Best small model for coding on consumer hardware. If you have an RTX 4090, Phi-4 gives you surprisingly strong coding results without needing a data center.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-mit">MIT</span>
+        <a class="api-link" href="https://huggingface.co/microsoft/phi-4" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-5" data-cat="coding" data-name="DeepSeek V3.2 coding agent" data-score="90">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=deepseek.com&sz=64" alt="DeepSeek" onerror="this.parentNode.textContent='🌊'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">DeepSeek-V3.2</div>
+          <div class="provider-name">DeepSeek AI · 2025</div>
+        </div>
+        <div class="rank-badge">5</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Overall</span><div class="score-bar"><div class="score-fill" style="width:90%"></div></div><span class="score-val">90/100</span></div>
+        <div class="score-row"><span class="score-label">Coding</span><div class="score-bar"><div class="score-fill" style="width:88%"></div></div><span class="score-val">88%</span></div>
+        <div class="desc">V3.2 specialised variant (DeepSeek-V3.2-Speciale) achieves GPT-5-level on hard math benchmarks. Strong for agentic coding pipelines and automated code review.</div>
+        <div class="tags"><span class="tag yellow">MIT</span><span class="tag blue">GPT-5 Level Math</span><span class="tag">8×H200</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #5</div>For math-heavy code (algorithms, scientific computing) the Speciale variant is unmatched. MIT license with frontier-class math performance.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-mit">MIT</span>
+        <a class="api-link" href="https://platform.deepseek.com" target="_blank">↗ DeepSeek API</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ SECTION: THINKING ════════════ -->
+<div class="section" id="sec-thinking" data-section="thinking">
+  <div class="section-header">
+    <div class="cat-icon">🧠</div>
+    <div>
+      <div class="section-title">Extensive Thinking & Deep Reasoning</div>
+      <div class="section-sub">Chain-of-thought, multi-step logic, math olympiad, STEM reasoning</div>
+    </div>
+    <span class="model-count">4 models</span>
+  </div>
+  <div class="cards-grid">
+
+    <div class="model-card rank-1" data-cat="thinking" data-name="GLM-5 Reasoning ZhipuAI thinking" data-score="96">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=zhipuai.cn&sz=64" alt="ZhipuAI" onerror="this.parentNode.textContent='⚡'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">GLM-5 (Reasoning)</div>
+          <div class="provider-name">Zhipu AI / Z AI · 2026</div>
+        </div>
+        <div class="rank-badge">1</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Quality Idx</span><div class="score-bar"><div class="score-fill" style="width:96%"></div></div><span class="score-val">49.64 QI</span></div>
+        <div class="score-row"><span class="score-label">LiveCode</span><div class="score-bar"><div class="score-fill" style="width:93%"></div></div><span class="score-val">93%</span></div>
+        <div class="score-row"><span class="score-label">Context</span><div class="score-bar"><div class="score-fill" style="width:100%"></div></div><span class="score-val">203K</span></div>
+        <div class="desc">Leads Artificial Analysis Intelligence Index v4.0 (Feb 2026) with Quality Index 49.64. 203K context window. Dethroned Kimi K2.5 from #1 spot. Best open-source model for complex analytical tasks.</div>
+        <div class="tags"><span class="tag yellow">QI #1 Ranked</span><span class="tag">203K Context</span><span class="tag blue">Apache 2.0</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #1</div>Top of Artificial Analysis Intelligence Index v4.0 — the most rigorous multi-benchmark composite. Beats all other open models on combined reasoning + coding + knowledge.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Open License</span>
+        <a class="api-link" href="https://huggingface.co/THUDM" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-2" data-cat="thinking" data-name="Kimi K2.5 Reasoning math AIME" data-score="95">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=kimi.moonshot.cn&sz=64" alt="Moonshot AI" onerror="this.parentNode.textContent='🌙'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Kimi K2.5 (Reasoning)</div>
+          <div class="provider-name">Moonshot AI · 2026</div>
+        </div>
+        <div class="rank-badge">2</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">AIME 2025</span><div class="score-bar"><div class="score-fill" style="width:96%"></div></div><span class="score-val">96%</span></div>
+        <div class="score-row"><span class="score-label">GPQA</span><div class="score-bar"><div class="score-fill" style="width:92%"></div></div><span class="score-val">92%</span></div>
+        <div class="desc">96% on AIME 2025 — outperforms most proprietary models on mathematical reasoning. Designed for formal logic, proof writing, and scientific reasoning. Previously ranked #1 before GLM-5.</div>
+        <div class="tags"><span class="tag yellow">AIME 96%</span><span class="tag">Math Expert</span><span class="tag blue">Scientific</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #2</div>Best pure math reasoning model. If your workload is olympiad math, scientific proofs, or formal logic, Kimi K2.5 is the top choice over everything else.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-custom">Moonshot</span>
+        <a class="api-link" href="https://platform.moonshot.cn" target="_blank">↗ Kimi API</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-3" data-cat="thinking" data-name="QwQ 32B Qwen thinking reasoning" data-score="88">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=qwenlm.github.io&sz=64" alt="Alibaba" onerror="this.parentNode.textContent='🔮'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">QwQ-32B</div>
+          <div class="provider-name">Alibaba / Qwen Team · 2025</div>
+        </div>
+        <div class="rank-badge">3</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">AIME</span><div class="score-bar"><div class="score-fill" style="width:85%"></div></div><span class="score-val">85%</span></div>
+        <div class="score-row"><span class="score-label">Consumer</span><div class="score-bar"><div class="score-fill" style="width:90%"></div></div><span class="score-val">Best</span></div>
+        <div class="desc">32B thinking model runs on a single RTX 4090 (24GB VRAM). Produces extended chain-of-thought reasoning. Best "runs on consumer hardware" thinking model. Apache 2.0 license.</div>
+        <div class="tags"><span class="tag orange">24GB VRAM</span><span class="tag blue">Apache 2.0</span><span class="tag">Extended CoT</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #3</div>Only frontier-class thinking model that runs on a single consumer GPU. Enormous practical value for solo developers and researchers without datacenter access.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://huggingface.co/Qwen/QwQ-32B" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-4" data-cat="thinking" data-name="Qwen3 235B thinking mode math STEM" data-score="90">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=qwenlm.github.io&sz=64" alt="Alibaba" onerror="this.parentNode.textContent='🔮'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Qwen3-235B (Thinking)</div>
+          <div class="provider-name">Alibaba / Qwen Team · 2025</div>
+        </div>
+        <div class="rank-badge">4</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">MATH-500</span><div class="score-bar"><div class="score-fill" style="width:97.8%"></div></div><span class="score-val">97.8%</span></div>
+        <div class="score-row"><span class="score-label">AIME</span><div class="score-bar"><div class="score-fill" style="width:93%"></div></div><span class="score-val">93%</span></div>
+        <div class="desc">With Thinking Mode enabled, achieves 97.8% on MATH-500 — the highest math benchmark score among all open-source models. Uses &lt;think&gt;&lt;/think&gt; reasoning blocks.</div>
+        <div class="tags"><span class="tag yellow">MATH-500 97.8%</span><span class="tag purple">Thinking Mode</span><span class="tag">235B MoE</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #4</div>Highest MATH-500 accuracy ever achieved by an open model. Perfect for academic research, complex problem solving, and mathematical proofs.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://huggingface.co/Qwen/Qwen3-235B-A22B-Thinking" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ SECTION: IMAGE GEN ════════════ -->
+<div class="section" id="sec-image" data-section="image">
+  <div class="section-header">
+    <div class="cat-icon">🎨</div>
+    <div>
+      <div class="section-title">Image Generation</div>
+      <div class="section-sub">Text-to-image, image editing, photorealism, artistic generation</div>
+    </div>
+    <span class="model-count">4 models</span>
+  </div>
+  <div class="cards-grid">
+
+    <div class="model-card rank-1" data-cat="image" data-name="FLUX.2 dev Black Forest Labs image" data-score="95">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=blackforestlabs.ai&sz=64" alt="BFL" onerror="this.parentNode.textContent='🌲'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">FLUX.2 [dev]</div>
+          <div class="provider-name">Black Forest Labs · Nov 2025</div>
+        </div>
+        <div class="rank-badge">1</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Quality</span><div class="score-bar"><div class="score-fill" style="width:95%"></div></div><span class="score-val">95/100</span></div>
+        <div class="score-row"><span class="score-label">Resolution</span><div class="score-bar"><div class="score-fill" style="width:100%"></div></div><span class="score-val">4MP</span></div>
+        <div class="desc">Production-grade visual creation. 32B open-weight model supporting image generation and editing. Up to 10 reference images for character/style consistency. 4MP resolution output. HEX color matching. Runs on consumer GPUs.</div>
+        <div class="tags"><span class="tag yellow">4MP Output</span><span class="tag">10 References</span><span class="tag blue">Editing</span><span class="tag purple">Typography</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #1</div>State-of-the-art production quality. Multi-reference consistency, 4MP resolution, and HEX color matching make it the only truly professional open-weight option for commercial work.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-custom">FLUX Dev Lic.</span>
+        <a class="api-link" href="https://blackforestlabs.ai" target="_blank">↗ BFL API</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-2" data-cat="image" data-name="Stable Diffusion 3.5 Stability AI" data-score="87">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=stability.ai&sz=64" alt="Stability AI" onerror="this.parentNode.textContent='🎭'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Stable Diffusion 3.5 Large</div>
+          <div class="provider-name">Stability AI · 2024</div>
+        </div>
+        <div class="rank-badge">2</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Quality</span><div class="score-bar"><div class="score-fill" style="width:87%"></div></div><span class="score-val">87/100</span></div>
+        <div class="score-row"><span class="score-label">Ecosystem</span><div class="score-bar"><div class="score-fill" style="width:100%"></div></div><span class="score-val">Largest</span></div>
+        <div class="desc">Most mature ecosystem in AI image generation — 90,000+ fine-tuned models on HuggingFace, vast LoRA library, ControlNet support. The cornerstone of community image generation. Broadest tooling (ComfyUI, Automatic1111).</div>
+        <div class="tags"><span class="tag blue">90K+ LoRAs</span><span class="tag">ControlNet</span><span class="tag purple">ComfyUI</span><span class="tag orange">Apache 2.0 SD3</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #2</div>Unbeatable ecosystem. The sheer breadth of fine-tunes, community models, and tooling means you can customize for any art style, character, or domain with minimal effort.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Stability AI</span>
+        <a class="api-link" href="https://stability.ai/stable-diffusion" target="_blank">↗ Stability API</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-3" data-cat="image" data-name="HiDream-I1 image generation" data-score="86">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=hidream.ai&sz=64" alt="HiDream" onerror="this.parentNode.textContent='💭'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">HiDream-I1</div>
+          <div class="provider-name">HiDream.ai · Apr 2025</div>
+        </div>
+        <div class="rank-badge">3</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Quality</span><div class="score-bar"><div class="score-fill" style="width:86%"></div></div><span class="score-val">86/100</span></div>
+        <div class="score-row"><span class="score-label">Benchmark</span><div class="score-bar"><div class="score-fill" style="width:88%"></div></div><span class="score-val">Beats SDXL</span></div>
+        <div class="desc">17B parameter model. Outperforms SDXL, DALL-E 3, and FLUX.1 on key benchmarks since April 2025 release. Autoregressive + diffusion hybrid architecture. Strong knowledge-intensive prompt adherence.</div>
+        <div class="tags"><span class="tag">17B Hybrid</span><span class="tag blue">Beats DALL-E 3</span><span class="tag purple">Autoregressive</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #3</div>Novel hybrid architecture bridges LLM prompt understanding with diffusion quality. Strong at complex, knowledge-intensive prompts that confuse pure diffusion models.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://huggingface.co/HiDream-ai" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-4" data-cat="image" data-name="FLUX.1 Schnell fast inference image" data-score="82">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=blackforestlabs.ai&sz=64" alt="BFL" onerror="this.parentNode.textContent='🌲'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">FLUX.1 [schnell]</div>
+          <div class="provider-name">Black Forest Labs · 2024</div>
+        </div>
+        <div class="rank-badge">4</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Speed</span><div class="score-bar"><div class="score-fill" style="width:95%"></div></div><span class="score-val">4.5s/img</span></div>
+        <div class="score-row"><span class="score-label">Quality</span><div class="score-bar"><div class="score-fill" style="width:82%"></div></div><span class="score-val">82/100</span></div>
+        <div class="desc">Apache 2.0 distilled model for rapid generation. 4-step inference. Best speed-to-quality ratio. Sub-5 second generation on consumer hardware. Fully commercial use allowed with Apache 2.0.</div>
+        <div class="tags"><span class="tag yellow">Apache 2.0</span><span class="tag orange">4-step Fast</span><span class="tag">Commercial ✓</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #4</div>Only FLUX variant with Apache 2.0 license AND fast 4-step inference. Ideal for high-throughput commercial pipelines needing thousands of images per hour.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://huggingface.co/black-forest-labs/FLUX.1-schnell" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ SECTION: VIDEO GEN ════════════ -->
+<div class="section" id="sec-video" data-section="video">
+  <div class="section-header">
+    <div class="cat-icon">🎬</div>
+    <div>
+      <div class="section-title">Video Generation</div>
+      <div class="section-sub">Text-to-video, image-to-video, cinematic generation, open-source</div>
+    </div>
+    <span class="model-count">4 models</span>
+  </div>
+  <div class="cards-grid">
+
+    <div class="model-card rank-1" data-cat="video" data-name="Wan2.2 Alibaba video generation" data-score="94">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=wanxiang.aliyun.com&sz=64" alt="Alibaba Wan" onerror="this.parentNode.textContent='🎞️'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Wan2.2 (T2V + I2V A14B)</div>
+          <div class="provider-name">Alibaba WaveSpeed AI · 2026</div>
+        </div>
+        <div class="rank-badge">1</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">VBench</span><div class="score-bar"><div class="score-fill" style="width:94%"></div></div><span class="score-val">84.7%+</span></div>
+        <div class="score-row"><span class="score-label">Resolution</span><div class="score-bar"><div class="score-fill" style="width:90%"></div></div><span class="score-val">720p</span></div>
+        <div class="desc">MoE architecture for video generation — first of its kind. Trained on 1.5B videos + 10B images. Outperforms all open-source and competes with commercial solutions. Text+image→video. Bilingual EN/CN. 8GB VRAM for 1.3B variant.</div>
+        <div class="tags"><span class="tag yellow">VBench #1</span><span class="tag">MoE Video</span><span class="tag blue">720p</span><span class="tag orange">8GB VRAM</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #1</div>Highest VBench score among open-source models. MoE architecture's specialized experts for noise stages deliver superior detail. The 1.3B variant is revolutionary for consumer hardware access.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://huggingface.co/Wan-AI" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-2" data-cat="video" data-name="HunyuanVideo Tencent cinematic" data-score="91">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=tencent.com&sz=64" alt="Tencent" onerror="this.parentNode.textContent='🐧'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">HunyuanVideo 1.5</div>
+          <div class="provider-name">Tencent · 2024-2025</div>
+        </div>
+        <div class="rank-badge">2</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Quality</span><div class="score-bar"><div class="score-fill" style="width:91%"></div></div><span class="score-val">91/100</span></div>
+        <div class="score-row"><span class="score-label">FPS/Len</span><div class="score-bar"><div class="score-fill" style="width:85%"></div></div><span class="score-val">24fps/15s</span></div>
+        <div class="desc">13B parameter model. 24fps cinematic output at 1280×720. Dual-stream transformer + decoder LLM text encoder. Avatar, I2V, and custom generation variants available. Best for cinematic storytelling.</div>
+        <div class="tags"><span class="tag purple">13B Params</span><span class="tag blue">24fps</span><span class="tag">Avatar Mode</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #2</div>Best cinematic quality among open models. The 3D-VAE + LLM text encoder combination produces the most realistic human characters and facial expressions of any open video model.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-custom">Hunyuan Comm.</span>
+        <a class="api-link" href="https://github.com/Tencent-Hunyuan/HunyuanVideo" target="_blank">↗ GitHub</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-3" data-cat="video" data-name="LTX-Video Lightricks fast video" data-score="85">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=lightricks.com&sz=64" alt="Lightricks" onerror="this.parentNode.textContent='⚡'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">LTX-Video 2.0</div>
+          <div class="provider-name">Lightricks · 2025</div>
+        </div>
+        <div class="rank-badge">3</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Speed</span><div class="score-bar"><div class="score-fill" style="width:90%"></div></div><span class="score-val">Fastest</span></div>
+        <div class="score-row"><span class="score-label">VRAM</span><div class="score-bar"><div class="score-fill" style="width:85%"></div></div><span class="score-val">12GB min</span></div>
+        <div class="desc">Optimized for speed and efficiency. Runs on 12GB VRAM (RTX 3060 12GB). Best for rapid iteration and prototyping. Excellent text-to-video and image-to-video. Apache 2.0 licensed.</div>
+        <div class="tags"><span class="tag orange">12GB VRAM</span><span class="tag blue">Apache 2.0</span><span class="tag">Fast Iter.</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #3</div>Best speed-to-quality ratio for developers prototyping video workflows. 12GB VRAM requirement makes it the most accessible capable video model for mid-range GPUs.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://huggingface.co/Lightricks/LTX-Video" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-4" data-cat="video" data-name="CogVideoX THUDM video generation" data-score="82">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=zhipuai.cn&sz=64" alt="THUDM" onerror="this.parentNode.textContent='🎬'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">CogVideoX-5B</div>
+          <div class="provider-name">THUDM (Zhipu) · 2024</div>
+        </div>
+        <div class="rank-badge">4</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Quality</span><div class="score-bar"><div class="score-fill" style="width:82%"></div></div><span class="score-val">82/100</span></div>
+        <div class="score-row"><span class="score-label">VRAM</span><div class="score-bar"><div class="score-fill" style="width:78%"></div></div><span class="score-val">16GB</span></div>
+        <div class="desc">720×480 resolution, 6-second clips at 8fps. Apache 2.0 licensed. Excellent for educational demos and educational content creation. Strong prompt alignment. HuggingFace Diffusers integration.</div>
+        <div class="tags"><span class="tag blue">Apache 2.0</span><span class="tag">Diffusers</span><span class="tag purple">Fine-tunable</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #4</div>Most fine-tunable open video model with best Diffusers/LoRA support. Ideal for creating specialized video generation pipelines with domain-specific training data.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://github.com/THUDM/CogVideo" target="_blank">↗ GitHub</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ SECTION: AUDIO ════════════ -->
+<div class="section" id="sec-audio" data-section="audio">
+  <div class="section-header">
+    <div class="cat-icon">🎵</div>
+    <div>
+      <div class="section-title">Audio Generation</div>
+      <div class="section-sub">Text-to-speech, voice cloning, music generation, speech synthesis</div>
+    </div>
+    <span class="model-count">4 models</span>
+  </div>
+  <div class="cards-grid">
+
+    <div class="model-card rank-1" data-cat="audio" data-name="Fish Speech V1.5 TTS multilingual" data-score="93">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=fish.audio&sz=64" alt="Fish Audio" onerror="this.parentNode.textContent='🐟'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Fish Speech V1.5</div>
+          <div class="provider-name">Fish Audio · 2025</div>
+        </div>
+        <div class="rank-badge">1</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">TTS Arena</span><div class="score-bar"><div class="score-fill" style="width:93%"></div></div><span class="score-val">ELO 1339</span></div>
+        <div class="score-row"><span class="score-label">WER (EN)</span><div class="score-bar"><div class="score-fill" style="width:97%"></div></div><span class="score-val">3.5%</span></div>
+        <div class="desc">DualAR architecture. 300K+ hours EN/CN training data, 100K+ hours Japanese. ELO 1339 on TTS Arena. 3.5% WER and 1.2% CER for English. Zero-shot voice cloning from short reference audio. Multi-speaker.</div>
+        <div class="tags"><span class="tag yellow">ELO 1339 #1</span><span class="tag blue">Voice Clone</span><span class="tag">EN/CN/JP</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #1</div>Best TTS Arena ELO score among open models. DualAR architecture produces the most natural prosody. Industry-leading accuracy on English and Chinese with zero-shot cloning.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-custom">Fish Audio</span>
+        <a class="api-link" href="https://fish.audio" target="_blank">↗ Fish Audio API</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-2" data-cat="audio" data-name="Kokoro 82M TTS fast lightweight" data-score="88">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=github.com&sz=64" alt="Hexgrad" onerror="this.parentNode.textContent='🎙️'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Kokoro v1.0 (82M)</div>
+          <div class="provider-name">hexgrad (Indie) · 2025</div>
+        </div>
+        <div class="rank-badge">2</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Speed</span><div class="score-bar"><div class="score-fill" style="width:95%"></div></div><span class="score-val">210× RT</span></div>
+        <div class="score-row"><span class="score-label">Size</span><div class="score-bar"><div class="score-fill" style="width:100%"></div></div><span class="score-val">82M 🏆</span></div>
+        <div class="desc">Only 82M parameters yet delivers comparable quality to models 15× its size. 210× realtime on RTX 4090. Generates 6-hour audiobook in 4 minutes. Apache 2.0. 8 languages, 48 voices. Decoder-only — no diffusion bottleneck.</div>
+        <div class="tags"><span class="tag blue">Apache 2.0</span><span class="tag orange">82M Tiny</span><span class="tag">210× Speed</span><span class="tag yellow">Edge Ready</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #2</div>The "Stable Diffusion moment" for TTS. 82M parameters at enterprise quality is revolutionary. Deploy on a Raspberry Pi. Perfect for edge, mobile, and high-throughput scenarios.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://github.com/hexgrad/kokoro" target="_blank">↗ GitHub</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-3" data-cat="audio" data-name="CosyVoice2 Alibaba streaming TTS" data-score="87">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=alibabacloud.com&sz=64" alt="Alibaba" onerror="this.parentNode.textContent='☁️'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">CosyVoice2-0.5B</div>
+          <div class="provider-name">Alibaba AI · 2024</div>
+        </div>
+        <div class="rank-badge">3</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Latency</span><div class="score-bar"><div class="score-fill" style="width:90%"></div></div><span class="score-val">150ms</span></div>
+        <div class="score-row"><span class="score-label">MOS</span><div class="score-bar"><div class="score-fill" style="width:88%"></div></div><span class="score-val">5.53</span></div>
+        <div class="desc">150ms streaming latency — best for real-time conversational AI. MOS improved from 5.4→5.53. Supports Chinese dialects, English, Japanese, Korean. Fine-grained emotion and dialect control. Unified streaming/non-streaming design.</div>
+        <div class="tags"><span class="tag orange">150ms Latency</span><span class="tag blue">Streaming</span><span class="tag purple">Emotion Ctrl</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #3</div>Best latency for real-time conversational AI applications. The 150ms first-token latency is class-leading. Unique dialect control makes it unmatched for Chinese regional applications.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://github.com/FunAudioLLM/CosyVoice" target="_blank">↗ GitHub</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-4" data-cat="audio" data-name="MusicGen Meta music generation" data-score="84">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=meta.com&sz=64" alt="Meta" onerror="this.parentNode.textContent='🎶'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">MusicGen Large</div>
+          <div class="provider-name">Meta AI · 2023-ongoing</div>
+        </div>
+        <div class="rank-badge">4</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Music</span><div class="score-bar"><div class="score-fill" style="width:84%"></div></div><span class="score-val">84/100</span></div>
+        <div class="score-row"><span class="score-label">Genres</span><div class="score-bar"><div class="score-fill" style="width:90%"></div></div><span class="score-val">All</span></div>
+        <div class="desc">Text-to-music generation from natural language. Trained on licensed music, multiple sizes for quality/speed. Use case: game soundtracks, video backgrounds, creative exploration. Open weights + HuggingFace integration.</div>
+        <div class="tags"><span class="tag yellow">CC-BY-NC 4.0</span><span class="tag blue">All Genres</span><span class="tag">Text→Music</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #4</div>Most mature and widely-used open music generation model. Excellent for content creators needing royalty-free background music from a simple text prompt.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-cc">CC-BY-NC 4.0</span>
+        <a class="api-link" href="https://huggingface.co/facebook/musicgen-large" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ SECTION: MEDICAL ════════════ -->
+<div class="section" id="sec-medical" data-section="medical">
+  <div class="section-header">
+    <div class="cat-icon">🏥</div>
+    <div>
+      <div class="section-title">Medical & Health AI</div>
+      <div class="section-sub">Clinical reasoning, medical imaging, biomedical NLP, USMLE benchmarks</div>
+    </div>
+    <span class="model-count">4 models</span>
+  </div>
+  <div class="cards-grid">
+
+    <div class="model-card rank-1" data-cat="medical" data-name="MedGemma 27B Google medical imaging" data-score="92">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=google.com&sz=64" alt="Google" onerror="this.parentNode.textContent='🔬'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">MedGemma 27B</div>
+          <div class="provider-name">Google · Jan 2026</div>
+        </div>
+        <div class="rank-badge">1</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">CXR Report</span><div class="score-bar"><div class="score-fill" style="width:92%"></div></div><span class="score-val">RadGraph 30.3</span></div>
+        <div class="score-row"><span class="score-label">Medical</span><div class="score-bar"><div class="score-fill" style="width:90%"></div></div><span class="score-val">90%+</span></div>
+        <div class="desc">Google's open medical model built on Gemma 3. 4B multimodal + 27B text-only variants. SigLIP encoder pre-trained on de-identified medical images. State-of-the-art CXR report generation. Integrates with FHIR, Gemini Live, web search agents.</div>
+        <div class="tags"><span class="tag yellow">Google·Gemma 3</span><span class="tag blue">Medical Imaging</span><span class="tag purple">FHIR Ready</span><span class="tag">4B+27B</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #1</div>Only open model with dedicated medical imaging encoder trained on de-identified clinical scans. FHIR integration makes it plug-and-play with healthcare systems. Backed by Google Research.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-custom">Gemma License</span>
+        <a class="api-link" href="https://developers.google.com/health-ai-developer-foundations/medgemma" target="_blank">↗ Google Dev</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-2" data-cat="medical" data-name="OpenBioLLM 70B biomedical clinical" data-score="89">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=huggingface.co&sz=64" alt="Saama AI" onerror="this.parentNode.textContent='🧬'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">OpenBioLLM-70B</div>
+          <div class="provider-name">Saama AI · 2024</div>
+        </div>
+        <div class="rank-badge">2</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Bio Bench</span><div class="score-bar"><div class="score-fill" style="width:89%"></div></div><span class="score-val">86.06%</span></div>
+        <div class="score-row"><span class="score-label">vs GPT-4</span><div class="score-bar"><div class="score-fill" style="width:88%"></div></div><span class="score-val">Outperforms</span></div>
+        <div class="desc">Beats GPT-4, Gemini, Meditron-70B, Med-PaLM-1 & 2 across 9 biomedical datasets with 86.06% average score. Built on Llama 3 70B with DPO fine-tuning and custom medical instruction dataset. Strong on Clinical KG, Medical Genetics, PubMedQA.</div>
+        <div class="tags"><span class="tag yellow">Beats GPT-4</span><span class="tag">9 Bio Datasets</span><span class="tag blue">Llama 3 Base</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #2</div>Outperforms GPT-4 and Med-PaLM-2 on standard biomedical benchmarks despite smaller size. Best for clinical question answering, medical research summarization, and diagnostic support.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-llama">Llama 3</span>
+        <a class="api-link" href="https://huggingface.co/aaditya/OpenBioLLM-Llama3-70B" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-3" data-cat="medical" data-name="Meditron 70B EPFL clinical" data-score="85">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=epfl.ch&sz=64" alt="EPFL" onerror="this.parentNode.textContent='🏫'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Meditron-70B</div>
+          <div class="provider-name">EPFL · 2024</div>
+        </div>
+        <div class="rank-badge">3</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">MedQA</span><div class="score-bar"><div class="score-fill" style="width:82%"></div></div><span class="score-val">82.3%</span></div>
+        <div class="score-row"><span class="score-label">USMLE</span><div class="score-bar"><div class="score-fill" style="width:80%"></div></div><span class="score-val">80%</span></div>
+        <div class="desc">Llama 2-based model continually pre-trained on medical literature, clinical guidelines, and PubMed. EPFL's rigorous academic approach yields reliable clinical reasoning. Trusted for medical research workflows.</div>
+        <div class="tags"><span class="tag purple">Academic</span><span class="tag blue">PubMed</span><span class="tag">Clinical Guide</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #3</div>Academic rigor from EPFL makes it the most trustworthy for research citation. Trained on verified clinical guidelines, making it more conservative and reliable than pure-instruction-tuned models.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-llama">Llama 2</span>
+        <a class="api-link" href="https://huggingface.co/epfl-llm/meditron-70b" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-4" data-cat="medical" data-name="BioMistral 7B biomedical multilingual" data-score="78">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=huggingface.co&sz=64" alt="BioMistral" onerror="this.parentNode.textContent='💊'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">BioMistral-7B</div>
+          <div class="provider-name">BioMistral Team · 2024</div>
+        </div>
+        <div class="rank-badge">4</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Med Score</span><div class="score-bar"><div class="score-fill" style="width:78%"></div></div><span class="score-val">78/100</span></div>
+        <div class="score-row"><span class="score-label">Languages</span><div class="score-bar"><div class="score-fill" style="width:85%"></div></div><span class="score-val">8 Lang</span></div>
+        <div class="desc">Mistral 7B fine-tuned on PubMed Central. Apache 2.0 license. Multilingual support across 8 languages. Lightweight enough to run locally on consumer hardware. Best for international biomedical NLP research.</div>
+        <div class="tags"><span class="tag blue">Apache 2.0</span><span class="tag">8 Languages</span><span class="tag orange">Consumer GPU</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #4</div>Only fully Apache 2.0 medical model with multi-language support. Perfect for international research teams or healthcare startups needing a deployable medical NLP model without licensing restrictions.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://huggingface.co/BioMistral/BioMistral-7B" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ SECTION: RESEARCH ════════════ -->
+<div class="section" id="sec-research" data-section="research">
+  <div class="section-header">
+    <div class="cat-icon">🔬</div>
+    <div>
+      <div class="section-title">Research & Study</div>
+      <div class="section-sub">Long-context analysis, scientific literature, document Q&A, academic work</div>
+    </div>
+    <span class="model-count">3 models</span>
+  </div>
+  <div class="cards-grid">
+
+    <div class="model-card rank-1" data-cat="research" data-name="Llama 4 Scout long context research" data-score="92">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=meta.com&sz=64" alt="Meta" onerror="this.parentNode.textContent='🦙'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Llama 4 Scout</div>
+          <div class="provider-name">Meta AI · 2025</div>
+        </div>
+        <div class="rank-badge">1</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Context</span><div class="score-bar"><div class="score-fill" style="width:100%"></div></div><span class="score-val">10M tokens</span></div>
+        <div class="score-row"><span class="score-label">Overall</span><div class="score-bar"><div class="score-fill" style="width:88%"></div></div><span class="score-val">88/100</span></div>
+        <div class="desc">10 million token context window — the largest of any open-weight model. Process entire research libraries in one pass. 17B active parameters (109B total MoE). Designed for extreme long-context processing. Multimodal.</div>
+        <div class="tags"><span class="tag yellow">10M Context 🏆</span><span class="tag blue">Multimodal</span><span class="tag">Library-Scale</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #1</div>10M token context is transformative for research. Read 100+ papers simultaneously, process entire codebases, or analyze multi-year document archives in a single prompt. No other open model comes close.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-llama">Llama 4</span>
+        <a class="api-link" href="https://huggingface.co/meta-llama" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-2" data-cat="research" data-name="DeepSeek V3.2 MMLU knowledge research" data-score="90">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=deepseek.com&sz=64" alt="DeepSeek" onerror="this.parentNode.textContent='🌊'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">DeepSeek-V3.2</div>
+          <div class="provider-name">DeepSeek AI · 2025</div>
+        </div>
+        <div class="rank-badge">2</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">MMLU</span><div class="score-bar"><div class="score-fill" style="width:94%"></div></div><span class="score-val">94.2%</span></div>
+        <div class="score-row"><span class="score-label">Knowledge</span><div class="score-bar"><div class="score-fill" style="width:91%"></div></div><span class="score-val">Best Open</span></div>
+        <div class="desc">Best MMLU score among all open-source models (94.2%) — ties with GPT-4o on knowledge benchmarks. Trained on 85K agentic tasks including search and research workflows. Excellent for academic Q&A and literature synthesis.</div>
+        <div class="tags"><span class="tag yellow">MMLU 94.2%</span><span class="tag blue">MIT License</span><span class="tag">Knowledge King</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #2</div>Best general knowledge comprehension of any open model. The 94.2% MMLU effectively means it has absorbed as much factual knowledge as the best proprietary models.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-mit">MIT</span>
+        <a class="api-link" href="https://platform.deepseek.com" target="_blank">↗ DeepSeek API</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-3" data-cat="research" data-name="Qwen3 235B Thinking research STEM" data-score="91">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=qwenlm.github.io&sz=64" alt="Alibaba" onerror="this.parentNode.textContent='🔮'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Qwen3-235B-Thinking</div>
+          <div class="provider-name">Alibaba / Qwen Team · 2025</div>
+        </div>
+        <div class="rank-badge">3</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">GPQA</span><div class="score-bar"><div class="score-fill" style="width:88%"></div></div><span class="score-val">88%</span></div>
+        <div class="score-row"><span class="score-label">MATH</span><div class="score-bar"><div class="score-fill" style="width:97.8%"></div></div><span class="score-val">97.8%</span></div>
+        <div class="desc">Thinking mode enables deep scientific reasoning. GPQA Diamond 88% makes it exceptional for graduate-level science questions. 100+ language support for international research. Best for STEM research assistance.</div>
+        <div class="tags"><span class="tag">GPQA 88%</span><span class="tag blue">100+ Languages</span><span class="tag purple">STEM Expert</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #3</div>GPQA Diamond 88% is doctoral-exam level science knowledge. Best for physics, chemistry, biology research assistance. Multilingual support serves global research communities.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://huggingface.co/Qwen" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ SECTION: DOCUMENT ════════════ -->
+<div class="section" id="sec-document" data-section="document">
+  <div class="section-header">
+    <div class="cat-icon">📄</div>
+    <div>
+      <div class="section-title">Document, PDF & Slides Generation</div>
+      <div class="section-sub">Structured output, document Q&A, report writing, multimodal document understanding</div>
+    </div>
+    <span class="model-count">3 models</span>
+  </div>
+  <div class="cards-grid">
+
+    <div class="model-card rank-1" data-cat="document" data-name="Llama 4 Scout document PDF processing" data-score="91">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=meta.com&sz=64" alt="Meta" onerror="this.parentNode.textContent='🦙'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Llama 4 Scout</div>
+          <div class="provider-name">Meta AI · 2025</div>
+        </div>
+        <div class="rank-badge">1</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Context</span><div class="score-bar"><div class="score-fill" style="width:100%"></div></div><span class="score-val">10M tokens</span></div>
+        <div class="score-row"><span class="score-label">Multimodal</span><div class="score-bar"><div class="score-fill" style="width:90%"></div></div><span class="score-val">✓ Visual</span></div>
+        <div class="desc">10M token context enables processing hundreds of PDF pages simultaneously. Multimodal: understands charts, diagrams, and slide visuals natively. Best for bulk document processing, contract analysis, and report generation.</div>
+        <div class="tags"><span class="tag yellow">10M Context</span><span class="tag blue">Visual PDF</span><span class="tag">Bulk Process</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #1</div>Can ingest 1000-page documents in a single context. Visual understanding of charts/tables in PDFs is built-in. For serious document workflows there's nothing comparable in open source.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-llama">Llama 4</span>
+        <a class="api-link" href="https://huggingface.co/meta-llama" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-2" data-cat="document" data-name="Qwen VL document visual question" data-score="88">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=qwenlm.github.io&sz=64" alt="Alibaba" onerror="this.parentNode.textContent='🔮'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Qwen2.5-VL-72B</div>
+          <div class="provider-name">Alibaba / Qwen Team · 2024</div>
+        </div>
+        <div class="rank-badge">2</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">DocVQA</span><div class="score-bar"><div class="score-fill" style="width:94%"></div></div><span class="score-val">94.5%</span></div>
+        <div class="score-row"><span class="score-label">OCR</span><div class="score-bar"><div class="score-fill" style="width:92%"></div></div><span class="score-val">92%</span></div>
+        <div class="desc">Best visual document understanding in open source. 94.5% on DocVQA. Native PDF, chart, and table parsing. Supports scanned documents with OCR quality approaching GPT-4V. Structured JSON extraction from visual documents.</div>
+        <div class="tags"><span class="tag yellow">DocVQA 94.5%</span><span class="tag blue">OCR Expert</span><span class="tag">JSON Extract</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #2</div>Best DocVQA score among open-weight models. Reliably extracts structured data from complex documents including tables, forms, and charts. Essential for document automation pipelines.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://huggingface.co/Qwen/Qwen2.5-VL-72B-Instruct" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-3" data-cat="document" data-name="Mistral Large 2 document report structured" data-score="83">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=mistral.ai&sz=64" alt="Mistral" onerror="this.parentNode.textContent='🌀'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Mistral Large 2</div>
+          <div class="provider-name">Mistral AI · 2024</div>
+        </div>
+        <div class="rank-badge">3</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Structured</span><div class="score-bar"><div class="score-fill" style="width:88%"></div></div><span class="score-val">Strong</span></div>
+        <div class="score-row"><span class="score-label">Context</span><div class="score-bar"><div class="score-fill" style="width:80%"></div></div><span class="score-val">128K</span></div>
+        <div class="desc">Exceptional at generating structured outputs: markdown reports, slide outlines, executive summaries. 128K context for long documents. Strong JSON mode for structured data extraction from text documents.</div>
+        <div class="tags"><span class="tag blue">JSON Mode</span><span class="tag">Report Gen</span><span class="tag purple">128K</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #3</div>Most reliable structured output generation (JSON, markdown, reports). Best for automated report writing pipelines where format consistency is critical.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-custom">MRL</span>
+        <a class="api-link" href="https://mistral.ai" target="_blank">↗ Mistral API</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ SECTION: MULTIMODAL ════════════ -->
+<div class="section" id="sec-multimodal" data-section="multimodal">
+  <div class="section-header">
+    <div class="cat-icon">👁</div>
+    <div>
+      <div class="section-title">Multimodal Vision-Language</div>
+      <div class="section-sub">Image understanding, visual reasoning, chart/diagram analysis, VQA</div>
+    </div>
+    <span class="model-count">3 models</span>
+  </div>
+  <div class="cards-grid">
+
+    <div class="model-card rank-1" data-cat="multimodal" data-name="Llama 4 Maverick multimodal vision" data-score="93">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=meta.com&sz=64" alt="Meta" onerror="this.parentNode.textContent='🦙'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Llama 4 Maverick</div>
+          <div class="provider-name">Meta AI · 2025</div>
+        </div>
+        <div class="rank-badge">1</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">VQA</span><div class="score-bar"><div class="score-fill" style="width:93%"></div></div><span class="score-val">93/100</span></div>
+        <div class="score-row"><span class="score-label">Context</span><div class="score-bar"><div class="score-fill" style="width:100%"></div></div><span class="score-val">1M</span></div>
+        <div class="desc">Native multimodal with 1M context. Can process hundreds of images in a single conversation. Strong visual reasoning, chart analysis, and image-to-text. Best general multimodal open model.</div>
+        <div class="tags"><span class="tag yellow">1M Multimodal</span><span class="tag blue">100 Images</span><span class="tag">Visual Reason</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #1</div>Only open model supporting multi-image long-context visual reasoning. Processing 100+ images simultaneously opens entirely new workflows for medical imaging, design review, and data extraction.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-llama">Llama 4</span>
+        <a class="api-link" href="https://huggingface.co/meta-llama" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-2" data-cat="multimodal" data-name="Qwen2.5 VL visual language model" data-score="90">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=qwenlm.github.io&sz=64" alt="Alibaba" onerror="this.parentNode.textContent='🔮'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Qwen2.5-VL-72B</div>
+          <div class="provider-name">Alibaba / Qwen Team · 2024</div>
+        </div>
+        <div class="rank-badge">2</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">DocVQA</span><div class="score-bar"><div class="score-fill" style="width:94%"></div></div><span class="score-val">94.5%</span></div>
+        <div class="score-row"><span class="score-label">Chart QA</span><div class="score-bar"><div class="score-fill" style="width:92%"></div></div><span class="score-val">92%</span></div>
+        <div class="desc">Top DocVQA and ChartQA scores among open VLMs. Dynamic resolution processing. Understands bounding boxes, spatial reasoning. Agents can use visual input to navigate UIs, analyze dashboards.</div>
+        <div class="tags"><span class="tag yellow">DocVQA #1</span><span class="tag blue">Chart Expert</span><span class="tag">Spatial Reason</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #2</div>Best specialized document and chart visual understanding. Dynamic resolution (processes any size natively) makes it more versatile than fixed-resolution competitors.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-apache">Apache 2.0</span>
+        <a class="api-link" href="https://huggingface.co/Qwen/Qwen2.5-VL-72B-Instruct" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+    <div class="model-card rank-3" data-cat="multimodal" data-name="Gemma 3 12B Google vision lightweight" data-score="84">
+      <div class="card-top">
+        <div class="provider-logo"><img src="https://www.google.com/s2/favicons?domain=google.com&sz=64" alt="Google" onerror="this.parentNode.textContent='💎'"/></div>
+        <div class="card-head-info">
+          <div class="model-name">Gemma 3 12B</div>
+          <div class="provider-name">Google · 2025</div>
+        </div>
+        <div class="rank-badge">3</div>
+      </div>
+      <div class="card-body">
+        <div class="score-row"><span class="score-label">Overall</span><div class="score-bar"><div class="score-fill" style="width:84%"></div></div><span class="score-val">84/100</span></div>
+        <div class="score-row"><span class="score-label">VRAM</span><div class="score-bar"><div class="score-fill" style="width:90%"></div></div><span class="score-val">10GB</span></div>
+        <div class="desc">12B multimodal model from Google. Runs on consumer GPUs (10GB VRAM). Strong instruction following for vision tasks. Foundation for MedGemma. 128K context. Apache 2.0 variant available.</div>
+        <div class="tags"><span class="tag orange">Consumer GPU</span><span class="tag blue">Google</span><span class="tag">128K</span></div>
+      </div>
+      <div class="why-box"><div class="why-label">Why #3</div>Best small multimodal model for consumer hardware deployment. Google's training quality shows in instruction following and visual reasoning relative to its size.</div>
+      <div class="card-footer">
+        <span class="license-badge lic-custom">Gemma</span>
+        <a class="api-link" href="https://huggingface.co/google/gemma-3-12b-it" target="_blank">↗ HuggingFace</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- No Results -->
+<div id="noResults">
+  <span class="emoji">🔍</span>
+  No models match your search. Try a different keyword or category.
+</div>
+
+<!-- ════════════ SUMMARY TABLE ════════════ -->
+<div class="table-section">
+  <div class="table-title">📊 Full Summary Table</div>
+  <p class="table-subtitle">Quick reference — all top models, categories, benchmark scores, and licenses at a glance.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Model</th>
+          <th>Provider</th>
+          <th>Category</th>
+          <th>Key Benchmark</th>
+          <th>Score</th>
+          <th>Context</th>
+          <th>License</th>
+          <th>API / Link</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Llama 4 Maverick</td><td>Meta</td><td class="td-cat">Daily / Multimodal</td><td>MMLU 89%</td><td class="td-score s-high">92/100</td><td>1M</td><td>Llama 4</td><td><a href="https://huggingface.co/meta-llama" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>2</td><td>Qwen3-235B-A22B</td><td>Alibaba</td><td class="td-cat">Daily / General</td><td>GPQA 88%</td><td class="td-score s-high">91/100</td><td>32K</td><td>Apache 2.0</td><td><a href="https://huggingface.co/Qwen" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>3</td><td>DeepSeek-V3.2</td><td>DeepSeek</td><td class="td-cat">Daily / Research</td><td>MMLU 94.2%</td><td class="td-score s-high">90/100</td><td>64K</td><td>MIT</td><td><a href="https://platform.deepseek.com" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>4</td><td>GLM-4.7</td><td>Zhipu AI</td><td class="td-cat">Coding</td><td>SWE-bench 91.2%</td><td class="td-score s-high">95/100</td><td>32K</td><td>GLM</td><td><a href="https://huggingface.co/THUDM" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>5</td><td>DeepSeek-R1</td><td>DeepSeek</td><td class="td-cat">Coding / Thinking</td><td>AIME 88%</td><td class="td-score s-high">92/100</td><td>64K</td><td>MIT</td><td><a href="https://api.deepseek.com" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>6</td><td>GLM-5 (Reasoning)</td><td>Z AI</td><td class="td-cat">Thinking / Research</td><td>QI 49.64 #1</td><td class="td-score s-high">96/100</td><td>203K</td><td>Open</td><td><a href="https://huggingface.co/THUDM" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>7</td><td>Kimi K2.5 (Reasoning)</td><td>Moonshot AI</td><td class="td-cat">Thinking / Math</td><td>AIME 96%</td><td class="td-score s-high">95/100</td><td>128K</td><td>Moonshot</td><td><a href="https://platform.moonshot.cn" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>8</td><td>QwQ-32B</td><td>Alibaba</td><td class="td-cat">Thinking</td><td>AIME 85%</td><td class="td-score s-med">88/100</td><td>32K</td><td>Apache 2.0</td><td><a href="https://huggingface.co/Qwen/QwQ-32B" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>9</td><td>Qwen3-235B (Thinking)</td><td>Alibaba</td><td class="td-cat">Thinking / STEM</td><td>MATH-500 97.8%</td><td class="td-score s-high">90/100</td><td>32K</td><td>Apache 2.0</td><td><a href="https://huggingface.co/Qwen" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>10</td><td>FLUX.2 [dev]</td><td>Black Forest Labs</td><td class="td-cat">Image Gen</td><td>4MP, 10 refs</td><td class="td-score s-high">95/100</td><td>—</td><td>FLUX Dev</td><td><a href="https://blackforestlabs.ai" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>11</td><td>Stable Diffusion 3.5 L</td><td>Stability AI</td><td class="td-cat">Image Gen</td><td>Ecosystem #1</td><td class="td-score s-med">87/100</td><td>—</td><td>Stability</td><td><a href="https://stability.ai" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>12</td><td>HiDream-I1</td><td>HiDream.ai</td><td class="td-cat">Image Gen</td><td>Beats DALL-E 3</td><td class="td-score s-med">86/100</td><td>—</td><td>Apache 2.0</td><td><a href="https://huggingface.co/HiDream-ai" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>13</td><td>Wan2.2 (A14B)</td><td>Alibaba WaveSpeed</td><td class="td-cat">Video Gen</td><td>VBench 84.7%</td><td class="td-score s-high">94/100</td><td>—</td><td>Apache 2.0</td><td><a href="https://huggingface.co/Wan-AI" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>14</td><td>HunyuanVideo 1.5</td><td>Tencent</td><td class="td-cat">Video Gen</td><td>24fps 720p</td><td class="td-score s-high">91/100</td><td>—</td><td>Hunyuan</td><td><a href="https://github.com/Tencent-Hunyuan/HunyuanVideo" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>15</td><td>LTX-Video 2.0</td><td>Lightricks</td><td class="td-cat">Video Gen</td><td>12GB VRAM</td><td class="td-score s-med">85/100</td><td>—</td><td>Apache 2.0</td><td><a href="https://huggingface.co/Lightricks" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>16</td><td>Fish Speech V1.5</td><td>Fish Audio</td><td class="td-cat">Audio / TTS</td><td>TTS Arena ELO 1339</td><td class="td-score s-high">93/100</td><td>—</td><td>Fish</td><td><a href="https://fish.audio" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>17</td><td>Kokoro v1.0 (82M)</td><td>hexgrad</td><td class="td-cat">Audio / TTS</td><td>210× realtime</td><td class="td-score s-med">88/100</td><td>—</td><td>Apache 2.0</td><td><a href="https://github.com/hexgrad/kokoro" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>18</td><td>CosyVoice2-0.5B</td><td>Alibaba</td><td class="td-cat">Audio / TTS</td><td>150ms latency</td><td class="td-score s-med">87/100</td><td>—</td><td>Apache 2.0</td><td><a href="https://github.com/FunAudioLLM/CosyVoice" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>19</td><td>MedGemma 27B</td><td>Google</td><td class="td-cat">Medical</td><td>CXR RadGraph 30.3</td><td class="td-score s-high">92/100</td><td>32K</td><td>Gemma</td><td><a href="https://developers.google.com/health-ai-developer-foundations/medgemma" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>20</td><td>OpenBioLLM-70B</td><td>Saama AI</td><td class="td-cat">Medical</td><td>BioMed 86.06%</td><td class="td-score s-med">89/100</td><td>8K</td><td>Llama 3</td><td><a href="https://huggingface.co/aaditya/OpenBioLLM-Llama3-70B" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>21</td><td>Llama 4 Scout</td><td>Meta</td><td class="td-cat">Research / Docs</td><td>10M context</td><td class="td-score s-high">92/100</td><td>10M</td><td>Llama 4</td><td><a href="https://huggingface.co/meta-llama" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>22</td><td>Qwen2.5-VL-72B</td><td>Alibaba</td><td class="td-cat">Multimodal / Docs</td><td>DocVQA 94.5%</td><td class="td-score s-high">90/100</td><td>32K</td><td>Apache 2.0</td><td><a href="https://huggingface.co/Qwen" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>23</td><td>Phi-4 (14B)</td><td>Microsoft</td><td class="td-cat">Coding / Small</td><td>Consumer GPU</td><td class="td-score s-med">84/100</td><td>16K</td><td>MIT</td><td><a href="https://huggingface.co/microsoft/phi-4" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+        <tr><td>24</td><td>Llama 3.3 70B</td><td>Meta</td><td class="td-cat">Daily / Local</td><td>GPT-4o parity</td><td class="td-score s-med">85/100</td><td>128K</td><td>Llama 3</td><td><a href="https://ollama.com/library/llama3.3" target="_blank" style="color:var(--accent2)">↗</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="container">
+    <div class="footer-logo">abhishekpanda.com</div>
+    <p>Compiled and verified for the open-source AI community · March 2026</p>
+    <p style="margin-top:8px">Data sourced from Artificial Analysis, WhatLLM.org, HuggingFace leaderboards, SWE-bench, AIME, MMLU, TTS Arena, and VBench.</p>
+    <p style="margin-top:8px; font-size:10px; color:var(--muted2)">Scores are composite assessments; always verify against latest benchmarks. Models evolve rapidly — check provider pages for the most current versions.</p>
+  </div>
+</footer>
+
+<!-- SCROLL TOP -->
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
+</button>
+
+<script>
+  const EMBEDDED_MODE = document.documentElement.getAttribute('data-embedded') === '1';
+
+  function reportEmbeddedHeight() {
+    if (!EMBEDDED_MODE) return;
+
+    const body = document.body;
+    const root = document.documentElement;
+    const height = Math.max(
+      body ? body.scrollHeight : 0,
+      body ? body.offsetHeight : 0,
+      root ? root.scrollHeight : 0,
+      root ? root.offsetHeight : 0,
+    );
+
+    window.parent.postMessage({ type: 'open-source-height', height }, window.location.origin);
+  }
+
+  if (EMBEDDED_MODE) {
+    window.addEventListener('load', reportEmbeddedHeight);
+    window.addEventListener('resize', reportEmbeddedHeight);
+    document.addEventListener('DOMContentLoaded', () => {
+      reportEmbeddedHeight();
+
+      if (typeof MutationObserver !== 'undefined') {
+        const observer = new MutationObserver(reportEmbeddedHeight);
+        observer.observe(document.documentElement, {
+          attributes: true,
+          childList: true,
+          subtree: true,
+          characterData: true,
+        });
+      }
+    });
+  }
+
+  const PROVIDER_DOMAINS = {
+    meta: 'meta.com',
+    qwen: 'qwenlm.ai',
+    alibaba: 'alibaba.com',
+    deepseek: 'deepseek.com',
+    mistral: 'mistral.ai',
+    zhipu: 'zhipuai.cn',
+    glm: 'zhipuai.cn',
+    moonshot: 'kimi.moonshot.cn',
+    blackforest: 'blackforestlabs.ai',
+    stability: 'stability.ai',
+    hidream: 'hidream.ai',
+    wan: 'wan.video',
+    tencent: 'tencent.com',
+    lightricks: 'lightricks.com',
+    fishaudio: 'fish.audio',
+    hexgrad: 'github.com',
+    cosyvoice: 'modelscope.cn',
+    google: 'google.com',
+    microsoft: 'microsoft.com',
+    huggingface: 'huggingface.co',
+    epfl: 'epfl.ch',
+    biomed: 'huggingface.co'
+  };
+
+  const PROVIDER_SVG_LOGOS = {
+    google: 'https://svgl.app/library/google.svg',
+    microsoft: 'https://svgl.app/library/microsoft.svg'
+  };
+
+  const PROVIDER_FALLBACKS = {
+    meta: 'M', qwen: 'Q', alibaba: 'A', deepseek: 'D', mistral: 'Mi', zhipu: 'Z', glm: 'G',
+    moonshot: 'K', blackforest: 'B', stability: 'S', hidream: 'H', wan: 'W', tencent: 'T',
+    lightricks: 'L', fishaudio: 'F', hexgrad: 'Hx', cosyvoice: 'C', google: 'G',
+    microsoft: 'Ms', huggingface: 'HF', epfl: 'E', biomed: 'B'
+  };
+
+  function logoFromDomain(domain, size = 128) {
+    if (!domain) return '';
+    return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`;
+  }
+
+  function parseDomain(url) {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return '';
+    }
+  }
+
+  function providerLogoSrc(key) {
+    if (PROVIDER_SVG_LOGOS[key]) return PROVIDER_SVG_LOGOS[key];
+    return logoFromDomain(PROVIDER_DOMAINS[key] || 'huggingface.co');
+  }
+
+  function getProviderKey(input) {
+    const text = (input || '').toLowerCase();
+    if (text.includes('meta') || text.includes('llama')) return 'meta';
+    if (text.includes('qwen')) return 'qwen';
+    if (text.includes('alibaba') || text.includes('aliyun') || text.includes('alibabacloud')) return 'alibaba';
+    if (text.includes('deepseek')) return 'deepseek';
+    if (text.includes('mistral')) return 'mistral';
+    if (text.includes('zhipu') || text.includes('thudm')) return 'zhipu';
+    if (text.includes('glm')) return 'glm';
+    if (text.includes('moonshot') || text.includes('kimi')) return 'moonshot';
+    if (text.includes('black forest') || text.includes('bfl') || text.includes('flux')) return 'blackforest';
+    if (text.includes('stability')) return 'stability';
+    if (text.includes('hidream')) return 'hidream';
+    if (text.includes('wan')) return 'wan';
+    if (text.includes('tencent') || text.includes('hunyuan')) return 'tencent';
+    if (text.includes('lightricks') || text.includes('ltx')) return 'lightricks';
+    if (text.includes('fish audio') || text.includes('fish')) return 'fishaudio';
+    if (text.includes('hexgrad') || text.includes('kokoro')) return 'hexgrad';
+    if (text.includes('cosyvoice')) return 'cosyvoice';
+    if (text.includes('google') || text.includes('gemma') || text.includes('medgemma')) return 'google';
+    if (text.includes('microsoft') || text.includes('phi')) return 'microsoft';
+    if (text.includes('epfl') || text.includes('meditron')) return 'epfl';
+    if (text.includes('huggingface') || text.includes('openbiollm') || text.includes('biomistral')) return 'huggingface';
+    return 'huggingface';
+  }
+
+  function applyProviderLogos() {
+    document.querySelectorAll('.model-card').forEach((card) => {
+      const logoWrap = card.querySelector('.provider-logo');
+      if (!logoWrap) return;
+
+      const providerText = card.querySelector('.provider-name')?.textContent || '';
+      const modelText = card.querySelector('.model-name')?.textContent || '';
+      const apiHref = card.querySelector('.api-link')?.getAttribute('href') || '';
+      const apiDomain = parseDomain(apiHref);
+      const altText = logoWrap.querySelector('img')?.getAttribute('alt') || providerText || modelText;
+      const key = getProviderKey(`${providerText} ${modelText} ${altText}`);
+      const src = providerLogoSrc(key) || logoFromDomain(apiDomain) || logoWrap.querySelector('img')?.getAttribute('src') || '';
+      const fallback = PROVIDER_FALLBACKS[key] || '?';
+
+      logoWrap.innerHTML = `<img src="${src}" alt="${altText}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/><span class="logo-fallback">${fallback}</span>`;
+
+      const img = logoWrap.querySelector('img');
+      if (img && apiDomain) {
+        img.addEventListener('error', () => {
+          const fallbackSrc = logoFromDomain(apiDomain);
+          if (fallbackSrc && img.src !== fallbackSrc) {
+            img.style.display = '';
+            img.src = fallbackSrc;
+          }
+        }, { once: true });
+      }
+    });
+  }
+
+  const TICKER_PROVIDERS = [
+    { key: 'meta', label: 'Meta' },
+    { key: 'qwen', label: 'Qwen' },
+    { key: 'deepseek', label: 'DeepSeek' },
+    { key: 'mistral', label: 'Mistral' },
+    { key: 'zhipu', label: 'Zhipu' },
+    { key: 'moonshot', label: 'Moonshot' },
+    { key: 'blackforest', label: 'Black Forest Labs' },
+    { key: 'stability', label: 'Stability AI' },
+    { key: 'wan', label: 'Wan AI' },
+    { key: 'tencent', label: 'Tencent' },
+    { key: 'lightricks', label: 'Lightricks' },
+    { key: 'fishaudio', label: 'Fish Audio' },
+    { key: 'hexgrad', label: 'hexgrad' },
+    { key: 'google', label: 'Google' },
+    { key: 'microsoft', label: 'Microsoft' },
+    { key: 'huggingface', label: 'HuggingFace' }
+  ];
+
+  function renderLogoTicker() {
+    const track = document.getElementById('logoTickerTrack');
+    if (!track) return;
+
+    const chips = TICKER_PROVIDERS.map((item) => {
+      const src = providerLogoSrc(item.key) || '';
+      const fallback = PROVIDER_FALLBACKS[item.key] || '?';
+      return `<span class="logo-chip"><span class="logo-chip-icon"><img class="ticker-logo" src="${src}" alt="${item.label} logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/><span class="logo-fallback">${fallback}</span></span><span>${item.label}</span></span>`;
+    }).join('');
+
+    track.innerHTML = chips + chips;
+  }
+
+  applyProviderLogos();
+  renderLogoTicker();
+
+  // ──── SCROLL TOP BUTTON ────
+  window.addEventListener('scroll', () => {
+    const btn = document.getElementById('scrollTop');
+    btn.classList.toggle('visible', window.scrollY > 400);
+  });
+
+  // ──── FILTER LOGIC ────
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const searchInput = document.getElementById('searchInput');
+  let activeFilter = 'all';
+  let searchQuery = '';
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.cat;
+      applyFilters();
+    });
+  });
+
+  searchInput.addEventListener('input', (e) => {
+    searchQuery = e.target.value.toLowerCase().trim();
+    applyFilters();
+  });
+
+  document.getElementById('sortSelect').addEventListener('change', applyFilters);
+
+  function applyFilters() {
+    const cards = document.querySelectorAll('.model-card');
+    const sections = document.querySelectorAll('.section[data-section]');
+    const sortVal = document.getElementById('sortSelect').value;
+
+    let anyVisible = false;
+
+    cards.forEach(card => {
+      const cardCat = card.dataset.cat;
+      const cardName = (card.dataset.name || '').toLowerCase();
+      const catMatch = activeFilter === 'all' || cardCat === activeFilter;
+      const searchMatch = !searchQuery || cardName.includes(searchQuery) ||
+        card.textContent.toLowerCase().includes(searchQuery);
+      const visible = catMatch && searchMatch;
+      card.classList.toggle('hidden', !visible);
+      if (visible) anyVisible = true;
+    });
+
+    // Hide empty sections
+    sections.forEach(sec => {
+      const secCat = sec.dataset.section;
+      const visibleCards = sec.querySelectorAll('.model-card:not(.hidden)');
+      const shouldHide = (activeFilter !== 'all' && secCat !== activeFilter) ||
+        (searchQuery && visibleCards.length === 0);
+      sec.classList.toggle('all-hidden', shouldHide);
+    });
+
+    document.getElementById('noResults').style.display = anyVisible ? 'none' : 'block';
+
+    reportEmbeddedHeight();
+  }
+
+  // ──── ANIMATE SCORE BARS ON SCROLL ────
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const fills = entry.target.querySelectorAll('.score-fill');
+        fills.forEach(fill => {
+          const w = fill.style.width;
+          fill.style.width = '0';
+          setTimeout(() => { fill.style.width = w; }, 100);
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.model-card').forEach(card => observer.observe(card));
+
+  // ──── STAGGER CARD ANIMATIONS ────
+  document.querySelectorAll('.cards-grid').forEach(grid => {
+    grid.querySelectorAll('.model-card').forEach((card, i) => {
+      card.style.animationDelay = `${i * 0.07}s`;
+    });
+  });
+
+  reportEmbeddedHeight();
+</script>
+</body>
+</html>

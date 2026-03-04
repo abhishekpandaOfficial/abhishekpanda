@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { AtlasHero } from "@/components/atlas/AtlasHero";
@@ -12,9 +14,18 @@ import { useLLMModels, getLastUpdated } from "@/hooks/useLLMModels";
 import { useOriginXUpdates } from "@/hooks/useOriginXUpdates";
 
 const LLMGalaxy = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { data: models = [] } = useLLMModels();
   const { data: updates = [] } = useOriginXUpdates(3);
   const lastUpdated = getLastUpdated(models);
+
+  useEffect(() => {
+    const section = location.hash.replace(/^#/, "").toLowerCase();
+    if (section === "model-comparison") {
+      navigate("/ai-model-comparison.html", { replace: true });
+    }
+  }, [location.hash, navigate]);
 
   return (
     <div className="min-h-screen bg-background">

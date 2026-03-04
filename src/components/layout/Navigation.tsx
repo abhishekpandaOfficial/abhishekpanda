@@ -4,21 +4,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Menu, 
   X, 
-  Sparkles, 
-  BarChart3, 
   GitCompare, 
   Layers, 
-  TrendingUp, 
   Rss, 
   Pen,
   UserCircle,
   BookOpen,
   MessageCircle,
   Send,
-  BrainCircuit,
   FileText,
   Brain,
-  GraduationCap
+  GraduationCap,
+  Lock,
+  Code2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -44,11 +42,9 @@ const navLinks = [
 ];
 
 const galaxySubLinks = [
-  { name: "Model Families", path: "/llm-galaxy#families", icon: Layers, description: "Explore GPT, Claude, Gemini, and more" },
-  { name: "Benchmarks", path: "/llm-galaxy#benchmarks", icon: BarChart3, description: "MMLU, HumanEval, GSM8K rankings" },
-  { name: "Compare Models", path: "/llm-galaxy#compare", icon: GitCompare, description: "Side-by-side model comparison" },
-  { name: "Use Cases", path: "/llm-galaxy#usecases", icon: BrainCircuit, description: "Find the perfect model for your task" },
-  { name: "Trends", path: "/llm-galaxy#trends", icon: TrendingUp, description: "Industry evolution and insights" },
+  { name: "Closed Source Models", path: "/ai-closed_models_2026.html", icon: Lock },
+  { name: "Open Source Models", path: "/open-source-models-march-2026.html", icon: Code2 },
+  { name: "Compare LLM Models", path: "/ai-model-comparison.html", icon: GitCompare },
 ];
 
 const blogSubLinks = [
@@ -254,33 +250,17 @@ export const Navigation = () => {
                       </span>
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <div className="w-[400px] p-4 bg-card/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-xl">
-                        <div className="mb-4">
-                          <Link
-                            to="/llm-galaxy"
-                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors"
-                          >
-                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                              <Sparkles className="w-5 h-5 text-primary-foreground" />
-                            </div>
-                            <div>
-                              <div className="font-semibold text-foreground">OriginX LLM Galaxy</div>
-                              <div className="text-sm text-muted-foreground">The Global Intelligence Index</div>
-                            </div>
-                          </Link>
-                        </div>
+                      <div className="w-[320px] p-4 bg-card/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-xl">
                         <div className="space-y-1">
                           {galaxySubLinks.map((subLink) => (
                             <Link
                               key={subLink.path}
                               to={subLink.path}
+                              reloadDocument={subLink.reloadDocument}
                               className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
                             >
                               <subLink.icon className="w-5 h-5 text-primary" />
-                              <div>
-                                <div className="font-medium text-foreground text-sm">{subLink.name}</div>
-                                <div className="text-xs text-muted-foreground">{subLink.description}</div>
-                              </div>
+                              <div className="font-medium text-foreground text-sm">{subLink.name}</div>
                             </Link>
                           ))}
                         </div>
@@ -457,19 +437,28 @@ export const Navigation = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.25 }}
+                className="px-4 py-2"
               >
-                <Link
-                  to="/llm-galaxy"
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
-                    isGalaxyActive
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <Brain className="w-5 h-5" />
+                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  <Brain className="w-3 h-3" />
                   LLM Galaxy
-                </Link>
+                </div>
+                {galaxySubLinks.map((subLink) => (
+                  <Link
+                    key={subLink.path}
+                    to={subLink.path}
+                    reloadDocument={subLink.reloadDocument}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2.5 rounded-lg text-base font-medium transition-all duration-200",
+                      location.pathname === subLink.path
+                        ? "text-primary bg-primary/10"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    )}
+                  >
+                    <subLink.icon className="w-4 h-4" />
+                    {subLink.name}
+                  </Link>
+                ))}
               </motion.div>
 
               <motion.div

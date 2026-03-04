@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight,
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { ModelFamilyModal } from "./ModelFamilyModal";
 import type { LLMModel } from "@/hooks/useLLMModels";
 import { getBenchmarkNumber } from "@/hooks/useLLMModels";
+import { useLocation } from "react-router-dom";
 
 const useCaseIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "General reasoning": Brain,
@@ -194,6 +195,7 @@ function ModelCard({ family, onExplore }: { family: LLMModel; onExplore: (family
 }
 
 export const ModelFamilies = (props: { models: LLMModel[] }) => {
+  const location = useLocation();
   const [selectedFamily, setSelectedFamily] = useState<LLMModel | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sourceModal, setSourceModal] = useState<"open" | "closed" | null>(null);
@@ -212,6 +214,15 @@ export const ModelFamilies = (props: { models: LLMModel[] }) => {
     setSelectedFamily(family);
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    if (location.pathname !== "/llm-galaxy") return;
+
+    const source = new URLSearchParams(location.search).get("source");
+    if (source === "open" || source === "closed") {
+      setSourceModal(source);
+    }
+  }, [location.pathname, location.search]);
 
   const sourceFamilies = sourceModal === "open" ? openFamilies : closedFamilies;
 
