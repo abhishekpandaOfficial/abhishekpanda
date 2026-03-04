@@ -92,7 +92,7 @@ export default defineConfig(() => {
           // Redoc and the admin app bundle can be large; raise the precache limit.
           maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB limit
           navigateFallback: "/index.html",
-          navigateFallbackDenylist: [/^\/api/, /^\/rest/, /^\/functions/],
+          navigateFallbackDenylist: [/^\/api/, /^\/rest/, /^\/functions/, /^\/embedded\//],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
