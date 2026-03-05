@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 export default function OpenOwlLanding() {
   useEffect(() => {
-    window.location.replace("/openowl.html?v=20260305c");
+    window.location.replace("/openowl.html?v=20260306a");
   }, []);
 
   return (

@@ -113,6 +113,27 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     },
   },
   {
+    pattern: "/privacy",
+    data: {
+      title: "Privacy Policy | Abhishek Panda",
+      description: "Read the privacy policy for abhishekpanda.com, including data collection, usage, and protection practices.",
+    },
+  },
+  {
+    pattern: "/terms",
+    data: {
+      title: "Terms of Service | Abhishek Panda",
+      description: "Review terms governing access and use of abhishekpanda.com services, content, and digital products.",
+    },
+  },
+  {
+    pattern: "/refund",
+    data: {
+      title: "Refund Policy | Abhishek Panda",
+      description: "Review refund eligibility, timelines, and process for courses, digital products, and mentorship services.",
+    },
+  },
+  {
     pattern: "/llm-galaxy",
     data: {
       title: "LLM Galaxy | AI Model Intelligence Hub by OriginX",

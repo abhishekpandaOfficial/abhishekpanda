@@ -19,6 +19,9 @@ const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const Products = lazy(() => import("./pages/Products"));
 const Mentorship = lazy(() => import("./pages/Mentorship"));
 const Contact = lazy(() => import("./pages/Contact"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const Ebooks = lazy(() => import("./pages/Ebooks"));
 const EbookDetail = lazy(() => import("./pages/EbookDetail"));
 const EbookReader = lazy(() => import("./pages/EbookReader"));
@@ -148,6 +151,9 @@ const App = () => {
                 <Route path="/products" element={<Products />} />
                 <Route path="/mentorship" element={<Mentorship />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/refund" element={<RefundPolicy />} />
                 <Route path="/llm-galaxy" element={<LLMGalaxy />} />
                 <Route path="/llm-galaxy/model/:modelId" element={<ModelDetail />} />
                 <Route path="/llm-galaxy/closed-source-models" element={<ClosedSourceModels />} />

@@ -67,12 +67,23 @@ export const FeaturedCourses = () => {
               Level up your engineering skills with industry-proven courses
             </p>
           </div>
-          <Button variant="hero-outline" asChild>
-            <Link to="/courses">
-              View All Courses
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2 md:justify-end">
+            <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-semibold text-muted-foreground">
+              Ebooks
+            </span>
+            <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-semibold text-muted-foreground">
+              YouTube
+            </span>
+            <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-semibold text-muted-foreground">
+              Udemy
+            </span>
+            <Button variant="hero-outline" asChild>
+              <Link to="/courses">
+                Courses
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </Button>
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -84,11 +95,11 @@ export const FeaturedCourses = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <Link to={`/courses/${course.slug}`} className="block group">
+              <div className="block group cursor-default">
                 <div className="glass-card-hover rounded-2xl overflow-hidden">
                   <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-glow">
+                      <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center transition-transform duration-300 shadow-glow">
                         <Play className="w-6 h-6 text-primary-foreground ml-1" />
                       </div>
                     </div>
@@ -111,13 +122,13 @@ export const FeaturedCourses = () => {
                       <span className={`font-bold text-lg ${course.is_premium ? 'gradient-text' : 'text-accent'}`}>
                         {course.is_premium && course.price_amount ? `₹${course.price_amount}` : 'Free'}
                       </span>
-                      <span className="text-primary text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                        Learn More<ArrowRight className="w-4 h-4" />
+                      <span className="text-primary text-sm font-medium inline-flex items-center gap-1">
+                        View in Courses<ArrowRight className="w-4 h-4" />
                       </span>
                     </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             </motion.div>
           ))}
         </div>

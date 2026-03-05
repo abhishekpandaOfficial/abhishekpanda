@@ -1,19 +1,55 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { BookOpen, Calendar, Sparkles, Code2, Cloud, Brain, ExternalLink, ShieldCheck } from "lucide-react";
+import { Sparkles, Code2, Cloud, Brain, ExternalLink, ShieldCheck, Database, Cpu } from "lucide-react";
 import abhishekAvatar from "@/assets/abhishek-avatar.png";
 import abhishekAvatarAlt from "@/assets/abhishek-avatar-alt.png";
-import { ChronyxLogo } from "@/components/ui/ChronyxLogo";
 import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
 import { OpenOwlLogo } from "@/components/ui/OpenOwlLogo";
 import { BrandLogo } from "@/components/ui/BrandLogo";
-import { StackcraftIcon } from "@/components/icons/StackcraftIcon";
 
 const badges = [
-  { icon: Code2, label: ".NET Architect", color: "from-primary to-secondary" },
+  { icon: Code2, label: ".NET Architect", color: "from-primary to-secondary", to: "/dotnet-mastery-toc" },
   { icon: Brain, label: "AI/ML Engineer", color: "from-secondary to-purple" },
   { icon: Cloud, label: "Cloud Specialist", color: "from-sky to-primary" },
+];
+
+const floatingTechStacks = [
+  {
+    icon: Code2,
+    title: ".NET Core",
+    subtitle: "Microservices",
+    position: "top-[12%] left-[4%]",
+    delay: 0,
+  },
+  {
+    icon: Cloud,
+    title: "Azure · AWS",
+    subtitle: "Cloud Native",
+    position: "top-[18%] right-[5%]",
+    delay: 0.3,
+  },
+  {
+    icon: Brain,
+    title: "AI/ML",
+    subtitle: "Agentic Flows",
+    position: "bottom-[24%] left-[6%]",
+    delay: 0.6,
+  },
+  {
+    icon: Database,
+    title: "Data + APIs",
+    subtitle: "Realtime Stack",
+    position: "bottom-[18%] right-[7%]",
+    delay: 0.9,
+  },
+  {
+    icon: Cpu,
+    title: "LLM Systems",
+    subtitle: "Inference & Ops",
+    position: "top-[46%] right-[2%]",
+    delay: 1.1,
+  },
 ];
 
 const taglines = [
@@ -24,11 +60,24 @@ const taglines = [
   "Engineering clarity from idea to production.",
 ];
 
+const nameTypographyVariants = [
+  "typo-ap-1",
+  "typo-ap-2",
+  "typo-ap-3",
+  "typo-ap-4",
+  "typo-ap-5",
+  "typo-ap-6",
+  "typo-ap-7",
+  "typo-ap-8",
+  "typo-ap-9",
+];
+
 export const HeroSection = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [taglineIndex, setTaglineIndex] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [currentAvatar, setCurrentAvatar] = useState(abhishekAvatar);
+  const [nameTypographyIndex, setNameTypographyIndex] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,6 +94,14 @@ export const HeroSection = () => {
       setCurrentAvatar(abhishekAvatar);
     }
   }, [hasScrolled, isHovered]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setNameTypographyIndex((prev) => (prev + 1) % nameTypographyVariants.length);
+    }, 1800);
+
+    return () => window.clearInterval(interval);
+  }, []);
 
   const handleHover = () => {
     setIsHovered(true);
@@ -63,6 +120,7 @@ export const HeroSection = () => {
     <section className="relative min-h-[100svh] flex items-center justify-center overflow-hidden pt-16">
       {/* Background Effects */}
       <div className="absolute inset-0 mesh-gradient" />
+      <div className="absolute inset-0 hero-grid-overlay" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
       
       {/* Animated Orbs */}
@@ -92,6 +150,29 @@ export const HeroSection = () => {
       />
 
       <div className="relative container mx-auto px-4 py-8 md:py-10">
+        <div className="pointer-events-none absolute inset-0 hidden lg:block">
+          {floatingTechStacks.map((stack, index) => (
+            <motion.div
+              key={stack.title}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 + stack.delay }}
+              className={`float-soft absolute ${stack.position} rounded-xl border border-border/60 bg-background/70 backdrop-blur-xl px-3 py-2 shadow-sm`}
+              style={{ animationDelay: `${index * 0.25}s` }}
+            >
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <stack.icon className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="text-[11px] font-semibold text-foreground">{stack.title}</div>
+                  <div className="text-[10px] text-muted-foreground">{stack.subtitle}</div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
         <div className="max-w-4xl mx-auto text-center">
           {/* Avatar with Hover Tagline */}
           <motion.div
@@ -166,7 +247,18 @@ export const HeroSection = () => {
           >
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-3 tracking-tight leading-[1.05]">
               <span className="text-foreground">Hi, I'm </span>
-              <span className="gradient-text">Abhishek Panda</span>
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={nameTypographyVariants[nameTypographyIndex]}
+                  initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+                  transition={{ duration: 0.45, ease: "easeOut" }}
+                  className={`gradient-text inline-block ${nameTypographyVariants[nameTypographyIndex]}`}
+                >
+                  Abhishek Panda
+                </motion.span>
+              </AnimatePresence>
             </h1>
             <p className="text-lg md:text-2xl text-muted-foreground mb-4 font-medium">
               Architecting production-ready .NET, Cloud, and AI systems
@@ -196,12 +288,23 @@ export const HeroSection = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: 0.5 + index * 0.1 }}
-                className="glass-card-hover px-4 py-2 rounded-full flex items-center gap-2"
+                className="px-0"
               >
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${badge.color} flex items-center justify-center`}>
-                  <badge.icon className="w-4 h-4 text-primary-foreground" />
-                </div>
-                <span className="font-semibold text-foreground">{badge.label}</span>
+                {badge.to ? (
+                  <Link to={badge.to} className="glass-card-hover px-4 py-2 rounded-full flex items-center gap-2">
+                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${badge.color} flex items-center justify-center`}>
+                      <badge.icon className="w-4 h-4 text-primary-foreground" />
+                    </div>
+                    <span className="font-semibold text-foreground">{badge.label}</span>
+                  </Link>
+                ) : (
+                  <div className="glass-card-hover px-4 py-2 rounded-full flex items-center gap-2">
+                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${badge.color} flex items-center justify-center`}>
+                      <badge.icon className="w-4 h-4 text-primary-foreground" />
+                    </div>
+                    <span className="font-semibold text-foreground">{badge.label}</span>
+                  </div>
+                )}
               </motion.div>
             ))}
           </motion.div>
@@ -263,68 +366,6 @@ export const HeroSection = () => {
             <ExternalLink className="mt-1 h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" />
           </motion.a>
 
-          {/* Premium CTA Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.66 }}
-            className="mx-auto grid max-w-6xl grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
-          >
-            <Link to="/chronyx" className="premium-border-card group p-3 text-left">
-              <div className="flex items-center gap-2 mb-1.5">
-                <ChronyxLogo compact size="md" imageClassName="h-4 w-4" />
-                <span className="text-[13px] font-semibold text-foreground">Explore CHRONYX</span>
-              </div>
-              <p className="text-xs text-muted-foreground">Personal command hub</p>
-              <span className="mt-2 inline-flex items-center rounded-full border border-border bg-background/75 px-2.5 py-1 text-[11px] font-semibold">
-                Open
-              </span>
-            </Link>
-
-            <a href="https://www.proxinex.com/" target="_blank" rel="noopener noreferrer" className="premium-border-card group p-3 text-left">
-              <div className="flex items-center gap-2 mb-1.5">
-                <BrandLogo variant="proxinex" size="sm" className="rounded-md p-0.5" imageClassName="h-4 w-4" />
-                <span className="text-[13px] font-semibold text-foreground">Explore Proxinex</span>
-              </div>
-              <p className="text-xs text-muted-foreground">AI Intelligence Control Plane</p>
-              <span className="mt-2 inline-flex items-center rounded-full border border-border bg-background/75 px-2.5 py-1 text-[11px] font-semibold">
-                Open
-              </span>
-            </a>
-
-            <Link to="/blog" className="premium-border-card group p-3 text-left">
-              <div className="flex items-center gap-2 mb-1.5">
-                <BookOpen className="h-4 w-4 text-primary" />
-                <span className="text-[13px] font-semibold text-foreground">Read Blogs</span>
-              </div>
-              <p className="text-xs text-muted-foreground">Engineering and AI deep-dives</p>
-              <span className="mt-2 inline-flex items-center rounded-full border border-border bg-background/75 px-2.5 py-1 text-[11px] font-semibold">
-                Open
-              </span>
-            </Link>
-
-            <Link to="/mentorship" className="premium-border-card group p-3 text-left">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Calendar className="h-4 w-4 text-primary" />
-                <span className="text-[13px] font-semibold text-foreground">Book 1:1 Session</span>
-              </div>
-              <p className="text-xs text-muted-foreground">Architecture and career mentoring</p>
-              <span className="mt-2 inline-flex items-center rounded-full border border-border bg-background/75 px-2.5 py-1 text-[11px] font-semibold">
-                Book
-              </span>
-            </Link>
-
-            <a href="https://www.stackcraft.io/" target="_blank" rel="noopener noreferrer" className="premium-border-card group p-3 text-left">
-              <div className="flex items-center gap-2 mb-1.5">
-                <StackcraftIcon className="h-4 w-4 text-white" />
-                <span className="text-[13px] font-semibold text-foreground">Explore StackCraft</span>
-              </div>
-              <p className="text-xs text-muted-foreground">Engineering writing platform</p>
-              <span className="mt-2 inline-flex items-center rounded-full border border-amber-300/60 bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-800 dark:border-amber-400/45 dark:bg-amber-900/25 dark:text-amber-300">
-                Coming Soon
-              </span>
-            </a>
-          </motion.div>
         </div>
       </div>
 

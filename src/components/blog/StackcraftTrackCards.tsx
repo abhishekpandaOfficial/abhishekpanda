@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { stackcraftTracks } from "@/lib/stackcraftTracks";
+
+const MotionLink = motion(Link);
 
 type Props = {
   limit?: number;
@@ -12,11 +15,9 @@ export function StackcraftTrackCards({ limit }: Props) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
       {tracks.map((track, index) => (
-        <motion.a
+        <MotionLink
           key={track.title}
-          href={track.href}
-          target="_blank"
-          rel="noopener noreferrer"
+          to="/blogs"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -57,9 +58,9 @@ export function StackcraftTrackCards({ limit }: Props) {
           </div>
           <div className="mt-4 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-70" />
           <div className="mt-4 text-xs text-muted-foreground dark:text-slate-300">
-            Read on <span className="text-foreground font-semibold">Stackcraft</span>
+            Read in <span className="text-foreground font-semibold">Blogs</span>
           </div>
-        </motion.a>
+        </MotionLink>
       ))}
     </div>
   );
