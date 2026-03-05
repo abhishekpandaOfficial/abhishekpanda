@@ -45,6 +45,7 @@ import {
   Network,
   Boxes,
   BookMarked,
+  BookOpen,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import GithubSlugger from "github-slugger";
@@ -757,6 +758,21 @@ const BlogPost = () => {
     win.print();
   };
 
+  const handleDownloadEpub = () => {
+    if (!canDownload || !exportRef.current) return;
+    const title = meta?.title || "Blog Post";
+    const html = exportRef.current.innerHTML;
+    const epubContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title><style>body{font-family:Georgia,serif;max-width:700px;margin:0 auto;padding:2rem;line-height:1.7}h1,h2,h3{font-weight:700}pre{background:#f4f4f4;padding:1rem;overflow-x:auto}code{font-family:monospace}img{max-width:100%}</style></head><body><h1>${title}</h1>${html}</body></html>`;
+    const blob = new Blob([epubContent], { type: "application/epub+zip" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${title.replace(/[^a-z0-9]/gi, "-").toLowerCase()}.epub`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  };
+
+  const [showAISummary, setShowAISummary] = useState(false);
+
   if (metaLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -845,7 +861,7 @@ const BlogPost = () => {
       </Helmet>
 
       <Navigation />
-      <main className="pt-24 pb-20">
+      <main className="pt-24 pb-32 lg:pb-20">
         <section className="container mx-auto px-4 max-w-[1320px]">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
             <article
@@ -1488,6 +1504,33 @@ const BlogPost = () => {
 
             <aside className="hidden lg:block lg:self-start">
               <div className="lg:fixed lg:top-24 lg:right-[max(1rem,calc((100vw-1320px)/2+1rem))] lg:w-[340px] max-h-[calc(100vh-6.5rem)] overflow-y-auto pr-1 space-y-4">
+              {/* Quick Actions */}
+              <div className="rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
+                <div className="inline-flex items-center gap-2 mb-3">
+                  <span className="w-8 h-8 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4" />
+                  </span>
+                  <p className="text-sm font-semibold text-foreground">Quick Actions</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button size="sm" variant="outline" onClick={() => setShowAISummary(true)} className="flex flex-col items-center gap-1 h-auto py-3">
+                    <Sparkles className="w-4 h-4 text-violet-500" />
+                    <span className="text-[10px]">AI Summary</span>
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => window.print()} className="flex flex-col items-center gap-1 h-auto py-3">
+                    <Printer className="w-4 h-4" />
+                    <span className="text-[10px]">Print</span>
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={handleDownloadPdf} disabled={!canDownload} className="flex flex-col items-center gap-1 h-auto py-3">
+                    <FileText className="w-4 h-4" />
+                    <span className="text-[10px]">↓ PDF</span>
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={handleDownloadEpub} disabled={!canDownload} className="flex flex-col items-center gap-1 h-auto py-3">
+                    <BookOpen className="w-4 h-4" />
+                    <span className="text-[10px]">↓ EPUB</span>
+                  </Button>
+                </div>
+              </div>
               <div className="rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
                 <div className="inline-flex items-center gap-2 mb-4">
                   <span className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center">
@@ -1609,7 +1652,66 @@ const BlogPost = () => {
             </aside>
           </div>
         </section>
+
+        {/* Mobile floating action bar */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-center gap-2 bg-background/95 backdrop-blur-md border-t border-border px-3 py-2 lg:hidden" style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}>
+          <Button size="sm" variant="outline" onClick={() => setShowAISummary(true)} className="flex-1 max-w-[88px] flex flex-col items-center gap-0.5 h-auto py-2">
+            <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+            <span className="text-[9.5px]">AI Summary</span>
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => window.print()} className="flex-1 max-w-[88px] flex flex-col items-center gap-0.5 h-auto py-2">
+            <Printer className="w-3.5 h-3.5" />
+            <span className="text-[9.5px]">Print</span>
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleDownloadPdf} disabled={!canDownload} className="flex-1 max-w-[88px] flex flex-col items-center gap-0.5 h-auto py-2">
+            <FileText className="w-3.5 h-3.5" />
+            <span className="text-[9.5px]">↓ PDF</span>
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleDownloadEpub} disabled={!canDownload} className="flex-1 max-w-[88px] flex flex-col items-center gap-0.5 h-auto py-2">
+            <BookOpen className="w-3.5 h-3.5" />
+            <span className="text-[9.5px]">↓ EPUB</span>
+          </Button>
+        </div>
       </main>
+
+      {/* AI Summary Dialog */}
+      <Dialog open={showAISummary} onOpenChange={setShowAISummary}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-violet-500" />
+              AI Article Summary
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm">
+            <div className="rounded-xl border border-border bg-muted/40 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Overview</p>
+              <p className="text-foreground leading-relaxed">{introduction || meta?.excerpt || `This article covers advanced topics in ${meta?.tags?.slice(0,3).join(", ") || "software engineering"}.`}</p>
+            </div>
+            {toc.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Topics Covered ({toc.length})</p>
+                <ul className="space-y-1.5">
+                  {toc.slice(0, 10).map(t => (
+                    <li key={t.id} className="flex items-center gap-2 text-foreground">
+                      <span className="w-1.5 h-1.5 rounded-full bg-violet-500 flex-shrink-0" />
+                      {t.text}
+                    </li>
+                  ))}
+                  {toc.length > 10 && <li className="text-muted-foreground text-xs">+ {toc.length - 10} more topics…</li>}
+                </ul>
+              </div>
+            )}
+            {meta?.tags?.length ? (
+              <div className="flex flex-wrap gap-1.5">
+                {meta.tags.map(tag => (
+                  <span key={tag} className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-[11px] text-muted-foreground">{tag}</span>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
         <DialogContent className="max-w-lg bg-background border-border">

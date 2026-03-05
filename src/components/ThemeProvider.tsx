@@ -51,6 +51,12 @@ export function ThemeProvider({
     theme,
     setTheme: (nextTheme: Theme) => {
       localStorage.setItem(storageKey, nextTheme);
+      // Broadcast to embedded iframes via BroadcastChannel (same-origin, any tab)
+      try {
+        const bc = new BroadcastChannel("abhishekpanda-theme");
+        bc.postMessage({ type: "theme-change", theme: nextTheme });
+        bc.close();
+      } catch {}
       setTheme(nextTheme);
     },
   };

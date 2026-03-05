@@ -5,9 +5,6 @@ import {
   Menu, 
   X, 
   GitCompare, 
-  Layers, 
-  Rss, 
-  Pen,
   UserCircle,
   BookOpen,
   MessageCircle,
@@ -16,12 +13,12 @@ import {
   Brain,
   GraduationCap,
   Lock,
-  Code2
+  Code2,
+  Cpu
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { OpenOwlLogo } from "@/components/ui/OpenOwlLogo";
 import { AbhishekAnimatedLogo } from "@/components/ui/AbhishekAnimatedLogo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -45,12 +42,11 @@ const galaxySubLinks = [
   { name: "Closed Source Models", path: "/ai-closed_models_2026.html", icon: Lock },
   { name: "Open Source Models", path: "/open-source-models-march-2026.html", icon: Code2 },
   { name: "Compare LLM Models", path: "/ai-model-comparison.html", icon: GitCompare },
+  { name: "LLM Visualizer", path: "/llm-visualizer", icon: Cpu },
 ];
 
 const blogSubLinks = [
-  { name: "Personal Blog", path: "/blog", icon: Pen, description: "My articles & tutorials" },
-  { name: "Blog Aggregator", path: "/blogs", icon: Rss, description: "Medium, Substack, Hashnode & more" },
-  { name: "TechHub", path: "/blog/techhub", icon: Layers, description: "Modular tech learning hub" },
+  { name: "C# & .NET Mastery", path: "/dotnet-mastery-toc", icon: Code2, description: "Complete .NET engineering series" },
 ];
 
 export const Navigation = () => {
@@ -70,11 +66,12 @@ export const Navigation = () => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
-  const isGalaxyActive = location.pathname.startsWith("/llm-galaxy");
+  const isGalaxyActive = location.pathname.startsWith("/llm-galaxy") || location.pathname === "/llm-visualizer";
   const isBlogActive =
     location.pathname.startsWith("/blog") ||
     location.pathname === "/blogs" ||
-    location.pathname.startsWith("/tech");
+    location.pathname.startsWith("/tech") ||
+    location.pathname === "/dotnet-mastery-toc";
   const isCoursesActive = location.pathname === "/courses" || location.pathname.startsWith("/courses/");
   const isEbooksActive = location.pathname === "/ebooks" || location.pathname.startsWith("/ebooks/");
 
@@ -97,10 +94,7 @@ export const Navigation = () => {
               <div className="group-hover:scale-110 transition-transform duration-300">
                 <AbhishekAnimatedLogo size="md" animate />
               </div>
-              <span className="font-bold text-lg hidden sm:block">
-                <span className="text-foreground">abhishek</span>
-                <span className="gradient-text">panda</span>
-              </span>
+              <span className="font-bold text-base sm:text-lg gradient-text">OpenOwl</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -274,22 +268,6 @@ export const Navigation = () => {
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-3">
               <ThemeToggle />
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="hero-outline"
-                    size="sm"
-                    className="relative overflow-hidden rounded-full border-white/45 bg-white/65 px-2.5 dark:border-white/20 dark:bg-black/60 backdrop-blur-xl hover:shadow-[0_0_20px_rgba(148,163,184,0.4)] transition-all duration-300"
-                    asChild
-                  >
-                    <Link to="/openowl">
-                      <OpenOwlLogo compact size="sm" animate className="ring-border/50" />
-                      <span className="font-bold tracking-wide">OpenOwl</span>
-                    </Link>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>OpenOwl AI assistant with live context and guided answers</TooltipContent>
-              </Tooltip>
             </div>
 
             {/* Mobile Menu Button */}
@@ -467,17 +445,6 @@ export const Navigation = () => {
                 transition={{ delay: 0.4 }}
                 className="mt-4"
               >
-                <Button
-                  variant="hero-outline"
-                  size="lg"
-                  className="mb-2 w-full rounded-full border-white/45 bg-white/65 dark:border-white/20 dark:bg-black/60 backdrop-blur-xl hover:shadow-[0_0_20px_rgba(148,163,184,0.4)] transition-all duration-300"
-                  asChild
-                >
-                  <Link to="/openowl">
-                    <OpenOwlLogo compact size="sm" animate className="ring-border/60" />
-                    OpenOwl
-                  </Link>
-                </Button>
                 <Button variant="hero" size="lg" className="w-full" asChild>
                   <Link to="/llm-galaxy">
                     <Brain className="w-5 h-5" />

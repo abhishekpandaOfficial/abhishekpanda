@@ -33,6 +33,22 @@
         }
       });
     }
+    // BroadcastChannel — receives theme changes from the React app in the same tab
+    try {
+      const _bc = new BroadcastChannel('abhishekpanda-theme');
+      _bc.addEventListener('message', (e) => {
+        const t = e.data && e.data.theme;
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      });
+    } catch (e) {}
+    // localStorage polling — reliable fallback for live theme toggle
+    setInterval(() => {
+      const stored = localStorage.getItem('abhishekpanda-theme');
+      if ((stored === 'light' || stored === 'dark') &&
+          stored !== document.documentElement.getAttribute('data-theme')) {
+        document.documentElement.setAttribute('data-theme', stored);
+      }
+    }, 300);
   })();
 </script>
 <style>

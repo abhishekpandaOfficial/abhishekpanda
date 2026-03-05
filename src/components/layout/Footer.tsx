@@ -27,6 +27,8 @@ const footerLinks = {
     { name: "Courses", path: "/courses" },
     { name: "Ebooks", path: "/ebooks" },
     { name: "LLM Galaxy", path: "/llm-galaxy" },
+    { name: "LLM Visualizer", path: "/llm-visualizer" },
+    { name: "OpenOwl", path: "/openowl" },
   ],
   resources: [
     { name: "MyBooks", path: "/about#mybooks" },

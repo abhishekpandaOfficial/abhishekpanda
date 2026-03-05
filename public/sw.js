@@ -3,10 +3,10 @@
 // CIA-Level Security with Offline Support
 // =============================================================================
 
-const CACHE_NAME = 'ap-admin-v2';
-const STATIC_CACHE = 'ap-static-v2';
-const DYNAMIC_CACHE = 'ap-dynamic-v2';
-const API_CACHE = 'ap-api-v2';
+const CACHE_NAME = 'ap-admin-v3';
+const STATIC_CACHE = 'ap-static-v3';
+const DYNAMIC_CACHE = 'ap-dynamic-v3';
+const API_CACHE = 'ap-api-v3';
 
 // Static assets to cache on install
 const STATIC_ASSETS = [
@@ -95,8 +95,20 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Force network-only for static embedded TOC HTML to avoid stale cached variants
+  if (url.pathname === '/embedded/dotnet-mastery-toc.html') {
+    event.respondWith(fetch(request));
+    return;
+  }
+
   // Handle API requests with Network First strategy
   if (isApiRequest(url)) {
+    event.respondWith(networkFirstStrategy(request));
+    return;
+  }
+
+  // Always network-first for HTML files (includes embedded iframes)
+  if (url.pathname.endsWith('.html') || url.pathname.includes('/embedded/')) {
     event.respondWith(networkFirstStrategy(request));
     return;
   }

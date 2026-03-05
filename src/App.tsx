@@ -39,6 +39,8 @@ const TechHub = lazy(() => import("./pages/TechHub"));
 const FoundationalModelsGuide = lazy(() => import("./pages/FoundationalModelsGuide"));
 const OpenOwlLanding = lazy(() => import("./pages/OpenOwlLanding"));
 const OpenOwlAssistant = lazy(() => import("./pages/OpenOwlAssistant"));
+const LLMVisualizer = lazy(() => import("./pages/llm-visualizer"));
+const DotnetMasteryTOC = lazy(() => import("./pages/DotnetMasteryTOC"));
 const OpenOwlWidget = lazy(() => import("@/components/openowl-widget/OpenOwlWidget").then((m) => ({ default: m.OpenOwlWidget })));
 
 const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
@@ -160,7 +162,11 @@ const App = () => {
                 <Route path="/tech/:slug" element={<Navigate to="/blog/techhub" replace />} />
                 <Route path="/openowl" element={<OpenOwlLanding />} />
                 <Route path="/openowl/assistant" element={<OpenOwlAssistant />} />
+                <Route path="/openowl-dashboard" element={<Navigate to="/openowl-dashboard.html" replace />} />
+                <Route path="/openowl-blueprint" element={<Navigate to="/openowl-blueprint.html" replace />} />
                 <Route path="/open-owl" element={<Navigate to="/openowl" replace />} />
+                <Route path="/llm-visualizer" element={<LLMVisualizer />} />
+                <Route path="/dotnet-mastery-toc" element={<DotnetMasteryTOC />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/account" element={<Account />} />
 
