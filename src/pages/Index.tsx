@@ -1,4 +1,5 @@
 import { lazy, Suspense, memo } from "react";
+import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
@@ -18,33 +19,89 @@ const SectionLoader = memo(() => (
 ));
 SectionLoader.displayName = 'SectionLoader';
 
+const sectionReveal = {
+  hidden: { opacity: 0, y: 28, filter: "blur(6px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+  },
+} as const;
+
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <motion.div
+      className="min-h-screen bg-background"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+    >
       <Navigation />
-      <main>
+      <motion.main
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.08, ease: "easeOut" }}
+      >
         {/* Hero loads immediately - critical for LCP */}
-        <HeroSection />
+        <motion.div
+          variants={sectionReveal}
+          initial="hidden"
+          animate="visible"
+        >
+          <HeroSection />
+        </motion.div>
         
         {/* Below-the-fold content loads lazily */}
-        <Suspense fallback={<SectionLoader />}>
-          <FeaturedCourses />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <FeaturedBlog />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <TrustSection />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <NewsletterSection />
-        </Suspense>
-      </main>
+        <motion.section
+          variants={sectionReveal}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-8% 0px -8% 0px" }}
+        >
+          <Suspense fallback={<SectionLoader />}>
+            <FeaturedCourses />
+          </Suspense>
+        </motion.section>
+
+        <motion.section
+          variants={sectionReveal}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-8% 0px -8% 0px" }}
+        >
+          <Suspense fallback={<SectionLoader />}>
+            <FeaturedBlog />
+          </Suspense>
+        </motion.section>
+
+        <motion.section
+          variants={sectionReveal}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-8% 0px -8% 0px" }}
+        >
+          <Suspense fallback={<SectionLoader />}>
+            <TrustSection />
+          </Suspense>
+        </motion.section>
+
+        <motion.section
+          variants={sectionReveal}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-8% 0px -8% 0px" }}
+        >
+          <Suspense fallback={<SectionLoader />}>
+            <NewsletterSection />
+          </Suspense>
+        </motion.section>
+      </motion.main>
       <Footer />
       <Suspense fallback={null}>
         <NewsletterPopup delay={8000} />
       </Suspense>
-    </div>
+    </motion.div>
   );
 };
 

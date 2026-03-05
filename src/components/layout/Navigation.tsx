@@ -94,7 +94,10 @@ export const Navigation = () => {
               <div className="group-hover:scale-110 transition-transform duration-300">
                 <AbhishekAnimatedLogo size="md" animate />
               </div>
-              <span className="font-bold text-base sm:text-lg gradient-text">OpenOwl</span>
+              <span className="font-bold text-lg hidden sm:block">
+                <span className="text-foreground">abhishek</span>
+                <span className="gradient-text">panda</span>
+              </span>
             </Link>
 
             {/* Desktop Navigation */}
