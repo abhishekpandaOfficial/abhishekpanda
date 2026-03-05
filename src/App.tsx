@@ -150,9 +150,12 @@ const App = () => {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/llm-galaxy" element={<LLMGalaxy />} />
                 <Route path="/llm-galaxy/model/:modelId" element={<ModelDetail />} />
-                <Route path="/ai-closed_models_2026.html" element={<ClosedSourceModels />} />
-                <Route path="/open-source-models-march-2026.html" element={<OpenSourceModels />} />
-                <Route path="/ai-model-comparison.html" element={<ModelComparisonPage />} />
+                <Route path="/llm-galaxy/closed-source-models" element={<ClosedSourceModels />} />
+                <Route path="/llm-galaxy/open-source-models" element={<OpenSourceModels />} />
+                <Route path="/llm-galaxy/model-comparison" element={<ModelComparisonPage />} />
+                <Route path="/ai-closed_models_2026.html" element={<Navigate to="/llm-galaxy/closed-source-models" replace />} />
+                <Route path="/open-source-models-march-2026.html" element={<Navigate to="/llm-galaxy/open-source-models" replace />} />
+                <Route path="/ai-model-comparison.html" element={<Navigate to="/llm-galaxy/model-comparison" replace />} />
                 <Route path="/blogs" element={<BlogAggregator />} />
                 <Route path="/blog/techhub" element={<TechHub />} />
                 <Route path="/blog/building-your-own-foundational-ai-models-from-scratch" element={<FoundationalModelsGuide />} />
@@ -162,6 +165,8 @@ const App = () => {
                 <Route path="/tech/:slug" element={<Navigate to="/blog/techhub" replace />} />
                 <Route path="/openowl" element={<OpenOwlLanding />} />
                 <Route path="/openowl/assistant" element={<OpenOwlAssistant />} />
+                <Route path="/openowl/setup" element={<Navigate to="/openowl-setup-guide.html" replace />} />
+                <Route path="/openowl/guide" element={<Navigate to="/openowl-setup-guide.html" replace />} />
                 <Route path="/openowl-dashboard" element={<Navigate to="/openowl-dashboard.html" replace />} />
                 <Route path="/openowl-blueprint" element={<Navigate to="/openowl-blueprint.html" replace />} />
                 <Route path="/open-owl" element={<Navigate to="/openowl" replace />} />

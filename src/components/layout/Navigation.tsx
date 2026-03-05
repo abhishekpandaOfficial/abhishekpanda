@@ -39,9 +39,9 @@ const navLinks = [
 ];
 
 const galaxySubLinks = [
-  { name: "Closed Source Models", path: "/ai-closed_models_2026.html", icon: Lock },
-  { name: "Open Source Models", path: "/open-source-models-march-2026.html", icon: Code2 },
-  { name: "Compare LLM Models", path: "/ai-model-comparison.html", icon: GitCompare },
+  { name: "Closed Source Models", path: "/llm-galaxy/closed-source-models", icon: Lock },
+  { name: "Open Source Models", path: "/llm-galaxy/open-source-models", icon: Code2 },
+  { name: "Compare LLM Models", path: "/llm-galaxy/model-comparison", icon: GitCompare },
   { name: "LLM Visualizer", path: "/llm-visualizer", icon: Cpu },
 ];
 

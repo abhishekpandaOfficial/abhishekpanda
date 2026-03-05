@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenOwl — Complete Setup Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --bg2: #161b22;
+  --bg3: #21262d;
+  --border: #30363d;
+  --border2: #444c56;
+  --text: #e6edf3;
+  --muted: #7d8590;
+  --green: #3fb950;
+  --blue: #58a6ff;
+  --orange: #d29922;
+  --red: #f85149;
+  --purple: #bc8cff;
+  --teal: #39d353;
+  --yellow: #e3b341;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* LAYOUT */
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+  background: var(--bg2); border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 24px 0; z-index: 100;
+}
+.sidebar-logo {
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.sidebar-logo h1 { font-size: 16px; font-weight: 700; color: var(--blue); }
+.sidebar-logo p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.nav-section { padding: 0 12px; margin-bottom: 8px; }
+.nav-label {
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); padding: 6px 8px; font-weight: 600;
+}
+.nav-item {
+  display: block; padding: 5px 8px; border-radius: 6px;
+  color: var(--muted); text-decoration: none; font-size: 12px;
+  transition: all 0.15s; cursor: pointer;
+}
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active { background: rgba(88,166,255,0.1); color: var(--blue); }
+.nav-item .num { 
+  display: inline-block; width: 18px; height: 18px; border-radius: 4px;
+  background: var(--bg3); text-align: center; line-height: 18px;
+  font-size: 10px; margin-right: 6px; font-weight: 600;
+}
+
+.main { margin-left: 240px; padding: 40px 48px; max-width: 900px; }
+
+.guide-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  margin-bottom: 14px;
+  background: var(--bg2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+.guide-breadcrumb a {
+  text-decoration: none;
+  color: var(--blue);
+}
+.guide-breadcrumb a:hover { color: var(--teal); }
+.guide-breadcrumb .sep { color: var(--muted); }
+.guide-breadcrumb .current { color: var(--text); }
+.guide-back {
+  margin-left: 6px;
+  color: var(--teal) !important;
+}
+
+.guide-ctas {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.guide-cta {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: var(--text);
+  background: var(--bg3);
+}
+.guide-cta:hover { border-color: var(--blue); color: var(--blue); }
+.guide-cta.primary {
+  color: var(--teal);
+  border-color: rgba(57,211,83,0.35);
+  background: rgba(57,211,83,0.08);
+}
+
+/* HEADER */
+.page-header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px; margin-bottom: 40px;
+}
+.page-header .eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--teal); letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.page-header h1 {
+  font-size: 28px; font-weight: 700; margin-bottom: 8px;
+}
+.page-header p { color: var(--muted); font-size: 14px; }
+
+/* SECTIONS */
+.section { margin-bottom: 56px; }
+.section-title {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.section-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--bg3); color: var(--blue);
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600;
+  flex-shrink: 0;
+}
+.section-title h2 { font-size: 18px; font-weight: 700; }
+
+/* CODE BLOCKS */
+.code-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; margin: 14px 0; overflow: hidden;
+}
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px; border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+}
+.code-lang {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  color: var(--muted); letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.code-label { font-size: 11px; color: var(--muted); }
+pre {
+  padding: 16px 18px; overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; line-height: 1.9;
+}
+.c-comment { color: #6e7681; font-style: italic; }
+.c-cmd     { color: var(--blue); }
+.c-str     { color: var(--green); }
+.c-key     { color: var(--purple); }
+.c-num     { color: var(--orange); }
+.c-ok      { color: var(--teal); }
+.c-warn    { color: var(--yellow); }
+.c-err     { color: var(--red); }
+.c-path    { color: #ffa657; }
+
+/* FOLDER TREE */
+.tree {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px 24px; margin: 14px 0;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 2;
+}
+.t-dir  { color: var(--blue); }
+.t-file { color: var(--text); }
+.t-new  { color: var(--teal); font-weight: 600; }
+.t-tag  {
+  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 1px 6px; border-radius: 3px; margin-left: 8px;
+  vertical-align: middle;
+}
+.t-tag.p1 { background: rgba(88,166,255,0.15); color: var(--blue); }
+.t-tag.p2 { background: rgba(63,185,80,0.15); color: var(--teal); }
+.t-tag.shared { background: rgba(188,140,255,0.15); color: var(--purple); }
+
+/* STEP BOXES */
+.steps { display: flex; flex-direction: column; gap: 0; margin: 14px 0; }
+.step {
+  display: flex; gap: 0;
+  position: relative;
+}
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute; left: 15px; top: 36px; bottom: 0;
+  width: 1px; background: var(--border);
+}
+.step-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--bg3); border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  font-weight: 600; color: var(--blue); flex-shrink: 0;
+  margin-right: 16px; margin-top: 2px; position: relative; z-index: 1;
+}
+.step-body { padding-bottom: 24px; flex: 1; min-width: 0; }
+.step-body h4 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.step-body p { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+
+/* CALLOUTS */
+.callout {
+  border-left: 3px solid var(--callout-c, var(--blue));
+  background: rgba(88,166,255,0.05); border-radius: 0 6px 6px 0;
+  padding: 12px 16px; margin: 14px 0;
+}
+.callout.green { --callout-c: var(--green); background: rgba(63,185,80,0.05); }
+.callout.orange { --callout-c: var(--orange); background: rgba(210,153,34,0.05); }
+.callout.red { --callout-c: var(--red); background: rgba(248,81,73,0.05); }
+.callout-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--callout-c, var(--blue));
+  margin-bottom: 4px;
+}
+.callout p { font-size: 13px; color: var(--muted); margin: 0; }
+.callout code { font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  background: var(--bg3); padding: 1px 5px; border-radius: 3px; color: var(--text); }
+
+/* INLINE CODE */
+code {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  background: var(--bg3); border: 1px solid var(--border);
+  padding: 1px 6px; border-radius: 4px; color: #ffa657;
+}
+
+/* BADGE GRID */
+.badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.badge {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  padding: 3px 10px; border-radius: 20px; font-weight: 500;
+  letter-spacing: 0.05em;
+}
+.badge.blue   { background: rgba(88,166,255,0.15); color: var(--blue); border: 1px solid rgba(88,166,255,0.3); }
+.badge.green  { background: rgba(63,185,80,0.15); color: var(--teal); border: 1px solid rgba(63,185,80,0.3); }
+.badge.orange { background: rgba(210,153,34,0.15); color: var(--yellow); border: 1px solid rgba(210,153,34,0.3); }
+.badge.purple { background: rgba(188,140,255,0.15); color: var(--purple); border: 1px solid rgba(188,140,255,0.3); }
+
+/* TABLE */
+.tbl { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+.tbl th {
+  background: var(--bg3); padding: 9px 14px; text-align: left;
+  font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--muted); border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+.tbl td {
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: rgba(255,255,255,0.02); }
+.tbl td code { font-size: 11px; }
+
+p { margin-bottom: 10px; }
+p:last-child { margin-bottom: 0; }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 24px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <h1>🦉 OpenOwl</h1>
+    <p>Developer Setup Guide</p>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Setup</div>
+    <a class="nav-item active" href="#s1"><span class="num">1</span>Prerequisites</a>
+    <a class="nav-item" href="#s2"><span class="num">2</span>Folder Structure</a>
+    <a class="nav-item" href="#s3"><span class="num">3</span>Merge Commands</a>
+    <a class="nav-item" href="#s4"><span class="num">4</span>VS Code Setup</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Telegram</div>
+    <a class="nav-item" href="#s5"><span class="num">5</span>Create Bot</a>
+    <a class="nav-item" href="#s6"><span class="num">6</span>Connect & Test</a>
+    <a class="nav-item" href="#s7"><span class="num">7</span>ngrok Tunnel</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Config</div>
+    <a class="nav-item" href="#s8"><span class="num">8</span>Environment File</a>
+    <a class="nav-item" href="#s9"><span class="num">9</span>Run Commands</a>
+    <a class="nav-item" href="#s10"><span class="num">10</span>First Message</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="page-header">
+    <div class="guide-breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span class="sep">›</span>
+      <a href="openowl.html">OpenOwl</a>
+      <span class="sep">›</span>
+      <span class="current">Setup Guide</span>
+      <a class="guide-back" href="openowl.html">← Back to OpenOwl</a>
+    </div>
+    <div class="eyebrow">🦉 OpenOwl · Developer Guide</div>
+    <h1>Integrate Phase 1 + Phase 2<br>Start in VS Code · Connect Telegram</h1>
+    <p>Everything in order. Run the commands exactly as shown. Start from zero, end with a working bot.</p>
+    <div class="badge-row" style="margin-top:14px">
+      <span class="badge blue">Python 3.11+</span>
+      <span class="badge green">Docker</span>
+      <span class="badge orange">Telegram</span>
+      <span class="badge purple">LangGraph</span>
+      <span class="badge green">Free to start</span>
+    </div>
+    <div class="guide-ctas">
+      <a class="guide-cta primary" href="openowl.html">🦉 OpenOwl Landing</a>
+      <a class="guide-cta" href="openowl-dashboard.html">⚡ Dashboard Preview</a>
+      <a class="guide-cta" href="openowl-blueprint.html">📘 Stack Blueprint</a>
+    </div>
+  </div>
+
+  <!-- ─── S1: PREREQUISITES ─────────────────────────────────────────────── -->
+  <div class="section" id="s1">
+    <div class="section-title">
+      <div class="section-badge">1</div>
+      <h2>Prerequisites — Install These First</h2>
+    </div>
+
+    <p>Before anything else, make sure these are installed on your machine.</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash · check what you have</span></div>
+      <pre><span class="c-comment"># Check Python version (need 3.11 or higher)</span>
+python --version
+<span class="c-comment"># Should show: Python 3.11.x or 3.12.x</span>
+
+<span class="c-comment"># Check Docker</span>
+docker --version
+docker-compose --version
+
+<span class="c-comment"># Check Git</span>
+git --version
+
+<span class="c-comment"># Check pip</span>
+pip --version</pre>
+    </div>
+
+    <table class="tbl">
+      <tr><th>Tool</th><th>Why needed</th><th>Install</th><th>Free?</th></tr>
+      <tr><td><strong>Python 3.11+</strong></td><td>Runs the entire backend</td><td><code>python.org/downloads</code></td><td>✅ Yes</td></tr>
+      <tr><td><strong>Docker Desktop</strong></td><td>Runs Redis + PostgreSQL + Ollama</td><td><code>docker.com/get-started</code></td><td>✅ Yes</td></tr>
+      <tr><td><strong>VS Code</strong></td><td>Your development IDE</td><td><code>code.visualstudio.com</code></td><td>✅ Yes</td></tr>
+      <tr><td><strong>Git</strong></td><td>Version control</td><td><code>git-scm.com</code></td><td>✅ Yes</td></tr>
+      <tr><td><strong>ngrok</strong></td><td>Expose local port for Telegram webhook</td><td><code>ngrok.com/download</code></td><td>✅ Free tier</td></tr>
+    </table>
+
+    <div class="callout green">
+      <div class="callout-title">Windows Users</div>
+      <p>Install <strong>WSL2</strong> (Windows Subsystem for Linux) first — run all commands inside WSL2 Ubuntu terminal, not PowerShell. This makes everything work exactly like Linux/Mac. Install: <code>wsl --install</code> in PowerShell as Administrator.</p>
+    </div>
+  </div>
+
+  <!-- ─── S2: FOLDER STRUCTURE ──────────────────────────────────────────── -->
+  <div class="section" id="s2">
+    <div class="section-title">
+      <div class="section-badge">2</div>
+      <h2>Final Folder Structure — Merged Phase 1 + Phase 2</h2>
+    </div>
+
+    <p>This is what your project looks like <strong>after</strong> merging both phases. Every file has a label showing which phase it came from.</p>
+
+    <div class="tree">
+<span class="t-dir">openowl/</span>
+│
+├── <span class="t-file">main.py</span>                    <span class="t-tag shared">REPLACE WITH PHASE 2</span>
+├── <span class="t-file">config.py</span>                  <span class="t-tag p1">PHASE 1 — keep as is</span>
+├── <span class="t-file">requirements.txt</span>           <span class="t-tag shared">MERGE BOTH</span>
+├── <span class="t-file">Dockerfile</span>                 <span class="t-tag p1">PHASE 1 — keep as is</span>
+├── <span class="t-file">docker-compose.yml</span>         <span class="t-tag p1">PHASE 1 — keep as is</span>
+├── <span class="t-file">.env</span>                       <span class="t-tag shared">YOUR CONFIG — add phase 2 vars</span>
+├── <span class="t-file">.env.example</span>              <span class="t-tag p1">PHASE 1 — keep as is</span>
+├── <span class="t-file">.gitignore</span>                <span class="t-tag shared">CREATE THIS</span>
+│
+├── <span class="t-dir">agent/</span>
+│   ├── <span class="t-file">__init__.py</span>
+│   ├── <span class="t-new">state.py</span>               <span class="t-tag p1">PHASE 1</span>
+│   └── <span class="t-new">graph.py</span>               <span class="t-tag p1">PHASE 1</span>
+│
+├── <span class="t-dir">channels/</span>
+│   ├── <span class="t-file">__init__.py</span>
+│   ├── <span class="t-new">telegram_handler.py</span>    <span class="t-tag p1">PHASE 1</span>
+│   └── <span class="t-new">whatsapp_handler.py</span>    <span class="t-tag p2">PHASE 2 — new file</span>
+│
+├── <span class="t-dir">memory/</span>
+│   ├── <span class="t-file">__init__.py</span>
+│   └── <span class="t-new">store.py</span>               <span class="t-tag p1">PHASE 1</span>
+│
+├── <span class="t-dir">models/</span>
+│   ├── <span class="t-file">__init__.py</span>
+│   └── <span class="t-new">router.py</span>              <span class="t-tag p1">PHASE 1</span>
+│
+├── <span class="t-dir">personas/</span>
+│   ├── <span class="t-file">__init__.py</span>
+│   └── <span class="t-new">agents.py</span>              <span class="t-tag p1">PHASE 1</span>
+│
+├── <span class="t-dir">tools/</span>                     <span class="t-tag p2">ALL PHASE 2 — new folder</span>
+│   ├── <span class="t-file">__init__.py</span>
+│   ├── <span class="t-new">google_calendar.py</span>
+│   ├── <span class="t-new">gmail.py</span>
+│   └── <span class="t-new">web_tools.py</span>
+│
+├── <span class="t-dir">integrations/</span>              <span class="t-tag p2">ALL PHASE 2 — new folder</span>
+│   ├── <span class="t-file">__init__.py</span>
+│   └── <span class="t-new">google_oauth.py</span>
+│
+├── <span class="t-dir">scheduler/</span>                 <span class="t-tag p2">ALL PHASE 2 — new folder</span>
+│   ├── <span class="t-file">__init__.py</span>
+│   └── <span class="t-new">proactive.py</span>
+│
+├── <span class="t-dir">data/</span>                      <span class="t-tag shared">AUTO-CREATED — stores Google tokens</span>
+│   └── <span class="t-file">.gitkeep</span>
+│
+├── <span class="t-dir">scripts/</span>
+│   ├── <span class="t-file">__init__.py</span>
+│   └── <span class="t-file">start.sh</span>               <span class="t-tag p1">PHASE 1</span>
+│
+└── <span class="t-dir">tests/</span>                     <span class="t-tag shared">OPTIONAL — create later</span>
+    └── <span class="t-file">__init__.py</span></div>
+  </div>
+
+  <!-- ─── S3: MERGE COMMANDS ────────────────────────────────────────────── -->
+  <div class="section" id="s3">
+    <div class="section-title">
+      <div class="section-badge">3</div>
+      <h2>Exact Commands — Merge Phase 1 + Phase 2</h2>
+    </div>
+
+    <p>Run these commands in order. This creates the full project from both zip files.</p>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <h4>Unzip both phase files into one folder</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span></div>
+            <pre><span class="c-comment"># Create your main project folder</span>
+mkdir openowl
+cd openowl
+
+<span class="c-comment"># Unzip Phase 1 (the base)</span>
+unzip ~/Downloads/openowl-phase1.zip -d .
+<span class="c-comment"># This creates: openowl/ folder with all Phase 1 files inside</span>
+
+<span class="c-comment"># Unzip Phase 2 into a temp folder</span>
+unzip ~/Downloads/openowl-phase2.zip -d /tmp/phase2</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <h4>Copy Phase 2 files into the project</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash · run from inside your openowl/ folder</span></div>
+            <pre><span class="c-comment"># Go into the project folder</span>
+cd openowl
+
+<span class="c-comment"># Copy Phase 2 new files/folders in</span>
+cp /tmp/phase2/openowl-phase2/channels/whatsapp_handler.py  channels/
+cp /tmp/phase2/openowl-phase2/tools/google_calendar.py      tools/
+cp /tmp/phase2/openowl-phase2/tools/gmail.py                tools/
+cp /tmp/phase2/openowl-phase2/tools/web_tools.py            tools/
+cp /tmp/phase2/openowl-phase2/integrations/google_oauth.py  integrations/
+cp /tmp/phase2/openowl-phase2/scheduler/proactive.py        scheduler/
+
+<span class="c-comment"># Replace main.py with Phase 2 version (it includes Phase 1 features + new)</span>
+cp /tmp/phase2/openowl-phase2/main.py  main.py</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <h4>Create missing __init__.py files</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span></div>
+            <pre><span class="c-comment"># Create all __init__.py files so Python treats folders as packages</span>
+touch agent/__init__.py
+touch channels/__init__.py
+touch memory/__init__.py
+touch models/__init__.py
+touch personas/__init__.py
+touch tools/__init__.py
+touch integrations/__init__.py
+touch scheduler/__init__.py
+touch scripts/__init__.py
+touch tests/__init__.py
+
+<span class="c-comment"># Create data folder (for Google OAuth tokens)</span>
+mkdir -p data
+touch data/.gitkeep</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <h4>Create .gitignore so you don't commit secrets</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span></div>
+            <pre>cat > .gitignore << 'EOF'
+.env
+data/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+.DS_Store
+Thumbs.db
+*.log
+EOF</pre>
+          </div>
+          <div class="callout red">
+            <div class="callout-title">⚠️ Critical — never commit .env</div>
+            <p>Your <code>.env</code> file contains API keys. The <code>.gitignore</code> above prevents it from being pushed to GitHub. Always check before committing.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <h4>Merge requirements into one file</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span></div>
+            <pre><span class="c-comment"># Append Phase 2 packages to main requirements.txt</span>
+cat >> requirements.txt << 'EOF'
+
+<span class="c-comment"># ── Phase 2 additions ──────────────────────────────────</span>
+google-auth==2.35.0
+google-auth-oauthlib==1.2.1
+google-auth-httplib2==0.2.0
+google-api-python-client==2.151.0
+apscheduler==3.10.4
+pydub==0.25.1
+tzdata==2024.2
+EOF</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">06</div>
+        <div class="step-body">
+          <h4>Create Python virtual environment and install</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span></div>
+            <pre><span class="c-comment"># Create virtual environment (named .venv)</span>
+python -m venv .venv
+
+<span class="c-comment"># Activate it</span>
+source .venv/bin/activate           <span class="c-comment"># Mac / Linux / WSL</span>
+<span class="c-comment"># .venv\Scripts\activate           # Windows PowerShell</span>
+
+<span class="c-comment"># Install all packages</span>
+pip install --upgrade pip
+pip install -r requirements.txt
+
+<span class="c-comment"># Verify key packages installed</span>
+python -c "import fastapi, langgraph, groq; print('✅ Core packages OK')"</pre>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end steps -->
+
+    <div class="callout green">
+      <div class="callout-title">✅ After these 6 steps</div>
+      <p>Your folder is complete. Run <code>ls -la</code> inside <code>openowl/</code> — you should see: <code>main.py config.py agent/ channels/ memory/ models/ personas/ tools/ integrations/ scheduler/ data/ .env.example .gitignore requirements.txt Dockerfile docker-compose.yml</code></p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ─── S4: VS CODE ───────────────────────────────────────────────────── -->
+  <div class="section" id="s4">
+    <div class="section-title">
+      <div class="section-badge">4</div>
+      <h2>VS Code Setup — Extensions + Workspace</h2>
+    </div>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Open the project in VS Code</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span></div>
+            <pre><span class="c-comment"># From inside the openowl/ folder</span>
+code .</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Install these VS Code extensions</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash · paste into VS Code terminal</span></div>
+            <pre>code --install-extension ms-python.python
+code --install-extension ms-python.pylance
+code --install-extension ms-python.black-formatter
+code --install-extension ms-azuretools.vscode-docker
+code --install-extension mikestead.dotenv
+code --install-extension eamodio.gitlens
+code --install-extension PKief.material-icon-theme</pre>
+          </div>
+          <p style="color:var(--muted);font-size:12px;margin-top:6px">Or search them in the Extensions panel (Ctrl+Shift+X)</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Select your Python interpreter (.venv)</h4>
+          <p>Press <strong>Ctrl+Shift+P</strong> → type <strong>Python: Select Interpreter</strong> → choose the one that says <code>.venv</code>. This makes VS Code use your virtual environment automatically.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Create VS Code settings for this project</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash · creates .vscode/settings.json</span></div>
+            <pre>mkdir -p .vscode
+cat > .vscode/settings.json << 'EOF'
+{
+  "python.defaultInterpreterPath": ".venv/bin/python",
+  "editor.formatOnSave": true,
+  "python.formatting.provider": "black",
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    ".venv": true,
+    "data": false
+  },
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": false,
+  "editor.rulers": [88],
+  "python.terminal.activateEnvironment": true
+}
+EOF</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Create launch config so you can press F5 to run</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash · creates .vscode/launch.json</span></div>
+            <pre>cat > .vscode/launch.json << 'EOF'
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🦉 Run OpenOwl",
+      "type": "python",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["main:app", "--reload", "--port", "8000"],
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}
+EOF</pre>
+          </div>
+          <p style="color:var(--muted);font-size:12px;margin-top:6px">Now pressing <strong>F5</strong> in VS Code starts the server with hot-reload.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ─── S5: CREATE BOT ────────────────────────────────────────────────── -->
+  <div class="section" id="s5">
+    <div class="section-title">
+      <div class="section-badge">5</div>
+      <h2>Create Your Telegram Bot — Step by Step</h2>
+    </div>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Open Telegram and find @BotFather</h4>
+          <p>On your phone or Telegram desktop app, search for <strong>@BotFather</strong> — it's the official bot for creating bots. The blue tick ✅ confirms it's official.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Create a new bot</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">telegram conversation with @BotFather</span></div>
+            <pre><span class="c-ok">You:</span>   /newbot
+
+<span class="c-ok">BotFather:</span> Alright, a new bot. How are we going to call it?
+           Please choose a name for your bot.
+
+<span class="c-ok">You:</span>   OpenOwl Assistant
+<span class="c-comment">       (this is the display name, can be anything)</span>
+
+<span class="c-ok">BotFather:</span> Good. Now let's choose a username for your bot.
+           It must end in 'bot'. Like this, for example:
+           TetrisBot or tetris_bot.
+
+<span class="c-ok">You:</span>   MyOpenOwlBot
+<span class="c-comment">       (must be unique + end in Bot or bot)</span>
+
+<span class="c-ok">BotFather:</span> Done! Congratulations on your new bot.
+           Use this token to access the HTTP API:
+           <span class="c-str">7234567890:AAEb3KmXgH9xxxxxxxxxxxxxxxZ4Qabcd</span>
+           <span class="c-comment">           ↑ THIS IS YOUR BOT TOKEN — copy it</span></pre>
+          </div>
+          <div class="callout orange">
+            <div class="callout-title">Save that token immediately</div>
+            <p>Copy the token BotFather gives you. It looks like <code>7234567890:AAEb3KmXgH9xZ4Qabcd</code>. You'll paste it into <code>.env</code> as <code>TELEGRAM_BOT_TOKEN</code>. Don't share this — it gives full control of your bot.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Get your own Telegram user ID</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">telegram · find @userinfobot</span></div>
+            <pre><span class="c-ok">Search:</span> @userinfobot
+
+<span class="c-ok">You:</span>   /start
+
+<span class="c-ok">userinfobot:</span> Id: <span class="c-str">123456789</span>
+             First: YourName
+             <span class="c-comment">      ↑ This is your OWNER_ID — copy it</span></pre>
+          </div>
+          <p>You need this so OpenOwl knows you're the owner and trusts your commands.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Configure bot commands (optional but nice)</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">telegram · back to @BotFather</span></div>
+            <pre><span class="c-ok">You:</span> /setcommands
+
+<span class="c-ok">BotFather:</span> Choose a bot to change the list of commands.
+<span class="c-ok">You:</span> @MyOpenOwlBot
+
+<span class="c-ok">BotFather:</span> OK. Send me a list of commands...
+<span class="c-ok">You:</span>
+start - Welcome and setup
+help - Show all commands
+switch - Change persona (aria/priya/nova/meera/zara)
+status - System health check
+memory - See what Owl remembers</pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── S6: CONNECT & TEST ────────────────────────────────────────────── -->
+  <div class="section" id="s6">
+    <div class="section-title">
+      <div class="section-badge">6</div>
+      <h2>Connect the Bot — Get Groq API Key + Configure</h2>
+    </div>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Get your Groq API key (free — takes 2 minutes)</h4>
+          <p>Groq is the free AI API that powers OpenOwl. No credit card needed.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">steps</span></div>
+            <pre><span class="c-ok">1.</span> Go to: <span class="c-str">console.groq.com</span>
+<span class="c-ok">2.</span> Click "Sign Up" → use Google account
+<span class="c-ok">3.</span> Go to API Keys → Create API Key
+<span class="c-ok">4.</span> Copy the key → looks like: <span class="c-str">gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>
+<span class="c-ok">5.</span> Paste into .env as GROQ_API_KEY</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Create your .env file from the template</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash · inside openowl/ folder</span></div>
+            <pre>cp .env.example .env</pre>
+          </div>
+          <p>Now open <code>.env</code> in VS Code and fill in <strong>just these 3 fields to start</strong>:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">.env · minimum to get running</span></div>
+            <pre><span class="c-comment"># The ONLY 3 things you MUST fill in to start</span>
+
+TELEGRAM_BOT_TOKEN=<span class="c-str">7234567890:AAEb3KmXgH9xZ4Qabcd</span>
+<span class="c-comment">                   ↑ paste your BotFather token here</span>
+
+GROQ_API_KEY=<span class="c-str">gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>
+<span class="c-comment">             ↑ paste your Groq key here</span>
+
+OWNER_ID=<span class="c-str">123456789</span>
+<span class="c-comment">         ↑ paste your Telegram user ID here (from @userinfobot)</span>
+
+<span class="c-comment"># TELEGRAM_WEBHOOK_URL gets filled in the NEXT step (after ngrok)</span>
+<span class="c-comment"># Everything else can stay as default for now</span></pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── S7: NGROK ─────────────────────────────────────────────────────── -->
+  <div class="section" id="s7">
+    <div class="section-title">
+      <div class="section-badge">7</div>
+      <h2>ngrok — Make Your Local Server Reachable by Telegram</h2>
+    </div>
+
+    <p>Telegram needs a public HTTPS URL to send messages to your bot. ngrok creates a tunnel from the internet to your local machine.</p>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Install and authenticate ngrok</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash</span></div>
+            <pre><span class="c-comment"># Mac</span>
+brew install ngrok
+
+<span class="c-comment"># Linux / WSL</span>
+curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+sudo apt update && sudo apt install ngrok
+
+<span class="c-comment"># Authenticate (get token from dashboard.ngrok.com → Your Authtoken)</span>
+ngrok config add-authtoken <span class="c-str">YOUR_NGROK_TOKEN</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Start Docker services (Redis + PostgreSQL)</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash · terminal window 1</span></div>
+            <pre><span class="c-comment"># Make sure Docker Desktop is running, then:</span>
+docker-compose up -d postgres redis
+
+<span class="c-comment"># Check they're running</span>
+docker ps
+<span class="c-comment"># Should show: openowl-postgres and openowl-redis both "Up"</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Start the OpenOwl server</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash · terminal window 2 (or press F5 in VS Code)</span></div>
+            <pre><span class="c-comment"># Make sure .venv is active</span>
+source .venv/bin/activate
+
+<span class="c-comment"># Start the server</span>
+uvicorn main:app --reload --port 8000
+
+<span class="c-comment"># You should see:</span>
+<span class="c-ok">INFO:     Uvicorn running on http://0.0.0.0:8000</span>
+<span class="c-ok">INFO:     ✅ Redis connected</span>
+<span class="c-ok">INFO:     ✅ PostgreSQL connected</span>
+<span class="c-ok">INFO:     ✅ OpenOwl is ready!</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Start ngrok in a new terminal</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash · terminal window 3</span></div>
+            <pre>ngrok http 8000
+
+<span class="c-comment"># ngrok shows something like this:</span>
+<span class="c-ok">Forwarding  https://a1b2c3d4.ngrok-free.app → http://localhost:8000</span>
+<span class="c-comment">                 ↑ COPY THIS URL</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Paste the ngrok URL into .env and restart</h4>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">.env · add the ngrok URL</span></div>
+            <pre>TELEGRAM_WEBHOOK_URL=<span class="c-str">https://a1b2c3d4.ngrok-free.app</span>
+<span class="c-comment">                      ↑ paste your ngrok URL here (no trailing slash)</span></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash · restart the server to pick up the new URL</span></div>
+            <pre><span class="c-comment"># Stop the server (Ctrl+C) then restart</span>
+uvicorn main:app --reload --port 8000
+
+<span class="c-comment"># You should now see:</span>
+<span class="c-ok">INFO:     ✅ Telegram webhook set → @MyOpenOwlBot</span>
+<span class="c-ok">INFO:     Webhook URL: https://a1b2c3d4.ngrok-free.app/telegram/webhook</span></pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">💡 ngrok free tier resets URL on restart</div>
+      <p>Every time you restart ngrok, you get a new URL. You'll need to update <code>TELEGRAM_WEBHOOK_URL</code> in <code>.env</code> and restart the server each time. For a permanent URL, upgrade ngrok to paid ($10/mo) or deploy to Railway (free tier).</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ─── S8: ENV FILE ──────────────────────────────────────────────────── -->
+  <div class="section" id="s8">
+    <div class="section-title">
+      <div class="section-badge">8</div>
+      <h2>Full .env Reference — What Each Variable Does</h2>
+    </div>
+
+    <table class="tbl">
+      <tr><th>Variable</th><th>What it does</th><th>Required?</th></tr>
+      <tr><td><code>TELEGRAM_BOT_TOKEN</code></td><td>From @BotFather — your bot's identity</td><td>✅ YES</td></tr>
+      <tr><td><code>GROQ_API_KEY</code></td><td>Free AI API (Mistral/LLaMA) — console.groq.com</td><td>✅ YES</td></tr>
+      <tr><td><code>OWNER_ID</code></td><td>Your Telegram user ID — from @userinfobot</td><td>✅ YES</td></tr>
+      <tr><td><code>TELEGRAM_WEBHOOK_URL</code></td><td>Your ngrok URL — changes when ngrok restarts</td><td>✅ YES</td></tr>
+      <tr><td><code>DATABASE_URL</code></td><td>PostgreSQL connection — default works with docker-compose</td><td>Auto-set</td></tr>
+      <tr><td><code>REDIS_URL</code></td><td>Redis connection — default works with docker-compose</td><td>Auto-set</td></tr>
+      <tr><td><code>SECRET_KEY</code></td><td>App security key — generate: <code>openssl rand -hex 32</code></td><td>Change it</td></tr>
+      <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Claude fallback — optional, only if Groq fails</td><td>Optional</td></tr>
+      <tr><td><code>OPENAI_API_KEY</code></td><td>GPT fallback — optional, last resort</td><td>Optional</td></tr>
+      <tr><td><code>TWILIO_ACCOUNT_SID</code></td><td>For WhatsApp + SMS — twilio.com trial</td><td>Optional</td></tr>
+      <tr><td><code>TWILIO_AUTH_TOKEN</code></td><td>Twilio auth — paired with above</td><td>Optional</td></tr>
+      <tr><td><code>GOOGLE_CLIENT_ID</code></td><td>For Gmail + Calendar — Google Cloud Console</td><td>Phase 2</td></tr>
+      <tr><td><code>GOOGLE_CLIENT_SECRET</code></td><td>Paired with Google Client ID</td><td>Phase 2</td></tr>
+    </table>
+  </div>
+
+  <!-- ─── S9: RUN COMMANDS ──────────────────────────────────────────────── -->
+  <div class="section" id="s9">
+    <div class="section-title">
+      <div class="section-badge">9</div>
+      <h2>Daily Run Commands — Cheat Sheet</h2>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash · every time you start development</span></div>
+      <pre><span class="c-comment">──────────────────────────────────────────────────────────────
+TERMINAL 1 — Start databases
+──────────────────────────────────────────────────────────────</span>
+docker-compose up -d postgres redis
+<span class="c-ok">✅ Databases running</span>
+
+<span class="c-comment">──────────────────────────────────────────────────────────────
+TERMINAL 2 — Start OpenOwl server
+──────────────────────────────────────────────────────────────</span>
+cd openowl
+source .venv/bin/activate
+uvicorn main:app --reload --port 8000
+<span class="c-ok">✅ Server running at http://localhost:8000</span>
+
+<span class="c-comment">──────────────────────────────────────────────────────────────
+TERMINAL 3 — Start ngrok tunnel (Telegram needs this)
+──────────────────────────────────────────────────────────────</span>
+ngrok http 8000
+<span class="c-ok">✅ Public URL shown — paste into .env → restart server</span>
+
+<span class="c-comment">──────────────────────────────────────────────────────────────
+BROWSER — Check everything is working
+──────────────────────────────────────────────────────────────</span>
+<span class="c-str">http://localhost:8000/health</span>     <span class="c-comment"># JSON health check</span>
+<span class="c-str">http://localhost:8000</span>            <span class="c-comment"># Live dashboard</span>
+<span class="c-str">http://localhost:8000/docs</span>       <span class="c-comment"># API documentation</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash · other useful commands</span></div>
+      <pre><span class="c-comment"># Stop all Docker services</span>
+docker-compose down
+
+<span class="c-comment"># View server logs</span>
+docker-compose logs -f openowl
+
+<span class="c-comment"># View only Redis logs</span>
+docker-compose logs -f redis
+
+<span class="c-comment"># Reset the database (⚠️ deletes all data)</span>
+docker-compose down -v
+docker-compose up -d postgres redis
+
+<span class="c-comment"># Install a new package</span>
+pip install some-package
+pip freeze > requirements.txt     <span class="c-comment"># save it</span>
+
+<span class="c-comment"># Check what's using port 8000 (if you get "address in use")</span>
+lsof -i :8000
+kill -9 &lt;PID&gt;</pre>
+    </div>
+  </div>
+
+  <!-- ─── S10: FIRST MESSAGE ────────────────────────────────────────────── -->
+  <div class="section" id="s10">
+    <div class="section-title">
+      <div class="section-badge">10</div>
+      <h2>Send Your First Message — Test It Works</h2>
+    </div>
+
+    <p>With everything running, open Telegram and find your bot by its username (e.g. <strong>@MyOpenOwlBot</strong>). Send these in order:</p>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">telegram · test sequence</span></div>
+      <pre><span class="c-ok">Test 1 — Basic response</span>
+You:  /start
+Owl:  🦉 Welcome to OpenOwl! I'm Aria, your PA...
+
+<span class="c-ok">Test 2 — Free text conversation</span>
+You:  Hello! What can you do?
+Owl:  Hey! I'm Aria, your personal assistant. I can book flights,
+      manage your calendar, set reminders, research anything...
+
+<span class="c-ok">Test 3 — AI working (Groq)</span>
+You:  Explain quantum computing in simple words
+Owl:  [Groq model responds — should be &lt;2 seconds]
+
+<span class="c-ok">Test 4 — Persona switch</span>
+You:  Switch to Meera
+Owl:  Namaste! Main Meera hoon 😊 Aaj main aapki kaise help...
+
+<span class="c-ok">Test 5 — Approval gate (safety test)</span>
+You:  Send an email to test@test.com saying hello
+Owl:  Here's what I'm about to do — confirm to proceed:
+      Action: Send email to test@test.com
+      [YES button] [NO button]
+
+<span class="c-ok">Test 6 — System status</span>
+You:  /status
+Owl:  🦉 OpenOwl Status
+      AI Model: 🟢 Groq (OSS)
+      Redis: 🟢 Connected
+      Database: 🟢 Connected</pre>
+    </div>
+
+    <div class="callout green">
+      <div class="callout-title">✅ If all 6 tests pass — you're live!</div>
+      <p>Your OpenOwl is fully working. The bot is connected, the AI is responding, memory is storing, and the approval gate is active. You can now start adding integrations (Google Calendar, Gmail) and testing more complex tasks.</p>
+    </div>
+
+    <div class="callout red">
+      <div class="callout-title">❌ If the bot doesn't respond</div>
+      <p>Check in order: <strong>(1)</strong> Is the server running? Check terminal 2. <strong>(2)</strong> Is ngrok running? Check terminal 3. <strong>(3)</strong> Is <code>TELEGRAM_WEBHOOK_URL</code> set in <code>.env</code> to the current ngrok URL? <strong>(4)</strong> Did you restart the server after changing <code>.env</code>? <strong>(5)</strong> Visit <code>http://localhost:8000/health</code> — does it say "ok"?</p>
+    </div>
+
+    <div class="callout orange">
+      <div class="callout-title">📱 Test on your phone too</div>
+      <p>Open Telegram on your phone, find your bot — it works on mobile too. That's the whole point: you can message it from anywhere and it responds instantly.</p>
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+<script>
+// Highlight active nav item based on scroll
+const sections = document.querySelectorAll('.section');
+const navItems = document.querySelectorAll('.nav-item');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      navItems.forEach(n => {
+        n.classList.toggle('active', n.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

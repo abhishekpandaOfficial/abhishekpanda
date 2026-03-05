@@ -223,6 +223,9 @@ const buildSitemap = (posts) => {
     { loc: `${SITE_URL}/llm-galaxy`, changefreq: "weekly", priority: "0.9" },
     { loc: `${SITE_URL}/chronyx`, changefreq: "weekly", priority: "0.8" },
     { loc: `${SITE_URL}/openowl`, changefreq: "weekly", priority: "0.9" },
+    { loc: `${SITE_URL}/openowl-dashboard`, changefreq: "weekly", priority: "0.8", lastmod: "2026-03-05" },
+    { loc: `${SITE_URL}/openowl-blueprint`, changefreq: "weekly", priority: "0.82", lastmod: "2026-03-05" },
+    { loc: `${SITE_URL}/openowl/setup`, changefreq: "monthly", priority: "0.8", lastmod: "2026-03-05" },
     { loc: `${SITE_URL}/openowl/assistant`, changefreq: "weekly", priority: "0.8" },
   ];
   for (const p of posts) {

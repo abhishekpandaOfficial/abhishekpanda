@@ -130,6 +130,30 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     },
   },
   {
+    pattern: "/llm-galaxy/closed-source-models",
+    data: {
+      title: "Closed Source Models | LLM Galaxy",
+      description:
+        "Explore ranked closed-source AI models, benchmark context, and capability insights inside LLM Galaxy.",
+    },
+  },
+  {
+    pattern: "/llm-galaxy/open-source-models",
+    data: {
+      title: "Open Source Models | LLM Galaxy",
+      description:
+        "Explore top open-source and open-weight AI models, strengths, and benchmark-driven comparisons in LLM Galaxy.",
+    },
+  },
+  {
+    pattern: "/llm-galaxy/model-comparison",
+    data: {
+      title: "Model Comparison | LLM Galaxy",
+      description:
+        "Compare model families across providers with benchmark and capability context in the LLM Galaxy model comparison view.",
+    },
+  },
+  {
     pattern: "/chronyx",
     data: {
       title: "CHRONYX | Personal Intelligence Space",

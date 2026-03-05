@@ -23,7 +23,7 @@ const LLMGalaxy = () => {
   useEffect(() => {
     const section = location.hash.replace(/^#/, "").toLowerCase();
     if (section === "model-comparison") {
-      navigate("/ai-model-comparison.html", { replace: true });
+      navigate("/llm-galaxy/model-comparison", { replace: true });
     }
   }, [location.hash, navigate]);
 
