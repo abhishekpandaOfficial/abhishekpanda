@@ -106,7 +106,7 @@ const About = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="about-open-source-typo min-h-screen bg-background">
       <Navigation />
       
       <main className="pt-20 md:pt-24 pb-16 md:pb-20">

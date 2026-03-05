@@ -712,6 +712,7 @@ export const CareerTimeline = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
   const pathRef = useRef<SVGPathElement | null>(null);
+  const pathGlowRef = useRef<SVGPathElement | null>(null);
   const orbRef = useRef<HTMLDivElement | null>(null);
 
   const handleMobileClick = (item: TimelineItem) => {
@@ -723,27 +724,68 @@ export const CareerTimeline = () => {
     const section = sectionRef.current;
     const timeline = timelineRef.current;
     const path = pathRef.current;
+    const pathGlow = pathGlowRef.current;
     const orb = orbRef.current;
-    if (!section || !timeline || !path || !orb) return;
+    if (!section || !timeline || !path || !pathGlow || !orb) return;
 
     const ctx = gsap.context(() => {
       const updatePath = () => {
         const totalHeight = timeline.scrollHeight;
         const totalWidth = timeline.clientWidth;
         const isDesktop = window.matchMedia("(min-width: 768px)").matches;
-        const x = isDesktop ? totalWidth / 2 : 20;
-        const curveOffset = isDesktop ? 26 : 14;
+        const timelineRect = timeline.getBoundingClientRect();
+        const waypoints = gsap.utils.toArray<HTMLElement>(".timeline-waypoint", timeline);
+        const laneX = isDesktop ? totalWidth / 2 : 20;
+        const amplitude = isDesktop
+          ? Math.min(130, Math.max(72, totalWidth * 0.16))
+          : 8;
 
-        const d = [
-          `M ${x} 0`,
-          `C ${x + curveOffset} ${totalHeight * 0.18}, ${x - curveOffset} ${totalHeight * 0.36}, ${x} ${totalHeight * 0.52}`,
-          `C ${x + curveOffset} ${totalHeight * 0.7}, ${x - curveOffset} ${totalHeight * 0.88}, ${x} ${totalHeight}`,
-        ].join(" ");
+        if (!waypoints.length) {
+          const straightPath = `M ${laneX} 0 L ${laneX} ${totalHeight}`;
+          path.setAttribute("d", straightPath);
+          pathGlow.setAttribute("d", straightPath);
+          return;
+        }
+
+        const points = waypoints.map((point, index) => {
+          const rect = point.getBoundingClientRect();
+          const y = rect.top - timelineRect.top + rect.height / 2;
+          const side = index % 2 === 0 ? -1 : 1;
+
+          return {
+            x: laneX + side * amplitude,
+            y,
+          };
+        });
+
+        const startY = Math.max(0, points[0].y - 58);
+        let d = `M ${laneX} ${startY}`;
+
+        points.forEach((point, index) => {
+          const prevY = index === 0 ? startY : points[index - 1].y;
+          const controlY = prevY + (point.y - prevY) * 0.5;
+          d += ` C ${laneX} ${controlY}, ${point.x} ${controlY}, ${point.x} ${point.y}`;
+        });
+
+        const lastY = points[points.length - 1].y;
+        const endY = Math.min(totalHeight, lastY + 68);
+        const endControlY = lastY + (endY - lastY) * 0.5;
+        d += ` C ${laneX} ${endControlY}, ${laneX} ${endControlY}, ${laneX} ${endY}`;
 
         path.setAttribute("d", d);
+        pathGlow.setAttribute("d", d);
+      };
+
+      const setupPathDash = () => {
+        const length = path.getTotalLength();
+        gsap.set([path, pathGlow], {
+          strokeDasharray: length,
+          strokeDashoffset: length,
+        });
       };
 
       updatePath();
+      setupPathDash();
       gsap.set(orb, { xPercent: -50, yPercent: -50 });
 
       gsap.to(orb, {
@@ -757,12 +799,43 @@ export const CareerTimeline = () => {
         },
         scrollTrigger: {
           trigger: timeline,
-          start: "top 74%",
-          end: "bottom 40%",
-          scrub: 1.1,
+          start: "top 78%",
+          end: "bottom 30%",
+          scrub: 1.2,
           invalidateOnRefresh: true,
-          onRefresh: updatePath,
+          onRefresh: () => {
+            updatePath();
+            setupPathDash();
+          },
         },
+      });
+
+      gsap.to([path, pathGlow], {
+        strokeDashoffset: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: timeline,
+          start: "top 80%",
+          end: "bottom 26%",
+          scrub: 1.15,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      gsap.to(orb, {
+        scale: 1.2,
+        duration: 1.1,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+
+      gsap.to(orb, {
+        boxShadow: "0 0 28px rgba(59,130,246,0.95), 0 0 54px rgba(167,139,250,0.55)",
+        duration: 1.1,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
       });
 
       const waypoints = gsap.utils.toArray<HTMLElement>(".timeline-waypoint", timeline);
@@ -771,16 +844,35 @@ export const CareerTimeline = () => {
           point,
           { scale: 1, boxShadow: "0 0 0 rgba(0,0,0,0)" },
           {
-            scale: 1.14,
-            boxShadow: "0 0 22px rgba(56,189,248,0.55)",
-            duration: 0.34,
+            scale: 1.16,
+            boxShadow: "0 0 0 6px rgba(56,189,248,0.18), 0 0 28px rgba(56,189,248,0.55)",
+            duration: 0.4,
             yoyo: true,
             repeat: 1,
-            ease: "power1.out",
+            ease: "power2.out",
             scrollTrigger: {
               trigger: point,
-              start: "top 72%",
+              start: "top 70%",
               toggleActions: "play none none none",
+            },
+          },
+        );
+      });
+
+      const cards = gsap.utils.toArray<HTMLElement>("[data-waypoint-card='true']", timeline);
+      cards.forEach((card) => {
+        gsap.fromTo(
+          card,
+          { y: 18, opacity: 0.78 },
+          {
+            y: 0,
+            opacity: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 84%",
+              end: "top 60%",
+              scrub: 0.6,
             },
           },
         );
@@ -788,10 +880,17 @@ export const CareerTimeline = () => {
 
       const resizeObserver = new ResizeObserver(() => {
         updatePath();
+        setupPathDash();
         ScrollTrigger.refresh();
       });
       resizeObserver.observe(timeline);
       window.addEventListener("resize", updatePath);
+
+      gsap.delayedCall(0.1, () => {
+        updatePath();
+        setupPathDash();
+        ScrollTrigger.refresh();
+      });
 
       return () => {
         resizeObserver.disconnect();
@@ -840,19 +939,29 @@ export const CareerTimeline = () => {
                 </linearGradient>
               </defs>
               <path
+                ref={pathGlowRef}
+                fill="none"
+                stroke="url(#career-path-gradient)"
+                strokeWidth="10"
+                strokeLinecap="round"
+                opacity="0.18"
+              />
+              <path
                 ref={pathRef}
                 fill="none"
                 stroke="url(#career-path-gradient)"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
-                strokeDasharray="4 4"
-                opacity="0.9"
+                strokeDasharray="6 8"
+                opacity="0.96"
               />
             </svg>
             <div
               ref={orbRef}
-              className="absolute left-0 top-0 h-4 w-4 rounded-full border border-background bg-primary shadow-[0_0_20px_rgba(59,130,246,0.75)]"
-            />
+              className="absolute left-0 top-0 h-5 w-5 rounded-full border border-background/90 bg-gradient-to-br from-primary via-sky-400 to-violet-500 shadow-[0_0_20px_rgba(59,130,246,0.75)]"
+            >
+              <span className="absolute -inset-2 rounded-full border border-primary/35 opacity-70" />
+            </div>
           </div>
 
           {/* Timeline Items */}

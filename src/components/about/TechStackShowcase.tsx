@@ -38,7 +38,7 @@ const techLogos: TechLogo[] = [
     name: "AWS",
     src: "/brand-logos/stacks/aws.svg",
     categories: ["cloud"],
-    imgClassName: "h-7 w-14 object-contain",
+    imgClassName: "h-5 w-10 object-contain sm:h-6 sm:w-11",
   },
   { id: "azure", name: "Azure", src: "/brand-logos/stacks/microsoftazure.svg", categories: ["cloud"] },
   { id: "gcp", name: "Google Cloud", src: "/brand-logos/stacks/gcp.svg", categories: ["cloud"] },
@@ -58,7 +58,7 @@ const techLogos: TechLogo[] = [
     name: "OpenAI",
     src: "/llm-logos/openai.png",
     categories: ["aiml"],
-    imgClassName: "h-10 w-10 object-contain",
+    imgClassName: "h-7 w-7 object-contain sm:h-8 sm:w-8",
   },
   { id: "huggingface", name: "Hugging Face", src: "/brand-logos/stacks/huggingface.svg", categories: ["aiml"] },
   { id: "langchain", name: "LangChain", src: "/brand-logos/stacks/langchain.svg", categories: ["aiml"] },
@@ -73,27 +73,30 @@ function TechLogoCard({ tech, isDimmed }: { tech: TechLogo; isDimmed: boolean })
     <motion.article
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: isDimmed ? 0.45 : 1, y: 0 }}
-      whileHover={{ y: -6, scale: 1.02 }}
+      whileHover={{ y: -4, scale: 1.02 }}
       transition={{ duration: 0.25 }}
       className={cn(
-        "group flex h-[120px] w-[122px] shrink-0 flex-col items-center justify-center rounded-2xl border px-3 py-3 text-center",
-        "border-border/60 bg-background/70 shadow-sm backdrop-blur",
+        "group flex w-[66px] shrink-0 flex-col items-center justify-start px-1 py-1 text-center sm:w-[72px] md:w-[78px]",
+        "transition-all duration-300",
       )}
       aria-label={`${tech.name} technology`}
     >
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-black/10 bg-white shadow-sm dark:border-white/15 dark:bg-zinc-100">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 bg-background/85 sm:h-9 sm:w-9 md:h-10 md:w-10">
         <img
           src={tech.src}
           alt={`${tech.name} logo`}
           loading="lazy"
-          className={cn("h-10 w-10 object-contain", tech.imgClassName)}
+          className={cn(
+            "h-6 w-6 object-contain drop-shadow-[0_2px_6px_rgba(15,23,42,0.18)] transition-transform duration-300 group-hover:scale-110 sm:h-7 sm:w-7",
+            tech.imgClassName,
+          )}
           onError={(event) => {
             const target = event.currentTarget;
             target.style.display = "none";
           }}
         />
       </div>
-      <p className="mt-2 line-clamp-1 text-[11px] font-semibold text-foreground/90 sm:text-xs">{tech.name}</p>
+      <p className="mt-1 line-clamp-1 text-[9px] font-medium text-foreground/90 sm:text-[10px]">{tech.name}</p>
     </motion.article>
   );
 }
@@ -114,15 +117,15 @@ function InfiniteScrollRow({
 
   return (
     <div
-      className="relative overflow-hidden py-2"
+      className="relative overflow-hidden py-1.5 sm:py-2"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-16 bg-gradient-to-r from-background to-transparent md:w-24" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-16 bg-gradient-to-l from-background to-transparent md:w-24" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-8 bg-gradient-to-r from-background via-background/90 to-transparent sm:w-12 md:w-20" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-8 bg-gradient-to-l from-background via-background/90 to-transparent sm:w-12 md:w-20" />
 
       <motion.div
-        className="flex gap-3 sm:gap-4"
+        className="flex gap-2 sm:gap-3 md:gap-4"
         animate={{ x: direction === "left" ? ["0%", "-33.33%"] : ["-33.33%", "0%"] }}
         transition={{ x: { duration: speed, ease: "linear", repeat: Infinity } }}
         style={{ animationPlayState: paused ? "paused" : "running" }}
@@ -162,9 +165,6 @@ export function TechStackShowcase() {
           <h2 className="mb-2 text-2xl font-black tracking-tight md:text-3xl lg:text-4xl">
             Technical <span className="gradient-text">Expertise</span>
           </h2>
-          <p className="mx-auto mb-5 max-w-2xl text-sm text-muted-foreground md:text-base">
-            Clear and recognizable stack logos with high-contrast rendering for both light and dark themes.
-          </p>
 
           <div className="flex flex-wrap justify-center gap-2">
             {categories.map((category) => (
@@ -188,8 +188,8 @@ export function TechStackShowcase() {
         </motion.div>
 
         <div className="space-y-1">
-          <InfiniteScrollRow items={rowA} direction="left" speed={34} activeCategory={activeCategory} />
-          <InfiniteScrollRow items={rowB} direction="right" speed={38} activeCategory={activeCategory} />
+          <InfiniteScrollRow items={rowA} direction="left" speed={30} activeCategory={activeCategory} />
+          <InfiniteScrollRow items={rowB} direction="right" speed={34} activeCategory={activeCategory} />
         </div>
       </div>
     </section>
