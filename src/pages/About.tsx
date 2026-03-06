@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -147,6 +148,15 @@ const About = () => {
                       <Download className="w-5 h-5" />
                       Download CV
                     </span>
+                  </Button>
+                  <Button asChild variant="hero" size="lg" className="relative group">
+                    <Link to="/mentorship">
+                      <span className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500 opacity-70 blur-sm group-hover:opacity-100 transition-opacity" />
+                      <span className="relative flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 rounded-lg text-white">
+                        <Briefcase className="w-5 h-5" />
+                        Mentorship
+                      </span>
+                    </Link>
                   </Button>
                   <Button 
                     variant="outline" 

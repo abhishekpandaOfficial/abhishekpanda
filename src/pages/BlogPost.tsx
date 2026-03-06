@@ -50,6 +50,8 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import GithubSlugger from "github-slugger";
 import { GiscusComments } from "@/components/blog/GiscusComments";
+import { LOCAL_BLOG_POSTS_BY_SLUG } from "@/content/blogs";
+import { LocalBlogPostView } from "@/components/blog/LocalBlogPostView";
 
 type CacheRow = {
   id: string;
@@ -164,8 +166,7 @@ const extractIntroduction = (content: string | null | undefined, fallback: strin
   return picked.join(" ").trim() || fallback;
 };
 
-const BlogPost = () => {
-  const { slug } = useParams();
+const RemoteBlogPost = ({ slug }: { slug?: string }) => {
   const { user } = useUserAuth();
   const { theme } = useTheme();
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -1903,6 +1904,17 @@ const BlogPost = () => {
       <Footer />
     </div>
   );
+};
+
+const BlogPost = () => {
+  const { slug } = useParams();
+  const localPost = slug ? LOCAL_BLOG_POSTS_BY_SLUG.get(slug) : null;
+
+  if (localPost) {
+    return <LocalBlogPostView post={localPost} />;
+  }
+
+  return <RemoteBlogPost slug={slug} />;
 };
 
 export default BlogPost;

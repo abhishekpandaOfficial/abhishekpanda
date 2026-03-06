@@ -51,7 +51,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Markdown } from "@/components/blog/Markdown";
 import { useTheme } from "@/components/ThemeProvider";
-import foundationalModelsSeedMarkdown from "@/content/blog/building-foundational-models.md?raw";
 
 type BlogPost = {
   id: string;
@@ -140,16 +139,6 @@ const REQUIRED_POST_STRUCTURE_HEADINGS = [
   "Interview Questions and Answers",
   "FAQs",
   "Final Thoughts",
-];
-const FOUNDATIONAL_GUIDE_TITLE = "Building Your Own Foundational AI Models From Scratch";
-const FOUNDATIONAL_GUIDE_SLUG = "building-your-own-foundational-ai-models-from-scratch";
-const FOUNDATIONAL_GUIDE_TAGS = [
-  "ai-ml",
-  "foundational-models",
-  "llm",
-  "distributed-training",
-  "mlops",
-  "originx-cloud",
 ];
 type TechHubDomainSlug =
   | "dotnet"
@@ -1613,78 +1602,6 @@ export const AdminBlogManager = () => {
       }
     });
     toast.success("Full course structure template applied. Customize and publish.");
-  };
-
-  const applyFoundationalAiMlSeed = () => {
-    const existing = posts.find((p) => p.slug === FOUNDATIONAL_GUIDE_SLUG);
-    if (existing) {
-      const mergedTags = Array.from(new Set([...(existing.tags || []), ...FOUNDATIONAL_GUIDE_TAGS]));
-      const nextPost: BlogPost = {
-        ...existing,
-        title: FOUNDATIONAL_GUIDE_TITLE,
-        slug: FOUNDATIONAL_GUIDE_SLUG,
-        excerpt:
-          existing.excerpt ||
-          "A practical engineering guide for building domain-specific foundational AI models from zero to production.",
-        tags: withTechHubDomainTag(
-          withPublishingChannelTag(mergedTags, "techhub"),
-          "ai-ml",
-        ),
-        meta_title: `${FOUNDATIONAL_GUIDE_TITLE} | Abhishek Panda`,
-        meta_description:
-          "Step-by-step guide for architectures, datasets, training, distributed infra, alignment, inference, and production deployment.",
-        content: existing.content || foundationalModelsSeedMarkdown,
-        level: existing.level || "architect",
-      };
-      setSelectedPost(nextPost);
-      setIsEditing(true);
-      setActiveTab("content");
-      setSelectedSection("all");
-      setHasUnsavedChanges(true);
-      scheduleAutosave(nextPost);
-      toast.success("Loaded existing AI/ML foundational guide into CMS editor.");
-      return;
-    }
-
-    const now = new Date().toISOString();
-    const aiMlSectionId =
-      sectionsData.find((s) => /ai|ml|machine learning/i.test(s.name))?.id || null;
-    const newPost: BlogPost = {
-      id: crypto.randomUUID(),
-      title: FOUNDATIONAL_GUIDE_TITLE,
-      slug: FOUNDATIONAL_GUIDE_SLUG,
-      excerpt:
-        "A practical engineering guide for building domain-specific foundational AI models from zero to production.",
-      content: foundationalModelsSeedMarkdown,
-      hero_image: "/images/blog/foundation-models/lifecycle.svg",
-      section_id: aiMlSectionId,
-      tags: withTechHubDomainTag(withPublishingChannelTag(FOUNDATIONAL_GUIDE_TAGS, "techhub"), "ai-ml"),
-      meta_title: `${FOUNDATIONAL_GUIDE_TITLE} | Abhishek Panda`,
-      meta_description:
-        "Step-by-step guide for architectures, datasets, training, distributed infra, alignment, inference, and production deployment.",
-      is_published: false,
-      is_premium: false,
-      is_locked: false,
-      level: "architect",
-      code_theme: theme === "dark" ? "github-dark-default" : "github-light-default",
-      color: sectionsData.find((s) => s.id === aiMlSectionId)?.color || "#0891b2",
-      source_code_url: "https://originxcloud.com",
-      series_name: "AI/ML Foundational Series",
-      series_order: 1,
-      views: 0,
-      created_at: now,
-      original_published_at: null,
-      published_at: null,
-      updated_at: now,
-      sort_order: posts.length + 1,
-    };
-    setSelectedPost(newPost);
-    setIsEditing(true);
-    setActiveTab("content");
-    setSelectedSection("all");
-    setHasUnsavedChanges(true);
-    scheduleAutosave(newPost);
-    toast.success("AI/ML foundational guide seed created in CMS. Review and publish.");
   };
 
   const upsertPost = useMutation({
@@ -3196,9 +3113,6 @@ export const AdminBlogManager = () => {
                         <div className="flex flex-wrap gap-2">
                           <Button type="button" variant="outline" size="sm" onClick={applyFullCourseTemplate}>
                             Apply Full Course Structure
-                          </Button>
-                          <Button type="button" size="sm" onClick={applyFoundationalAiMlSeed}>
-                            Create AI/ML Foundation Seed
                           </Button>
                         </div>
                       </div>

@@ -44,10 +44,35 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
   {
     pattern: "/blogs",
     data: {
-      title: "Blog Aggregator | Abhishek Panda + Stackcraft + Social Writing",
+      title: "All Blogs | Abhishek Panda",
       description:
-        "Discover content from Abhishek Panda across Stackcraft, Medium, Substack, Hashnode, and other official channels.",
-      keywords: "Stackcraft, Medium, Substack, Hashnode, Abhishek Panda writing",
+        "Browse all blog series and all website blog cards from Abhishek Panda in one place.",
+      keywords: "Abhishek Panda blogs, mastery series, engineering blog hub, blog series cards",
+    },
+  },
+  {
+    pattern: "/blogs/:seriesSlug",
+    data: {
+      title: "Blog Series | Abhishek Panda",
+      description:
+        "Read a dedicated mastery series page with related website blog posts, structured learning context, and linked reading paths.",
+    },
+  },
+  {
+    pattern: "/articles",
+    data: {
+      title: "Articles | Abhishek Panda",
+      description:
+        "Browse route-native articles with editorial cards, technical iconography, tags, and long-form detail pages.",
+      keywords: "Abhishek Panda articles, privacy article, long-form articles, editorial dashboards",
+    },
+  },
+  {
+    pattern: "/articles/:slug",
+    data: {
+      title: "Article | Abhishek Panda",
+      description:
+        "Read detailed routed articles with supporting navigation, related content, and theme-aware presentation.",
     },
   },
   {

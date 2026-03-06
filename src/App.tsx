@@ -32,6 +32,8 @@ const OpenSourceModels = lazy(() => import("./pages/OpenSourceModels"));
 const ModelComparisonPage = lazy(() => import("./pages/ModelComparisonPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const BlogAggregator = lazy(() => import("./pages/BlogAggregator"));
+const BlogSeries = lazy(() => import("./pages/BlogSeries"));
+const ArticlesPage = lazy(() => import("./pages/Articles"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const InstallPWA = lazy(() => import("./pages/InstallPWA"));
 const PasskeyRegistration = lazy(() => import("./pages/PasskeyRegistration"));
@@ -39,7 +41,6 @@ const Login = lazy(() => import("./pages/Login"));
 const Account = lazy(() => import("./pages/Account"));
 const Chronyx = lazy(() => import("./pages/Chronyx"));
 const TechHub = lazy(() => import("./pages/TechHub"));
-const FoundationalModelsGuide = lazy(() => import("./pages/FoundationalModelsGuide"));
 const OpenOwlLanding = lazy(() => import("./pages/OpenOwlLanding"));
 const OpenOwlAssistant = lazy(() => import("./pages/OpenOwlAssistant"));
 const LLMVisualizer = lazy(() => import("./pages/llm-visualizer"));
@@ -105,9 +106,13 @@ const AssistantMount = () => {
 };
 
 const App = () => {
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.location.pathname === "/";
+  });
 
   useEffect(() => {
+    if (!showIntro) return;
     const start = Date.now();
     const minDuration = 1500;
 
@@ -123,7 +128,7 @@ const App = () => {
       window.addEventListener("load", complete, { once: true });
       return () => window.removeEventListener("load", complete);
     }
-  }, []);
+  }, [showIntro]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -163,8 +168,10 @@ const App = () => {
                 <Route path="/open-source-models-march-2026.html" element={<Navigate to="/llm-galaxy/open-source-models" replace />} />
                 <Route path="/ai-model-comparison.html" element={<Navigate to="/llm-galaxy/model-comparison" replace />} />
                 <Route path="/blogs" element={<BlogAggregator />} />
+                <Route path="/blogs/:seriesSlug" element={<BlogSeries />} />
                 <Route path="/blog/techhub" element={<TechHub />} />
-                <Route path="/blog/building-your-own-foundational-ai-models-from-scratch" element={<FoundationalModelsGuide />} />
+                <Route path="/articles" element={<Suspense fallback={<RouteLoader />}><ArticlesPage /></Suspense>} />
+                <Route path="/articles/:slug" element={<Suspense fallback={<RouteLoader />}><ArticlesPage /></Suspense>} />
                 <Route path="/blog/techstacks" element={<Navigate to="/blog/techhub" replace />} />
                 <Route path="/chronyx" element={<Chronyx />} />
                 <Route path="/tech" element={<Navigate to="/blog/techhub" replace />} />

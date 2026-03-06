@@ -532,10 +532,10 @@ const TechHub = () => {
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Link
-                    to="/blog/building-your-own-foundational-ai-models-from-scratch"
+                    to="/blog"
                     className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
                   >
-                    Open AI/ML Docs Guide
+                    Open Blog
                     <ChevronRight className="h-3.5 w-3.5" />
                   </Link>
                   <a

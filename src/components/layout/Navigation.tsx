@@ -7,9 +7,9 @@ import {
   GitCompare, 
   UserCircle,
   BookOpen,
-  MessageCircle,
   Send,
   FileText,
+  Newspaper,
   Brain,
   GraduationCap,
   Lock,
@@ -29,12 +29,11 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-// Nav links in order: About, Courses, Ebooks, Mentorship, Contact
+// Nav links in order: About, Courses, Ebooks, Contact
 const navLinks = [
   { name: "About", path: "/about", icon: UserCircle },
   { name: "Courses", path: "/courses", icon: GraduationCap },
   { name: "Ebooks", path: "/ebooks", icon: BookOpen },
-  { name: "Mentorship", path: "/mentorship", icon: MessageCircle },
   { name: "Contact", path: "/contact", icon: Send },
 ];
 
@@ -43,10 +42,6 @@ const galaxySubLinks = [
   { name: "Open Source Models", path: "/llm-galaxy/open-source-models", icon: Code2 },
   { name: "Compare LLM Models", path: "/llm-galaxy/model-comparison", icon: GitCompare },
   { name: "LLM Visualizer", path: "/llm-visualizer", icon: Cpu },
-];
-
-const blogSubLinks = [
-  { name: "C# & .NET Mastery", path: "/dotnet-mastery-toc", icon: Code2, description: "Complete .NET engineering series" },
 ];
 
 export const Navigation = () => {
@@ -69,9 +64,10 @@ export const Navigation = () => {
   const isGalaxyActive = location.pathname.startsWith("/llm-galaxy") || location.pathname === "/llm-visualizer";
   const isBlogActive =
     location.pathname.startsWith("/blog") ||
-    location.pathname === "/blogs" ||
+    location.pathname.startsWith("/blogs") ||
     location.pathname.startsWith("/tech") ||
     location.pathname === "/dotnet-mastery-toc";
+  const isArticlesActive = location.pathname.startsWith("/articles");
   const isCoursesActive = location.pathname === "/courses" || location.pathname.startsWith("/courses/");
   const isEbooksActive = location.pathname === "/ebooks" || location.pathname.startsWith("/ebooks/");
 
@@ -159,54 +155,41 @@ export const Navigation = () => {
                 </span>
               </Link>
 
-              {/* Blog Dropdown */}
-              <NavigationMenu>
-                <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger
-                      className={cn(
-                        "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 bg-transparent data-[state=open]:bg-transparent group",
-                        isBlogActive
-                          ? "text-primary bg-primary/10"
-                          : "text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                      <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                      <span className="relative flex items-center gap-2">
-                        <FileText className="w-4 h-4 transition-transform group-hover:scale-110" />
-                        Blogs
-                      </span>
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <div className="w-[300px] p-4 bg-card/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-xl">
-                        <div className="space-y-1">
-                          {blogSubLinks.map((subLink) => (
-                            <Link
-                              key={subLink.path}
-                              to={subLink.path}
-                              className={cn(
-                                "flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors",
-                                location.pathname === subLink.path && "bg-muted"
-                              )}
-                            >
-                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                                <subLink.icon className="w-5 h-5 text-primary" />
-                              </div>
-                              <div>
-                                <div className="font-medium text-foreground text-sm">{subLink.name}</div>
-                                <div className="text-xs text-muted-foreground">{subLink.description}</div>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
+              <Link
+                to="/articles"
+                className={cn(
+                  "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 group",
+                  isArticlesActive
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                <span className="relative flex items-center gap-2">
+                  <Newspaper className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  Articles
+                </span>
+              </Link>
 
-              {/* Mentorship & Contact */}
+              <Link
+                to="/blogs"
+                className={cn(
+                  "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 group",
+                  isBlogActive
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                <span className="relative flex items-center gap-2">
+                  <FileText className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  Blogs
+                </span>
+              </Link>
+
+              {/* Contact */}
               {navLinks.slice(3).map((link) => (
                 <Link
                   key={link.path}
@@ -362,35 +345,45 @@ export const Navigation = () => {
                 </Link>
               </motion.div>
 
-              {/* Blog Links Mobile */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.14 }}
+              >
+                <Link
+                  to="/articles"
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    isArticlesActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <Newspaper className="w-5 h-5" />
+                  Articles
+                </Link>
+              </motion.div>
+
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.15 }}
-                className="px-4 py-2"
               >
-                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  <FileText className="w-3 h-3" />
+                <Link
+                  to="/blogs"
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    isBlogActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <FileText className="w-5 h-5" />
                   Blogs
-                </div>
-                {blogSubLinks.map((subLink) => (
-                  <Link
-                    key={subLink.path}
-                    to={subLink.path}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-2.5 rounded-lg text-base font-medium transition-all duration-200",
-                      location.pathname === subLink.path
-                        ? "text-primary bg-primary/10"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    )}
-                  >
-                    <subLink.icon className="w-4 h-4" />
-                    {subLink.name}
-                  </Link>
-                ))}
+                </Link>
               </motion.div>
 
-              {/* Mentorship & Contact */}
+              {/* Contact */}
               {navLinks.slice(3).map((link, index) => (
                 <motion.div
                   key={link.path}

@@ -1,9 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -18,6 +18,9 @@ import {
   Eye,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BlogSeriesGrid } from "@/components/blog/BlogSeriesGrid";
+import { LOCAL_BLOG_POSTS, getLocalBlogFolderPath, getLocalBlogUploadHint } from "@/content/blogs";
+import { BLOG_SERIES, BLOG_SERIES_BY_SLUG, matchesBlogSeries } from "@/lib/blogSeries";
 
 const LEVELS = ["beginner", "fundamentals", "intermediate", "general", "architect"] as const;
 type TagStyleRow = {
@@ -45,10 +48,13 @@ const getPublishingChannel = (tags: string[] | null | undefined): "personal" | "
 };
 
 const Blog = () => {
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedLevel, setSelectedLevel] = useState("All");
   const [showPremiumOnly, setShowPremiumOnly] = useState(false);
+  const selectedSeriesSlug = searchParams.get("series");
+  const selectedSeries = selectedSeriesSlug ? BLOG_SERIES_BY_SLUG.get(selectedSeriesSlug) || null : null;
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["published-blog-posts"],
@@ -91,28 +97,86 @@ const Blog = () => {
     [tagStyles],
   );
 
-  const personalPosts = useMemo(
-    () => posts.filter((p) => getPublishingChannel(p.tags || []) === "personal"),
-    [posts]
+  const localPosts = useMemo(
+    () =>
+      LOCAL_BLOG_POSTS.map((post) => ({
+        id: post.id,
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt,
+        hero_image: post.heroImage,
+        tags: post.tags,
+        is_premium: false,
+        is_published: true,
+        level: post.level,
+        original_published_at: post.publishedAt,
+        published_at: post.publishedAt,
+        meta_title: post.title,
+        meta_description: post.excerpt,
+        reading_time_minutes: post.readingTimeMinutes,
+        views: 0,
+        updated_at: post.updatedAt,
+      })),
+    []
   );
 
+  const mergedPosts = useMemo(() => {
+    const map = new Map<string, any>();
+    localPosts.forEach((post) => map.set(post.slug, post));
+    posts.forEach((post) => {
+      if (!map.has(post.slug)) map.set(post.slug, post);
+    });
+    return Array.from(map.values()).sort((a, b) => {
+      const aDate = new Date((a.original_published_at || a.published_at || a.updated_at || 0) as string).getTime();
+      const bDate = new Date((b.original_published_at || b.published_at || b.updated_at || 0) as string).getTime();
+      return bDate - aDate;
+    });
+  }, [localPosts, posts]);
+
+  const personalPosts = useMemo(
+    () => mergedPosts.filter((p) => getPublishingChannel(p.tags || []) === "personal"),
+    [mergedPosts]
+  );
+
+  useEffect(() => {
+    setSelectedCategory("All");
+    setSelectedLevel("All");
+    setShowPremiumOnly(false);
+  }, [selectedSeriesSlug]);
+
+  const seriesPostCounts = useMemo(
+    () =>
+      new Map(
+        BLOG_SERIES.map((series) => [
+          series.slug,
+          personalPosts.filter((post) => matchesBlogSeries(series, post)).length,
+        ]),
+      ),
+    [personalPosts]
+  );
+
+  const seriesScopedPosts = useMemo(() => {
+    if (!selectedSeries) return personalPosts;
+    return personalPosts.filter((post) => matchesBlogSeries(selectedSeries, post));
+  }, [personalPosts, selectedSeries]);
+
   const categories = [
-    { name: "All", count: personalPosts.length },
-    ...Array.from(new Set(personalPosts.flatMap((p) => p.tags || []).filter(Boolean))).map((cat) => ({
+    { name: "All", count: seriesScopedPosts.length },
+    ...Array.from(new Set(seriesScopedPosts.flatMap((p) => p.tags || []).filter(Boolean))).map((cat) => ({
       name: cat as string,
-      count: personalPosts.filter((p) => (p.tags || []).includes(cat as string)).length,
+      count: seriesScopedPosts.filter((p) => (p.tags || []).includes(cat as string)).length,
     })),
   ];
 
   const levelCounts = [
-    { name: "All", count: personalPosts.length },
+    { name: "All", count: seriesScopedPosts.length },
     ...LEVELS.map((level) => ({
       name: titleCaseLevel(level),
-      count: personalPosts.filter((p) => (p as { level?: string | null }).level === level).length,
+      count: seriesScopedPosts.filter((p) => (p as { level?: string | null }).level === level).length,
     })),
   ];
 
-  const filteredPosts = personalPosts.filter((post) => {
+  const filteredPosts = seriesScopedPosts.filter((post) => {
     const matchesSearch =
       post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -204,20 +268,58 @@ const Blog = () => {
         </section>
 
         <section className="container mx-auto px-4">
+          <div className="mb-8 rounded-[2rem] border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Blog Series Hub</p>
+                <h2 className="mt-2 text-3xl font-black tracking-tight text-foreground md:text-4xl">
+                  Structured Series Cards in the Exact Learning Order
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
+                  Mastery tracks for C#, architecture, cloud, AI/ML, frontend, data, DevOps, blockchain, and Web3.
+                  Click a card to open the series route or filter this website blog for that learning path.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {selectedSeries ? (
+                  <>
+                    <div className="rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
+                      Active Series: {selectedSeries.title}
+                    </div>
+                    <Link
+                      to="/blog"
+                      className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/30 hover:text-primary"
+                    >
+                      Clear Series
+                    </Link>
+                  </>
+                ) : (
+                  <div className="rounded-full border border-border/60 bg-background/80 px-4 py-2 text-sm font-semibold text-muted-foreground">
+                    21 ordered mastery tracks
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <BlogSeriesGrid counts={seriesPostCounts} selectedSlug={selectedSeriesSlug} />
+            </div>
+          </div>
+
           <div className="mb-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-cyan-500/10 p-5">
             <p className="text-xs font-black uppercase tracking-[0.16em] text-primary">Featured AI/ML Documentation</p>
             <h2 className="mt-1 text-xl font-black tracking-tight text-foreground">
-              Building Your Own Foundational AI Models From Scratch
+              Engineering Blog
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Architectures, datasets, distributed training, alignment, cost and production serving with a real-world finance assistant example.
+              Folder-backed and published blog posts from this website with route-based reading pages and structured discovery.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Link
-                to="/blog/building-your-own-foundational-ai-models-from-scratch"
+                to="/blog"
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
               >
-                Open Documentation Guide
+                Open Blog
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
               <a
@@ -301,7 +403,7 @@ const Blog = () => {
             </motion.aside>
 
             <div className="flex-1">
-              {isLoading ? (
+              {isLoading && personalPosts.length === 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="glass-card rounded-2xl overflow-hidden">
@@ -318,11 +420,18 @@ const Blog = () => {
               ) : filteredPosts.length === 0 ? (
                 <div className="text-center py-20">
                   <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-foreground mb-2">No Posts Available Yet</h3>
+                  <h3 className="text-xl font-bold text-foreground mb-2">
+                    {selectedSeries ? `${selectedSeries.title} is Ready for Posts` : "No Posts Available Yet"}
+                  </h3>
                   <p className="text-muted-foreground max-w-md mx-auto">
                     {searchQuery || selectedCategory !== "All" || selectedLevel !== "All"
                       ? "No posts found matching your criteria."
-                      : "New articles are being crafted. Check back soon for insights on .NET, AI/ML, and cloud architecture."}
+                      : selectedSeries
+                        ? `This series card is live on the blog hub. Add matching posts into the website blog pipeline and they will appear under ${selectedSeries.title}.`
+                        : "New articles are being crafted. Check back soon for insights on .NET, AI/ML, and cloud architecture."}
+                  </p>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    {getLocalBlogUploadHint()} Folder: <span className="font-semibold text-foreground">{getLocalBlogFolderPath()}</span>
                   </p>
                 </div>
               ) : (
