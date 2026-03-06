@@ -1,16 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ArrowLeft, BookOpen, FileText, Home, Menu, Newspaper, PanelsTopLeft, Printer, Sparkles } from "lucide-react";
-import { GiscusComments } from "@/components/blog/GiscusComments";
-import { LongformEngagementBar, useLongformEngagement } from "@/components/content/LongformEngagementBar";
 import { LongformSidebar } from "@/components/content/LongformSidebar";
 import { LongformSummaryDialog } from "@/components/content/LongformSummaryDialog";
-import { getRelatedArticles, type ArticleRecord } from "@/content/articles";
-import { usePublishedPersonalBlogs } from "@/hooks/usePublishedPersonalBlogs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useTheme } from "@/components/ThemeProvider";
+import { ARTICLES } from "@/content/articles";
+import { type CaseStudyRecord, getRelatedCaseStudies } from "@/content/caseStudies";
+import { usePublishedPersonalBlogs } from "@/hooks/usePublishedPersonalBlogs";
 import {
   buildTocFromRoot,
   computeScrollProgress,
@@ -19,55 +18,55 @@ import {
 } from "@/lib/longformNavigation";
 import {
   applyEmbeddedThemeBridge,
-  buildIframeExportPayload,
+  buildHtmlExportPayload,
   downloadEpub,
   downloadPdfViaPrint,
   openPrintWindow,
 } from "@/lib/readerActions";
 
-type ArticleDetailProps = {
-  article: ArticleRecord;
+type CaseStudyDetailProps = {
+  caseStudy: CaseStudyRecord;
 };
 
-const SITE_URL =
-  (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, "") ||
-  "https://www.abhishekpanda.com";
-
-export default function ArticleDetail({ article }: ArticleDetailProps) {
-  const location = useLocation();
+export default function CaseStudyDetail({ caseStudy }: CaseStudyDetailProps) {
   const { theme } = useTheme();
   const { personalPosts } = usePublishedPersonalBlogs();
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const iframeCleanupRef = useRef<(() => void) | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
 
   const [toc, setToc] = useState<LongformTocItem[]>([]);
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
-  const commentsSectionId = `article-comments-${article.slug}`;
-  const canonical = `${SITE_URL}${location.pathname}`;
-  const engagement = useLongformEngagement({
-    canonical,
-    title: article.title,
-    description: article.description,
-    commentsTargetId: commentsSectionId,
-  });
+
+  const relatedCaseStudies = useMemo(
+    () =>
+      getRelatedCaseStudies(caseStudy, 5).map((item) => ({
+        title: item.title,
+        to: `/case-studies/${item.slug}`,
+        description: item.description,
+      })),
+    [caseStudy],
+  );
 
   const relatedArticles = useMemo(
     () =>
-      getRelatedArticles(article, 5).map((item) => ({
-        title: item.title,
-        to: `/articles/${item.slug}`,
-        description: item.description,
-      })),
-    [article],
+      ARTICLES.filter((item) => item.slug !== "15-case-studies-dotnet")
+        .slice(0, 3)
+        .map((item) => ({
+          title: item.title,
+          to: `/articles/${item.slug}`,
+          description: item.description,
+        })),
+    [],
   );
 
   const popularBlogs = useMemo(
     () =>
       personalPosts
         .filter((post) => post.slug)
-        .slice(0, 5)
+        .slice(0, 3)
         .map((post) => ({
           title: post.title,
           to: `/blog/${post.slug}`,
@@ -90,13 +89,18 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
     }
   }, [theme]);
 
-  const iframeSrc = `${article.assetUrl}${location.hash || ""}`;
   const navLinks = [
     {
-      title: "Back to Articles Hub",
-      description: "Return to the full routed articles collection.",
-      to: "/articles",
+      title: "Back to Case Studies Hub",
+      description: "Return to the routed case-study library.",
+      to: "/case-studies",
       icon: ArrowLeft,
+    },
+    {
+      title: "Open 15 Case Studies Guide",
+      description: "View the full flagship guide in the Articles hub.",
+      to: "/articles/15-case-studies-dotnet",
+      icon: Newspaper,
     },
     {
       title: "Home",
@@ -110,12 +114,6 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
       to: "/blogs",
       icon: FileText,
     },
-    {
-      title: "Case Studies",
-      description: "Open the case-study hub for more long-form deep dives.",
-      to: "/case-studies",
-      icon: BookOpen,
-    },
   ];
 
   const handleIframeLoad = () => {
@@ -127,17 +125,35 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
     iframeCleanupRef.current?.();
     applyEmbeddedThemeBridge(doc, theme);
 
-    const { items, elements } = buildTocFromRoot(doc);
+    const section = doc.getElementById(caseStudy.anchorId || "") as HTMLElement | null;
+    sectionRef.current = section;
+    const contentRoot = section || doc;
+    const { items, elements } = buildTocFromRoot(contentRoot);
     setToc(items);
     setActiveHeadingId(items[0]?.id || null);
 
     const update = () => {
       const root = doc.documentElement;
-      setScrollProgress(computeScrollProgress(win.scrollY, root.scrollHeight, win.innerHeight));
+      if (!section) {
+        setScrollProgress(computeScrollProgress(win.scrollY, root.scrollHeight, win.innerHeight));
+        setActiveHeadingId(getActiveHeadingId(elements));
+        return;
+      }
+
+      const start = Math.max(section.offsetTop - 24, 0);
+      const effectiveHeight = Math.max(section.offsetHeight, win.innerHeight);
+      const relativeScroll = Math.max(win.scrollY - start, 0);
+      setScrollProgress(computeScrollProgress(relativeScroll, effectiveHeight, win.innerHeight));
       setActiveHeadingId(getActiveHeadingId(elements));
     };
 
-    update();
+    requestAnimationFrame(() => {
+      if (section) {
+        win.scrollTo({ top: Math.max(section.offsetTop - 24, 0), behavior: "auto" });
+      }
+      update();
+    });
+
     win.addEventListener("scroll", update, { passive: true });
     win.addEventListener("resize", update);
 
@@ -154,12 +170,23 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
   };
 
   const handleScrollTop = () => {
-    iframeRef.current?.contentWindow?.scrollTo({ top: 0, behavior: "smooth" });
+    const win = iframeRef.current?.contentWindow;
+    const section = sectionRef.current;
+    if (win && section) {
+      win.scrollTo({ top: Math.max(section.offsetTop - 24, 0), behavior: "smooth" });
+      return;
+    }
+    win?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleScrollBottom = () => {
     const win = iframeRef.current?.contentWindow;
+    const section = sectionRef.current;
     const doc = iframeRef.current?.contentDocument;
+    if (win && section) {
+      win.scrollTo({ top: Math.max(section.offsetTop + section.offsetHeight - win.innerHeight, 0), behavior: "smooth" });
+      return;
+    }
     if (win && doc) {
       win.scrollTo({ top: doc.documentElement.scrollHeight, behavior: "smooth" });
     }
@@ -167,12 +194,25 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
 
   const buildExportPayload = () => {
     const doc = iframeRef.current?.contentDocument;
-    if (!doc) return null;
-    return buildIframeExportPayload(doc, {
-      title: article.title,
-      slug: article.slug,
-      description: article.description,
+    const section = sectionRef.current;
+    if (!doc || !section) return null;
+
+    const stylesCss = Array.from(doc.querySelectorAll("style"))
+      .map((node) => node.textContent || "")
+      .join("\n");
+    const stylesheets = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'))
+      .map((node) => node.getAttribute("href"))
+      .filter((href): href is string => Boolean(href));
+
+    return buildHtmlExportPayload({
+      title: caseStudy.title,
+      slug: caseStudy.slug,
+      description: caseStudy.description,
       author: "Abhishek Panda",
+      bodyHtml: `<article><h1>${caseStudy.title}</h1>${section.innerHTML}</article>`,
+      stylesCss,
+      stylesheets,
+      lang: doc.documentElement.lang || "en",
     });
   };
 
@@ -195,9 +235,9 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
   };
 
   const summaryBullets = useMemo(() => {
-    const points = [...article.keyPoints, ...toc.slice(0, 4).map((item) => item.text)].filter(Boolean);
+    const points = [...caseStudy.keyPoints, ...toc.slice(0, 4).map((item) => item.text)].filter(Boolean);
     return Array.from(new Set(points)).slice(0, 6);
-  }, [article.keyPoints, toc]);
+  }, [caseStudy.keyPoints, toc]);
 
   const quickActions = [
     {
@@ -231,6 +271,16 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
     },
   ];
 
+  if (!caseStudy.assetUrl) {
+    return (
+      <div className="rounded-[2rem] border border-border/60 bg-card/80 p-10 text-center">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Case study unavailable</p>
+        <h1 className="mt-3 text-3xl font-black tracking-tight text-foreground">{caseStudy.title}</h1>
+        <p className="mt-4 text-muted-foreground">This case study route is reserved, but the detailed content has not been attached yet.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="relative grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-8">
       <Sheet>
@@ -241,14 +291,14 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
             className="fixed left-4 top-24 z-40 h-11 w-11 rounded-full border-border/70 bg-background/90 shadow-lg backdrop-blur md:left-6"
           >
             <Menu className="h-5 w-5" />
-            <span className="sr-only">Open article navigation menu</span>
+            <span className="sr-only">Open case study navigation menu</span>
           </Button>
         </SheetTrigger>
 
         <SheetContent side="left" className="w-[88vw] max-w-sm border-border/60 bg-background/95 p-0 backdrop-blur">
           <SheetHeader className="border-b border-border/60 px-6 py-5 pr-12">
-            <SheetTitle>Article Navigation</SheetTitle>
-            <SheetDescription className="line-clamp-2">{article.title}</SheetDescription>
+            <SheetTitle>Case Study Navigation</SheetTitle>
+            <SheetDescription className="line-clamp-2">{caseStudy.title}</SheetDescription>
           </SheetHeader>
 
           <ScrollArea className="h-[calc(100vh-5.5rem)]">
@@ -282,7 +332,7 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
                 <section className="space-y-3">
                   <div className="flex items-center gap-2">
                     <PanelsTopLeft className="h-4 w-4 text-primary" />
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">On This Page</p>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">This Case Study</p>
                   </div>
                   <div className="space-y-2">
                     {toc.map((item, index) => (
@@ -303,43 +353,21 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
                 </section>
               ) : null}
 
-              {relatedArticles.length ? (
+              {relatedCaseStudies.length ? (
                 <section className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Newspaper className="h-4 w-4 text-primary" />
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Related Articles</p>
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Other Case Studies</p>
                   </div>
                   <div className="space-y-3">
-                    {relatedArticles.slice(0, 4).map((item) => (
+                    {relatedCaseStudies.slice(0, 4).map((item) => (
                       <SheetClose asChild key={item.to}>
                         <Link
                           to={item.to}
                           className="block rounded-2xl border border-border/60 bg-card/80 px-4 py-3 transition hover:border-primary/30 hover:bg-primary/5"
                         >
                           <p className="font-semibold text-foreground">{item.title}</p>
-                          {item.description ? <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.description}</p> : null}
-                        </Link>
-                      </SheetClose>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-
-              {popularBlogs.length ? (
-                <section className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-primary" />
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Popular Blog Chapters</p>
-                  </div>
-                  <div className="space-y-3">
-                    {popularBlogs.slice(0, 4).map((item) => (
-                      <SheetClose asChild key={item.to}>
-                        <Link
-                          to={item.to}
-                          className="block rounded-2xl border border-border/60 bg-card/80 px-4 py-3 transition hover:border-primary/30 hover:bg-primary/5"
-                        >
-                          <p className="font-semibold text-foreground">{item.title}</p>
-                          {item.description ? <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.description}</p> : null}
+                          <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.description}</p>
                         </Link>
                       </SheetClose>
                     ))}
@@ -351,53 +379,32 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
         </SheetContent>
       </Sheet>
 
-      <article className="min-w-0 space-y-6">
+      <article className="min-w-0">
         <iframe
           ref={iframeRef}
-          title={article.title}
-          src={iframeSrc}
+          title={caseStudy.title}
+          src={caseStudy.assetUrl}
           loading="eager"
           className="block h-[82vh] min-h-[720px] w-full border-0 bg-background md:min-h-[760px] xl:h-[calc(100vh-7rem)] xl:min-h-[calc(100vh-7rem)]"
           onLoad={handleIframeLoad}
         />
-
-        <LongformEngagementBar
-          title={article.title}
-          controller={engagement}
-          placement="bottom"
-          variant="share-footer"
-        />
-
-        <section
-          id={commentsSectionId}
-          className="rounded-[1.75rem] border border-border/70 bg-card/80 p-5 shadow-sm backdrop-blur md:p-6"
-        >
-          <div className="mb-5">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Community</p>
-            <h2 className="mt-2 text-2xl font-black tracking-tight text-foreground">Comments on this article</h2>
-            <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">
-              Share your take, add follow-up questions, or drop improvements for this article.
-            </p>
-          </div>
-          <GiscusComments />
-        </section>
       </article>
 
       <aside className="border-t border-border/60 pt-6 xl:sticky xl:top-24 xl:self-start xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0">
         <LongformSidebar
-          readMinutes={article.readMinutes}
+          readMinutes={caseStudy.readMinutes}
           progressPercent={scrollProgress}
           toc={toc}
           activeHeadingId={activeHeadingId}
           actions={quickActions}
           showMobileActions
-          popularTitle="Popular Blog Chapters"
-          popularItems={popularBlogs}
-          popularCta={{ label: "Open all blogs", to: "/blogs" }}
-          secondaryTitle="Continue Reading"
-          secondaryItems={[...relatedArticles.slice(0, 3), ...article.relatedBlogs.slice(0, 2)]}
-          newsletterTitle="Weekly engineering and article updates"
-          newsletterDescription="Get new articles, blog chapters, and architecture notes from this website in one weekly drop."
+          popularTitle="Other Case Studies"
+          popularItems={relatedCaseStudies}
+          popularCta={{ label: "Open case studies hub", to: "/case-studies" }}
+          secondaryTitle="Related Articles & Blogs"
+          secondaryItems={[...relatedArticles, ...popularBlogs]}
+          newsletterTitle="Weekly engineering and case-study updates"
+          newsletterDescription="Get new case studies, articles, and blog chapters from this website in one weekly drop."
           onTocClick={handleTocClick}
           onScrollTop={handleScrollTop}
           onScrollBottom={handleScrollBottom}
@@ -407,11 +414,11 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
       <LongformSummaryDialog
         open={showSummary}
         onOpenChange={setShowSummary}
-        title={article.title}
-        overview={article.intro || article.description}
-        bulletTitle="What this article covers"
+        title={caseStudy.title}
+        overview={caseStudy.intro || caseStudy.description}
+        bulletTitle="What this case study covers"
         bullets={summaryBullets}
-        tags={article.tags}
+        tags={caseStudy.tags}
       />
     </div>
   );

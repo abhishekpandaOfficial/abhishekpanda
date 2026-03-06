@@ -1,769 +1,374 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import {
+  ArrowRight,
+  BookOpen,
+  Clock,
+  GraduationCap,
+  Layers3,
+  Search,
+  Sparkles,
+  Star,
+  Users,
+} from "lucide-react";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { 
-  Clock, 
-  Users, 
-  Star, 
-  Play, 
-  Lock,
-  Filter,
-  GraduationCap,
-  Award,
-  BookOpen,
-  ArrowRight,
-  Sparkles,
-  Search
-} from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CourseOneToOneModal } from "@/components/courses/CourseOneToOneModal";
-import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
-import { iconForKey } from "@/lib/social/iconMap";
+import { CourseCover } from "@/components/courses/CourseCover";
+import {
+  COURSE_INSTRUCTOR,
+  countCourseLessons,
+  FUTURE_COURSE_TOPICS,
+  LOCAL_COURSE_CATALOG,
+  mapDbCourseToCatalogItem,
+  type CourseCatalogItem,
+} from "@/content/courses";
+import { supabase } from "@/integrations/supabase/client";
 
-const filters = {
-  levels: ["All", "Beginner", "Intermediate", "Advanced"],
-  types: ["All", "Free", "Premium"],
+const matchesCourseQuery = (course: CourseCatalogItem, query: string) => {
+  if (!query) return true;
+  const source = [
+    course.title,
+    course.category,
+    course.description,
+    course.level,
+    course.tags.join(" "),
+    course.highlights.join(" "),
+  ]
+    .join(" ")
+    .toLowerCase();
+  return source.includes(query);
 };
 
-type UpcomingCourse = {
-  title: string;
-  category: string;
-  duration: string;
-  level: "Beginner" | "Intermediate" | "Advanced";
-  isPremium: boolean;
-  isFree: boolean;
-  price: string | null;
-  priceAmount?: number | null;
-  slug?: string;
-  oneToOneEnabled?: boolean;
-  oneToOnePriceInr?: number | null;
-  oneToOneDurationMinutes?: number | null;
-  oneToOneStartHourIst?: number | null;
-  oneToOneEndHourIst?: number | null;
-  oneToOnePayAfterSchedule?: boolean | null;
-  includes: string[];
-};
+const availabilityWeight = (course: CourseCatalogItem) => (course.availability === "available" ? 0 : 1);
 
-const upcomingCourses: UpcomingCourse[] = [
-  {
-    title: "Azure Architect Series Course",
-    category: "Architect & Engineering Tracks",
-    duration: "14 Weeks",
-    level: "Advanced",
-    isPremium: true,
-    isFree: false,
-    price: "₹24,999",
-    priceAmount: 24999,
-    slug: "azure-architect-series",
-    oneToOneEnabled: true,
-    oneToOnePriceInr: 24999,
-    oneToOneDurationMinutes: 60,
-    oneToOneStartHourIst: 20,
-    oneToOneEndHourIst: 24,
-    oneToOnePayAfterSchedule: true,
-    includes: ["1:1 Weekend Session", "Lifetime Access"],
-  },
-  {
-    title: ".NET Architect Series",
-    category: "Architect & Engineering Tracks",
-    duration: "16 Weeks",
-    level: "Advanced",
-    isPremium: true,
-    isFree: false,
-    price: "₹29,999",
-    priceAmount: 29999,
-    slug: "dotnet-architect-series",
-    oneToOneEnabled: true,
-    oneToOnePriceInr: 29999,
-    oneToOneDurationMinutes: 60,
-    oneToOneStartHourIst: 20,
-    oneToOneEndHourIst: 24,
-    oneToOnePayAfterSchedule: true,
-    includes: ["1:1 Weekend Session", "Lifetime Access"],
-  },
-  {
-    title: "Microservices Architecture",
-    category: "Architect & Engineering Tracks",
-    duration: "10 Weeks",
-    level: "Intermediate",
-    isPremium: true,
-    isFree: false,
-    price: "₹9,999",
-    priceAmount: 9999,
-    slug: "microservices-architecture",
-    oneToOneEnabled: true,
-    oneToOnePriceInr: 9999,
-    oneToOneDurationMinutes: 60,
-    oneToOneStartHourIst: 20,
-    oneToOneEndHourIst: 24,
-    oneToOnePayAfterSchedule: true,
-    includes: ["Case Studies", "Lifetime Access"],
-  },
-  {
-    title: "SOLID Principles Deep Dive",
-    category: "Development Foundations",
-    duration: "4 Weeks",
-    level: "Beginner",
-    isPremium: false,
-    isFree: true,
-    price: null,
-    priceAmount: null,
-    slug: "solid-principles",
-    oneToOneEnabled: true,
-    oneToOnePriceInr: 3999,
-    oneToOneDurationMinutes: 60,
-    oneToOneStartHourIst: 20,
-    oneToOneEndHourIst: 24,
-    oneToOnePayAfterSchedule: true,
-    includes: ["Free Access", "Starter Exercises"],
-  },
-  {
-    title: "Design Patterns Masterclass",
-    category: "Development Foundations",
-    duration: "8 Weeks",
-    level: "Intermediate",
-    isPremium: true,
-    isFree: false,
-    price: "₹6,999",
-    priceAmount: 6999,
-    slug: "design-patterns-masterclass",
-    oneToOneEnabled: true,
-    oneToOnePriceInr: 6999,
-    oneToOneDurationMinutes: 60,
-    oneToOneStartHourIst: 20,
-    oneToOneEndHourIst: 24,
-    oneToOnePayAfterSchedule: true,
-    includes: ["Pattern Catalog", "Lifetime Access"],
-  },
-  {
-    title: "Interview Preparation Series (.NET / Architect)",
-    category: "Development Foundations",
-    duration: "6 Weeks",
-    level: "Beginner",
-    isPremium: false,
-    isFree: true,
-    price: null,
-    priceAmount: null,
-    slug: "interview-prep-series",
-    oneToOneEnabled: true,
-    oneToOnePriceInr: 2999,
-    oneToOneDurationMinutes: 60,
-    oneToOneStartHourIst: 20,
-    oneToOneEndHourIst: 24,
-    oneToOnePayAfterSchedule: true,
-    includes: ["Mock Interviews", "Question Bank"],
-  },
-  {
-    title: "Apache Kafka Enterprise Series",
-    category: "Messaging & Streaming",
-    duration: "7 Weeks",
-    level: "Advanced",
-    isPremium: true,
-    isFree: false,
-    price: "₹8,999",
-    priceAmount: 8999,
-    slug: "apache-kafka-enterprise",
-    oneToOneEnabled: true,
-    oneToOnePriceInr: 8999,
-    oneToOneDurationMinutes: 60,
-    oneToOneStartHourIst: 20,
-    oneToOneEndHourIst: 24,
-    oneToOnePayAfterSchedule: true,
-    includes: ["Architecture Labs", "Lifetime Access"],
-  },
-  {
-    title: "C# Coding (Beginner → Advanced)",
-    category: "Development Foundations",
-    duration: "12 Weeks",
-    level: "Beginner",
-    isPremium: false,
-    isFree: true,
-    price: null,
-    priceAmount: null,
-    slug: "csharp-coding",
-    oneToOneEnabled: true,
-    oneToOnePriceInr: 2499,
-    oneToOneDurationMinutes: 60,
-    oneToOneStartHourIst: 20,
-    oneToOneEndHourIst: 24,
-    oneToOnePayAfterSchedule: true,
-    includes: ["Free Core Modules", "Community Support"],
-  },
-  {
-    title: "Next.js + TypeScript Full Stack",
-    category: "Modern Web Stack",
-    duration: "9 Weeks",
-    level: "Intermediate",
-    isPremium: true,
-    isFree: false,
-    price: "₹7,999",
-    priceAmount: 7999,
-    slug: "nextjs-typescript-fullstack",
-    oneToOneEnabled: true,
-    oneToOnePriceInr: 7999,
-    oneToOneDurationMinutes: 60,
-    oneToOneStartHourIst: 20,
-    oneToOneEndHourIst: 24,
-    oneToOnePayAfterSchedule: true,
-    includes: ["Production Project", "Lifetime Access"],
-  },
-];
-
-const Courses = () => {
-  const [selectedLevel, setSelectedLevel] = useState("All");
-  const [selectedType, setSelectedType] = useState("All");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+export default function Courses() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [oneToOneOpen, setOneToOneOpen] = useState(false);
-  const [oneToOneCourse, setOneToOneCourse] = useState<{
-    title: string;
-    priceAmount?: number | null;
-    slug?: string;
-    oneToOneEnabled?: boolean;
-    oneToOnePriceInr?: number | null;
-    oneToOneDurationMinutes?: number | null;
-    oneToOneStartHourIst?: number | null;
-    oneToOneEndHourIst?: number | null;
-    oneToOnePayAfterSchedule?: boolean | null;
-  } | null>(null);
 
-  const { data: courses = [], isLoading } = useQuery({
-    queryKey: ['published-courses'],
+  useEffect(() => {
+    document.title = "Courses | Abhishek Panda";
+  }, []);
+
+  const { data: publishedCourses = [], isLoading } = useQuery({
+    queryKey: ["published-courses"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('is_published', true)
-        .order('created_at', { ascending: false });
-      
+        .from("courses")
+        .select("*")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false });
+
       if (error) throw error;
       return data || [];
     },
   });
 
-  const courseMeta = (course: any) => {
-    const modules = Array.isArray(course.modules) ? course.modules : [];
-    const lessons = modules.flatMap((m: any) => (Array.isArray(m.lessons) ? m.lessons : []));
-    const videoCount = lessons.length || course.lesson_count || 0;
-    const durationLabel = course.duration || "Self-paced";
-    return { videoCount, durationLabel };
-  };
+  const allCourses = useMemo(() => {
+    const bySlug = new Map<string, CourseCatalogItem>();
 
-  const categories = useMemo(() => {
-    const fromDb = courses.flatMap((course: any) => (course.tags || []).map((t: string) => t.toUpperCase()));
-    const fromUpcoming = upcomingCourses.map((c) => c.category.toUpperCase());
-    const unique = Array.from(new Set(["All", ...fromDb, ...fromUpcoming]));
-    return unique;
-  }, [courses]);
+    for (const row of publishedCourses) {
+      const mapped = mapDbCourseToCatalogItem(row);
+      bySlug.set(mapped.slug, mapped);
+    }
 
-  const filteredCourses = courses.filter((course: any) => {
-    const q = searchQuery.trim().toLowerCase();
-    const matchesSearch =
-      !q ||
-      course.title?.toLowerCase().includes(q) ||
-      course.description?.toLowerCase().includes(q) ||
-      (course.tags || []).join(" ").toLowerCase().includes(q);
-    const matchesLevel = selectedLevel === "All" || course.level === selectedLevel;
-    const matchesType = selectedType === "All" || 
-      (selectedType === "Free" && !course.is_premium) ||
-      (selectedType === "Premium" && course.is_premium);
-    const matchesCategory =
-      selectedCategory === "All" ||
-      (course.tags || []).map((t: string) => t.toUpperCase()).includes(selectedCategory);
-    return matchesSearch && matchesLevel && matchesType && matchesCategory;
-  });
+    for (const localCourse of LOCAL_COURSE_CATALOG) {
+      if (!bySlug.has(localCourse.slug)) {
+        bySlug.set(localCourse.slug, localCourse);
+      }
+    }
 
-  const filteredUpcoming = upcomingCourses.filter((course) => {
-    const q = searchQuery.trim().toLowerCase();
-    const matchesSearch =
-      !q ||
-      course.title.toLowerCase().includes(q) ||
-      course.category.toLowerCase().includes(q);
-    const matchesLevel = selectedLevel === "All" || course.level === selectedLevel;
-    const matchesType =
-      selectedType === "All" ||
-      (selectedType === "Free" && course.isFree) ||
-      (selectedType === "Premium" && course.isPremium);
-    const matchesCategory =
-      selectedCategory === "All" || course.category.toUpperCase() === selectedCategory;
-    return matchesSearch && matchesLevel && matchesType && matchesCategory;
-  });
+    return Array.from(bySlug.values()).sort((left, right) => {
+      const leftWeight = availabilityWeight(left);
+      const rightWeight = availabilityWeight(right);
+      if (leftWeight !== rightWeight) return leftWeight - rightWeight;
+      if (right.rating !== left.rating) return right.rating - left.rating;
+      return left.title.localeCompare(right.title);
+    });
+  }, [publishedCourses]);
 
-  const { data: profiles } = usePublicSocialProfiles();
-  const socialProfiles = (profiles ?? []).filter((p: any) => p.category === "social" && p.profile_url);
+  const query = searchQuery.trim().toLowerCase();
+  const visibleCourses = useMemo(
+    () => allCourses.filter((course) => matchesCourseQuery(course, query)),
+    [allCourses, query],
+  );
+
+  const activeCourseCount = useMemo(
+    () => allCourses.filter((course) => course.availability === "available").length,
+    [allCourses],
+  );
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      {/* Social Rail */}
-      <div className="hidden xl:flex fixed right-6 top-1/2 -translate-y-1/2 z-40 flex-col gap-3">
-        {socialProfiles.map((p: any) => {
-          const Icon: any = iconForKey(p.icon_key);
-          return (
-            <a
-              key={p.platform}
-              href={p.profile_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-12 h-12 rounded-2xl bg-card/90 border border-border/60 backdrop-blur-xl flex items-center justify-center text-muted-foreground hover:text-primary transition-all hover:shadow-glow"
-              aria-label={p.display_name}
-              title={p.display_name}
-            >
-              <Icon className="w-5 h-5" />
-            </a>
-          );
-        })}
-      </div>
-      
       <main className="pt-24 pb-20">
-        {/* Hero */}
-        <section className="relative overflow-hidden py-14">
-          <div className="absolute inset-0 atlas-mesh-bg opacity-70" />
+        <section className="relative overflow-hidden py-16 sm:py-20">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.16),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(34,197,94,0.14),transparent_34%)]" />
           <div className="relative container mx-auto px-4">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-center"
+              transition={{ duration: 0.45 }}
+              className="mx-auto max-w-4xl text-center"
             >
-              <div>
-                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-2 text-xs font-semibold mb-5">
-                  <GraduationCap className="w-4 h-4" />
-                  Abhishek Panda Courses
-                </div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight">
-                  Master Modern Engineering <span className="gradient-text">with a Direct Architect</span>
-                </h1>
-                <p className="text-lg text-muted-foreground max-w-2xl mb-6">
-                  Premium, job-ready programs across .NET, Azure, microservices, AI/ML, and interview prep.
-                  Built from real production systems and guided mentorship.
-                </p>
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                  <div className="inline-flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-primary" />
-                    20+ Premium Tracks
-                  </div>
-                  <div className="inline-flex items-center gap-2">
-                    <Users className="w-4 h-4 text-primary" />
-                    300k+ learners globally
-                  </div>
-                  <div className="inline-flex items-center gap-2">
-                    <Award className="w-4 h-4 text-primary" />
-                    Architect-level outcomes
-                  </div>
-                </div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/85 px-4 py-2 text-sm font-semibold text-foreground shadow-sm backdrop-blur">
+                <GraduationCap className="h-4 w-4 text-primary" />
+                {allCourses.length} Courses Available
               </div>
-              <div className="glass-card rounded-3xl p-6 border border-border/60">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary text-primary-foreground flex items-center justify-center text-2xl font-bold">
-                    AP
+
+              <h1 className="mt-6 text-4xl font-black tracking-tight text-foreground md:text-5xl lg:text-6xl">
+                Learn Engineering Through <span className="gradient-text">Structured Courses</span>
+              </h1>
+              <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">
+                Course cards, chapter-style roadmaps, and long-form learning paths built for .NET,
+                architecture, cloud, AI, and modern engineering delivery.
+              </p>
+
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                {[
+                  "Chapter-based learning paths",
+                  "Responsive lesson roadmaps",
+                  "Mentorship-ready course tracks",
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-2xl border border-border/70 bg-card/80 px-4 py-3 text-sm font-medium text-foreground shadow-sm backdrop-blur"
+                  >
+                    {item}
                   </div>
-                  <div>
-                    <div className="text-sm uppercase text-muted-foreground">Your Instructor</div>
-                    <div className="text-xl font-bold text-foreground">Abhishek Panda</div>
-                    <div className="text-sm text-muted-foreground">Architect & AI Engineer • OriginX Labs</div>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-                  Architecting real-world systems for 10+ years. Focused on production-ready
-                  patterns, scale, and leadership-grade engineering thinking.
-                </p>
-                <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs text-muted-foreground">
-                  <div className="rounded-xl border border-border/70 p-3">
-                    <div className="text-lg font-bold text-foreground">15+</div>
-                    Years exp
-                  </div>
-                  <div className="rounded-xl border border-border/70 p-3">
-                    <div className="text-lg font-bold text-foreground">120+</div>
-                    Modules
-                  </div>
-                  <div className="rounded-xl border border-border/70 p-3">
-                    <div className="text-lg font-bold text-foreground">24/7</div>
-                    Support
-                  </div>
-                </div>
+                ))}
+              </div>
+
+              <div className="relative mx-auto mt-8 max-w-2xl">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search courses, stacks, topics, or architecture tracks..."
+                  className="h-14 rounded-2xl border-border/70 bg-card pl-12 pr-4 text-base shadow-sm"
+                />
+              </div>
+
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-4 py-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  {activeCourseCount} active learning paths
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-4 py-2">
+                  <BookOpen className="h-4 w-4 text-primary" />
+                  Course pages with lesson TOCs
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-4 py-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  Directly from {COURSE_INSTRUCTOR.name}
+                </span>
               </div>
             </motion.div>
           </div>
         </section>
 
-        {/* Filters */}
-        <section className="container mx-auto px-4 mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="glass-card rounded-2xl p-4"
-          >
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap gap-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
-                      selectedCategory === cat
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr_1fr] gap-3 items-center">
-                <div className="relative">
-                  <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search course title, tag, or topic..."
-                    className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm"
-                  />
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <Filter className="w-4 h-4" />
-                  Level:
-                  <div className="flex flex-wrap gap-2">
-                    {filters.levels.map((level) => (
-                      <button
-                        key={level}
-                        onClick={() => setSelectedLevel(level)}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                          selectedLevel === level
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {level}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  Type:
-                  <div className="flex flex-wrap gap-2">
-                    {filters.types.map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => setSelectedType(type)}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                          selectedType === type
-                            ? "bg-secondary text-secondary-foreground"
-                            : "bg-muted text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </section>
-
-        {/* Course Grid */}
         <section className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="text-3xl font-black tracking-tight text-foreground">Explore Courses</h2>
-              <p className="text-sm text-muted-foreground">Find the right path and start building production-ready skills.</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Start learning today</p>
+              <h2 className="mt-2 text-3xl font-black tracking-tight text-foreground md:text-4xl">
+                Open any course card and jump into the roadmap
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
+                Every course card routes into a dedicated course page with overview, learning path,
+                modules, lessons, and a sticky action panel.
+              </p>
             </div>
-            <Button variant="outline" size="sm">View All Courses</Button>
+            <div className="rounded-full border border-border/70 bg-card/80 px-4 py-2 text-sm font-semibold text-muted-foreground shadow-sm">
+              {visibleCourses.length} visible of {allCourses.length}
+            </div>
           </div>
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="glass-card rounded-2xl overflow-hidden">
-                  <Skeleton className="aspect-video w-full" />
-                  <div className="p-6 space-y-3">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-6 w-full" />
+
+          {isLoading && !allCourses.length ? (
+            <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="overflow-hidden rounded-[2rem] border border-border/70 bg-card">
+                  <Skeleton className="aspect-[16/10] w-full" />
+                  <div className="space-y-4 p-6">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-7 w-4/5" />
+                    <Skeleton className="h-4 w-full" />
                     <Skeleton className="h-4 w-3/4" />
                   </div>
                 </div>
               ))}
             </div>
-          ) : filteredCourses.length === 0 && filteredUpcoming.length === 0 ? (
-            <div className="space-y-10">
-              <div className="text-center pt-8">
-                <GraduationCap className="w-14 h-14 text-primary mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-foreground mb-2">Courses Coming Soon</h3>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Fresh tracks are being prepared and published. Browse planned courses below.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredUpcoming.map((course, index) => (
+          ) : visibleCourses.length ? (
+            <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {visibleCourses.map((course, index) => {
+                const lessonCount = countCourseLessons(course.modules);
+                const proofLabel =
+                  course.rating > 0
+                    ? `${course.rating.toFixed(1)} rating`
+                    : course.availability === "roadmap"
+                      ? "Roadmap"
+                      : "Open";
+
+                return (
                   <motion.article
-                    key={course.title}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.45, delay: index * 0.06 }}
-                    className="glass-card rounded-2xl p-6 border border-border/60"
+                    key={course.slug}
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-60px" }}
+                    transition={{ duration: 0.4, delay: index * 0.04 }}
+                    className="group h-full"
                   >
-                    <div className="flex items-center justify-between gap-2 mb-4">
-                      {course.isPremium ? (
-                        <span className="badge-premium"><Lock className="w-3 h-3" />Premium</span>
-                      ) : (
-                        <span className="badge-free">Free</span>
-                      )}
-                      <span className="px-2 py-1 rounded-md text-xs font-semibold bg-muted text-foreground">{course.level}</span>
-                    </div>
-                    <div className="text-xs uppercase tracking-wide text-primary font-semibold mb-2">{course.category}</div>
-                    <h4 className="font-bold text-foreground text-lg leading-snug mb-3">{course.title}</h4>
-                    <div className="space-y-1.5 text-xs text-muted-foreground mb-3">
-                      <div>Instructor: <span className="text-foreground font-semibold">Abhishek Panda</span></div>
-                      <div className="inline-flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5" />
-                        Duration: {course.duration}
+                    <Link
+                      to={`/courses/${course.slug}`}
+                      className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl"
+                    >
+                      <div className="relative">
+                        <CourseCover course={course} className="aspect-[16/10]" compact />
+                        <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${
+                              course.isPremium
+                                ? "bg-foreground text-background"
+                                : "bg-emerald-500/90 text-white"
+                            }`}
+                          >
+                            {course.isPremium ? course.priceLabel : "Free"}
+                          </span>
+                          <span className="rounded-full border border-white/25 bg-background/80 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+                            {course.level}
+                          </span>
+                        </div>
+                        <div className="absolute right-4 top-4 rounded-full border border-white/25 bg-background/80 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+                          {course.availability === "roadmap" ? "Roadmap" : "Open"}
+                        </div>
                       </div>
-                      <div>Price: <span className="text-foreground font-semibold">{course.price ?? "Free"}</span></div>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {course.includes.map((item) => (
-                        <span key={`${course.title}-${item}`} className="px-2 py-1 rounded-full text-[11px] bg-muted text-foreground/90 border border-border/70">
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="inline-flex items-center gap-2 text-xs text-muted-foreground bg-primary/10 px-3 py-1.5 rounded-full">
-                      <Sparkles className="w-3.5 h-3.5 text-primary" />
-                      Coming Soon
-                    </div>
+
+                      <div className="flex flex-1 flex-col p-6">
+                        <div className="flex flex-wrap gap-2">
+                          {course.tags.slice(0, 3).map((tag) => (
+                            <span
+                              key={`${course.slug}-${tag}`}
+                              className="rounded-full border border-border/70 bg-background px-3 py-1 text-xs font-medium text-muted-foreground"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+
+                        <h3 className="mt-4 text-2xl font-black tracking-tight text-foreground transition-colors group-hover:text-primary">
+                          {course.title}
+                        </h3>
+                        <p className="mt-3 line-clamp-3 text-sm leading-7 text-muted-foreground">
+                          {course.description}
+                        </p>
+
+                        <div className="mt-5 grid grid-cols-2 gap-3 text-sm text-muted-foreground">
+                          <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background px-3 py-2">
+                            <BookOpen className="h-4 w-4 text-primary" />
+                            {lessonCount} lessons
+                          </div>
+                          <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background px-3 py-2">
+                            <Clock className="h-4 w-4 text-primary" />
+                            {course.duration}
+                          </div>
+                          <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background px-3 py-2">
+                            <Users className="h-4 w-4 text-primary" />
+                            {course.studentsLabel}
+                          </div>
+                          <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background px-3 py-2">
+                            {course.rating > 0 ? <Star className="h-4 w-4 text-amber-500" /> : <Layers3 className="h-4 w-4 text-primary" />}
+                            {proofLabel}
+                          </div>
+                        </div>
+
+                        <div className="mt-6 flex items-center justify-between border-t border-border/70 pt-5">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-foreground">{COURSE_INSTRUCTOR.name}</p>
+                            <p className="truncate text-xs text-muted-foreground">{COURSE_INSTRUCTOR.role}</p>
+                          </div>
+                          <span className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+                            {course.availability === "roadmap" ? "Explore roadmap" : "Start"}
+                            <ArrowRight className="h-4 w-4" />
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
                   </motion.article>
-                ))}
-              </div>
+                );
+              })}
             </div>
           ) : (
-            <div className="space-y-12">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCourses.map((course, index) => (
-                  <motion.div
-                    key={course.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                  >
-                    <div className="glass-card-hover rounded-2xl overflow-hidden h-full flex flex-col">
-                      <Link to={`/courses/${course.slug}`} className="block group">
-                        <div className="relative aspect-video bg-gradient-to-br from-primary/20 via-secondary/20 to-purple/20 overflow-hidden">
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-glow">
-                              <Play className="w-6 h-6 text-primary-foreground ml-1" />
-                            </div>
-                          </div>
-                          <div className="absolute top-3 left-3 flex gap-2">
-                            {course.is_premium ? (
-                              <span className="badge-premium"><Lock className="w-3 h-3" />Premium</span>
-                            ) : (
-                              <span className="badge-free">Free</span>
-                            )}
-                            {course.level && (
-                              <span className="px-2 py-1 rounded-md text-xs font-semibold bg-card/90 text-foreground">{course.level}</span>
-                            )}
-                          </div>
-                        </div>
-                      </Link>
-                      <div className="p-6 flex-1 flex flex-col">
-                        <div className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground mb-2">
-                          {(course.tags?.[0] || "PROGRAM").toString().toUpperCase()}
-                        </div>
-                        <Link to={`/courses/${course.slug}`}>
-                          <h3 className="font-bold text-lg text-foreground mb-2 hover:text-primary transition-colors line-clamp-2">{course.title}</h3>
-                        </Link>
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">{course.description}</p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
-                          <span className="inline-flex items-center gap-1"><Play className="w-3.5 h-3.5" />{courseMeta(course).videoCount} videos</span>
-                          <span className="inline-flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{courseMeta(course).durationLabel}</span>
-                          <span className="inline-flex items-center gap-1"><Users className="w-3.5 h-3.5" />{course.students_count || 0} learners</span>
-                          <span className="inline-flex items-center gap-1"><Star className="w-3.5 h-3.5 text-amber-500" />{course.rating || "4.9"}</span>
-                        </div>
-                        <div className="flex items-center justify-between pt-4 border-t border-border">
-                          <span className={`font-bold text-xl ${course.is_premium ? 'gradient-text' : 'text-accent'}`}>
-                            {course.is_premium && course.price_amount ? `₹${course.price_amount}` : 'Free'}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            {(course.one_to_one_enabled ?? true) ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setOneToOneCourse({
-                                    title: course.title,
-                                    priceAmount: course.price_amount,
-                                    slug: course.slug,
-                                    oneToOneEnabled: course.one_to_one_enabled,
-                                    oneToOnePriceInr: course.one_to_one_price_inr,
-                                    oneToOneDurationMinutes: course.one_to_one_duration_minutes,
-                                    oneToOneStartHourIst: course.one_to_one_start_hour_ist,
-                                    oneToOneEndHourIst: course.one_to_one_end_hour_ist,
-                                    oneToOnePayAfterSchedule: course.one_to_one_pay_after_schedule,
-                                  });
-                                  setOneToOneOpen(true);
-                                }}
-                              >
-                                1:1 Session
-                              </Button>
-                            ) : null}
-                            <Button variant={course.is_premium ? "premium" : "default"} size="sm" asChild>
-                              <Link to={`/courses/${course.slug}`}>
-                                {course.is_premium ? "Buy Now" : "Start Free"}<ArrowRight className="w-4 h-4" />
-                              </Link>
-                            </Button>
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link to={`/courses/${course.slug}`}>Details</Link>
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              <div>
-                <div className="flex items-center gap-2 mb-5">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  <h3 className="text-2xl font-bold text-foreground">Coming Soon Tracks</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredUpcoming.map((course, index) => (
-                    <motion.article
-                      key={course.title}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.45, delay: index * 0.05 }}
-                      className="glass-card rounded-2xl p-6 border border-border/60"
-                    >
-                      <div className="flex items-center justify-between gap-2 mb-4">
-                        {course.isPremium ? (
-                          <span className="badge-premium"><Lock className="w-3 h-3" />Premium</span>
-                        ) : (
-                          <span className="badge-free">Free</span>
-                        )}
-                        <span className="px-2 py-1 rounded-md text-xs font-semibold bg-muted text-foreground">{course.level}</span>
-                      </div>
-                      <div className="text-xs uppercase tracking-wide text-primary font-semibold mb-2">{course.category}</div>
-                      <h4 className="font-bold text-foreground text-lg leading-snug mb-3">{course.title}</h4>
-                      <div className="space-y-1.5 text-xs text-muted-foreground mb-3">
-                        <div>Instructor: <span className="text-foreground font-semibold">Abhishek Panda</span></div>
-                        <div className="inline-flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5" />
-                          Duration: {course.duration}
-                        </div>
-                        <div>Price: <span className="text-foreground font-semibold">{course.price ?? "Free"}</span></div>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5 mb-3">
-                        {course.includes.map((item) => (
-                          <span key={`${course.title}-${item}`} className="px-2 py-1 rounded-full text-[11px] bg-muted text-foreground/90 border border-border/70">
-                            {item}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="inline-flex items-center gap-2 text-xs text-muted-foreground bg-primary/10 px-3 py-1.5 rounded-full">
-                        <Sparkles className="w-3.5 h-3.5 text-primary" />
-                        Coming Soon
-                      </div>
-                      {(course.oneToOneEnabled ?? true) ? (
-                        <div className="mt-4 flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setOneToOneCourse({
-                                title: course.title,
-                                priceAmount: course.priceAmount,
-                                slug: course.slug,
-                                oneToOneEnabled: course.oneToOneEnabled,
-                                oneToOnePriceInr: course.oneToOnePriceInr,
-                                oneToOneDurationMinutes: course.oneToOneDurationMinutes,
-                                oneToOneStartHourIst: course.oneToOneStartHourIst,
-                                oneToOneEndHourIst: course.oneToOneEndHourIst,
-                                oneToOnePayAfterSchedule: course.oneToOnePayAfterSchedule,
-                              });
-                              setOneToOneOpen(true);
-                            }}
-                          >
-                            1:1 Session
-                          </Button>
-                        </div>
-                      ) : null}
-                    </motion.article>
-                  ))}
-                </div>
-              </div>
+            <div className="mt-8 rounded-[2rem] border border-dashed border-border/70 bg-card/60 p-10 text-center">
+              <h3 className="text-xl font-bold text-foreground">No matching courses found.</h3>
+              <p className="mt-3 text-muted-foreground">
+                Try a broader search term or open one of the available course routes directly.
+              </p>
             </div>
           )}
-        </section>
 
-        {/* Testimonials */}
-        <section className="container mx-auto px-4 mt-16">
-          <div className="text-center mb-8">
-            <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Testimonials</div>
-            <h2 className="text-3xl font-black text-foreground mt-2">What Students Say</h2>
-            <p className="text-sm text-muted-foreground">Career transformations driven by real-world, production-grade learning.</p>
-          </div>
-          <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
-            {[
-              {
-                name: "Arjun S. (Bangalore)",
-                quote: "After the Azure Architect 1:1 track, I cracked a cloud architect role at a fintech startup. The review sessions were pure gold.",
-              },
-              {
-                name: "Nivedita R. (Hyderabad)",
-                quote: "The 1:1 guidance helped me move from dev to solution architect in 4 months. The clarity on system tradeoffs was a breakthrough.",
-              },
-              {
-                name: "Manish K. (Pune)",
-                quote: "Abhishek’s Azure sessions were hands-on and practical. I now lead cloud migration initiatives confidently.",
-              },
-              {
-                name: "Shreya D. (Chennai)",
-                quote: "The nightly 1:1 sessions fit my schedule perfectly. I shipped my first enterprise-grade cloud design doc in weeks.",
-              },
-              {
-                name: "Rohit V. (Noida)",
-                quote: "From DDD basics to Azure architecture decisions — the sessions filled all gaps and landed me a promotion.",
-              },
-            ].map((t) => (
-              <div
-                key={t.name}
-                className="glass-card rounded-2xl p-6 border border-border/60 min-w-[280px] md:min-w-[360px] snap-start"
-              >
-                <div className="text-sm text-muted-foreground mb-3">★★★★★</div>
-                <p className="text-sm text-foreground/90 leading-relaxed mb-4">“{t.quote}”</p>
-                <div className="text-xs font-semibold text-muted-foreground">{t.name}</div>
+          <div className="mt-12 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+            <div className="rounded-[2rem] border border-border/70 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-4 py-2 text-sm font-semibold text-foreground">
+                <Sparkles className="h-4 w-4 text-primary" />
+                In the works
               </div>
-            ))}
+              <h2 className="mt-5 text-3xl font-black tracking-tight text-foreground">
+                More courses are coming soon
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
+                New architect-grade courses, deep-dive modules, and companion learning tracks are being prepared.
+                The course routes above already preview how the final learning flow will look.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                {FUTURE_COURSE_TOPICS.map((topic) => (
+                  <span
+                    key={topic}
+                    className="rounded-full border border-border/70 bg-background px-4 py-2 text-sm font-medium text-foreground"
+                  >
+                    {topic}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-6">
+                <Button variant="outline" asChild>
+                  <Link to="/#newsletter">
+                    Get notified
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-border/70 bg-slate-950 p-6 text-white shadow-sm md:p-8">
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/70">Weekly engineering notes</p>
+              <h2 className="mt-4 text-3xl font-black tracking-tight">
+                Stay updated on new courses, roadmaps, and chapter drops
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-white/75">
+                Join the newsletter to get the next course release, architecture notes, and linked lesson updates from this website.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3 text-sm text-white/80">
+                <span className="rounded-full border border-white/15 bg-white/5 px-4 py-2">Courses</span>
+                <span className="rounded-full border border-white/15 bg-white/5 px-4 py-2">Architecture</span>
+                <span className="rounded-full border border-white/15 bg-white/5 px-4 py-2">Cloud</span>
+                <span className="rounded-full border border-white/15 bg-white/5 px-4 py-2">AI</span>
+              </div>
+              <Button variant="secondary" className="mt-6" asChild>
+                <Link to="/#newsletter">
+                  Join the newsletter
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </section>
       </main>
 
-      <CourseOneToOneModal
-        open={oneToOneOpen}
-        onOpenChange={setOneToOneOpen}
-        courseTitle={oneToOneCourse?.title || "Course"}
-        coursePriceInr={oneToOneCourse?.priceAmount ?? null}
-        courseSlug={oneToOneCourse?.slug}
-        oneToOneEnabled={oneToOneCourse?.oneToOneEnabled}
-        oneToOnePriceInr={oneToOneCourse?.oneToOnePriceInr}
-        oneToOneDurationMinutes={oneToOneCourse?.oneToOneDurationMinutes}
-        oneToOneStartHourIst={oneToOneCourse?.oneToOneStartHourIst}
-        oneToOneEndHourIst={oneToOneCourse?.oneToOneEndHourIst}
-        payAfterSchedule={oneToOneCourse?.oneToOnePayAfterSchedule}
-      />
-
       <Footer />
     </div>
   );
-};
-
-export default Courses;
+}

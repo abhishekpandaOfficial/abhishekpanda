@@ -55,7 +55,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     data: {
       title: "Blog Series | Abhishek Panda",
       description:
-        "Read a dedicated mastery series page with related website blog posts, structured learning context, and linked reading paths.",
+        "Open a mastery series TOC with modules, chapters, topics, and related website blog posts.",
     },
   },
   {
@@ -73,6 +73,38 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "Article | Abhishek Panda",
       description:
         "Read detailed routed articles with supporting navigation, related content, and theme-aware presentation.",
+    },
+  },
+  {
+    pattern: "/case-studies",
+    data: {
+      title: "Case Studies | Abhishek Panda",
+      description:
+        "Browse case-study style engineering breakdowns across .NET architecture, distributed systems, privacy, and roadmap-driven technical writing.",
+    },
+  },
+  {
+    pattern: "/case-studies/:slug",
+    data: {
+      title: "Case Study | Abhishek Panda",
+      description:
+        "Open a dedicated engineering case-study page with routed detail view, section-aware reading flow, and related long-form content.",
+    },
+  },
+  {
+    pattern: "/interview",
+    data: {
+      title: "Interview | Abhishek Panda",
+      description:
+        "Open interview-focused courses, ebooks, architect preparation packs, and mentorship routes from one top-level hub.",
+    },
+  },
+  {
+    pattern: "/projects",
+    data: {
+      title: "Projects | Abhishek Panda",
+      description:
+        "Explore live products, engineering platforms, and project-oriented learning destinations across the website.",
     },
   },
   {

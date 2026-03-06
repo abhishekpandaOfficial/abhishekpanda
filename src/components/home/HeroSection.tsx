@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, Code2, Cloud, Brain, ExternalLink, ShieldCheck, Database, Cpu, ArrowRight, UserCircle, Briefcase } from "lucide-react";
+import { Sparkles, Code2, Cloud, Brain, ExternalLink, ShieldCheck, Database, Cpu, ArrowRight, UserCircle, Briefcase, BookOpen } from "lucide-react";
 import abhishekAvatar from "@/assets/abhishek-avatar.png";
 import abhishekAvatarAlt from "@/assets/abhishek-avatar-alt.png";
 import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
@@ -325,13 +325,20 @@ export const HeroSection = () => {
             transition={{ duration: 0.45, delay: 0.58 }}
             className="mb-5"
           >
-            <div className="flex flex-col justify-center gap-3 sm:flex-row">
+            <div className="flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 to="/about"
                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/80 px-5 py-3 text-sm font-semibold text-foreground backdrop-blur-xl transition hover:border-primary/35 hover:text-primary"
               >
                 <UserCircle className="h-4 w-4" />
                 Explore About
+              </Link>
+              <Link
+                to="/ebooks"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-primary/25 bg-primary/10 px-5 py-3 text-sm font-semibold text-primary backdrop-blur-xl transition hover:border-primary/40 hover:bg-primary/15"
+              >
+                <BookOpen className="h-4 w-4" />
+                Browse Ebooks
               </Link>
               <Link
                 to="/mentorship"

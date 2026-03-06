@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { useTheme } from "@/components/ThemeProvider";
 
 type GiscusConfig = {
   repo?: string;
@@ -21,7 +22,9 @@ const getConfig = (): GiscusConfig => ({
 export function GiscusComments() {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const cfg = useMemo(getConfig, []);
+  const { theme } = useTheme();
   const isConfigured = !!(cfg.repo && cfg.repoId && cfg.category && cfg.categoryId);
+  const giscusTheme = theme === "dark" ? "dark" : "light";
 
   useEffect(() => {
     if (!isConfigured) return;
@@ -43,11 +46,26 @@ export function GiscusComments() {
     script.setAttribute("data-reactions-enabled", "1");
     script.setAttribute("data-emit-metadata", "0");
     script.setAttribute("data-input-position", "top");
-    script.setAttribute("data-theme", cfg.theme || "dark");
+    script.setAttribute("data-theme", giscusTheme || cfg.theme || "dark");
     script.setAttribute("data-lang", "en");
     script.setAttribute("data-loading", "lazy");
     root.appendChild(script);
   }, [cfg.category, cfg.categoryId, cfg.mapping, cfg.repo, cfg.repoId, cfg.theme, isConfigured]);
+
+  useEffect(() => {
+    if (!isConfigured) return;
+    const iframe = hostRef.current?.querySelector<HTMLIFrameElement>("iframe.giscus-frame");
+    iframe?.contentWindow?.postMessage(
+      {
+        giscus: {
+          setConfig: {
+            theme: giscusTheme,
+          },
+        },
+      },
+      "https://giscus.app",
+    );
+  }, [giscusTheme, isConfigured]);
 
   if (!isConfigured) {
     if (!import.meta.env.DEV) return null;

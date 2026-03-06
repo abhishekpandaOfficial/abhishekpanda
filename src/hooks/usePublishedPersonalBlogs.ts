@@ -109,6 +109,8 @@ export const usePublishedPersonalBlogs = () => {
         reading_time_minutes: post.readingTimeMinutes,
         views: 0,
         updated_at: post.updatedAt,
+        series_name: post.seriesName,
+        series_order: post.seriesOrder,
       }) satisfies BlogIndexRow),
     [],
   );

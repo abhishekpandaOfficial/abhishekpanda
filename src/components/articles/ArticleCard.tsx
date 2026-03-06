@@ -9,6 +9,8 @@ type ArticleCardProps = {
 };
 
 export default function ArticleCard({ article, featured = false }: ArticleCardProps) {
+  const hasBrandStrip = article.tags.includes("Case Studies") && article.logos.length > 4;
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -63,16 +65,25 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
       <div className={`relative border-t border-border/60 ${featured ? "lg:border-l lg:border-t-0" : ""}`}>
         <div className={`flex h-full flex-col justify-between ${featured ? "p-8" : "p-6"}`}>
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Stack & Signals</p>
-            <div className="mt-4 flex flex-wrap gap-3">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">
+              {hasBrandStrip ? "Featured Systems" : "Stack & Signals"}
+            </p>
+            <div className={`mt-4 flex flex-wrap ${hasBrandStrip ? "gap-2.5" : "gap-3"}`}>
               {article.logos.map((logo) => {
-                const Icon = logo.icon;
                 return (
                   <span
                     key={logo.name}
-                    className={`inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-semibold ${logo.bgClass}`}
+                    className={`inline-flex items-center gap-2 rounded-2xl border px-3 py-2 font-semibold ${
+                      hasBrandStrip ? "text-xs" : "text-sm"
+                    } ${logo.bgClass}`}
                   >
-                    <Icon className={`h-4 w-4 ${logo.colorClass}`} />
+                    {logo.imageSrc ? (
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-black/10 ring-1 ring-white/10">
+                        <img src={logo.imageSrc} alt={`${logo.name} logo`} className="h-3.5 w-3.5 object-contain" loading="lazy" />
+                      </span>
+                    ) : logo.icon ? (
+                      <logo.icon className={`h-4 w-4 ${logo.colorClass || "text-foreground"}`} />
+                    ) : null}
                     <span className="text-foreground">{logo.name}</span>
                   </span>
                 );

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Layers3 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BLOG_SERIES } from "@/lib/blogSeries";
+import { BLOG_SERIES, getBlogSeriesHref } from "@/lib/blogSeries";
 
 const MotionLink = motion.create(Link);
 
@@ -16,7 +16,7 @@ export function BlogSeriesGrid({ counts, selectedSlug, seriesList = BLOG_SERIES 
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
       {seriesList.map((series, index) => {
-        const to = `/blogs/${series.slug}`;
+        const to = getBlogSeriesHref(series);
         const count = counts.get(series.slug) ?? 0;
         const isSelected = selectedSlug === series.slug;
 
@@ -80,9 +80,9 @@ export function BlogSeriesGrid({ counts, selectedSlug, seriesList = BLOG_SERIES 
               <div className="mt-5 flex items-center justify-between gap-3 border-t border-border/60 pt-4 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-2">
                   <Layers3 className="h-4 w-4 text-primary/80" />
-                  {count > 0 ? `${count} website post${count === 1 ? "" : "s"}` : "Series route ready"}
+                  {count > 0 ? `${count} website chapter${count === 1 ? "" : "s"}` : "TOC ready"}
                 </span>
-                <span className="font-semibold text-foreground">Read Series</span>
+                <span className="font-semibold text-foreground">{series.actionLabel || "Open TOC"}</span>
               </div>
             </div>
           </MotionLink>

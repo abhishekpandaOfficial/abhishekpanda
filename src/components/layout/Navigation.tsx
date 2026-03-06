@@ -6,7 +6,6 @@ import {
   X, 
   GitCompare, 
   UserCircle,
-  BookOpen,
   Send,
   FileText,
   Newspaper,
@@ -14,7 +13,9 @@ import {
   GraduationCap,
   Lock,
   Code2,
-  Cpu
+  Cpu,
+  FolderOpen,
+  Target
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -29,11 +30,9 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-// Nav links in order: About, Courses, Ebooks, Contact
+// Nav links in order: About, Contact
 const navLinks = [
   { name: "About", path: "/about", icon: UserCircle },
-  { name: "Courses", path: "/courses", icon: GraduationCap },
-  { name: "Ebooks", path: "/ebooks", icon: BookOpen },
   { name: "Contact", path: "/contact", icon: Send },
 ];
 
@@ -69,7 +68,9 @@ export const Navigation = () => {
     location.pathname === "/dotnet-mastery-toc";
   const isArticlesActive = location.pathname.startsWith("/articles");
   const isCoursesActive = location.pathname === "/courses" || location.pathname.startsWith("/courses/");
-  const isEbooksActive = location.pathname === "/ebooks" || location.pathname.startsWith("/ebooks/");
+  const isCaseStudiesActive = location.pathname.startsWith("/case-studies");
+  const isInterviewActive = location.pathname.startsWith("/interview");
+  const isProjectsActive = location.pathname.startsWith("/projects");
 
   return (
     <>
@@ -97,14 +98,14 @@ export const Navigation = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden min-[1520px]:flex items-center gap-0.5 flex-nowrap">
               {/* About */}
               {navLinks.slice(0, 1).map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
                   className={cn(
-                    "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 group",
+                    "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
                     location.pathname === link.path
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground"
@@ -123,7 +124,7 @@ export const Navigation = () => {
               <Link
                 to="/courses"
                 className={cn(
-                  "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 group",
+                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
                   isCoursesActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
@@ -137,28 +138,10 @@ export const Navigation = () => {
                 </span>
               </Link>
 
-              {/* Ebooks */}
-              <Link
-                to="/ebooks"
-                className={cn(
-                  "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 group",
-                  isEbooksActive
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                <span className="relative flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 transition-transform group-hover:scale-110" />
-                  Ebooks
-                </span>
-              </Link>
-
               <Link
                 to="/articles"
                 className={cn(
-                  "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 group",
+                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
                   isArticlesActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
@@ -175,7 +158,7 @@ export const Navigation = () => {
               <Link
                 to="/blogs"
                 className={cn(
-                  "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 group",
+                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
                   isBlogActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
@@ -189,14 +172,65 @@ export const Navigation = () => {
                 </span>
               </Link>
 
+              <Link
+                to="/case-studies"
+                className={cn(
+                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                  isCaseStudiesActive
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                <span className="relative flex items-center gap-2">
+                  <FileText className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  Case Studies
+                </span>
+              </Link>
+
+              <Link
+                to="/interview"
+                className={cn(
+                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                  isInterviewActive
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                <span className="relative flex items-center gap-2">
+                  <Target className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  Interview
+                </span>
+              </Link>
+
+              <Link
+                to="/projects"
+                className={cn(
+                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                  isProjectsActive
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                <span className="relative flex items-center gap-2">
+                  <FolderOpen className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  Projects
+                </span>
+              </Link>
+
               {/* Contact */}
-              {navLinks.slice(3).map((link) => (
+              {navLinks.slice(1).map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
                   className={cn(
-                    "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 group",
-                    (link.path === "/ebooks" ? isEbooksActive : location.pathname === link.path)
+                    "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                    location.pathname === link.path
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground"
                   )}
@@ -216,7 +250,7 @@ export const Navigation = () => {
                   <NavigationMenuItem>
                     <NavigationMenuTrigger
                       className={cn(
-                        "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 bg-transparent data-[state=open]:bg-transparent group",
+                        "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 bg-transparent data-[state=open]:bg-transparent group",
                         isGalaxyActive
                           ? "text-primary bg-primary/10"
                           : "text-muted-foreground hover:text-foreground"
@@ -252,12 +286,12 @@ export const Navigation = () => {
             </nav>
 
             {/* CTA Buttons */}
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden min-[1520px]:flex items-center gap-3">
               <ThemeToggle />
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="flex items-center gap-2 lg:hidden">
+            <div className="flex items-center gap-2 min-[1520px]:hidden">
               <ThemeToggle />
               <Button
                 variant="ghost"
@@ -278,7 +312,7 @@ export const Navigation = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 lg:hidden pt-20"
+            className="fixed inset-0 z-40 min-[1520px]:hidden pt-20"
           >
             <div className="absolute inset-0 bg-background/95 backdrop-blur-xl" />
             <nav className="relative container mx-auto px-4 py-8 flex flex-col gap-2 max-h-[calc(100vh-5rem)] overflow-y-auto">
@@ -325,30 +359,10 @@ export const Navigation = () => {
                 </Link>
               </motion.div>
 
-              {/* Ebooks */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.12 }}
-              >
-                <Link
-                  to="/ebooks"
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
-                    isEbooksActive
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <BookOpen className="w-5 h-5" />
-                  Ebooks
-                </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.14 }}
               >
                 <Link
                   to="/articles"
@@ -367,7 +381,7 @@ export const Navigation = () => {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.15 }}
+                transition={{ delay: 0.13 }}
               >
                 <Link
                   to="/blogs"
@@ -383,19 +397,76 @@ export const Navigation = () => {
                 </Link>
               </motion.div>
 
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.14 }}
+              >
+                <Link
+                  to="/case-studies"
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    isCaseStudiesActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <FileText className="w-5 h-5" />
+                  Case Studies
+                </Link>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.15 }}
+              >
+                <Link
+                  to="/interview"
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    isInterviewActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <Target className="w-5 h-5" />
+                  Interview
+                </Link>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.16 }}
+              >
+                <Link
+                  to="/projects"
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    isProjectsActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <FolderOpen className="w-5 h-5" />
+                  Projects
+                </Link>
+              </motion.div>
+
               {/* Contact */}
-              {navLinks.slice(3).map((link, index) => (
+              {navLinks.slice(1).map((link, index) => (
                 <motion.div
                   key={link.path}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: (index + 4) * 0.05 }}
+                  transition={{ delay: 0.18 + index * 0.05 }}
                 >
                   <Link
                     to={link.path}
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
-                      (link.path === "/ebooks" ? isEbooksActive : location.pathname === link.path)
+                      location.pathname === link.path
                         ? "text-primary bg-primary/10"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     )}

@@ -277,7 +277,7 @@ const Blog = () => {
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
                   Mastery tracks for C#, architecture, cloud, AI/ML, frontend, data, DevOps, blockchain, and Web3.
-                  Click a card to open the series route or filter this website blog for that learning path.
+                  Click a card to open that series TOC directly with its chapters, topics, and matching website posts.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">

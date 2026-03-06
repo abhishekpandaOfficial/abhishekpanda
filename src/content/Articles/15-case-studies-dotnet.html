@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>15 System Design Case Studies — Complete .NET Implementation Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#080b12;--bg2:#0d1220;--bg3:#111827;
+  --text:#dde6f0;--muted:#4a5568;--border:rgba(255,255,255,0.06);
+  --sw:290px;
+  --c1:#25d366;--c2:#1db954;--c3:#1da1f2;--c4:#003087;
+  --c5:#ff4500;--c6:#5865f2;--c7:#ff6b00;--c8:#4285f4;
+  --c9:#e01e5a;--c10:#10a37f;--c11:#ff0000;--c12:#f90;
+  --c13:#0085ff;--c14:#2563eb;--c15:#231f20;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;display:flex;min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:#333;border-radius:2px;}
+
+/* SIDEBAR */
+.sb{width:var(--sw);min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+.sb-head{padding:24px 20px 16px;border-bottom:1px solid var(--border);}
+.sb-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:900;line-height:1.3;color:#fff;}
+.sb-sub{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
+.sb-nav{padding:8px 0;flex:1;}
+.nav-a{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:12.5px;color:var(--muted);text-decoration:none;border-left:2px solid transparent;transition:all .2s;font-weight:500;}
+.nav-a:hover,.nav-a.on{color:#fff;border-left-color:currentColor;background:rgba(255,255,255,0.03);}
+.nav-dot{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:#000;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.12);}
+.nav-dot img,.chip-icon img,.nav-dot svg,.chip-icon svg{display:block;width:14px;height:14px;object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,0.28));}
+.nav-num{font-family:'Fira Code',monospace;font-size:10px;color:var(--muted);margin-left:auto;}
+
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;}
+#pbar{position:fixed;top:0;left:var(--sw);right:0;height:2px;background:linear-gradient(90deg,#25d366,#1da1f2,#ff4500);transform-origin:left;transform:scaleX(0);z-index:200;transition:transform .1s linear;}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 40px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 30% 50%,rgba(37,211,102,0.04) 0%,transparent 50%),radial-gradient(ellipse at 70% 50%,rgba(29,161,242,0.04) 0%,transparent 50%);}
+.hero::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.02) 0,rgba(255,255,255,0.02) 1px,transparent 1px,transparent 60px),repeating-linear-gradient(90deg,rgba(255,255,255,0.02) 0,rgba(255,255,255,0.02) 1px,transparent 1px,transparent 60px);pointer-events:none;}
+.hero-num{font-family:'Playfair Display',serif;font-size:clamp(120px,20vw,240px);font-weight:900;color:rgba(255,255,255,0.03);position:absolute;user-select:none;line-height:1;}
+.hero-tag{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#4a5568;margin-bottom:20px;position:relative;z-index:1;}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,68px);font-weight:900;line-height:1.05;position:relative;z-index:1;color:#fff;}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,#25d366,#1da1f2,#ff4500,#ff6b00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-desc{font-size:17px;color:var(--muted);max-width:640px;margin:20px auto 40px;position:relative;z-index:1;line-height:1.7;}
+.hero-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;position:relative;z-index:1;max-width:700px;}
+.hero-chip{display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:999px;font-size:12px;color:#9aa4b2;font-weight:600;transition:all .3s;background:rgba(255,255,255,0.03);box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);}
+.hero-chip:hover{border-color:rgba(255,255,255,0.2);color:#e5e7eb;transform:translateY(-1px);}
+.chip-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;flex-shrink:0;box-shadow:0 8px 18px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.12);}
+
+/* CASE STUDY SECTION */
+.cs{padding:0;border-bottom:1px solid var(--border);}
+.cs-hero{padding:72px 64px 48px;position:relative;overflow:hidden;}
+.cs-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 0% 50%,var(--acc,rgba(255,255,255,0.03)) 0%,transparent 60%);pointer-events:none;}
+.cs-num{font-family:'Fira Code',monospace;font-size:11px;letter-spacing:3px;color:var(--acc-color,#555);text-transform:uppercase;margin-bottom:14px;}
+.cs-title{font-family:'Playfair Display',serif;font-size:clamp(32px,4vw,58px);font-weight:900;color:#fff;line-height:1.05;margin-bottom:12px;}
+.cs-lead{font-size:16px;color:#6b7280;max-width:680px;line-height:1.7;margin-bottom:28px;}
+.cs-stats{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:0;}
+.stat-pill{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#888;}
+
+/* CONTENT BODY */
+.cs-body{padding:0 64px 56px;display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+.cs-body.wide{grid-template-columns:1fr;}
+.cs-body.tri{grid-template-columns:1fr 1fr 1fr;}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;transition:border-color .25s;}
+.card:hover{border-color:rgba(255,255,255,0.12);}
+.card-label{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:14px;}
+.card h3{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:10px;}
+.card p{font-size:13.5px;color:#6b7280;line-height:1.75;}
+.card ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:7px;}
+.card ul li{font-size:13px;color:#6b7280;padding-left:16px;position:relative;line-height:1.6;}
+.card ul li::before{content:'→';position:absolute;left:0;color:var(--acc-color,#555);font-size:11px;}
+
+/* DIAGRAM */
+.diagram{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:24px;overflow:auto;grid-column:1/-1;}
+.diagram svg{display:block;margin:0 auto;}
+
+/* CODE */
+.code{background:#050810;border:1px solid rgba(255,255,255,0.06);border-radius:12px;overflow:hidden;grid-column:1/-1;}
+.code-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.04);}
+.code-file{font-family:'Fira Code',monospace;font-size:11px;color:#555;}
+.code-tag{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:4px;background:rgba(255,255,255,0.06);color:#888;}
+.code pre{font-family:'Fira Code',monospace;font-size:12.5px;line-height:1.75;padding:20px;overflow-x:auto;color:#abb2bf;}
+.kw{color:#c678dd;}.cls{color:#e5c07b;}.str{color:#98c379;}.cm{color:#5c6370;font-style:italic;}.num{color:#d19a66;}.fn{color:#61afef;}.dec{color:#e06c75;}.iface{color:#56b6c2;}.prop{color:#e06c75;}
+
+/* ARCH LABEL */
+.arch-section{padding:28px 64px 0;grid-column:1/-1;}
+.arch-label{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#4a5568;margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.arch-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* FULL WIDTH */
+.fw{grid-column:1/-1;}
+
+@media(max-width:1100px){.cs-body{grid-template-columns:1fr;}.cs-body.tri{grid-template-columns:1fr 1fr;}}
+@media(max-width:768px){.sb{transform:translateX(-100%);}.main{margin-left:0;}#pbar{left:0;}.cs-hero,.cs-body{padding-left:20px;padding-right:20px;}.hero{padding:60px 20px;}}
+</style>
+</head>
+<body>
+<div id="pbar"></div>
+
+<!-- SIDEBAR -->
+<aside class="sb" id="sb">
+<div class="sb-head">
+  <div class="sb-title">15 System Design<br>Case Studies</div>
+  <div class="sb-sub">Complete .NET Build Guide</div>
+</div>
+<nav class="sb-nav">
+  <a class="nav-a" href="#cs1" style="--acc:var(--c1)"><div class="nav-dot" style="background:var(--c1)"><img src="https://cdn.simpleicons.org/whatsapp/FFFFFF" alt="WhatsApp logo"/></div>WhatsApp<span class="nav-num">01</span></a>
+  <a class="nav-a" href="#cs2" style="--acc:var(--c2)"><div class="nav-dot" style="background:var(--c2)"><img src="https://cdn.simpleicons.org/spotify/FFFFFF" alt="Spotify logo"/></div>Spotify<span class="nav-num">02</span></a>
+  <a class="nav-a" href="#cs3" style="--acc:var(--c3)"><div class="nav-dot" style="background:var(--c3)"><img src="https://cdn.simpleicons.org/x/FFFFFF" alt="X logo"/></div>Twitter Timeline<span class="nav-num">03</span></a>
+  <a class="nav-a" href="#cs4" style="--acc:var(--c4)"><div class="nav-dot" style="background:var(--c4)"><svg viewBox="0 0 24 24" aria-label="Stock exchange icon" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 10 12l4 4 6-8"/><path d="M18 8h2v2"/><path d="M4 20h16"/></svg></div>Stock Exchange<span class="nav-num">04</span></a>
+  <a class="nav-a" href="#cs5" style="--acc:var(--c5)"><div class="nav-dot" style="background:var(--c5)"><img src="https://cdn.simpleicons.org/reddit/FFFFFF" alt="Reddit logo"/></div>Reddit<span class="nav-num">05</span></a>
+  <a class="nav-a" href="#cs6" style="--acc:var(--c6)"><div class="nav-dot" style="background:var(--c6)"><img src="https://cdn.simpleicons.org/stripe/FFFFFF" alt="Stripe logo"/></div>Payment System<span class="nav-num">06</span></a>
+  <a class="nav-a" href="#cs7" style="--acc:var(--c7)"><div class="nav-dot" style="background:var(--c7)"><img src="https://cdn.simpleicons.org/uber/FFFFFF" alt="Uber logo"/></div>Uber ETA<span class="nav-num">07</span></a>
+  <a class="nav-a" href="#cs8" style="--acc:var(--c8)"><div class="nav-dot" style="background:var(--c8)"><img src="https://cdn.simpleicons.org/google/FFFFFF" alt="Google logo"/></div>Google Search<span class="nav-num">08</span></a>
+  <a class="nav-a" href="#cs9" style="--acc:var(--c9)"><div class="nav-dot" style="background:var(--c9)"><svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" color="#fff" style="color:#fff" aria-label="Slack logo" xmlns="http://www.w3.org/2000/svg"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"></path></svg></div>Slack<span class="nav-num">09</span></a>
+  <a class="nav-a" href="#cs10" style="--acc:var(--c10)"><div class="nav-dot" style="background:var(--c10)"><svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" color="#fff" style="color:#fff" aria-label="OpenAI logo" xmlns="http://www.w3.org/2000/svg"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"></path></svg></div>ChatGPT<span class="nav-num">10</span></a>
+  <a class="nav-a" href="#cs11" style="--acc:var(--c11)"><div class="nav-dot" style="background:var(--c11)"><img src="https://cdn.simpleicons.org/youtube/FFFFFF" alt="YouTube logo"/></div>YouTube<span class="nav-num">11</span></a>
+  <a class="nav-a" href="#cs12" style="--acc:var(--c12)"><div class="nav-dot" style="background:var(--c12)"><svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" color="#fff" style="color:#fff" aria-label="AWS logo" xmlns="http://www.w3.org/2000/svg"><path d="M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576.04.063.056.127.056.183 0 .08-.048.16-.152.24l-.503.335a.383.383 0 0 1-.208.072c-.08 0-.16-.04-.239-.112a2.47 2.47 0 0 1-.287-.375 6.18 6.18 0 0 1-.248-.471c-.622.734-1.405 1.101-2.347 1.101-.67 0-1.205-.191-1.596-.574-.391-.384-.59-.894-.59-1.533 0-.678.239-1.23.726-1.644.487-.415 1.133-.623 1.955-.623.272 0 .551.024.846.064.296.04.6.104.918.176v-.583c0-.607-.127-1.03-.375-1.277-.255-.248-.686-.367-1.3-.367-.28 0-.568.031-.863.103-.295.072-.583.16-.862.272a2.287 2.287 0 0 1-.28.104.488.488 0 0 1-.127.023c-.112 0-.168-.08-.168-.247v-.391c0-.128.016-.224.056-.28a.597.597 0 0 1 .224-.167c.279-.144.614-.264 1.005-.36a4.84 4.84 0 0 1 1.246-.151c.95 0 1.644.216 2.091.647.439.43.662 1.085.662 1.963v2.586zm-3.24 1.214c.263 0 .534-.048.822-.144.287-.096.543-.271.758-.51.128-.152.224-.32.272-.512.047-.191.08-.423.08-.694v-.335a6.66 6.66 0 0 0-.735-.136 6.02 6.02 0 0 0-.75-.048c-.535 0-.926.104-1.19.32-.263.215-.39.518-.39.917 0 .375.095.655.295.846.191.2.47.296.838.296zm6.41.862c-.144 0-.24-.024-.304-.08-.064-.048-.12-.16-.168-.311L7.586 5.55a1.398 1.398 0 0 1-.072-.32c0-.128.064-.2.191-.2h.783c.151 0 .255.025.31.08.065.048.113.16.16.312l1.342 5.284 1.245-5.284c.04-.16.088-.264.151-.312a.549.549 0 0 1 .32-.08h.638c.152 0 .256.025.32.08.063.048.12.16.151.312l1.261 5.348 1.381-5.348c.048-.16.104-.264.16-.312a.52.52 0 0 1 .311-.08h.743c.127 0 .2.065.2.2 0 .04-.009.08-.017.128a1.137 1.137 0 0 1-.056.2l-1.923 6.17c-.048.16-.104.263-.168.311a.51.51 0 0 1-.303.08h-.687c-.151 0-.255-.024-.32-.08-.063-.056-.119-.16-.15-.32l-1.238-5.148-1.23 5.14c-.04.16-.087.264-.15.32-.065.056-.177.08-.32.08zm10.256.215c-.415 0-.83-.048-1.229-.143-.399-.096-.71-.2-.918-.32-.128-.071-.215-.151-.247-.223a.563.563 0 0 1-.048-.224v-.407c0-.167.064-.247.183-.247.048 0 .096.008.144.024.048.016.12.048.2.08.271.12.566.215.878.279.319.064.63.096.95.096.502 0 .894-.088 1.165-.264a.86.86 0 0 0 .415-.758.777.777 0 0 0-.215-.559c-.144-.151-.416-.287-.807-.415l-1.157-.36c-.583-.183-1.014-.454-1.277-.813a1.902 1.902 0 0 1-.4-1.158c0-.335.073-.63.216-.886.144-.255.335-.479.575-.654.24-.184.51-.32.83-.415.32-.096.655-.136 1.006-.136.175 0 .359.008.535.032.183.024.35.056.518.088.16.04.312.08.455.127.144.048.256.096.336.144a.69.69 0 0 1 .24.2.43.43 0 0 1 .071.263v.375c0 .168-.064.256-.184.256a.83.83 0 0 1-.303-.096 3.652 3.652 0 0 0-1.532-.311c-.455 0-.815.071-1.062.223-.248.152-.375.383-.375.71 0 .224.08.416.24.567.159.152.454.304.877.44l1.134.358c.574.184.99.44 1.237.767.247.327.367.702.367 1.117 0 .343-.072.655-.207.926-.144.272-.336.511-.583.703-.248.2-.543.343-.886.447-.36.111-.734.167-1.142.167zM21.698 16.207c-2.626 1.94-6.442 2.969-9.722 2.969-4.598 0-8.74-1.7-11.87-4.526-.247-.223-.024-.527.272-.351 3.384 1.963 7.559 3.153 11.877 3.153 2.914 0 6.114-.607 9.06-1.852.439-.2.814.287.383.607zM22.792 14.961c-.336-.43-2.22-.207-3.074-.103-.255.032-.295-.192-.063-.36 1.5-1.053 3.967-.75 4.254-.399.287.36-.08 2.826-1.485 4.007-.215.184-.423.088-.327-.151.32-.79 1.03-2.57.695-2.994z"></path></svg></div>AWS S3<span class="nav-num">12</span></a>
+  <a class="nav-a" href="#cs13" style="--acc:var(--c13)"><div class="nav-dot" style="background:var(--c13)"><img src="https://cdn.simpleicons.org/bluesky/FFFFFF" alt="Bluesky logo"/></div>Bluesky<span class="nav-num">13</span></a>
+  <a class="nav-a" href="#cs14" style="--acc:var(--c14)"><div class="nav-dot" style="background:var(--c14)"><img src="https://cdn.simpleicons.org/bitly/FFFFFF" alt="Bitly logo"/></div>URL Shortener<span class="nav-num">14</span></a>
+  <a class="nav-a" href="#cs15" style="--acc:var(--c15);"><div class="nav-dot" style="background:#231f20;color:#fff"><img src="https://cdn.simpleicons.org/apachekafka/FFFFFF" alt="Apache Kafka logo"/></div>Apache Kafka<span class="nav-num">15</span></a>
+</nav>
+</aside>
+
+<main class="main">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-num">15</div>
+  <div class="hero-tag">System Design × .NET Implementation</div>
+  <h1>System Design<br><em>Case Studies</em></h1>
+  <p class="hero-desc">How the world's most complex systems actually work — with complete architecture, diagrams, and .NET code to build each one from scratch.</p>
+  <div class="hero-grid">
+    <div class="hero-chip"><span class="chip-icon" style="background:var(--c1)"><img src="https://cdn.simpleicons.org/whatsapp/FFFFFF" alt="WhatsApp logo"/></span>WhatsApp</div><div class="hero-chip"><span class="chip-icon" style="background:var(--c2)"><img src="https://cdn.simpleicons.org/spotify/FFFFFF" alt="Spotify logo"/></span>Spotify</div><div class="hero-chip"><span class="chip-icon" style="background:var(--c3)"><img src="https://cdn.simpleicons.org/x/FFFFFF" alt="X logo"/></span>Twitter</div>
+    <div class="hero-chip"><span class="chip-icon" style="background:var(--c4)"><svg viewBox="0 0 24 24" aria-label="Stock exchange icon" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 10 12l4 4 6-8"/><path d="M18 8h2v2"/><path d="M4 20h16"/></svg></span>Stock Exchange</div><div class="hero-chip"><span class="chip-icon" style="background:var(--c5)"><img src="https://cdn.simpleicons.org/reddit/FFFFFF" alt="Reddit logo"/></span>Reddit</div><div class="hero-chip"><span class="chip-icon" style="background:var(--c6)"><img src="https://cdn.simpleicons.org/stripe/FFFFFF" alt="Stripe logo"/></span>Payments</div>
+    <div class="hero-chip"><span class="chip-icon" style="background:var(--c7)"><img src="https://cdn.simpleicons.org/uber/FFFFFF" alt="Uber logo"/></span>Uber ETA</div><div class="hero-chip"><span class="chip-icon" style="background:var(--c8)"><img src="https://cdn.simpleicons.org/google/FFFFFF" alt="Google logo"/></span>Google Search</div><div class="hero-chip"><span class="chip-icon" style="background:var(--c9)"><svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" color="#fff" style="color:#fff" aria-label="Slack logo" xmlns="http://www.w3.org/2000/svg"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"></path></svg></span>Slack</div>
+    <div class="hero-chip"><span class="chip-icon" style="background:var(--c10)"><svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" color="#fff" style="color:#fff" aria-label="OpenAI logo" xmlns="http://www.w3.org/2000/svg"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"></path></svg></span>ChatGPT</div><div class="hero-chip"><span class="chip-icon" style="background:var(--c11)"><img src="https://cdn.simpleicons.org/youtube/FFFFFF" alt="YouTube logo"/></span>YouTube</div><div class="hero-chip"><span class="chip-icon" style="background:var(--c12)"><svg stroke="currentColor" fill="currentColor" stroke-width="0" role="img" viewBox="0 0 24 24" color="#fff" style="color:#fff" aria-label="AWS logo" xmlns="http://www.w3.org/2000/svg"><path d="M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576.04.063.056.127.056.183 0 .08-.048.16-.152.24l-.503.335a.383.383 0 0 1-.208.072c-.08 0-.16-.04-.239-.112a2.47 2.47 0 0 1-.287-.375 6.18 6.18 0 0 1-.248-.471c-.622.734-1.405 1.101-2.347 1.101-.67 0-1.205-.191-1.596-.574-.391-.384-.59-.894-.59-1.533 0-.678.239-1.23.726-1.644.487-.415 1.133-.623 1.955-.623.272 0 .551.024.846.064.296.04.6.104.918.176v-.583c0-.607-.127-1.03-.375-1.277-.255-.248-.686-.367-1.3-.367-.28 0-.568.031-.863.103-.295.072-.583.16-.862.272a2.287 2.287 0 0 1-.28.104.488.488 0 0 1-.127.023c-.112 0-.168-.08-.168-.247v-.391c0-.128.016-.224.056-.28a.597.597 0 0 1 .224-.167c.279-.144.614-.264 1.005-.36a4.84 4.84 0 0 1 1.246-.151c.95 0 1.644.216 2.091.647.439.43.662 1.085.662 1.963v2.586zm-3.24 1.214c.263 0 .534-.048.822-.144.287-.096.543-.271.758-.51.128-.152.224-.32.272-.512.047-.191.08-.423.08-.694v-.335a6.66 6.66 0 0 0-.735-.136 6.02 6.02 0 0 0-.75-.048c-.535 0-.926.104-1.19.32-.263.215-.39.518-.39.917 0 .375.095.655.295.846.191.2.47.296.838.296zm6.41.862c-.144 0-.24-.024-.304-.08-.064-.048-.12-.16-.168-.311L7.586 5.55a1.398 1.398 0 0 1-.072-.32c0-.128.064-.2.191-.2h.783c.151 0 .255.025.31.08.065.048.113.16.16.312l1.342 5.284 1.245-5.284c.04-.16.088-.264.151-.312a.549.549 0 0 1 .32-.08h.638c.152 0 .256.025.32.08.063.048.12.16.151.312l1.261 5.348 1.381-5.348c.048-.16.104-.264.16-.312a.52.52 0 0 1 .311-.08h.743c.127 0 .2.065.2.2 0 .04-.009.08-.017.128a1.137 1.137 0 0 1-.056.2l-1.923 6.17c-.048.16-.104.263-.168.311a.51.51 0 0 1-.303.08h-.687c-.151 0-.255-.024-.32-.08-.063-.056-.119-.16-.15-.32l-1.238-5.148-1.23 5.14c-.04.16-.087.264-.15.32-.065.056-.177.08-.32.08zm10.256.215c-.415 0-.83-.048-1.229-.143-.399-.096-.71-.2-.918-.32-.128-.071-.215-.151-.247-.223a.563.563 0 0 1-.048-.224v-.407c0-.167.064-.247.183-.247.048 0 .096.008.144.024.048.016.12.048.2.08.271.12.566.215.878.279.319.064.63.096.95.096.502 0 .894-.088 1.165-.264a.86.86 0 0 0 .415-.758.777.777 0 0 0-.215-.559c-.144-.151-.416-.287-.807-.415l-1.157-.36c-.583-.183-1.014-.454-1.277-.813a1.902 1.902 0 0 1-.4-1.158c0-.335.073-.63.216-.886.144-.255.335-.479.575-.654.24-.184.51-.32.83-.415.32-.096.655-.136 1.006-.136.175 0 .359.008.535.032.183.024.35.056.518.088.16.04.312.08.455.127.144.048.256.096.336.144a.69.69 0 0 1 .24.2.43.43 0 0 1 .071.263v.375c0 .168-.064.256-.184.256a.83.83 0 0 1-.303-.096 3.652 3.652 0 0 0-1.532-.311c-.455 0-.815.071-1.062.223-.248.152-.375.383-.375.71 0 .224.08.416.24.567.159.152.454.304.877.44l1.134.358c.574.184.99.44 1.237.767.247.327.367.702.367 1.117 0 .343-.072.655-.207.926-.144.272-.336.511-.583.703-.248.2-.543.343-.886.447-.36.111-.734.167-1.142.167zM21.698 16.207c-2.626 1.94-6.442 2.969-9.722 2.969-4.598 0-8.74-1.7-11.87-4.526-.247-.223-.024-.527.272-.351 3.384 1.963 7.559 3.153 11.877 3.153 2.914 0 6.114-.607 9.06-1.852.439-.2.814.287.383.607zM22.792 14.961c-.336-.43-2.22-.207-3.074-.103-.255.032-.295-.192-.063-.36 1.5-1.053 3.967-.75 4.254-.399.287.36-.08 2.826-1.485 4.007-.215.184-.423.088-.327-.151.32-.79 1.03-2.57.695-2.994z"></path></svg></span>AWS S3</div>
+    <div class="hero-chip"><span class="chip-icon" style="background:var(--c13)"><img src="https://cdn.simpleicons.org/bluesky/FFFFFF" alt="Bluesky logo"/></span>Bluesky</div><div class="hero-chip"><span class="chip-icon" style="background:var(--c14)"><img src="https://cdn.simpleicons.org/bitly/FFFFFF" alt="Bitly logo"/></span>URL Shortener</div><div class="hero-chip"><span class="chip-icon" style="background:var(--c15)"><img src="https://cdn.simpleicons.org/apachekafka/FFFFFF" alt="Apache Kafka logo"/></span>Kafka</div>
+  </div>
+</section>
+
+<!-- ═══════════ CS1: WHATSAPP ═══════════ -->
+<section class="cs" id="cs1" style="--acc-color:#25d366;--acc:rgba(37,211,102,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 01</div>
+  <div class="cs-title">How WhatsApp Works</div>
+  <div class="cs-lead">2 billion users, 100 billion messages/day, 50 engineers. WhatsApp is one of the most efficient distributed systems ever built — achieved with Erlang (backend) and deliberate simplicity.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">2B+ Users</span><span class="stat-pill">100B msgs/day</span><span class="stat-pill">99.999% uptime</span><span class="stat-pill">~50 engineers</span><span class="stat-pill">WebSocket connections</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#25d366">Core Architecture</div>
+    <h3>Connection Layer</h3>
+    <ul>
+      <li>Each user holds a persistent WebSocket/XMPP connection to a gateway server</li>
+      <li>Connection servers are stateful — they know which users are connected</li>
+      <li>A DHT (Distributed Hash Table) maps UserID → ConnectionServer</li>
+      <li>Message delivery: Sender → Sender's Gateway → DHT lookup → Recipient's Gateway → Recipient</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#25d366">Storage Strategy</div>
+    <h3>Message Store & Delivery</h3>
+    <ul>
+      <li>Messages stored in Mnesia (Erlang DB) on gateway servers temporarily</li>
+      <li>On delivery ACK received, message deleted — WhatsApp stores as little as possible</li>
+      <li>Media goes to separate blob store (similar to S3), not through message pipeline</li>
+      <li>End-to-end encryption: Signal Protocol — server never sees plaintext</li>
+      <li>Offline queue: messages held until device reconnects</li>
+    </ul>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 860 260" width="100%" xmlns="http://www.w3.org/2000/svg" style="min-width:500px">
+      <defs><marker id="a1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="rgba(37,211,102,0.7)"/></marker></defs>
+      <!-- Phone A -->
+      <rect x="10" y="100" width="80" height="60" rx="8" fill="rgba(37,211,102,0.08)" stroke="rgba(37,211,102,0.35)" stroke-width="1.5"/>
+      <text x="50" y="126" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#25d366" font-weight="700">Alice</text>
+      <text x="50" y="143" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">📱 Client</text>
+      <!-- Arrow to GW1 -->
+      <line x1="90" y1="130" x2="170" y2="130" stroke="rgba(37,211,102,0.5)" stroke-width="1.5" marker-end="url(#a1)" stroke-dasharray="4,3"/>
+      <text x="130" y="122" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">WS/XMPP</text>
+      <!-- GW1 -->
+      <rect x="170" y="80" width="110" height="100" rx="10" fill="rgba(37,211,102,0.05)" stroke="rgba(37,211,102,0.3)" stroke-width="1.5"/>
+      <text x="225" y="118" text-anchor="middle" font-family="Rajdhani" font-size="13" fill="#25d366" font-weight="700">Gateway</text>
+      <text x="225" y="134" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Server #1</text>
+      <text x="225" y="150" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Erlang/OTP</text>
+      <text x="225" y="165" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#25d366">Alice connected</text>
+      <!-- Arrow to Router -->
+      <line x1="280" y1="130" x2="360" y2="130" stroke="rgba(37,211,102,0.5)" stroke-width="1.5" marker-end="url(#a1)"/>
+      <!-- Router/DHT -->
+      <rect x="360" y="90" width="140" height="80" rx="10" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+      <text x="430" y="122" text-anchor="middle" font-family="Rajdhani" font-size="13" fill="#e5c07b" font-weight="700">Message Router</text>
+      <text x="430" y="140" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">DHT lookup</text>
+      <text x="430" y="157" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">UserID→GW mapping</text>
+      <!-- Arrow to GW2 -->
+      <line x1="500" y1="130" x2="580" y2="130" stroke="rgba(37,211,102,0.5)" stroke-width="1.5" marker-end="url(#a1)"/>
+      <!-- GW2 -->
+      <rect x="580" y="80" width="110" height="100" rx="10" fill="rgba(37,211,102,0.05)" stroke="rgba(37,211,102,0.3)" stroke-width="1.5"/>
+      <text x="635" y="118" text-anchor="middle" font-family="Rajdhani" font-size="13" fill="#25d366" font-weight="700">Gateway</text>
+      <text x="635" y="134" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Server #N</text>
+      <text x="635" y="150" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Erlang/OTP</text>
+      <text x="635" y="165" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#25d366">Bob connected</text>
+      <!-- Arrow to Phone B -->
+      <line x1="690" y1="130" x2="770" y2="130" stroke="rgba(37,211,102,0.5)" stroke-width="1.5" marker-end="url(#a1)" stroke-dasharray="4,3"/>
+      <!-- Phone B -->
+      <rect x="770" y="100" width="80" height="60" rx="8" fill="rgba(37,211,102,0.08)" stroke="rgba(37,211,102,0.35)" stroke-width="1.5"/>
+      <text x="810" y="126" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#25d366" font-weight="700">Bob</text>
+      <text x="810" y="143" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">📱 Client</text>
+      <!-- Media Store -->
+      <rect x="360" y="195" width="140" height="50" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <text x="430" y="218" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#888" font-weight="600">Media Store (S3-like)</text>
+      <text x="430" y="234" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Photos · Videos · Audio</text>
+      <line x1="430" y1="170" x2="430" y2="195" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-dasharray="3,3"/>
+      <!-- E2E label -->
+      <text x="430" y="40" text-anchor="middle" font-family="Rajdhani" font-size="11" fill="#555" font-weight="600">🔒 End-to-End Encrypted (Signal Protocol) — Server sees only encrypted bytes</text>
+    </svg>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">WhatsApp.Gateway/Hubs/ChatHub.cs — .NET SignalR Gateway</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="cm">// WebSocket connection gateway — each user maintains one persistent connection</span>
+<span class="kw">public class</span> <span class="cls">ChatHub</span> : <span class="iface">Hub</span>
+{
+    <span class="kw">private readonly</span> <span class="cls">IConnectionRegistry</span> _registry;
+    <span class="kw">private readonly</span> <span class="cls">IMessageRouter</span> _router;
+    <span class="kw">private readonly</span> <span class="cls">IOfflineQueueService</span> _offlineQueue;
+
+    <span class="kw">public override async</span> <span class="cls">Task</span> <span class="fn">OnConnectedAsync</span>()
+    {
+        <span class="kw">var</span> userId = Context.User.FindFirst(<span class="str">"sub"</span>)!.Value;
+        <span class="cm">// Register: userId → this SignalR connectionId → this server instance</span>
+        <span class="kw">await</span> _registry.<span class="fn">RegisterAsync</span>(userId, Context.ConnectionId);
+
+        <span class="cm">// Drain offline queue — messages received while user was away</span>
+        <span class="kw">var</span> pending = <span class="kw">await</span> _offlineQueue.<span class="fn">DequeueAllAsync</span>(userId);
+        <span class="kw">foreach</span> (<span class="kw">var</span> msg <span class="kw">in</span> pending)
+            <span class="kw">await</span> Clients.Caller.<span class="fn">SendAsync</span>(<span class="str">"msg"</span>, msg);
+
+        <span class="kw">await base</span>.<span class="fn">OnConnectedAsync</span>();
+    }
+
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">SendMessage</span>(<span class="cls">SendMessageDto</span> dto)
+    {
+        <span class="kw">var</span> senderId = Context.User.FindFirst(<span class="str">"sub"</span>)!.Value;
+        <span class="cm">// Message is ALREADY E2E encrypted by the client — we just route it</span>
+        <span class="kw">var</span> envelope = <span class="kw">new</span> <span class="cls">MessageEnvelope</span>(
+            Id: <span class="cls">Guid</span>.NewGuid(), From: senderId,
+            To: dto.RecipientId, EncryptedPayload: dto.EncryptedBytes,
+            SentAt: <span class="cls">DateTimeOffset</span>.UtcNow);
+
+        <span class="kw">await</span> _router.<span class="fn">RouteAsync</span>(envelope);     <span class="cm">// DHT lookup + deliver</span>
+        <span class="kw">await</span> Clients.Caller.<span class="fn">SendAsync</span>(<span class="str">"ack"</span>, envelope.Id);  <span class="cm">// 1 tick ✓</span>
+    }
+
+    <span class="kw">public override async</span> <span class="cls">Task</span> <span class="fn">OnDisconnectedAsync</span>(<span class="cls">Exception</span>? ex)
+    {
+        <span class="kw">var</span> userId = Context.User.FindFirst(<span class="str">"sub"</span>)!.Value;
+        <span class="kw">await</span> _registry.<span class="fn">UnregisterAsync</span>(userId);
+        <span class="kw">await base</span>.<span class="fn">OnDisconnectedAsync</span>(ex);
+    }
+}
+
+<span class="cm">// Message router — finds recipient's gateway server via Redis Pub/Sub</span>
+<span class="kw">public class</span> <span class="cls">MessageRouter</span>(<span class="cls">IConnectionRegistry</span> registry, <span class="cls">IHubContext</span>&lt;<span class="cls">ChatHub</span>&gt; hub,
+    <span class="cls">ISubscriber</span> redis, <span class="cls">IOfflineQueueService</span> offlineQueue) : <span class="iface">IMessageRouter</span>
+{
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">RouteAsync</span>(<span class="cls">MessageEnvelope</span> msg)
+    {
+        <span class="kw">var</span> connId = <span class="kw">await</span> registry.<span class="fn">FindConnectionAsync</span>(msg.To);
+        <span class="kw">if</span> (connId <span class="kw">is not null</span>)
+        {
+            <span class="kw">await</span> hub.Clients.<span class="fn">Client</span>(connId).<span class="fn">SendAsync</span>(<span class="str">"msg"</span>, msg);
+            <span class="cm">// If recipient on DIFFERENT server, publish to Redis channel</span>
+        }
+        <span class="kw">else</span>
+        {
+            <span class="cm">// User offline — queue message for later delivery</span>
+            <span class="kw">await</span> offlineQueue.<span class="fn">EnqueueAsync</span>(msg.To, msg);
+        }
+    }
+}
+
+<span class="cm">// Connection Registry backed by Redis (shared across all gateway instances)</span>
+<span class="kw">public class</span> <span class="cls">RedisConnectionRegistry</span>(<span class="cls">IDatabase</span> db) : <span class="iface">IConnectionRegistry</span>
+{
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">RegisterAsync</span>(<span class="cls">string</span> userId, <span class="cls">string</span> connId)
+        =&gt; <span class="kw">await</span> db.<span class="fn">StringSetAsync</span>(<span class="str">$"conn:{userId}"</span>, connId, <span class="cls">TimeSpan</span>.<span class="fn">FromHours</span>(<span class="num">24</span>));
+
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">string</span>?&gt; <span class="fn">FindConnectionAsync</span>(<span class="cls">string</span> userId)
+        =&gt; <span class="kw">await</span> db.<span class="fn">StringGetAsync</span>(<span class="str">$"conn:{userId}"</span>);
+}</pre>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#25d366">Scaling Secrets</div>
+    <h3>Why 50 Engineers Could Handle 2B Users</h3>
+    <ul>
+      <li>Erlang: lightweight green threads — one process per connection, millions on one machine</li>
+      <li>Minimal state: messages deleted after delivery, no history stored on servers</li>
+      <li>FreeBSD + tuned TCP stack: 2M concurrent connections per server</li>
+      <li>No analytics, no ads system, no recommendation engine — just messaging</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#25d366">.NET Equivalent Stack</div>
+    <h3>Building WhatsApp in .NET</h3>
+    <ul>
+      <li>ASP.NET Core SignalR — persistent WebSocket connections</li>
+      <li>Redis backplane — fan-out messages across gateway instances</li>
+      <li>Redis Streams — offline message queue per user</li>
+      <li>libsignal-protocol-dotnet — Signal E2E encryption</li>
+      <li>Azure Service Bus — reliable delivery guarantees</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS2: SPOTIFY ═══════════ -->
+<section class="cs" id="cs2" style="--acc-color:#1db954;--acc:rgba(29,185,84,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 02</div>
+  <div class="cs-title">How Spotify Works</div>
+  <div class="cs-lead">600M users, 100M songs, music streaming at 320kbps globally with sub-second playback start. Spotify's architecture is famous for its autonomous "Squad" teams and microservices-first design.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">600M Users</span><span class="stat-pill">100M+ Tracks</span><span class="stat-pill">5M Podcast Episodes</span><span class="stat-pill">CDN-first delivery</span><span class="stat-pill">Cassandra + GCS</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#1db954">Audio Delivery Pipeline</div>
+    <h3>How Audio Reaches You</h3>
+    <ul>
+      <li><strong>Ingestion:</strong> Artist uploads WAV → transcoded to 4 quality levels (96/160/320kbps OGG Vorbis + AAC)</li>
+      <li><strong>Storage:</strong> Audio files in Google Cloud Storage (petabytes); metadata in PostgreSQL + Cassandra</li>
+      <li><strong>CDN:</strong> Akamai/Cloudflare caches popular tracks at edge (90%+ cache hit rate)</li>
+      <li><strong>Client pre-fetch:</strong> App pre-buffers next 30s while you listen to current track</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#1db954">Recommendation Engine</div>
+    <h3>Discover Weekly & Taste Profiles</h3>
+    <ul>
+      <li>Collaborative filtering: users with similar taste → recommend their songs to each other</li>
+      <li>NLP on lyrics + podcast transcripts: topic modelling for content-based filtering</li>
+      <li>Audio analysis: BPM, key, energy, danceability extracted via ML models</li>
+      <li>Taste profiles updated weekly via Spark batch jobs on listening history</li>
+      <li>Kafka streams: real-time play events → live taste profile updates</li>
+    </ul>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 860 240" width="100%" xmlns="http://www.w3.org/2000/svg" style="min-width:500px">
+      <defs><marker id="a2" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="rgba(29,185,84,0.7)"/></marker></defs>
+      <!-- Upload -->
+      <rect x="10" y="90" width="100" height="60" rx="8" fill="rgba(29,185,84,0.08)" stroke="rgba(29,185,84,0.3)" stroke-width="1.5"/>
+      <text x="60" y="116" text-anchor="middle" font-family="Rajdhani" font-size="11" fill="#1db954" font-weight="700">Artist Upload</text>
+      <text x="60" y="132" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">WAV/FLAC</text>
+      <line x1="110" y1="120" x2="165" y2="120" stroke="rgba(29,185,84,0.4)" stroke-width="1.5" marker-end="url(#a2)"/>
+      <!-- Transcoder -->
+      <rect x="165" y="80" width="120" height="80" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+      <text x="225" y="108" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#e5c07b" font-weight="700">Transcoder</text>
+      <text x="225" y="124" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">96/160/320kbps</text>
+      <text x="225" y="140" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">OGG + AAC</text>
+      <line x1="285" y1="120" x2="340" y2="120" stroke="rgba(29,185,84,0.4)" stroke-width="1.5" marker-end="url(#a2)"/>
+      <!-- GCS -->
+      <rect x="340" y="85" width="110" height="70" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+      <text x="395" y="112" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#888" font-weight="700">GCS / S3</text>
+      <text x="395" y="128" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Audio blob store</text>
+      <text x="395" y="144" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Petabytes</text>
+      <line x1="450" y1="120" x2="510" y2="120" stroke="rgba(29,185,84,0.4)" stroke-width="1.5" marker-end="url(#a2)"/>
+      <!-- CDN -->
+      <rect x="510" y="80" width="110" height="80" rx="8" fill="rgba(29,185,84,0.06)" stroke="rgba(29,185,84,0.25)" stroke-width="1.5"/>
+      <text x="565" y="108" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#1db954" font-weight="700">CDN Edge</text>
+      <text x="565" y="124" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Akamai / CF</text>
+      <text x="565" y="140" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1db954">90%+ cache hit</text>
+      <line x1="620" y1="120" x2="680" y2="120" stroke="rgba(29,185,84,0.4)" stroke-width="1.5" marker-end="url(#a2)"/>
+      <!-- Client -->
+      <rect x="680" y="90" width="100" height="60" rx="8" fill="rgba(29,185,84,0.08)" stroke="rgba(29,185,84,0.3)" stroke-width="1.5"/>
+      <text x="730" y="116" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#1db954" font-weight="700">Client</text>
+      <text x="730" y="132" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Pre-buffer 30s</text>
+      <!-- Metadata below -->
+      <rect x="340" y="180" width="220" height="45" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+      <text x="450" y="200" text-anchor="middle" font-family="Rajdhani" font-size="11" fill="#888" font-weight="600">Metadata: PostgreSQL + Cassandra</text>
+      <text x="450" y="216" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Song meta · User playlists · Play history · Recommendations</text>
+      <!-- Kafka -->
+      <rect x="165" y="180" width="140" height="45" rx="8" fill="rgba(0,0,0,0.3)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+      <text x="235" y="200" text-anchor="middle" font-family="Rajdhani" font-size="11" fill="#888" font-weight="600">Kafka Events</text>
+      <text x="235" y="216" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Play · Skip · Like · Search</text>
+    </svg>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">Spotify.Streaming/Services/AudioStreamingService.cs</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="cm">// Audio streaming service — generates pre-signed URLs and manages playback sessions</span>
+<span class="kw">public class</span> <span class="cls">AudioStreamingService</span>(<span class="cls">IBlobStorage</span> storage, <span class="cls">ITrackRepository</span> tracks,
+    <span class="cls">IPublishEndpoint</span> bus, <span class="cls">IUserSessionService</span> sessions) : <span class="iface">IAudioStreamingService</span>
+{
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">StreamSessionDto</span>&gt; <span class="fn">StartStreamAsync</span>(<span class="cls">StartStreamRequest</span> req, <span class="cls">string</span> userId)
+    {
+        <span class="kw">var</span> track = <span class="kw">await</span> tracks.<span class="fn">GetByIdAsync</span>(req.TrackId)
+            ?? <span class="kw">throw new</span> <span class="cls">TrackNotFoundException</span>(req.TrackId);
+
+        <span class="cm">// Choose quality based on user plan + network quality hint</span>
+        <span class="kw">var</span> quality = <span class="fn">SelectQuality</span>(req.NetworkQuality, req.UserPlan);
+        <span class="kw">var</span> blobKey = <span class="str">$"tracks/{track.Id}/{quality}.ogg"</span>;
+
+        <span class="cm">// Generate pre-signed CDN URL valid for 1 hour</span>
+        <span class="kw">var</span> streamUrl = <span class="kw">await</span> storage.<span class="fn">GeneratePresignedUrlAsync</span>(blobKey, <span class="cls">TimeSpan</span>.<span class="fn">FromHours</span>(<span class="num">1</span>));
+
+        <span class="kw">var</span> session = <span class="kw">new</span> <span class="cls">PlaybackSession</span>(userId, track.Id, streamUrl, quality, <span class="cls">DateTimeOffset</span>.UtcNow);
+        <span class="kw">await</span> sessions.<span class="fn">SaveAsync</span>(session);
+
+        <span class="cm">// Publish play event to Kafka → feeds recommendation engine + royalty calculation</span>
+        <span class="kw">await</span> bus.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="cls">TrackPlayStartedEvent</span>(userId, track.Id, track.ArtistId, quality, <span class="cls">DateTimeOffset</span>.UtcNow));
+
+        <span class="kw">return new</span> <span class="cls">StreamSessionDto</span>(session.Id, streamUrl, track.DurationMs, <span class="fn">GetNextTrackHint</span>(userId, req));
+    }
+
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">ReportPlaybackEventAsync</span>(<span class="cls">PlaybackEventDto</span> evt, <span class="cls">string</span> userId)
+    {
+        <span class="cm">// Client reports: position every 30s, skip, seek, like</span>
+        <span class="kw">await</span> bus.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="cls">PlaybackProgressEvent</span>(userId, evt.TrackId, evt.PositionMs,
+            evt.EventType, evt.NetworkKbps, <span class="cls">DateTimeOffset</span>.UtcNow));
+
+        <span class="kw">if</span> (evt.EventType == <span class="cls">PlaybackEventType</span>.Skip &amp;&amp; evt.PositionMs &lt; <span class="num">30000</span>)
+            <span class="cm">// Early skip = negative signal for recommendation model</span>
+            <span class="kw">await</span> bus.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="cls">EarlySkipEvent</span>(userId, evt.TrackId, evt.PositionMs));
+    }
+
+    <span class="kw">private static</span> <span class="cls">AudioQuality</span> <span class="fn">SelectQuality</span>(<span class="cls">NetworkQuality</span> net, <span class="cls">UserPlan</span> plan) =&gt; (net, plan) <span class="kw">switch</span>
+    {
+        (_, <span class="cls">UserPlan</span>.Free) =&gt; <span class="cls">AudioQuality</span>.Low,        <span class="cm">// 96kbps</span>
+        (<span class="cls">NetworkQuality</span>.Poor, _) =&gt; <span class="cls">AudioQuality</span>.Medium, <span class="cm">// 160kbps</span>
+        _ =&gt; <span class="cls">AudioQuality</span>.High                           <span class="cm">// 320kbps</span>
+    };
+}
+
+<span class="cm">// Track transcoding pipeline — Azure Media Services equivalent</span>
+<span class="kw">public class</span> <span class="cls">TrackTranscodingConsumer</span>(<span class="cls">ITranscoder</span> transcoder, <span class="cls">IBlobStorage</span> storage) : <span class="iface">IConsumer</span>&lt;<span class="cls">TrackUploadedEvent</span>&gt;
+{
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">Consume</span>(<span class="cls">ConsumeContext</span>&lt;<span class="cls">TrackUploadedEvent</span>&gt; ctx)
+    {
+        <span class="kw">var</span> rawBlob = <span class="kw">await</span> storage.<span class="fn">DownloadAsync</span>(ctx.Message.RawBlobKey);
+        <span class="kw">var</span> qualities = <span class="kw">new</span>[] { <span class="num">96</span>, <span class="num">160</span>, <span class="num">320</span> };  <span class="cm">// kbps</span>
+
+        <span class="kw">await</span> <span class="cls">Task</span>.<span class="fn">WhenAll</span>(qualities.<span class="fn">Select</span>(<span class="kw">async</span> q =&gt; {
+            <span class="kw">var</span> transcoded = <span class="kw">await</span> transcoder.<span class="fn">TranscodeToOggAsync</span>(rawBlob, q);
+            <span class="kw">await</span> storage.<span class="fn">UploadAsync</span>(<span class="str">$"tracks/{ctx.Message.TrackId}/{q}.ogg"</span>, transcoded);
+        }));
+
+        <span class="kw">await</span> ctx.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="cls">TrackReadyEvent</span>(ctx.Message.TrackId));
+    }
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS3: TWITTER TIMELINE ═══════════ -->
+<section class="cs" id="cs3" style="--acc-color:#1da1f2;--acc:rgba(29,161,242,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 03</div>
+  <div class="cs-title">How Twitter Timeline Works</div>
+  <div class="cs-lead">The Twitter timeline is one of the most complex feed systems ever built. The core challenge: delivering personalized timelines to 400M users where 50M of them follow over 1000 accounts each — in under 100ms.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">400M Users</span><span class="stat-pill">500M Tweets/day</span><span class="stat-pill">&lt;100ms timeline load</span><span class="stat-pill">Push + Pull hybrid</span><span class="stat-pill">Redis timeline cache</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#1da1f2">Fan-Out Problem</div>
+    <h3>Push vs Pull — The Core Trade-off</h3>
+    <ul>
+      <li><strong>Pull model:</strong> On timeline load, fetch latest tweets from all followed accounts and merge. Simple but slow for high follower counts (Lady Gaga follows 1000 people → 1000 DB queries)</li>
+      <li><strong>Push model (fan-out on write):</strong> When a tweet is posted, push it to all followers' cached timelines immediately. Fast reads but explosion for celebrities (100M followers × 1 tweet = 100M writes)</li>
+      <li><strong>Twitter's hybrid:</strong> Push for normal users (&lt;1M followers), pull for celebrities, merge at read time</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#1da1f2">Storage Architecture</div>
+    <h3>What Goes Where</h3>
+    <ul>
+      <li>Tweet content: MySQL (sharded by tweet ID) + Manhattan (Twitter's distributed store)</li>
+      <li>Timeline cache: Redis sorted sets (score = tweet timestamp) — last 800 tweets per user</li>
+      <li>Social graph: Flock (Twitter's in-house social graph store, similar to Memcached)</li>
+      <li>Media: CDN-backed blob storage (photos/videos)</li>
+      <li>Search index: Earlybird (custom Lucene, real-time indexing within 5 seconds of post)</li>
+    </ul>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 860 290" width="100%" xmlns="http://www.w3.org/2000/svg" style="min-width:500px">
+      <defs><marker id="a3" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="rgba(29,161,242,0.7)"/></marker></defs>
+      <!-- Tweet posted -->
+      <rect x="10" y="120" width="100" height="50" rx="8" fill="rgba(29,161,242,0.1)" stroke="rgba(29,161,242,0.3)" stroke-width="1.5"/>
+      <text x="60" y="142" text-anchor="middle" font-family="Rajdhani" font-size="11" fill="#1da1f2" font-weight="700">Tweet Posted</text>
+      <text x="60" y="158" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">by @elonmusk</text>
+      <line x1="110" y1="145" x2="160" y2="145" stroke="rgba(29,161,242,0.5)" stroke-width="1.5" marker-end="url(#a3)"/>
+      <!-- Fan-out worker -->
+      <rect x="160" y="105" width="130" height="80" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+      <text x="225" y="135" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#e5c07b" font-weight="700">Fan-Out Worker</text>
+      <text x="225" y="151" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Check follower count</text>
+      <text x="225" y="167" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1da1f2">&lt;1M → push fans</text>
+      <!-- Push path -->
+      <line x1="290" y1="130" x2="370" y2="70" stroke="rgba(29,161,242,0.4)" stroke-width="1.5" marker-end="url(#a3)" stroke-dasharray="4,3"/>
+      <text x="330" y="85" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1da1f2">PUSH path</text>
+      <!-- Pull path -->
+      <line x1="290" y1="160" x2="370" y2="200" stroke="rgba(255,100,100,0.4)" stroke-width="1.5" marker-end="url(#a3)" stroke-dasharray="4,3"/>
+      <text x="335" y="210" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#e06c75">PULL path (celeb)</text>
+      <!-- Redis timelines -->
+      <rect x="370" y="40" width="160" height="60" rx="8" fill="rgba(29,161,242,0.06)" stroke="rgba(29,161,242,0.25)" stroke-width="1.5"/>
+      <text x="450" y="66" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#1da1f2" font-weight="700">Redis Timeline Cache</text>
+      <text x="450" y="82" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Sorted Set per user · 800 tweets max</text>
+      <!-- Tweet store -->
+      <rect x="370" y="170" width="160" height="55" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+      <text x="450" y="195" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#888" font-weight="700">Tweet Store (MySQL)</text>
+      <text x="450" y="211" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Sharded by tweetId</text>
+      <!-- Merge service -->
+      <rect x="575" y="100" width="140" height="90" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+      <text x="645" y="127" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#888" font-weight="700">Timeline Merge</text>
+      <text x="645" y="144" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Redis cache hits</text>
+      <text x="645" y="160" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">+ celeb pull results</text>
+      <text x="645" y="176" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#1da1f2">Ranked + deduped</text>
+      <line x1="530" y1="70" x2="575" y2="140" stroke="rgba(29,161,242,0.3)" stroke-width="1.5" marker-end="url(#a3)"/>
+      <line x1="530" y1="197" x2="575" y2="165" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" marker-end="url(#a3)"/>
+      <line x1="715" y1="145" x2="780" y2="145" stroke="rgba(29,161,242,0.5)" stroke-width="1.5" marker-end="url(#a3)"/>
+      <!-- User -->
+      <rect x="780" y="120" width="70" height="50" rx="8" fill="rgba(29,161,242,0.1)" stroke="rgba(29,161,242,0.3)" stroke-width="1.5"/>
+      <text x="815" y="142" text-anchor="middle" font-family="Rajdhani" font-size="11" fill="#1da1f2" font-weight="700">User</text>
+      <text x="815" y="158" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">&lt;100ms ✓</text>
+      <!-- Social graph -->
+      <rect x="160" y="220" width="130" height="45" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <text x="225" y="239" text-anchor="middle" font-family="Rajdhani" font-size="11" fill="#888" font-weight="600">Social Graph (Flock)</text>
+      <text x="225" y="255" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">who follows whom</text>
+    </svg>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">Twitter.Timeline/Services/TimelineService.cs — Hybrid Fan-Out</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="cm">// Hybrid push/pull timeline — the heart of Twitter's architecture</span>
+<span class="kw">public class</span> <span class="cls">TimelineService</span>(<span class="cls">ISocialGraph</span> graph, <span class="cls">IDatabase</span> redis,
+    <span class="cls">ITweetRepository</span> tweets, <span class="cls">IPublishEndpoint</span> bus)
+{
+    <span class="kw">private const int</span> CelebFollowerThreshold = <span class="num">1_000_000</span>;
+    <span class="kw">private const int</span> MaxTimelineSize = <span class="num">800</span>;
+
+    <span class="cm">// Called when user posts a tweet</span>
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">OnTweetCreatedAsync</span>(<span class="cls">Tweet</span> tweet)
+    {
+        <span class="kw">await</span> tweets.<span class="fn">SaveAsync</span>(tweet);  <span class="cm">// Persist to MySQL</span>
+
+        <span class="kw">var</span> followerCount = <span class="kw">await</span> graph.<span class="fn">GetFollowerCountAsync</span>(tweet.AuthorId);
+
+        <span class="kw">if</span> (followerCount &lt; CelebFollowerThreshold)
+            <span class="cm">// Normal user — fan-out to all follower timelines now (async)</span>
+            <span class="kw">await</span> bus.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="cls">FanOutTweetCommand</span>(tweet.Id, tweet.AuthorId));
+        <span class="cm">// Celebrities: no fan-out — their tweets are pulled at read time</span>
+    }
+
+    <span class="cm">// Fan-out worker — runs asynchronously for normal users</span>
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">FanOutTweetAsync</span>(<span class="cls">Guid</span> tweetId, <span class="cls">Guid</span> authorId)
+    {
+        <span class="kw">await foreach</span> (<span class="kw">var</span> followerBatch <span class="kw">in</span> graph.<span class="fn">GetFollowersBatchedAsync</span>(authorId, batchSize: <span class="num">1000</span>))
+        {
+            <span class="kw">var</span> batch = redis.CreateBatch();
+            <span class="kw">foreach</span> (<span class="kw">var</span> followerId <span class="kw">in</span> followerBatch)
+            {
+                <span class="kw">var</span> key = <span class="str">$"timeline:{followerId}"</span>;
+                <span class="kw">var</span> score = <span class="cls">DateTimeOffset</span>.UtcNow.ToUnixTimeMilliseconds();
+                <span class="cm">// Add tweet to follower's sorted set (score = timestamp for ordering)</span>
+                _ = batch.<span class="fn">SortedSetAddAsync</span>(key, tweetId.ToString(), score);
+                <span class="cm">// Keep only last 800 tweets — trim the tail</span>
+                _ = batch.<span class="fn">SortedSetRemoveRangeByRankAsync</span>(key, <span class="num">0</span>, -(MaxTimelineSize + <span class="num">1</span>));
+            }
+            <span class="kw">await</span> batch.<span class="fn">ExecuteAsync</span>();
+        }
+    }
+
+    <span class="cm">// Fetch user's timeline — hybrid pull + cache</span>
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">IReadOnlyList</span>&lt;<span class="cls">Tweet</span>&gt;&gt; <span class="fn">GetTimelineAsync</span>(<span class="cls">Guid</span> userId, <span class="cls">int</span> pageSize = <span class="num">20</span>)
+    {
+        <span class="cm">// 1. Get tweet IDs from Redis cache (pushed tweets from normal users)</span>
+        <span class="kw">var</span> cachedIds = <span class="kw">await</span> redis.<span class="fn">SortedSetRangeByRankAsync</span>(<span class="str">$"timeline:{userId}"</span>,
+            start: <span class="num">0</span>, stop: pageSize - <span class="num">1</span>, order: <span class="cls">Order</span>.Descending);
+
+        <span class="cm">// 2. Find celebrity accounts this user follows — fetch their recent tweets directly</span>
+        <span class="kw">var</span> celebs = <span class="kw">await</span> graph.<span class="fn">GetCelebFolloweesAsync</span>(userId, CelebFollowerThreshold);
+        <span class="kw">var</span> celebTweets = <span class="kw">await</span> <span class="cls">Task</span>.<span class="fn">WhenAll</span>(celebs.<span class="fn">Select</span>(c =&gt;
+            tweets.<span class="fn">GetRecentByAuthorAsync</span>(c, pageSize)));
+
+        <span class="cm">// 3. Merge, deduplicate, rank by time, return top N</span>
+        <span class="kw">var</span> allTweets = <span class="kw">await</span> tweets.<span class="fn">GetByIdsAsync</span>(cachedIds.<span class="fn">Select</span>(id =&gt; <span class="cls">Guid</span>.<span class="fn">Parse</span>(id!)));
+        <span class="kw">return</span> allTweets
+            .<span class="fn">Concat</span>(celebTweets.<span class="fn">SelectMany</span>(t =&gt; t))
+            .<span class="fn">DistinctBy</span>(t =&gt; t.Id)
+            .<span class="fn">OrderByDescending</span>(t =&gt; t.CreatedAt)
+            .<span class="fn">Take</span>(pageSize)
+            .<span class="fn">ToList</span>();
+    }
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS4: STOCK EXCHANGE ═══════════ -->
+<section class="cs" id="cs4" style="--acc-color:#4ade80;--acc:rgba(0,48,135,0.1);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 04</div>
+  <div class="cs-title">How a Stock Exchange Works</div>
+  <div class="cs-lead">NASDAQ processes 30 billion orders per day at sub-microsecond latency. The matching engine — the heart of an exchange — must match buy and sell orders with absolute fairness, deterministic ordering, and zero data loss.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">30B+ Orders/day</span><span class="stat-pill">&lt;1µs match latency</span><span class="stat-pill">Zero data loss</span><span class="stat-pill">LMAX Disruptor pattern</span><span class="stat-pill">Co-location servers</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#4ade80">Order Book</div>
+    <h3>The Matching Engine Core</h3>
+    <ul>
+      <li>Order book: sorted map of Buy orders (descending price) + Sell orders (ascending price)</li>
+      <li>Matching: when highest bid ≥ lowest ask → execute trade at ask price</li>
+      <li>Price-Time Priority (FIFO): same price → earliest order wins</li>
+      <li>All orders processed single-threaded (no locks) — LMAX Disruptor ring buffer pattern</li>
+      <li>Event sourcing: every order event persisted before execution — crash-safe replay</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#4ade80">Market Data Feed</div>
+    <h3>Publishing to the World</h3>
+    <ul>
+      <li>Level 1 data: best bid, best ask, last price — published via UDP multicast to all participants</li>
+      <li>Level 2 data: full order book depth — premium feed for market makers</li>
+      <li>FIX protocol: industry standard for order entry (Financial Information eXchange)</li>
+      <li>Co-location: HFT firms rent rack space in exchange data centers — microseconds of advantage</li>
+    </ul>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 860 250" width="100%" xmlns="http://www.w3.org/2000/svg" style="min-width:500px">
+      <defs><marker id="a4" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="rgba(74,222,128,0.7)"/></marker></defs>
+      <!-- Order Gateway -->
+      <rect x="10" y="100" width="110" height="55" rx="8" fill="rgba(74,222,128,0.06)" stroke="rgba(74,222,128,0.25)" stroke-width="1.5"/>
+      <text x="65" y="124" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#4ade80" font-weight="700">Order Gateway</text>
+      <text x="65" y="141" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">FIX / REST input</text>
+      <line x1="120" y1="127" x2="175" y2="127" stroke="rgba(74,222,128,0.4)" stroke-width="1.5" marker-end="url(#a4)"/>
+      <!-- Sequencer -->
+      <rect x="175" y="90" width="120" height="75" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+      <text x="235" y="118" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#e5c07b" font-weight="700">Sequencer</text>
+      <text x="235" y="134" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Assigns sequence #</text>
+      <text x="235" y="150" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#4ade80">Ring Buffer (LMAX)</text>
+      <line x1="295" y1="127" x2="350" y2="127" stroke="rgba(74,222,128,0.4)" stroke-width="1.5" marker-end="url(#a4)"/>
+      <!-- Matching Engine -->
+      <rect x="350" y="75" width="160" height="105" rx="10" fill="rgba(74,222,128,0.06)" stroke="rgba(74,222,128,0.3)" stroke-width="2"/>
+      <text x="430" y="107" text-anchor="middle" font-family="Rajdhani" font-size="14" fill="#4ade80" font-weight="700">Matching Engine</text>
+      <text x="430" y="124" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Single-threaded</text>
+      <text x="430" y="140" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Order Book (sorted)</text>
+      <text x="430" y="156" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#4ade80">Price-Time Priority</text>
+      <line x1="510" y1="110" x2="570" y2="80" stroke="rgba(74,222,128,0.4)" stroke-width="1.5" marker-end="url(#a4)"/>
+      <line x1="510" y1="140" x2="570" y2="175" stroke="rgba(74,222,128,0.4)" stroke-width="1.5" marker-end="url(#a4)"/>
+      <!-- Market data -->
+      <rect x="570" y="50" width="130" height="55" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+      <text x="635" y="74" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#888" font-weight="700">Market Data Feed</text>
+      <text x="635" y="90" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">UDP Multicast · L1/L2</text>
+      <!-- Event Store -->
+      <rect x="570" y="155" width="130" height="55" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+      <text x="635" y="179" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#888" font-weight="700">Event Store</text>
+      <text x="635" y="196" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#4ade80">Append-only · Replay</text>
+      <!-- Clearing -->
+      <rect x="730" y="100" width="120" height="55" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+      <text x="790" y="124" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#888" font-weight="700">Clearing House</text>
+      <text x="790" y="141" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Settlement T+2</text>
+      <line x1="700" y1="77" x2="730" y2="120" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="700" y1="182" x2="730" y2="140" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-dasharray="3,3"/>
+    </svg>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">Exchange.Core/Engine/OrderBook.cs — LMAX Disruptor Pattern in .NET</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="cm">// Order book — the heart of the matching engine. All single-threaded, no locks.</span>
+<span class="kw">public class</span> <span class="cls">OrderBook</span>
+{
+    <span class="cm">// Bids: descending price (highest bid first)</span>
+    <span class="kw">private readonly</span> <span class="cls">SortedDictionary</span>&lt;<span class="cls">decimal</span>, <span class="cls">Queue</span>&lt;<span class="cls">Order</span>&gt;&gt; _bids =
+        <span class="kw">new</span>(<span class="cls">Comparer</span>&lt;<span class="cls">decimal</span>&gt;.<span class="fn">Create</span>((a, b) =&gt; b.<span class="fn">CompareTo</span>(a)));
+    <span class="cm">// Asks: ascending price (lowest ask first)</span>
+    <span class="kw">private readonly</span> <span class="cls">SortedDictionary</span>&lt;<span class="cls">decimal</span>, <span class="cls">Queue</span>&lt;<span class="cls">Order</span>&gt;&gt; _asks = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="cls">IReadOnlyList</span>&lt;<span class="cls">TradeExecution</span>&gt; <span class="fn">AddOrder</span>(<span class="cls">Order</span> incoming)
+    {
+        <span class="kw">var</span> executions = <span class="kw">new</span> <span class="cls">List</span>&lt;<span class="cls">TradeExecution</span>&gt;();
+        <span class="kw">if</span> (incoming.Side == <span class="cls">OrderSide</span>.Buy)
+            <span class="fn">MatchBuyOrder</span>(incoming, executions);
+        <span class="kw">else</span>
+            <span class="fn">MatchSellOrder</span>(incoming, executions);
+        <span class="kw">return</span> executions;
+    }
+
+    <span class="kw">private void</span> <span class="fn">MatchBuyOrder</span>(<span class="cls">Order</span> buy, <span class="cls">List</span>&lt;<span class="cls">TradeExecution</span>&gt; execs)
+    {
+        <span class="kw">while</span> (buy.RemainingQty &gt; <span class="num">0</span> &amp;&amp; _asks.Count &gt; <span class="num">0</span>)
+        {
+            <span class="kw">var</span> (bestAskPrice, askQueue) = _asks.<span class="fn">First</span>();
+            <span class="kw">if</span> (buy.Price &lt; bestAskPrice) <span class="kw">break</span>; <span class="cm">// No match — bid &lt; lowest ask</span>
+
+            <span class="kw">var</span> sell = askQueue.<span class="fn">Peek</span>();
+            <span class="kw">var</span> qty = <span class="cls">Math</span>.<span class="fn">Min</span>(buy.RemainingQty, sell.RemainingQty);
+            execs.<span class="fn">Add</span>(<span class="kw">new</span> <span class="cls">TradeExecution</span>(buy.Id, sell.Id, bestAskPrice, qty, <span class="cls">DateTime</span>.UtcNow));
+
+            buy.RemainingQty -= qty;
+            sell.RemainingQty -= qty;
+            <span class="kw">if</span> (sell.RemainingQty == <span class="num">0</span>) { askQueue.<span class="fn">Dequeue</span>(); <span class="kw">if</span> (!askQueue.Any()) _asks.<span class="fn">Remove</span>(bestAskPrice); }
+        }
+        <span class="kw">if</span> (buy.RemainingQty &gt; <span class="num">0</span>) <span class="fn">AddToBook</span>(_bids, buy); <span class="cm">// Rest goes to order book</span>
+    }
+
+    <span class="kw">private void</span> <span class="fn">AddToBook</span>(<span class="cls">SortedDictionary</span>&lt;<span class="cls">decimal</span>, <span class="cls">Queue</span>&lt;<span class="cls">Order</span>&gt;&gt; book, <span class="cls">Order</span> order)
+    {
+        <span class="kw">if</span> (!book.<span class="fn">TryGetValue</span>(order.Price, <span class="kw">out var</span> q)) { q = <span class="kw">new</span>(); book[order.Price] = q; }
+        q.<span class="fn">Enqueue</span>(order);
+    }
+}
+
+<span class="cm">// LMAX Disruptor-style sequencer — lock-free ring buffer for order intake</span>
+<span class="kw">public class</span> <span class="cls">OrderSequencer</span>
+{
+    <span class="kw">private readonly</span> <span class="cls">Channel</span>&lt;<span class="cls">OrderCommand</span>&gt; _channel =
+        <span class="cls">Channel</span>.<span class="fn">CreateBounded</span>&lt;<span class="cls">OrderCommand</span>&gt;(<span class="kw">new</span> <span class="cls">BoundedChannelOptions</span>(<span class="num">1_000_000</span>)
+        { SingleReader = <span class="kw">true</span>, SingleWriter = <span class="kw">false</span>, FullMode = <span class="cls">BoundedChannelFullMode</span>.Wait });
+    <span class="kw">private long</span> _sequence = <span class="num">0</span>;
+
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">SubmitAsync</span>(<span class="cls">OrderCommand</span> cmd)
+    {
+        cmd.SequenceNumber = <span class="cls">Interlocked</span>.<span class="fn">Increment</span>(<span class="kw">ref</span> _sequence);
+        <span class="kw">await</span> _channel.Writer.<span class="fn">WriteAsync</span>(cmd);
+    }
+
+    <span class="cm">// Single reader — matching engine processes one order at a time, no locks needed</span>
+    <span class="kw">public async</span> <span class="cls">IAsyncEnumerable</span>&lt;<span class="cls">OrderCommand</span>&gt; <span class="fn">ReadAllAsync</span>(<span class="cls">CancellationToken</span> ct)
+    {
+        <span class="kw">await foreach</span> (<span class="kw">var</span> cmd <span class="kw">in</span> _channel.Reader.<span class="fn">ReadAllAsync</span>(ct))
+            <span class="kw">yield return</span> cmd;
+    }
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS5: REDDIT ═══════════ -->
+<section class="cs" id="cs5" style="--acc-color:#ff4500;--acc:rgba(255,69,0,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 05</div>
+  <div class="cs-title">How Reddit Works</div>
+  <div class="cs-lead">1.5 billion posts, 50 billion votes, 100K+ active communities. Reddit's feed ranking algorithm (Wilson Score + Hot) and vote processing system handles millions of concurrent interactions with eventual consistency at its core.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">1.5B+ Posts</span><span class="stat-pill">50B+ Votes</span><span class="stat-pill">100K+ Subreddits</span><span class="stat-pill">Hot ranking algorithm</span><span class="stat-pill">PostgreSQL + Cassandra</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#ff4500">Vote System</div>
+    <h3>Counting Votes at Scale</h3>
+    <ul>
+      <li>Votes are written to Kafka — eventual consistency (scores lag by seconds)</li>
+      <li>Vote counting in Cassandra counters (atomic increment/decrement)</li>
+      <li>Anti-vote-manipulation: rate limiting, account age checks, IP detection</li>
+      <li>Score fuzzing: Reddit deliberately obscures exact vote counts by ±10% to prevent brigading detection</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#ff4500">Hot Ranking Algorithm</div>
+    <h3>Wilson Score + Time Decay</h3>
+    <ul>
+      <li>Hot score = log10(ups - downs) + (seconds since epoch - 1134028003) / 45000</li>
+      <li>Time decay: older posts naturally fall — even viral posts sink after hours</li>
+      <li>Wilson Score Lower Bound: for "Top" sort — statistically valid ranking with confidence intervals</li>
+      <li>Scores pre-computed on vote events, cached in Redis sorted sets per subreddit</li>
+    </ul>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">Reddit.Ranking/Services/HotScoreService.cs — Reddit's Hot Algorithm</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="kw">public static class</span> <span class="cls">RedditRanking</span>
+{
+    <span class="kw">private static readonly</span> <span class="cls">DateTimeOffset</span> Epoch = <span class="kw">new</span>(<span class="num">2005</span>, <span class="num">12</span>, <span class="num">8</span>, <span class="num">7</span>, <span class="num">46</span>, <span class="num">43</span>, <span class="cls">TimeSpan</span>.Zero);
+
+    <span class="cm">// Reddit's actual hot ranking formula</span>
+    <span class="kw">public static double</span> <span class="fn">HotScore</span>(<span class="cls">int</span> ups, <span class="cls">int</span> downs, <span class="cls">DateTimeOffset</span> created)
+    {
+        <span class="kw">var</span> score = ups - downs;
+        <span class="kw">var</span> order = <span class="cls">Math</span>.<span class="fn">Log10</span>(<span class="cls">Math</span>.<span class="fn">Max</span>(<span class="cls">Math</span>.<span class="fn">Abs</span>(score), <span class="num">1</span>));
+        <span class="kw">var</span> sign = score &gt; <span class="num">0</span> ? <span class="num">1</span> : score &lt; <span class="num">0</span> ? -<span class="num">1</span> : <span class="num">0</span>;
+        <span class="kw">var</span> seconds = (created - Epoch).TotalSeconds;
+        <span class="kw">return</span> <span class="cls">Math</span>.<span class="fn">Round</span>(sign * order + seconds / <span class="num">45000</span>, <span class="num">7</span>);
+    }
+
+    <span class="cm">// Wilson Score for "Best" sort — statistically valid with small sample sizes</span>
+    <span class="kw">public static double</span> <span class="fn">WilsonScore</span>(<span class="cls">int</span> ups, <span class="cls">int</span> total, <span class="kw">double</span> z = <span class="num">1.96</span>)
+    {
+        <span class="kw">if</span> (total == <span class="num">0</span>) <span class="kw">return</span> <span class="num">0</span>;
+        <span class="kw">var</span> p = (<span class="kw">double</span>)ups / total;
+        <span class="kw">var</span> n = total;
+        <span class="kw">return</span> (p + z * z / (<span class="num">2</span> * n) - z * <span class="cls">Math</span>.<span class="fn">Sqrt</span>((p * (<span class="num">1</span> - p) + z * z / (<span class="num">4</span> * n)) / n))
+               / (<span class="num">1</span> + z * z / n);
+    }
+}
+
+<span class="cm">// Vote processing — Kafka consumer updates scores asynchronously</span>
+<span class="kw">public class</span> <span class="cls">VoteProcessingConsumer</span>(<span class="cls">IDatabase</span> redis, <span class="cls">IVoteRepository</span> repo) : <span class="iface">IConsumer</span>&lt;<span class="cls">VoteCastEvent</span>&gt;
+{
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">Consume</span>(<span class="cls">ConsumeContext</span>&lt;<span class="cls">VoteCastEvent</span>&gt; ctx)
+    {
+        <span class="kw">var</span> vote = ctx.Message;
+        <span class="kw">await</span> repo.<span class="fn">RecordVoteAsync</span>(vote.UserId, vote.PostId, vote.Direction);
+        <span class="kw">var</span> (ups, downs) = <span class="kw">await</span> repo.<span class="fn">GetVoteCountsAsync</span>(vote.PostId);
+
+        <span class="kw">var</span> post = <span class="kw">await</span> repo.<span class="fn">GetPostAsync</span>(vote.PostId);
+        <span class="kw">var</span> hotScore = <span class="cls">RedditRanking</span>.<span class="fn">HotScore</span>(ups, downs, post.CreatedAt);
+
+        <span class="cm">// Update subreddit's hot feed sorted set in Redis</span>
+        <span class="kw">await</span> redis.<span class="fn">SortedSetAddAsync</span>(<span class="str">$"hot:{post.SubredditId}"</span>, vote.PostId.ToString(), hotScore);
+    }
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS6: PAYMENT SYSTEM ═══════════ -->
+<section class="cs" id="cs6" style="--acc-color:#5865f2;--acc:rgba(88,101,242,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 06</div>
+  <div class="cs-title">How a Payment System Works</div>
+  <div class="cs-lead">Stripe processes $1 trillion+ annually. Every payment involves 3–12 hops across banks, card networks, and processors — in under 3 seconds, with exactly-once execution guaranteed. One failed transaction = real money lost.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">$1T+ Annually (Stripe)</span><span class="stat-pill">250ms avg latency</span><span class="stat-pill">99.999% uptime SLA</span><span class="stat-pill">PCI DSS Level 1</span><span class="stat-pill">Idempotency-Key critical</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#5865f2">Payment Flow</div>
+    <h3>Merchant → Bank → You</h3>
+    <ul>
+      <li><strong>Authorization:</strong> Merchant's payment gateway → Acquirer bank → Card network (Visa/MC) → Issuing bank. Issuer checks: funds, fraud, card valid. Response: Authorized/Declined. ~1-2 seconds.</li>
+      <li><strong>Capture:</strong> Merchant requests settlement (usually same day)</li>
+      <li><strong>Settlement:</strong> Nets between banks overnight via ACH/SWIFT</li>
+      <li><strong>Refunds:</strong> Reverse settlement — issuing bank credits customer</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#5865f2">Critical Safety Patterns</div>
+    <h3>Never Charge Twice</h3>
+    <ul>
+      <li><strong>Idempotency Keys:</strong> Every payment request has a unique key — duplicate requests return the same result without re-processing (Stripe's #1 safety feature)</li>
+      <li><strong>Outbox pattern:</strong> Payment event and DB write in one transaction — never lose a payment confirmation</li>
+      <li><strong>Saga with compensation:</strong> Multi-step payments (auth → reserve → capture) with explicit rollback steps</li>
+      <li><strong>State machine:</strong> Payment can only move forward through defined states — no invalid transitions</li>
+    </ul>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 860 220" width="100%" xmlns="http://www.w3.org/2000/svg" style="min-width:500px">
+      <defs><marker id="a6" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="rgba(88,101,242,0.7)"/></marker></defs>
+      <rect x="10" y="85" width="90" height="50" rx="8" fill="rgba(88,101,242,0.1)" stroke="rgba(88,101,242,0.3)" stroke-width="1.5"/>
+      <text x="55" y="108" text-anchor="middle" font-family="Rajdhani" font-size="11" fill="#5865f2" font-weight="700">Merchant</text>
+      <text x="55" y="124" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">+Idempotency-Key</text>
+      <line x1="100" y1="110" x2="150" y2="110" stroke="rgba(88,101,242,0.5)" stroke-width="1.5" marker-end="url(#a6)"/>
+      <rect x="150" y="80" width="110" height="60" rx="8" fill="rgba(88,101,242,0.06)" stroke="rgba(88,101,242,0.25)" stroke-width="1.5"/>
+      <text x="205" y="104" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#5865f2" font-weight="700">Payment</text>
+      <text x="205" y="120" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#5865f2" font-weight="700">Processor</text>
+      <text x="205" y="134" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#5865f2">Idempotency check</text>
+      <line x1="260" y1="110" x2="310" y2="110" stroke="rgba(88,101,242,0.5)" stroke-width="1.5" marker-end="url(#a6)"/>
+      <rect x="310" y="80" width="100" height="60" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+      <text x="360" y="104" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#888" font-weight="700">Acquirer</text>
+      <text x="360" y="120" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#888" font-weight="700">Bank</text>
+      <text x="360" y="135" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Merchant's bank</text>
+      <line x1="410" y1="110" x2="460" y2="110" stroke="rgba(88,101,242,0.5)" stroke-width="1.5" marker-end="url(#a6)"/>
+      <rect x="460" y="80" width="110" height="60" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+      <text x="515" y="104" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#888" font-weight="700">Card Network</text>
+      <text x="515" y="121" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Visa / Mastercard</text>
+      <text x="515" y="135" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Routes to issuer</text>
+      <line x1="570" y1="110" x2="620" y2="110" stroke="rgba(88,101,242,0.5)" stroke-width="1.5" marker-end="url(#a6)"/>
+      <rect x="620" y="80" width="110" height="60" rx="8" fill="rgba(88,101,242,0.06)" stroke="rgba(88,101,242,0.25)" stroke-width="1.5"/>
+      <text x="675" y="104" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#5865f2" font-weight="700">Issuing Bank</text>
+      <text x="675" y="120" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Customer's bank</text>
+      <text x="675" y="135" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#5865f2">✓ Auth / ✗ Decline</text>
+      <line x1="730" y1="110" x2="800" y2="110" stroke="rgba(88,101,242,0.4)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a6)"/>
+      <text x="815" y="114" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#5865f2">↩ Response</text>
+      <!-- States row -->
+      <text x="430" y="180" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">States: PENDING → AUTHORIZED → CAPTURED → SETTLED → (REFUNDED)</text>
+      <text x="430" y="200" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#5865f2">Each transition persisted atomically — no invalid state skips allowed</text>
+    </svg>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">Payments.Core/Domain/Payment.cs — State Machine + Saga</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="cm">// Payment domain aggregate with state machine</span>
+<span class="kw">public sealed class</span> <span class="cls">Payment</span> : <span class="iface">AggregateRoot</span>&lt;<span class="cls">PaymentId</span>&gt;
+{
+    <span class="kw">public</span> <span class="cls">PaymentStatus</span> Status { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="cls">PaymentStatus</span>.Pending;
+    <span class="kw">public</span> <span class="cls">Money</span> Amount { <span class="kw">get</span>; <span class="kw">private set</span>; }
+    <span class="kw">public</span> <span class="cls">string</span>? AuthorizationCode { <span class="kw">get</span>; <span class="kw">private set</span>; }
+    <span class="kw">public</span> <span class="cls">string</span> IdempotencyKey { <span class="kw">get</span>; <span class="kw">private set</span>; }
+
+    <span class="kw">public void</span> <span class="fn">Authorize</span>(<span class="cls">string</span> authCode)
+    {
+        <span class="fn">EnsureStatus</span>(<span class="cls">PaymentStatus</span>.Pending);
+        AuthorizationCode = authCode;
+        Status = <span class="cls">PaymentStatus</span>.Authorized;
+        <span class="fn">RaiseDomainEvent</span>(<span class="kw">new</span> <span class="cls">PaymentAuthorizedEvent</span>(Id, Amount, authCode));
+    }
+
+    <span class="kw">public void</span> <span class="fn">Capture</span>()
+    {
+        <span class="fn">EnsureStatus</span>(<span class="cls">PaymentStatus</span>.Authorized);
+        Status = <span class="cls">PaymentStatus</span>.Captured;
+        <span class="fn">RaiseDomainEvent</span>(<span class="kw">new</span> <span class="cls">PaymentCapturedEvent</span>(Id, Amount));
+    }
+
+    <span class="kw">public void</span> <span class="fn">Fail</span>(<span class="cls">string</span> reason)
+    {
+        <span class="kw">if</span> (Status <span class="kw">is</span> <span class="cls">PaymentStatus</span>.Captured <span class="kw">or</span> <span class="cls">PaymentStatus</span>.Settled)
+            <span class="kw">throw new</span> <span class="cls">DomainException</span>(<span class="str">"Cannot fail an already settled payment"</span>);
+        Status = <span class="cls">PaymentStatus</span>.Failed;
+        <span class="fn">RaiseDomainEvent</span>(<span class="kw">new</span> <span class="cls">PaymentFailedEvent</span>(Id, reason));
+    }
+
+    <span class="kw">private void</span> <span class="fn">EnsureStatus</span>(<span class="cls">PaymentStatus</span> expected)
+    {
+        <span class="kw">if</span> (Status != expected)
+            <span class="kw">throw new</span> <span class="cls">InvalidPaymentStateException</span>(Id, expected, Status);
+    }
+}
+
+<span class="cm">// Idempotent payment command handler</span>
+<span class="kw">public class</span> <span class="cls">InitiatePaymentHandler</span>(<span class="cls">IPaymentRepository</span> repo, <span class="cls">IIdempotencyService</span> idempotency,
+    <span class="cls">IAcquirerGateway</span> acquirer) : <span class="iface">IRequestHandler</span>&lt;<span class="cls">InitiatePaymentCommand</span>, <span class="cls">PaymentResult</span>&gt;
+{
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">PaymentResult</span>&gt; <span class="fn">Handle</span>(<span class="cls">InitiatePaymentCommand</span> cmd, <span class="cls">CancellationToken</span> ct)
+    {
+        <span class="cm">// Check idempotency key — return cached result if duplicate request</span>
+        <span class="kw">var</span> cached = <span class="kw">await</span> idempotency.<span class="fn">GetResultAsync</span>&lt;<span class="cls">PaymentResult</span>&gt;(cmd.IdempotencyKey);
+        <span class="kw">if</span> (cached <span class="kw">is not null</span>) <span class="kw">return</span> cached;
+
+        <span class="kw">var</span> payment = <span class="cls">Payment</span>.<span class="fn">Create</span>(cmd.Amount, cmd.CardToken, cmd.IdempotencyKey);
+        <span class="kw">await</span> repo.<span class="fn">AddAsync</span>(payment, ct);
+
+        <span class="kw">var</span> authResult = <span class="kw">await</span> acquirer.<span class="fn">AuthorizeAsync</span>(payment.Amount, cmd.CardToken, ct);
+        <span class="kw">if</span> (authResult.IsApproved)
+            payment.<span class="fn">Authorize</span>(authResult.AuthorizationCode);
+        <span class="kw">else</span>
+            payment.<span class="fn">Fail</span>(authResult.DeclineReason);
+
+        <span class="kw">await</span> repo.<span class="fn">UpdateAsync</span>(payment, ct);  <span class="cm">// Outbox pattern saves domain events atomically</span>
+        <span class="kw">var</span> result = <span class="cls">PaymentResult</span>.<span class="fn">From</span>(payment);
+        <span class="kw">await</span> idempotency.<span class="fn">StoreResultAsync</span>(cmd.IdempotencyKey, result);
+        <span class="kw">return</span> result;
+    }
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS7: UBER ETA ═══════════ -->
+<section class="cs" id="cs7" style="--acc-color:#ff6b00;--acc:rgba(255,107,0,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 07</div>
+  <div class="cs-title">How Uber Computes ETA</div>
+  <div class="cs-lead">Uber computes billions of ETA predictions daily, powering ride matching, surge pricing, and driver dispatch. Accurate ETAs require real-time traffic, historical patterns, weather, events, and ML-adjusted routing — all in under 500ms.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">Billions ETAs/day</span><span class="stat-pill">&lt;500ms per estimate</span><span class="stat-pill">Real-time traffic data</span><span class="stat-pill">H3 geospatial grid</span><span class="stat-pill">ML-corrected routing</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#ff6b00">ETA Pipeline</div>
+    <h3>From Coordinates to Prediction</h3>
+    <ul>
+      <li><strong>Map routing:</strong> OSRM/Valhalla — Dijkstra on a road graph with weighted edges (speed limits, turn costs)</li>
+      <li><strong>Real-time traffic:</strong> GPS pings from active Uber drivers update road segment speeds every 30 seconds</li>
+      <li><strong>ML correction:</strong> Historical ETA accuracy data trains a gradient boost model that corrects routing engine estimates</li>
+      <li><strong>H3 geospatial grid:</strong> Uber's hexagonal grid divides Earth into cells — demand/supply aggregated per cell</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#ff6b00">Driver Matching</div>
+    <h3>Finding the Nearest Driver</h3>
+    <ul>
+      <li>All active drivers stream GPS location every 4 seconds via WebSocket</li>
+      <li>Driver locations stored in Redis Geo (geospatial sorted set by S2 cell)</li>
+      <li>On ride request: GEORADIUS query → candidates ranked by ETA (not raw distance)</li>
+      <li>Dispatch: send offer to top 3 drivers simultaneously, first accept wins</li>
+      <li>Surge pricing: real-time demand/supply ratio per H3 cell</li>
+    </ul>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">Uber.Dispatch/Services/ETAService.cs + DriverLocationService.cs</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="cm">// Real-time driver location tracking — GPS ping every 4 seconds</span>
+<span class="kw">public class</span> <span class="cls">DriverLocationHub</span>(<span class="cls">IDatabase</span> redis, <span class="cls">IPublishEndpoint</span> bus) : <span class="iface">Hub</span>
+{
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">UpdateLocation</span>(<span class="kw">double</span> lat, <span class="kw">double</span> lon, <span class="kw">double</span> headingDeg, <span class="kw">double</span> speedMph)
+    {
+        <span class="kw">var</span> driverId = Context.User.FindFirst(<span class="str">"sub"</span>)!.Value;
+        <span class="cm">// Store in Redis GEO — O(log N) geospatial sorted set</span>
+        <span class="kw">await</span> redis.<span class="fn">GeoAddAsync</span>(<span class="str">"drivers:active"</span>, lon, lat, driverId);
+        <span class="cm">// Store full location state</span>
+        <span class="kw">await</span> redis.<span class="fn">HashSetAsync</span>(<span class="str">$"driver:{driverId}:state"</span>, [
+            <span class="kw">new</span>(<span class="str">"lat"</span>, lat), <span class="kw">new</span>(<span class="str">"lon"</span>, lon),
+            <span class="kw">new</span>(<span class="str">"heading"</span>, headingDeg), <span class="kw">new</span>(<span class="str">"speed"</span>, speedMph),
+            <span class="kw">new</span>(<span class="str">"ts"</span>, <span class="cls">DateTimeOffset</span>.UtcNow.ToUnixTimeSeconds())
+        ]);
+        <span class="kw">await</span> redis.<span class="fn">KeyExpireAsync</span>(<span class="str">$"driver:{driverId}:state"</span>, <span class="cls">TimeSpan</span>.<span class="fn">FromMinutes</span>(<span class="num">2</span>));
+        <span class="cm">// Feed into traffic map update</span>
+        <span class="kw">await</span> bus.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="cls">DriverLocationEvent</span>(driverId, lat, lon, speedMph));
+    }
+}
+
+<span class="cm">// ETA computation — routing + ML correction</span>
+<span class="kw">public class</span> <span class="cls">ETAService</span>(<span class="cls">IRoutingEngine</span> routing, <span class="cls">IDatabase</span> redis, <span class="cls">IMLETAModel</span> model)
+{
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">ETAResult</span>&gt; <span class="fn">ComputeETAAsync</span>(<span class="cls">GeoPoint</span> origin, <span class="cls">GeoPoint</span> destination)
+    {
+        <span class="cm">// 1. Get routing engine estimate (OSRM-like shortest path with traffic weights)</span>
+        <span class="kw">var</span> route = <span class="kw">await</span> routing.<span class="fn">ComputeRouteAsync</span>(origin, destination);
+
+        <span class="cm">// 2. Apply real-time speed data from Redis (from driver GPS pings)</span>
+        <span class="kw">var</span> liveSegmentSpeeds = <span class="kw">await</span> <span class="fn">GetLiveSpeedsAsync</span>(route.Segments, redis);
+        <span class="kw">var</span> adjustedSeconds = route.Segments.<span class="fn">Sum</span>(s =>
+            s.LengthMeters / (liveSegmentSpeeds.<span class="fn">GetValueOrDefault</span>(s.Id, s.SpeedLimit) * <span class="num">0.447</span>));
+
+        <span class="cm">// 3. ML model correction — trained on historical ETA accuracy</span>
+        <span class="kw">var</span> features = <span class="kw">new</span> <span class="cls">ETAFeatures</span>(adjustedSeconds, origin, destination,
+            <span class="cls">DateTime</span>.UtcNow.DayOfWeek, <span class="cls">DateTime</span>.UtcNow.Hour,
+            route.DistanceMeters, route.Turns);
+        <span class="kw">var</span> correctedSeconds = model.<span class="fn">Predict</span>(features);
+
+        <span class="kw">return new</span> <span class="cls">ETAResult</span>(
+            EstimatedSeconds: (<span class="cls">int</span>)correctedSeconds,
+            ConfidenceInterval: model.<span class="fn">GetConfidenceInterval</span>(features),
+            RoutePolyline: route.Polyline);
+    }
+
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">IReadOnlyList</span>&lt;<span class="cls">NearbyDriver</span>&gt;&gt; <span class="fn">FindNearestDriversAsync</span>(<span class="cls">GeoPoint</span> pickup, <span class="cls">int</span> count = <span class="num">5</span>)
+    {
+        <span class="cm">// Redis GEO search — find drivers within 5km radius</span>
+        <span class="kw">var</span> nearby = <span class="kw">await</span> redis.<span class="fn">GeoSearchAsync</span>(<span class="str">"drivers:active"</span>,
+            <span class="kw">new</span> <span class="cls">GeoSearchBox</span>(pickup.Lon, pickup.Lat, <span class="num">5</span>, <span class="cls">GeoUnit</span>.Kilometers));
+
+        <span class="cm">// Rank by ETA (not raw distance) — a nearby driver in traffic may be slower</span>
+        <span class="kw">var</span> tasks = nearby.<span class="fn">Take</span>(<span class="num">20</span>).<span class="fn">Select</span>(<span class="kw">async</span> d =&gt; {
+            <span class="kw">var</span> driverPos = <span class="kw">await</span> <span class="fn">GetDriverPositionAsync</span>(d.Member, redis);
+            <span class="kw">var</span> eta = <span class="kw">await</span> <span class="fn">ComputeETAAsync</span>(driverPos, pickup);
+            <span class="kw">return new</span> <span class="cls">NearbyDriver</span>(d.Member!, driverPos, eta.EstimatedSeconds);
+        });
+        <span class="kw">return</span> (<span class="kw">await</span> <span class="cls">Task</span>.<span class="fn">WhenAll</span>(tasks)).<span class="fn">OrderBy</span>(d =&gt; d.ETASeconds).<span class="fn">Take</span>(count).<span class="fn">ToList</span>();
+    }
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS8: GOOGLE SEARCH ═══════════ -->
+<section class="cs" id="cs8" style="--acc-color:#4285f4;--acc:rgba(66,133,244,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 08</div>
+  <div class="cs-title">How Google Search Works</div>
+  <div class="cs-lead">Google indexes 100+ billion web pages, answers 8.5 billion queries/day, and returns results in under 200ms. The three pillars: web crawling, indexing, and PageRank — each a distributed system challenge of its own.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">100B+ Pages Indexed</span><span class="stat-pill">8.5B Queries/day</span><span class="stat-pill">&lt;200ms response</span><span class="stat-pill">PageRank algorithm</span><span class="stat-pill">Bigtable + Colossus</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#4285f4">Web Crawler (Googlebot)</div>
+    <h3>Discovering the Web</h3>
+    <ul>
+      <li>Starts from seed URLs, follows links breadth-first</li>
+      <li>Respects robots.txt, crawl-delay directives</li>
+      <li>Politeness: max 1 req/sec per domain, distributed across thousands of crawlers</li>
+      <li>URL frontier: priority queue ranked by PageRank (important pages crawled more frequently)</li>
+      <li>Canonicalization: deduplication via SimHash of page content (near-duplicate detection)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#4285f4">Inverted Index</div>
+    <h3>From Page to Searchable Token</h3>
+    <ul>
+      <li>Forward index: DocID → list of words in the document</li>
+      <li>Inverted index: word → list of DocIDs containing that word (with position + TF-IDF score)</li>
+      <li>Sharded across thousands of machines: each shard owns a slice of the index</li>
+      <li>Query: search term → scatter to all index shards → gather + rank → return top 10</li>
+      <li>PageRank: iterative algorithm — page importance = sum of linking page importances / # outbound links</li>
+    </ul>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">Search.Core/Indexing/InvertedIndex.cs + PageRank.cs</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="cm">// Inverted index — the core data structure of every search engine</span>
+<span class="kw">public class</span> <span class="cls">InvertedIndex</span>
+{
+    <span class="cm">// term → (docId, tf-idf score, positions)</span>
+    <span class="kw">private readonly</span> <span class="cls">Dictionary</span>&lt;<span class="cls">string</span>, <span class="cls">List</span>&lt;<span class="cls">PostingEntry</span>&gt;&gt; _index = <span class="kw">new</span>();
+
+    <span class="kw">public void</span> <span class="fn">IndexDocument</span>(<span class="cls">Document</span> doc)
+    {
+        <span class="kw">var</span> terms = <span class="fn">Tokenize</span>(doc.Content);
+        <span class="kw">var</span> termFreqs = terms.<span class="fn">GroupBy</span>(t =&gt; t).<span class="fn">ToDictionary</span>(g =&gt; g.Key, g =&gt; g.Count());
+        <span class="kw">var</span> maxFreq = termFreqs.Values.Max();
+
+        <span class="kw">foreach</span> (<span class="kw">var</span> (term, freq) <span class="kw">in</span> termFreqs)
+        {
+            <span class="kw">var</span> tf = (<span class="kw">double</span>)freq / maxFreq;  <span class="cm">// Term frequency (normalized)</span>
+            <span class="kw">if</span> (!_index.<span class="fn">TryGetValue</span>(term, <span class="kw">out var</span> postings)) { postings = <span class="kw">new</span>(); _index[term] = postings; }
+            postings.<span class="fn">Add</span>(<span class="kw">new</span> <span class="cls">PostingEntry</span>(doc.Id, tf, doc.PageRank, <span class="fn">FindPositions</span>(terms, term)));
+        }
+    }
+
+    <span class="kw">public</span> <span class="cls">IEnumerable</span>&lt;<span class="cls">SearchResult</span>&gt; <span class="fn">Search</span>(<span class="cls">string</span> query, <span class="cls">int</span> totalDocs)
+    {
+        <span class="kw">var</span> queryTerms = <span class="fn">Tokenize</span>(query);
+        <span class="cm">// Intersect postings for AND semantics, then rank by TF-IDF × PageRank</span>
+        <span class="kw">return</span> queryTerms
+            .<span class="fn">Select</span>(t =&gt; _index.<span class="fn">GetValueOrDefault</span>(t) ?? [])
+            .<span class="fn">Aggregate</span>((a, b) =&gt; a.<span class="fn">IntersectBy</span>(b.<span class="fn">Select</span>(e =&gt; e.DocId), e =&gt; e.DocId).<span class="fn">ToList</span>())
+            .<span class="fn">Select</span>(e =&gt; <span class="kw">new</span> <span class="cls">SearchResult</span>(e.DocId, <span class="fn">BM25Score</span>(e, queryTerms, totalDocs) * e.PageRank))
+            .<span class="fn">OrderByDescending</span>(r =&gt; r.Score);
+    }
+
+    <span class="kw">private static double</span> <span class="fn">BM25Score</span>(<span class="cls">PostingEntry</span> e, <span class="cls">List</span>&lt;<span class="cls">string</span>&gt; query, <span class="cls">int</span> N,
+        <span class="kw">double</span> k1 = <span class="num">1.5</span>, <span class="kw">double</span> b = <span class="num">0.75</span>)
+    {
+        <span class="cm">// BM25 — the industry standard relevance ranking function</span>
+        <span class="kw">var</span> idf = <span class="cls">Math</span>.<span class="fn">Log</span>((<span class="cls">double</span>)N / <span class="num">1</span>);
+        <span class="kw">return</span> idf * (e.TF * (k1 + <span class="num">1</span>)) / (e.TF + k1);
+    }
+}
+
+<span class="cm">// PageRank — iterative convergence algorithm</span>
+<span class="kw">public class</span> <span class="cls">PageRankCalculator</span>
+{
+    <span class="kw">public</span> <span class="cls">Dictionary</span>&lt;<span class="cls">string</span>, <span class="kw">double</span>&gt; <span class="fn">Compute</span>(<span class="cls">Dictionary</span>&lt;<span class="cls">string</span>, <span class="cls">List</span>&lt;<span class="cls">string</span>&gt;&gt; links,
+        <span class="cls">int</span> iterations = <span class="num">100</span>, <span class="kw">double</span> d = <span class="num">0.85</span>)
+    {
+        <span class="kw">var</span> pages = links.Keys.<span class="fn">ToHashSet</span>();
+        <span class="kw">var</span> N = pages.Count;
+        <span class="kw">var</span> rank = pages.<span class="fn">ToDictionary</span>(p =&gt; p, _ =&gt; <span class="num">1.0</span> / N);
+
+        <span class="kw">for</span> (<span class="cls">int</span> i = <span class="num">0</span>; i &lt; iterations; i++)
+        {
+            <span class="kw">var</span> newRank = pages.<span class="fn">ToDictionary</span>(p =&gt; p, _ =&gt; (<span class="num">1</span> - d) / N);
+            <span class="kw">foreach</span> (<span class="kw">var</span> (page, outLinks) <span class="kw">in</span> links)
+                <span class="kw">foreach</span> (<span class="kw">var</span> target <span class="kw">in</span> outLinks)
+                    newRank[target] += d * rank[page] / outLinks.Count;  <span class="cm">// Distribute rank equally</span>
+            rank = newRank;
+        }
+        <span class="kw">return</span> rank;
+    }
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS9: SLACK ═══════════ -->
+<section class="cs" id="cs9" style="--acc-color:#e01e5a;--acc:rgba(224,30,90,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 09</div>
+  <div class="cs-title">How Slack Works</div>
+  <div class="cs-lead">Slack serves 38M daily active users across 750,000 organizations with real-time messaging, file sharing, and search. The core engineering challenge: reliable message delivery with offline support across a massive multi-tenant architecture.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">38M DAU</span><span class="stat-pill">750K+ Orgs</span><span class="stat-pill">10B+ Messages/day</span><span class="stat-pill">WebSocket + Flannel</span><span class="stat-pill">Vitess MySQL sharding</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#e01e5a">Real-Time Delivery</div>
+    <h3>Flannel — Slack's Channel Architecture</h3>
+    <ul>
+      <li>Flannel: Slack's edge cache layer — maintains a fan-out cache per channel</li>
+      <li>Each workspace has a dedicated "channel server" that holds WebSocket connections for that org</li>
+      <li>Message sent → channel server fans out to all members connected to that server</li>
+      <li>Members on different servers: cross-server delivery via internal pub/sub (Consul + Kafka)</li>
+      <li>Presence (online/away/offline): heartbeat every 30 seconds, TTL-based Redis presence tracking</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#e01e5a">Storage & Search</div>
+    <h3>Multi-Tenant Data Architecture</h3>
+    <ul>
+      <li>Vitess: MySQL sharding proxy — workspace data sharded by workspace_id</li>
+      <li>Message storage: Slack stores ALL messages forever (Compliance Archive)</li>
+      <li>Search: Elasticsearch cluster per region — messages indexed within seconds</li>
+      <li>Files: stored in S3, metadata in MySQL, CDN-served via pre-signed URLs</li>
+      <li>Encryption: workspace-level keys stored in HSM for Enterprise Grid compliance</li>
+    </ul>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">Slack.Messaging/Hubs/WorkspaceHub.cs — Real-Time Channel Fanout</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="cm">// Workspace-scoped SignalR hub — Slack's channel architecture in .NET</span>
+<span class="kw">public class</span> <span class="cls">WorkspaceHub</span>(<span class="cls">IMessageRepository</span> messages, <span class="cls">IChannelMemberService</span> members,
+    <span class="cls">IPublishEndpoint</span> bus, <span class="cls">IDatabase</span> redis) : <span class="iface">Hub</span>
+{
+    <span class="kw">public override async</span> <span class="cls">Task</span> <span class="fn">OnConnectedAsync</span>()
+    {
+        <span class="kw">var</span> userId = <span class="fn">GetUserId</span>();
+        <span class="kw">var</span> workspaceId = <span class="fn">GetWorkspaceId</span>();
+
+        <span class="cm">// Join all channels this user is a member of (SignalR groups)</span>
+        <span class="kw">var</span> userChannels = <span class="kw">await</span> members.<span class="fn">GetUserChannelsAsync</span>(workspaceId, userId);
+        <span class="kw">await</span> <span class="cls">Task</span>.<span class="fn">WhenAll</span>(userChannels.<span class="fn">Select</span>(c =&gt; Groups.<span class="fn">AddToGroupAsync</span>(Context.ConnectionId, <span class="str">$"channel:{c}"</span>)));
+
+        <span class="cm">// Mark presence as online</span>
+        <span class="kw">await</span> redis.<span class="fn">StringSetAsync</span>(<span class="str">$"presence:{userId}"</span>, <span class="str">"online"</span>, <span class="cls">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="num">40</span>));
+
+        <span class="kw">await base</span>.<span class="fn">OnConnectedAsync</span>();
+    }
+
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">SendMessage</span>(<span class="cls">SendMessageCommand</span> cmd)
+    {
+        <span class="kw">var</span> userId = <span class="fn">GetUserId</span>();
+        <span class="kw">var</span> workspaceId = <span class="fn">GetWorkspaceId</span>();
+
+        <span class="cm">// Validate channel membership</span>
+        <span class="kw">if</span> (!<span class="kw">await</span> members.<span class="fn">IsMemberAsync</span>(workspaceId, cmd.ChannelId, userId))
+            <span class="kw">throw new</span> <span class="cls">HubException</span>(<span class="str">"Not a member of this channel"</span>);
+
+        <span class="kw">var</span> message = <span class="kw">new</span> <span class="cls">Message</span>(workspaceId, cmd.ChannelId, userId, cmd.Text,
+            cmd.ThreadTs, <span class="cls">DateTimeOffset</span>.UtcNow);
+        <span class="kw">await</span> messages.<span class="fn">SaveAsync</span>(message); <span class="cm">// Persisted first (outbox)</span>
+
+        <span class="kw">var</span> payload = <span class="cls">MessagePayload</span>.<span class="fn">From</span>(message);
+
+        <span class="cm">// Fan-out to all channel members on THIS server</span>
+        <span class="kw">await</span> Clients.<span class="fn">Group</span>(<span class="str">$"channel:{cmd.ChannelId}"</span>).<span class="fn">SendAsync</span>(<span class="str">"message"</span>, payload);
+
+        <span class="cm">// Publish to bus — other servers fan-out to their connected members</span>
+        <span class="kw">await</span> bus.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="cls">MessageCreatedEvent</span>(workspaceId, cmd.ChannelId, message.Id, payload));
+
+        <span class="cm">// Update unread counts for offline members (Redis)</span>
+        <span class="kw">await</span> bus.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="cls">UpdateUnreadCountCommand</span>(cmd.ChannelId, message.Id));
+    }
+
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">Heartbeat</span>()
+    {
+        <span class="cm">// Extend presence TTL — called every 30s by client</span>
+        <span class="kw">await</span> redis.<span class="fn">KeyExpireAsync</span>(<span class="str">$"presence:{<span class="fn">GetUserId</span>()}"</span>, <span class="cls">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="num">40</span>));
+    }
+
+    <span class="kw">private</span> <span class="cls">string</span> <span class="fn">GetUserId</span>() =&gt; Context.User!.<span class="fn">FindFirst</span>(<span class="str">"sub"</span>)!.Value;
+    <span class="kw">private</span> <span class="cls">string</span> <span class="fn">GetWorkspaceId</span>() =&gt; Context.User!.<span class="fn">FindFirst</span>(<span class="str">"workspace"</span>)!.Value;
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS10: CHATGPT ═══════════ -->
+<section class="cs" id="cs10" style="--acc-color:#10b981;--acc:rgba(16,185,129,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 10</div>
+  <div class="cs-title">How ChatGPT Works</div>
+  <div class="cs-lead">ChatGPT runs on GPT-4 — a 1.7 trillion parameter transformer model. 100M+ users, real-time streaming inference, conversation history management, and content moderation — all running on Azure's massive GPU clusters.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">100M+ Users</span><span class="stat-pill">1.7T Parameters (GPT-4)</span><span class="stat-pill">Streaming inference</span><span class="stat-pill">Azure GPU clusters</span><span class="stat-pill">RAG + Vector search</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#10b981">Transformer Architecture</div>
+    <h3>How Tokens Become Words</h3>
+    <ul>
+      <li><strong>Tokenization:</strong> Text → BPE tokens (roughly 4 chars/token). "Hello" = 1 token, "Helloween" = 3 tokens</li>
+      <li><strong>Embeddings:</strong> Each token → 768/4096-dim float vector representing semantic meaning</li>
+      <li><strong>Self-attention:</strong> Each token "attends" to all other tokens — context window up to 128K tokens</li>
+      <li><strong>Autoregressive generation:</strong> Generates one token at a time, each token conditions on all previous</li>
+      <li><strong>Temperature/sampling:</strong> Controls randomness — low temp = deterministic, high = creative</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#10b981">Production Inference System</div>
+    <h3>Serving Trillions of Tokens</h3>
+    <ul>
+      <li>Model parallelism: large models split across multiple GPUs (tensor parallelism)</li>
+      <li>KV Cache: attention key/value pairs cached per request — avoids re-computing previous tokens</li>
+      <li>Streaming: tokens sent via SSE as they're generated (Server-Sent Events)</li>
+      <li>Batching: multiple user requests batched together on same GPU for efficiency</li>
+      <li>Conversation history: stored in Redis, trimmed to fit context window (sliding window)</li>
+    </ul>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">AI.Chat/Services/ChatService.cs — Streaming LLM API with Semantic Kernel</span><span class="code-tag">C# / .NET 9 + Semantic Kernel</span></div>
+    <pre><span class="cm">// ChatGPT-like service using Semantic Kernel + OpenAI in .NET</span>
+<span class="kw">public class</span> <span class="cls">ChatService</span>(<span class="cls">Kernel</span> kernel, <span class="cls">IDatabase</span> redis, <span class="cls">IChatHistoryRepository</span> historyRepo,
+    <span class="cls">IContentModerator</span> moderator)
+{
+    <span class="kw">public async</span> <span class="cls">IAsyncEnumerable</span>&lt;<span class="cls">string</span>&gt; <span class="fn">StreamResponseAsync</span>(
+        <span class="cls">string</span> conversationId, <span class="cls">string</span> userMessage, [<span class="dec">EnumeratorCancellation</span>] <span class="cls">CancellationToken</span> ct)
+    {
+        <span class="cm">// 1. Moderate input — check for policy violations before sending to model</span>
+        <span class="kw">var</span> modResult = <span class="kw">await</span> moderator.<span class="fn">CheckAsync</span>(userMessage);
+        <span class="kw">if</span> (modResult.IsFlagged) { <span class="kw">yield return</span> <span class="str">"[Content policy violation]"</span>; <span class="kw">yield break</span>; }
+
+        <span class="cm">// 2. Load conversation history from Redis (sliding window to fit context)</span>
+        <span class="kw">var</span> history = <span class="kw">new</span> <span class="cls">ChatHistory</span>();
+        history.<span class="fn">AddSystemMessage</span>(<span class="str">"You are a helpful AI assistant."</span>);
+        <span class="kw">var</span> previousMessages = <span class="kw">await</span> historyRepo.<span class="fn">GetRecentAsync</span>(conversationId, maxTokens: <span class="num">6000</span>);
+        <span class="kw">foreach</span> (<span class="kw">var</span> msg <span class="kw">in</span> previousMessages) history.<span class="fn">AddMessage</span>(msg.Role, msg.Content);
+        history.<span class="fn">AddUserMessage</span>(userMessage);
+
+        <span class="cm">// 3. Stream from OpenAI — yield each chunk as it arrives</span>
+        <span class="kw">var</span> chatCompletion = kernel.<span class="fn">GetRequiredService</span>&lt;<span class="cls">IChatCompletionService</span>&gt;();
+        <span class="kw">var</span> fullResponse = <span class="kw">new</span> <span class="cls">StringBuilder</span>();
+
+        <span class="kw">await foreach</span> (<span class="kw">var</span> chunk <span class="kw">in</span> chatCompletion.<span class="fn">GetStreamingChatMessageContentsAsync</span>(history,
+            executionSettings: <span class="kw">new</span> <span class="cls">OpenAIPromptExecutionSettings</span> {
+                Temperature = <span class="num">0.7</span>, MaxTokens = <span class="num">2048</span>,
+                ToolCallBehavior = <span class="cls">ToolCallBehavior</span>.AutoInvokeKernelFunctions
+            }, kernel: kernel, cancellationToken: ct))
+        {
+            <span class="kw">if</span> (chunk.Content <span class="kw">is</span> { Length: &gt; <span class="num">0</span> })
+            {
+                fullResponse.<span class="fn">Append</span>(chunk.Content);
+                <span class="kw">yield return</span> chunk.Content;   <span class="cm">// Stream each token to client via SSE</span>
+            }
+        }
+
+        <span class="cm">// 4. Save complete exchange to history for next turn</span>
+        <span class="kw">await</span> historyRepo.<span class="fn">AppendAsync</span>(conversationId,
+            <span class="kw">new</span> <span class="cls">ChatMessage</span>(<span class="cls">AuthorRole</span>.User, userMessage),
+            <span class="kw">new</span> <span class="cls">ChatMessage</span>(<span class="cls">AuthorRole</span>.Assistant, fullResponse.ToString()));
+    }
+}
+
+<span class="cm">// RAG pipeline — retrieve relevant docs to augment the LLM's knowledge</span>
+<span class="kw">public class</span> <span class="cls">RAGChatPlugin</span>(<span class="cls">ISemanticTextMemory</span> memory) : <span class="iface">IKernelPlugin</span>
+{
+    [<span class="dec">KernelFunction</span>, <span class="dec">Description</span>(<span class="str">"Search knowledge base for relevant information"</span>)]
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">string</span>&gt; <span class="fn">SearchKnowledgeBase</span>(<span class="cls">string</span> query, <span class="cls">int</span> topK = <span class="num">5</span>)
+    {
+        <span class="kw">var</span> results = <span class="kw">await</span> memory.<span class="fn">SearchAsync</span>(<span class="str">"knowledge"</span>, query, limit: topK)
+            .<span class="fn">ToListAsync</span>();
+        <span class="kw">return</span> <span class="cls">string</span>.<span class="fn">Join</span>(<span class="str">"\n---\n"</span>, results.<span class="fn">Select</span>(r =&gt; r.Metadata.Text));
+    }
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS11: YOUTUBE ═══════════ -->
+<section class="cs" id="cs11" style="--acc-color:#ff0000;--acc:rgba(255,0,0,0.05);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 11</div>
+  <div class="cs-title">How YouTube Works</div>
+  <div class="cs-lead">YouTube serves 500 hours of video uploaded every minute to 2.7 billion users. The infrastructure challenges span video transcoding at petabyte scale, adaptive bitrate streaming, recommendation algorithms, and global CDN delivery.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">500hrs uploaded/min</span><span class="stat-pill">2.7B Users</span><span class="stat-pill">1B+ hours watched/day</span><span class="stat-pill">Adaptive Bitrate (ABR)</span><span class="stat-pill">Google Spanner + Vitess</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#ff0000">Video Upload Pipeline</div>
+    <h3>From Upload to Playable in Minutes</h3>
+    <ul>
+      <li>Raw upload → Google Cloud Storage (raw bucket)</li>
+      <li>Transcoding farm: 8-10 resolution variants (144p/240p/360p/480p/720p/1080p/1440p/4K)</li>
+      <li>Format: VP9 + AV1 (better compression than H.264) — saves ~30% bandwidth</li>
+      <li>Thumbnails: 3 auto-generated at 25/50/75% timestamps</li>
+      <li>Audio: separated, transcribed via Speech-to-Text for captions + search indexing</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#ff0000">Adaptive Bitrate Streaming (DASH)</div>
+    <h3>Smooth Playback on Any Network</h3>
+    <ul>
+      <li>DASH: video split into 2-second chunks at each resolution</li>
+      <li>Client measures available bandwidth and buffers; switches quality chunk-by-chunk</li>
+      <li>CDN: Google's own CDN (Edge Points of Presence) — 90%+ of traffic served from edge</li>
+      <li>Pre-caching: popular videos pushed to edge before users request them</li>
+      <li>First chunk served in &lt;2 seconds globally via anycast routing</li>
+    </ul>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">YouTube.Upload/Services/VideoProcessingService.cs</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="cm">// Video upload and transcoding pipeline</span>
+<span class="kw">public class</span> <span class="cls">VideoUploadService</span>(<span class="cls">IBlobStorage</span> storage, <span class="cls">IPublishEndpoint</span> bus,
+    <span class="cls">IVideoRepository</span> repo)
+{
+    <span class="kw">private static readonly</span> (<span class="cls">int</span> Height, <span class="cls">int</span> BitratekBps, <span class="cls">string</span> Label)[] Variants =
+    [
+        (<span class="num">360</span>, <span class="num">500</span>, <span class="str">"360p"</span>), (<span class="num">480</span>, <span class="num">1000</span>, <span class="str">"480p"</span>), (<span class="num">720</span>, <span class="num">2500</span>, <span class="str">"720p"</span>),
+        (<span class="num">1080</span>, <span class="num">5000</span>, <span class="str">"1080p"</span>), (<span class="num">1440</span>, <span class="num">8000</span>, <span class="str">"1440p"</span>), (<span class="num">2160</span>, <span class="num">20000</span>, <span class="str">"4K"</span>)
+    ];
+
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">VideoUploadResult</span>&gt; <span class="fn">InitiateUploadAsync</span>(<span class="cls">UploadRequest</span> req, <span class="cls">string</span> userId)
+    {
+        <span class="kw">var</span> video = <span class="cls">Video</span>.<span class="fn">Create</span>(userId, req.Title, req.Description);
+        <span class="kw">await</span> repo.<span class="fn">AddAsync</span>(video);
+
+        <span class="cm">// Generate resumable upload URL (client uploads directly to blob store)</span>
+        <span class="kw">var</span> rawKey = <span class="str">$"raw/{video.Id}/{req.FileName}"</span>;
+        <span class="kw">var</span> resumableUrl = <span class="kw">await</span> storage.<span class="fn">CreateResumableUploadAsync</span>(rawKey, req.ContentType, req.FileSizeBytes);
+
+        <span class="kw">return new</span> <span class="cls">VideoUploadResult</span>(video.Id, resumableUrl);
+    }
+}
+
+<span class="cm">// Transcoding consumer — processes each video into multiple quality variants</span>
+<span class="kw">public class</span> <span class="cls">VideoTranscodingConsumer</span>(<span class="cls">ITranscoder</span> transcoder, <span class="cls">IBlobStorage</span> storage,
+    <span class="cls">IVideoRepository</span> repo) : <span class="iface">IConsumer</span>&lt;<span class="cls">VideoUploadCompletedEvent</span>&gt;
+{
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">Consume</span>(<span class="cls">ConsumeContext</span>&lt;<span class="cls">VideoUploadCompletedEvent</span>&gt; ctx)
+    {
+        <span class="kw">var</span> videoId = ctx.Message.VideoId;
+        <span class="kw">var</span> rawStream = <span class="kw">await</span> storage.<span class="fn">DownloadAsync</span>(ctx.Message.RawBlobKey);
+
+        <span class="cm">// Transcode all variants in parallel (different compute workers)</span>
+        <span class="kw">var</span> tasks = VideoUploadService.Variants.<span class="fn">Select</span>(<span class="kw">async</span> v =&gt; {
+            <span class="cm">// Segment video into 2-second DASH chunks at this quality level</span>
+            <span class="kw">var</span> chunks = <span class="kw">await</span> transcoder.<span class="fn">TranscodeAndSegmentAsync</span>(rawStream, v.Height, v.BitratekBps);
+            <span class="cm">// Upload each chunk to CDN-backed storage</span>
+            <span class="kw">await</span> <span class="cls">Task</span>.<span class="fn">WhenAll</span>(chunks.<span class="fn">Select</span>((<span class="kw">chunk</span>, i) =&gt;
+                storage.<span class="fn">UploadAsync</span>(<span class="str">$"videos/{videoId}/{v.Label}/segment{i:000}.webm"</span>, chunk)));
+            <span class="cm">// Upload DASH manifest for this quality level</span>
+            <span class="kw">await</span> storage.<span class="fn">UploadAsync</span>(<span class="str">$"videos/{videoId}/{v.Label}/manifest.mpd"</span>, transcoder.Manifest);
+            <span class="kw">return</span> v.Label;
+        });
+
+        <span class="kw">var</span> completedVariants = <span class="kw">await</span> <span class="cls">Task</span>.<span class="fn">WhenAll</span>(tasks);
+        <span class="kw">await</span> repo.<span class="fn">MarkAvailableAsync</span>(videoId, completedVariants);
+        <span class="kw">await</span> ctx.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="cls">VideoReadyEvent</span>(videoId));
+    }
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS12: AWS S3 ═══════════ -->
+<section class="cs" id="cs12" style="--acc-color:#ff9900;--acc:rgba(255,153,0,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 12</div>
+  <div class="cs-title">How AWS S3 Works</div>
+  <div class="cs-lead">S3 stores over 300 trillion objects and handles millions of requests per second. Its secret: a clever consistent-hashing distributed storage system with 11 nines of durability (99.999999999%) achieved through data replication and erasure coding.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">300T+ Objects</span><span class="stat-pill">11 nines durability</span><span class="stat-pill">Millions RPS</span><span class="stat-pill">Erasure coding</span><span class="stat-pill">3-AZ replication</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#ff9900">Storage Architecture</div>
+    <h3>How S3 Achieves 11 Nines</h3>
+    <ul>
+      <li><strong>3-AZ replication:</strong> Every object stored across 3 Availability Zones synchronously</li>
+      <li><strong>Erasure coding:</strong> Large objects split into 16 chunks + 4 parity chunks — survive 4 chunk failures</li>
+      <li><strong>Consistent hashing:</strong> Object key → hash → storage node (add/remove nodes with minimal redistribution)</li>
+      <li><strong>Write path:</strong> PUT → metadata service assigns storage nodes → parallel write to 3 nodes → ACK when 2/3 succeed → return 200</li>
+      <li><strong>Read path:</strong> GET → metadata lookup → read from nearest replica</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#ff9900">Key Design Patterns</div>
+    <h3>Building a Blob Store in .NET</h3>
+    <ul>
+      <li>Multipart upload: files &gt;100MB split client-side, each part uploaded independently, assembled server-side</li>
+      <li>Pre-signed URLs: time-limited signed URLs for direct client upload/download (bypass your servers)</li>
+      <li>Versioning: S3 keeps all versions — delete is a soft delete (puts a delete marker)</li>
+      <li>Event notifications: S3 → SQS/SNS/Lambda on PUT/DELETE — drives processing pipelines</li>
+    </ul>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">BlobStore.Core/Services/ObjectStorageService.cs — S3-like Implementation</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="cm">// S3-like blob store service — consistent hashing + replication</span>
+<span class="kw">public class</span> <span class="cls">ObjectStorageService</span>(<span class="cls">IConsistentHashRing</span> ring, <span class="cls">IObjectMetadataRepository</span> metadata,
+    <span class="cls">IReplicationService</span> replication, <span class="cls">IPublishEndpoint</span> bus)
+{
+    <span class="kw">private const int</span> ReplicationFactor = <span class="num">3</span>;
+
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">PutObjectResult</span>&gt; <span class="fn">PutObjectAsync</span>(<span class="cls">string</span> bucket, <span class="cls">string</span> key,
+        <span class="cls">Stream</span> data, <span class="cls">string</span> contentType, <span class="cls">CancellationToken</span> ct)
+    {
+        <span class="kw">var</span> objectKey = <span class="str">$"{bucket}/{key}"</span>;
+        <span class="kw">var</span> etag = <span class="kw">await</span> <span class="fn">ComputeETagAsync</span>(data);
+
+        <span class="cm">// Consistent hash → find N storage nodes for this object</span>
+        <span class="kw">var</span> primaryNode = ring.<span class="fn">GetNode</span>(objectKey);
+        <span class="kw">var</span> replicaNodes = ring.<span class="fn">GetReplicaNodes</span>(objectKey, ReplicationFactor - <span class="num">1</span>);
+        <span class="kw">var</span> allNodes = <span class="kw">new</span>[] { primaryNode }.<span class="fn">Concat</span>(replicaNodes).<span class="fn">ToArray</span>();
+
+        <span class="cm">// Write to all 3 nodes in parallel (quorum write: succeed if 2/3 succeed)</span>
+        <span class="kw">var</span> writeResults = <span class="kw">await</span> <span class="cls">Task</span>.<span class="fn">WhenAll</span>(allNodes.<span class="fn">Select</span>(node =&gt;
+            replication.<span class="fn">WriteToNodeAsync</span>(node, objectKey, data, ct)));
+
+        <span class="kw">var</span> successCount = writeResults.<span class="fn">Count</span>(r =&gt; r.Success);
+        <span class="kw">if</span> (successCount &lt; <span class="num">2</span>) <span class="kw">throw new</span> <span class="cls">StorageException</span>(<span class="str">"Write quorum not met"</span>);
+
+        <span class="cm">// Write metadata (after successful storage)</span>
+        <span class="kw">var</span> obj = <span class="kw">new</span> <span class="cls">StoredObject</span>(objectKey, etag, data.Length, contentType,
+            allNodes.<span class="fn">Select</span>(n =&gt; n.NodeId).<span class="fn">ToList</span>(), <span class="cls">DateTimeOffset</span>.UtcNow);
+        <span class="kw">await</span> metadata.<span class="fn">SaveAsync</span>(obj, ct);
+
+        <span class="cm">// Publish event for downstream processing</span>
+        <span class="kw">await</span> bus.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="cls">ObjectCreatedEvent</span>(bucket, key, etag, data.Length, contentType));
+        <span class="kw">return new</span> <span class="cls">PutObjectResult</span>(etag, <span class="cls">DateTimeOffset</span>.UtcNow);
+    }
+
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">string</span>&gt; <span class="fn">GeneratePresignedUrlAsync</span>(<span class="cls">string</span> bucket, <span class="cls">string</span> key,
+        <span class="cls">PresignedUrlOperation</span> operation, <span class="cls">TimeSpan</span> validity)
+    {
+        <span class="kw">var</span> expiry = <span class="cls">DateTimeOffset</span>.UtcNow.<span class="fn">Add</span>(validity).ToUnixTimeSeconds();
+        <span class="kw">var</span> payload = <span class="str">$"{operation}:{bucket}/{key}:{expiry}"</span>;
+        <span class="kw">var</span> signature = <span class="fn">SignHmac256</span>(payload);
+        <span class="kw">return</span> <span class="str">$"https://storage.example.com/{bucket}/{key}?X-Op={operation}&amp;X-Expires={expiry}&amp;X-Sig={signature}"</span>;
+    }
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS13: BLUESKY ═══════════ -->
+<section class="cs" id="cs13" style="--acc-color:#0085ff;--acc:rgba(0,133,255,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 13</div>
+  <div class="cs-title">How Bluesky Works</div>
+  <div class="cs-lead">Bluesky is a decentralized social network built on the AT Protocol (Authenticated Transfer). Unlike Twitter, your data lives in a Personal Data Server (PDS) YOU control. The federation model is a completely new distributed architecture approach.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">30M+ Users</span><span class="stat-pill">AT Protocol (open)</span><span class="stat-pill">Federated PDS</span><span class="stat-pill">Cryptographic identity (DIDs)</span><span class="stat-pill">Custom feed algorithms</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#0085ff">AT Protocol Architecture</div>
+    <h3>Decentralized by Design</h3>
+    <ul>
+      <li><strong>PDS (Personal Data Server):</strong> Stores your posts, likes, follows — you can self-host or choose a provider</li>
+      <li><strong>DID (Decentralized Identifier):</strong> Cryptographic identity — did:plc:xyz — not owned by any platform</li>
+      <li><strong>Repo:</strong> Your data is a Merkle DAG (similar to Git) — content-addressed, verifiable, signed</li>
+      <li><strong>Relay/Firehose:</strong> Aggregates all events from all PDSs — the global event stream</li>
+      <li><strong>App View:</strong> Reads from relay + indexes data — provides the feed APIs</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#0085ff">Feed Algorithms</div>
+    <h3>Algorithmic Feeds are Open</h3>
+    <ul>
+      <li>Bluesky's key innovation: feed algorithms are user-selectable and third-party buildable</li>
+      <li>Feed Generator: a server that implements a simple REST API — returns a list of post URIs</li>
+      <li>Your "Following" feed, "What's Hot" feed, and any custom feed are all the same interface</li>
+      <li>AT URI: at://did:plc:abc/app.bsky.feed.post/xyz — globally unique, resolvable</li>
+    </ul>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">Bluesky.FeedGenerator/Services/FeedGeneratorService.cs — Custom Feed Algorithm</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="cm">// Custom Bluesky Feed Generator — subscribes to firehose, indexes, serves feed</span>
+<span class="kw">public class</span> <span class="cls">TechNewsFeedGenerator</span>(<span class="cls">IFirehoseSubscriber</span> firehose, <span class="cls">IDatabase</span> redis)
+{
+    <span class="kw">private const string</span> FeedKey = <span class="str">"feed:tech-news"</span>;
+
+    <span class="cm">// Subscribe to the global AT Protocol firehose (all posts from all PDSs)</span>
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">StartIndexingAsync</span>(<span class="cls">CancellationToken</span> ct)
+    {
+        <span class="kw">await foreach</span> (<span class="kw">var</span> commit <span class="kw">in</span> firehose.<span class="fn">SubscribeAsync</span>(<span class="str">"wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos"</span>, ct))
+        {
+            <span class="kw">foreach</span> (<span class="kw">var</span> op <span class="kw">in</span> commit.Ops.<span class="fn">Where</span>(o =&gt; o.Action == <span class="str">"create"</span> &amp;&amp; o.Path.<span class="fn">StartsWith</span>(<span class="str">"app.bsky.feed.post"</span>)))
+            {
+                <span class="kw">if</span> (op.Record <span class="kw">is</span> <span class="cls">BlueskyPost</span> post &amp;&amp; <span class="fn">IsTechContent</span>(post.Text))
+                {
+                    <span class="kw">var</span> uri = <span class="str">$"at://{commit.Repo}/{op.Path}"</span>;
+                    <span class="kw">var</span> score = <span class="fn">ComputeRelevanceScore</span>(post);
+                    <span class="cm">// Add to Redis sorted set — feed items scored by relevance</span>
+                    <span class="kw">await</span> redis.<span class="fn">SortedSetAddAsync</span>(FeedKey, uri, score);
+                    <span class="kw">await</span> redis.<span class="fn">SortedSetRemoveRangeByRankAsync</span>(FeedKey, <span class="num">0</span>, -<span class="num">1001</span>); <span class="cm">// Keep top 1000</span>
+                }
+            }
+        }
+    }
+
+    <span class="cm">// Bluesky calls this endpoint to get the feed</span>
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">FeedResponse</span>&gt; <span class="fn">GetFeedAsync</span>(<span class="cls">string</span>? cursor, <span class="cls">int</span> limit = <span class="num">30</span>)
+    {
+        <span class="kw">var</span> start = cursor <span class="kw">is null</span> ? <span class="num">0</span> : <span class="cls">int</span>.<span class="fn">Parse</span>(cursor);
+        <span class="kw">var</span> items = <span class="kw">await</span> redis.<span class="fn">SortedSetRangeByRankAsync</span>(FeedKey, start, start + limit - <span class="num">1</span>, <span class="cls">Order</span>.Descending);
+        <span class="kw">return new</span> <span class="cls">FeedResponse</span>(
+            Feed: items.<span class="fn">Select</span>(i =&gt; <span class="kw">new</span> <span class="cls">FeedItem</span>(i.ToString())).<span class="fn">ToList</span>(),
+            Cursor: (start + limit).<span class="fn">ToString</span>());
+    }
+
+    <span class="kw">private static bool</span> <span class="fn">IsTechContent</span>(<span class="cls">string</span> text) =&gt;
+        _techKeywords.<span class="fn">Any</span>(kw =&gt; text.<span class="fn">Contains</span>(kw, <span class="cls">StringComparison</span>.OrdinalIgnoreCase));
+
+    <span class="kw">private static readonly</span> <span class="cls">string</span>[] _techKeywords = [<span class="str">"dotnet"</span>, <span class="str">"csharp"</span>, <span class="str">"kubernetes"</span>, <span class="str">"ai"</span>, <span class="str">"llm"</span>];
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS14: URL SHORTENER ═══════════ -->
+<section class="cs" id="cs14" style="--acc-color:#2563eb;--acc:rgba(37,99,235,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 14</div>
+  <div class="cs-title">How a URL Shortener Works</div>
+  <div class="cs-lead">bit.ly processes 10 billion clicks per month. What looks trivially simple hides fascinating distributed systems challenges: globally unique ID generation without coordination, massive read-heavy caching, and real-time analytics at scale.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">10B+ Clicks/month</span><span class="stat-pill">&lt;10ms redirect latency</span><span class="stat-pill">Base62 encoding</span><span class="stat-pill">Redis cache (99%+ hit)</span><span class="stat-pill">Real-time analytics</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#2563eb">ID Generation</div>
+    <h3>Creating the Short Code</h3>
+    <ul>
+      <li><strong>Base62 encoding:</strong> [A-Za-z0-9] = 62 chars. 7 chars = 62^7 = 3.5 trillion unique URLs</li>
+      <li><strong>Snowflake ID:</strong> 64-bit ID = timestamp (ms) + datacenter (5 bits) + worker (5 bits) + sequence (12 bits) → globally unique without coordination</li>
+      <li><strong>Hash-based:</strong> MD5(long_url) → take first 7 chars → check collision → retry with offset</li>
+      <li><strong>Counter-based:</strong> Auto-increment DB ID → Base62 encode. Simple but sequential (guessable)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#2563eb">Read Path Optimization</div>
+    <h3>99%+ Cache Hit on Redirects</h3>
+    <ul>
+      <li>Reads are 100:1 vs writes — optimize heavily for reads</li>
+      <li>L1: In-process cache (IMemoryCache) — microsecond lookup for hottest URLs</li>
+      <li>L2: Redis cluster — sub-millisecond for warm URLs</li>
+      <li>L3: PostgreSQL/DynamoDB — cold URLs only</li>
+      <li>Analytics: async fire-and-forget to Kafka → Flink/Spark for real-time stats</li>
+    </ul>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">UrlShortener.Core/Services/ShortenerService.cs — Complete Implementation</span><span class="code-tag">C# / .NET 9</span></div>
+    <pre><span class="cm">// Snowflake ID generator — globally unique, time-ordered, no coordination</span>
+<span class="kw">public class</span> <span class="cls">SnowflakeIdGenerator</span>
+{
+    <span class="kw">private static readonly long</span> Epoch = <span class="kw">new</span> <span class="cls">DateTimeOffset</span>(<span class="num">2024</span>, <span class="num">1</span>, <span class="num">1</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="cls">TimeSpan</span>.Zero).ToUnixTimeMilliseconds();
+    <span class="kw">private readonly long</span> _workerId;
+    <span class="kw">private long</span> _sequence = <span class="num">0</span>, _lastTimestamp = -<span class="num">1</span>;
+
+    <span class="kw">public long</span> <span class="fn">NextId</span>()
+    {
+        <span class="kw">lock</span> (<span class="kw">this</span>) {
+            <span class="kw">var</span> ts = <span class="cls">DateTimeOffset</span>.UtcNow.ToUnixTimeMilliseconds() - Epoch;
+            <span class="kw">if</span> (ts == _lastTimestamp) { <span class="kw">if</span> (++_sequence &gt; <span class="num">4095</span>) <span class="cls">Thread</span>.<span class="fn">Sleep</span>(<span class="num">1</span>); }
+            <span class="kw">else</span> { _sequence = <span class="num">0</span>; _lastTimestamp = ts; }
+            <span class="kw">return</span> (ts &lt;&lt; <span class="num">22</span>) | (_workerId &lt;&lt; <span class="num">12</span>) | _sequence;
+        }
+    }
+}
+
+<span class="kw">public class</span> <span class="cls">UrlShortenerService</span>(<span class="cls">SnowflakeIdGenerator</span> idGen, <span class="cls">HybridCache</span> cache,
+    <span class="cls">IUrlRepository</span> repo, <span class="cls">IPublishEndpoint</span> bus)
+{
+    <span class="kw">private const string</span> Base62Chars = <span class="str">"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"</span>;
+
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">string</span>&gt; <span class="fn">ShortenAsync</span>(<span class="cls">string</span> longUrl, <span class="cls">string</span>? customCode = <span class="kw">null</span>)
+    {
+        <span class="kw">var</span> shortCode = customCode ?? <span class="fn">ToBase62</span>(idGen.<span class="fn">NextId</span>());
+        <span class="kw">await</span> repo.<span class="fn">SaveAsync</span>(<span class="kw">new</span> <span class="cls">ShortUrl</span>(shortCode, longUrl, <span class="cls">DateTimeOffset</span>.UtcNow));
+        <span class="kw">return</span> <span class="str">$"https://short.ly/{shortCode}"</span>;
+    }
+
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">RedirectResult</span>&gt; <span class="fn">ResolveAsync</span>(<span class="cls">string</span> shortCode, <span class="cls">HttpContext</span> ctx)
+    {
+        <span class="cm">// HybridCache: L1 in-process + L2 Redis — 99%+ cache hit for hot URLs</span>
+        <span class="kw">var</span> longUrl = <span class="kw">await</span> cache.<span class="fn">GetOrCreateAsync</span>(<span class="str">$"url:{shortCode}"</span>, <span class="kw">async</span> _ =&gt;
+            (<span class="kw">await</span> repo.<span class="fn">GetAsync</span>(shortCode))?.LongUrl,
+            <span class="kw">new</span> <span class="cls">HybridCacheEntryOptions</span> { Expiration = <span class="cls">TimeSpan</span>.<span class="fn">FromHours</span>(<span class="num">24</span>) });
+
+        <span class="kw">if</span> (longUrl <span class="kw">is null</span>) <span class="kw">return</span> <span class="cls">RedirectResult</span>.NotFound;
+
+        <span class="cm">// Async analytics — don't slow down the redirect for tracking</span>
+        _ = bus.<span class="fn">Publish</span>(<span class="kw">new</span> <span class="cls">ClickEvent</span>(shortCode, ctx.Connection.RemoteIpAddress?.ToString(),
+            ctx.Request.Headers.Referer, ctx.Request.Headers.UserAgent, <span class="cls">DateTimeOffset</span>.UtcNow));
+
+        <span class="kw">return</span> <span class="cls">RedirectResult</span>.<span class="fn">MovedPermanently</span>(longUrl);
+    }
+
+    <span class="kw">private static string</span> <span class="fn">ToBase62</span>(<span class="cls">long</span> n)
+    {
+        <span class="kw">var</span> sb = <span class="kw">new</span> <span class="cls">StringBuilder</span>();
+        <span class="kw">while</span> (n &gt; <span class="num">0</span>) { sb.<span class="fn">Insert</span>(<span class="num">0</span>, Base62Chars[(<span class="cls">int</span>)(n % <span class="num">62</span>)]); n /= <span class="num">62</span>; }
+        <span class="kw">return</span> sb.ToString().<span class="fn">PadLeft</span>(<span class="num">7</span>, <span class="str">'0'</span>);
+    }
+}</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════ CS15: APACHE KAFKA ═══════════ -->
+<section class="cs" id="cs15" style="--acc-color:#f59e0b;--acc:rgba(245,158,11,0.06);">
+<div class="cs-hero">
+  <div class="cs-num">Case Study 15</div>
+  <div class="cs-title">How Apache Kafka Works</div>
+  <div class="cs-lead">Kafka processes 7 trillion events per day at LinkedIn. It's not just a message queue — it's a distributed commit log that enables event streaming, event sourcing, and real-time data pipelines at planetary scale. Understanding Kafka is mandatory for senior engineers.</div>
+  <div class="cs-stats">
+    <span class="stat-pill">7T Events/day (LinkedIn)</span><span class="stat-pill">1M+ Messages/sec/broker</span><span class="stat-pill">Distributed commit log</span><span class="stat-pill">Consumer group scaling</span><span class="stat-pill">Exactly-once semantics</span>
+  </div>
+</div>
+<div class="cs-body">
+  <div class="card">
+    <div class="card-label" style="color:#f59e0b">Core Concepts</div>
+    <h3>Topics, Partitions, Offsets</h3>
+    <ul>
+      <li><strong>Topic:</strong> Named stream of records (like a table in a DB). Partitioned for parallelism.</li>
+      <li><strong>Partition:</strong> Ordered, immutable log. Each record has an offset (sequential ID). Messages append-only.</li>
+      <li><strong>Broker:</strong> Kafka server that stores partitions. 3+ brokers per cluster for fault tolerance.</li>
+      <li><strong>Consumer Group:</strong> N consumers sharing a topic. Each partition assigned to ONE consumer — parallelism = partition count</li>
+      <li><strong>Offset commit:</strong> Consumer tracks which messages it's processed. Crash → restart from last committed offset</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#f59e0b">Why Kafka is Fast</div>
+    <h3>Sequential I/O + Zero Copy</h3>
+    <ul>
+      <li>Append-only writes to sequential disk — 10x faster than random I/O (100MB/s vs 10MB/s on HDD)</li>
+      <li>Zero-copy: kernel sends data from disk page cache to network socket directly (no userspace copy)</li>
+      <li>Batching: producer batches multiple messages → fewer network round trips</li>
+      <li>Compression: GZIP/Snappy/LZ4 per batch — reduces network bandwidth by 5-7x</li>
+      <li>Replication: leader receives writes, followers replicate asynchronously</li>
+    </ul>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 860 260" width="100%" xmlns="http://www.w3.org/2000/svg" style="min-width:500px">
+      <defs><marker id="a15" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="rgba(245,158,11,0.7)"/></marker></defs>
+      <!-- Producer -->
+      <rect x="10" y="100" width="100" height="60" rx="8" fill="rgba(245,158,11,0.1)" stroke="rgba(245,158,11,0.3)" stroke-width="1.5"/>
+      <text x="60" y="124" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#f59e0b" font-weight="700">Producer</text>
+      <text x="60" y="141" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Batch + key hash</text>
+      <line x1="110" y1="130" x2="175" y2="100" stroke="rgba(245,158,11,0.4)" stroke-width="1.5" marker-end="url(#a15)"/>
+      <line x1="110" y1="130" x2="175" y2="160" stroke="rgba(245,158,11,0.4)" stroke-width="1.5" marker-end="url(#a15)"/>
+      <!-- Partitions -->
+      <rect x="175" y="60" width="250" height="45" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.25)" stroke-width="1.5"/>
+      <text x="300" y="78" text-anchor="middle" font-family="Rajdhani" font-size="11" fill="#f59e0b" font-weight="700">Partition 0 (Leader: Broker 1)</text>
+      <text x="300" y="94" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">|  0  |  1  |  2  |  3  |  4  | ← append only</text>
+      <rect x="175" y="120" width="250" height="45" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.25)" stroke-width="1.5"/>
+      <text x="300" y="138" text-anchor="middle" font-family="Rajdhani" font-size="11" fill="#f59e0b" font-weight="700">Partition 1 (Leader: Broker 2)</text>
+      <text x="300" y="154" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">|  0  |  1  |  2  |  3  |  4  |</text>
+      <rect x="175" y="180" width="250" height="45" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.25)" stroke-width="1.5"/>
+      <text x="300" y="198" text-anchor="middle" font-family="Rajdhani" font-size="11" fill="#f59e0b" font-weight="700">Partition 2 (Leader: Broker 3)</text>
+      <text x="300" y="214" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">|  0  |  1  |  2  |  3  |</text>
+      <!-- Consumer Group -->
+      <line x1="425" y1="82" x2="545" y2="80" stroke="rgba(245,158,11,0.4)" stroke-width="1.5" marker-end="url(#a15)"/>
+      <line x1="425" y1="142" x2="545" y2="130" stroke="rgba(245,158,11,0.4)" stroke-width="1.5" marker-end="url(#a15)"/>
+      <line x1="425" y1="202" x2="545" y2="180" stroke="rgba(245,158,11,0.4)" stroke-width="1.5" marker-end="url(#a15)"/>
+      <rect x="545" y="50" width="140" height="190" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+      <text x="615" y="78" text-anchor="middle" font-family="Rajdhani" font-size="12" fill="#888" font-weight="700">Consumer Group A</text>
+      <rect x="560" y="88" width="110" height="35" rx="5" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+      <text x="615" y="108" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#f59e0b">Consumer 1 → P0</text>
+      <rect x="560" y="133" width="110" height="35" rx="5" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+      <text x="615" y="153" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#f59e0b">Consumer 2 → P1</text>
+      <rect x="560" y="178" width="110" height="35" rx="5" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+      <text x="615" y="198" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#f59e0b">Consumer 3 → P2</text>
+      <!-- ZooKeeper/KRaft -->
+      <rect x="710" y="100" width="140" height="60" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+      <text x="780" y="125" text-anchor="middle" font-family="Rajdhani" font-size="11" fill="#888" font-weight="600">KRaft (Raft Consensus)</text>
+      <text x="780" y="142" text-anchor="middle" font-family="Fira Code" font-size="9" fill="#555">Leader election · metadata</text>
+    </svg>
+  </div>
+  <div class="code">
+    <div class="code-bar"><span class="code-file">Kafka.Integration/Services/EventStreamingService.cs — MassTransit Kafka</span><span class="code-tag">C# / .NET 9 + MassTransit</span></div>
+    <pre><span class="cm">// Kafka producer — publishes events with partition key for ordering guarantees</span>
+<span class="kw">public class</span> <span class="cls">OrderEventProducer</span>(<span class="cls">ITopicProducer</span>&lt;<span class="cls">OrderEvent</span>&gt; producer)
+{
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">PublishOrderEventAsync</span>(<span class="cls">Order</span> order, <span class="cls">OrderEventType</span> type)
+    {
+        <span class="kw">await</span> producer.<span class="fn">Produce</span>(
+            partitionKey: order.Id.ToString(),  <span class="cm">// Same order → same partition → ordered delivery</span>
+            value: <span class="kw">new</span> <span class="cls">OrderEvent</span>(order.Id, type, order, <span class="cls">DateTimeOffset</span>.UtcNow),
+            pipe: p =&gt; p.<span class="fn">UseExecute</span>(ctx =&gt; ctx.SetHeader(<span class="str">"source"</span>, <span class="str">"orders-service"</span>)));
+    }
+}
+
+<span class="cm">// Kafka consumer — processes events with exactly-once semantics via transactional outbox</span>
+<span class="kw">public class</span> <span class="cls">OrderEventConsumer</span>(<span class="cls">IInventoryService</span> inventory, <span class="cls">IOrderRepository</span> repo)
+    : <span class="iface">IConsumer</span>&lt;<span class="cls">OrderEvent</span>&gt;
+{
+    <span class="kw">public async</span> <span class="cls">Task</span> <span class="fn">Consume</span>(<span class="cls">ConsumeContext</span>&lt;<span class="cls">OrderEvent</span>&gt; ctx)
+    {
+        <span class="kw">var</span> evt = ctx.Message;
+        <span class="kw">switch</span> (evt.EventType)
+        {
+            <span class="kw">case</span> <span class="cls">OrderEventType</span>.Placed:
+                <span class="kw">await</span> inventory.<span class="fn">ReserveStockAsync</span>(evt.Order.Items);
+                <span class="kw">break</span>;
+            <span class="kw">case</span> <span class="cls">OrderEventType</span>.Cancelled:
+                <span class="kw">await</span> inventory.<span class="fn">ReleaseStockAsync</span>(evt.Order.Items);
+                <span class="kw">break</span>;
+        }
+        <span class="cm">// MassTransit handles offset commit after successful processing</span>
+    }
+}
+
+<span class="cm">// Program.cs — Kafka integration via MassTransit</span>
+builder.Services.<span class="fn">AddMassTransit</span>(x =&gt;
+{
+    x.<span class="fn">UsingKafka</span>((ctx, cfg) =&gt;
+    {
+        cfg.<span class="fn">Host</span>(<span class="str">"kafka:9092"</span>);
+        cfg.<span class="fn">TopicEndpoint</span>&lt;<span class="cls">OrderEvent</span>&gt;(<span class="str">"orders-events"</span>, <span class="str">"inventory-consumer-group"</span>, e =&gt;
+        {
+            e.<span class="fn">Consumer</span>&lt;<span class="cls">OrderEventConsumer</span>&gt;(ctx);
+            e.AutoOffsetReset = <span class="cls">AutoOffsetReset</span>.Earliest;
+            e.ConcurrentMessageLimit = <span class="num">10</span>;   <span class="cm">// Process 10 messages concurrently per partition</span>
+        });
+    });
+
+    x.<span class="fn">AddProducer</span>&lt;<span class="cls">OrderEvent</span>&gt;(<span class="str">"orders-events"</span>);
+    x.<span class="fn">AddEntityFrameworkOutbox</span>&lt;<span class="cls">AppDbContext</span>&gt;(o =&gt; { o.<span class="fn">UsePostgres</span>(); o.UseBusOutbox(); });
+});</pre>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:#f59e0b">Kafka vs Message Queues</div>
+    <h3>When to Use Kafka vs RabbitMQ</h3>
+    <ul>
+      <li><strong>Use Kafka when:</strong> Event replay needed (consume from the past), massive throughput (&gt;100K msg/s), multiple consumer groups reading same stream independently, event sourcing/streaming analytics</li>
+      <li><strong>Use RabbitMQ when:</strong> Simple task queue (work queue semantics), complex routing (topic/fanout/direct exchanges), low volume with complex routing logic, easier ops</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<div style="text-align:center;padding:80px 40px;border-top:1px solid rgba(255,255,255,0.06);background:var(--bg2);">
+  <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:#fff;margin-bottom:12px;">All 15 Case Studies Complete</div>
+  <p style="color:#4a5568;max-width:580px;margin:0 auto 32px;font-size:15px;">From WhatsApp's persistent WebSocket connections to Kafka's distributed commit log — you now have the architecture knowledge and .NET code to build each one from scratch.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:700px;margin:0 auto;">
+    <span style="padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;font-size:11px;color:#555;">ASP.NET Core 9</span>
+    <span style="padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;font-size:11px;color:#555;">SignalR</span>
+    <span style="padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;font-size:11px;color:#555;">MassTransit</span>
+    <span style="padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;font-size:11px;color:#555;">Redis</span>
+    <span style="padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;font-size:11px;color:#555;">Semantic Kernel</span>
+    <span style="padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;font-size:11px;color:#555;">Kafka</span>
+    <span style="padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;font-size:11px;color:#555;">EF Core</span>
+    <span style="padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;font-size:11px;color:#555;">Polly v8</span>
+    <span style="padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;font-size:11px;color:#555;">OpenTelemetry</span>
+  </div>
+</div>
+
+<script>
+// Progress bar
+window.addEventListener('scroll',()=>{
+  const e=document.documentElement,s=e.scrollTop,t=e.scrollHeight-e.clientHeight;
+  document.getElementById('pbar').style.transform=`scaleX(${s/t})`;
+});
+// Active nav
+const links=document.querySelectorAll('.nav-a');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      links.forEach(l=>l.classList.remove('on'));
+      const a=document.querySelector(`.nav-a[href="#${e.target.id}"]`);
+      if(a)a.classList.add('on');
+    }
+  });
+},{rootMargin:'-20% 0px -70% 0px'});
+document.querySelectorAll('.cs').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

@@ -34,6 +34,9 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const BlogAggregator = lazy(() => import("./pages/BlogAggregator"));
 const BlogSeries = lazy(() => import("./pages/BlogSeries"));
 const ArticlesPage = lazy(() => import("./pages/Articles"));
+const CaseStudies = lazy(() => import("./pages/CaseStudies"));
+const Interview = lazy(() => import("./pages/Interview"));
+const Projects = lazy(() => import("./pages/Projects"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const InstallPWA = lazy(() => import("./pages/InstallPWA"));
 const PasskeyRegistration = lazy(() => import("./pages/PasskeyRegistration"));
@@ -172,6 +175,10 @@ const App = () => {
                 <Route path="/blog/techhub" element={<TechHub />} />
                 <Route path="/articles" element={<Suspense fallback={<RouteLoader />}><ArticlesPage /></Suspense>} />
                 <Route path="/articles/:slug" element={<Suspense fallback={<RouteLoader />}><ArticlesPage /></Suspense>} />
+                <Route path="/case-studies" element={<CaseStudies />} />
+                <Route path="/case-studies/:slug" element={<CaseStudies />} />
+                <Route path="/interview" element={<Interview />} />
+                <Route path="/projects" element={<Projects />} />
                 <Route path="/blog/techstacks" element={<Navigate to="/blog/techhub" replace />} />
                 <Route path="/chronyx" element={<Chronyx />} />
                 <Route path="/tech" element={<Navigate to="/blog/techhub" replace />} />

@@ -11,6 +11,25 @@ export type BlogSeriesTrack = {
   actionLabel?: string;
 };
 
+export type BlogSeriesChapter = {
+  title: string;
+  description: string;
+  topics: string[];
+};
+
+export type BlogSeriesModule = {
+  id: string;
+  title: string;
+  description: string;
+  chapters: BlogSeriesChapter[];
+};
+
+export type BlogSeriesToc = {
+  overview: string;
+  highlights: string[];
+  modules: BlogSeriesModule[];
+};
+
 export const BLOG_SERIES: BlogSeriesTrack[] = [
   {
     slug: "csharp-mastery",
@@ -217,4 +236,307 @@ type SeriesMatchCandidate = {
 export const matchesBlogSeries = (series: BlogSeriesTrack, candidate: SeriesMatchCandidate) => {
   const source = `${candidate.title || ""} ${candidate.excerpt || ""} ${(candidate.tags || []).join(" ")}`.toLowerCase();
   return series.keywords.some((keyword) => source.includes(keyword.toLowerCase()));
+};
+
+export const getBlogSeriesDisplayTitle = (series: BlogSeriesTrack) => series.detailTitle || series.title;
+
+export const getBlogSeriesHref = (series: BlogSeriesTrack) => series.href || `/blogs/${series.slug}`;
+
+type SeriesKind =
+  | "engineering"
+  | "platform"
+  | "frontend"
+  | "data"
+  | "ai"
+  | "web3"
+  | "delivery";
+
+const SPECIAL_TOPIC_LABELS: Record<string, string> = {
+  "c#": "C#",
+  ".net": ".NET",
+  dotnet: ".NET",
+  "asp.net": "ASP.NET Core",
+  blazor: "Blazor",
+  ai: "AI",
+  ml: "ML",
+  "ai/ml": "AI/ML",
+  llm: "LLM",
+  llms: "LLMs",
+  nlp: "NLP",
+  sql: "SQL",
+  nosql: "NoSQL",
+  rxjs: "RxJS",
+  "next.js": "Next.js",
+  nextjs: "Next.js",
+  web3: "Web3",
+  devops: "DevOps",
+  "ci/cd": "CI/CD",
+  aws: "AWS",
+  gcp: "GCP",
+  kafka: "Kafka",
+  kubernetes: "Kubernetes",
+  docker: "Docker",
+  terraform: "Terraform",
+  azure: "Azure",
+  angular: "Angular",
+  react: "React",
+  oop: "OOP",
+  solid: "SOLID",
+  rag: "RAG",
+  opencv: "OpenCV",
+  "scikit-learn": "Scikit-learn",
+  scikit: "Scikit-learn",
+  "deep learning": "Deep Learning",
+  "machine learning": "Machine Learning",
+  "computer vision": "Computer Vision",
+};
+
+const KIND_FALLBACK_TOPICS: Record<SeriesKind, string[]> = {
+  engineering: ["Core Concepts", "Code Design", "Testing", "Architecture", "Refactoring", "Production Delivery"],
+  platform: ["Foundations", "Infrastructure", "Automation", "Observability", "Security", "Scale"],
+  frontend: ["Components", "State Management", "Routing", "Performance", "Testing", "Deployment"],
+  data: ["Modeling", "Query Design", "Performance", "Reliability", "Scaling", "Operations"],
+  ai: ["Foundations", "Training", "Evaluation", "Pipelines", "Inference", "Production"],
+  web3: ["Protocols", "Wallets", "Smart Contracts", "Security", "Identity", "Scale"],
+  delivery: ["Principles", "Execution", "Planning", "Ceremonies", "Metrics", "Improvement"],
+};
+
+const KIND_BLUEPRINTS: Record<
+  SeriesKind,
+  Array<{ id: string; title: string; description: string; chapterLabels: [string, string] }>
+> = {
+  engineering: [
+    {
+      id: "foundations",
+      title: "Foundation Track",
+      description: "Build the core mental model, vocabulary, and baseline implementation flow for this mastery series.",
+      chapterLabels: ["Core Concepts", "Hands-on Setup"],
+    },
+    {
+      id: "architecture",
+      title: "Architecture Track",
+      description: "Move from isolated concepts into maintainable design, patterns, and production-oriented implementation choices.",
+      chapterLabels: ["Architecture Decisions", "Implementation Patterns"],
+    },
+    {
+      id: "delivery",
+      title: "Delivery Track",
+      description: "Finish with testing, performance, refactoring, and operational discipline so the series lands in real projects.",
+      chapterLabels: ["Quality and Reliability", "Production Readiness"],
+    },
+  ],
+  platform: [
+    {
+      id: "services",
+      title: "Service Foundations",
+      description: "Cover the essential platform services, runtime setup, and baseline workflows for building with confidence.",
+      chapterLabels: ["Core Services", "Platform Setup"],
+    },
+    {
+      id: "automation",
+      title: "Automation and Architecture",
+      description: "Introduce the infrastructure, deployment, messaging, and scaling patterns that shape production systems.",
+      chapterLabels: ["Automation Flows", "Architecture Patterns"],
+    },
+    {
+      id: "operations",
+      title: "Operations and Scale",
+      description: "Focus on resilience, observability, cost, security, and scale once the platform is live.",
+      chapterLabels: ["Reliability", "Security and Scale"],
+    },
+  ],
+  frontend: [
+    {
+      id: "ui-core",
+      title: "UI Foundations",
+      description: "Establish the mental model, component system, and local workflows that anchor frontend mastery.",
+      chapterLabels: ["Core Building Blocks", "UI Patterns"],
+    },
+    {
+      id: "application",
+      title: "Application Architecture",
+      description: "Design routing, state, data flow, and architecture boundaries for production-grade frontend systems.",
+      chapterLabels: ["State and Data Flow", "Application Structure"],
+    },
+    {
+      id: "experience",
+      title: "Performance and Delivery",
+      description: "Close with testing, optimization, accessibility, and deployment so the experience holds up at scale.",
+      chapterLabels: ["Quality", "Optimization and Release"],
+    },
+  ],
+  data: [
+    {
+      id: "data-core",
+      title: "Data Foundations",
+      description: "Start with schemas, storage models, and the primitives that determine how data behaves in a system.",
+      chapterLabels: ["Storage Models", "Query Basics"],
+    },
+    {
+      id: "design",
+      title: "Design and Performance",
+      description: "Move into query design, indexing, transactions, and throughput-aware decisions for data-heavy workloads.",
+      chapterLabels: ["Design Choices", "Performance Tuning"],
+    },
+    {
+      id: "operations",
+      title: "Reliability and Scale",
+      description: "Finish with backup, consistency, replication, and the operational concerns of real-world data platforms.",
+      chapterLabels: ["Reliability", "Scale and Operations"],
+    },
+  ],
+  ai: [
+    {
+      id: "ai-foundations",
+      title: "Model Foundations",
+      description: "Build the baseline understanding of model types, datasets, and the workflow required to ship useful ML systems.",
+      chapterLabels: ["Core Concepts", "Data and Training Setup"],
+    },
+    {
+      id: "ai-systems",
+      title: "Modeling and Evaluation",
+      description: "Deepen the track with experimentation, evaluation, prompt/model behavior, and system-level architecture choices.",
+      chapterLabels: ["Modeling Patterns", "Evaluation Workflows"],
+    },
+    {
+      id: "ai-production",
+      title: "Inference and Production",
+      description: "Wrap with deployment, monitoring, optimization, and governance so the series reaches production-grade maturity.",
+      chapterLabels: ["Serving and Inference", "Production Operations"],
+    },
+  ],
+  web3: [
+    {
+      id: "protocols",
+      title: "Protocol Foundations",
+      description: "Understand the protocol layer, value flow, and wallet basics behind decentralized systems.",
+      chapterLabels: ["Protocol Basics", "Identity and Wallets"],
+    },
+    {
+      id: "contracts",
+      title: "Contracts and Applications",
+      description: "Design smart contracts, dApp flows, and application architecture that connect on-chain and off-chain systems.",
+      chapterLabels: ["Smart Contract Design", "dApp Architecture"],
+    },
+    {
+      id: "web3-production",
+      title: "Security and Scale",
+      description: "End with governance, audits, ecosystem integration, and the tradeoffs required for production Web3 systems.",
+      chapterLabels: ["Security Controls", "Scale and Ecosystem"],
+    },
+  ],
+  delivery: [
+    {
+      id: "principles",
+      title: "Principles and Mindset",
+      description: "Begin with the discipline, language, and baseline structures that frame strong team execution.",
+      chapterLabels: ["Foundational Principles", "Ways of Working"],
+    },
+    {
+      id: "execution",
+      title: "Execution Systems",
+      description: "Translate those principles into rituals, backlogs, planning flows, and healthy delivery feedback loops.",
+      chapterLabels: ["Planning and Flow", "Execution Patterns"],
+    },
+    {
+      id: "improvement",
+      title: "Improvement and Scale",
+      description: "Close with metrics, coaching, optimization, and the operational systems that support lasting improvement.",
+      chapterLabels: ["Metrics and Insight", "Continuous Improvement"],
+    },
+  ],
+};
+
+const toTitleCase = (value: string) =>
+  value
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+
+const normalizeTopic = (value: string) => {
+  const raw = value.trim();
+  if (!raw) return "";
+  const special = SPECIAL_TOPIC_LABELS[raw.toLowerCase()];
+  if (special) return special;
+  const cleaned = raw.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  const direct = SPECIAL_TOPIC_LABELS[cleaned.toLowerCase()];
+  if (direct) return direct;
+  return toTitleCase(cleaned);
+};
+
+const dedupeTopics = (items: string[]) => {
+  const seen = new Set<string>();
+  const output: string[] = [];
+  for (const item of items) {
+    const normalized = normalizeTopic(item);
+    if (!normalized) continue;
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    output.push(normalized);
+  }
+  return output;
+};
+
+const inferSeriesKind = (series: BlogSeriesTrack): SeriesKind => {
+  const source = `${series.title} ${series.subtitle} ${series.tags.join(" ")} ${series.keywords.join(" ")}`.toLowerCase();
+  if (/\bweb3|blockchain|wallet|smart contract|ethereum|bitcoin\b/.test(source)) return "web3";
+  if (/\bai|ml|llm|nlp|deep learning|machine learning|computer vision|model training\b/.test(source)) return "ai";
+  if (/\bdatabase|sql|postgresql|mongodb|redis|data\b/.test(source)) return "data";
+  if (/\bangular|next\.js|nextjs|react|frontend|rxjs|typescript\b/.test(source)) return "frontend";
+  if (/\bagile|scrum|kanban|delivery\b/.test(source)) return "delivery";
+  if (/\bazure|aws|gcp|cloud|devops|kafka|kubernetes|docker|terraform|microservices|platform\b/.test(source)) return "platform";
+  return "engineering";
+};
+
+const buildTopicPool = (series: BlogSeriesTrack, kind: SeriesKind) =>
+  dedupeTopics([
+    ...series.tags,
+    ...series.keywords,
+    ...KIND_FALLBACK_TOPICS[kind],
+    getBlogSeriesDisplayTitle(series),
+  ]).slice(0, 12);
+
+const topicSegment = (topics: string[], index: number) => {
+  const start = index * 4;
+  const slice = topics.slice(start, start + 4);
+  if (slice.length >= 4) return slice;
+  const fallback = topics.filter((topic) => !slice.includes(topic));
+  return [...slice, ...fallback].slice(0, 4);
+};
+
+export const getBlogSeriesToc = (series: BlogSeriesTrack): BlogSeriesToc => {
+  const kind = inferSeriesKind(series);
+  const blueprints = KIND_BLUEPRINTS[kind];
+  const topics = buildTopicPool(series, kind);
+  const displayTitle = getBlogSeriesDisplayTitle(series);
+
+  return {
+    overview: `${displayTitle} is organized as a practical table of contents so you can move from fundamentals to production-grade implementation without losing the structure of the learning path.`,
+    highlights: topics.slice(0, 6),
+    modules: blueprints.map((module, index) => {
+      const segment = topicSegment(topics, index);
+      const chapterOneTopics = segment.slice(0, 2);
+      const chapterTwoTopics = segment.slice(2, 4);
+
+      return {
+        id: `${series.slug}-${module.id}`,
+        title: module.title,
+        description: module.description,
+        chapters: [
+          {
+            title: `${module.chapterLabels[0]}: ${chapterOneTopics[0] || "Core Concepts"}`,
+            description: `Start this part of the ${series.title} track with the concepts and implementation details that set up the rest of the module.`,
+            topics: chapterOneTopics.length ? chapterOneTopics : topics.slice(0, 2),
+          },
+          {
+            title: `${module.chapterLabels[1]}: ${chapterTwoTopics[0] || "Production Workflows"}`,
+            description: `Translate the module into practical delivery flow, deeper design decisions, and real project execution.`,
+            topics: chapterTwoTopics.length ? chapterTwoTopics : topics.slice(2, 4),
+          },
+        ],
+      };
+    }),
+  };
 };

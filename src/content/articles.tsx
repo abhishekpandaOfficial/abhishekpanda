@@ -1,12 +1,28 @@
-import { Code2, FileStack, Lock, Newspaper, ScanSearch, ShieldCheck, type LucideIcon } from "lucide-react";
+import { BarChart3, Code2, FileStack, Lock, Newspaper, ScanSearch, ShieldCheck, type LucideIcon } from "lucide-react";
 import {
+  SiApachekafka,
+  SiAmazonwebservices,
   SiBrave,
+  SiBitly,
+  SiBluesky,
+  SiDocker,
   SiDuckduckgo,
   SiFirefoxbrowser,
   SiGooglechrome,
+  SiGoogle,
+  SiOpenai,
+  SiReddit,
   SiProtonvpn,
+  SiRabbitmq,
+  SiSlack,
+  SiSpotify,
+  SiStripe,
   SiTorbrowser,
   SiUblockorigin,
+  SiUber,
+  SiWhatsapp,
+  SiX,
+  SiYoutube,
 } from "react-icons/si";
 import type { IconType } from "react-icons";
 
@@ -20,8 +36,9 @@ export type ArticleLink = {
 
 export type ArticleLogo = {
   name: string;
-  icon: IconType | LucideIcon;
-  colorClass: string;
+  icon?: IconType | LucideIcon;
+  imageSrc?: string;
+  colorClass?: string;
   bgClass: string;
 };
 
@@ -46,6 +63,7 @@ export type ArticleRecord = {
 
 const MAX_ARTICLE_TAGS = 4;
 const MAX_ARTICLE_LOGOS = 3;
+const MAX_CASE_STUDY_LOGOS = 8;
 const MAX_ARTICLE_KEY_POINTS = 3;
 
 const rawArticles = import.meta.glob("./Articles/*.html", {
@@ -66,13 +84,187 @@ const FALLBACK_DATE = new Date("2026-03-06T00:00:00").toLocaleDateString("en-US"
   year: "numeric",
 });
 
+const brandLogo = (name: string, color = "FFFFFF") => `https://cdn.simpleicons.org/${name}/${color}`;
+const svgLogo = (svg: string) => `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+const exchangeLogo = svgLogo(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 10 12l4 4 6-8"/><path d="M18 8h2v2"/><path d="M4 20h16"/></svg>',
+);
+const slackLogo = svgLogo(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFFFFF"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>',
+);
+const awsLogo = svgLogo(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFFFFF"><path d="M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576.04.063.056.127.056.183 0 .08-.048.16-.152.24l-.503.335a.383.383 0 0 1-.208.072c-.08 0-.16-.04-.239-.112a2.47 2.47 0 0 1-.287-.375 6.18 6.18 0 0 1-.248-.471c-.622.734-1.405 1.101-2.347 1.101-.67 0-1.205-.191-1.596-.574-.391-.384-.59-.894-.59-1.533 0-.678.239-1.23.726-1.644.487-.415 1.133-.623 1.955-.623.272 0 .551.024.846.064.296.04.6.104.918.176v-.583c0-.607-.127-1.03-.375-1.277-.255-.248-.686-.367-1.3-.367-.28 0-.568.031-.863.103-.295.072-.583.16-.862.272a2.287 2.287 0 0 1-.28.104.488.488 0 0 1-.127.023c-.112 0-.168-.08-.168-.247v-.391c0-.128.016-.224.056-.28a.597.597 0 0 1 .224-.167c.279-.144.614-.264 1.005-.36a4.84 4.84 0 0 1 1.246-.151c.95 0 1.644.216 2.091.647.439.43.662 1.085.662 1.963v2.586zm-3.24 1.214c.263 0 .534-.048.822-.144.287-.096.543-.271.758-.51.128-.152.224-.32.272-.512.047-.191.08-.423.08-.694v-.335a6.66 6.66 0 0 0-.735-.136 6.02 6.02 0 0 0-.75-.048c-.535 0-.926.104-1.19.32-.263.215-.39.518-.39.917 0 .375.095.655.295.846.191.2.47.296.838.296zm6.41.862c-.144 0-.24-.024-.304-.08-.064-.048-.12-.16-.168-.311L7.586 5.55a1.398 1.398 0 0 1-.072-.32c0-.128.064-.2.191-.2h.783c.151 0 .255.025.31.08.065.048.113.16.16.312l1.342 5.284 1.245-5.284c.04-.16.088-.264.151-.312a.549.549 0 0 1 .32-.08h.638c.152 0 .256.025.32.08.063.048.12.16.151.312l1.261 5.348 1.381-5.348c.048-.16.104-.264.16-.312a.52.52 0 0 1 .311-.08h.743c.127 0 .2.065.2.2 0 .04-.009.08-.017.128a1.137 1.137 0 0 1-.056.2l-1.923 6.17c-.048.16-.104.263-.168.311a.51.51 0 0 1-.303.08h-.687c-.151 0-.255-.024-.32-.08-.063-.056-.119-.16-.15-.32l-1.238-5.148-1.23 5.14c-.04.16-.087.264-.15.32-.065.056-.177.08-.32.08zm10.256.215c-.415 0-.83-.048-1.229-.143-.399-.096-.71-.2-.918-.32-.128-.071-.215-.151-.247-.223a.563.563 0 0 1-.048-.224v-.407c0-.167.064-.247.183-.247.048 0 .096.008.144.024.048.016.12.048.2.08.271.12.566.215.878.279.319.064.63.096.95.096.502 0 .894-.088 1.165-.264a.86.86 0 0 0 .415-.758.777.777 0 0 0-.215-.559c-.144-.151-.416-.287-.807-.415l-1.157-.36c-.583-.183-1.014-.454-1.277-.813a1.902 1.902 0 0 1-.4-1.158c0-.335.073-.63.216-.886.144-.255.335-.479.575-.654.24-.184.51-.32.83-.415.32-.096.655-.136 1.006-.136.175 0 .359.008.535.032.183.024.35.056.518.088.16.04.312.08.455.127.144.048.256.096.336.144a.69.69 0 0 1 .24.2.43.43 0 0 1 .071.263v.375c0 .168-.064.256-.184.256a.83.83 0 0 1-.303-.096 3.652 3.652 0 0 0-1.532-.311c-.455 0-.815.071-1.062.223-.248.152-.375.383-.375.71 0 .224.08.416.24.567.159.152.454.304.877.44l1.134.358c.574.184.99.44 1.237.767.247.327.367.702.367 1.117 0 .343-.072.655-.207.926-.144.272-.336.511-.583.703-.248.2-.543.343-.886.447-.36.111-.734.167-1.142.167zM21.698 16.207c-2.626 1.94-6.442 2.969-9.722 2.969-4.598 0-8.74-1.7-11.87-4.526-.247-.223-.024-.527.272-.351 3.384 1.963 7.559 3.153 11.877 3.153 2.914 0 6.114-.607 9.06-1.852.439-.2.814.287.383.607zM22.792 14.961c-.336-.43-2.22-.207-3.074-.103-.255.032-.295-.192-.063-.36 1.5-1.053 3.967-.75 4.254-.399.287.36-.08 2.826-1.485 4.007-.215.184-.423.088-.327-.151.32-.79 1.03-2.57.695-2.994z"/></svg>',
+);
+const openAiLogo = svgLogo(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFFFFF"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>',
+);
+
+const COMPANY_LOGO_RULES: Array<{
+  match: RegExp;
+  name: string;
+  icon?: IconType | LucideIcon;
+  imageSrc?: string;
+  colorClass?: string;
+  bgClass: string;
+}> = [
+  {
+    match: /\bwhatsapp\b/i,
+    name: "WhatsApp",
+    icon: SiWhatsapp,
+    imageSrc: brandLogo("whatsapp"),
+    colorClass: "text-[#25D366]",
+    bgClass: "bg-[#25D366]/12 border-[#25D366]/30",
+  },
+  {
+    match: /\bspotify\b/i,
+    name: "Spotify",
+    icon: SiSpotify,
+    imageSrc: brandLogo("spotify"),
+    colorClass: "text-[#1DB954]",
+    bgClass: "bg-[#1DB954]/12 border-[#1DB954]/30",
+  },
+  {
+    match: /\btwitter timeline\b|\btwitter\b|\bx timeline\b/i,
+    name: "X",
+    icon: SiX,
+    imageSrc: brandLogo("x"),
+    colorClass: "text-white",
+    bgClass: "bg-white/10 border-white/20",
+  },
+  {
+    match: /\bstock exchange\b|\bnasdaq\b|\bmatching engine\b/i,
+    name: "NASDAQ",
+    icon: BarChart3,
+    imageSrc: exchangeLogo,
+    colorClass: "text-[#003087]",
+    bgClass: "bg-[#003087]/12 border-[#003087]/30",
+  },
+  {
+    match: /\breddit\b/i,
+    name: "Reddit",
+    icon: SiReddit,
+    imageSrc: brandLogo("reddit"),
+    colorClass: "text-[#FF4500]",
+    bgClass: "bg-[#FF4500]/12 border-[#FF4500]/30",
+  },
+  {
+    match: /\bpayment system\b|\bstripe\b|\bcard networks?\b/i,
+    name: "Stripe",
+    icon: SiStripe,
+    imageSrc: brandLogo("stripe"),
+    colorClass: "text-[#635BFF]",
+    bgClass: "bg-[#635BFF]/12 border-[#635BFF]/30",
+  },
+  {
+    match: /\buber\b/i,
+    name: "Uber",
+    icon: SiUber,
+    imageSrc: brandLogo("uber"),
+    colorClass: "text-white",
+    bgClass: "bg-white/10 border-white/20",
+  },
+  {
+    match: /\bgoogle search\b|\bgoogle\b/i,
+    name: "Google",
+    icon: SiGoogle,
+    imageSrc: brandLogo("google"),
+    colorClass: "text-[#4285F4]",
+    bgClass: "bg-[#4285F4]/12 border-[#4285F4]/30",
+  },
+  {
+    match: /\bslack\b/i,
+    name: "Slack",
+    icon: SiSlack,
+    imageSrc: slackLogo,
+    colorClass: "text-[#E01E5A]",
+    bgClass: "bg-[#E01E5A]/12 border-[#E01E5A]/30",
+  },
+  {
+    match: /\bchatgpt\b|\bopenai\b/i,
+    name: "OpenAI",
+    icon: SiOpenai,
+    imageSrc: openAiLogo,
+    colorClass: "text-[#10A37F]",
+    bgClass: "bg-[#10A37F]/12 border-[#10A37F]/30",
+  },
+  {
+    match: /\byoutube\b/i,
+    name: "YouTube",
+    icon: SiYoutube,
+    imageSrc: brandLogo("youtube"),
+    colorClass: "text-[#FF0000]",
+    bgClass: "bg-[#FF0000]/12 border-[#FF0000]/30",
+  },
+  {
+    match: /\baws s3\b|\bamazon s3\b|\bs3\b/i,
+    name: "AWS",
+    icon: SiAmazonwebservices,
+    imageSrc: awsLogo,
+    colorClass: "text-[#FF9900]",
+    bgClass: "bg-[#FF9900]/12 border-[#FF9900]/30",
+  },
+  {
+    match: /\bbluesky\b/i,
+    name: "Bluesky",
+    icon: SiBluesky,
+    imageSrc: brandLogo("bluesky"),
+    colorClass: "text-[#0085FF]",
+    bgClass: "bg-[#0085FF]/12 border-[#0085FF]/30",
+  },
+  {
+    match: /\burl shortener\b|\bbitly\b|\bbit\.ly\b/i,
+    name: "Bitly",
+    icon: SiBitly,
+    imageSrc: brandLogo("bitly"),
+    colorClass: "text-[#2563EB]",
+    bgClass: "bg-[#2563EB]/12 border-[#2563EB]/30",
+  },
+  {
+    match: /\bapache kafka\b|\bkafka\b/i,
+    name: "Kafka",
+    icon: SiApachekafka,
+    imageSrc: brandLogo("apachekafka"),
+    colorClass: "text-white",
+    bgClass: "bg-white/10 border-white/20",
+  },
+];
+
 const LOGO_RULES: Array<{
   match: RegExp;
   name: string;
-  icon: IconType | LucideIcon;
-  colorClass: string;
+  icon?: IconType | LucideIcon;
+  imageSrc?: string;
+  colorClass?: string;
   bgClass: string;
 }> = [
+  {
+    match: /\bmicroservices?|distributed systems?|api gateway|service mesh|saga pattern|bounded contexts?|strangler fig\b/i,
+    name: "Microservices",
+    icon: FileStack,
+    colorClass: "text-cyan-600 dark:text-cyan-300",
+    bgClass: "bg-cyan-500/10 border-cyan-500/25",
+  },
+  {
+    match: /\bkafka\b/i,
+    name: "Kafka",
+    icon: SiApachekafka,
+    colorClass: "text-orange-600 dark:text-orange-300",
+    bgClass: "bg-orange-500/10 border-orange-500/25",
+  },
+  {
+    match: /\brabbitmq|masstransit|async messaging|event-driven\b/i,
+    name: "Messaging",
+    icon: SiRabbitmq,
+    colorClass: "text-amber-600 dark:text-amber-300",
+    bgClass: "bg-amber-500/10 border-amber-500/25",
+  },
+  {
+    match: /\bdocker|kubernetes|dapr|yarp|cloud-native\b/i,
+    name: "Cloud Native",
+    icon: SiDocker,
+    colorClass: "text-sky-600 dark:text-sky-300",
+    bgClass: "bg-sky-500/10 border-sky-500/25",
+  },
   {
     match: /\bbrave\b/i,
     name: "Brave",
@@ -227,10 +419,22 @@ const deriveTags = (html: string, text: string, title: string) => {
   const lower = `${title} ${text}`.toLowerCase();
   const solidScore = countMatches(lower, /\bsolid|single responsibility|open-closed|liskov|interface segregation|dependency inversion\b/i);
   const dotnetScore = countMatches(lower, /\b\.net|dotnet|asp\.net|c#|dependency injection|di container\b/i);
+  const caseStudyScore = countMatches(lower, /\bcase stud(?:y|ies)\b/i);
+  const systemDesignScore = countMatches(lower, /\bsystem design|scalability|throughput|latency|capacity planning|high availability\b/i);
+  const microservicesScore = countMatches(
+    lower,
+    /\bmicroservices?|distributed systems?|api gateway|service mesh|saga pattern|bounded contexts?|strangler fig|circuit breaker|event-driven|outbox\b/i,
+  );
+  const messagingScore = countMatches(lower, /\bkafka|rabbitmq|masstransit|async messaging|event-driven|message broker\b/i);
 
   if (solidScore >= 2 || /\bsolid\b/.test(lower)) detected.push("SOLID");
   if (dotnetScore >= 1) detected.push(".NET");
+  if (systemDesignScore >= 1) detected.push("System Design");
+  if (caseStudyScore >= 1) detected.push("Case Studies");
   if (solidScore >= 1 || /\barchitecture|architect|domain model|clean architecture\b/.test(lower)) detected.push("Architecture");
+  if (microservicesScore >= 1) detected.push("Microservices");
+  if (microservicesScore >= 2) detected.push("Distributed Systems");
+  if (messagingScore >= 1) detected.push("Messaging");
   if (solidScore >= 1 || /\binterface|dependency inversion|single responsibility|open-closed|liskov|isp\b/.test(lower)) {
     detected.push("Design");
   }
@@ -242,14 +446,17 @@ const deriveTags = (html: string, text: string, title: string) => {
     detected.push("Countermeasures");
   }
   if ((solidScore === 0 && dotnetScore === 0) && /\bcloud|azure|aws\b/.test(lower)) detected.push("Cloud");
+  if (microservicesScore >= 1 && /\bdocker|kubernetes|dapr|yarp|cloud-native\b/.test(lower)) detected.push("Cloud Native");
   if ((solidScore === 0 && dotnetScore === 0) && /\bai|ml|llm|agentic\b/.test(lower)) detected.push("AI");
 
   return unique([...keywords, ...detected]).slice(0, MAX_ARTICLE_TAGS);
 };
 
-const deriveLogos = (source: string, tags: string[]) => {
+const deriveLogos = (source: string, tags: string[], options?: { preferBrands?: boolean }) => {
   const signals = `${source} ${tags.join(" ")}`;
-  const hits = LOGO_RULES.filter((rule) => rule.match.test(signals)).slice(0, MAX_ARTICLE_LOGOS);
+  const brandHits = COMPANY_LOGO_RULES.filter((rule) => rule.match.test(signals));
+  const signalHits = LOGO_RULES.filter((rule) => rule.match.test(signals));
+  const limit = options?.preferBrands && brandHits.length ? MAX_CASE_STUDY_LOGOS : MAX_ARTICLE_LOGOS;
   const fallbackLogos = [
     {
       name: "Articles",
@@ -270,13 +477,15 @@ const deriveLogos = (source: string, tags: string[]) => {
       bgClass: "bg-emerald-500/10 border-emerald-500/25",
     },
   ];
-  const merged = [...hits];
+  const merged = [...(options?.preferBrands ? brandHits : signalHits), ...(options?.preferBrands ? signalHits : brandHits)].filter(
+    (item, index, array) => array.findIndex((candidate) => candidate.name === item.name) === index,
+  );
   for (const fallback of fallbackLogos) {
-    if (merged.length >= MAX_ARTICLE_LOGOS) break;
+    if (merged.length >= limit) break;
     if (merged.some((item) => item.name === fallback.name)) continue;
     merged.push(fallback);
   }
-  return merged;
+  return merged.slice(0, limit);
 };
 
 const deriveDescription = (html: string, paragraphs: string[], title: string) => {
@@ -314,16 +523,25 @@ const buildArticleRecord = (filePath: string, html: string, assetUrl: string): A
   const headings = extractHeadings(bodyHtml);
   const paragraphs = extractParagraphs(bodyHtml);
   const heroSub = extractClassText(bodyHtml, "hero-sub");
+  const heroDesc = extractClassText(bodyHtml, "hero-desc");
   const sectionDesc = extractClassText(bodyHtml, "section-desc");
   const heroTag = extractClassText(bodyHtml, "hero-tag");
   const statValue = extractClassText(bodyHtml, "stat-num");
-  const previewText = [heroSub, sectionDesc, ...headings, ...paragraphs.slice(0, 3)].filter(Boolean).join(" ");
+  const previewText = [heroSub, heroDesc, sectionDesc, ...headings, ...paragraphs.slice(0, 3)].filter(Boolean).join(" ");
   const tags = deriveTags(safeHtml, previewText || plainText, title);
-  const logos = deriveLogos(`${title} ${previewText}`, tags);
-  const description = heroSub || sectionDesc || deriveDescription(safeHtml, paragraphs, title);
+  const description = heroSub || heroDesc || sectionDesc || deriveDescription(safeHtml, paragraphs, title);
   const intro = paragraphs[0] || description;
-  const firstPercent = statValue || plainText.match(/\b\d{1,3}%\b/)?.[0] || `${Math.max(1, Math.ceil(plainText.split(/\s+/).length / 40))} min`;
-  const heroLabel = /\bexposure|score|risk|threat\b/i.test(plainText)
+  const caseStudyCount = title.match(/\b(\d{1,2})\b/)?.[1];
+  const isCaseStudyArticle = /\bcase stud(?:y|ies)\b/i.test(title) || /\bcase stud(?:y|ies)\b/i.test(previewText || plainText);
+  const logos = deriveLogos(isCaseStudyArticle ? `${title} ${plainText}` : `${title} ${previewText}`, tags, {
+    preferBrands: isCaseStudyArticle,
+  });
+  const firstPercent = isCaseStudyArticle
+    ? `${caseStudyCount || "Multi"} case studies`
+    : statValue || plainText.match(/\b\d{1,3}%\b/)?.[0] || `${Math.max(1, Math.ceil(plainText.split(/\s+/).length / 40))} min`;
+  const heroLabel = isCaseStudyArticle
+    ? "Coverage"
+    : /\bexposure|score|risk|threat\b/i.test(plainText)
     ? "Signal"
     : /\bprinciples|examples|use cases|antipatterns\b/i.test(plainText)
       ? "Coverage"

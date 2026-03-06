@@ -16,6 +16,8 @@ export type LocalBlogPostRecord = {
   tags: string[];
   level: string | null;
   heroImage: string | null;
+  seriesName: string | null;
+  seriesOrder: number | null;
 };
 
 export type LocalBlogLogo = {
@@ -125,6 +127,7 @@ const buildRecord = (filePath: string, rawContent: string): LocalBlogPostRecord 
   const tags = (data.tags ? data.tags.split(",").map((item) => item.trim()).filter(Boolean) : deriveTags(`${title} ${plainText}`)).slice(0, 8);
   const level = data.level || deriveLevel(`${title} ${plainText}`);
   const heroImage = data.hero_image || (format === "html" ? firstHtmlImage(body) : firstMarkdownImage(body));
+  const seriesOrder = data.series_order ? Number.parseInt(data.series_order, 10) : null;
 
   return {
     id: `local-blog:${slug}`,
@@ -139,6 +142,8 @@ const buildRecord = (filePath: string, rawContent: string): LocalBlogPostRecord 
     tags,
     level,
     heroImage,
+    seriesName: data.series_name || null,
+    seriesOrder: Number.isFinite(seriesOrder) ? seriesOrder : null,
   };
 };
 

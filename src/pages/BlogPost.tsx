@@ -50,6 +50,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import GithubSlugger from "github-slugger";
 import { GiscusComments } from "@/components/blog/GiscusComments";
+import { LongformEngagementBar, useLongformEngagement } from "@/components/content/LongformEngagementBar";
 import { LOCAL_BLOG_POSTS_BY_SLUG } from "@/content/blogs";
 import { LocalBlogPostView } from "@/components/blog/LocalBlogPostView";
 
@@ -556,6 +557,7 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
   const title = meta?.meta_title || meta?.title || "Blog";
   const description = meta?.meta_description || meta?.excerpt || "Blog post";
   const canonical = slug ? `${SITE_URL}/blog/${slug}` : `${SITE_URL}/blog`;
+  const commentsSectionId = `remote-blog-comments-${slug || "post"}`;
   const robots = meta?.is_premium ? "noindex,follow" : "index,follow";
   const showPaywall = isPaywalled;
   const canDownload = !showPaywall && !!post?.content;
@@ -619,6 +621,12 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
     () => nav.series?.name || findSeriesTag(meta?.tags) || "Standalone learning article",
     [nav.series?.name, meta?.tags],
   );
+  const engagement = useLongformEngagement({
+    canonical,
+    title: meta?.title || "Blog post",
+    description: meta?.excerpt || description,
+    commentsTargetId: commentsSectionId,
+  });
 
   const handleArticleContextMenu = (event: ReactMouseEvent<HTMLElement>) => {
     event.preventDefault();
@@ -1113,6 +1121,13 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
                 </div>
               </section>
 
+              <LongformEngagementBar
+                title={meta.title}
+                controller={engagement}
+                placement="top"
+                className="mb-8"
+              />
+
               {showPaywall ? (
                 <div className="rounded-2xl border border-border bg-card p-8">
                   <div className="flex items-start gap-4">
@@ -1164,6 +1179,13 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
                       }
                     />
                   </div>
+
+                  <LongformEngagementBar
+                    title={meta.title}
+                    controller={engagement}
+                    placement="bottom"
+                    className="mt-8"
+                  />
 
                   <div
                     className="group mt-8 relative overflow-hidden rounded-2xl border border-emerald-400/25 bg-gradient-to-r from-emerald-950/80 via-teal-900/70 to-cyan-950/70 p-6 text-white brand-square-glow"
@@ -1372,7 +1394,7 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
                   ) : null}
 
                   {!showPaywall ? (
-                    <div className="mt-12 pt-8 border-t border-border">
+                    <div id={commentsSectionId} className="mt-12 pt-8 border-t border-border">
                       <h3 className="text-2xl font-bold text-foreground mb-2">What's your feedback?</h3>
                       <p className="text-sm text-muted-foreground mb-5">
                         Do let me know your thoughts around this article.
