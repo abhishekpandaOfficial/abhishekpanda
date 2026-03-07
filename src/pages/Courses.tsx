@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Award,
   ArrowRight,
   BookOpen,
   Clock,
@@ -19,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CourseCover } from "@/components/courses/CourseCover";
-import { OriginXAnimatedLogo } from "@/components/ui/OriginXAnimatedLogo";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import {
   COURSE_INSTRUCTOR,
@@ -47,6 +47,14 @@ const matchesCourseQuery = (course: CourseCatalogItem, query: string) => {
 };
 
 const availabilityWeight = (course: CourseCatalogItem) => (course.availability === "available" ? 0 : 1);
+
+const TAG_COLOR_CLASSES = [
+  "border-cyan-300/70 bg-cyan-50 text-cyan-900 dark:border-cyan-500/40 dark:bg-cyan-500/15 dark:text-cyan-100",
+  "border-emerald-300/70 bg-emerald-50 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-100",
+  "border-violet-300/70 bg-violet-50 text-violet-900 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-100",
+  "border-amber-300/70 bg-amber-50 text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-100",
+  "border-rose-300/70 bg-rose-50 text-rose-900 dark:border-rose-500/40 dark:bg-rose-500/15 dark:text-rose-100",
+];
 
 export default function Courses() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -240,6 +248,9 @@ export default function Courses() {
                       : "Open";
                 const progress = progressBySlug[course.slug] ?? 0;
                 const cardAction = course.availability === "available" ? "Start Watching" : "Register Session";
+                const visibleTags = course.tags
+                  .filter((tag) => tag.trim().toLowerCase() !== course.level.trim().toLowerCase())
+                  .slice(0, 3);
 
                 return (
                   <motion.article
@@ -255,7 +266,13 @@ export default function Courses() {
                       className="flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl"
                     >
                       <div className="relative">
-                        <CourseCover course={course} className="aspect-[16/10]" compact />
+                        <CourseCover
+                          course={course}
+                          className="aspect-[16/10]"
+                          compact
+                          sessionTitles={course.modules.map((module) => module.title)}
+                          lessonCount={lessonCount}
+                        />
                         <div className="absolute inset-x-4 top-4 flex flex-col gap-2">
                           <div className="flex items-start justify-between gap-2">
                             <span
@@ -268,9 +285,6 @@ export default function Courses() {
                             >
                               {course.isPremium ? course.priceLabel : "Free"}
                             </span>
-                            <span className="shrink-0 rounded-full border border-white/25 bg-background/80 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
-                              {course.availability === "roadmap" ? "Roadmap" : "Open"}
-                            </span>
                           </div>
                           <div className="flex">
                             <span className="max-w-full truncate rounded-full border border-white/25 bg-background/80 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
@@ -282,10 +296,10 @@ export default function Courses() {
 
                       <div className="flex flex-1 flex-col p-6">
                         <div className="flex flex-wrap gap-2">
-                          {course.tags.slice(0, 3).map((tag) => (
+                          {visibleTags.map((tag, tagIndex) => (
                             <span
                               key={`${course.slug}-${tag}`}
-                              className="rounded-full border border-border/70 bg-background px-3 py-1 text-xs font-medium text-muted-foreground"
+                              className={`rounded-full border px-3 py-1 text-xs font-semibold ${TAG_COLOR_CLASSES[tagIndex % TAG_COLOR_CLASSES.length]}`}
                             >
                               {tag}
                             </span>
@@ -362,20 +376,23 @@ export default function Courses() {
             </p>
 
             <div className="mt-6 rounded-[1.75rem] border border-amber-300/70 bg-white/90 p-6 md:p-8 dark:border-amber-400/30 dark:bg-slate-950/60">
-              <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">OriginX Labs · Learning &amp; Development Division</p>
-                  <h3 className="mt-2 text-3xl font-black tracking-tight text-amber-950 dark:text-amber-100">Certificate of Completion</h3>
-                  <p className="mt-2 text-sm text-amber-900/80 dark:text-amber-100/80">
-                    Awarded to <span className="font-bold">Alejandro Rossi</span> for successful completion of the selected video course track and session assessments.
-                  </p>
+              <div className="text-center">
+                <div className="mx-auto inline-flex items-center gap-3 rounded-full border border-amber-300/70 bg-amber-50 px-4 py-2 dark:border-amber-400/30 dark:bg-amber-950/40">
+                  <Award className="h-4 w-4 text-amber-700 dark:text-amber-300" />
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-amber-800 dark:text-amber-200">Official Certificate</span>
                 </div>
-                <div className="rounded-2xl border border-amber-300/80 bg-amber-50 p-3 dark:border-amber-400/30 dark:bg-amber-950/40">
-                  <div className="flex items-center gap-3">
-                    <OriginXAnimatedLogo size="md" />
-                    <BrandLogo variant="originx" size="md" className="rounded-xl border border-amber-300/60 bg-white p-2" />
-                  </div>
+                <div className="mt-4 flex justify-center">
+                  <BrandLogo
+                    variant="originx"
+                    size="lg"
+                    className="rounded-2xl border border-amber-300/70 bg-white p-3 shadow-sm dark:border-amber-400/30 dark:bg-slate-900"
+                  />
                 </div>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">OriginX Labs · Learning &amp; Development Division</p>
+                <h3 className="mt-2 text-3xl font-black tracking-tight text-amber-950 dark:text-amber-100">Certificate of Completion</h3>
+                <p className="mt-2 text-sm text-amber-900/80 dark:text-amber-100/80">
+                  Awarded to <span className="font-bold">Alejandro Rossi</span> for successful completion of the selected video course track and session assessments.
+                </p>
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-3">
