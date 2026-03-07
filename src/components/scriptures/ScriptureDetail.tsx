@@ -71,8 +71,8 @@ const toExplainableNarration = (raw: string) => {
     .slice(0, 220);
 
   const transformed = lines.map((line, index) => {
-    if (index % 4 === 0) return `In simple words, ${line}`;
-    if (/\btherefore\b|\bhence\b|\bso\b/i.test(line)) return `Meaning clearly: ${line}`;
+    if (index % 4 === 0) return `Let us understand this simply. ${line}`;
+    if (/\btherefore\b|\bhence\b|\bso\b/i.test(line)) return `This means. ${line}`;
     return line;
   });
 
@@ -674,11 +674,28 @@ export default function ScriptureDetail({ scripture }: ScriptureDetailProps) {
     };
   };
 
-  const playWithBrowser = (text: string, charStarts: number[]) => {
+const pickBestBrowserVoice = () => {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return null;
+  return (
+    voices.find((v) => /en[-_](IN|GB|US)/i.test(v.lang) && /(female|zira|samantha|aria|google uk|ananya|rishi)/i.test(v.name)) ||
+    voices.find((v) => /en[-_](IN|GB|US)/i.test(v.lang)) ||
+    voices[0]
+  );
+};
+
+const playWithBrowser = (text: string, charStarts: number[]) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = speechRate;
-    utterance.pitch = 1;
+    utterance.pitch = 1.02;
     utterance.volume = 1;
+    const voice = pickBestBrowserVoice();
+    if (voice) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang;
+    } else {
+      utterance.lang = "en-IN";
+    }
 
     utterance.onstart = () => {
       setProvider("browser");
@@ -725,14 +742,21 @@ export default function ScriptureDetail({ scripture }: ScriptureDetailProps) {
     setSpokenWordIndex(0);
     currentSpokenIndexRef.current = -1;
 
-    const useBrowserForSync = wordSyncEnabled;
-    if (!useBrowserForSync && SARVAM_API_KEY) {
+    if (SARVAM_API_KEY) {
       try {
         const audioSrc = await requestSarvamTts(payload.narrationText);
         if (!audioRef.current) audioRef.current = new Audio();
 
         audioRef.current.src = audioSrc;
         audioRef.current.playbackRate = speechRate;
+        audioRef.current.ontimeupdate = () => {
+          if (!wordSyncEnabled || !audioRef.current) return;
+          const duration = audioRef.current.duration || 0;
+          if (!duration || !Number.isFinite(duration)) return;
+          const ratio = Math.min(1, Math.max(0, audioRef.current.currentTime / duration));
+          const index = Math.floor(ratio * Math.max(payload.words.length - 1, 0));
+          highlightWordByIndex(index);
+        };
         audioRef.current.onplay = () => {
           setProvider("sarvam");
           setIsPlaying(true);
@@ -741,9 +765,11 @@ export default function ScriptureDetail({ scripture }: ScriptureDetailProps) {
         audioRef.current.onended = () => {
           setIsPlaying(false);
           setProvider("idle");
+          setSpokenWordIndex(payload.words.length);
         };
         audioRef.current.onerror = () => {
           setAudioError("Sarvam audio could not play. Falling back to browser speech.");
+          if (audioRef.current) audioRef.current.ontimeupdate = null;
           playWithBrowser(payload.narrationText, payload.charStarts);
         };
 
@@ -923,11 +949,9 @@ export default function ScriptureDetail({ scripture }: ScriptureDetailProps) {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            {wordSyncEnabled
-              ? "Word sync uses browser speech for precise highlighting."
-              : SARVAM_API_KEY
-              ? "Sarvam AI will be used first, then browser fallback if needed."
-              : "Sarvam API key not detected. Browser speech fallback is active."}
+          {SARVAM_API_KEY
+              ? "Sarvam AI is primary. If unavailable, browser/device TTS fallback is used automatically."
+              : "Sarvam API key not detected. Browser/device TTS fallback is active."}
           </p>
 
           <p className="text-xs text-muted-foreground">
