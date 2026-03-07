@@ -125,6 +125,70 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     },
   },
   {
+    pattern: "/tech",
+    data: {
+      title: "Tech Redirect | Abhishek Panda",
+      description: "Legacy route redirecting to the active tech hub.",
+      robots: "noindex,follow",
+    },
+  },
+  {
+    pattern: "/tech/:slug",
+    data: {
+      title: "Tech Redirect | Abhishek Panda",
+      description: "Legacy route redirecting to the active tech hub.",
+      robots: "noindex,follow",
+    },
+  },
+  {
+    pattern: "/blog/techstacks",
+    data: {
+      title: "Tech Stacks Redirect | Abhishek Panda",
+      description: "Legacy route redirecting to the active tech hub.",
+      robots: "noindex,follow",
+    },
+  },
+  {
+    pattern: "/open-owl",
+    data: {
+      title: "OpenOwl Redirect | Abhishek Panda",
+      description: "Legacy route redirecting to OpenOwl.",
+      robots: "noindex,follow",
+    },
+  },
+  {
+    pattern: "/ai-closed_models_2026.html",
+    data: {
+      title: "Closed Models Redirect | Abhishek Panda",
+      description: "Legacy route redirecting to LLM Galaxy.",
+      robots: "noindex,follow",
+    },
+  },
+  {
+    pattern: "/open-source-models-march-2026.html",
+    data: {
+      title: "Open Models Redirect | Abhishek Panda",
+      description: "Legacy route redirecting to LLM Galaxy.",
+      robots: "noindex,follow",
+    },
+  },
+  {
+    pattern: "/ai-model-comparison.html",
+    data: {
+      title: "Model Comparison Redirect | Abhishek Panda",
+      description: "Legacy route redirecting to LLM Galaxy.",
+      robots: "noindex,follow",
+    },
+  },
+  {
+    pattern: "/install",
+    data: {
+      title: "Install App | Abhishek Panda",
+      description: "Install helper route.",
+      robots: "noindex,follow",
+    },
+  },
+  {
     pattern: "/courses/:courseId",
     data: {
       title: "Course Detail | Abhishek Panda Courses",
@@ -322,7 +386,12 @@ export function RouteSeo() {
       <meta name="description" content={seo.description} />
       {keywords ? <meta name="keywords" content={keywords} /> : null}
       <meta name="robots" content={robots} />
+      <meta name="googlebot" content={robots} />
+      <meta name="bingbot" content={robots} />
+      <meta name="author" content="Abhishek Panda" />
       <link rel="canonical" href={canonical} />
+      <link rel="alternate" hrefLang="en" href={canonical} />
+      <link rel="alternate" hrefLang="x-default" href={canonical} />
       <link rel="alternate" type="application/rss+xml" title="Abhishek Panda Blog RSS" href={`${SITE_URL}/rss.xml`} />
       <link rel="alternate" type="text/plain" title="LLMs.txt" href={`${SITE_URL}/llms.txt`} />
 
@@ -331,11 +400,13 @@ export function RouteSeo() {
       <meta property="og:description" content={seo.description} />
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+      <meta property="og:image:alt" content="Abhishek Panda official website cover image" />
       <meta property="og:site_name" content="Abhishek Panda" />
       <meta property="og:locale" content="en_US" />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content="@Panda_Abhishek8" />
+      <meta name="twitter:creator" content="@Panda_Abhishek8" />
       <meta name="twitter:title" content={seo.title} />
       <meta name="twitter:description" content={seo.description} />
       <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
@@ -346,6 +417,17 @@ export function RouteSeo() {
 }
 
 function buildSchemaGraph(pathname: string, canonical: string, title: string, description: string) {
+  const organization = {
+    "@type": "Organization",
+    "@id": "https://www.abhishekpanda.com/#organization",
+    name: "Abhishek Panda",
+    url: "https://www.abhishekpanda.com",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://www.abhishekpanda.com/favicon.png",
+    },
+  };
+
   const person = {
     "@type": "Person",
     "@id": "https://www.abhishekpanda.com/#person",
@@ -370,6 +452,7 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
     "@id": "https://www.abhishekpanda.com/#website",
     name: "Abhishek Panda",
     url: "https://www.abhishekpanda.com",
+    publisher: { "@id": "https://www.abhishekpanda.com/#organization" },
     potentialAction: {
       "@type": "SearchAction",
       target: "https://www.abhishekpanda.com/blog?query={search_term_string}",
@@ -384,9 +467,11 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
     name: title,
     description,
     isPartOf: { "@id": "https://www.abhishekpanda.com/#website" },
+    about: { "@id": "https://www.abhishekpanda.com/#person" },
   };
 
-  const graph: Array<Record<string, unknown>> = [person, website, webpage];
+  const breadcrumb = buildBreadcrumbSchema(pathname, canonical);
+  const graph: Array<Record<string, unknown>> = [organization, person, website, webpage, breadcrumb];
 
   if (pathname.startsWith("/openowl")) {
     graph.push({
@@ -413,5 +498,37 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
   return {
     "@context": "https://schema.org",
     "@graph": graph,
+  };
+}
+
+function buildBreadcrumbSchema(pathname: string, canonical: string) {
+  const rawSegments = pathname.split("/").filter(Boolean);
+  const segments = rawSegments.length ? rawSegments : [""];
+
+  const itemListElement = segments.map((segment, index) => {
+    const isRoot = segment === "";
+    const name = isRoot
+      ? "Home"
+      : segment
+          .replace(/[-_]/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+    const itemPath = isRoot ? "/" : `/${rawSegments.slice(0, index + 1).join("/")}`;
+    const item = `${SITE_URL}${itemPath === "/" ? "" : itemPath}`;
+
+    return {
+      "@type": "ListItem",
+      position: index + 1,
+      name,
+      item,
+    };
+  });
+
+  if (itemListElement[itemListElement.length - 1]) {
+    itemListElement[itemListElement.length - 1].item = canonical;
+  }
+
+  return {
+    "@type": "BreadcrumbList",
+    itemListElement,
   };
 }

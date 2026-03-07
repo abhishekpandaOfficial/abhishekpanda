@@ -573,7 +573,15 @@ const buildArticleRecord = (filePath: string, html: string, assetUrl: string): A
 
 export const ARTICLES: ArticleRecord[] = Object.entries(rawArticles)
   .map(([filePath, html]) => buildArticleRecord(filePath, html, articleAssetUrls[filePath] || ""))
-  .sort((a, b) => a.title.localeCompare(b.title));
+  .sort((a, b) => {
+    // Sort by publishedAt descending, fallback to title
+    const dateA = new Date(a.publishedAt);
+    const dateB = new Date(b.publishedAt);
+    if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+      return dateB.getTime() - dateA.getTime();
+    }
+    return b.title.localeCompare(a.title);
+  });
 
 export const ARTICLES_BY_SLUG = new Map(ARTICLES.map((article) => [article.slug, article]));
 
