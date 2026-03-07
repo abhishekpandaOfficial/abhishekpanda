@@ -118,11 +118,11 @@ export const FeaturedCourses = () => {
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                       {course.description}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <span className={`font-bold text-lg ${course.is_premium ? 'gradient-text' : 'text-accent'}`}>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <span className={`font-bold text-lg break-words ${course.is_premium ? 'gradient-text' : 'text-accent'}`}>
                         {course.is_premium && course.price_amount ? `₹${course.price_amount}` : 'Free'}
                       </span>
-                      <span className="text-primary text-sm font-medium inline-flex items-center gap-1">
+                      <span className="text-primary text-sm font-medium inline-flex items-center gap-1 sm:justify-end">
                         View in Courses<ArrowRight className="w-4 h-4" />
                       </span>
                     </div>

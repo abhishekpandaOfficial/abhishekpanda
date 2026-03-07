@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CourseCover } from "@/components/courses/CourseCover";
+import { OriginXAnimatedLogo } from "@/components/ui/OriginXAnimatedLogo";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import {
   COURSE_INSTRUCTOR,
   countCourseLessons,
@@ -48,6 +50,7 @@ const availabilityWeight = (course: CourseCatalogItem) => (course.availability =
 
 export default function Courses() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [progressBySlug, setProgressBySlug] = useState<Record<string, number>>({});
 
   useEffect(() => {
     document.title = "Courses | Abhishek Panda";
@@ -101,6 +104,31 @@ export default function Courses() {
     [allCourses],
   );
 
+  useEffect(() => {
+    if (typeof window === "undefined" || !allCourses.length) return;
+    const next: Record<string, number> = {};
+    allCourses.forEach((course) => {
+      const total = countCourseLessons(course.modules);
+      if (!total) {
+        next[course.slug] = 0;
+        return;
+      }
+      const raw = window.localStorage.getItem(`course-progress:${course.slug}`);
+      if (!raw) {
+        next[course.slug] = 0;
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        const completed = Array.isArray(parsed) ? parsed.length : 0;
+        next[course.slug] = Math.max(0, Math.min(100, Math.round((completed / total) * 100)));
+      } catch {
+        next[course.slug] = 0;
+      }
+    });
+    setProgressBySlug(next);
+  }, [allCourses]);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -121,18 +149,17 @@ export default function Courses() {
               </div>
 
               <h1 className="mt-6 text-4xl font-black tracking-tight text-foreground md:text-5xl lg:text-6xl">
-                Learn Engineering Through <span className="gradient-text">Structured Courses</span>
+                Master Through <span className="gradient-text">Video Courses</span>
               </h1>
               <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">
-                Course cards, chapter-style roadmaps, and long-form learning paths built for .NET,
-                architecture, cloud, AI, and modern engineering delivery.
+                Video-first course sessions focused on practical engineering delivery for .NET, architecture, cloud, and AI.
               </p>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 {[
-                  "Chapter-based learning paths",
-                  "Responsive lesson roadmaps",
-                  "Mentorship-ready course tracks",
+                  "Video-based sessions",
+                  "Structured curriculum",
+                  "Register for guided sessions",
                 ].map((item) => (
                   <div
                     key={item}
@@ -176,11 +203,10 @@ export default function Courses() {
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Start learning today</p>
               <h2 className="mt-2 text-3xl font-black tracking-tight text-foreground md:text-4xl">
-                Open any course card and jump into the roadmap
+                Open any course card and register for sessions
               </h2>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
-                Every course card routes into a dedicated course page with overview, learning path,
-                modules, lessons, and a sticky action panel.
+                Every course card opens a clean course page with overview, what you will learn, full curriculum, and registration CTA.
               </p>
             </div>
             <div className="rounded-full border border-border/70 bg-card/80 px-4 py-2 text-sm font-semibold text-muted-foreground shadow-sm">
@@ -212,6 +238,8 @@ export default function Courses() {
                     : course.availability === "roadmap"
                       ? "Roadmap"
                       : "Open";
+                const progress = progressBySlug[course.slug] ?? 0;
+                const cardAction = course.availability === "available" ? "Start Watching" : "Register Session";
 
                 return (
                   <motion.article
@@ -224,26 +252,31 @@ export default function Courses() {
                   >
                     <Link
                       to={`/courses/${course.slug}`}
-                      className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl"
+                      className="flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl"
                     >
                       <div className="relative">
                         <CourseCover course={course} className="aspect-[16/10]" compact />
-                        <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${
-                              course.isPremium
-                                ? "bg-foreground text-background"
-                                : "bg-emerald-500/90 text-white"
-                            }`}
-                          >
-                            {course.isPremium ? course.priceLabel : "Free"}
-                          </span>
-                          <span className="rounded-full border border-white/25 bg-background/80 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
-                            {course.level}
-                          </span>
-                        </div>
-                        <div className="absolute right-4 top-4 rounded-full border border-white/25 bg-background/80 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
-                          {course.availability === "roadmap" ? "Roadmap" : "Open"}
+                        <div className="absolute inset-x-4 top-4 flex flex-col gap-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <span
+                              className={`max-w-[70%] truncate rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${
+                                course.isPremium
+                                  ? "bg-foreground text-background"
+                                  : "bg-emerald-500/90 text-white"
+                              }`}
+                              title={course.isPremium ? course.priceLabel : "Free"}
+                            >
+                              {course.isPremium ? course.priceLabel : "Free"}
+                            </span>
+                            <span className="shrink-0 rounded-full border border-white/25 bg-background/80 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+                              {course.availability === "roadmap" ? "Roadmap" : "Open"}
+                            </span>
+                          </div>
+                          <div className="flex">
+                            <span className="max-w-full truncate rounded-full border border-white/25 bg-background/80 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+                              {course.level}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
@@ -259,7 +292,7 @@ export default function Courses() {
                           ))}
                         </div>
 
-                        <h3 className="mt-4 text-2xl font-black tracking-tight text-foreground transition-colors group-hover:text-primary">
+                        <h3 className="mt-4 text-xl font-black tracking-tight text-foreground transition-colors group-hover:text-primary md:text-2xl">
                           {course.title}
                         </h3>
                         <p className="mt-3 line-clamp-3 text-sm leading-7 text-muted-foreground">
@@ -267,33 +300,44 @@ export default function Courses() {
                         </p>
 
                         <div className="mt-5 grid grid-cols-2 gap-3 text-sm text-muted-foreground">
-                          <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background px-3 py-2">
+                          <div className="inline-flex items-center gap-2 rounded-xl border border-border/60 bg-background px-3 py-2">
                             <BookOpen className="h-4 w-4 text-primary" />
                             {lessonCount} lessons
                           </div>
-                          <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background px-3 py-2">
+                          <div className="inline-flex items-center gap-2 rounded-xl border border-border/60 bg-background px-3 py-2">
                             <Clock className="h-4 w-4 text-primary" />
                             {course.duration}
                           </div>
-                          <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background px-3 py-2">
+                          <div className="inline-flex items-center gap-2 rounded-xl border border-border/60 bg-background px-3 py-2">
                             <Users className="h-4 w-4 text-primary" />
                             {course.studentsLabel}
                           </div>
-                          <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background px-3 py-2">
+                          <div className="inline-flex items-center gap-2 rounded-xl border border-border/60 bg-background px-3 py-2">
                             {course.rating > 0 ? <Star className="h-4 w-4 text-amber-500" /> : <Layers3 className="h-4 w-4 text-primary" />}
                             {proofLabel}
                           </div>
                         </div>
 
-                        <div className="mt-6 flex items-center justify-between border-t border-border/70 pt-5">
+                        <div className="mt-6 border-t border-border/70 pt-5">
+                          <div className="mb-4">
+                            <div className="mb-1 flex items-center justify-between text-xs font-semibold text-muted-foreground">
+                              <span>Progress</span>
+                              <span>{progress}%</span>
+                            </div>
+                            <div className="h-2 w-full overflow-hidden rounded-full bg-muted/70">
+                              <div className="h-full rounded-full bg-gradient-to-r from-primary to-sky-500" style={{ width: `${progress}%` }} />
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-foreground">{COURSE_INSTRUCTOR.name}</p>
                             <p className="truncate text-xs text-muted-foreground">{COURSE_INSTRUCTOR.role}</p>
                           </div>
-                          <span className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
-                            {course.availability === "roadmap" ? "Explore roadmap" : "Start"}
-                            <ArrowRight className="h-4 w-4" />
-                          </span>
+                            <span className="inline-flex items-center gap-2 text-sm font-semibold text-primary sm:justify-end">
+                              {cardAction}
+                              <ArrowRight className="h-4 w-4" />
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </Link>
@@ -309,6 +353,72 @@ export default function Courses() {
               </p>
             </div>
           )}
+
+          <div className="mt-12 rounded-[2rem] border border-amber-400/35 bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 p-6 md:p-8 shadow-[0_20px_60px_rgba(180,83,9,0.15)] dark:from-amber-950/40 dark:via-yellow-950/30 dark:to-amber-900/40">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-300">Certificate Preview</p>
+            <h2 className="mt-2 text-3xl font-black tracking-tight text-amber-950 dark:text-amber-100">OriginX Labs L&amp;D Completion Certificate</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-amber-900/80 dark:text-amber-100/80">
+              Showcase a premium signed completion certificate after course completion. This demo is used for marketing and enrollment trust.
+            </p>
+
+            <div className="mt-6 rounded-[1.75rem] border border-amber-300/70 bg-white/90 p-6 md:p-8 dark:border-amber-400/30 dark:bg-slate-950/60">
+              <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">OriginX Labs · Learning &amp; Development Division</p>
+                  <h3 className="mt-2 text-3xl font-black tracking-tight text-amber-950 dark:text-amber-100">Certificate of Completion</h3>
+                  <p className="mt-2 text-sm text-amber-900/80 dark:text-amber-100/80">
+                    Awarded to <span className="font-bold">Alejandro Rossi</span> for successful completion of the selected video course track and session assessments.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-amber-300/80 bg-amber-50 p-3 dark:border-amber-400/30 dark:bg-amber-950/40">
+                  <div className="flex items-center gap-3">
+                    <OriginXAnimatedLogo size="md" />
+                    <BrandLogo variant="originx" size="md" className="rounded-xl border border-amber-300/60 bg-white p-2" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm text-amber-900 dark:border-amber-400/30 dark:bg-amber-950/30 dark:text-amber-100">
+                  Course: <span className="font-semibold">.NET Web API Zero to Hero</span>
+                </div>
+                <div className="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm text-amber-900 dark:border-amber-400/30 dark:bg-amber-950/30 dark:text-amber-100">
+                  Certificate ID: <span className="font-semibold">ORX-LND-2026-00128</span>
+                </div>
+                <div className="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm text-amber-900 dark:border-amber-400/30 dark:bg-amber-950/30 dark:text-amber-100">
+                  Completion: <span className="font-semibold">March 07, 2026</span>
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-col gap-4 border-t border-amber-300/60 pt-6 md:flex-row md:items-end md:justify-between">
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">Verified by OriginX Labs L&amp;D</p>
+                  <p className="text-xs text-amber-800/80 dark:text-amber-200/80">Digitally verifiable and issued after completion milestone.</p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Collaboration</span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/70 bg-white/70 px-2 py-1 text-[11px] font-semibold text-amber-900 dark:border-amber-400/30 dark:bg-slate-900/40 dark:text-amber-100">
+                      <img src="/brand-logos/stacks/microsoftazure.svg" alt="Microsoft" className="h-4 w-4 object-contain" />
+                      MICROSOFT
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/70 bg-white/70 px-2 py-1 text-[11px] font-semibold text-amber-900 dark:border-amber-400/30 dark:bg-slate-900/40 dark:text-amber-100">
+                      <img src="/brand-logos/stacks/aws.svg" alt="Amazon" className="h-4 w-4 object-contain" />
+                      AMAZON
+                    </span>
+                  </div>
+                </div>
+                <div className="grid gap-3 text-right">
+                  <div>
+                    <p className="font-serif text-2xl italic text-amber-900 dark:text-amber-100">Abhishek Panda</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">CEO, OriginX Labs</p>
+                  </div>
+                  <div>
+                    <p className="font-serif text-xl italic text-amber-900 dark:text-amber-100">Namrata Sahoo</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Director, OriginX Labs</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="mt-12 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
             <div className="rounded-[2rem] border border-border/70 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8">
