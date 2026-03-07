@@ -350,12 +350,19 @@ async function requestSarvamTts(text: string) {
 
     if (!response.ok) {
       const body = await response.text().catch(() => "");
-      throw new Error(`Sarvam TTS failed (${response.status}) ${body.slice(0, 140)}`);
+      throw new Error(`Cloud TTS failed (${response.status}) ${body.slice(0, 140)}`);
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("audio/")) {
+      const buffer = await response.arrayBuffer();
+      const blob = new Blob([buffer], { type: contentType || "audio/mpeg" });
+      return URL.createObjectURL(blob);
     }
 
     const payload = (await response.json()) as Record<string, unknown>;
     const base64 = readSarvamAudioBase64(payload);
-    if (!base64) throw new Error("Sarvam TTS response did not contain playable audio.");
+    if (!base64) throw new Error("Cloud TTS response did not contain playable audio.");
 
     const src = base64.startsWith("data:") ? base64 : `data:audio/mpeg;base64,${base64}`;
     return src;
@@ -431,6 +438,12 @@ const startAmbientForScripture = async (religion: ScriptureRecord["religion"], r
     addOsc(110.0, "sine", 0.38);
     addOsc(220.0, "triangle", 0.12);
     addOsc(261.6, "sine", 0.08);
+  } else if (religion === "Jainism") {
+    addOsc(144.0, "sine", 0.36);
+    addOsc(288.0, "triangle", 0.11);
+  } else if (religion === "Taoism") {
+    addOsc(128.0, "sine", 0.34);
+    addOsc(256.0, "triangle", 0.10);
   } else {
     addOsc(220.0, "sine", 0.35);
   }
@@ -464,11 +477,13 @@ export default function ScriptureDetail({ scripture }: ScriptureDetailProps) {
 
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [provider, setProvider] = useState<"browser" | "sarvam" | "idle">("idle");
+  const [provider, setProvider] = useState<"browser" | "cloud" | "idle">("idle");
   const [audioError, setAudioError] = useState<string | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
 
   const [spokenWordIndex, setSpokenWordIndex] = useState(0);
   const [spokenTotalWords, setSpokenTotalWords] = useState(0);
+  const [compactReaderMode, setCompactReaderMode] = useState(false);
   const staticToc = useMemo(() => buildTocFromHtmlString(scripture.rawHtml), [scripture.rawHtml]);
   const ambientRefs = useRef<AmbientRefs>({ ctx: null, master: null, oscillators: [] });
   const [ambientEnabled, setAmbientEnabled] = useState(true);
@@ -563,17 +578,36 @@ export default function ScriptureDetail({ scripture }: ScriptureDetailProps) {
       observerStopTimer = window.setTimeout(() => observer?.disconnect(), 15000);
     }
 
+    const findPrimaryScrollContainer = (): HTMLElement | null => {
+      const candidates = Array.from(doc.querySelectorAll<HTMLElement>("body *")).filter((el) => {
+        const style = win.getComputedStyle(el);
+        const canScroll = /(auto|scroll)/.test(style.overflowY);
+        const travel = el.scrollHeight - el.clientHeight;
+        return canScroll && travel > 180;
+      });
+      if (!candidates.length) return null;
+      return candidates.sort((a, b) => b.scrollHeight - a.scrollHeight)[0] || null;
+    };
+
+    const primaryContainer = findPrimaryScrollContainer();
+    const scrollingRoot = (doc.scrollingElement as HTMLElement | null) || doc.documentElement;
+
     const update = () => {
       const root = doc.documentElement;
-      const scrollTop = Math.max(
-        win.scrollY || 0,
-        win.pageYOffset || 0,
-        doc.documentElement.scrollTop || 0,
-        doc.body.scrollTop || 0,
-      );
-      const scrollHeight = Math.max(root.scrollHeight || 0, doc.body.scrollHeight || 0);
-      const viewportHeight = win.innerHeight || root.clientHeight || 1;
+      const scrollTop = primaryContainer
+        ? primaryContainer.scrollTop
+        : Math.max(
+            win.scrollY || 0,
+            win.pageYOffset || 0,
+            scrollingRoot.scrollTop || 0,
+            doc.body.scrollTop || 0,
+          );
+      const scrollHeight = primaryContainer
+        ? primaryContainer.scrollHeight
+        : Math.max(root.scrollHeight || 0, doc.body.scrollHeight || 0, scrollingRoot.scrollHeight || 0);
+      const viewportHeight = primaryContainer ? primaryContainer.clientHeight : win.innerHeight || root.clientHeight || 1;
       setScrollProgress(computeScrollProgress(scrollTop, scrollHeight, viewportHeight));
+      setCompactReaderMode(scrollTop > 72);
       const nextActive = getActiveHeadingId(liveElements);
       setActiveHeadingId(nextActive);
       setSelectedHeadingId((current) => current || nextActive);
@@ -582,11 +616,13 @@ export default function ScriptureDetail({ scripture }: ScriptureDetailProps) {
     update();
     win.addEventListener("scroll", update, { passive: true });
     doc.addEventListener("scroll", update, { passive: true });
+    primaryContainer?.addEventListener("scroll", update, { passive: true });
     win.addEventListener("resize", update);
 
     cleanupRef.current = () => {
       win.removeEventListener("scroll", update);
       doc.removeEventListener("scroll", update);
+      primaryContainer?.removeEventListener("scroll", update);
       win.removeEventListener("resize", update);
       if (observerStopTimer) window.clearTimeout(observerStopTimer);
       observer?.disconnect();
@@ -624,6 +660,10 @@ export default function ScriptureDetail({ scripture }: ScriptureDetailProps) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       audioRef.current.src = "";
+    }
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
     }
 
     const doc = iframeRef.current?.contentDocument;
@@ -746,6 +786,13 @@ const playWithBrowser = (text: string, charStarts: number[]) => {
       try {
         const audioSrc = await requestSarvamTts(payload.narrationText);
         if (!audioRef.current) audioRef.current = new Audio();
+        if (objectUrlRef.current) {
+          URL.revokeObjectURL(objectUrlRef.current);
+          objectUrlRef.current = null;
+        }
+        if (audioSrc.startsWith("blob:")) {
+          objectUrlRef.current = audioSrc;
+        }
 
         audioRef.current.src = audioSrc;
         audioRef.current.playbackRate = speechRate;
@@ -758,7 +805,7 @@ const playWithBrowser = (text: string, charStarts: number[]) => {
           highlightWordByIndex(index);
         };
         audioRef.current.onplay = () => {
-          setProvider("sarvam");
+          setProvider("cloud");
           setIsPlaying(true);
           setIsLoadingAudio(false);
         };
@@ -768,7 +815,7 @@ const playWithBrowser = (text: string, charStarts: number[]) => {
           setSpokenWordIndex(payload.words.length);
         };
         audioRef.current.onerror = () => {
-          setAudioError("Sarvam audio could not play. Falling back to browser speech.");
+          setAudioError("Cloud audio could not play. Falling back to device speech.");
           if (audioRef.current) audioRef.current.ontimeupdate = null;
           playWithBrowser(payload.narrationText, payload.charStarts);
         };
@@ -776,8 +823,8 @@ const playWithBrowser = (text: string, charStarts: number[]) => {
         await audioRef.current.play();
         return;
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Sarvam TTS failed.";
-        setAudioError(`${message} Using browser speech fallback.`);
+        const message = error instanceof Error ? error.message : "Cloud TTS failed.";
+        setAudioError(`${message} Using device speech fallback.`);
       }
     }
 
@@ -794,7 +841,7 @@ const playWithBrowser = (text: string, charStarts: number[]) => {
           window.speechSynthesis.pause();
           setIsPlaying(false);
         }
-      } else if (provider === "sarvam" && audioRef.current) {
+      } else if (provider === "cloud" && audioRef.current) {
         if (audioRef.current.paused) {
           await audioRef.current.play();
           setIsPlaying(true);
@@ -812,20 +859,24 @@ const playWithBrowser = (text: string, charStarts: number[]) => {
   return (
     <div className="relative grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-8">
       <section className="space-y-4 min-w-0">
-        <div className="rounded-[1.75rem] border border-border/60 bg-card/80 p-5 md:p-6">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-            <BookOpenText className="h-4 w-4" />
-            {scripture.religion} Scripture
-          </div>
-          <h1 className="mt-3 text-3xl font-black tracking-tight text-foreground md:text-4xl">{scripture.title}</h1>
-          <p className="mt-3 max-w-4xl text-sm leading-7 text-muted-foreground md:text-base">{scripture.description}</p>
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-2"><CalendarDays className="h-4 w-4" />{scripture.publishedAt}</span>
-            <span className="inline-flex items-center gap-2"><Timer className="h-4 w-4" />{scripture.readMinutes} min read</span>
-          </div>
-        </div>
+        {!compactReaderMode ? (
+          <>
+            <div className="rounded-[1.75rem] border border-border/60 bg-card/80 p-5 md:p-6">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                <BookOpenText className="h-4 w-4" />
+                {scripture.religion} Scripture
+              </div>
+              <h1 className="mt-3 text-3xl font-black tracking-tight text-foreground md:text-4xl">{scripture.title}</h1>
+              <p className="mt-3 max-w-4xl text-sm leading-7 text-muted-foreground md:text-base">{scripture.description}</p>
+              <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-2"><CalendarDays className="h-4 w-4" />{scripture.publishedAt}</span>
+                <span className="inline-flex items-center gap-2"><Timer className="h-4 w-4" />{scripture.readMinutes} min read</span>
+              </div>
+            </div>
 
-        <LongformEngagementBar title={scripture.title} controller={engagement} placement="top" showPageUrl={false} />
+            <LongformEngagementBar title={scripture.title} controller={engagement} placement="top" showPageUrl={false} />
+          </>
+        ) : null}
 
         <div className="overflow-hidden rounded-[1.75rem] border border-border/60 bg-background/80 shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
           <iframe
@@ -950,8 +1001,8 @@ const playWithBrowser = (text: string, charStarts: number[]) => {
 
           <p className="text-xs text-muted-foreground">
           {SARVAM_API_KEY
-              ? "Sarvam AI is primary. If unavailable, browser/device TTS fallback is used automatically."
-              : "Sarvam API key not detected. Browser/device TTS fallback is active."}
+              ? "Cloud voice is primary. If unavailable, device TTS fallback is used automatically."
+              : "Cloud API key not detected. Device TTS fallback is active."}
           </p>
 
           <p className="text-xs text-muted-foreground">
@@ -966,7 +1017,7 @@ const playWithBrowser = (text: string, charStarts: number[]) => {
             <ListTree className="h-4 w-4 text-primary" />
             <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">On This Scripture</p>
           </div>
-          <div className="mt-4 space-y-2 max-h-[340px] overflow-auto pr-1">
+          <div className="mt-4 space-y-2 max-h-[52vh] overflow-y-auto pr-1">
             {toc.length ? (
               toc.map((item, index) => (
                 <button

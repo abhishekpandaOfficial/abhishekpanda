@@ -1,6 +1,6 @@
 import { BookOpen, FileText, Sparkles, type LucideIcon } from "lucide-react";
 
-export type ScriptureReligion = "Hinduism" | "Islam" | "Christianity" | "Buddhism" | "General";
+export type ScriptureReligion = "Hinduism" | "Islam" | "Christianity" | "Buddhism" | "Jainism" | "Taoism" | "General";
 
 export type ScriptureRecord = {
   slug: string;
@@ -69,11 +69,83 @@ const escapeXml = (value: string) =>
     .replace(/'/g, "&apos;");
 
 const symbolCard = (symbol: string, religion: ScriptureReligion) => {
+  if (religion === "Buddhism") {
+    const buddhismSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+      <defs>
+        <radialGradient id="goldCore" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="#fff6c9"/>
+          <stop offset="35%" stop-color="#f3d777"/>
+          <stop offset="70%" stop-color="#c99a2e"/>
+          <stop offset="100%" stop-color="#7a5518"/>
+        </radialGradient>
+        <radialGradient id="ringDark" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#6a3e12"/>
+          <stop offset="55%" stop-color="#402008"/>
+          <stop offset="100%" stop-color="#251103"/>
+        </radialGradient>
+      </defs>
+      <g transform="translate(320,180)">
+        <g stroke="url(#goldCore)" stroke-width="16" stroke-linecap="round">
+          <line x1="0" y1="-150" x2="0" y2="-106"/>
+          <line x1="88" y1="-121" x2="61" y2="-86"/>
+          <line x1="142" y1="-46" x2="100" y2="-33"/>
+          <line x1="142" y1="46" x2="100" y2="33"/>
+          <line x1="88" y1="121" x2="61" y2="86"/>
+          <line x1="0" y1="150" x2="0" y2="106"/>
+          <line x1="-88" y1="121" x2="-61" y2="86"/>
+          <line x1="-142" y1="46" x2="-100" y2="33"/>
+          <line x1="-142" y1="-46" x2="-100" y2="-33"/>
+          <line x1="-88" y1="-121" x2="-61" y2="-86"/>
+        </g>
+        <circle r="120" fill="none" stroke="url(#ringDark)" stroke-width="24"/>
+        <circle r="120" fill="none" stroke="url(#goldCore)" stroke-width="8"/>
+        <circle r="84" fill="none" stroke="url(#goldCore)" stroke-width="8"/>
+        <g stroke="url(#goldCore)" stroke-width="8" stroke-linecap="round">
+          <line x1="0" y1="-84" x2="0" y2="84"/>
+          <line x1="-84" y1="0" x2="84" y2="0"/>
+          <line x1="-59.4" y1="-59.4" x2="59.4" y2="59.4"/>
+          <line x1="59.4" y1="-59.4" x2="-59.4" y2="59.4"/>
+          <line x1="-31.1" y1="-77.9" x2="31.1" y2="77.9"/>
+          <line x1="31.1" y1="-77.9" x2="-31.1" y2="77.9"/>
+          <line x1="-77.9" y1="-31.1" x2="77.9" y2="31.1"/>
+          <line x1="77.9" y1="-31.1" x2="-77.9" y2="31.1"/>
+        </g>
+        <circle r="34" fill="url(#goldCore)" stroke="#7a5518" stroke-width="4"/>
+        <circle r="18" fill="none" stroke="#8f671f" stroke-width="3"/>
+      </g>
+    </svg>`;
+    return `data:image/svg+xml;utf8,${encodeURIComponent(buddhismSvg)}`;
+  }
+
+  if (religion === "Jainism") {
+    const jainSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+      <g transform="translate(220,18)" fill="none" stroke="#111827" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M95 30c0-13 10-23 23-23s23 10 23 23v114" />
+        <path d="M52 54c0-12 10-22 22-22s22 10 22 22v94" />
+        <path d="M8 95c0-12 10-22 22-22s22 10 22 22v84" />
+        <path d="M140 58c0-12 10-22 22-22s22 10 22 22v95" />
+        <path d="M184 136c10-17 33-24 53-16c-20 27-23 51-23 89v39c0 41-31 72-72 72H77c-41 0-72-31-72-72V156" />
+        <circle cx="106" cy="223" r="53" />
+        <circle cx="106" cy="223" r="39" />
+        <g stroke-width="4">
+          <line x1="106" y1="184" x2="106" y2="262"/>
+          <line x1="67" y1="223" x2="145" y2="223"/>
+          <line x1="79" y1="196" x2="133" y2="250"/>
+          <line x1="133" y1="196" x2="79" y2="250"/>
+        </g>
+        <text x="106" y="229" text-anchor="middle" font-size="15" fill="#111827" stroke="none" font-family="Georgia,serif">अहिंसा</text>
+      </g>
+    </svg>`;
+    return `data:image/svg+xml;utf8,${encodeURIComponent(jainSvg)}`;
+  }
+
   const palette: Record<ScriptureReligion, { from: string; to: string }> = {
     Hinduism: { from: "#FF7A18", to: "#AF002D" },
     Islam: { from: "#0F4C35", to: "#0C1F3F" },
     Christianity: { from: "#1D4ED8", to: "#1E3A8A" },
     Buddhism: { from: "#8B5E3C", to: "#C9972E" },
+    Jainism: { from: "#0E7490", to: "#155E75" },
+    Taoism: { from: "#334155", to: "#0f172a" },
     General: { from: "#1E3A8A", to: "#312E81" },
   };
 
@@ -94,6 +166,12 @@ const detectReligion = (title: string, text: string): ScriptureReligion => {
   }
   if (/\bbuddh\b|\bbuddha\b|\bdharma\b|\bsangha\b|\bnirvana\b|\btripitaka\b|\bsutta\b/i.test(source)) {
     return "Buddhism";
+  }
+  if (/\bjain\b|\bjainism\b|\bmahavira\b|\btirthankara\b|\bahimsa\b|\bagam\b|\banekantavada\b/i.test(source)) {
+    return "Jainism";
+  }
+  if (/\btao\b|\bdao\b|\btaoism\b|\bdaodejing\b|\blao tzu\b|\blaozi\b|\bwu wei\b|\byin\b|\byang\b/i.test(source)) {
+    return "Taoism";
   }
   return "General";
 };
@@ -123,6 +201,18 @@ const religionConfig = (religion: ScriptureReligion) => {
       tags: ["Scripture", "Buddhism", "Dharma", "Mindfulness"],
     };
   }
+  if (religion === "Jainism") {
+    return {
+      symbol: "✋",
+      tags: ["Scripture", "Jainism", "Ahimsa", "Mahavira"],
+    };
+  }
+  if (religion === "Taoism") {
+    return {
+      symbol: "☯",
+      tags: ["Scripture", "Taoism", "Tao Te Ching", "Harmony"],
+    };
+  }
   return {
     symbol: "✦",
     tags: ["Scripture", "Wisdom", "Faith", "Guide"],
@@ -149,6 +239,10 @@ const buildScriptureRecord = (filePath: string, html: string, assetUrl: string):
       ? "Christianity"
       : fileName.toLowerCase().includes("buddh")
       ? "Buddhism"
+      : fileName.toLowerCase().includes("jain")
+      ? "Jainism"
+      : fileName.toLowerCase().includes("tao") || fileName.toLowerCase().includes("dao")
+      ? "Taoism"
       : fileName.toLowerCase().includes("gita")
       ? "Hinduism"
       : detectReligion(title, plainText);
@@ -179,13 +273,17 @@ export const SCRIPTURES: ScriptureRecord[] = Object.entries(rawScriptures)
       "holy-quran-complete-guide": 1,
       "holy-bible-complete-guide": 2,
       "buddhism-complete-guide": 3,
+      "jainism-complete-guide": 4,
+      "taoism-complete-guide": 5,
     };
     const religionOrder: Record<ScriptureReligion, number> = {
       Hinduism: 0,
       Islam: 1,
       Christianity: 2,
       Buddhism: 3,
-      General: 4,
+      Jainism: 4,
+      Taoism: 5,
+      General: 6,
     };
 
     const rank = (item: ScriptureRecord) => {
@@ -195,6 +293,8 @@ export const SCRIPTURES: ScriptureRecord[] = Object.entries(rawScriptures)
       if (item.slug.includes("quran") || item.slug.includes("quoran")) return 1;
       if (item.slug.includes("bible")) return 2;
       if (item.slug.includes("buddh")) return 3;
+      if (item.slug.includes("jain")) return 4;
+      if (item.slug.includes("tao") || item.slug.includes("dao")) return 5;
       return 10 + (religionOrder[item.religion] ?? 9);
     };
 

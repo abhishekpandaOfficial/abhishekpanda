@@ -58,7 +58,7 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     subtitle: "Factory, Strategy, Builder, Observer, and the patterns that shape production codebases.",
     tags: ["Patterns", "Architecture", "Systems"],
     keywords: ["design pattern", "factory", "strategy", "observer", "builder", "decorator", "adapter"],
-    logos: ["/brand-logos/stacks/typescript.svg", "/brand-logos/stacks/dotnet.svg"],
+    logos: ["/brand-logos/stacks/csharp.svg", "/brand-logos/stacks/dotnet.svg"],
     rgb: "251 146 60",
   },
   {
@@ -76,7 +76,7 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     subtitle: "Event streaming, producers, consumers, partitions, and high-scale platform design.",
     tags: ["Kafka", "Streaming", "Events"],
     keywords: ["kafka", "event streaming", "producer", "consumer", "partition", "stream processing"],
-    logos: ["/brand-logos/stacks/docker.svg", "/brand-logos/stacks/kubernetes.svg"],
+    logos: ["/brand-logos/stacks/kafka.svg", "/brand-logos/stacks/docker.svg"],
     rgb: "168 85 247",
   },
   {

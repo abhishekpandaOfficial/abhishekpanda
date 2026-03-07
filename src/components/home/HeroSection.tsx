@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, Code2, Cloud, Brain, ExternalLink, ShieldCheck, Database, Cpu, ArrowRight, UserCircle, Briefcase, BookOpen } from "lucide-react";
+import { Sparkles, Code2, Cloud, Brain, Database, Cpu, ArrowRight, Briefcase, BookOpen, ScrollText, Newspaper } from "lucide-react";
 import abhishekAvatar from "@/assets/abhishek-avatar.png";
 import abhishekAvatarAlt from "@/assets/abhishek-avatar-alt.png";
 import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
-import { OpenOwlLogo } from "@/components/ui/OpenOwlLogo";
-import { BrandLogo } from "@/components/ui/BrandLogo";
 
 const badges = [
   { icon: Code2, label: ".NET Architect", color: "from-primary to-secondary", to: "/dotnet-mastery-toc" },
@@ -327,11 +325,25 @@ export const HeroSection = () => {
           >
             <div className="flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
               <Link
-                to="/about"
+                to="/scriptures"
                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/80 px-5 py-3 text-sm font-semibold text-foreground backdrop-blur-xl transition hover:border-primary/35 hover:text-primary"
               >
-                <UserCircle className="h-4 w-4" />
-                Explore About
+                <ScrollText className="h-4 w-4" />
+                Explore Scriptures
+              </Link>
+              <Link
+                to="/articles"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/80 px-5 py-3 text-sm font-semibold text-foreground backdrop-blur-xl transition hover:border-primary/35 hover:text-primary"
+              >
+                <Newspaper className="h-4 w-4" />
+                Explore Articles
+              </Link>
+              <Link
+                to="/case-studies"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/80 px-5 py-3 text-sm font-semibold text-foreground backdrop-blur-xl transition hover:border-primary/35 hover:text-primary"
+              >
+                <Briefcase className="h-4 w-4" />
+                Explore Case Studies
               </Link>
               <Link
                 to="/ebooks"
@@ -361,7 +373,13 @@ export const HeroSection = () => {
               to="/openowl"
               className="group mx-auto max-w-3xl flex items-center gap-3 rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-3 md:p-4 shadow-[0_10px_24px_rgba(15,23,42,0.12)] dark:shadow-[0_10px_30px_rgba(2,6,23,0.55)] hover:shadow-[0_0_30px_rgba(56,189,248,0.3)] transition-all duration-300"
             >
-              <OpenOwlLogo size="lg" animate className="ring-sky-300/45" />
+              <div className="relative h-14 w-14 md:h-16 md:w-16 shrink-0">
+                <div className="absolute inset-0 rounded-full border border-emerald-400/45 animate-spin [animation-duration:8s]" />
+                <div className="absolute inset-[5px] rounded-full border border-sky-400/45 animate-spin [animation-direction:reverse] [animation-duration:12s]" />
+                <div className="absolute inset-[10px] rounded-full border border-sky-300/45 bg-slate-900/90 flex items-center justify-center text-xl md:text-2xl shadow-[0_0_20px_rgba(56,189,248,0.28)]">
+                  🦉
+                </div>
+              </div>
               <div className="text-left min-w-0">
                 <div className="text-sm md:text-base font-bold text-foreground">OpenOwl AI Assistant</div>
                 <p className="text-xs md:text-sm text-muted-foreground">
@@ -371,32 +389,6 @@ export const HeroSection = () => {
               </div>
             </Link>
           </motion.div>
-
-          <motion.a
-            href="https://www.proxinex.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.62 }}
-            className="group mx-auto mb-4 flex max-w-3xl items-start gap-3 rounded-2xl border border-slate-200/70 bg-white/65 p-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.12)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(59,130,246,0.28)] dark:border-slate-700/70 dark:bg-slate-900/65 dark:shadow-[0_10px_30px_rgba(2,6,23,0.55)]"
-          >
-            <BrandLogo variant="proxinex" size="lg" className="shrink-0 rounded-xl p-2" imageClassName="h-8 w-8" />
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm md:text-base font-bold text-foreground">Proxinex</span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">
-                  <ShieldCheck className="h-3 w-3" />
-                  AI Intelligence Control Plane
-                </span>
-              </div>
-              <p className="mt-1 text-xs md:text-sm text-muted-foreground leading-relaxed">
-                Control Every AI. Trust Every Result. Multi-model routing, governance, and cost transparency across
-                text, coding, image, video, and every kind of tasks.
-              </p>
-            </div>
-            <ExternalLink className="mt-1 h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" />
-          </motion.a>
 
         </div>
       </div>

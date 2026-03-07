@@ -132,7 +132,7 @@ export default function BlogAggregator() {
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Series Library</p>
-                <h2 className="mt-2 text-3xl font-black tracking-tight text-foreground md:text-4xl">Series 01, 02, 03 and Beyond</h2>
+                <h2 className="mt-2 text-3xl font-black tracking-tight text-foreground md:text-4xl">Explore Blog Series</h2>
                 <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
                   After the blog cards, open any numbered mastery series to jump straight into its TOC with modules, chapters, topics, and attached website posts.
                 </p>

@@ -12,6 +12,8 @@ const religionAccent = (religion: ScriptureRecord["religion"]) => {
   if (religion === "Islam") return "from-emerald-500/15 to-blue-500/10 border-emerald-300/35";
   if (religion === "Christianity") return "from-blue-500/15 to-indigo-500/10 border-blue-300/35";
   if (religion === "Buddhism") return "from-amber-500/15 to-yellow-600/10 border-amber-300/35";
+  if (religion === "Jainism") return "from-cyan-500/15 to-teal-600/10 border-cyan-300/35";
+  if (religion === "Taoism") return "from-slate-500/15 to-zinc-600/10 border-slate-300/35";
   return "from-primary/15 to-secondary/10 border-primary/25";
 };
 

@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Index from "./pages/Index";
@@ -49,7 +49,6 @@ const OpenOwlAssistant = lazy(() => import("./pages/OpenOwlAssistant"));
 const LLMVisualizer = lazy(() => import("./pages/llm-visualizer"));
 const DotnetMasteryTOC = lazy(() => import("./pages/DotnetMasteryTOC"));
 const Scriptures = lazy(() => import("./pages/Scriptures"));
-const OpenOwlWidget = lazy(() => import("@/components/openowl-widget/OpenOwlWidget").then((m) => ({ default: m.OpenOwlWidget })));
 
 const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
 const AdminDashboard = lazy(() => import("@/components/admin/AdminDashboard"));
@@ -97,17 +96,6 @@ const RouteLoader = () => (
     <div className="w-8 h-8 border-2 border-primary/35 border-t-primary rounded-full animate-spin" />
   </div>
 );
-
-const AssistantMount = () => {
-  const { pathname } = useLocation();
-  if (pathname.startsWith("/admin") || pathname.startsWith("/openowl")) return null;
-
-  return (
-    <Suspense fallback={null}>
-      <OpenOwlWidget />
-    </Suspense>
-  );
-};
 
 const App = () => {
   const [showIntro, setShowIntro] = useState(() => {
@@ -245,7 +233,6 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
               </Suspense>
-              <AssistantMount />
             </AnalyticsWrapper>
           </BrowserRouter>
         </TooltipProvider>

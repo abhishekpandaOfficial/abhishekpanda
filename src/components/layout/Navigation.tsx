@@ -100,7 +100,7 @@ export const Navigation = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden min-[1520px]:flex items-center gap-0.5 flex-nowrap">
+            <nav className="hidden xl:flex items-center gap-0.5 flex-nowrap">
               {/* About */}
               {navLinks.slice(0, 1).map((link) => (
                 <Link

@@ -16,6 +16,8 @@ export type ResourceHubCard = {
   description: string;
   to?: string;
   icon: LucideIcon;
+  logoSrc?: string;
+  logoAlt?: string;
   tags: string[];
   eyebrow?: string;
   ctaLabel?: string;
@@ -117,6 +119,13 @@ export function ResourceHubPage({
               {cards.map((card) => {
                 const Icon = card.icon;
                 const cardKey = `${card.to || card.title}-${card.title}`;
+                const tagPalette = [
+                  "border-sky-300/40 bg-sky-500/10 text-sky-700 dark:text-sky-300",
+                  "border-emerald-300/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+                  "border-amber-300/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+                  "border-violet-300/40 bg-violet-500/10 text-violet-700 dark:text-violet-300",
+                  "border-rose-300/40 bg-rose-500/10 text-rose-700 dark:text-rose-300",
+                ];
                 const cardContent = (
                   <>
                     <div className="flex items-start justify-between gap-4">
@@ -133,18 +142,29 @@ export function ResourceHubPage({
                         </div>
                         <h3 className="mt-4 text-2xl font-black tracking-tight text-foreground">{card.title}</h3>
                       </div>
-                      <div className="rounded-2xl border border-border/60 bg-background/80 p-3 text-primary">
-                        <Icon className="h-5 w-5" />
+                      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-background/90 p-2 text-primary">
+                        {card.logoSrc ? (
+                          <img
+                            src={card.logoSrc}
+                            alt={card.logoAlt || `${card.title} logo`}
+                            className="h-8 w-8 object-contain"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <Icon className="h-5 w-5" />
+                        )}
                       </div>
                     </div>
 
                     <p className="mt-4 text-sm leading-7 text-muted-foreground md:text-base">{card.description}</p>
 
                     <div className="mt-5 flex flex-wrap gap-2">
-                      {card.tags.map((tag) => (
+                      {card.tags.map((tag, tagIndex) => (
                         <span
                           key={`${card.title}-${tag}`}
-                          className="rounded-full border border-border/60 bg-background/80 px-3 py-1 text-[11px] font-semibold text-foreground/80"
+                          className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${
+                            tagPalette[(tagIndex + card.title.length) % tagPalette.length]
+                          }`}
                         >
                           {tag}
                         </span>
