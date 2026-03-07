@@ -48,6 +48,7 @@ const OpenOwlLanding = lazy(() => import("./pages/OpenOwlLanding"));
 const OpenOwlAssistant = lazy(() => import("./pages/OpenOwlAssistant"));
 const LLMVisualizer = lazy(() => import("./pages/llm-visualizer"));
 const DotnetMasteryTOC = lazy(() => import("./pages/DotnetMasteryTOC"));
+const Scriptures = lazy(() => import("./pages/Scriptures"));
 const OpenOwlWidget = lazy(() => import("@/components/openowl-widget/OpenOwlWidget").then((m) => ({ default: m.OpenOwlWidget })));
 
 const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
@@ -139,7 +140,7 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
             <AnalyticsWrapper>
               <RouteSeo />
               <AnimatePresence>{showIntro ? <BrandIntro /> : null}</AnimatePresence>
@@ -175,6 +176,8 @@ const App = () => {
                 <Route path="/blog/techhub" element={<TechHub />} />
                 <Route path="/articles" element={<Suspense fallback={<RouteLoader />}><ArticlesPage /></Suspense>} />
                 <Route path="/articles/:slug" element={<Suspense fallback={<RouteLoader />}><ArticlesPage /></Suspense>} />
+                <Route path="/scriptures" element={<Suspense fallback={<RouteLoader />}><Scriptures /></Suspense>} />
+                <Route path="/scriptures/:slug" element={<Suspense fallback={<RouteLoader />}><Scriptures /></Suspense>} />
                 <Route path="/case-studies" element={<CaseStudies />} />
                 <Route path="/case-studies/:slug" element={<CaseStudies />} />
                 <Route path="/interview" element={<Interview />} />

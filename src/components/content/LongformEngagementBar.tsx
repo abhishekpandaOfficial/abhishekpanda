@@ -38,6 +38,7 @@ type LongformEngagementBarProps = {
   controller: LongformEngagementController;
   placement?: "top" | "bottom";
   variant?: "full" | "share-footer";
+  showPageUrl?: boolean;
   className?: string;
 };
 
@@ -210,6 +211,7 @@ export function LongformEngagementBar({
   controller,
   placement = "top",
   variant = "full",
+  showPageUrl = true,
   className,
 }: LongformEngagementBarProps) {
   const [particles, setParticles] = useState<EmojiParticle[]>([]);
@@ -306,7 +308,7 @@ export function LongformEngagementBar({
           ) : (
             <div className="mt-3 rounded-2xl border border-border/60 bg-background/80 px-3 py-2">
               <p className="line-clamp-1 text-sm font-semibold text-foreground">{title}</p>
-              <p className="line-clamp-1 text-xs text-muted-foreground">{controller.displayUrl}</p>
+              {showPageUrl ? <p className="line-clamp-1 text-xs text-muted-foreground">{controller.displayUrl}</p> : null}
             </div>
           )}
         </div>

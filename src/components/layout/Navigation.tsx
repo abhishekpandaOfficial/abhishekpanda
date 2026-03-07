@@ -15,7 +15,8 @@ import {
   Code2,
   Cpu,
   FolderOpen,
-  Target
+  Target,
+  BookOpenText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -67,6 +68,7 @@ export const Navigation = () => {
     location.pathname.startsWith("/tech") ||
     location.pathname === "/dotnet-mastery-toc";
   const isArticlesActive = location.pathname.startsWith("/articles");
+  const isScripturesActive = location.pathname.startsWith("/scriptures");
   const isCoursesActive = location.pathname === "/courses" || location.pathname.startsWith("/courses/");
   const isCaseStudiesActive = location.pathname.startsWith("/case-studies");
   const isInterviewActive = location.pathname.startsWith("/interview");
@@ -283,6 +285,23 @@ export const Navigation = () => {
                   </NavigationMenuItem>
                 </NavigationMenuList>
               </NavigationMenu>
+
+              <Link
+                to="/scriptures"
+                className={cn(
+                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                  isScripturesActive
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                <span className="relative flex items-center gap-2">
+                  <BookOpenText className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  Scriptures
+                </span>
+              </Link>
             </nav>
 
             {/* CTA Buttons */}
@@ -381,7 +400,7 @@ export const Navigation = () => {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.13 }}
+                transition={{ delay: 0.135 }}
               >
                 <Link
                   to="/blogs"
@@ -394,6 +413,25 @@ export const Navigation = () => {
                 >
                   <FileText className="w-5 h-5" />
                   Blogs
+                </Link>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.31 }}
+              >
+                <Link
+                  to="/scriptures"
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    isScripturesActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <BookOpenText className="w-5 h-5" />
+                  Scriptures
                 </Link>
               </motion.div>
 

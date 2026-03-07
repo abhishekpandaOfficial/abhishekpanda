@@ -68,6 +68,23 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     },
   },
   {
+    pattern: "/scriptures",
+    data: {
+      title: "Scriptures | Abhishek Panda",
+      description:
+        "Read scripture guides with symbolic cards, religion tags, and a focused long-form reading experience with progress and timing.",
+      keywords: "Bhagavad Gita guide, Holy Quran guide, scriptures, spiritual reading, Abhishek Panda scriptures",
+    },
+  },
+  {
+    pattern: "/scriptures/:slug",
+    data: {
+      title: "Scripture Guide | Abhishek Panda",
+      description:
+        "Open scripture detail pages with complete guide rendering, reading progress, timer insights, and structured navigation.",
+    },
+  },
+  {
     pattern: "/articles/:slug",
     data: {
       title: "Article | Abhishek Panda",
