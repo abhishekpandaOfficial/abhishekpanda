@@ -26,14 +26,14 @@ export default function ArticlesHeader({
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.12),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.10),transparent_30%)]" />
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-primary">
+          <div className="editorial-kicker mb-4 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-2 text-primary">
             <Newspaper className="h-4 w-4" />
             Articles Hub
           </div>
-          <h1 className={`${compact ? "text-3xl" : "text-4xl md:text-5xl lg:text-6xl"} font-black tracking-tight text-foreground`}>
+          <h1 className={`editorial-title ${compact ? "text-3xl" : "text-4xl md:text-5xl lg:text-6xl"} font-black text-foreground`}>
             {title}
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">{subtitle}</p>
+          <p className="editorial-copy mt-4 max-w-2xl text-base text-muted-foreground md:text-lg">{subtitle}</p>
         </div>
 
         <div className="flex flex-col items-start gap-4 lg:items-end">

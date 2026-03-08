@@ -96,8 +96,8 @@ export function BlogSeriesGrid({ counts, selectedSlug, seriesList = BLOG_SERIES 
                 ))}
               </div>
 
-              <h3 className="mt-4 text-xl font-black tracking-tight text-foreground">{series.title}</h3>
-              <p className="mt-2 min-h-[4rem] text-sm leading-6 text-muted-foreground">{series.subtitle}</p>
+              <h3 className="editorial-card-title mt-4 text-xl font-black text-foreground">{series.title}</h3>
+              <p className="editorial-copy mt-2 min-h-[4rem] text-sm text-muted-foreground">{series.subtitle}</p>
 
               <div className="mt-4 flex flex-wrap gap-2">
                 {series.tags.map((tag) => (
@@ -110,7 +110,7 @@ export function BlogSeriesGrid({ counts, selectedSlug, seriesList = BLOG_SERIES 
                 ))}
               </div>
 
-              <div className="mt-5 flex items-center justify-between gap-3 border-t border-border/60 pt-4 text-xs text-muted-foreground">
+              <div className="editorial-meta mt-5 flex items-center justify-between gap-3 border-t border-border/60 pt-4 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-2">
                   <Layers3 className="h-4 w-4 text-primary/80" />
                   {count > 0 ? `${count} website chapter${count === 1 ? "" : "s"}` : "TOC ready"}

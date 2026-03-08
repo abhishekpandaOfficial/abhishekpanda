@@ -90,9 +90,9 @@ export default function Articles() {
             {isDetail ? (
               <section className="py-20 text-center">
                 <div className="mx-auto max-w-2xl rounded-[2rem] border border-border/60 bg-card/80 p-10">
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">Article not found</p>
-                  <h1 className="mt-3 text-3xl font-black tracking-tight text-foreground">That article route does not exist yet.</h1>
-                  <p className="mt-4 text-muted-foreground">
+                  <p className="editorial-kicker text-primary">Article not found</p>
+                  <h1 className="editorial-title mt-3 text-3xl font-black text-foreground">That article route does not exist yet.</h1>
+                  <p className="editorial-copy mt-4 text-muted-foreground">
                     Future HTML files can be integrated into this hub and bound to their own article routes.
                   </p>
                   <Link
@@ -154,9 +154,9 @@ export default function Articles() {
                         What this hub does
                       </div>
                       <div className="mt-4 space-y-3 text-sm leading-7 text-muted-foreground">
-                        <p>Turns supplied HTML concepts into React-native article routes instead of standalone static pages.</p>
-                        <p>Preserves the site navbar, theme toggle, card language, and navigation flow across list and detail screens.</p>
-                        <p>{getArticleUploadHint()}</p>
+                        <p className="editorial-copy">Turns supplied HTML concepts into React-native article routes instead of standalone static pages.</p>
+                        <p className="editorial-copy">Preserves the site navbar, theme toggle, card language, and navigation flow across list and detail screens.</p>
+                        <p className="editorial-copy">{getArticleUploadHint()}</p>
                       </div>
                     </div>
 
@@ -184,7 +184,7 @@ export default function Articles() {
                         <Newspaper className="h-4 w-4" />
                         Routing Ready
                       </div>
-                      <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                      <p className="editorial-copy mt-4 text-sm text-muted-foreground">
                         Upload `.html` files to <span className="font-semibold text-foreground">{getArticleFolderPath()}</span> and they will appear as cards and route pages under the same layout.
                       </p>
                     </div>

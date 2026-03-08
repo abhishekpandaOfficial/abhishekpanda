@@ -25,7 +25,7 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
       <div className={`relative flex flex-col ${featured ? "justify-between p-8 md:p-10" : "p-6"}`}>
         <div>
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-primary">
+            <span className="editorial-kicker rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-primary">
               {article.eyebrow}
             </span>
             <span className="rounded-full border border-border/60 bg-background/70 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
@@ -33,10 +33,10 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
             </span>
           </div>
 
-          <h2 className={`${featured ? "text-3xl md:text-4xl" : "text-xl md:text-2xl"} font-black tracking-tight text-foreground`}>
+          <h2 className={`editorial-card-title ${featured ? "text-3xl md:text-4xl" : "text-xl md:text-2xl"} font-black text-foreground`}>
             {article.title}
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">{article.description}</p>
+          <p className="editorial-copy mt-3 max-w-2xl text-sm text-muted-foreground md:text-base">{article.description}</p>
         </div>
 
         <div className="mt-6 flex flex-wrap gap-2">
@@ -50,7 +50,7 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
           ))}
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+        <div className="editorial-meta mt-6 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-2">
             <CalendarDays className="h-4 w-4" />
             {article.publishedAt}
@@ -65,7 +65,7 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
       <div className={`relative border-t border-border/60 ${featured ? "lg:border-l lg:border-t-0" : ""}`}>
         <div className={`flex h-full flex-col justify-between ${featured ? "p-8" : "p-6"}`}>
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">
+            <p className="editorial-kicker text-primary">
               {hasBrandStrip ? "Featured Systems" : "Stack & Signals"}
             </p>
             <div className={`mt-4 flex flex-wrap ${hasBrandStrip ? "gap-2.5" : "gap-3"}`}>
@@ -95,7 +95,7 @@ export default function ArticleCard({ article, featured = false }: ArticleCardPr
             {article.keyPoints.map((point) => (
               <div
                 key={point}
-                className="rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm leading-6 text-foreground/85"
+                className="editorial-copy rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm text-foreground/85"
               >
                 {point}
               </div>

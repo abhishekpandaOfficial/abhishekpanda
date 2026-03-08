@@ -241,10 +241,10 @@ const Blog = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight">
+              <h1 className="editorial-title text-4xl md:text-5xl lg:text-6xl font-black mb-4">
                 The <span className="gradient-text">Engineering</span> Blog
               </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              <p className="editorial-copy text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
                 Insights, tutorials, and deep dives into .NET, AI/ML, cloud architecture, and modern software engineering
               </p>
             </motion.div>
@@ -271,11 +271,11 @@ const Blog = () => {
           <div className="mb-8 rounded-[2rem] border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Blog Series Hub</p>
-                <h2 className="mt-2 text-3xl font-black tracking-tight text-foreground md:text-4xl">
+                <p className="editorial-kicker text-primary">Blog Series Hub</p>
+                <h2 className="editorial-title mt-2 text-3xl font-black text-foreground md:text-4xl">
                   Structured Series Cards in the Exact Learning Order
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
+                <p className="editorial-copy mt-3 text-sm text-muted-foreground md:text-base">
                   Mastery tracks for C#, architecture, cloud, AI/ML, frontend, data, DevOps, blockchain, and Web3.
                   Click a card to open that series TOC directly with its chapters, topics, and matching website posts.
                 </p>

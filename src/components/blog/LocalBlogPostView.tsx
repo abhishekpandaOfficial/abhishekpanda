@@ -306,7 +306,7 @@ export function LocalBlogPostView({ post }: LocalBlogPostViewProps) {
           </div>
 
           <div className="rounded-[2rem] border border-border/60 bg-gradient-to-br from-card via-card to-primary/10 p-6 md:p-8 lg:p-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-1 text-xs text-muted-foreground">
+            <div className="editorial-meta inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-1 text-xs text-muted-foreground">
               <House className="h-3.5 w-3.5" />
               <Link to="/" className="hover:text-foreground">Home</Link>
               <ChevronRight className="h-3.5 w-3.5" />
@@ -326,12 +326,12 @@ export function LocalBlogPostView({ post }: LocalBlogPostViewProps) {
               ))}
             </div>
 
-            <h1 className="mt-6 max-w-5xl text-4xl font-black tracking-tight text-foreground md:text-5xl xl:text-6xl">
+            <h1 className="editorial-title mt-6 max-w-5xl text-4xl font-black text-foreground md:text-5xl xl:text-6xl">
               {post.title}
             </h1>
-            <p className="mt-5 max-w-4xl text-base leading-8 text-muted-foreground md:text-lg">{post.excerpt}</p>
+            <p className="editorial-copy mt-5 max-w-4xl text-base text-muted-foreground md:text-lg">{post.excerpt}</p>
 
-            <div className="mt-6 flex flex-wrap gap-3 text-sm text-muted-foreground">
+            <div className="editorial-meta mt-6 flex flex-wrap gap-3 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-2">
                 <Clock className="h-4 w-4 text-primary" />
                 {post.readingTimeMinutes} min read
@@ -365,7 +365,7 @@ export function LocalBlogPostView({ post }: LocalBlogPostViewProps) {
                     />
                   </div>
                 ) : (
-                  <div ref={articleBodyRef} className="rounded-[1.5rem] bg-background p-2 md:p-4">
+                  <div ref={articleBodyRef} className="editorial-shell rounded-[1.5rem] bg-background p-2 md:p-4">
                     <Markdown
                       value={post.content}
                       codeTheme={theme === "dark" ? "github-dark-default" : "github-light-default"}

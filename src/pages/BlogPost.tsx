@@ -882,7 +882,7 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
                 <div className="absolute inset-0 pointer-events-none hidden dark:block bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.20),transparent_60%)]" />
                 <div className="absolute -right-16 top-[-30px] h-40 w-40 rounded-full bg-blue-500/20 blur-2xl hidden dark:block" />
                 <div className="absolute -left-12 bottom-[-40px] h-36 w-36 rounded-full bg-indigo-500/20 blur-2xl hidden dark:block" />
-                <div className="relative inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1 text-xs text-muted-foreground mx-auto dark:border-slate-700/70 dark:bg-slate-900/60 dark:text-slate-300">
+                <div className="editorial-meta relative inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1 text-xs text-muted-foreground mx-auto dark:border-slate-700/70 dark:bg-slate-900/60 dark:text-slate-300">
                   <House className="w-3.5 h-3.5" />
                   <Link to="/" className="hover:text-foreground dark:hover:text-white">Home</Link>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -926,11 +926,11 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
                   ) : null}
                 </div>
 
-                <h1 className="relative mt-6 text-center text-3xl md:text-6xl font-black tracking-tight text-foreground dark:text-white leading-tight max-w-5xl mx-auto">
+                <h1 className="editorial-title relative mt-6 text-center text-3xl md:text-6xl font-black text-foreground dark:text-white max-w-5xl mx-auto">
                   {meta.title}
                 </h1>
 
-                <div className="relative mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground dark:text-slate-300">
+                <div className="editorial-meta relative mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground dark:text-slate-300">
                   <span className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-indigo-500 dark:text-indigo-300" />
                     {Math.max(1, meta.reading_time_minutes || 0)} min read
@@ -972,8 +972,8 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
                     AP
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-foreground dark:text-white">Abhishek Panda</p>
-                    <p className="text-xs text-muted-foreground dark:text-slate-300">Admin, Founder, Author</p>
+                    <p className="editorial-card-title text-sm font-semibold text-foreground dark:text-white">Abhishek Panda</p>
+                    <p className="editorial-meta text-xs text-muted-foreground dark:text-slate-300">Admin, Founder, Author</p>
                   </div>
                 </div>
 
@@ -1915,7 +1915,7 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
       ) : null}
 
       <div className="hidden">
-        <div ref={exportRef} className="prose prose-neutral max-w-none">
+        <div ref={exportRef} className="editorial-shell prose prose-neutral max-w-none">
           {meta?.hero_image ? <img src={meta.hero_image} alt="" /> : null}
           <h1>{meta?.title}</h1>
           {meta?.excerpt ? <p className="excerpt">{meta.excerpt}</p> : null}

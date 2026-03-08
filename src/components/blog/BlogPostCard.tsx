@@ -118,7 +118,7 @@ export function BlogPostCard({ post, index = 0, getTagStyle }: BlogPostCardProps
               <img src={post.hero_image} alt={post.title} className="absolute inset-0 h-full w-full object-cover opacity-20 mix-blend-soft-light" />
             ) : null}
 
-            <div className="absolute right-4 top-2 text-4xl font-black tracking-tight text-white/40 dark:text-white/28">
+            <div className="editorial-title absolute right-4 top-2 text-4xl font-black text-white/40 dark:text-white/28">
               {serial}
             </div>
 
@@ -127,19 +127,19 @@ export function BlogPostCard({ post, index = 0, getTagStyle }: BlogPostCardProps
                 topTags.map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-md border border-white/55 bg-black/30 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur-sm dark:border-white/35 dark:bg-white/20"
+                    className="editorial-kicker rounded-md border border-white/55 bg-black/30 px-2 py-1 text-white backdrop-blur-sm dark:border-white/35 dark:bg-white/20"
                   >
                     {tag}
                   </span>
                 ))
               ) : (
-                <span className="rounded-md border border-white/55 bg-black/30 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur-sm dark:border-white/35 dark:bg-white/20">
+                <span className="editorial-kicker rounded-md border border-white/55 bg-black/30 px-2 py-1 text-white backdrop-blur-sm dark:border-white/35 dark:bg-white/20">
                   BLOG
                 </span>
               )}
             </div>
 
-            <div className="absolute right-3 bottom-3 hidden md:flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+            <div className="editorial-kicker absolute right-3 bottom-3 hidden md:flex items-center gap-2 text-white">
               {(rightMeta.length ? rightMeta : [level, "Read", "Series"]).map((item) => (
                 <span key={item}>{item}</span>
               ))}
@@ -198,15 +198,15 @@ export function BlogPostCard({ post, index = 0, getTagStyle }: BlogPostCardProps
               </div>
             ) : null}
 
-            <h2 className="font-bold text-lg md:text-xl text-foreground mt-2 mb-3 group-hover:text-primary transition-colors line-clamp-2 min-h-[3.3rem]">
+            <h2 className="editorial-card-title text-lg md:text-xl text-foreground mt-2 mb-3 group-hover:text-primary transition-colors line-clamp-2 min-h-[3.3rem]">
               {post.title}
             </h2>
 
             {post.excerpt ? (
-              <p className="text-muted-foreground text-sm mb-4 line-clamp-3 min-h-[3.8rem]">{post.excerpt}</p>
+              <p className="editorial-copy text-muted-foreground text-sm mb-4 line-clamp-3 min-h-[3.8rem]">{post.excerpt}</p>
             ) : null}
 
-            <div className="space-y-2 text-sm text-muted-foreground">
+            <div className="editorial-meta space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-3 flex-wrap">
                 {originalPublishedAt ? (
                   <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-1 text-xs">
