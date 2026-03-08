@@ -4,71 +4,25 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>C# & .NET Mastery — Complete Series | abhishekpanda.com</title>
-<script>
-  (function () {
-    var params   = new URLSearchParams(window.location.search);
-    var embedded = params.get('embedded') === '1';
-    var qTheme   = params.get('theme');
-    var stored   = localStorage.getItem('abhishekpanda-theme') || localStorage.getItem('ap-theme');
-    var theme    = (qTheme === 'light' || qTheme === 'dark') ? qTheme
-                 : (stored === 'light' || stored === 'dark') ? stored : 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-    if (embedded) {
-      document.documentElement.setAttribute('data-embedded', '1');
-      var sendHeight = function () {
-        var b = document.body, r = document.documentElement;
-        var h = Math.max(b.scrollHeight, b.offsetHeight, r.scrollHeight, r.offsetHeight);
-        window.parent.postMessage({ type: 'dotnet-toc-height', height: h }, window.location.origin);
-      };
-      window.addEventListener('load', sendHeight);
-      new MutationObserver(sendHeight).observe(document.body, { childList: true, subtree: true, attributes: false });
-    }
-    window.addEventListener('message', function (e) {
-      if (e.origin !== window.location.origin) return;
-      var d = e.data || {};
-      if (d.type === 'parent-theme' && (d.theme === 'light' || d.theme === 'dark')) {
-        document.documentElement.setAttribute('data-theme', d.theme);
-      }
-    });
-    // BroadcastChannel — receives theme changes from the React app in the same tab
-    try {
-      var _bc = new BroadcastChannel('abhishekpanda-theme');
-      _bc.addEventListener('message', function (e) {
-        var t = (e.data && e.data.theme);
-        if (t === 'light' || t === 'dark') {
-          document.documentElement.setAttribute('data-theme', t);
-        }
-      });
-    } catch (e) {}
-    // localStorage polling — reliable fallback for live theme toggle (fires every 300ms)
-    setInterval(function () {
-      var stored = localStorage.getItem('abhishekpanda-theme');
-      if ((stored === 'light' || stored === 'dark') &&
-          stored !== document.documentElement.getAttribute('data-theme')) {
-        document.documentElement.setAttribute('data-theme', stored);
-      }
-    }, 300);
-  })();
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,300;1,9..144,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #080e1c;
-    --bg2: #0d1528;
-    --bg3: #121d35;
-    --bg4: #17243f;
-    --border: #1e2a4a;
-    --border2: #253350;
+    --bg: #0a0c10;
+    --bg2: #0f1218;
+    --bg3: #161b24;
+    --bg4: #1e2533;
+    --border: #232b3a;
+    --border2: #2d3748;
     --text: #e2e8f0;
     --text2: #8899b0;
     --text3: #556070;
-    --accent: #60a5fa;
-    --accent2: #3b82f6;
-    --accent3: #1e3a8a;
+    --accent: #00d4ff;
+    --accent2: #0099cc;
+    --accent3: #005f7f;
     --green: #00e5a0;
-    --blue: #60a5fa;
+    --blue: #4d9fff;
     --purple: #b47fff;
     --red: #ff6b6b;
     --orange: #ffaa44;
@@ -79,43 +33,6 @@
     --font-mono: 'JetBrains Mono', monospace;
     --font-body: 'Plus Jakarta Sans', sans-serif;
   }
-
-  /* ─── LIGHT THEME ────────────────────────────────── */
-  [data-theme="light"] {
-    --bg: #f5f7fc;
-    --bg2: #ffffff;
-    --bg3: #eef1f8;
-    --bg4: #e3e8f0;
-    --border: #d1d9e8;
-    --border2: #b8c4d8;
-    --text: #0f1728;
-    --text2: #3a4a6b;
-    --text3: #7a8899;
-    --accent: #3b82f6;
-    --accent2: #2563eb;
-    --accent3: #1d4ed8;
-    --green: #059669;
-    --blue: #3b82f6;
-    --purple: #7c3aed;
-    --red: #dc2626;
-    --orange: #ea580c;
-    --yellow: #ca8a04;
-  }
-  /* Hero gradient title: white start becomes invisible on light bg */
-  [data-theme="light"] .hero-title {
-    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  /* Module card borders / hover */
-  [data-theme="light"] .module-card { background: var(--bg2); }
-  [data-theme="light"] .part-header { background: var(--bg2); }
-  [data-theme="light"] .part-chapters { background: var(--bg3); }
-  [data-theme="light"] .chapter-item:hover { background: var(--bg3); }
-  [data-theme="light"] .sidebar-nav-item.active { background: rgba(59,130,246,0.10); }
-  [data-theme="light"] .rec-card { background: var(--bg3); }
-  [data-theme="light"] .rec-card:hover { background: var(--bg4); border-color: var(--accent); }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -255,7 +172,7 @@
   }
 
   .sidebar-nav-item.active {
-    background: rgba(96,165,250,0.06);
+    background: rgba(0,212,255,0.06);
     color: var(--accent);
     border-left-color: var(--accent);
   }
@@ -314,7 +231,7 @@
     position: absolute;
     top: -80px; right: -80px;
     width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(96,165,250,0.08) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
     pointer-events: none;
   }
 
@@ -332,8 +249,8 @@
     letter-spacing: 1px;
     text-transform: uppercase;
     color: var(--accent);
-    background: rgba(96,165,250,0.1);
-    border: 1px solid rgba(96,165,250,0.2);
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.2);
     padding: 3px 10px;
     border-radius: 20px;
   }
@@ -422,7 +339,7 @@
 
   .level-dot { width: 7px; height: 7px; border-radius: 50%; }
   .level-badge.basic { background: rgba(0,229,160,0.1); color: var(--green); border: 1px solid rgba(0,229,160,0.25); }
-  .level-badge.inter { background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); }
+  .level-badge.inter { background: rgba(77,159,255,0.1); color: var(--blue); border: 1px solid rgba(77,159,255,0.25); }
   .level-badge.adv   { background: rgba(180,127,255,0.1); color: var(--purple); border: 1px solid rgba(180,127,255,0.25); }
   .level-badge.arch  { background: rgba(255,107,107,0.1); color: var(--red); border: 1px solid rgba(255,107,107,0.25); }
   .level-badge.basic .level-dot { background: var(--green); }
@@ -710,7 +627,7 @@
   }
 
   .ch-basic { background: rgba(0,229,160,0.1); color: var(--green); border: 1px solid rgba(0,229,160,0.2); }
-  .ch-inter { background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
+  .ch-inter { background: rgba(77,159,255,0.1); color: var(--blue); border: 1px solid rgba(77,159,255,0.2); }
   .ch-adv   { background: rgba(180,127,255,0.1); color: var(--purple); border: 1px solid rgba(180,127,255,0.2); }
   .ch-arch  { background: rgba(255,107,107,0.1); color: var(--red); border: 1px solid rgba(255,107,107,0.2); }
   .ch-new   { background: rgba(255,170,68,0.1); color: var(--orange); border: 1px solid rgba(255,170,68,0.2); }
@@ -1104,12 +1021,28 @@
     font-family: var(--font-mono);
   }
 
+  .rec-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 2px 7px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(255,170,68,0.14);
+    border: 1px solid rgba(255,170,68,0.28);
+    color: var(--orange);
+  }
+
   /* ─── MODULE COLORS ──────────────────────────────── */
-  .mod-c  { background: rgba(96,165,250,0.1); }
-  .mod-asp { background: rgba(96,165,250,0.1); }
+  .mod-c  { background: rgba(0,212,255,0.1); }
+  .mod-asp { background: rgba(77,159,255,0.1); }
   .mod-ef  { background: rgba(0,229,160,0.1); }
   .mod-ms  { background: rgba(255,170,68,0.1); }
-  .mod-cloud { background: rgba(96,165,250,0.08); }
+  .mod-cloud { background: rgba(77,159,255,0.08); }
   .mod-sec { background: rgba(255,107,107,0.1); }
   .mod-test { background: rgba(180,127,255,0.1); }
   .mod-devops { background: rgba(255,224,102,0.1); }
@@ -1257,157 +1190,348 @@
   /* Chapter row hover sub-toggle */
   .chapter-item .ch-expand { display: inline-block; }
 
-  /* ─── EMBEDDED MODE (inside React iframe) ───────────── */
-  [data-embedded] .site-header { display: none !important; }
-  [data-embedded] .mobile-sidebar-overlay { display: none !important; }
-  [data-embedded] .mobile-menu-btn { display: none !important; }
-
-  /* Fixed-height shell: sidebars lock, only centre scrolls */
-  html[data-embedded],
-  html[data-embedded] body { height: 100%; overflow: hidden; }
-
-  html[data-embedded] .page-wrapper {
-    padding-top: 0 !important;
-    height: 100%;
-    min-height: unset !important;
-    overflow: hidden;
+  /* ─── LIGHT THEME ──────────────────────────────────── */
+  [data-theme="light"] {
+    --bg: #f0f5fb; --bg2: #ffffff; --bg3: #f7fafc; --bg4: #edf2f7;
+    --border: #dde6f0; --border2: #c7d4e2;
+    --text: #0f1923; --text2: #4a5568; --text3: #718096;
+    --accent: #0284c7; --accent2: #0369a1; --accent3: #0c4a6e;
+    --green: #059669; --blue: #2563eb; --purple: #7c3aed;
+    --red: #dc2626; --orange: #d97706; --yellow: #b45309;
   }
 
-  html[data-embedded] .left-sidebar {
-    top: 0 !important;
-    height: 100% !important;
-    position: sticky;
+  /* ─── BACKGROUND TEXTURE ────────────────────────────── */
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.3;
+  }
+  body::after {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 52px 52px; opacity: 0.1;
   }
 
-  html[data-embedded] .right-sidebar {
-    top: 0 !important;
-    height: 100% !important;
-    position: sticky;
+  /* ─── ACTION BUTTONS ────────────────────────────────── */
+  .hero-actions {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    margin-top: 24px; padding-top: 20px;
+    border-top: 1px solid var(--border);
   }
-
-  html[data-embedded] main.main-content {
-    overflow-y: auto;
-    height: 100%;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border2) transparent;
+  .action-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 16px; border-radius: 8px;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+    letter-spacing: 0.03em; cursor: pointer;
+    border: 1px solid var(--border2); background: var(--bg3); color: var(--text2);
+    transition: all 0.18s; white-space: nowrap;
   }
-
-  html { scroll-behavior: smooth; }
-
-  /* ─── ACTION BUTTONS ────────────────────────────── */
-  .hero-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:24px; padding-top:20px; border-top:1px solid var(--border); }
-  .action-btn { display:inline-flex; align-items:center; gap:7px; padding:9px 16px; border-radius:8px; font-family:var(--font-mono); font-size:12px; font-weight:500; letter-spacing:.03em; cursor:pointer; border:1px solid var(--border2); background:var(--bg3); color:var(--text2); transition:all .18s; white-space:nowrap; }
-  .action-btn:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,.22); }
+  .action-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.22); }
   .action-btn svg { flex-shrink:0; }
-  .btn-ai { background:rgba(0,212,255,.08); color:var(--accent); border-color:rgba(0,212,255,.25); }
-  .btn-ai:hover { background:rgba(0,212,255,.16); border-color:var(--accent); }
-  .btn-print:hover { background:var(--bg4); }
-  .btn-pdf { background:rgba(255,107,107,.07); color:var(--red); border-color:rgba(255,107,107,.2); }
-  .btn-pdf:hover { background:rgba(255,107,107,.13); }
-  .btn-epub { background:rgba(180,127,255,.07); color:var(--purple); border-color:rgba(180,127,255,.2); }
-  .btn-epub:hover { background:rgba(180,127,255,.13); }
+  .btn-ai { background: rgba(0,212,255,0.08); color: var(--accent); border-color: rgba(0,212,255,0.25); }
+  .btn-ai:hover { background: rgba(0,212,255,0.16); border-color: var(--accent); }
+  .btn-print:hover { background: var(--bg4); }
+  .btn-pdf { background: rgba(255,107,107,0.07); color: var(--red); border-color: rgba(255,107,107,0.2); }
+  .btn-pdf:hover { background: rgba(255,107,107,0.13); }
+  .btn-epub { background: rgba(180,127,255,0.07); color: var(--purple); border-color: rgba(180,127,255,0.2); }
+  .btn-epub:hover { background: rgba(180,127,255,0.13); }
 
-  /* ─── TECH LOGO TICKER ──────────────────────────── */
-  .logo-ticker-wrap { overflow:hidden; margin-top:22px; padding-top:16px; border-top:1px solid var(--border); mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent); -webkit-mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent); }
-  .logo-ticker-track { display:flex; align-items:center; gap:8px; width:max-content; animation:tickerSlide 36s linear infinite; }
-  .logo-ticker-wrap:hover .logo-ticker-track { animation-play-state:paused; }
-  @keyframes tickerSlide { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-  .logo-chip { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px; border:1px solid var(--border2); background:var(--bg3); white-space:nowrap; font-size:10.5px; font-family:var(--font-mono); color:var(--text2); }
-  .logo-chip img { width:15px; height:15px; object-fit:contain; border-radius:2px; }
+  /* ─── TECH LOGO TICKER ──────────────────────────────── */
+  .logo-ticker-wrap {
+    overflow: hidden; margin-top: 22px; padding-top: 16px;
+    border-top: 1px solid var(--border);
+    mask-image: linear-gradient(90deg, transparent, black 6%, black 94%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 6%, black 94%, transparent);
+  }
+  .logo-ticker-track {
+    display: flex; align-items: center; gap: 8px;
+    width: max-content; animation: tickerSlide 36s linear infinite;
+  }
+  .logo-ticker-wrap:hover .logo-ticker-track { animation-play-state: paused; }
+  @keyframes tickerSlide { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+  .logo-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 999px;
+    border: 1px solid var(--border2); background: var(--bg3);
+    white-space: nowrap; font-size: 10.5px;
+    font-family: var(--font-mono); color: var(--text2);
+  }
+  .logo-chip img { width: 15px; height: 15px; object-fit: contain; border-radius: 2px; }
 
-  /* ─── AI SUMMARY MODAL ──────────────────────────── */
-  .ai-modal-overlay { display:none; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(0,0,0,.74); backdrop-filter:blur(10px); z-index:9999; padding:20px; }
-  .ai-modal-overlay.open { display:flex; }
-  .ai-modal { background:var(--bg2); border:1px solid var(--border2); border-radius:16px; width:100%; max-width:660px; max-height:84vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 24px 80px rgba(0,0,0,.55); animation:modalSlideIn .22s ease; }
-  @keyframes modalSlideIn { from{opacity:0;transform:scale(.95) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
-  .ai-modal-head { display:flex; align-items:center; gap:12px; padding:18px 22px; border-bottom:1px solid var(--border); flex-shrink:0; }
-  .ai-modal-icon { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,rgba(0,212,255,.14),rgba(0,212,255,.04)); border:1px solid rgba(0,212,255,.25); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
-  .ai-modal-ttl-wrap { flex:1; }
-  .ai-modal-ttl { font-family:var(--font-display); font-size:16px; font-weight:700; color:var(--text); margin:0; }
-  .ai-modal-sub { font-family:var(--font-mono); font-size:10px; color:var(--text3); margin-top:2px; }
-  .ai-modal-close { width:30px; height:30px; border-radius:7px; background:var(--bg3); border:1px solid var(--border); color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; transition:all .15s; flex-shrink:0; line-height:1; }
-  .ai-modal-close:hover { background:var(--bg4); color:var(--text); }
-  .ai-modal-body { overflow-y:auto; padding:20px 22px; flex:1; }
-  .ai-thinking-bar { display:flex; align-items:center; gap:10px; padding:12px 16px; background:rgba(0,212,255,.06); border:1px solid rgba(0,212,255,.15); border-radius:10px; font-family:var(--font-mono); font-size:12px; color:var(--accent); margin-bottom:16px; }
-  .ai-dots span { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin:0 2px; animation:dotPop 1.2s ease infinite; }
-  .ai-dots span:nth-child(2){animation-delay:.2s} .ai-dots span:nth-child(3){animation-delay:.4s}
-  @keyframes dotPop{0%,80%,100%{transform:scale(.6);opacity:.5}40%{transform:scale(1);opacity:1}}
-  .ai-summ-card { margin-bottom:14px; padding:16px; background:var(--bg3); border:1px solid var(--border); border-radius:10px; }
-  .ai-summ-card-title { font-family:var(--font-display); font-size:13px; font-weight:700; color:var(--text); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
-  .ai-summ-series-num { font-family:var(--font-mono); font-size:9px; padding:2px 7px; border-radius:999px; background:var(--bg4); border:1px solid var(--border2); color:var(--text3); }
-  .ai-summ-text { font-size:13px; line-height:1.72; color:var(--text2); margin:0; }
-  .ai-modal-foot { padding:14px 22px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; background:var(--bg2); }
-  .ai-foot-note { font-family:var(--font-mono); font-size:10px; color:var(--text3); }
-  .ai-regen-btn { font-family:var(--font-mono); font-size:11px; padding:6px 14px; border-radius:6px; background:rgba(0,212,255,.08); color:var(--accent); border:1px solid rgba(0,212,255,.22); cursor:pointer; transition:all .15s; }
-  .ai-regen-btn:hover { background:rgba(0,212,255,.16); }
+  /* ─── AI SUMMARY MODAL ──────────────────────────────── */
+  .ai-modal-overlay {
+    display: none; align-items: center; justify-content: center;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.74);
+    backdrop-filter: blur(10px); z-index: 999; padding: 20px;
+  }
+  .ai-modal-overlay.open { display: flex; }
+  .ai-modal {
+    background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px;
+    width: 100%; max-width: 660px; max-height: 84vh; overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,212,255,0.07);
+    animation: modalSlideIn 0.22s ease;
+  }
+  @keyframes modalSlideIn { from{opacity:0;transform:scale(0.95) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
+  .ai-modal-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 22px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .ai-modal-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, rgba(0,212,255,0.14), rgba(0,212,255,0.04));
+    border: 1px solid rgba(0,212,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .ai-modal-ttl-wrap { flex: 1; }
+  .ai-modal-ttl { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text); margin: 0; }
+  .ai-modal-sub { font-family: var(--font-mono); font-size: 10px; color: var(--text3); margin-top: 2px; }
+  .ai-modal-close {
+    width: 30px; height: 30px; border-radius: 7px;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; transition: all 0.15s; flex-shrink: 0; line-height: 1;
+  }
+  .ai-modal-close:hover { background: var(--bg4); color: var(--text); }
+  .ai-modal-body { overflow-y: auto; padding: 20px 22px; flex: 1; }
+  .ai-thinking-bar {
+    display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+    background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 10px; font-family: var(--font-mono); font-size: 12px;
+    color: var(--accent); margin-bottom: 16px;
+  }
+  .ai-dots span {
+    display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent); margin: 0 2px;
+    animation: dotPop 1.2s ease infinite;
+  }
+  .ai-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .ai-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dotPop { 0%,80%,100%{transform:scale(0.6);opacity:.5} 40%{transform:scale(1);opacity:1} }
+  .ai-summ-card {
+    margin-bottom: 14px; padding: 16px;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
+  }
+  .ai-summ-card-title {
+    font-family: var(--font-display); font-size: 13px; font-weight: 700;
+    color: var(--text); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .ai-summ-series-num {
+    font-family: var(--font-mono); font-size: 9px;
+    padding: 2px 7px; border-radius: 999px;
+    background: var(--bg4); border: 1px solid var(--border2); color: var(--text3);
+  }
+  .ai-summ-text { font-size: 13px; line-height: 1.72; color: var(--text2); margin: 0; }
+  .ai-modal-foot {
+    padding: 14px 22px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0; background: var(--bg2);
+  }
+  .ai-foot-note { font-family: var(--font-mono); font-size: 10px; color: var(--text3); }
+  .ai-regen-btn {
+    font-family: var(--font-mono); font-size: 11px; padding: 6px 14px;
+    border-radius: 6px; background: rgba(0,212,255,0.08); color: var(--accent);
+    border: 1px solid rgba(0,212,255,0.22); cursor: pointer; transition: all 0.15s;
+  }
+  .ai-regen-btn:hover { background: rgba(0,212,255,0.16); }
 
-  /* ─── MODULE TECH LOGO CHIPS ────────────────────── */
-  .module-tech-logos { display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
-  .tech-logo-chip { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; border:1px solid var(--border); background:var(--bg3); font-family:var(--font-mono); font-size:9px; color:var(--text3); white-space:nowrap; }
-  .tech-logo-chip img { width:12px; height:12px; object-fit:contain; border-radius:2px; }
-  .module-top-strip { height:4px; width:100%; flex-shrink:0; }
+  /* ─── MODULE TECH LOGO CHIPS ────────────────────────── */
+  .module-tech-logos { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .tech-logo-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 8px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--bg3);
+    font-family: var(--font-mono); font-size: 9px; color: var(--text3);
+    white-space: nowrap;
+  }
+  .tech-logo-chip img { width: 12px; height: 12px; object-fit: contain; border-radius: 2px; }
 
-  /* ─── SERIES CARD OVERRIDES ─────────────────────── */
-  .series-card { background:var(--bg3); border:1px solid var(--border); border-radius:14px; overflow:hidden; cursor:pointer; transition:all .22s; text-decoration:none; display:flex; flex-direction:column; padding:0; }
-  .series-card:hover { border-color:var(--border2); transform:translateY(-3px); box-shadow:0 14px 38px rgba(0,0,0,.32); }
-  .sc-cover { height:94px; position:relative; overflow:hidden; display:flex; align-items:flex-end; justify-content:space-between; padding:10px 14px; flex-shrink:0; }
-  .sc-cover-glow { position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse at 75% 25%,rgba(255,255,255,.16) 0%,transparent 65%); }
-  .sc-cover-grid { position:absolute; inset:0; pointer-events:none; background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px); background-size:18px 18px; }
-  .sc-num-badge { position:absolute; top:8px; right:12px; font-family:var(--font-mono); font-size:32px; font-weight:700; color:rgba(255,255,255,.16); line-height:1; pointer-events:none; letter-spacing:-2px; }
-  .sc-cover-logos { display:flex; gap:5px; align-items:center; position:relative; z-index:1; }
-  .sc-logo-icon { width:30px; height:30px; border-radius:8px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; overflow:hidden; backdrop-filter:blur(4px); flex-shrink:0; }
-  .sc-logo-icon img { width:18px; height:18px; object-fit:contain; }
-  .sc-cover-label { position:relative; z-index:1; font-family:var(--font-mono); font-size:9px; color:rgba(255,255,255,.72); font-weight:600; letter-spacing:.12em; text-transform:uppercase; }
-  .sc-body { padding:13px 15px 15px; flex:1; display:flex; flex-direction:column; }
-  .sc-tags { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px; }
-  .sc-tag { font-family:var(--font-mono); font-size:9px; padding:2px 7px; border-radius:999px; border:1px solid var(--border2); color:var(--text3); background:var(--bg); }
-  .sc-name { font-family:var(--font-display); font-size:13.5px; font-weight:700; color:var(--text); line-height:1.3; margin:0 0 8px 0; }
-  .sc-footer { margin-top:auto; }
-  .sc-meta-row { display:flex; align-items:center; gap:6px; margin-bottom:7px; }
-  .sc-chapters,.sc-parts { font-family:var(--font-mono); font-size:10px; color:var(--text3); }
-  .sc-sep { color:var(--border2); font-size:12px; }
-  .sc-bar { height:2px; background:var(--border); border-radius:1px; overflow:hidden; }
-  .sc-bar-fill { height:100%; border-radius:1px; }
-  .series-card > .sc-icon,.series-card > .sc-num { display:none; }
+  /* ─── MODULE TOP ACCENT STRIP ───────────────────────── */
+  .module-top-strip { height: 4px; width: 100%; flex-shrink: 0; }
 
-  /* ─── SEMANTIC HEADINGS ─────────────────────────── */
-  h2.section-title { font-family:var(--font-display); font-size:18px; font-weight:700; color:var(--text); letter-spacing:-.3px; margin:0; }
+  /* ─── SERIES CARD — RICH COVER CARDS ────────────────── */
+  .series-card {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden; cursor: pointer;
+    transition: all 0.22s; text-decoration: none;
+    display: flex; flex-direction: column; padding: 0;
+  }
+  .series-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-3px);
+    box-shadow: 0 14px 38px rgba(0,0,0,0.32);
+  }
+  .sc-cover {
+    height: 94px; position: relative; overflow: hidden;
+    display: flex; align-items: flex-end;
+    justify-content: space-between; padding: 10px 14px; flex-shrink: 0;
+  }
+  .sc-cover-glow {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 75% 25%, rgba(255,255,255,0.16) 0%, transparent 65%);
+  }
+  .sc-cover-grid {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  .sc-num-badge {
+    position: absolute; top: 8px; right: 12px;
+    font-family: var(--font-mono); font-size: 32px; font-weight: 700;
+    color: rgba(255,255,255,0.16); line-height: 1; pointer-events: none;
+    letter-spacing: -2px;
+  }
+  .sc-cover-logos { display: flex; gap: 5px; align-items: center; position: relative; z-index: 1; }
+  .sc-logo-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; backdrop-filter: blur(4px); flex-shrink: 0;
+  }
+  .sc-logo-icon img { width: 18px; height: 18px; object-fit: contain; }
+  .sc-cover-label {
+    position: relative; z-index: 1;
+    font-family: var(--font-mono); font-size: 9px;
+    color: rgba(255,255,255,0.72); font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .sc-body { padding: 13px 15px 15px; flex: 1; display: flex; flex-direction: column; }
+  .sc-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .sc-tag {
+    font-family: var(--font-mono); font-size: 9px; padding: 2px 7px;
+    border-radius: 999px; border: 1px solid var(--border2);
+    color: var(--text3); background: var(--bg);
+  }
+  .sc-name {
+    font-family: var(--font-display); font-size: 13.5px; font-weight: 700;
+    color: var(--text); line-height: 1.3; margin: 0 0 8px 0;
+  }
+  .sc-footer { margin-top: auto; }
+  .sc-meta-row { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; }
+  .sc-chapters, .sc-parts { font-family: var(--font-mono); font-size: 10px; color: var(--text3); }
+  .sc-sep { color: var(--border2); font-size: 12px; }
+  .sc-bar { height: 2px; background: var(--border); border-radius: 1px; overflow: hidden; }
+  .sc-bar-fill { height: 100%; border-radius: 1px; }
+  /* hide old sc-icon / sc-num if outside sc-body */
+  .series-card > .sc-icon, .series-card > .sc-num { display: none; }
+
+  /* ─── SEMANTIC HEADING NORMALIZE ─────────────────────── */
+  h2.section-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; margin: 0; }
   h3.module-title {
-    font-family:var(--font-display); font-weight:700; color:var(--text);
-    letter-spacing:-.4px; margin:0; line-height:1.25;
+    font-family: var(--font-display); font-weight: 700; color: var(--text);
+    letter-spacing: -0.4px; margin: 0; line-height: 1.25;
     font-size: clamp(12px, 1.35vw, 17px);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width:100%;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
   }
-  h4.part-name { font-family:var(--font-display); font-size:13px; font-weight:600; color:var(--text); letter-spacing:-.2px; margin:0; }
-  h5.chapter-title { font-family:var(--font-body); font-size:13px; font-weight:500; color:var(--text); margin:0; line-height:1.3; }
+  h4.part-name { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.2px; margin: 0; }
+  h5.chapter-title { font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--text); margin: 0; line-height: 1.3; }
 
-  /* --- RIGHT SIDEBAR QUICK ACTIONS --- */
-  .rs-actions { margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid var(--border); }
-  .rs-actions-label { font-family:var(--font-mono); font-size:9px; font-weight:600; letter-spacing:1.4px; text-transform:uppercase; color:var(--text3); margin-bottom:10px; }
-  .rs-actions-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-  .rs-actions-grid .action-btn { padding:9px 6px; font-size:10px; flex-direction:column; justify-content:center; align-items:center; gap:5px; border-radius:8px; text-align:center; }
-  .rs-actions-grid .action-btn svg { flex-shrink:0; }
+  /* ─── RIGHT SIDEBAR QUICK ACTIONS ───────────────────── */
+  .rs-actions {
+    margin-bottom: 20px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .rs-actions-label {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase; color: var(--text3);
+    margin-bottom: 14px;
+  }
+  .rs-actions-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  .rs-actions-grid .action-btn {
+    min-height: 102px;
+    padding: 18px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-direction: column; justify-content: center;
+    align-items: center; gap: 5px;
+    border-radius: 18px; text-align: center;
+    letter-spacing: 0.08em;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+  }
+  .rs-actions-grid .action-btn svg { flex-shrink: 0; width: 22px; height: 22px; }
+  .rs-actions-grid .btn-ai {
+    background: rgba(59,130,246,0.08);
+    color: #3b82f6;
+    border-color: rgba(125,211,252,0.55);
+  }
+  .rs-actions-grid .btn-print {
+    background: rgba(148,163,184,0.08);
+    color: #475569;
+    border-color: rgba(148,163,184,0.36);
+  }
+  .rs-actions-grid .btn-pdf {
+    background: rgba(239,68,68,0.07);
+    color: #ef4444;
+    border-color: rgba(252,165,165,0.5);
+  }
+  .rs-actions-grid .btn-epub {
+    background: rgba(139,92,246,0.08);
+    color: #7c3aed;
+    border-color: rgba(196,181,253,0.55);
+  }
+  [data-theme="dark"] .rs-actions-grid .btn-print {
+    color: #cbd5e1;
+    background: rgba(148,163,184,0.06);
+    border-color: rgba(148,163,184,0.22);
+  }
 
-  /* --- MOBILE FLOATING ACTION BAR --- */
+  /* ─── MOBILE FLOATING ACTION BAR ───────────────────── */
   .mob-float-actions {
-    display:none; position:fixed; bottom:0; left:0; right:0; z-index:300;
-    background:rgba(8,16,28,0.96); backdrop-filter:blur(14px) saturate(1.8);
-    border-top:1px solid var(--border2);
-    padding:10px 12px; padding-bottom:max(12px,env(safe-area-inset-bottom));
-    gap:6px; align-items:stretch; justify-content:center;
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+    background: rgba(8,16,28,0.96);
+    backdrop-filter: blur(14px) saturate(1.8);
+    border-top: 1px solid var(--border2);
+    padding: 10px 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    gap: 6px; align-items: stretch; justify-content: center;
   }
-  .mob-float-actions .action-btn { flex:1; max-width:90px; padding:8px 4px; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:9.5px; border-radius:8px; }
-  @media (max-width:1024px) { .mob-float-actions { display:flex; } body { padding-bottom:72px; } html[data-embedded] main.main-content { padding-bottom:72px; } }
-  @media (max-width:768px) { h3.module-title { white-space:normal; font-size:clamp(12px,3.5vw,15px); overflow:visible; text-overflow:unset; } }
+  .mob-float-actions .action-btn {
+    flex: 1; max-width: 90px; padding: 8px 4px;
+    flex-direction: column; align-items: center;
+    justify-content: center; gap: 4px;
+    font-size: 9.5px; border-radius: 8px;
+  }
+  @media (max-width: 1024px) {
+    .mob-float-actions { display: flex; }
+    body { padding-bottom: 72px; }
+    html[data-embedded] main.main-content { padding-bottom: 72px; }
+  }
+  @media (max-width: 768px) {
+    h3.module-title {
+      white-space: normal;
+      font-size: clamp(12px, 3.5vw, 15px);
+      overflow: visible; text-overflow: unset;
+    }
+  }
 
-  @media print { .site-header,.left-sidebar,.right-sidebar,.mobile-menu-btn,.hero-actions,.logo-ticker-wrap,.module-toggle,.ch-expand,.mob-float-actions,#aiModal{display:none!important} .page-wrapper{display:block!important;padding-top:0!important} .main-content{padding:20px!important} .module-parts,.part-chapters,.chapter-subs{display:block!important} .module-card{page-break-inside:avoid;border:1px solid #ccc} body{background:#fff!important;color:#000!important} h1,h2,h3,h4,h5{color:#000!important} .hero-title{-webkit-text-fill-color:#000!important} }
+  /* ─── PRINT STYLES ───────────────────────────────────── */
+  @media print {
+    .site-header, .left-sidebar, .right-sidebar, .mobile-menu-btn,
+    .hero-actions, .logo-ticker-wrap, .module-toggle, .ch-expand,
+    .mob-float-actions, #aiModal { display: none !important; }
+    .page-wrapper { display: block !important; padding-top: 0 !important; }
+    .main-content { padding: 20px !important; }
+    .module-parts, .part-chapters, .chapter-subs { display: block !important; }
+    .module-card { page-break-inside: avoid; border: 1px solid #ccc; margin-bottom: 12px; }
+    body { background: #fff !important; color: #000 !important; }
+    h1, h2, h3, h4, h5 { color: #000 !important; }
+    .hero-title { -webkit-text-fill-color: #000 !important; }
+    .chapter-item { padding-left: 40px !important; }
+  }
 </style>
 </head>
 <body>
 
 <!-- HEADER -->
 <header class="site-header">
-  <a class="header-logo" href="/dotnet-mastery-toc">
+  <a class="header-logo" href="#">
     <div class="logo-dot">C#</div>
     <span class="logo-text">abhishek<span>panda</span>.com</span>
   </a>
@@ -1432,14 +1556,14 @@
     <div class="sidebar-section-label">Blog Series</div>
 
     <a class="sidebar-nav-item active" href="#module-1" onclick="scrollToModule('module-1',this)">
-      <span class="nav-icon" style="background:rgba(96,165,250,0.15);">⚙️</span>
+      <span class="nav-icon" style="background:rgba(0,212,255,0.15);">⚙️</span>
       <span style="flex:1;font-size:11.5px">C# Mastery</span>
       <span class="nav-num">34ch</span>
     </a>
     <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" style="width:0%;background:var(--accent)"></div></div>
 
     <a class="sidebar-nav-item" href="#module-2" onclick="scrollToModule('module-2',this)">
-      <span class="nav-icon" style="background:rgba(96,165,250,0.15);">🌐</span>
+      <span class="nav-icon" style="background:rgba(77,159,255,0.15);">🌐</span>
       <span style="flex:1;font-size:11.5px">.NET Core API</span>
       <span class="nav-num">10ch</span>
     </a>
@@ -1485,7 +1609,7 @@
       <span style="flex:1;font-size:11.5px">AI/ML Engineering</span>
       <span class="nav-num">28ch</span>
     </a>
-    <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" style="width:0%;background:var(--purple)"></div></div>
+    <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" style="width:0%;background:var(--yellow)"></div></div>
 
     <a class="sidebar-nav-item" href="#module-9" onclick="scrollToModule('module-9',this)">
       <span class="nav-icon" style="background:rgba(0,229,160,0.12);">💰</span>
@@ -1503,6 +1627,13 @@
       <span class="nav-icon" style="background:var(--bg3);">📰</span>
       <span style="flex:1;font-size:11.5px">All Articles</span>
     </a>
+    <div class="sidebar-section-label" style="margin-top:20px;">Fresh Articles</div>
+    <div id="sidebarArticlesList">
+      <a class="sidebar-nav-item" href="#blog-articles">
+        <span class="nav-icon" style="background:var(--bg3);">📰</span>
+        <span style="flex:1;font-size:11.5px">Loading latest articles…</span>
+      </a>
+    </div>
   </aside>
 
   <!-- ═══════════════════════════ MAIN CONTENT ═══════════════════════════ -->
@@ -1548,10 +1679,22 @@
 
       <!-- ── Action Buttons ── -->
       <div class="hero-actions">
-        <button class="action-btn btn-ai" onclick="openAISummary()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>AI Summary</button>
-        <button class="action-btn btn-print" onclick="printTOC()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print</button>
-        <button class="action-btn btn-pdf" onclick="downloadPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>↓ PDF</button>
-        <button class="action-btn btn-epub" onclick="downloadEPUB()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="8" y1="3" x2="8" y2="21"/><line x1="2" y1="12" x2="22" y2="12"/></svg>↓ EPUB</button>
+        <button class="action-btn btn-ai" onclick="openAISummary()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          AI Summary
+        </button>
+        <button class="action-btn btn-print" onclick="printTOC()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print
+        </button>
+        <button class="action-btn btn-pdf" onclick="downloadPDF()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          ↓ PDF
+        </button>
+        <button class="action-btn btn-epub" onclick="downloadEPUB()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="8" y1="3" x2="8" y2="21"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+          ↓ EPUB
+        </button>
       </div>
 
       <!-- ── Tech Stack Ticker ── -->
@@ -1573,6 +1716,7 @@
           <span class="logo-chip"><img src="https://cdn.simpleicons.org/python/4d9fff" alt="">Python</span>
           <span class="logo-chip"><img src="https://cdn.simpleicons.org/grafana/ff8800" alt="">Grafana</span>
           <span class="logo-chip"><img src="https://cdn.simpleicons.org/githubactions/aaaaaa" alt="">GitHub Actions</span>
+          <!-- duplicate for seamless loop -->
           <span class="logo-chip"><svg width="15" height="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" aria-label="C#" style="flex-shrink:0"><path fill="#9B4F96" d="M115.4 30.7L67.1 2.9c-.8-.5-1.9-.7-3.1-.7-1.2 0-2.3.3-3.1.7l-48 27.9c-1.7 1-2.9 3.5-2.9 5.4v55.7c0 1.1.2 2.4 1 3.5l106.8-62c-.6-1.2-1.5-2.1-2.4-2.7z"/><path fill="#68217A" d="M10.7 95.3c.5.8 1.2 1.5 1.9 1.9l48.2 27.9c.8.5 1.9.7 3.1.7 1.2 0 2.3-.3 3.1-.7l48-27.9c1.7-1 2.9-3.5 2.9-5.4V36.1c0-.9-.1-1.9-.6-2.8l-106.6 62z"/><path fill="#fff" d="M85.3 76.1C81.1 83.5 73.1 88.5 64 88.5c-13.5 0-24.5-11-24.5-24.5s11-24.5 24.5-24.5c9.1 0 17.1 5 21.3 12.5l13-7.5c-6.8-11.9-19.6-20-34.3-20-21.8 0-39.5 17.7-39.5 39.5s17.7 39.5 39.5 39.5c14.6 0 27.4-8 34.2-19.8l-12.9-7.6zM97 66.2l.9-4.3h-4.2v-4.7h5.1L100 51h4.9l-1.2 6.1h3.8l1.2-6.1h4.8l-1.2 6.1h2.4v4.7h-3.3l-.9 4.3h4.2v4.7h-5.1l-1.2 6h-4.9l1.2-6h-3.8l-1.2 6h-4.8l1.2-6h-2.4v-4.7H97zm4.8 0h3.8l.9-4.3h-3.8l-.9 4.3z"/></svg>C#</span>
           <span class="logo-chip"><img src="https://cdn.simpleicons.org/dotnet/8878ff" alt="">.NET 9</span>
           <span class="logo-chip"><img src="https://cdn.simpleicons.org/postgresql/4d9fff" alt="">PostgreSQL</span>
@@ -1601,23 +1745,197 @@
       </div>
       <div class="series-cards-grid">
 
-        <a class="series-card" href="#module-1"><div class="sc-cover" style="background:linear-gradient(135deg,#0e3a6e 0%,#0369a1 100%)"><div class="sc-cover-grid"></div><div class="sc-cover-glow"></div><div class="sc-cover-logos"><div class="sc-logo-icon"><svg width="22" height="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" aria-label="C#" style="flex-shrink:0"><path fill="#9B4F96" d="M115.4 30.7L67.1 2.9c-.8-.5-1.9-.7-3.1-.7-1.2 0-2.3.3-3.1.7l-48 27.9c-1.7 1-2.9 3.5-2.9 5.4v55.7c0 1.1.2 2.4 1 3.5l106.8-62c-.6-1.2-1.5-2.1-2.4-2.7z"/><path fill="#68217A" d="M10.7 95.3c.5.8 1.2 1.5 1.9 1.9l48.2 27.9c.8.5 1.9.7 3.1.7 1.2 0 2.3-.3 3.1-.7l48-27.9c1.7-1 2.9-3.5 2.9-5.4V36.1c0-.9-.1-1.9-.6-2.8l-106.6 62z"/><path fill="#fff" d="M85.3 76.1C81.1 83.5 73.1 88.5 64 88.5c-13.5 0-24.5-11-24.5-24.5s11-24.5 24.5-24.5c9.1 0 17.1 5 21.3 12.5l13-7.5c-6.8-11.9-19.6-20-34.3-20-21.8 0-39.5 17.7-39.5 39.5s17.7 39.5 39.5 39.5c14.6 0 27.4-8 34.2-19.8l-12.9-7.6zM97 66.2l.9-4.3h-4.2v-4.7h5.1L100 51h4.9l-1.2 6.1h3.8l1.2-6.1h4.8l-1.2 6.1h2.4v4.7h-3.3l-.9 4.3h4.2v4.7h-5.1l-1.2 6h-4.9l1.2-6h-3.8l-1.2 6h-4.8l1.2-6h-2.4v-4.7H97zm4.8 0h3.8l.9-4.3h-3.8l-.9 4.3z"/></svg></div><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/dotnet/ffffff" alt=".NET"></div></div><span class="sc-cover-label">CLR · GC · Async</span><span class="sc-num-badge">01</span></div><div class="sc-body"><div class="sc-tags"><span class="sc-tag">CLR</span><span class="sc-tag">Memory</span><span class="sc-tag">Concurrency</span><span class="sc-tag">LINQ</span></div><h3 class="sc-name">C# &amp; .NET Runtime Engineering</h3><div class="sc-footer"><div class="sc-meta-row"><span class="sc-chapters">34 chapters</span><span class="sc-sep">·</span><span class="sc-parts">11 parts</span></div><div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--accent)"></div></div></div></div></a>
+        <!-- Series 01 -->
+        <a class="series-card" href="#module-1">
+          <div class="sc-cover" style="background:linear-gradient(135deg,#0e3a6e 0%,#0369a1 100%)">
+            <div class="sc-cover-grid"></div><div class="sc-cover-glow"></div>
+            <div class="sc-cover-logos">
+              <div class="sc-logo-icon"><svg width="22" height="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" aria-label="C#" style="flex-shrink:0"><path fill="#9B4F96" d="M115.4 30.7L67.1 2.9c-.8-.5-1.9-.7-3.1-.7-1.2 0-2.3.3-3.1.7l-48 27.9c-1.7 1-2.9 3.5-2.9 5.4v55.7c0 1.1.2 2.4 1 3.5l106.8-62c-.6-1.2-1.5-2.1-2.4-2.7z"/><path fill="#68217A" d="M10.7 95.3c.5.8 1.2 1.5 1.9 1.9l48.2 27.9c.8.5 1.9.7 3.1.7 1.2 0 2.3-.3 3.1-.7l48-27.9c1.7-1 2.9-3.5 2.9-5.4V36.1c0-.9-.1-1.9-.6-2.8l-106.6 62z"/><path fill="#fff" d="M85.3 76.1C81.1 83.5 73.1 88.5 64 88.5c-13.5 0-24.5-11-24.5-24.5s11-24.5 24.5-24.5c9.1 0 17.1 5 21.3 12.5l13-7.5c-6.8-11.9-19.6-20-34.3-20-21.8 0-39.5 17.7-39.5 39.5s17.7 39.5 39.5 39.5c14.6 0 27.4-8 34.2-19.8l-12.9-7.6zM97 66.2l.9-4.3h-4.2v-4.7h5.1L100 51h4.9l-1.2 6.1h3.8l1.2-6.1h4.8l-1.2 6.1h2.4v4.7h-3.3l-.9 4.3h4.2v4.7h-5.1l-1.2 6h-4.9l1.2-6h-3.8l-1.2 6h-4.8l1.2-6h-2.4v-4.7H97zm4.8 0h3.8l.9-4.3h-3.8l-.9 4.3z"/></svg></div>
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/dotnet/ffffff" alt=".NET"></div>
+            </div>
+            <span class="sc-cover-label">CLR · GC · Async</span>
+            <span class="sc-num-badge">01</span>
+          </div>
+          <div class="sc-body">
+            <div class="sc-tags"><span class="sc-tag">CLR</span><span class="sc-tag">Memory</span><span class="sc-tag">Concurrency</span><span class="sc-tag">LINQ</span></div>
+            <h3 class="sc-name">C# &amp; .NET Runtime Engineering</h3>
+            <div class="sc-footer">
+              <div class="sc-meta-row"><span class="sc-chapters">34 chapters</span><span class="sc-sep">·</span><span class="sc-parts">11 parts</span></div>
+              <div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--accent)"></div></div>
+            </div>
+          </div>
+        </a>
 
-        <a class="series-card" href="#module-2"><div class="sc-cover" style="background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%)"><div class="sc-cover-grid"></div><div class="sc-cover-glow"></div><div class="sc-cover-logos"><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/dotnet/ffffff" alt=".NET"></div><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/nuget/ffffff" alt="NuGet"></div></div><span class="sc-cover-label">Middleware · DI · Kestrel</span><span class="sc-num-badge">02</span></div><div class="sc-body"><div class="sc-tags"><span class="sc-tag">Middleware</span><span class="sc-tag">DI</span><span class="sc-tag">Routing</span><span class="sc-tag">SignalR</span></div><h3 class="sc-name">ASP.NET Core Internals &amp; Hosting</h3><div class="sc-footer"><div class="sc-meta-row"><span class="sc-chapters">10 chapters</span><span class="sc-sep">·</span><span class="sc-parts">10 parts</span></div><div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--blue)"></div></div></div></div></a>
+        <!-- Series 02 -->
+        <a class="series-card" href="#module-2">
+          <div class="sc-cover" style="background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%)">
+            <div class="sc-cover-grid"></div><div class="sc-cover-glow"></div>
+            <div class="sc-cover-logos">
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/dotnet/ffffff" alt=".NET"></div>
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/nuget/ffffff" alt="NuGet"></div>
+            </div>
+            <span class="sc-cover-label">Middleware · DI · Kestrel</span>
+            <span class="sc-num-badge">02</span>
+          </div>
+          <div class="sc-body">
+            <div class="sc-tags"><span class="sc-tag">Middleware</span><span class="sc-tag">DI</span><span class="sc-tag">Routing</span><span class="sc-tag">SignalR</span></div>
+            <h3 class="sc-name">ASP.NET Core Internals &amp; Hosting</h3>
+            <div class="sc-footer">
+              <div class="sc-meta-row"><span class="sc-chapters">10 chapters</span><span class="sc-sep">·</span><span class="sc-parts">10 parts</span></div>
+              <div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--blue)"></div></div>
+            </div>
+          </div>
+        </a>
 
-        <a class="series-card" href="#module-3"><div class="sc-cover" style="background:linear-gradient(135deg,#064e3b 0%,#059669 100%)"><div class="sc-cover-grid"></div><div class="sc-cover-glow"></div><div class="sc-cover-logos"><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/dotnet/ffffff" alt="EF Core"></div><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/postgresql/ffffff" alt="PostgreSQL"></div></div><span class="sc-cover-label">ORM · DDD · SaaS</span><span class="sc-num-badge">03</span></div><div class="sc-body"><div class="sc-tags"><span class="sc-tag">EF Core</span><span class="sc-tag">PostgreSQL</span><span class="sc-tag">Migrations</span><span class="sc-tag">DDD</span></div><h3 class="sc-name">EF Core &amp; PostgreSQL Persistence</h3><div class="sc-footer"><div class="sc-meta-row"><span class="sc-chapters">15 chapters</span><span class="sc-sep">·</span><span class="sc-parts">5 parts</span></div><div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--green)"></div></div></div></div></a>
+        <!-- Series 03 -->
+        <a class="series-card" href="#module-3">
+          <div class="sc-cover" style="background:linear-gradient(135deg,#064e3b 0%,#059669 100%)">
+            <div class="sc-cover-grid"></div><div class="sc-cover-glow"></div>
+            <div class="sc-cover-logos">
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/dotnet/ffffff" alt="EF Core"></div>
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/postgresql/ffffff" alt="PostgreSQL"></div>
+            </div>
+            <span class="sc-cover-label">ORM · DDD · SaaS</span>
+            <span class="sc-num-badge">03</span>
+          </div>
+          <div class="sc-body">
+            <div class="sc-tags"><span class="sc-tag">EF Core</span><span class="sc-tag">PostgreSQL</span><span class="sc-tag">Migrations</span><span class="sc-tag">DDD</span></div>
+            <h3 class="sc-name">EF Core &amp; PostgreSQL Persistence</h3>
+            <div class="sc-footer">
+              <div class="sc-meta-row"><span class="sc-chapters">15 chapters</span><span class="sc-sep">·</span><span class="sc-parts">5 parts</span></div>
+              <div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--green)"></div></div>
+            </div>
+          </div>
+        </a>
 
-        <a class="series-card" href="#module-4"><div class="sc-cover" style="background:linear-gradient(135deg,#78350f 0%,#d97706 100%)"><div class="sc-cover-grid"></div><div class="sc-cover-glow"></div><div class="sc-cover-logos"><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/graphql/ffffff" alt="GraphQL"></div><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/openapiinitiative/ffffff" alt="OpenAPI"></div></div><span class="sc-cover-label">REST · gRPC · GraphQL</span><span class="sc-num-badge">04</span></div><div class="sc-body"><div class="sc-tags"><span class="sc-tag">REST</span><span class="sc-tag">gRPC</span><span class="sc-tag">GraphQL</span><span class="sc-tag">OpenAPI</span></div><h3 class="sc-name">API Styles &amp; Contract Engineering</h3><div class="sc-footer"><div class="sc-meta-row"><span class="sc-chapters">15 chapters</span><span class="sc-sep">·</span><span class="sc-parts">8 parts + preface</span></div><div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--orange)"></div></div></div></div></a>
+        <!-- Series 04 -->
+        <a class="series-card" href="#module-4">
+          <div class="sc-cover" style="background:linear-gradient(135deg,#78350f 0%,#d97706 100%)">
+            <div class="sc-cover-grid"></div><div class="sc-cover-glow"></div>
+            <div class="sc-cover-logos">
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/graphql/ffffff" alt="GraphQL"></div>
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/openapiinitiative/ffffff" alt="OpenAPI"></div>
+            </div>
+            <span class="sc-cover-label">REST · gRPC · GraphQL</span>
+            <span class="sc-num-badge">04</span>
+          </div>
+          <div class="sc-body">
+            <div class="sc-tags"><span class="sc-tag">REST</span><span class="sc-tag">gRPC</span><span class="sc-tag">GraphQL</span><span class="sc-tag">OpenAPI</span></div>
+            <h3 class="sc-name">API Styles &amp; Contract Engineering</h3>
+            <div class="sc-footer">
+              <div class="sc-meta-row"><span class="sc-chapters">15 chapters</span><span class="sc-sep">·</span><span class="sc-parts">8 parts + preface</span></div>
+              <div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--orange)"></div></div>
+            </div>
+          </div>
+        </a>
 
-        <a class="series-card" href="#module-5"><div class="sc-cover" style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%)"><div class="sc-cover-grid"></div><div class="sc-cover-glow"></div><div class="sc-cover-logos"><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/jsonwebtokens/ffffff" alt="JWT"></div><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/microsoftazure/ffffff" alt="Azure AD"></div></div><span class="sc-cover-label">JWT · OAuth2 · OWASP</span><span class="sc-num-badge">05</span></div><div class="sc-body"><div class="sc-tags"><span class="sc-tag">JWT</span><span class="sc-tag">OAuth2</span><span class="sc-tag">OWASP</span><span class="sc-tag">Zero Trust</span></div><h3 class="sc-name">API Security &amp; Identity Architecture</h3><div class="sc-footer"><div class="sc-meta-row"><span class="sc-chapters">7 chapters</span><span class="sc-sep">·</span><span class="sc-parts">7 parts</span></div><div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--red)"></div></div></div></div></a>
+        <!-- Series 05 -->
+        <a class="series-card" href="#module-5">
+          <div class="sc-cover" style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%)">
+            <div class="sc-cover-grid"></div><div class="sc-cover-glow"></div>
+            <div class="sc-cover-logos">
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/jsonwebtokens/ffffff" alt="JWT"></div>
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/microsoftazure/ffffff" alt="Azure AD"></div>
+            </div>
+            <span class="sc-cover-label">JWT · OAuth2 · OWASP</span>
+            <span class="sc-num-badge">05</span>
+          </div>
+          <div class="sc-body">
+            <div class="sc-tags"><span class="sc-tag">JWT</span><span class="sc-tag">OAuth2</span><span class="sc-tag">OWASP</span><span class="sc-tag">Zero Trust</span></div>
+            <h3 class="sc-name">API Security &amp; Identity Architecture</h3>
+            <div class="sc-footer">
+              <div class="sc-meta-row"><span class="sc-chapters">7 chapters</span><span class="sc-sep">·</span><span class="sc-parts">7 parts</span></div>
+              <div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--red)"></div></div>
+            </div>
+          </div>
+        </a>
 
-        <a class="series-card" href="#module-6"><div class="sc-cover" style="background:linear-gradient(135deg,#7c2d12 0%,#ea580c 100%)"><div class="sc-cover-grid"></div><div class="sc-cover-glow"></div><div class="sc-cover-logos"><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/docker/ffffff" alt="Docker"></div><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/apachekafka/ffffff" alt="Kafka"></div><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/redis/ffffff" alt="Redis"></div></div><span class="sc-cover-label">Dapr · Kafka · Saga</span><span class="sc-num-badge">06</span></div><div class="sc-body"><div class="sc-tags"><span class="sc-tag">Docker</span><span class="sc-tag">Dapr</span><span class="sc-tag">Kafka</span><span class="sc-tag">Saga</span></div><h3 class="sc-name">Microservices &amp; Distributed .NET</h3><div class="sc-footer"><div class="sc-meta-row"><span class="sc-chapters">9 chapters</span><span class="sc-sep">·</span><span class="sc-parts">4 parts</span></div><div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--orange)"></div></div></div></div></a>
+        <!-- Series 06 -->
+        <a class="series-card" href="#module-6">
+          <div class="sc-cover" style="background:linear-gradient(135deg,#7c2d12 0%,#ea580c 100%)">
+            <div class="sc-cover-grid"></div><div class="sc-cover-glow"></div>
+            <div class="sc-cover-logos">
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/docker/ffffff" alt="Docker"></div>
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/apachekafka/ffffff" alt="Kafka"></div>
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/redis/ffffff" alt="Redis"></div>
+            </div>
+            <span class="sc-cover-label">Dapr · Kafka · Saga</span>
+            <span class="sc-num-badge">06</span>
+          </div>
+          <div class="sc-body">
+            <div class="sc-tags"><span class="sc-tag">Docker</span><span class="sc-tag">Dapr</span><span class="sc-tag">Kafka</span><span class="sc-tag">Saga</span></div>
+            <h3 class="sc-name">Microservices &amp; Distributed .NET</h3>
+            <div class="sc-footer">
+              <div class="sc-meta-row"><span class="sc-chapters">9 chapters</span><span class="sc-sep">·</span><span class="sc-parts">4 parts</span></div>
+              <div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--orange)"></div></div>
+            </div>
+          </div>
+        </a>
 
-        <a class="series-card" href="#module-7"><div class="sc-cover" style="background:linear-gradient(135deg,#3b0764 0%,#7c3aed 100%)"><div class="sc-cover-grid"></div><div class="sc-cover-glow"></div><div class="sc-cover-logos"><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/dotnet/ffffff" alt="xUnit"></div><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/testcontainers/ffffff" alt="Testcontainers"></div></div><span class="sc-cover-label">xUnit · Moq · AI</span><span class="sc-num-badge">07</span></div><div class="sc-body"><div class="sc-tags"><span class="sc-tag">xUnit</span><span class="sc-tag">Moq</span><span class="sc-tag">Testcontainers</span><span class="sc-tag">FlowAPI</span></div><h3 class="sc-name">Testing, Validation &amp; Autonomous API</h3><div class="sc-footer"><div class="sc-meta-row"><span class="sc-chapters">7 chapters</span><span class="sc-sep">·</span><span class="sc-parts">7 parts</span></div><div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--purple)"></div></div></div></div></a>
+        <!-- Series 07 -->
+        <a class="series-card" href="#module-7">
+          <div class="sc-cover" style="background:linear-gradient(135deg,#3b0764 0%,#7c3aed 100%)">
+            <div class="sc-cover-grid"></div><div class="sc-cover-glow"></div>
+            <div class="sc-cover-logos">
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/dotnet/ffffff" alt="xUnit"></div>
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/testcontainers/ffffff" alt="Testcontainers"></div>
+            </div>
+            <span class="sc-cover-label">xUnit · Moq · AI</span>
+            <span class="sc-num-badge">07</span>
+          </div>
+          <div class="sc-body">
+            <div class="sc-tags"><span class="sc-tag">xUnit</span><span class="sc-tag">Moq</span><span class="sc-tag">Testcontainers</span><span class="sc-tag">FlowAPI</span></div>
+            <h3 class="sc-name">Testing, Validation &amp; Autonomous API</h3>
+            <div class="sc-footer">
+              <div class="sc-meta-row"><span class="sc-chapters">7 chapters</span><span class="sc-sep">·</span><span class="sc-parts">7 parts</span></div>
+              <div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--purple)"></div></div>
+            </div>
+          </div>
+        </a>
 
-        <a class="series-card" href="#module-8"><div class="sc-cover" style="background:linear-gradient(135deg,#1e1b4b 0%,#4c1d95 100%)"><div class="sc-cover-grid"></div><div class="sc-cover-glow"></div><div class="sc-cover-logos"><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/openai/ffffff" alt="OpenAI"></div><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/dotnet/ffffff" alt="ML.NET"></div><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/python/ffffff" alt="Python"></div></div><span class="sc-cover-label">ML.NET · RAG · Agents</span><span class="sc-num-badge">08</span></div><div class="sc-body"><div class="sc-tags"><span class="sc-tag">ML.NET</span><span class="sc-tag">ONNX</span><span class="sc-tag">Semantic Kernel</span><span class="sc-tag">RAG</span></div><h3 class="sc-name">AI/ML Engineering in .NET</h3><div class="sc-footer"><div class="sc-meta-row"><span class="sc-chapters">28 chapters</span><span class="sc-sep">·</span><span class="sc-parts">11 parts</span></div><div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--purple)"></div></div></div></div></a>
+        <!-- Series 08 -->
+        <a class="series-card" href="#module-8">
+          <div class="sc-cover" style="background:linear-gradient(135deg,#1e1b4b 0%,#4c1d95 100%)">
+            <div class="sc-cover-grid"></div><div class="sc-cover-glow"></div>
+            <div class="sc-cover-logos">
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/openai/ffffff" alt="OpenAI"></div>
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/dotnet/ffffff" alt="ML.NET"></div>
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/python/ffffff" alt="Python"></div>
+            </div>
+            <span class="sc-cover-label">ML.NET · RAG · Agents</span>
+            <span class="sc-num-badge">08</span>
+          </div>
+          <div class="sc-body">
+            <div class="sc-tags"><span class="sc-tag">ML.NET</span><span class="sc-tag">ONNX</span><span class="sc-tag">Semantic Kernel</span><span class="sc-tag">RAG</span></div>
+            <h3 class="sc-name">AI/ML Engineering in .NET</h3>
+            <div class="sc-footer">
+              <div class="sc-meta-row"><span class="sc-chapters">28 chapters</span><span class="sc-sep">·</span><span class="sc-parts">11 parts</span></div>
+              <div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--purple)"></div></div>
+            </div>
+          </div>
+        </a>
 
-        <a class="series-card" href="#module-9"><div class="sc-cover" style="background:linear-gradient(135deg,#022c22 0%,#065f46 100%)"><div class="sc-cover-grid"></div><div class="sc-cover-glow"></div><div class="sc-cover-logos"><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/stripe/ffffff" alt="Stripe"></div><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/grafana/ffffff" alt="Grafana"></div><div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/microsoftazure/ffffff" alt="Azure"></div></div><span class="sc-cover-label">SaaS · Billing · Metering</span><span class="sc-num-badge">09</span></div><div class="sc-body"><div class="sc-tags"><span class="sc-tag">Stripe</span><span class="sc-tag">Metering</span><span class="sc-tag">Razorpay</span><span class="sc-tag">SaaS</span></div><h3 class="sc-name">Revenue-Grade API Platforms</h3><div class="sc-footer"><div class="sc-meta-row"><span class="sc-chapters">8 chapters</span><span class="sc-sep">·</span><span class="sc-parts">8 parts</span></div><div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--green)"></div></div></div></div></a>
+        <!-- Series 09 -->
+        <a class="series-card" href="#module-9">
+          <div class="sc-cover" style="background:linear-gradient(135deg,#022c22 0%,#065f46 100%)">
+            <div class="sc-cover-grid"></div><div class="sc-cover-glow"></div>
+            <div class="sc-cover-logos">
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/stripe/ffffff" alt="Stripe"></div>
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/grafana/ffffff" alt="Grafana"></div>
+              <div class="sc-logo-icon"><img src="https://cdn.simpleicons.org/microsoftazure/ffffff" alt="Azure"></div>
+            </div>
+            <span class="sc-cover-label">SaaS · Billing · Metering</span>
+            <span class="sc-num-badge">09</span>
+          </div>
+          <div class="sc-body">
+            <div class="sc-tags"><span class="sc-tag">Stripe</span><span class="sc-tag">Metering</span><span class="sc-tag">Razorpay</span><span class="sc-tag">SaaS</span></div>
+            <h3 class="sc-name">Revenue-Grade API Platforms</h3>
+            <div class="sc-footer">
+              <div class="sc-meta-row"><span class="sc-chapters">8 chapters</span><span class="sc-sep">·</span><span class="sc-parts">8 parts</span></div>
+              <div class="sc-bar"><div class="sc-bar-fill" style="width:100%;background:var(--green)"></div></div>
+            </div>
+          </div>
+        </a>
 
       </div>
     </div>
@@ -2275,7 +2593,9 @@
     <div class="module-card" id="module-2">
       <div class="module-top-strip" style="background:linear-gradient(90deg,#1d4ed8,#2563eb)"></div>
       <div class="module-header" onclick="toggleModule(this)">
-        <div class="module-icon-wrap mod-asp"><img src="https://cdn.simpleicons.org/dotnet/4d9fff" width="22" height="22" alt="ASP.NET" style="object-fit:contain"></div>
+        <div class="module-icon-wrap mod-asp">
+          <img src="https://cdn.simpleicons.org/dotnet/4d9fff" width="22" height="22" alt="ASP.NET" style="object-fit:contain">
+        </div>
         <div class="module-header-info">
           <div class="module-num">Series 02 · ASP.NET Core Internals</div>
           <h3 class="module-title">ASP.NET Core Internals &amp; Hosting Architecture</h3>
@@ -2708,7 +3028,9 @@
     <div class="module-card" id="module-3">
       <div class="module-top-strip" style="background:linear-gradient(90deg,#059669,#047857)"></div>
       <div class="module-header" onclick="toggleModule(this)">
-        <div class="module-icon-wrap mod-ef"><img src="https://cdn.simpleicons.org/postgresql/4d9fff" width="22" height="22" alt="PostgreSQL" style="object-fit:contain"></div>
+        <div class="module-icon-wrap mod-ef">
+          <img src="https://cdn.simpleicons.org/postgresql/00e5a0" width="22" height="22" alt="PostgreSQL" style="object-fit:contain">
+        </div>
         <div class="module-header-info">
           <div class="module-num">Series 03 · EF Core Mastery</div>
           <h3 class="module-title">EF Core &amp; PostgreSQL Persistence Engineering</h3>
@@ -2717,8 +3039,8 @@
             <span class="meta-chip">5 Parts</span>
             <span class="new-badge">Updated 2026</span>
             <div class="module-tech-logos">
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/dotnet/4d9fff" alt="">EF Core</span>
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/postgresql/4d9fff" alt="">PostgreSQL</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/dotnet/00e5a0" alt="EF Core">EF Core</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/postgresql/00e5a0" alt="PostgreSQL">PostgreSQL</span>
               <span class="tech-logo-chip">Npgsql</span>
               <span class="tech-logo-chip">DDD</span>
               <span class="tech-logo-chip">SaaS</span>
@@ -3109,19 +3431,22 @@
     <div class="module-card" id="module-4">
       <div class="module-top-strip" style="background:linear-gradient(90deg,#d97706,#b45309)"></div>
       <div class="module-header" onclick="toggleModule(this)">
-        <div class="module-icon-wrap mod-ms"><img src="https://cdn.simpleicons.org/openapiinitiative/ffffff" width="22" height="22" alt="OpenAPI" style="object-fit:contain"></div>
+        <div class="module-icon-wrap mod-ms">
+          <img src="https://cdn.simpleicons.org/openapiinitiative/ffaa44" width="22" height="22" alt="OpenAPI" style="object-fit:contain">
+        </div>
         <div class="module-header-info">
           <div class="module-num">Series 04 · API Architecture</div>
           <h3 class="module-title">API Styles &amp; Contract Engineering</h3>
           <div class="module-meta">
             <span class="meta-tag">15 Chapters</span>
             <span class="meta-chip">8 Parts + Preface</span>
+            <span class="new-badge">New 2026</span>
             <div class="module-tech-logos">
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/dotnet/ffffff" alt="ASP.NET Core">ASP.NET Core</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/dotnet/ffaa44" alt="ASP.NET Core">ASP.NET Core</span>
               <span class="tech-logo-chip">REST</span>
               <span class="tech-logo-chip">gRPC</span>
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/graphql/ff6b9d" alt="GraphQL">GraphQL</span>
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/openapiinitiative/ffffff" alt="OpenAPI">OpenAPI</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/graphql/ffaa44" alt="GraphQL">GraphQL</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/openapiinitiative/ffaa44" alt="OpenAPI">OpenAPI</span>
             </div>
           </div>
         </div>
@@ -3523,19 +3848,22 @@
     <div class="module-card" id="module-5">
       <div class="module-top-strip" style="background:linear-gradient(90deg,#dc2626,#991b1b)"></div>
       <div class="module-header" onclick="toggleModule(this)">
-        <div class="module-icon-wrap mod-sec"><img src="https://cdn.simpleicons.org/jsonwebtokens/ffaa44" width="22" height="22" alt="JWT" style="object-fit:contain"></div>
+        <div class="module-icon-wrap mod-sec">
+          <img src="https://cdn.simpleicons.org/jsonwebtokens/ff6b6b" width="22" height="22" alt="JWT" style="object-fit:contain">
+        </div>
         <div class="module-header-info">
           <div class="module-num">Series 05 · Security &amp; Identity</div>
           <h3 class="module-title">API Security &amp; Identity Architecture</h3>
           <div class="module-meta">
             <span class="meta-tag">7 Chapters</span>
             <span class="meta-chip">7 Parts</span>
+            <span class="new-badge">Updated 2026</span>
             <div class="module-tech-logos">
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/jsonwebtokens/ffaa44" alt="">JWT</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/jsonwebtokens/ff6b6b" alt="JWT">JWT</span>
               <span class="tech-logo-chip">OAuth2 / OIDC</span>
               <span class="tech-logo-chip">OWASP API</span>
               <span class="tech-logo-chip">mTLS</span>
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/microsoftazure/4d9fff" alt="">Entra ID</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/microsoftazure/4d9fff" alt="Azure">Entra ID</span>
             </div>
           </div>
         </div>
@@ -3799,17 +4127,20 @@
     <div class="module-card" id="module-6">
       <div class="module-top-strip" style="background:linear-gradient(90deg,#ea580c,#c2410c)"></div>
       <div class="module-header" onclick="toggleModule(this)">
-        <div class="module-icon-wrap mod-ms"><img src="https://cdn.simpleicons.org/docker/4d9fff" width="22" height="22" alt="Docker" style="object-fit:contain"></div>
+        <div class="module-icon-wrap mod-ms">
+          <img src="https://cdn.simpleicons.org/docker/ffaa44" width="22" height="22" alt="Docker" style="object-fit:contain">
+        </div>
         <div class="module-header-info">
           <div class="module-num">Series 06 · Microservices Mastery</div>
           <h3 class="module-title">Microservices &amp; Distributed Systems with .NET</h3>
           <div class="module-meta">
             <span class="meta-tag">9 Chapters</span>
             <span class="meta-chip">4 Parts</span>
+            <span class="new-badge">New 2026</span>
             <div class="module-tech-logos">
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/docker/4d9fff" alt="">Docker</span>
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/apachekafka/aaaaaa" alt="">Kafka</span>
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/redis/ff6b6b" alt="">Redis</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/docker/ffaa44" alt="Docker">Docker</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/apachekafka/aaaaaa" alt="Kafka">Kafka</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/redis/ff6b6b" alt="Redis">Redis</span>
               <span class="tech-logo-chip">Dapr</span>
             </div>
           </div>
@@ -3983,17 +4314,20 @@
     <div class="module-card" id="module-7">
       <div class="module-top-strip" style="background:linear-gradient(90deg,#7c3aed,#6d28d9)"></div>
       <div class="module-header" onclick="toggleModule(this)">
-        <div class="module-icon-wrap mod-test"><img src="https://cdn.simpleicons.org/dotnet/b47fff" width="22" height="22" alt="xUnit" style="object-fit:contain"></div>
+        <div class="module-icon-wrap mod-test">
+          <img src="https://cdn.simpleicons.org/dotnet/b47fff" width="22" height="22" alt="xUnit" style="object-fit:contain">
+        </div>
         <div class="module-header-info">
           <div class="module-num">Series 07 · Testing Mastery</div>
           <h3 class="module-title">Testing, Validation &amp; Autonomous API Engineering</h3>
           <div class="module-meta">
             <span class="meta-tag">7 Chapters</span>
             <span class="meta-chip">7 Parts</span>
+            <span class="new-badge">Updated 2026</span>
             <div class="module-tech-logos">
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/dotnet/b47fff" alt="">xUnit</span>
-              <span class="tech-logo-chip">Moq</span>
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/testcontainers/aaaaaa" alt="">Testcontainers</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/dotnet/b47fff" alt="xUnit">xUnit</span>
+              <span class="tech-logo-chip">WireMock</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/testcontainers/b47fff" alt="Testcontainers">Testcontainers</span>
               <span class="tech-logo-chip">FlowAPI</span>
             </div>
           </div>
@@ -4005,7 +4339,7 @@
         <div class="part-section open">
           <div class="part-header" onclick="togglePart(this)">
             <div class="part-icon" style="background:rgba(180,127,255,0.12);color:var(--purple)">I</div>
-            <span class="part-name">Unit Testing Engineering (xUnit + Deterministic Design)</span>
+            <span class="part-name">🟢 Unit Testing Engineering (xUnit + Deterministic Design)</span>
             <span class="part-count">1 chapter</span>
             <span class="part-arrow">▾</span>
           </div>
@@ -4015,42 +4349,41 @@
               <div class="chapter-info">
                 <div class="chapter-title">The Philosophy of Unit Testing</div>
                 <div class="chapter-subs">
-                  <div class="sub-item">43.1 Test Boundaries
+                  <div class="sub-item">Level: 🟢 Basic → 🔵 Intermediate</div>
+                  <div class="sub-item">Tag levels: 🟢 Basic | 🔵 Intermediate | 🟣 Advanced | 🔴 Architect</div>
+                  <div class="sub-item">43.1 Defining test boundaries
                     <div class="subsub-item">What is a unit? · Behavior vs implementation testing</div>
-                    <div class="subsub-item">Domain logic vs infrastructure · Avoiding over-mocking</div>
-                    <div class="subsub-item">Test as specification</div>
+                    <div class="subsub-item">Domain logic vs infrastructure · Avoiding over-mocking · Test as specification</div>
                   </div>
-                  <div class="sub-item">43.2 xUnit Architecture
-                    <div class="subsub-item">Test discovery model · Fact vs Theory</div>
-                    <div class="subsub-item">Data-driven testing · Fixtures &amp; shared context</div>
-                    <div class="subsub-item">Collection fixtures · Parallel execution · Test ordering pitfalls</div>
+                  <div class="sub-item">43.2 xUnit architecture
+                    <div class="subsub-item">Test discovery model · Fact vs Theory · Data-driven testing</div>
+                    <div class="subsub-item">Fixtures &amp; shared context · collection fixtures · parallel execution model · test ordering pitfalls</div>
                   </div>
-                  <div class="sub-item">43.3 Deterministic Testing
-                    <div class="subsub-item">Eliminating time-based flakiness · Abstracting DateTime &amp; randomness</div>
-                    <div class="subsub-item">Using test clocks · Stable test data strategies</div>
-                    <div class="subsub-item">Avoiding external dependencies · Repeatable test runs</div>
+                  <div class="sub-item">43.3 Deterministic testing patterns
+                    <div class="subsub-item">Eliminating time-based flakiness · abstracting DateTime &amp; randomness · using test clocks</div>
+                    <div class="subsub-item">Stable test data strategies · avoiding external dependencies · repeatable test runs</div>
                   </div>
-                  <div class="sub-item">43.4 Mocking &amp; Test Doubles
-                    <div class="subsub-item">When to mock · Interface-driven design</div>
-                    <div class="subsub-item">Mock vs stub vs fake · State vs behavior verification</div>
-                    <div class="subsub-item">Over-mocking anti-patterns · Testing async methods</div>
+                  <div class="sub-item">43.4 Mocking &amp; test doubles
+                    <div class="subsub-item">When to mock · interface-driven design · mock vs stub vs fake</div>
+                    <div class="subsub-item">State vs behavior verification · over-mocking anti-patterns · testing async methods</div>
                   </div>
-                  <div class="sub-item">43.5 Advanced Techniques
-                    <div class="subsub-item">Property-based testing · Snapshot testing</div>
-                    <div class="subsub-item">Testing exception flows · Mutation testing concepts</div>
-                    <div class="subsub-item">Code coverage limitations</div>
+                  <div class="sub-item">43.5 Advanced unit testing techniques (🟣)
+                    <div class="subsub-item">Property-based testing · snapshot testing · testing exception flows</div>
+                    <div class="subsub-item">Mutation testing concepts · code coverage limitations</div>
                   </div>
+                  <div class="sub-item">🧠 Interview Mastery — Unit Testing</div>
                 </div>
               </div>
-              <span class="chapter-level ch-adv">Advanced</span><span class="ch-expand">▾</span>
+              <span class="chapter-level ch-inter">Intermediate</span><span class="ch-expand">▾</span>
             </div>
           </div>
         </div>
+
         <!-- PART II -->
         <div class="part-section">
           <div class="part-header" onclick="togglePart(this)">
             <div class="part-icon" style="background:rgba(0,229,160,0.12);color:var(--green)">II</div>
-            <span class="part-name">Integration Testing APIs</span>
+            <span class="part-name">🟢 Integration Testing APIs</span>
             <span class="part-count">1 chapter</span>
             <span class="part-arrow">▾</span>
           </div>
@@ -4060,38 +4393,37 @@
               <div class="chapter-info">
                 <div class="chapter-title">Testing the System Boundary</div>
                 <div class="chapter-subs">
-                  <div class="sub-item">44.1 WebApplicationFactory
-                    <div class="subsub-item">In-memory TestServer · Customizing Startup for tests</div>
-                    <div class="subsub-item">Dependency overrides · Test host lifecycle</div>
+                  <div class="sub-item">Level: 🔵 Intermediate → 🟣 Advanced</div>
+                  <div class="sub-item">44.1 WebApplicationFactory deep dive
+                    <div class="subsub-item">In-memory TestServer · customizing Startup for tests · dependency overrides · test host lifecycle</div>
                   </div>
-                  <div class="sub-item">44.2 Real Database Testing
+                  <div class="sub-item">44.2 Real database testing
                     <div class="subsub-item">Why EF InMemory misleads · PostgreSQL Testcontainers</div>
-                    <div class="subsub-item">Running migrations in tests · Seed data patterns</div>
-                    <div class="subsub-item">Isolation per test class</div>
+                    <div class="subsub-item">Running migrations in tests · seed data patterns · isolation per test class</div>
                   </div>
-                  <div class="sub-item">44.3 Test Isolation
-                    <div class="subsub-item">Transaction rollback strategy · Database reset strategy</div>
-                    <div class="subsub-item">Parallel isolation · Preventing data bleed</div>
+                  <div class="sub-item">44.3 Test isolation engineering
+                    <div class="subsub-item">Transaction rollback strategy · database reset strategy · parallel isolation · preventing data bleed</div>
                   </div>
-                  <div class="sub-item">44.4 External Dependency Testing
-                    <div class="subsub-item">Mock HTTP servers (WireMock) · Contract verification with external APIs</div>
-                    <div class="subsub-item">Testing message brokers · Idempotency verification</div>
+                  <div class="sub-item">44.4 External dependency testing
+                    <div class="subsub-item">Mock HTTP servers (WireMock) · contract verification with external APIs</div>
+                    <div class="subsub-item">Testing message brokers · idempotency verification</div>
                   </div>
-                  <div class="sub-item">44.5 Observability in Tests
-                    <div class="subsub-item">Capturing logs during tests · Verifying trace propagation</div>
-                    <div class="subsub-item">Metrics validation</div>
+                  <div class="sub-item">44.5 Observability in tests
+                    <div class="subsub-item">Capturing logs during tests · verifying trace propagation · metrics validation</div>
                   </div>
+                  <div class="sub-item">🧠 Interview Mastery — Integration Testing</div>
                 </div>
               </div>
               <span class="chapter-level ch-adv">Advanced</span><span class="ch-expand">▾</span>
             </div>
           </div>
         </div>
+
         <!-- PART III -->
         <div class="part-section">
           <div class="part-header" onclick="togglePart(this)">
             <div class="part-icon" style="background:rgba(96,165,250,0.12);color:var(--blue)">III</div>
-            <span class="part-name">End-to-End & Contract Testing</span>
+            <span class="part-name">🟢 End-to-End &amp; Contract Testing</span>
             <span class="part-count">1 chapter</span>
             <span class="part-arrow">▾</span>
           </div>
@@ -4101,33 +4433,32 @@
               <div class="chapter-info">
                 <div class="chapter-title">The API Test Pyramid</div>
                 <div class="chapter-subs">
-                  <div class="sub-item">45.1 Pyramid Layers
+                  <div class="sub-item">Level: 🔵 Intermediate</div>
+                  <div class="sub-item">45.1 Pyramid layers
                     <div class="subsub-item">Unit · Integration · Contract · End-to-End</div>
                   </div>
-                  <div class="sub-item">45.2 Contract Testing
-                    <div class="subsub-item">OpenAPI schema validation · Backward compatibility enforcement</div>
-                    <div class="subsub-item">Schema diffing · Version negotiation validation</div>
+                  <div class="sub-item">45.2 Contract testing
+                    <div class="subsub-item">OpenAPI schema validation · backward compatibility enforcement · schema diffing · version negotiation validation</div>
                   </div>
-                  <div class="sub-item">45.3 Consumer-Driven Contracts
-                    <div class="subsub-item">Provider expectations · Consumer contracts</div>
-                    <div class="subsub-item">Breaking change detection · Pact-style workflows</div>
-                    <div class="subsub-item">CI enforcement</div>
+                  <div class="sub-item">45.3 Consumer-driven contracts
+                    <div class="subsub-item">Provider expectations · consumer contracts · breaking change detection · Pact-style workflows · CI enforcement</div>
                   </div>
-                  <div class="sub-item">45.4 E2E Testing
-                    <div class="subsub-item">Testing deployed environments · Test environments vs staging</div>
-                    <div class="subsub-item">Synthetic monitoring · Canary test automation · Smoke test strategy</div>
+                  <div class="sub-item">45.4 End-to-end testing (🟣)
+                    <div class="subsub-item">Testing deployed environments · test environments vs staging</div>
+                    <div class="subsub-item">Synthetic monitoring · canary test automation · smoke test strategy</div>
                   </div>
                 </div>
               </div>
-              <span class="chapter-level ch-adv">Advanced</span><span class="ch-expand">▾</span>
+              <span class="chapter-level ch-inter">Intermediate</span><span class="ch-expand">▾</span>
             </div>
           </div>
         </div>
+
         <!-- PART IV -->
         <div class="part-section">
           <div class="part-header" onclick="togglePart(this)">
             <div class="part-icon" style="background:rgba(255,170,68,0.12);color:var(--orange)">IV</div>
-            <span class="part-name">Load, Stress & Capacity Engineering</span>
+            <span class="part-name">🟢 Load, Stress &amp; Capacity Engineering</span>
             <span class="part-count">1 chapter</span>
             <span class="part-arrow">▾</span>
           </div>
@@ -4135,34 +4466,34 @@
             <div class="chapter-item" onclick="toggleChapter(this)">
               <span class="chapter-num">Ch.46</span>
               <div class="chapter-info">
-                <div class="chapter-title">Performance & Capacity Validation</div>
+                <div class="chapter-title">Performance &amp; Capacity Validation</div>
                 <div class="chapter-subs">
-                  <div class="sub-item">46.1 Load Testing Profiles
-                    <div class="subsub-item">Baseline load · Peak load · Sustained load · Spike testing</div>
+                  <div class="sub-item">Level: 🟣 Advanced → 🔴 Architect</div>
+                  <div class="sub-item">46.1 Load testing profiles
+                    <div class="subsub-item">Baseline load · peak load · sustained load · spike testing</div>
                   </div>
-                  <div class="sub-item">46.2 Stress Testing &amp; Breaking Points
-                    <div class="subsub-item">Identifying saturation · Thread pool starvation</div>
-                    <div class="subsub-item">Memory exhaustion · DB connection limits · Queue buildup</div>
+                  <div class="sub-item">46.2 Stress testing &amp; breaking points
+                    <div class="subsub-item">Identifying saturation · thread pool starvation · memory exhaustion · DB connection limits · queue buildup</div>
                   </div>
-                  <div class="sub-item">46.3 Bottleneck Analysis
-                    <div class="subsub-item">CPU profiling · Query latency inspection</div>
-                    <div class="subsub-item">External dependency limits · Observability dashboards</div>
+                  <div class="sub-item">46.3 Bottleneck analysis
+                    <div class="subsub-item">CPU profiling · query latency inspection · external dependency limits · observability dashboards</div>
                   </div>
-                  <div class="sub-item">46.4 Capacity Planning
-                    <div class="subsub-item">Throughput modeling · Horizontal scaling thresholds</div>
-                    <div class="subsub-item">Cost-per-request modeling · Scaling test automation</div>
+                  <div class="sub-item">46.4 Capacity planning
+                    <div class="subsub-item">Throughput modeling · horizontal scaling thresholds · cost-per-request modeling · scaling test automation</div>
                   </div>
+                  <div class="sub-item">🧠 Interview Mastery — Performance Testing</div>
                 </div>
               </div>
               <span class="chapter-level ch-arch">Architect</span><span class="ch-expand">▾</span>
             </div>
           </div>
         </div>
+
         <!-- PART V -->
         <div class="part-section">
           <div class="part-header" onclick="togglePart(this)">
             <div class="part-icon" style="background:rgba(255,107,107,0.12);color:var(--red)">V</div>
-            <span class="part-name">CI/CD & Quality Gates</span>
+            <span class="part-name">🟢 CI/CD &amp; Quality Gates</span>
             <span class="part-count">1 chapter</span>
             <span class="part-arrow">▾</span>
           </div>
@@ -4172,21 +4503,18 @@
               <div class="chapter-info">
                 <div class="chapter-title">Enterprise Testing Pipeline</div>
                 <div class="chapter-subs">
-                  <div class="sub-item">47.1 CI Workflow Stages
-                    <div class="subsub-item">Unit tests on PR · Integration tests in container</div>
-                    <div class="subsub-item">Contract validation stage · Load smoke tests</div>
+                  <div class="sub-item">Level: 🔴 Architect</div>
+                  <div class="sub-item">47.1 CI testing workflow
+                    <div class="subsub-item">Unit tests on PR · integration tests in container · contract validation stage · load smoke tests</div>
                   </div>
-                  <div class="sub-item">47.2 Quality Gates
-                    <div class="subsub-item">Code coverage thresholds · Performance regression gates</div>
-                    <div class="subsub-item">Schema breaking change detection · Static analysis integration</div>
+                  <div class="sub-item">47.2 Quality gates
+                    <div class="subsub-item">Code coverage thresholds · performance regression gates · schema breaking change detection · static analysis integration</div>
                   </div>
-                  <div class="sub-item">47.3 Flaky Test Detection
-                    <div class="subsub-item">Retry policies · Test quarantine strategy</div>
-                    <div class="subsub-item">Statistical flakiness detection · CI stability metrics</div>
+                  <div class="sub-item">47.3 Flaky test detection
+                    <div class="subsub-item">Retry policies · test quarantine strategy · statistical flakiness detection · CI stability metrics</div>
                   </div>
-                  <div class="sub-item">47.4 Observability-Driven Testing
-                    <div class="subsub-item">Alert-triggered regression tests · SLO-based validation</div>
-                    <div class="subsub-item">Production replay testing</div>
+                  <div class="sub-item">47.4 Observability-driven testing
+                    <div class="subsub-item">Alert-triggered regression tests · SLO-based validation · production replay testing</div>
                   </div>
                 </div>
               </div>
@@ -4194,11 +4522,12 @@
             </div>
           </div>
         </div>
+
         <!-- PART VI -->
         <div class="part-section">
           <div class="part-header" onclick="togglePart(this)">
             <div class="part-icon" style="background:rgba(255,107,107,0.2);color:var(--red)">VI</div>
-            <span class="part-name">Autonomous API Testing with Agentic AI (FlowAPI)</span>
+            <span class="part-name">🔴 Autonomous API Testing with Agentic AI (FlowAPI)</span>
             <span class="part-count">1 chapter</span>
             <span class="part-arrow">▾</span>
           </div>
@@ -4208,32 +4537,31 @@
               <div class="chapter-info">
                 <div class="chapter-title">FlowAPI: AI-Driven API Validation Engine</div>
                 <div class="chapter-subs">
-                  <div class="sub-item">48.1 What is FlowAPI
-                    <div class="subsub-item">Reads OpenAPI schemas · Generates test cases automatically</div>
-                    <div class="subsub-item">Detects contract drift · Simulates abuse scenarios</div>
-                    <div class="subsub-item">Learns from production failures</div>
+                  <div class="sub-item">Level: 🔴 Architect</div>
+                  <div class="sub-item">48.1 What is FlowAPI?
+                    <div class="subsub-item">Agentic AI-driven autonomous API testing platform</div>
+                    <div class="subsub-item">Reads OpenAPI schemas · generates test cases automatically · detects contract drift</div>
+                    <div class="subsub-item">Simulates abuse scenarios · learns from production failures</div>
                   </div>
-                  <div class="sub-item">48.2 Architecture
-                    <div class="subsub-item">Control Plane: Orchestrator, Policy Engine, Schema Analyzer, Test Planner</div>
+                  <div class="sub-item">48.2 Architecture of FlowAPI
+                    <div class="subsub-item">Control Plane: Orchestrator (LangGraph), Policy Engine, Schema Analyzer, Test Planner</div>
                     <div class="subsub-item">Worker Agents: Unit Test Generator, Contract Validation, Security Attack Simulation</div>
                     <div class="subsub-item">Load Scenario Generator, Regression Analyzer, Observability Feedback</div>
                   </div>
-                  <div class="sub-item">48.3 Tech Stack
-                    <div class="subsub-item">LangGraph · LangSmith · OpenAPI parser · Test container runner</div>
-                    <div class="subsub-item">Observability ingestion · Vector DB for historical test memory</div>
+                  <div class="sub-item">48.3 Technology stack
+                    <div class="subsub-item">LangGraph · LangSmith · OpenAPI parser · test container runner</div>
+                    <div class="subsub-item">Observability ingestion (logs/metrics/traces) · vector DB for historical test memory</div>
                   </div>
-                  <div class="sub-item">48.4 Autonomous Workflow
-                    <div class="subsub-item">1. Parse OpenAPI spec → 2. Generate test matrix → 3. Create test cases</div>
-                    <div class="subsub-item">4. Simulate abuse patterns (BOLA, injection) → 5. Run load scenario</div>
-                    <div class="subsub-item">6. Collect logs + traces → 7. Analyze anomalies → 8. Update test KB</div>
+                  <div class="sub-item">48.4 Autonomous testing workflow
+                    <div class="subsub-item">1) Parse OpenAPI spec → 2) Generate test matrix → 3) Create positive/negative tests</div>
+                    <div class="subsub-item">4) Simulate abuse patterns (BOLA, injection) → 5) Run load scenarios</div>
+                    <div class="subsub-item">6) Collect logs/traces → 7) Analyze anomalies → 8) Update test knowledge base</div>
                   </div>
-                  <div class="sub-item">48.5 AI-Driven Failure Analysis
-                    <div class="subsub-item">Trace clustering · Error signature detection</div>
-                    <div class="subsub-item">Automatic regression labeling · Risk scoring per endpoint</div>
+                  <div class="sub-item">48.5 AI-driven failure analysis
+                    <div class="subsub-item">Trace clustering · error signature detection · automatic regression labeling · risk scoring per endpoint</div>
                   </div>
-                  <div class="sub-item">48.6 Self-Healing Capabilities
-                    <div class="subsub-item">Detect flaky tests · Auto-adjust timing</div>
-                    <div class="subsub-item">Suggest mocking boundaries · Recommend contract changes</div>
+                  <div class="sub-item">48.6 Self-healing test strategies
+                    <div class="subsub-item">Detect flaky tests · auto-adjust timing · suggest mocking boundaries · recommend contract changes</div>
                   </div>
                 </div>
               </div>
@@ -4241,12 +4569,13 @@
             </div>
           </div>
         </div>
+
         <!-- PART VII -->
         <div class="part-section">
           <div class="part-header" onclick="togglePart(this)">
             <div class="part-icon" style="background:rgba(96,165,250,0.12);color:var(--accent)">VII</div>
-            <span class="part-name">Lab: Building FlowAPI MVP</span>
-            <span class="part-count">1 chapter</span>
+            <span class="part-name">🧪 Lab: Building FlowAPI MVP</span>
+            <span class="part-count">1 chapter + summary</span>
             <span class="part-arrow">▾</span>
           </div>
           <div class="part-chapters">
@@ -4265,6 +4594,22 @@
               </div>
               <span class="chapter-level ch-arch">Architect</span><span class="ch-expand">▾</span>
             </div>
+
+            <div class="chapter-item" onclick="toggleChapter(this)">
+              <span class="chapter-num">Summary</span>
+              <div class="chapter-info">
+                <div class="chapter-title">From Deterministic Unit Tests to AI-Driven Continuous API Verification</div>
+                <div class="chapter-subs">
+                  <div class="sub-item">Testing readiness checklist: deterministic unit tests · real integration tests with containerized DB · load test reports versioned · contract validation automated</div>
+                  <div class="sub-item">Checklist continued: CI quality gates enforced · observability integrated · AI regression detection enabled</div>
+                  <div class="sub-item">Final learning outcomes: design deterministic test suites · validate full API boundaries · automate contract verification · engineer load/stress resilience</div>
+                  <div class="sub-item">Outcomes continued: build AI-driven autonomous testing pipelines · prevent breaking API changes · clear Senior/Principal testing interviews · architect enterprise-grade CI/CD validation systems</div>
+                  <div class="sub-item">Architectural level summary: Unit Testing → Advanced · Integration Testing → Production-grade · Contract Testing → Enterprise · Load Testing → Architect</div>
+                  <div class="sub-item">Architectural summary continued: CI/CD → Enterprise · AI-Driven Testing → Architect · Autonomous FlowAPI → Innovation-level</div>
+                </div>
+              </div>
+              <span class="chapter-level ch-arch">Architect</span><span class="ch-expand">▾</span>
+            </div>
           </div>
         </div>
       </div>
@@ -4274,18 +4619,22 @@
     <div class="module-card" id="module-8">
       <div class="module-top-strip" style="background:linear-gradient(90deg,#4c1d95,#6d28d9)"></div>
       <div class="module-header" onclick="toggleModule(this)">
-        <div class="module-icon-wrap mod-ai"><img src="https://cdn.simpleicons.org/openai/aaaaaa" width="22" height="22" alt="OpenAI" style="object-fit:contain"></div>
+        <div class="module-icon-wrap mod-ai">
+          <img src="https://cdn.simpleicons.org/openai/b47fff" width="22" height="22" alt="OpenAI" style="object-fit:contain">
+        </div>
         <div class="module-header-info">
           <div class="module-num">Series 08 · AI/ML Engineering</div>
           <h3 class="module-title">AI/ML Engineering in the .NET Ecosystem</h3>
           <div class="module-meta">
             <span class="meta-tag">28 Chapters</span>
             <span class="meta-chip">11 Parts</span>
+            <span class="new-badge">New 2026</span>
             <div class="module-tech-logos">
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/openai/aaaaaa" alt="">ML.NET</span>
-              <span class="tech-logo-chip">ONNX Runtime</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/openai/aaaaaa" alt="OpenAI">OpenAI</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/dotnet/b47fff" alt="ML.NET">ML.NET</span>
+              <span class="tech-logo-chip">ONNX</span>
               <span class="tech-logo-chip">Semantic Kernel</span>
-              <span class="tech-logo-chip">RAG / Agents</span>
+              <span class="tech-logo-chip">RAG</span>
             </div>
           </div>
         </div>
@@ -4822,18 +5171,21 @@
     <div class="module-card" id="module-9">
       <div class="module-top-strip" style="background:linear-gradient(90deg,#059669,#047857)"></div>
       <div class="module-header" onclick="toggleModule(this)">
-        <div class="module-icon-wrap mod-arch"><img src="https://cdn.simpleicons.org/stripe/8878ff" width="22" height="22" alt="Stripe" style="object-fit:contain"></div>
+        <div class="module-icon-wrap mod-arch">
+          <img src="https://cdn.simpleicons.org/stripe/00e5a0" width="22" height="22" alt="Stripe" style="object-fit:contain">
+        </div>
         <div class="module-header-info">
           <div class="module-num">Series 09 · API Monetization</div>
           <h3 class="module-title">Designing Revenue-Grade API Platforms</h3>
           <div class="module-meta">
             <span class="meta-tag">8 Chapters</span>
             <span class="meta-chip">8 Parts</span>
+            <span class="new-badge">New 2026</span>
             <div class="module-tech-logos">
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/stripe/8878ff" alt="">Stripe</span>
-              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/grafana/ff8800" alt="">Grafana</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/stripe/00e5a0" alt="Stripe">Stripe</span>
+              <span class="tech-logo-chip"><img src="https://cdn.simpleicons.org/grafana/ff8800" alt="Grafana">Grafana</span>
               <span class="tech-logo-chip">Metering</span>
-              <span class="tech-logo-chip">SaaS Billing</span>
+              <span class="tech-logo-chip">SaaS</span>
             </div>
           </div>
         </div>
@@ -5200,39 +5552,14 @@
 
     <div class="series-grid-section">
       <div class="section-header">
-        <span class="section-title">Start Reading — Featured Articles</span>
-        <span class="section-sub">Recommended starting points per series</span>
+        <span class="section-title">Start Reading — Website Articles</span>
+        <span class="section-sub">Latest articles currently published on the website</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <a class="rec-card" href="#">
-          <div class="rec-series">C# Mastery · Ch.3</div>
-          <div class="rec-title">How .NET JIT Compiles Your Code: Tiered Compilation Explained</div>
-          <div class="rec-meta"><span>12 min read</span><span class="rec-read">Read →</span></div>
-        </a>
-        <a class="rec-card" href="#">
-          <div class="rec-series">C# Mastery · Ch.22</div>
-          <div class="rec-title">The async/await State Machine: What the Compiler Actually Generates</div>
-          <div class="rec-meta"><span>18 min read</span><span class="rec-read">Read →</span></div>
-        </a>
-        <a class="rec-card" href="#">
-          <div class="rec-series">ASP.NET Core · Ch.3</div>
-          <div class="rec-title">Middleware Ordering Mistakes That Broke Our Production API</div>
-          <div class="rec-meta"><span>10 min read</span><span class="rec-read">Read →</span></div>
-        </a>
-        <a class="rec-card" href="#">
-          <div class="rec-series">EF Core · Ch.22</div>
-          <div class="rec-title">The N+1 Problem: How to Detect and Fix It in EF Core</div>
-          <div class="rec-meta"><span>14 min read</span><span class="rec-read">Read →</span></div>
-        </a>
-        <a class="rec-card" href="#">
-          <div class="rec-series">Architecture · Ch.4</div>
-          <div class="rec-title">CQRS with MediatR: Pipeline Behaviors Are the Real Power</div>
-          <div class="rec-meta"><span>16 min read</span><span class="rec-read">Read →</span></div>
-        </a>
-        <a class="rec-card" href="#">
-          <div class="rec-series">Microservices · Ch.4</div>
-          <div class="rec-title">Kafka with .NET 9: Building Event-Driven Microservices</div>
-          <div class="rec-meta"><span>20 min read</span><span class="rec-read">Read →</span></div>
+      <div id="featuredArticlesGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <a class="rec-card" href="#blog-articles">
+          <div class="rec-series">Articles Hub</div>
+          <div class="rec-title">Loading latest website articles…</div>
+          <div class="rec-meta"><span>Fetching now</span><span class="rec-read">Read →</span></div>
         </a>
       </div>
     </div>
@@ -5271,8 +5598,8 @@
         <svg class="ring-svg" viewBox="0 0 110 110">
           <defs>
             <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" style="stop-color:#60a5fa" />
-              <stop offset="100%" style="stop-color:#3b82f6" />
+              <stop offset="0%" style="stop-color:#00d4ff" />
+              <stop offset="100%" style="stop-color:#4d9fff" />
             </linearGradient>
           </defs>
           <circle class="ring-track" cx="55" cy="55" r="45" />
@@ -5342,26 +5669,13 @@
     <!-- Recommended articles -->
     <div class="rec-section">
       <div class="rec-label">Recommended Next</div>
-      <a class="rec-card" href="#">
-        <div class="rec-series">C# Mastery</div>
-        <div class="rec-title">Span&lt;T&gt; and Memory&lt;T&gt;: Zero-Allocation Patterns</div>
-        <div class="rec-meta"><span>🟣 Advanced</span><span class="rec-read">Read →</span></div>
-      </a>
-      <a class="rec-card" href="#">
-        <div class="rec-series">ASP.NET Core</div>
-        <div class="rec-title">DI Captive Dependencies: The Silent Bug</div>
-        <div class="rec-meta"><span>🔵 Intermediate</span><span class="rec-read">Read →</span></div>
-      </a>
-      <a class="rec-card" href="#">
-        <div class="rec-series">Architecture</div>
-        <div class="rec-title">Clean vs Vertical Slice: When to Use Which</div>
-        <div class="rec-meta"><span>🔴 Architect</span><span class="rec-read">Read →</span></div>
-      </a>
-      <a class="rec-card" href="#">
-        <div class="rec-series">Cloud-Native</div>
-        <div class="rec-title">.NET Aspire: Building Cloud-Native Apps in 2026</div>
-        <div class="rec-meta"><span>🟠 New</span><span class="rec-read">Read →</span></div>
-      </a>
+      <div id="recommendedArticlesList">
+        <a class="rec-card" href="#blog-articles">
+          <div class="rec-series">Articles Hub</div>
+          <div class="rec-title">Loading related website articles…</div>
+          <div class="rec-meta"><span>Fetching now</span><span class="rec-read">Read →</span></div>
+        </a>
+      </div>
     </div>
 
     <!-- Quick stats -->
@@ -5424,105 +5738,68 @@
     openChapterReader(chNum, chTitle, chLevel, subs, moduleId);
   }
 
-  // ── Scroll to module ──────────────────────────────────────
+  // ── Scroll to module ───────────────────────────────
   function scrollToModule(id, navItem) {
     const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.add('open');
-    const main = document.getElementById('mainContent');
-    if (document.documentElement.hasAttribute('data-embedded') && main) {
-      const targetTop = el.getBoundingClientRect().top - main.getBoundingClientRect().top + main.scrollTop - 16;
-      main.scrollTo({ top: targetTop, behavior: 'smooth' });
-    } else {
+    if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.classList.add('open');
     }
   }
 
-  // ── Scroll progress ring ──────────────────────────────────
+  // ── Scroll progress ring ───────────────────────────
   const ringFill = document.getElementById('ringFill');
   const ringPct  = document.getElementById('ringPct');
   const scrollChapterEl = document.getElementById('scrollChapter');
-  const circumference = 2 * Math.PI * 45; // ~283.27
+  const circumference = 2 * Math.PI * 45; // 283.27
 
   const moduleIds = ['module-1','module-2','module-3','module-4','module-5','module-6','module-7','module-8','module-9'];
   const moduleNames = ['C# Mastery','ASP.NET Core','EF Core','API Styles & Contracts','API Security','Microservices','Testing & AI','AI/ML Engineering','API as a Service'];
 
-  function getScrollContainer() {
-    return document.documentElement.hasAttribute('data-embedded')
-      ? document.getElementById('mainContent')
-      : null;
-  }
-
   function updateScrollProgress() {
-    const main = getScrollContainer();
-    let scrollTop, pct;
-
-    if (main) {
-      // Embedded: the main element is the scroll container
-      const scrollable = main.scrollHeight - main.clientHeight;
-      scrollTop = main.scrollTop;
-      pct = scrollable > 0 ? Math.min(100, Math.round((scrollTop / scrollable) * 100)) : 0;
-    } else {
-      // Standalone: window scrolls
-      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
-      scrollTop = window.scrollY;
-      pct = scrollable > 0 ? Math.min(100, Math.round((scrollTop / scrollable) * 100)) : 0;
-    }
+    const main = document.getElementById('mainContent');
+    const scrollTop = window.scrollY - 56;
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = Math.min(100, Math.max(0, Math.round((window.scrollY / scrollHeight) * 100)));
 
     // Ring
     const offset = circumference - (pct / 100) * circumference;
-    if (ringFill) ringFill.style.strokeDashoffset = offset;
-    if (ringPct)  ringPct.textContent = pct + '%';
+    ringFill.style.strokeDashoffset = offset;
+    ringPct.textContent = pct + '%';
 
-    // Current module — position relative to scroll container's viewport
-    const containerTop = main ? main.getBoundingClientRect().top : 0;
+    // Current module
     let current = 0;
     moduleIds.forEach((id, i) => {
       const el = document.getElementById(id);
       if (el) {
-        const relTop = el.getBoundingClientRect().top - containerTop;
-        if (relTop <= 80) current = i;
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= 120) current = i;
       }
     });
-    if (scrollChapterEl) scrollChapterEl.textContent = moduleNames[current];
+    scrollChapterEl.textContent = moduleNames[current];
 
     // Module mini-bars
     moduleIds.forEach((id, i) => {
       const el = document.getElementById(id);
-      const bar = document.getElementById('mp-' + (i + 1));
-      if (!el || !bar) return;
-      const elHeight = el.offsetHeight;
-      // Absolute scroll offset at which the module's top is reached
-      const elAbsTop = el.getBoundingClientRect().top - containerTop + scrollTop;
-      const progress = elHeight > 0
-        ? Math.min(100, Math.max(0, ((scrollTop - elAbsTop) / elHeight) * 100))
-        : 0;
-      bar.style.width = progress + '%';
+      const bar = document.getElementById('mp-' + (i+1));
+      if (el && bar) {
+        const rect = el.getBoundingClientRect();
+        const elHeight = el.offsetHeight;
+        const startOffset = window.scrollY + rect.top - 56;
+        const progress = Math.min(100, Math.max(0, ((window.scrollY - startOffset) / elHeight) * 100));
+        bar.style.width = progress + '%';
+      }
     });
 
-    // Left sidebar active item
+    // Left sidebar active
     document.querySelectorAll('.sidebar-nav-item').forEach((item, i) => {
       if (i === current) item.classList.add('active');
       else item.classList.remove('active');
     });
   }
 
-  // Attach listener to the right scroll target
-  function attachScrollListener() {
-    const main = getScrollContainer();
-    if (main) {
-      main.addEventListener('scroll', updateScrollProgress, { passive: true });
-    } else {
-      window.addEventListener('scroll', updateScrollProgress, { passive: true });
-    }
-    updateScrollProgress();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', attachScrollListener);
-  } else {
-    attachScrollListener();
-  }
+  window.addEventListener('scroll', updateScrollProgress, { passive: true });
+  updateScrollProgress();
 </script>
 
 <!-- ═══════════════ CHAPTER READER OVERLAY ═══════════════ -->
@@ -5651,10 +5928,10 @@
   white-space: nowrap;
 }
 .cr-btn:hover { background: var(--bg4); color: var(--text); }
-.cr-btn.primary { background: rgba(96,165,250,0.1); border-color: rgba(96,165,250,0.3); color: var(--accent); }
-.cr-btn.primary:hover { background: rgba(96,165,250,0.2); }
-.cr-btn.action { background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.24); color: var(--blue); }
-.cr-btn.action:hover { background: rgba(96,165,250,0.16); color: var(--text); }
+.cr-btn.primary { background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.3); color: var(--accent); }
+.cr-btn.primary:hover { background: rgba(0,212,255,0.2); }
+.cr-btn.action { background: rgba(77,159,255,0.08); border-color: rgba(77,159,255,0.24); color: var(--blue); }
+.cr-btn.action:hover { background: rgba(77,159,255,0.16); color: var(--text); }
 
 @media (max-width: 1200px) {
   .cr-header { padding: 8px 12px; }
@@ -5734,7 +6011,7 @@
 }
 .cr-ch-item:hover { background: var(--bg3); }
 .cr-ch-item.active {
-  background: rgba(96,165,250,0.06);
+  background: rgba(0,212,255,0.06);
   border-left-color: var(--accent);
 }
 .cr-ch-item.active .cr-ch-num { color: var(--accent); }
@@ -5817,7 +6094,7 @@
   flex-shrink: 0;
 }
 .cr-lv-basic  { background: rgba(0,229,160,0.1); color: var(--green); }
-.cr-lv-inter  { background: rgba(96,165,250,0.1); color: var(--blue); }
+.cr-lv-inter  { background: rgba(77,159,255,0.1); color: var(--blue); }
 .cr-lv-adv    { background: rgba(180,127,255,0.1); color: var(--purple); }
 .cr-lv-arch   { background: rgba(255,107,107,0.1); color: var(--red); }
 
@@ -6091,7 +6368,7 @@
 
 .cr-content blockquote {
   border-left: 3px solid var(--blue);
-  background: rgba(96,165,250,0.05);
+  background: rgba(77,159,255,0.05);
   padding: 16px 20px 16px 22px;
   border-radius: 0 12px 12px 0;
   margin: 28px 0;
@@ -6118,8 +6395,8 @@
 .cr-content li { margin-bottom: 6px; }
 
 .cr-content .callout {
-  background: rgba(96,165,250,0.06);
-  border: 1px solid rgba(96,165,250,0.2);
+  background: rgba(77,159,255,0.06);
+  border: 1px solid rgba(77,159,255,0.2);
   border-radius: 10px;
   padding: 16px 20px;
   margin: 24px 0;
@@ -6154,24 +6431,7 @@
   100% { background-position: -200% 0; }
 }
 
-/* ─── FIXED BOTTOM BAR ── */
-.cr-bottom-bar {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 12px 14px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bg2) 70%, transparent 30%) 0%, var(--bg) 100%);
-  border-top: 1px solid var(--border);
-  z-index: 10;
-}
-[data-theme="light"] .cr-bottom-bar {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bg3) 55%, white 45%) 0%, var(--bg) 100%);
-  border-top: 1px solid var(--border);
-}
-
-/* ─── NAVIGATION BAR (kept for legacy, actual nav moved to .cr-bottom-bar) ── */
+/* ─── NAVIGATION BAR ── */
 .cr-nav-bar {
   display: flex;
   align-items: center;
@@ -6180,6 +6440,17 @@
   margin-top: 0;
   padding-top: 0;
   border-top: 0;
+}
+
+.cr-nav-footer {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg2) 86%, var(--accent) 14%) 100%);
+  border-radius: 10px;
+  padding-left: 6px;
+  padding-right: 6px;
+  padding-bottom: 6px;
 }
 
 .cr-nav-btn {
@@ -6316,7 +6587,7 @@
   text-align: center;
 }
 .cr-timer-btn:hover { background: var(--bg2); color: var(--text); }
-.cr-timer-btn.active { background: rgba(96,165,250,0.1); border-color: rgba(96,165,250,0.3); color: var(--accent); }
+.cr-timer-btn.active { background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.3); color: var(--accent); }
 
 /* Reading progress widget */
 .cr-progress-widget {
@@ -6719,11 +6990,11 @@ function buildReaderHTML() {
             <div class="cr-skeleton" style="height:14px;width:80%"></div>
           </div>
           <div id="crArticleContent" style="display:none"></div>
+          <div id="crNavFooterSlot"></div>
         </div>
       </div>
       <div class="cr-right" id="crRight"><!-- filled by renderRightPanel --></div>
-    </div>
-    <div class="cr-bottom-bar" id="crBottomBar"></div>`;
+    </div>`;
 }
 
 // ─── Render chapter list (left panel) ────────────────────────────────
@@ -6898,6 +7169,109 @@ function toInlineJsArg(value) {
     .replace(/>/g, '\\u003e');
 }
 
+let siteArticles = [];
+
+function truncateText(text, maxLength) {
+  const value = String(text ?? '').trim();
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, Math.max(0, maxLength - 1)).trimEnd()}…`;
+}
+
+function formatArticleMeta(article) {
+  const parts = [];
+  if (article?.publishedAt) parts.push(article.publishedAt);
+  if (article?.readMinutes) parts.push(`${article.readMinutes} min read`);
+  return escapeHtml(parts.join(' · ') || 'Fresh on the website');
+}
+
+function buildNewBadge(article, compact = false) {
+  if (!article?.isNew) return '';
+  const compactStyle = compact ? ' style="padding:1px 6px;font-size:8px;"' : '';
+  return `<span class="rec-badge"${compactStyle}>New</span>`;
+}
+
+function buildArticleCard(article) {
+  return `
+    <a class="rec-card" href="${escapeHtml(article.href || '/articles')}" target="_top" rel="noopener">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">
+        <div class="rec-series">${escapeHtml(article.eyebrow || 'Website Article')}</div>
+        ${buildNewBadge(article)}
+      </div>
+      <div class="rec-title">${escapeHtml(article.title || 'Untitled article')}</div>
+      <div style="font-size:10.5px;line-height:1.5;color:var(--text2);margin-bottom:8px;">
+        ${escapeHtml(truncateText(article.description || 'Read the latest article published on the website.', 116))}
+      </div>
+      <div class="rec-meta">
+        <span>${formatArticleMeta(article)}</span>
+        <span class="rec-read">Read →</span>
+      </div>
+    </a>`;
+}
+
+function buildSidebarArticleItem(article) {
+  return `
+    <a class="sidebar-nav-item" href="${escapeHtml(article.href || '/articles')}" target="_top" rel="noopener">
+      <span class="nav-icon" style="background:var(--bg3);">📰</span>
+      <span style="flex:1;min-width:0">
+        <span style="display:block;font-size:11px;font-weight:600;line-height:1.35;color:var(--text);">
+          ${escapeHtml(truncateText(article.title || 'Untitled article', 48))}
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;margin-top:4px;font-family:var(--font-mono);font-size:8.5px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">
+          <span>${escapeHtml(article.eyebrow || 'Article')}</span>
+          ${buildNewBadge(article, true)}
+        </span>
+      </span>
+      <span class="nav-num">${escapeHtml(String(article.readMinutes || 8))}m</span>
+    </a>`;
+}
+
+function renderSiteArticles() {
+  const sidebarList = document.getElementById('sidebarArticlesList');
+  const featuredGrid = document.getElementById('featuredArticlesGrid');
+  const recommendedList = document.getElementById('recommendedArticlesList');
+  const articles = Array.isArray(siteArticles) ? siteArticles : [];
+
+  if (sidebarList) {
+    sidebarList.innerHTML = articles.length
+      ? articles.slice(0, 6).map(buildSidebarArticleItem).join('')
+      : `
+        <a class="sidebar-nav-item" href="/articles" target="_top" rel="noopener">
+          <span class="nav-icon" style="background:var(--bg3);">📰</span>
+          <span style="flex:1;font-size:11.5px">Browse website articles</span>
+        </a>`;
+  }
+
+  if (featuredGrid) {
+    featuredGrid.innerHTML = articles.length
+      ? articles.slice(0, 6).map(buildArticleCard).join('')
+      : `
+        <a class="rec-card" href="/articles" target="_top" rel="noopener">
+          <div class="rec-series">Articles Hub</div>
+          <div class="rec-title">Browse the website articles</div>
+          <div class="rec-meta"><span>Latest posts</span><span class="rec-read">Read →</span></div>
+        </a>`;
+  }
+
+  if (recommendedList) {
+    recommendedList.innerHTML = articles.length
+      ? articles.slice(0, 4).map(buildArticleCard).join('')
+      : `
+        <a class="rec-card" href="/articles" target="_top" rel="noopener">
+          <div class="rec-series">Articles Hub</div>
+          <div class="rec-title">Browse related website articles</div>
+          <div class="rec-meta"><span>Latest posts</span><span class="rec-read">Read →</span></div>
+        </a>`;
+  }
+}
+
+window.addEventListener('message', (event) => {
+  if (event.origin !== window.location.origin) return;
+  const data = event.data || {};
+  if (data.type !== 'site-articles' || !Array.isArray(data.articles)) return;
+  siteArticles = data.articles;
+  renderSiteArticles();
+});
+
 function buildStaticChapterBody(seriesName, chNum, chTitle, chLevel, subs) {
   return ``;
 }
@@ -6957,11 +7331,13 @@ async function loadChapterContent(chId, chTitle, subs, chLevel, moduleId) {
     markDoneBtn.classList.add('done');
   }
 
-  // ── Populate fixed bottom bar immediately ──────────────────────────────
-  const bottomBarEl = document.getElementById('crBottomBar');
-  if (bottomBarEl) bottomBarEl.innerHTML = buildNavButtons(chId, moduleId, null);
-
   try {
+
+    // Build full article HTML
+    const lvClass = getLevelClass(chLevel);
+    const lvColors = { basic: 'var(--green)', inter: 'var(--blue)', adv: 'var(--purple)', arch: 'var(--red)' };
+    const lvColor = lvColors[lvClass] || 'var(--text3)';
+
     const readMin = Math.max(8, Math.min(25, subs.length * 3 + 5));
 
     const lvStyle = getLevelBadgeStyle(chLevel);
@@ -7003,9 +7379,7 @@ async function loadChapterContent(chId, chTitle, subs, chLevel, moduleId) {
       contentEl.innerHTML = articleHTML;
       contentEl.style.display = 'block';
     }
-    // Refresh bottom bar with final Mark Done state
-    const bbEl = document.getElementById('crBottomBar');
-    if (bbEl) bbEl.innerHTML = buildNavButtons(chId, moduleId, null);
+    renderReaderFooterNav(chId, moduleId, null, chData?.partName || '');
 
   } catch (err) {
     console.error('Chapter load error:', err);
@@ -7026,10 +7400,8 @@ async function loadChapterContent(chId, chTitle, subs, chLevel, moduleId) {
         ${buildTopicBreadcrumb(subs, chId, moduleId, chData?.partName || '', '')}
         ${buildTechBadgesHTML(getTechStackBadges(subs, seriesName, chTitle))}`;
       contentEl.style.display = 'block';
-      // Refresh bottom bar for error state
-      const bbErrEl = document.getElementById('crBottomBar');
-      if (bbErrEl) bbErrEl.innerHTML = buildNavButtons(chId, moduleId, null);
     }
+    renderReaderFooterNav(chId, moduleId, null, chData?.partName || '');
   }
 }
 
@@ -7114,7 +7486,7 @@ function buildTechBadgesHTML(badges) {
 function getLevelBadgeStyle(level) {
   const l = (level || '').toLowerCase();
   if (l.includes('basic'))        return { bg: 'rgba(0,229,160,0.12)', border: 'rgba(0,229,160,0.3)', color: '#00e5a0', icon: '🌱' };
-  if (l.includes('intermediate')) return { bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.3)', color: '#4d9fff', icon: '⚡' };
+  if (l.includes('intermediate')) return { bg: 'rgba(77,159,255,0.12)', border: 'rgba(77,159,255,0.3)', color: '#4d9fff', icon: '⚡' };
   if (l.includes('advanced'))     return { bg: 'rgba(180,127,255,0.12)', border: 'rgba(180,127,255,0.3)', color: '#b47fff', icon: '🔥' };
   if (l.includes('architect'))    return { bg: 'rgba(255,107,107,0.12)', border: 'rgba(255,107,107,0.3)', color: '#ff6b6b', icon: '🏗' };
   return { bg: 'rgba(0,229,160,0.12)', border: 'rgba(0,229,160,0.3)', color: '#00e5a0', icon: '🌱' };
@@ -7161,6 +7533,12 @@ function buildNavButtons(chId, moduleId, topicText = null, partName = '') {
   return prevBtn + meta + nextBtn;
 }
 
+function renderReaderFooterNav(chId, moduleId, topicText = null, partName = '') {
+  const slot = document.getElementById('crNavFooterSlot');
+  if (!slot) return;
+  slot.innerHTML = `<div class="cr-nav-footer"><div class="cr-nav-bar">${buildNavButtons(chId, moduleId, topicText, partName)}</div></div>`;
+}
+
 // ─── Navigate between chapters ────────────────────────────────────────
 function navigateToChapter(chId, moduleId) {
   const ch = CHAPTER_DB[chId];
@@ -7187,7 +7565,8 @@ function navigateToChapter(chId, moduleId) {
         <div class="cr-skeleton" style="height:14px;width:88%"></div>
         <div class="cr-skeleton" style="height:14px;width:100%"></div>
       </div>
-      <div id="crArticleContent" style="display:none"></div>`;
+        <div id="crArticleContent" style="display:none"></div>
+        <div id="crNavFooterSlot"></div>`;
   }
 
   // Update chapter list
@@ -7263,10 +7642,9 @@ function markChapterDone() {
     renderRightPanel(chData.moduleId, currentChapterId);
   }
 
-  // Rebuild nav buttons in fixed bottom bar
+  // Rebuild nav buttons
   if (chData) {
-    const bottomBar = document.getElementById('crBottomBar');
-    if (bottomBar) bottomBar.innerHTML = buildNavButtons(currentChapterId, chData.moduleId, currentTopicText);
+    renderReaderFooterNav(currentChapterId, chData.moduleId, currentTopicText, chData.partName || '');
   }
 }
 
@@ -7651,14 +8029,10 @@ async function loadTopicContent(chId, chTitle, subs, chLevel, moduleId, topicTex
   }
 
   // ── Bottom nav bar ────────────────────────────────────────────────
-  const bottomBarEl = document.getElementById('crBottomBar');
-  if (bottomBarEl) bottomBarEl.innerHTML = buildNavButtons(chId, moduleId, topicText, partName || '');
-
   const readMin = 10;
   const lvStyle = getLevelBadgeStyle(chLevel);
 
   try {
-
     const techBadges = getTechStackBadges(subs, seriesName, chTitle);
     const techBadgesHTML = buildTechBadgesHTML(techBadges);
 
@@ -7689,12 +8063,10 @@ async function loadTopicContent(chId, chTitle, subs, chLevel, moduleId, topicTex
     const contentEl = document.getElementById('crArticleContent');
     if (loadingEl) loadingEl.style.display = 'none';
     if (contentEl) { contentEl.innerHTML = articleHTML; contentEl.style.display = 'block'; }
+    renderReaderFooterNav(chId, moduleId, topicText, partName || chData?.partName || '');
 
     const timerEst = document.getElementById('crTimerEst');
     if (timerEst) timerEst.textContent = `Est. ${readMin}–${readMin + 3} min read`;
-
-    const bbEl = document.getElementById('crBottomBar');
-    if (bbEl) bbEl.innerHTML = buildNavButtons(chId, moduleId, topicText, partName || '');
 
   } catch (err) {
     console.error('Topic load error:', err);
@@ -7709,6 +8081,7 @@ async function loadTopicContent(chId, chTitle, subs, chLevel, moduleId, topicTex
         ${buildTechBadgesHTML(getTechStackBadges(subs, seriesName, chTitle))}`;
       contentEl.style.display = 'block';
     }
+    renderReaderFooterNav(chId, moduleId, topicText, partName || chData?.partName || '');
   }
 }
 
@@ -7735,7 +8108,8 @@ function switchToTopic(topicText, chId, moduleId, partName) {
         <div class="cr-skeleton" style="height:14px;width:88%"></div>
         <div class="cr-skeleton" style="height:14px;width:80%"></div>
       </div>
-      <div id="crArticleContent" style="display:none"></div>`;
+        <div id="crArticleContent" style="display:none"></div>
+        <div id="crNavFooterSlot"></div>`;
   }
 
   timerSeconds = 0;
@@ -7745,12 +8119,13 @@ function switchToTopic(topicText, chId, moduleId, partName) {
 
 // Initialize DB and restore selection from URL on page load
 document.addEventListener('DOMContentLoaded', () => {
+  renderSiteArticles();
   buildChapterDB();
   restoreReaderSelectionFromUrl();
 });
 </script>
 
-<!-- MOBILE FLOATING ACTION BAR -->
+<!-- ─────────────── MOBILE FLOATING ACTION BAR ─────────────── -->
 <div class="mob-float-actions" role="toolbar" aria-label="Quick actions">
   <button class="action-btn btn-ai" onclick="openAISummary()">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>

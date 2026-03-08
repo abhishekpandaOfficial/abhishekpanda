@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AbhishekAnimatedLogo } from "@/components/ui/AbhishekAnimatedLogo";
+import { HeaderGlobe } from "@/components/layout/HeaderGlobe";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -337,6 +338,7 @@ export const Navigation = () => {
             </nav>
 
             <div className="flex items-center gap-2">
+              <HeaderGlobe className="hidden sm:flex" compact />
               <ThemeToggle />
               <Button
                 variant="ghost"
@@ -362,6 +364,17 @@ export const Navigation = () => {
           >
             <div className="absolute inset-0 bg-background/95 backdrop-blur-xl" />
             <nav className="relative container mx-auto px-4 py-8 flex flex-col gap-2 max-h-[calc(100vh-5rem)] overflow-y-auto">
+              <Link
+                to="/classified"
+                className="mb-4 flex items-center justify-between rounded-2xl border border-border/60 bg-card/70 px-4 py-3 backdrop-blur-xl transition hover:border-primary/35 hover:bg-card"
+              >
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Global View</div>
+                  <div className="text-xs text-muted-foreground">Open ARGUS VIII classified preview</div>
+                </div>
+                <HeaderGlobe compact />
+              </Link>
+
               {/* About */}
               {navLinks.slice(0, 1).map((link, index) => (
                 <motion.div

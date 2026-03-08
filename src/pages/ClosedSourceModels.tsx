@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { useTheme } from "@/components/ThemeProvider";
+import { measureEmbeddedFrameHeight, syncThemeToEmbeddedFrame } from "@/lib/embeddedFrame";
 
 const ClosedSourceModels = () => {
   const { theme } = useTheme();
@@ -11,10 +12,7 @@ const ClosedSourceModels = () => {
   const [minViewportHeight, setMinViewportHeight] = useState(800);
 
   const postThemeToIframe = (nextTheme: "light" | "dark") => {
-    const frameWindow = iframeRef.current?.contentWindow;
-    if (!frameWindow) return;
-
-    frameWindow.postMessage({ type: "parent-theme", theme: nextTheme }, window.location.origin);
+    syncThemeToEmbeddedFrame(iframeRef.current, nextTheme);
   };
 
   const iframeSrc = useMemo(
@@ -23,19 +21,7 @@ const ClosedSourceModels = () => {
   );
 
   const measureFromIframe = () => {
-    const frame = iframeRef.current;
-    const doc = frame?.contentDocument;
-    if (!doc) return;
-
-    const body = doc.body;
-    const root = doc.documentElement;
-    const measuredHeight = Math.max(
-      body ? body.scrollHeight : 0,
-      body ? body.offsetHeight : 0,
-      root ? root.scrollHeight : 0,
-      root ? root.offsetHeight : 0,
-    );
-
+    const measuredHeight = measureEmbeddedFrameHeight(iframeRef.current);
     if (measuredHeight > 0) {
       setContentHeight(measuredHeight);
     }

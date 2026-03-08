@@ -1,0 +1,3564 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GoF Design Patterns — All 23 with C# Examples</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    html, body, #root { margin: 0; padding: 0; height: 100%; background: #0a0a0f; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useRef } = React;
+    const ALLOWED_THEMES = new Set(["light", "dark"]);
+    const getStoredTheme = () => {
+      try {
+        return localStorage.getItem("abhishekpanda-theme");
+      } catch {
+        return null;
+      }
+    };
+    const resolveTheme = (candidate) => {
+      if (ALLOWED_THEMES.has(candidate)) return candidate;
+      const stored = getStoredTheme();
+      if (ALLOWED_THEMES.has(stored)) return stored;
+      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    };
+    const applyEmbeddedTheme = (candidate) => {
+      const theme = resolveTheme(candidate);
+      document.documentElement.setAttribute("data-theme", theme);
+      document.documentElement.style.colorScheme = theme;
+      if (document.body) {
+        document.body.style.background = theme === "light" ? "#f8fafc" : "#0a0a0f";
+      }
+    };
+    applyEmbeddedTheme(new URLSearchParams(window.location.search).get("theme"));
+    window.addEventListener("message", (event) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type === "parent-theme") applyEmbeddedTheme(event.data.theme);
+    });
+    window.addEventListener("storage", (event) => {
+      if (event.key === "abhishekpanda-theme") applyEmbeddedTheme(event.newValue);
+    });
+    try {
+      const channel = new BroadcastChannel("abhishekpanda-theme");
+      channel.addEventListener("message", (event) => {
+        if (event.data?.type === "theme-change") applyEmbeddedTheme(event.data.theme);
+      });
+    } catch {}
+
+const INJECTED_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{color-scheme:dark}
+  html[data-theme="light"]{color-scheme:light}
+  html[data-theme="light"] body{filter:invert(1) hue-rotate(180deg);background:#f8fafc !important}
+  html[data-theme="light"] img,
+  html[data-theme="light"] picture,
+  html[data-theme="light"] svg,
+  html[data-theme="light"] video,
+  html[data-theme="light"] canvas,
+  html[data-theme="light"] iframe{filter:invert(1) hue-rotate(180deg)}
+  img,svg,video,canvas{max-width:100%;height:auto}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:#0d0d1a}
+  ::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+  ::-webkit-scrollbar-thumb:hover{background:#555}
+  @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  @keyframes flowRight{0%{stroke-dashoffset:60}100%{stroke-dashoffset:0}}
+  @keyframes glow{0%,100%{box-shadow:0 0 6px var(--glow)}50%{box-shadow:0 0 20px var(--glow),0 0 40px var(--glow)}}
+  @keyframes particle{0%{left:-10%;opacity:0}20%{opacity:1}80%{opacity:1}100%{left:110%;opacity:0}}
+  @keyframes nodeAppear{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  @keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes arrowFlow{0%{opacity:0;transform:translateX(-5px)}50%{opacity:1}100%{opacity:0;transform:translateX(5px)}}
+`;
+
+const CAT_COLORS = {
+  creational: { primary: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.3)", glow: "#f59e0b" },
+  structural:  { primary: "#06b6d4", bg: "rgba(6,182,212,0.08)",   border: "rgba(6,182,212,0.3)",  glow: "#06b6d4" },
+  behavioral:  { primary: "#a855f7", bg: "rgba(168,85,247,0.08)",  border: "rgba(168,85,247,0.3)", glow: "#a855f7" },
+};
+
+const SOLID_MAP = {
+  S: { label: "Single Responsibility", color: "#34d399", desc: "A class should have only one reason to change" },
+  O: { label: "Open/Closed",           color: "#60a5fa", desc: "Open for extension, closed for modification" },
+  L: { label: "Liskov Substitution",   color: "#f472b6", desc: "Subtypes must be substitutable for their base types" },
+  I: { label: "Interface Segregation", color: "#fb923c", desc: "Clients shouldn't depend on interfaces they don't use" },
+  D: { label: "Dependency Inversion",  color: "#a78bfa", desc: "Depend on abstractions, not concretions" },
+};
+
+// ─── ALL 23 PATTERNS ────────────────────────────────────────────────────────────
+const ALL_PATTERNS = [
+// ═══ CREATIONAL ════════════════════════════════════════════════════════════════
+{
+  id:"singleton", name:"Singleton", cat:"creational", emoji:"👑", num:1,
+  tagline:"One and only one instance, globally accessible",
+  analogy:"🏛️ Like a country's President — only ONE person holds the office at any time. Everyone communicates through the same president.",
+  what:"Ensures a class has only one instance and provides a global point of access to it.",
+  why:"Prevents duplicate instances that waste resources or cause inconsistent state (e.g., two database connections fighting over the same data).",
+  when:["Managing shared resources: DB connections, thread pools, config","Logging systems where all modules write to ONE log","Cache managers","App-level settings/configuration"],
+  how:"The constructor is made private. A static method (GetInstance) controls creation — if an instance already exists, it returns that; otherwise creates a new one.",
+  solid:["S","O"],
+  withoutPattern:`// Every class creates its own logger → 100 log files!
+class OrderService { Logger log = new Logger(); }
+class PaymentService { Logger log = new Logger(); }
+class ShippingService { Logger log = new Logger(); }`,
+  withPattern:`// Thread-safe Singleton Logger
+public sealed class Logger {
+    private static readonly Lazy<Logger> _instance =
+        new Lazy<Logger>(() => new Logger());
+    
+    public static Logger Instance => _instance.Value;
+    
+    private readonly string _logPath = "app.log";
+    private Logger() { } // Private constructor
+    
+    public void Log(string msg) {
+        File.AppendAllText(_logPath, 
+            $"[{DateTime.Now:HH:mm:ss}] {msg}\\n");
+    }
+}
+
+// Usage — same instance everywhere
+Logger.Instance.Log("Order placed");
+Logger.Instance.Log("Payment processed");
+Logger.Instance.Log("Shipped!");`,
+  enterprise:["Configuration Manager: App settings loaded once, shared everywhere","Connection Pool: Single pool managing N DB connections","Feature Flag Service: One service reads flags, all modules query it","Event Bus: Single message broker routing domain events"],
+  flow:[
+    {id:"c1",label:"Client A",x:10,y:40},
+    {id:"c2",label:"Client B",x:10,y:70},
+    {id:"s",label:"Singleton\\nGetInstance()",x:45,y:55,special:true},
+    {id:"i",label:"Single\\nInstance",x:78,y:55},
+  ],
+  arrows:[["c1","s"],["c2","s"],["s","i"]],
+},
+{
+  id:"factory-method", name:"Factory Method", cat:"creational", emoji:"🏭", num:2,
+  tagline:"Let subclasses decide which object to create",
+  analogy:"🚗 Like a car dealership: you say 'I want a car', the specific DEALER decides whether to give you a sedan, SUV, or truck based on inventory.",
+  what:"Defines an interface for creating an object, but lets subclasses decide which class to instantiate.",
+  why:"Decouples the code that uses objects from the code that creates them. Add new product types without changing existing code.",
+  when:["When you don't know ahead of time what class you need to instantiate","When subclasses should control what gets created","Plugin architectures","Notification systems (Email, SMS, Push)"],
+  how:"An abstract creator defines a factory method. Concrete creators override it to produce specific products. Client uses the abstract creator interface.",
+  solid:["O","D"],
+  withoutPattern:`// Hard-coded type checks — add new notification = change this!
+public void SendNotification(string type, string msg) {
+    if (type == "email") { new EmailSender().Send(msg); }
+    else if (type == "sms") { new SmsSender().Send(msg); }
+    // Add push? Edit this class — VIOLATION of Open/Closed!
+}`,
+  withPattern:`// Abstract product
+public interface INotification {
+    void Send(string message);
+}
+
+// Concrete products
+public class EmailNotification : INotification {
+    public void Send(string msg) => 
+        Console.WriteLine($"📧 Email: {msg}");
+}
+public class SmsNotification : INotification {
+    public void Send(string msg) => 
+        Console.WriteLine($"📱 SMS: {msg}");
+}
+public class PushNotification : INotification {
+    public void Send(string msg) => 
+        Console.WriteLine($"🔔 Push: {msg}");
+}
+
+// Abstract creator
+public abstract class NotificationFactory {
+    public abstract INotification CreateNotification();
+    public void Notify(string msg) => 
+        CreateNotification().Send(msg); // Template pattern bonus!
+}
+
+// Concrete factories — add new? Just new class, no edits!
+public class EmailFactory : NotificationFactory {
+    public override INotification CreateNotification() 
+        => new EmailNotification();
+}
+public class SmsFactory : NotificationFactory {
+    public override INotification CreateNotification() 
+        => new SmsNotification();
+}
+
+// Client code — open for extension, closed for modification ✅
+NotificationFactory factory = new EmailFactory();
+factory.Notify("Your order shipped!");`,
+  enterprise:["Payment Gateway: PayPalFactory, StripeFactory, BankFactory","Report Generator: PdfReportFactory, ExcelReportFactory, CsvReportFactory","Data Parser: JsonParserFactory, XmlParserFactory, CsvParserFactory","Cloud Storage: AwsStorageFactory, AzureStorageFactory"],
+  flow:[
+    {id:"cl",label:"Client",x:5,y:55},
+    {id:"af",label:"Abstract\\nFactory",x:30,y:55,special:true},
+    {id:"cf1",label:"EmailFactory",x:58,y:30},
+    {id:"cf2",label:"SmsFactory",x:58,y:55},
+    {id:"cf3",label:"PushFactory",x:58,y:80},
+    {id:"p1",label:"Email",x:83,y:30},
+    {id:"p2",label:"SMS",x:83,y:55},
+    {id:"p3",label:"Push",x:83,y:80},
+  ],
+  arrows:[["cl","af"],["af","cf1"],["af","cf2"],["af","cf3"],["cf1","p1"],["cf2","p2"],["cf3","p3"]],
+},
+{
+  id:"abstract-factory", name:"Abstract Factory", cat:"creational", emoji:"🏗️", num:3,
+  tagline:"Factory of factories — create families of related objects",
+  analogy:"🪑 Like an IKEA store: you choose a furniture STYLE (Modern/Classic), and get an entire FAMILY — matching chair, table, sofa — all consistent.",
+  what:"Provides an interface for creating families of related or dependent objects without specifying their concrete classes.",
+  why:"Ensures products from the same family are used together. Switching families (e.g., from Windows to Mac UI) requires changing only one factory.",
+  when:["UI toolkits: Windows/Mac/Linux controls that must be consistent","Database providers: SQL Server vs Oracle vs PostgreSQL families","Cloud providers: AWS vs Azure service families"],
+  how:"Abstract factory declares creation methods for each product type. Concrete factories implement all creation methods for a specific family. Client only uses abstract interfaces.",
+  solid:["O","D","I"],
+  withoutPattern:`// Direct instantiation — changing theme breaks everything
+var btn = new WindowsButton();
+var chk = new WindowsCheckbox();
+var txt = new WindowsTextbox();
+// Switch to Mac? Change EVERY LINE manually! 😱`,
+  withPattern:`// Abstract products
+public interface IButton  { void Render(); }
+public interface ICheckbox { void Check(); }
+
+// Windows family
+public class WinButton  : IButton   { public void Render() => Console.WriteLine("🪟 Win Button"); }
+public class WinCheckbox: ICheckbox { public void Check()  => Console.WriteLine("🪟 Win Checkbox"); }
+
+// Mac family
+public class MacButton  : IButton   { public void Render() => Console.WriteLine("🍎 Mac Button"); }
+public class MacCheckbox: ICheckbox { public void Check()  => Console.WriteLine("🍎 Mac Checkbox"); }
+
+// Abstract factory
+public interface IUIFactory {
+    IButton CreateButton();
+    ICheckbox CreateCheckbox();
+}
+
+// Concrete factories
+public class WindowsUIFactory : IUIFactory {
+    public IButton CreateButton() => new WinButton();
+    public ICheckbox CreateCheckbox() => new WinCheckbox();
+}
+public class MacUIFactory : IUIFactory {
+    public IButton CreateButton() => new MacButton();
+    public ICheckbox CreateCheckbox() => new MacCheckbox();
+}
+
+// Application — swap factory = swap entire UI family ✅
+public class Application {
+    private IUIFactory _factory;
+    public Application(IUIFactory factory) => _factory = factory;
+    public void BuildUI() {
+        _factory.CreateButton().Render();
+        _factory.CreateCheckbox().Check();
+    }
+}
+// Switch OS: new Application(new MacUIFactory()) — DONE!`,
+  enterprise:["Cross-platform UI frameworks","Multi-cloud infrastructure provisioning","Multi-theme design systems (Light/Dark/High-contrast)","Multi-DB ORM (SQL/NoSQL/Graph DB)"],
+  flow:[
+    {id:"cl",label:"Client",x:5,y:55},
+    {id:"af",label:"IUIFactory\\n(Abstract)",x:30,y:55,special:true},
+    {id:"wf",label:"WinFactory",x:58,y:30},
+    {id:"mf",label:"MacFactory",x:58,y:80},
+    {id:"wb",label:"WinBtn+Chk",x:83,y:30},
+    {id:"mb",label:"MacBtn+Chk",x:83,y:80},
+  ],
+  arrows:[["cl","af"],["af","wf"],["af","mf"],["wf","wb"],["mf","mb"]],
+},
+{
+  id:"builder", name:"Builder", cat:"creational", emoji:"🧱", num:4,
+  tagline:"Construct complex objects step by step",
+  analogy:"🍔 Like ordering a custom burger: you specify each layer — bun, patty, cheese, sauce — one step at a time, then say 'Build!'",
+  what:"Separates the construction of a complex object from its representation, allowing the same process to produce different representations.",
+  why:"Avoids 'telescoping constructors' (constructors with 20 parameters). Builds objects step-by-step with only the parts you need.",
+  when:["Creating objects with many optional parameters","Building complex documents (HTML, PDF, SQL queries)","Test data builders","SQL query builders"],
+  how:"Director controls the build process. Builder interface defines building steps. Concrete builders implement steps. Product is assembled step-by-step.",
+  solid:["S","O"],
+  withoutPattern:`// Telescoping constructor nightmare 😱
+var report = new Report("Q4 2024", true, false, true, 
+    "USD", "en-US", true, false, null, 15, "Portrait", 
+    true, "Arial", 12, true, false, true);
+// What does parameter 6 mean?? 🤷`,
+  withPattern:`public class Report {
+    public string Title { get; set; }
+    public bool HasHeader { get; set; }
+    public bool HasFooter { get; set; }
+    public int FontSize { get; set; }
+    public string Currency { get; set; }
+    // ... 15 more properties
+}
+
+// Fluent Builder
+public class ReportBuilder {
+    private Report _report = new Report();
+    
+    public ReportBuilder WithTitle(string t) { 
+        _report.Title = t; return this; 
+    }
+    public ReportBuilder WithHeader() { 
+        _report.HasHeader = true; return this; 
+    }
+    public ReportBuilder WithFooter() { 
+        _report.HasFooter = true; return this; 
+    }
+    public ReportBuilder WithFontSize(int size) { 
+        _report.FontSize = size; return this; 
+    }
+    public ReportBuilder InCurrency(string c) { 
+        _report.Currency = c; return this; 
+    }
+    public Report Build() {
+        Validate(); // Validate before handing over
+        return _report;
+    }
+    private void Validate() {
+        if (string.IsNullOrEmpty(_report.Title))
+            throw new InvalidOperationException("Title required");
+    }
+}
+
+// Usage — reads like natural English ✅
+var report = new ReportBuilder()
+    .WithTitle("Q4 2024 Sales")
+    .WithHeader()
+    .WithFooter()
+    .WithFontSize(12)
+    .InCurrency("USD")
+    .Build();`,
+  enterprise:["SQL Query Builders (EF LINQ expressions)","HTTP Request builders (HttpClient)","Test Data Builders (unit test objects)","Email builders (subject, body, attachments, recipients)"],
+  flow:[
+    {id:"dir",label:"Director",x:5,y:55},
+    {id:"bi",label:"IBuilder",x:28,y:55,special:true},
+    {id:"cb",label:"ReportBuilder",x:55,y:30},
+    {id:"hb",label:"HTMLBuilder",x:55,y:80},
+    {id:"p1",label:"Report",x:82,y:30},
+    {id:"p2",label:"HTML Page",x:82,y:80},
+  ],
+  arrows:[["dir","bi"],["bi","cb"],["bi","hb"],["cb","p1"],["hb","p2"]],
+},
+{
+  id:"prototype", name:"Prototype", cat:"creational", emoji:"🧬", num:5,
+  tagline:"Clone objects without coupling to their classes",
+  analogy:"🐑 Like cloning Dolly the sheep — you copy an existing organism to create a new one, rather than starting from scratch.",
+  what:"Specifies the kinds of objects to create using a prototypical instance, and creates new objects by copying this prototype.",
+  why:"Avoids expensive object initialization. Creates copies of complex objects without depending on their classes.",
+  when:["Object creation is expensive (DB calls, network requests)","When classes to instantiate are specified at runtime","Caching pre-built objects","Game object spawning"],
+  how:"Objects implement a Clone() method. Shallow copy duplicates references; deep copy duplicates entire object graph.",
+  solid:["O","D"],
+  withoutPattern:`// Re-creating expensive objects from scratch every time
+public Enemy SpawnEnemy(string type) {
+    // Expensive: loads model, textures, AI config from disk
+    var enemy = new Enemy();
+    enemy.LoadModel("dragon.obj");        // 2 seconds
+    enemy.LoadTextures("dragon_tex/");    // 1 second
+    enemy.ConfigureAI("dragon_ai.json"); // 0.5 seconds
+    return enemy; // 3.5 seconds per spawn! 😱
+}`,
+  withPattern:`public interface IPrototype<T> {
+    T Clone();
+}
+
+public class Enemy : IPrototype<Enemy> {
+    public string Name { get; set; }
+    public int Health { get; set; }
+    public string Model { get; private set; }
+    public AIConfig AI { get; private set; }
+    
+    // Expensive initialization — done ONCE
+    public void Initialize(string modelPath) {
+        Model = LoadModel(modelPath);   // Slow
+        AI = LoadAIConfig(modelPath);   // Slow
+        Console.WriteLine("✅ Enemy initialized (expensive)");
+    }
+    
+    // Clone is fast — copies already-loaded data
+    public Enemy Clone() {
+        return (Enemy)MemberwiseClone(); // Shallow
+        // For deep: return new Enemy { ..., AI = AI.DeepCopy() }
+    }
+    
+    private string LoadModel(string p) { Thread.Sleep(100); return p; }
+    private AIConfig LoadAIConfig(string p) => new AIConfig();
+}
+
+// Enemy registry (Prototype Registry pattern)
+public class EnemyRegistry {
+    private Dictionary<string,Enemy> _cache = new();
+    
+    public void Register(string key, Enemy prototype) 
+        => _cache[key] = prototype;
+    
+    public Enemy Get(string key) 
+        => _cache[key].Clone(); // Fast clone!
+}
+
+// Usage
+var registry = new EnemyRegistry();
+var dragon = new Enemy { Name = "Dragon" };
+dragon.Initialize("dragon.obj"); // Slow — once only!
+registry.Register("dragon", dragon);
+
+// Spawn 100 dragons cheaply:
+for(int i = 0; i < 100; i++) {
+    var d = registry.Get("dragon"); // Fast clone ✅
+    d.Health = 100 + (i * 10);
+}`,
+  enterprise:["Game engines: spawning large numbers of pre-configured objects","Document templates: clone base template then customize","Configuration snapshots: clone config per environment","Object caching in ORM (entity state tracking)"],
+  flow:[
+    {id:"r",label:"Registry",x:5,y:55},
+    {id:"p",label:"Prototype\\n(Original)",x:35,y:55,special:true},
+    {id:"c1",label:"Clone 1",x:68,y:30},
+    {id:"c2",label:"Clone 2",x:68,y:55},
+    {id:"c3",label:"Clone 3",x:68,y:80},
+  ],
+  arrows:[["r","p"],["p","c1"],["p","c2"],["p","c3"]],
+},
+
+// ═══ STRUCTURAL ════════════════════════════════════════════════════════════════
+{
+  id:"adapter", name:"Adapter", cat:"structural", emoji:"🔌", num:6,
+  tagline:"Make incompatible interfaces work together",
+  analogy:"✈️ Like a travel power adapter — your US plug (110V) can't fit in a European socket (220V). The adapter converts the interface so they're compatible.",
+  what:"Converts the interface of a class into another interface clients expect. Lets classes work together that couldn't otherwise because of incompatible interfaces.",
+  why:"Enables reuse of existing classes even when their interfaces don't match. Integrates legacy systems with new code.",
+  when:["Integrating legacy code with new systems","Using third-party libraries with incompatible interfaces","Wrapping external APIs","Creating reusable classes with unknown interfaces"],
+  how:"Target interface defines what client expects. Adaptee is the incompatible class. Adapter wraps Adaptee and translates calls to/from Target.",
+  solid:["O","S","D"],
+  withoutPattern:`// You have an old XML logger but your app expects JSON
+// You'd have to modify EVERY call site... or the library!
+public class XmlLogger { 
+    public void LogXml(string xml) { /* logs XML */ }
+}
+// New interface wants: logger.Log(string json)
+// They're INCOMPATIBLE — can't use XmlLogger directly!`,
+  withPattern:`// Target interface (what our app expects)
+public interface ILogger {
+    void Log(string jsonMessage);
+}
+
+// Adaptee (legacy/third-party — can't modify)
+public class LegacyXmlLogger {
+    public void LogXml(string xmlData) 
+        => Console.WriteLine($"XML LOG: {xmlData}");
+}
+
+// Adapter — bridges the gap
+public class XmlLoggerAdapter : ILogger {
+    private readonly LegacyXmlLogger _adaptee;
+    
+    public XmlLoggerAdapter(LegacyXmlLogger adaptee) 
+        => _adaptee = adaptee;
+    
+    public void Log(string jsonMessage) {
+        // Convert JSON → XML then delegate
+        var xml = ConvertJsonToXml(jsonMessage);
+        _adaptee.LogXml(xml);
+    }
+    
+    private string ConvertJsonToXml(string json) 
+        => $"<log>{json}</log>"; // Real impl uses XmlSerializer
+}
+
+// Client — uses ILogger, unaware of the legacy system
+ILogger logger = new XmlLoggerAdapter(new LegacyXmlLogger());
+logger.Log("{\"event\":\"UserLogin\",\"userId\":42}"); // ✅ Works!`,
+  enterprise:["Payment gateways: wrap Stripe/PayPal with your IPaymentProvider","Legacy ERP integration: adapt old SOAP APIs to REST interfaces","Third-party logging: adapt Serilog/NLog to your ILogger","Data format converters: XML↔JSON↔CSV adapters"],
+  flow:[
+    {id:"cl",label:"Client",x:5,y:55},
+    {id:"ti",label:"ITarget\\nInterface",x:28,y:55,special:true},
+    {id:"ad",label:"Adapter",x:55,y:55},
+    {id:"ae",label:"Adaptee\\n(Legacy)",x:82,y:55},
+  ],
+  arrows:[["cl","ti"],["ti","ad"],["ad","ae"]],
+},
+{
+  id:"bridge", name:"Bridge", cat:"structural", emoji:"🌉", num:7,
+  tagline:"Decouple abstraction from implementation",
+  analogy:"📺 Like a TV remote control: the remote (abstraction) works with ANY TV brand (implementation). Swap Sony for Samsung — same remote works!",
+  what:"Decouples an abstraction from its implementation so that the two can vary independently.",
+  why:"Avoids an explosion of subclasses when combining abstractions with implementations. Change either side without affecting the other.",
+  when:["When you want abstraction and implementation to vary independently","Avoiding permanent binding between abstraction and implementation","Cross-platform applications","When you have a proliferation of classes"],
+  how:"Abstraction contains a reference to Implementor. ConcreteAbstraction extends Abstraction. ConcreteImplementor implements Implementor interface.",
+  solid:["O","D","S"],
+  withoutPattern:`// Without Bridge: CLASS EXPLOSION! 💥
+// Shape × Renderer combinations:
+class CircleVectorRenderer {}
+class CircleRasterRenderer {}
+class SquareVectorRenderer {}
+class SquareRasterRenderer {}
+class TriangleVectorRenderer {}
+class TriangleRasterRenderer {}
+// Add 1 shape = +2 classes. Add 1 renderer = +3 classes!`,
+  withPattern:`// Implementor (rendering side)
+public interface IRenderer {
+    void RenderCircle(float radius);
+    void RenderSquare(float side);
+}
+
+public class VectorRenderer : IRenderer {
+    public void RenderCircle(float r) 
+        => Console.WriteLine($"Vector circle r={r}");
+    public void RenderSquare(float s) 
+        => Console.WriteLine($"Vector square s={s}");
+}
+
+public class RasterRenderer : IRenderer {
+    public void RenderCircle(float r) 
+        => Console.WriteLine($"Raster circle pixels r={r}");
+    public void RenderSquare(float s) 
+        => Console.WriteLine($"Raster square pixels s={s}");
+}
+
+// Abstraction (shape side) — holds reference to implementor
+public abstract class Shape {
+    protected IRenderer _renderer;
+    protected Shape(IRenderer renderer) => _renderer = renderer;
+    public abstract void Draw();
+    public abstract void Resize(float factor);
+}
+
+public class Circle : Shape {
+    private float _radius;
+    public Circle(IRenderer r, float radius) : base(r) => _radius = radius;
+    public override void Draw() => _renderer.RenderCircle(_radius);
+    public override void Resize(float f) => _radius *= f;
+}
+
+// Mix & match freely ✅  N shapes + M renderers = N+M classes (not N×M!)
+var c1 = new Circle(new VectorRenderer(), 5f);
+var c2 = new Circle(new RasterRenderer(), 5f);
+c1.Draw(); // Vector circle
+c2.Draw(); // Raster circle`,
+  enterprise:["Device driver abstraction (OS ↔ hardware)","Notification systems: channels × message types","Report formats: business logic × output format (PDF/Excel/HTML)","Database abstraction layers"],
+  flow:[
+    {id:"a",label:"Abstraction\\n(Shape)",x:20,y:40,special:true},
+    {id:"ca",label:"Circle",x:5,y:75},
+    {id:"cb",label:"Square",x:35,y:75},
+    {id:"i",label:"IRenderer",x:65,y:40,special:true},
+    {id:"c1",label:"Vector",x:52,y:75},
+    {id:"c2",label:"Raster",x:78,y:75},
+  ],
+  arrows:[["a","ca"],["a","cb"],["a","i"],["i","c1"],["i","c2"]],
+},
+{
+  id:"composite", name:"Composite", cat:"structural", emoji:"🌳", num:8,
+  tagline:"Treat individual objects and compositions uniformly",
+  analogy:"📁 Like a file system: a FOLDER can contain files AND other folders. You can call Delete() on a file OR a folder — same operation, handles everything inside.",
+  what:"Composes objects into tree structures to represent part-whole hierarchies. Lets clients treat individual objects and compositions of objects uniformly.",
+  why:"Clients don't need to know if they're dealing with a single object or a complex hierarchy. Simplifies client code dramatically.",
+  when:["Representing hierarchies (org charts, file systems, UI components)","When clients should ignore the difference between leaf and composite","Building tree structures","Menu systems"],
+  how:"Component interface defines operations. Leaf implements operations directly. Composite implements operations by delegating to children.",
+  solid:["O","D"],
+  withoutPattern:`// Without Composite: tedious type-checking everywhere
+public decimal CalculatePrice(object item) {
+    if (item is Product p) return p.Price;
+    if (item is Bundle b) {
+        decimal total = 0;
+        foreach (var i in b.Items)
+            total += CalculatePrice(i); // Recursive but messy
+        return total;
+    }
+    throw new Exception("Unknown type!");
+}`,
+  withPattern:`// Component interface
+public interface IFileSystemItem {
+    string Name { get; }
+    long GetSize();
+    void Display(int indent = 0);
+}
+
+// Leaf
+public class File : IFileSystemItem {
+    public string Name { get; }
+    private long _size;
+    public File(string name, long size) { Name = name; _size = size; }
+    public long GetSize() => _size;
+    public void Display(int indent = 0) 
+        => Console.WriteLine($"{new string(' ', indent)}📄 {Name} ({_size}b)");
+}
+
+// Composite
+public class Folder : IFileSystemItem {
+    public string Name { get; }
+    private List<IFileSystemItem> _children = new();
+    public Folder(string name) => Name = name;
+    
+    public void Add(IFileSystemItem item) => _children.Add(item);
+    public void Remove(IFileSystemItem item) => _children.Remove(item);
+    
+    public long GetSize() => _children.Sum(c => c.GetSize());
+    
+    public void Display(int indent = 0) {
+        Console.WriteLine($"{new string(' ', indent)}📁 {Name}");
+        foreach (var child in _children)
+            child.Display(indent + 2); // Recursion is elegant ✅
+    }
+}
+
+// Client — treats File and Folder identically!
+var root = new Folder("C:\\");
+var docs = new Folder("Documents");
+docs.Add(new File("resume.pdf", 1024));
+docs.Add(new File("cover.docx", 512));
+root.Add(docs);
+root.Add(new File("config.ini", 256));
+
+root.Display();           // Shows entire tree
+Console.WriteLine(root.GetSize()); // 1792 bytes total`,
+  enterprise:["Organization chart calculations (salaries, headcount)","UI component trees (React/WPF components)","Menu systems (menu items and submenus)","XML/HTML DOM tree traversal","Bill of materials in manufacturing"],
+  flow:[
+    {id:"c",label:"Component\\nInterface",x:45,y:10,special:true},
+    {id:"l1",label:"File\\n(Leaf)",x:15,y:50},
+    {id:"l2",label:"File\\n(Leaf)",x:32,y:50},
+    {id:"comp",label:"Folder\\n(Composite)",x:65,y:50},
+    {id:"ch1",label:"File",x:52,y:85},
+    {id:"ch2",label:"Folder",x:78,y:85},
+  ],
+  arrows:[["c","l1"],["c","l2"],["c","comp"],["comp","ch1"],["comp","ch2"]],
+},
+{
+  id:"decorator", name:"Decorator", cat:"structural", emoji:"🎁", num:9,
+  tagline:"Add responsibilities to objects dynamically",
+  analogy:"☕ Like customizing coffee: start with espresso, wrap it with milk (Latte), wrap that with caramel (Caramel Latte). Each wrap ADDS behavior without changing the original.",
+  what:"Attaches additional responsibilities to an object dynamically. Decorators provide a flexible alternative to subclassing for extending functionality.",
+  why:"Add features at runtime without modifying the original class. Combine features freely without an explosion of subclasses.",
+  when:["Adding features to objects at runtime","When subclassing leads to too many classes","I/O streams (compression + encryption + buffering)","Cross-cutting concerns (logging, caching, validation)"],
+  how:"Component interface defines base behavior. ConcreteComponent is the base object. Decorator wraps a Component, adds behavior before/after delegation.",
+  solid:["O","S"],
+  withoutPattern:`// Subclass explosion: every combo needs a class
+class Coffee {}
+class CoffeeWithMilk : Coffee {}
+class CoffeeWithSugar : Coffee {}
+class CoffeeWithMilkAndSugar : Coffee {}
+class CoffeeWithMilkAndSugarAndCaramel : Coffee {}
+// N toppings = 2^N subclasses! ☕💀`,
+  withPattern:`public interface ICoffee {
+    string GetDescription();
+    double GetCost();
+}
+
+// Base component
+public class Espresso : ICoffee {
+    public string GetDescription() => "Espresso";
+    public double GetCost() => 1.00;
+}
+
+// Base decorator
+public abstract class CoffeeDecorator : ICoffee {
+    protected ICoffee _coffee;
+    protected CoffeeDecorator(ICoffee coffee) => _coffee = coffee;
+    public virtual string GetDescription() => _coffee.GetDescription();
+    public virtual double GetCost() => _coffee.GetCost();
+}
+
+// Concrete decorators
+public class MilkDecorator : CoffeeDecorator {
+    public MilkDecorator(ICoffee c) : base(c) {}
+    public override string GetDescription() 
+        => _coffee.GetDescription() + ", Milk";
+    public override double GetCost() => _coffee.GetCost() + 0.25;
+}
+
+public class CaramelDecorator : CoffeeDecorator {
+    public CaramelDecorator(ICoffee c) : base(c) {}
+    public override string GetDescription() 
+        => _coffee.GetDescription() + ", Caramel";
+    public override double GetCost() => _coffee.GetCost() + 0.50;
+}
+
+public class WhipDecorator : CoffeeDecorator {
+    public WhipDecorator(ICoffee c) : base(c) {}
+    public override string GetDescription() 
+        => _coffee.GetDescription() + ", Whip";
+    public override double GetCost() => _coffee.GetCost() + 0.35;
+}
+
+// Compose at runtime — infinite combinations! ✅
+ICoffee myDrink = new Espresso();
+myDrink = new MilkDecorator(myDrink);
+myDrink = new CaramelDecorator(myDrink);
+myDrink = new WhipDecorator(myDrink);
+
+Console.WriteLine(myDrink.GetDescription()); 
+// Espresso, Milk, Caramel, Whip
+Console.WriteLine(\$"\${myDrink.GetCost():F2}"); // $2.10`,
+  enterprise:["ASP.NET Core middleware pipeline (each middleware decorates the next)","I/O streams (GZipStream wraps FileStream)","Logging decorators (add timing/tracing to services)","Caching decorators (add Redis cache to any repository)"],
+  flow:[
+    {id:"base",label:"Espresso\\n$1.00",x:10,y:55},
+    {id:"d1",label:"+ Milk\\n$1.25",x:32,y:55},
+    {id:"d2",label:"+ Caramel\\n$1.75",x:56,y:55},
+    {id:"d3",label:"+ Whip\\n$2.10",x:80,y:55,special:true},
+  ],
+  arrows:[["base","d1"],["d1","d2"],["d2","d3"]],
+},
+{
+  id:"facade", name:"Facade", cat:"structural", emoji:"🏠", num:10,
+  tagline:"Provide a simple interface to a complex subsystem",
+  analogy:"🎬 Like a movie streaming app: you click PLAY, and behind the scenes it handles authentication, CDN selection, codec negotiation, buffering, DRM — you see none of that complexity.",
+  what:"Provides a unified, simplified interface to a complex subsystem, hiding its complexity from clients.",
+  why:"Reduces coupling between clients and subsystems. Clients only know about the Facade, not the internal complexity.",
+  when:["Simplifying complex library or framework usage","Layered architecture (Presentation → Facade → Domain)","When you want to provide a simple API over complex internals","Microservices API Gateway pattern"],
+  how:"Facade class contains references to subsystem objects. Facade methods coordinate subsystem calls. Client only talks to Facade.",
+  solid:["S","D"],
+  withoutPattern:`// Client must know and coordinate ALL subsystem classes
+var auth = new AuthService();
+var user = auth.ValidateToken(token);
+var inv = new InventoryService();
+if (!inv.CheckStock(productId)) throw new Exception();
+var payment = new PaymentService();
+payment.Charge(user.CardId, amount);
+var order = new OrderService();
+order.Create(user.Id, productId);
+var shipping = new ShippingService();
+shipping.Schedule(order.Id);
+var email = new EmailService();
+email.SendConfirmation(user.Email, order.Id);
+// Client knows TOO MUCH about internals! 😱`,
+  withPattern:`// Complex subsystems (unchanged)
+public class InventoryService  { public bool CheckStock(int id) => true; }
+public class PaymentService    { public bool Charge(string card, decimal amt) => true; }
+public class OrderService      { public int Create(int uid, int pid) => 101; }
+public class ShippingService   { public void Schedule(int orderId) {} }
+public class EmailService      { public void SendConfirmation(string email, int orderId) {} }
+
+// FACADE — simple interface hiding all complexity
+public class OrderFacade {
+    private readonly InventoryService _inventory = new();
+    private readonly PaymentService _payment = new();
+    private readonly OrderService _orders = new();
+    private readonly ShippingService _shipping = new();
+    private readonly EmailService _email = new();
+    
+    public OrderResult PlaceOrder(
+        int userId, int productId, string cardId, 
+        decimal amount, string userEmail) 
+    {
+        if (!_inventory.CheckStock(productId))
+            return OrderResult.OutOfStock;
+        
+        if (!_payment.Charge(cardId, amount))
+            return OrderResult.PaymentFailed;
+        
+        var orderId = _orders.Create(userId, productId);
+        _shipping.Schedule(orderId);
+        _email.SendConfirmation(userEmail, orderId);
+        
+        return OrderResult.Success(orderId);
+    }
+}
+
+// Client is now beautifully simple ✅
+var facade = new OrderFacade();
+var result = facade.PlaceOrder(1, 42, "card_123", 99.99m, "john@email.com");`,
+  enterprise:["API Gateway in microservices","Service layer in DDD (application services)","SDK facades (AWS SDK simplifies S3, EC2, RDS)","Home automation controllers"],
+  flow:[
+    {id:"cl",label:"Client",x:5,y:55},
+    {id:"f",label:"OrderFacade",x:32,y:55,special:true},
+    {id:"s1",label:"Inventory",x:65,y:20},
+    {id:"s2",label:"Payment",x:65,y:38},
+    {id:"s3",label:"Orders",x:65,y:55},
+    {id:"s4",label:"Shipping",x:65,y:72},
+    {id:"s5",label:"Email",x:65,y:88},
+  ],
+  arrows:[["cl","f"],["f","s1"],["f","s2"],["f","s3"],["f","s4"],["f","s5"]],
+},
+{
+  id:"flyweight", name:"Flyweight", cat:"structural", emoji:"🪶", num:11,
+  tagline:"Share fine-grained objects to save memory",
+  analogy:"📝 Like a word processor: it doesn't store font/size data per-character. Instead, every 'A' SHARES the same glyph object. Only position is unique per character.",
+  what:"Uses sharing to support large numbers of fine-grained objects efficiently. Separates intrinsic (shared) state from extrinsic (unique) state.",
+  why:"Drastically reduces memory usage when you have millions of similar objects. Perfect for games with thousands of particles or tree objects.",
+  when:["Application uses huge numbers of similar objects","Memory is a concern","Objects' state can be made extrinsic","Many groups of objects can be replaced by few shared objects"],
+  how:"FlyweightFactory maintains a pool of shared flyweights. Flyweight stores intrinsic (shared) state. Extrinsic state is passed in at runtime.",
+  solid:["S"],
+  withoutPattern:`// Without Flyweight: 1 million tree objects, each with full state
+public class Tree {
+    public float X, Y;           // Unique
+    public float Height;         // Unique  
+    public string TreeType;      // SAME for all oak trees ← waste!
+    public byte[] Texture;       // SAME for all oak trees ← 1MB each!
+    public Color Color;          // SAME for all oak trees ← waste!
+}
+// 1,000,000 oaks × 1MB texture = 1 TERABYTE! 💀`,
+  withPattern:`// Intrinsic state (shared) — the flyweight
+public class TreeType {
+    public string Name { get; }
+    public Color Color { get; }
+    public byte[] Texture { get; } // Loaded once, shared!
+    
+    public TreeType(string name, Color color, string texturePath) {
+        Name = name; Color = color;
+        Texture = File.ReadAllBytes(texturePath); // Expensive — done once
+    }
+    
+    public void Draw(float x, float y, float height) {
+        Console.WriteLine($"Drawing {Name} at ({x},{y}) h={height}");
+        // Uses shared texture
+    }
+}
+
+// Flyweight factory — manages the shared pool
+public class TreeFactory {
+    private static Dictionary<string, TreeType> _types = new();
+    
+    public static TreeType GetTreeType(string name, Color color, string tex) {
+        var key = $"{name}-{color}";
+        if (!_types.ContainsKey(key))
+            _types[key] = new TreeType(name, color, tex); // Create once
+        return _types[key]; // Return SHARED instance
+    }
+}
+
+// Tree with extrinsic state (position, height are unique per tree)
+public class Tree {
+    public float X { get; }
+    public float Y { get; }
+    public float Height { get; }
+    private TreeType _type; // Reference to SHARED flyweight
+    
+    public Tree(float x, float y, float h, TreeType type) {
+        X=x; Y=y; Height=h; _type=type;
+    }
+    public void Draw() => _type.Draw(X, Y, Height);
+}
+
+// 1,000,000 trees but only 1 TreeType in memory! ✅
+var oakType = TreeFactory.GetTreeType("Oak", Color.Green, "oak.png");
+var forest = Enumerable.Range(0, 1_000_000)
+    .Select(i => new Tree(Random.Shared.NextSingle()*1000, 
+                          Random.Shared.NextSingle()*1000,
+                          5 + Random.Shared.NextSingle()*10,
+                          oakType)) // All share the SAME TreeType
+    .ToList();`,
+  enterprise:["Game engines: particles, bullets, trees, grass","Text editors: character glyph objects","Map rendering: tile objects","Database connection metadata"],
+  flow:[
+    {id:"cl",label:"Client",x:5,y:55},
+    {id:"ff",label:"FlyweightFactory",x:32,y:55,special:true},
+    {id:"fw",label:"Shared\\nFlyweight",x:62,y:30},
+    {id:"e1",label:"Tree1\\n(x,y,h)",x:72,y:65},
+    {id:"e2",label:"Tree2\\n(x,y,h)",x:88,y:65},
+  ],
+  arrows:[["cl","ff"],["ff","fw"],["e1","fw"],["e2","fw"]],
+},
+{
+  id:"proxy", name:"Proxy", cat:"structural", emoji:"🛡️", num:12,
+  tagline:"Provide a surrogate or placeholder for another object",
+  analogy:"🏦 Like a bank ATM: you don't go to the bank vault yourself. The ATM (proxy) handles your request, checks authorization, then accesses the vault on your behalf.",
+  what:"Provides a surrogate or placeholder for another object to control access to it.",
+  why:"Adds functionality (lazy loading, access control, caching, logging) without changing the real object.",
+  when:["Lazy initialization (virtual proxy): delay expensive object creation","Access control (protection proxy): check permissions","Remote proxy: represent remote objects locally","Caching proxy: cache expensive operation results"],
+  how:"Subject interface defines operations. RealSubject implements them. Proxy implements same interface, controls access to RealSubject.",
+  solid:["O","S","D"],
+  withoutPattern:`// Direct access — no caching, no access control, no logging
+public class ProductService {
+    public Product GetProduct(int id) {
+        // Expensive DB call every time!
+        return _db.Query<Product>($"SELECT * FROM Products WHERE Id={id}");
+    }
+}
+// Called 1000 times/second for the same product → DB on fire 🔥`,
+  withPattern:`public interface IProductService {
+    Product GetProduct(int id);
+}
+
+// Real subject
+public class ProductService : IProductService {
+    public Product GetProduct(int id) {
+        Console.WriteLine($"🗄️ DB query for product {id}");
+        return new Product { Id = id, Name = "Widget" };
+    }
+}
+
+// Caching Proxy
+public class CachingProductProxy : IProductService {
+    private readonly IProductService _real;
+    private readonly Dictionary<int, (Product p, DateTime exp)> _cache = new();
+    private readonly TimeSpan _ttl = TimeSpan.FromMinutes(5);
+    
+    public CachingProductProxy(IProductService real) => _real = real;
+    
+    public Product GetProduct(int id) {
+        if (_cache.TryGetValue(id, out var cached) 
+            && DateTime.UtcNow < cached.exp) {
+            Console.WriteLine($"⚡ Cache HIT for product {id}");
+            return cached.p; // Return from cache
+        }
+        var product = _real.GetProduct(id); // Only on cache miss
+        _cache[id] = (product, DateTime.UtcNow.Add(_ttl));
+        return product;
+    }
+}
+
+// Authorization Proxy (chain proxies!)
+public class AuthProductProxy : IProductService {
+    private readonly IProductService _inner;
+    private readonly ICurrentUserService _user;
+    
+    public AuthProductProxy(IProductService inner, ICurrentUserService user) {
+        _inner = inner; _user = user;
+    }
+    
+    public Product GetProduct(int id) {
+        if (!_user.HasPermission("product.read"))
+            throw new UnauthorizedAccessException("Access denied!");
+        return _inner.GetProduct(id);
+    }
+}
+
+// Chain: Auth → Cache → Real (proxy composition!) ✅
+IProductService service = 
+    new AuthProductProxy(
+        new CachingProductProxy(
+            new ProductService()), 
+        currentUser);`,
+  enterprise:["ASP.NET lazy loading in ORMs (EF Core virtual navigation properties)","API rate limiting proxies","Distributed cache proxy (Redis in front of DB)","Circuit breaker pattern implementation"],
+  flow:[
+    {id:"cl",label:"Client",x:5,y:55},
+    {id:"ap",label:"Auth Proxy",x:25,y:55},
+    {id:"cp",label:"Cache Proxy",x:48,y:55},
+    {id:"rs",label:"Real Service",x:75,y:55,special:true},
+    {id:"db",label:"Database",x:92,y:55},
+  ],
+  arrows:[["cl","ap"],["ap","cp"],["cp","rs"],["rs","db"]],
+},
+
+// ═══ BEHAVIORAL ════════════════════════════════════════════════════════════════
+{
+  id:"chain-of-responsibility", name:"Chain of Responsibility", cat:"behavioral", emoji:"⛓️", num:13,
+  tagline:"Pass requests along a chain of handlers",
+  analogy:"🏥 Like a hospital triage: Nurse → Doctor → Specialist → Surgeon. Each level handles what they can; unresolvable cases go up the chain.",
+  what:"Avoids coupling the sender of a request to its receiver by giving more than one object a chance to handle the request.",
+  why:"Decouples senders and receivers. Dynamically add/remove handlers. Each handler only needs to know about the next one.",
+  when:["Multiple objects may handle a request","You don't want to hardcode the handler","Set of handlers changes dynamically","Support request pipeline (middleware, filters)"],
+  how:"Each handler has a reference to the next handler. On receiving a request: handle it OR pass to next. Chain is configured at runtime.",
+  solid:["O","S"],
+  withoutPattern:`// One massive if-else — adding levels = editing this method
+public void HandleSupport(Ticket ticket) {
+    if (ticket.Level == 1) { Level1Support(); }
+    else if (ticket.Level == 2) { Level2Support(); }
+    else if (ticket.Level == 3) { Level3Support(); }
+    else if (ticket.Level == 4) { ManagerSupport(); }
+    // Adding Level 5? Edit this method. Test all levels. Deploy. 😩`,
+  withPattern:`public abstract class SupportHandler {
+    protected SupportHandler? _next;
+    
+    public SupportHandler SetNext(SupportHandler next) {
+        _next = next;
+        return next; // Enables fluent chaining
+    }
+    
+    public abstract void Handle(SupportTicket ticket);
+    
+    protected void PassToNext(SupportTicket ticket) {
+        if (_next != null) _next.Handle(ticket);
+        else Console.WriteLine($"❌ Ticket {ticket.Id} unresolved!");
+    }
+}
+
+public class Level1Handler : SupportHandler {
+    public override void Handle(SupportTicket t) {
+        if (t.Priority <= 1) Console.WriteLine($"L1 resolved ticket {t.Id}");
+        else { Console.WriteLine($"L1 escalating {t.Id}"); PassToNext(t); }
+    }
+}
+
+public class Level2Handler : SupportHandler {
+    public override void Handle(SupportTicket t) {
+        if (t.Priority <= 2) Console.WriteLine($"L2 resolved ticket {t.Id}");
+        else { Console.WriteLine($"L2 escalating {t.Id}"); PassToNext(t); }
+    }
+}
+
+public class ManagerHandler : SupportHandler {
+    public override void Handle(SupportTicket t) {
+        Console.WriteLine($"🎯 Manager resolved critical ticket {t.Id}");
+    }
+}
+
+// Build chain — easily reconfigured
+var l1 = new Level1Handler();
+var l2 = new Level2Handler();
+var mgr = new ManagerHandler();
+l1.SetNext(l2).SetNext(mgr); // Fluent!
+
+l1.Handle(new SupportTicket { Id=1, Priority=1 }); // L1 handles
+l1.Handle(new SupportTicket { Id=2, Priority=3 }); // → Manager`,
+  enterprise:["ASP.NET Core middleware pipeline","Request validation pipelines","Approval workflows (employee → manager → director → VP)","Event handling in UI frameworks","Logging levels (DEBUG → INFO → WARN → ERROR)"],
+  flow:[
+    {id:"r",label:"Request",x:3,y:55},
+    {id:"h1",label:"Level 1",x:22,y:55},
+    {id:"h2",label:"Level 2",x:43,y:55},
+    {id:"h3",label:"Manager",x:64,y:55},
+    {id:"ha",label:"Handled!",x:85,y:55,special:true},
+    {id:"skip",label:"Skip↓",x:22,y:80},
+  ],
+  arrows:[["r","h1"],["h1","h2"],["h2","h3"],["h3","ha"]],
+},
+{
+  id:"command", name:"Command", cat:"behavioral", emoji:"📋", num:14,
+  tagline:"Encapsulate requests as objects",
+  analogy:"🍽️ Like a restaurant order: waiter writes your ORDER on a ticket (encapsulated command). Kitchen executes it. You can cancel, modify, or reorder the same ticket.",
+  what:"Encapsulates a request as an object, allowing you to parameterize clients with different requests, queue or log requests, and support undoable operations.",
+  why:"Decouples the object that invokes the operation from the one that knows how to perform it. Enables undo/redo, queuing, and transaction logging.",
+  when:["Parameterizing actions (undo/redo, macros)","Queuing operations for later execution","Logging/auditing operations","Transactional systems (rollback support)"],
+  how:"Command interface declares Execute(). ConcreteCommand implements it, holding reference to Receiver. Invoker stores and calls commands.",
+  solid:["O","S","D"],
+  withoutPattern:`// Invoker coupled to receiver — no undo, no logging
+public class TextEditor {
+    private string _text = "";
+    public void Bold()  { _text = $"<b>{_text}</b>"; }
+    public void Italic(){ _text = $"<i>{_text}</i>"; }
+    // How to undo? Need history of every operation... 
+    // Hard-coded in TextEditor itself = violation of SRP 😩`,
+  withPattern:`// Command interface
+public interface ICommand {
+    void Execute();
+    void Undo();
+}
+
+// Receiver
+public class TextDocument {
+    public string Content { get; private set; } = "";
+    public void Append(string text) => Content += text;
+    public void Remove(int count) => 
+        Content = Content[..^Math.Min(count, Content.Length)];
+}
+
+// Concrete commands
+public class AppendCommand : ICommand {
+    private TextDocument _doc;
+    private string _text;
+    public AppendCommand(TextDocument doc, string text) {
+        _doc = doc; _text = text;
+    }
+    public void Execute() => _doc.Append(_text);
+    public void Undo()    => _doc.Remove(_text.Length);
+}
+
+// Invoker — manages command history
+public class CommandHistory {
+    private Stack<ICommand> _history = new();
+    
+    public void Execute(ICommand cmd) {
+        cmd.Execute();
+        _history.Push(cmd);
+        Console.WriteLine($"✅ Executed: {cmd.GetType().Name}");
+    }
+    
+    public void Undo() {
+        if (_history.TryPop(out var cmd)) {
+            cmd.Undo();
+            Console.WriteLine($"↩️ Undone: {cmd.GetType().Name}");
+        }
+    }
+}
+
+// Usage
+var doc = new TextDocument();
+var history = new CommandHistory();
+
+history.Execute(new AppendCommand(doc, "Hello"));
+history.Execute(new AppendCommand(doc, " World"));
+Console.WriteLine(doc.Content); // "Hello World"
+
+history.Undo(); // Undo "World"
+Console.WriteLine(doc.Content); // "Hello" ✅`,
+  enterprise:["Text editor undo/redo (Word, VS Code)","Database transaction management","Task queues (Hangfire, Quartz.NET)","GUI button actions","Macro recording"],
+  flow:[
+    {id:"cl",label:"Client",x:5,y:55},
+    {id:"inv",label:"Invoker\\n(History)",x:28,y:55},
+    {id:"cmd",label:"ICommand",x:52,y:55,special:true},
+    {id:"rec",label:"Receiver\\n(TextDoc)",x:78,y:55},
+    {id:"undo",label:"Undo Stack",x:28,y:80},
+  ],
+  arrows:[["cl","inv"],["inv","cmd"],["cmd","rec"],["inv","undo"]],
+},
+{
+  id:"iterator", name:"Iterator", cat:"behavioral", emoji:"🔄", num:15,
+  tagline:"Access elements of a collection sequentially",
+  analogy:"📺 Like a TV remote: next/previous channel buttons let you iterate through channels without knowing how the TV stores channel data internally.",
+  what:"Provides a way to access elements of an aggregate object sequentially without exposing its underlying representation.",
+  why:"Separates traversal algorithms from collection objects. Client code is the same regardless of collection type.",
+  when:["Providing a standard way to iterate different collections","Hiding collection's internal structure","Supporting multiple traversal strategies","C# IEnumerable/IEnumerator — this IS Iterator!"],
+  how:"Iterator interface declares Next(), HasNext(), Current(). ConcreteIterator traverses a specific collection. Aggregate creates iterators.",
+  solid:["S","I"],
+  withoutPattern:`// Client must know internal structure of each collection
+int[] arr = {1,2,3};
+for(int i=0; i<arr.Length; i++) process(arr[i]); // Array: index
+
+LinkedList<int> list = new LinkedList<int>();
+var node = list.First;
+while(node != null) { process(node.Value); node=node.Next; } // LinkedList: node
+
+// Change collection type? Rewrite ALL traversal code! 😩`,
+  withPattern:`// C# already implements this pattern via IEnumerable/IEnumerator
+// Let's see a custom implementation to understand the pattern
+
+public interface IIterator<T> {
+    T Current { get; }
+    bool HasNext();
+    void Next();
+    void Reset();
+}
+
+// A custom tree iterator (in-order traversal)
+public class BinaryTree<T> where T : IComparable<T> {
+    private class Node { public T Value; public Node? Left, Right; }
+    private Node? _root;
+    
+    public void Insert(T value) { /* BST insertion */ }
+    
+    // Returns an in-order iterator
+    public IIterator<T> GetInOrderIterator() 
+        => new InOrderIterator<T>(_root);
+}
+
+// Concrete iterator — client doesn't know about Node structure!
+public class InOrderIterator<T> : IIterator<T> {
+    private Stack<dynamic> _stack = new();
+    public T Current { get; private set; }
+    
+    public InOrderIterator(dynamic root) => PushLeft(root);
+    
+    public bool HasNext() => _stack.Count > 0;
+    public void Next() {
+        var node = _stack.Pop();
+        Current = node.Value;
+        PushLeft(node.Right);
+    }
+    public void Reset() => _stack.Clear();
+    private void PushLeft(dynamic node) {
+        while(node != null) { _stack.Push(node); node = node.Left; }
+    }
+}
+
+// C# idiomatic version using yield return ✅
+public IEnumerable<T> InOrder() {
+    IEnumerable<T> Traverse(Node? n) {
+        if (n == null) yield break;
+        foreach (var v in Traverse(n.Left)) yield return v;
+        yield return n.Value;
+        foreach (var v in Traverse(n.Right)) yield return v;
+    }
+    return Traverse(_root);
+}`,
+  enterprise:["LINQ (entire .NET query system is Iterator-based)","Database cursor pagination","File system traversal","Stream processing (reading large files in chunks)","Event source replaying"],
+  flow:[
+    {id:"cl",label:"Client",x:5,y:55},
+    {id:"it",label:"IIterator",x:30,y:55,special:true},
+    {id:"ci",label:"ConcreteIterator",x:58,y:40},
+    {id:"col",label:"Collection",x:58,y:70},
+    {id:"e1",label:"[0]",x:82,y:30},
+    {id:"e2",label:"[1]",x:82,y:55},
+    {id:"e3",label:"[2]",x:82,y:80},
+  ],
+  arrows:[["cl","it"],["it","ci"],["ci","col"],["col","e1"],["col","e2"],["col","e3"]],
+},
+{
+  id:"mediator", name:"Mediator", cat:"behavioral", emoji:"📡", num:16,
+  tagline:"Define an object that encapsulates object interactions",
+  analogy:"✈️ Like an air traffic controller: planes don't communicate directly (chaos!). All communicate through the CONTROL TOWER (mediator) which coordinates safely.",
+  what:"Defines an object that encapsulates how a set of objects interact, promoting loose coupling by preventing objects from referring to each other explicitly.",
+  why:"Reduces chaotic many-to-many dependencies to one-to-many. Centralizes complex communication and control logic.",
+  when:["Many objects communicate in complex ways","Tight coupling makes reuse hard","UI component interaction (MVVM Mediator)","Chat rooms, trading systems"],
+  how:"Mediator interface declares communication methods. ConcreteMediator implements coordination logic. Colleagues communicate ONLY through mediator.",
+  solid:["S","D"],
+  withoutPattern:`// Direct coupling: N components × N = N² connections
+class Button  { public Form form; void Click() { form.textbox.Show(); form.label.Update(); } }
+class TextBox { public Form form; void Change(){ form.button.Disable(); form.label.Update(); } }
+class Label   { public Form form; void Update(){ /* needs button, textbox state */ } }
+// Add 1 component? Update ALL others. Delete one? Track all references. 😱`,
+  withPattern:`// Mediator interface
+public interface IChatMediator {
+    void SendMessage(string message, ChatUser sender);
+    void AddUser(ChatUser user);
+}
+
+// Concrete mediator — knows all participants
+public class ChatRoom : IChatMediator {
+    private List<ChatUser> _users = new();
+    
+    public void AddUser(ChatUser user) => _users.Add(user);
+    
+    public void SendMessage(string message, ChatUser sender) {
+        foreach (var user in _users) {
+            if (user != sender) { // Don't echo back to sender
+                user.Receive($"[{sender.Name}]: {message}");
+            }
+        }
+    }
+}
+
+// Colleague — only knows the mediator
+public class ChatUser {
+    public string Name { get; }
+    private readonly IChatMediator _mediator;
+    
+    public ChatUser(string name, IChatMediator mediator) {
+        Name = name; _mediator = mediator;
+        mediator.AddUser(this);
+    }
+    
+    public void Send(string message) {
+        Console.WriteLine($"📤 {Name} sends: {message}");
+        _mediator.SendMessage(message, this);
+    }
+    
+    public void Receive(string message) 
+        => Console.WriteLine($"📨 {Name} received: {message}");
+}
+
+// Usage — no direct coupling between users ✅
+var room = new ChatRoom();
+var alice = new ChatUser("Alice", room);
+var bob   = new ChatUser("Bob", room);
+var carol = new ChatUser("Carol", room);
+
+alice.Send("Hello everyone!"); 
+// Bob received: [Alice]: Hello everyone!
+// Carol received: [Alice]: Hello everyone!`,
+  enterprise:["MediatR library in .NET (CQRS mediator)","Chat/messaging systems","Event buses in microservices","Air traffic control simulation","UI component coordination (MVVM/Blazor)"],
+  flow:[
+    {id:"a",label:"Alice",x:10,y:25},
+    {id:"b",label:"Bob",x:10,y:75},
+    {id:"med",label:"ChatRoom\\nMediator",x:50,y:50,special:true},
+    {id:"c",label:"Carol",x:85,y:25},
+    {id:"d",label:"Dave",x:85,y:75},
+  ],
+  arrows:[["a","med"],["b","med"],["med","c"],["med","d"]],
+},
+{
+  id:"memento", name:"Memento", cat:"behavioral", emoji:"📸", num:17,
+  tagline:"Capture and restore object state without violating encapsulation",
+  analogy:"💾 Like saving a video game: at any point you save your state (memento). If you die, you restore from save. The saved state is a 'snapshot' of that moment.",
+  what:"Captures and externalizes an object's internal state so the object can be restored to this state later, without violating encapsulation.",
+  why:"Provides undo functionality without exposing internal state. Originator controls what gets saved.",
+  when:["Undo/redo functionality","Snapshot mechanisms","Transaction rollback","State history tracking"],
+  how:"Originator creates Memento with snapshot of its state. Caretaker stores Mementos. Originator can restore state from a Memento.",
+  solid:["S","O"],
+  withoutPattern:`// Exposing internal state for undo — violates encapsulation
+public class TextEditor {
+    public string Text { get; set; } // Public = anyone can corrupt it!
+    public int CursorPos { get; set; } // Exposed for 'undo' — wrong!
+}
+// Undo manager must know about Text AND CursorPos AND selection...
+// Editor's internals are LEAKED to the undo system 😩`,
+  withPattern:`// Memento — stores a snapshot (immutable)
+public class EditorMemento {
+    public string Text { get; }
+    public int CursorPosition { get; }
+    public DateTime CreatedAt { get; }
+    
+    public EditorMemento(string text, int cursorPos) {
+        Text = text;
+        CursorPosition = cursorPos;
+        CreatedAt = DateTime.UtcNow;
+    }
+}
+
+// Originator — creates and restores mementos
+public class TextEditor {
+    private string _text = "";
+    private int _cursorPos = 0;
+    
+    public void Type(string text) {
+        _text = _text.Insert(_cursorPos, text);
+        _cursorPos += text.Length;
+    }
+    
+    // Creates snapshot (saves encapsulated state)
+    public EditorMemento Save() 
+        => new EditorMemento(_text, _cursorPos);
+    
+    // Restores from snapshot
+    public void Restore(EditorMemento memento) {
+        _text = memento.Text;
+        _cursorPos = memento.CursorPosition;
+    }
+    
+    public string GetText() => _text;
+}
+
+// Caretaker — manages history (doesn't access memento internals)
+public class UndoHistory {
+    private Stack<EditorMemento> _history = new();
+    
+    public void Push(EditorMemento m) => _history.Push(m);
+    
+    public EditorMemento? Pop() => 
+        _history.TryPop(out var m) ? m : null;
+}
+
+// Usage
+var editor = new TextEditor();
+var history = new UndoHistory();
+
+history.Push(editor.Save()); editor.Type("Hello");
+history.Push(editor.Save()); editor.Type(" World");
+Console.WriteLine(editor.GetText()); // "Hello World"
+
+editor.Restore(history.Pop()!);
+Console.WriteLine(editor.GetText()); // "Hello" ✅ UNDO!`,
+  enterprise:["VS Code/Word undo/redo system","Database transaction savepoints","Game state checkpoints","Workflow state snapshots","Configuration rollback"],
+  flow:[
+    {id:"orig",label:"Originator\\n(TextEditor)",x:20,y:50,special:true},
+    {id:"mem",label:"Memento\\n(Snapshot)",x:50,y:25},
+    {id:"care",label:"Caretaker\\n(History)",x:75,y:50},
+    {id:"save",label:"Save→",x:35,y:25},
+    {id:"rest",label:"←Restore",x:35,y:75},
+  ],
+  arrows:[["orig","mem"],["mem","care"],["care","orig"]],
+},
+{
+  id:"observer", name:"Observer", cat:"behavioral", emoji:"👁️", num:18,
+  tagline:"Define a one-to-many dependency between objects",
+  analogy:"📰 Like a newspaper subscription: newspaper (subject) doesn't know who subscribes. Subscribers get notified when a new edition is published. Subscribe/unsubscribe anytime.",
+  what:"Defines a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically.",
+  why:"Loose coupling between subject and observers. Observers added/removed at runtime. Subject doesn't know anything about observers.",
+  when:["Event handling systems","MVC: model changes → view updates","Distributed event-driven systems","Real-time data feeds (stock prices, notifications)"],
+  how:"Subject maintains observer list, provides Subscribe/Unsubscribe. Observer declares Update(). Subject calls Update() on all observers when state changes.",
+  solid:["O","D"],
+  withoutPattern:`// Subject knows about every specific subscriber
+class PriceTracker {
+    private EmailNotifier emailNotifier = new();
+    private SmsNotifier smsNotifier = new();
+    private DashboardUpdater dashboard = new();
+    
+    void UpdatePrice(decimal price) {
+        emailNotifier.SendAlert(price);  // Tightly coupled!
+        smsNotifier.SendAlert(price);    // Add new notifier = edit this!
+        dashboard.Refresh(price);        // 🔥 violation of Open/Closed
+    }
+}`,
+  withPattern:`// Observer interface
+public interface IStockObserver {
+    void OnPriceChanged(string ticker, decimal newPrice, decimal oldPrice);
+}
+
+// Subject
+public class StockTicker {
+    private readonly string _ticker;
+    private decimal _price;
+    private List<IStockObserver> _observers = new();
+    
+    public StockTicker(string ticker, decimal initialPrice) {
+        _ticker = ticker; _price = initialPrice;
+    }
+    
+    public void Subscribe(IStockObserver observer) 
+        => _observers.Add(observer);
+    public void Unsubscribe(IStockObserver observer) 
+        => _observers.Remove(observer);
+    
+    public decimal Price {
+        get => _price;
+        set {
+            var old = _price;
+            _price = value;
+            if (old != value) NotifyAll(old); // Notify on change!
+        }
+    }
+    
+    private void NotifyAll(decimal oldPrice) {
+        foreach (var obs in _observers)
+            obs.OnPriceChanged(_ticker, _price, oldPrice);
+    }
+}
+
+// Concrete observers
+public class EmailAlertObserver : IStockObserver {
+    public void OnPriceChanged(string t, decimal n, decimal o) {
+        if (Math.Abs(n-o)/o > 0.05m) // 5% change threshold
+            Console.WriteLine($"📧 Email: {t} moved {n-o:+0.00;-0.00}!");
+    }
+}
+
+public class TradingBotObserver : IStockObserver {
+    public void OnPriceChanged(string t, decimal n, decimal o) {
+        if (n < o * 0.9m) Console.WriteLine($"🤖 Bot: BUY {t}!");
+        if (n > o * 1.1m) Console.WriteLine($"🤖 Bot: SELL {t}!");
+    }
+}
+
+// Usage ✅
+var apple = new StockTicker("AAPL", 175m);
+apple.Subscribe(new EmailAlertObserver());
+apple.Subscribe(new TradingBotObserver());
+
+apple.Price = 165m; // Both observers notified automatically!`,
+  enterprise:[".NET Events/Delegates (built-in Observer)","SignalR real-time notifications","Redux store subscriptions","Message brokers (RabbitMQ, Kafka consumer groups)","Entity Framework change tracking"],
+  flow:[
+    {id:"sub",label:"Subject\\n(StockTicker)",x:38,y:50,special:true},
+    {id:"o1",label:"Email\\nObserver",x:73,y:20},
+    {id:"o2",label:"Trading Bot",x:73,y:50},
+    {id:"o3",label:"Dashboard",x:73,y:80},
+    {id:"ch",label:"Price\\nChanges",x:10,y:50},
+  ],
+  arrows:[["ch","sub"],["sub","o1"],["sub","o2"],["sub","o3"]],
+},
+{
+  id:"state", name:"State", cat:"behavioral", emoji:"🔀", num:19,
+  tagline:"Allow an object to alter its behavior when state changes",
+  analogy:"🚦 Like a traffic light: it behaves differently in Red/Yellow/Green state. You call 'NextState()' and it transitions. Same object, different behavior per state.",
+  what:"Allows an object to alter its behavior when its internal state changes. The object will appear to change its class.",
+  why:"Eliminates large conditional statements. State transitions are explicit. Easy to add new states without modifying existing ones.",
+  when:["Object behavior depends on its state","Large conditionals based on state","Explicit state machine representation","Document workflows, order lifecycles"],
+  how:"Context holds a reference to a State object. State interface declares state-specific behavior. ConcreteStates implement behavior and handle transitions.",
+  solid:["O","S"],
+  withoutPattern:`// Giant if-else / switch — adding states = modifying this
+public void HandlePayment(PaymentStatus status) {
+    if (status == PaymentStatus.Pending) { /* process */ }
+    else if (status == PaymentStatus.Processing) { /* validate */ }
+    else if (status == PaymentStatus.Completed) { /* log */ }
+    else if (status == PaymentStatus.Failed) { /* retry */ }
+    else if (status == PaymentStatus.Refunded) { /* refund flow */ }
+    // Add "Disputed"? Find and edit EVERY switch/if that touches status 😩`,
+  withPattern:`// State interface
+public interface IOrderState {
+    void Process(Order order);
+    void Cancel(Order order);
+    void Refund(Order order);
+    string GetStatus();
+}
+
+// Context
+public class Order {
+    private IOrderState _state;
+    public int Id { get; }
+    
+    public Order(int id) { Id = id; _state = new PendingState(); }
+    public void SetState(IOrderState state) => _state = state;
+    
+    public void Process() => _state.Process(this);
+    public void Cancel()  => _state.Cancel(this);
+    public void Refund()  => _state.Refund(this);
+    public string Status  => _state.GetStatus();
+}
+
+// Concrete states
+public class PendingState : IOrderState {
+    public string GetStatus() => "⏳ Pending";
+    public void Process(Order o) {
+        Console.WriteLine("💳 Processing payment...");
+        o.SetState(new ProcessingState()); // State transition!
+    }
+    public void Cancel(Order o) {
+        Console.WriteLine("❌ Order cancelled");
+        o.SetState(new CancelledState());
+    }
+    public void Refund(Order o) 
+        => Console.WriteLine("⚠️ Can't refund a pending order");
+}
+
+public class ProcessingState : IOrderState {
+    public string GetStatus() => "⚙️ Processing";
+    public void Process(Order o) {
+        Console.WriteLine("✅ Payment confirmed!");
+        o.SetState(new CompletedState());
+    }
+    public void Cancel(Order o) {
+        Console.WriteLine("↩️ Cancelling with penalty...");
+        o.SetState(new CancelledState());
+    }
+    public void Refund(Order o) 
+        => Console.WriteLine("⚠️ Can't refund while processing");
+}
+
+public class CompletedState : IOrderState {
+    public string GetStatus() => "✅ Completed";
+    public void Process(Order o) => Console.WriteLine("Already complete");
+    public void Cancel(Order o) => Console.WriteLine("❌ Too late to cancel");
+    public void Refund(Order o) {
+        Console.WriteLine("💸 Initiating refund...");
+        o.SetState(new RefundedState());
+    }
+}
+
+// Usage
+var order = new Order(1);
+Console.WriteLine(order.Status); // ⏳ Pending
+order.Process();                  // 💳 Processing payment...
+order.Process();                  // ✅ Payment confirmed!
+Console.WriteLine(order.Status);  // ✅ Completed
+order.Refund();                   // 💸 Initiating refund...`,
+  enterprise:["Order lifecycle management (e-commerce)","Document approval workflows","TCP connection states","ATM machine states","Game character states (idle/walking/attacking/dead)"],
+  flow:[
+    {id:"pend",label:"Pending",x:10,y:50},
+    {id:"proc",label:"Processing",x:35,y:50},
+    {id:"comp",label:"Completed",x:60,y:50,special:true},
+    {id:"ref",label:"Refunded",x:82,y:50},
+    {id:"can",label:"Cancelled",x:35,y:82},
+  ],
+  arrows:[["pend","proc"],["proc","comp"],["comp","ref"],["pend","can"],["proc","can"]],
+},
+{
+  id:"strategy", name:"Strategy", cat:"behavioral", emoji:"♟️", num:20,
+  tagline:"Define a family of algorithms and make them interchangeable",
+  analogy:"🗺️ Like a GPS navigation app: you choose the STRATEGY — fastest route, avoid tolls, walk, bike. The destination is the same; only the algorithm changes.",
+  what:"Defines a family of algorithms, encapsulates each one, and makes them interchangeable. Strategy lets the algorithm vary independently from clients that use it.",
+  why:"Eliminates conditional statements for algorithm selection. Algorithms can be switched at runtime. Easy to add new strategies.",
+  when:["Multiple algorithms for a behavior, switchable at runtime","Variants of an algorithm","Eliminating large conditionals","Injection of behavior from outside"],
+  how:"Strategy interface declares the algorithm. ConcreteStrategies implement different algorithms. Context holds a Strategy and delegates to it.",
+  solid:["O","D","S"],
+  withoutPattern:`// Giant switch for payment method — new method = edit this file
+public void ProcessPayment(string method, decimal amount) {
+    switch(method) {
+        case "creditcard": ChargeCreditCard(amount); break;
+        case "paypal":     ChargePayPal(amount); break;
+        case "crypto":     ChargeCrypto(amount); break;
+        // Add "BankTransfer"? Edit this. Redeploy everything. 😩
+    }
+}`,
+  withPattern:`// Strategy interface
+public interface IPaymentStrategy {
+    bool ProcessPayment(decimal amount, PaymentDetails details);
+    string StrategyName { get; }
+}
+
+// Concrete strategies
+public class CreditCardStrategy : IPaymentStrategy {
+    public string StrategyName => "💳 Credit Card";
+    public bool ProcessPayment(decimal amount, PaymentDetails d) {
+        Console.WriteLine(\$"Charging \${amount} to card ending {d.CardLast4}");
+        // Call Stripe/Braintree API
+        return true;
+    }
+}
+
+public class PayPalStrategy : IPaymentStrategy {
+    public string StrategyName => "🅿️ PayPal";
+    public bool ProcessPayment(decimal amount, PaymentDetails d) {
+        Console.WriteLine(\$"Charging \${amount} via PayPal to {d.Email}");
+        return true;
+    }
+}
+
+public class CryptoStrategy : IPaymentStrategy {
+    public string StrategyName => "₿ Crypto";
+    public bool ProcessPayment(decimal amount, PaymentDetails d) {
+        Console.WriteLine(\$"Converting \${amount} to BTC → {d.WalletAddress}");
+        return true;
+    }
+}
+
+// Context
+public class PaymentProcessor {
+    private IPaymentStrategy _strategy;
+    
+    public PaymentProcessor(IPaymentStrategy strategy) 
+        => _strategy = strategy;
+    
+    // Switch strategy at runtime!
+    public void SetStrategy(IPaymentStrategy strategy) 
+        => _strategy = strategy;
+    
+    public bool Process(decimal amount, PaymentDetails details) {
+        Console.WriteLine($"Using: {_strategy.StrategyName}");
+        return _strategy.ProcessPayment(amount, details);
+    }
+}
+
+// Usage — swap algorithms freely at runtime ✅
+var processor = new PaymentProcessor(new CreditCardStrategy());
+processor.Process(99.99m, details);
+
+processor.SetStrategy(new CryptoStrategy()); // Switch!
+processor.Process(99.99m, details);`,
+  enterprise:["Payment processing strategies","Sorting algorithms in data grids","Compression strategies (gzip, brotli, zstd)","Authentication strategies (JWT, OAuth, SAML)","Pricing strategies (regular, member, holiday)","Tax calculation by region"],
+  flow:[
+    {id:"cl",label:"Client",x:5,y:55},
+    {id:"ctx",label:"Context",x:28,y:55},
+    {id:"si",label:"IStrategy",x:55,y:55,special:true},
+    {id:"s1",label:"CreditCard",x:78,y:25},
+    {id:"s2",label:"PayPal",x:78,y:55},
+    {id:"s3",label:"Crypto",x:78,y:82},
+  ],
+  arrows:[["cl","ctx"],["ctx","si"],["si","s1"],["si","s2"],["si","s3"]],
+},
+{
+  id:"template-method", name:"Template Method", cat:"behavioral", emoji:"📐", num:21,
+  tagline:"Define the skeleton of an algorithm, defer steps to subclasses",
+  analogy:"🍳 Like a recipe template: 'Prepare → Cook → Serve'. All dishes follow this skeleton. The specific steps (WHAT to cook) vary per recipe, but the ORDER is fixed.",
+  what:"Defines the skeleton of an algorithm in a base class, deferring some steps to subclasses. Subclasses redefine certain steps without changing the algorithm's structure.",
+  why:"Eliminates code duplication in algorithm variants. Controls the algorithm structure while allowing specific steps to vary.",
+  when:["Multiple classes share the same algorithm structure","Controlling which parts can be customized","Preventing subclasses from changing algorithm order","Code generation frameworks"],
+  how:"Abstract class defines the template method (calls abstract methods in order). Concrete subclasses implement the abstract steps.",
+  solid:["O","D"],
+  withoutPattern:`// Code duplication: same algorithm flow in every class
+class PdfReportGenerator {
+    public void Generate() {
+        FetchData(); ValidateData(); FormatAsPdf(); SaveReport(); // Same flow!
+    }
+}
+class ExcelReportGenerator {
+    public void Generate() {
+        FetchData(); ValidateData(); FormatAsExcel(); SaveReport(); // Same flow!
+    }
+}
+// Steps 1, 2, 4 are IDENTICAL but copied everywhere 😩`,
+  withPattern:`public abstract class ReportGenerator {
+    // TEMPLATE METHOD — defines the algorithm skeleton (sealed = can't change order)
+    public sealed void GenerateReport() {
+        var data = FetchData();
+        ValidateData(data);
+        var formatted = FormatData(data);  // ← Abstract: subclass decides
+        ApplyBranding(formatted);          // ← Hook: optional override
+        SaveReport(formatted);
+        Console.WriteLine($"✅ {ReportName} report generated!");
+    }
+    
+    // Abstract steps — MUST be implemented by subclasses
+    protected abstract string ReportName { get; }
+    protected abstract List<Record> FetchData();
+    protected abstract string FormatData(List<Record> data);
+    
+    // Concrete steps — shared implementation
+    private void ValidateData(List<Record> data) {
+        if (!data.Any()) throw new InvalidOperationException("No data!");
+        Console.WriteLine($"✅ {data.Count} records validated");
+    }
+    
+    private void SaveReport(string content) {
+        File.WriteAllText($"{ReportName}_{DateTime.Now:yyyyMMdd}.txt", content);
+    }
+    
+    // Hook method — optional override (default: do nothing)
+    protected virtual void ApplyBranding(string content) { }
+}
+
+// Concrete reports — only specify WHAT changes
+public class SalesReport : ReportGenerator {
+    protected override string ReportName => "Sales";
+    protected override List<Record> FetchData() {
+        Console.WriteLine("📊 Fetching sales data from CRM...");
+        return _crm.GetSalesData(); 
+    }
+    protected override string FormatData(List<Record> data) 
+        => string.Join("\\n", data.Select(r => \$"{r.Date}: \${r.Amount}"));
+    
+    // Override hook for branded reports
+    protected override void ApplyBranding(string c) 
+        => Console.WriteLine("🏷️ Adding company watermark");
+}
+
+public class InventoryReport : ReportGenerator {
+    protected override string ReportName => "Inventory";
+    protected override List<Record> FetchData() 
+        => _warehouse.GetStockLevels();
+    protected override string FormatData(List<Record> data) 
+        => $"Total SKUs: {data.Count}, Low Stock: {data.Count(r => r.Qty < 10)}";
+}
+
+// Usage ✅
+new SalesReport().GenerateReport();
+new InventoryReport().GenerateReport();`,
+  enterprise:["ETL pipeline frameworks","Unit test base classes (TestBase with setup/teardown)","HTTP request handlers","Data processing pipelines","Code generators"],
+  flow:[
+    {id:"tmpl",label:"Template\\nMethod",x:42,y:10,special:true},
+    {id:"s1",label:"Step 1\\nFetch",x:10,y:50},
+    {id:"s2",label:"Step 2\\nValidate",x:30,y:50},
+    {id:"s3",label:"Step 3\\nFormat↑",x:52,y:50},
+    {id:"s4",label:"Step 4\\nSave",x:74,y:50},
+    {id:"sub",label:"Subclass\\nOverrides",x:52,y:82},
+  ],
+  arrows:[["tmpl","s1"],["s1","s2"],["s2","s3"],["s3","s4"],["s3","sub"]],
+},
+{
+  id:"visitor", name:"Visitor", cat:"behavioral", emoji:"🚶", num:22,
+  tagline:"Add operations to objects without modifying them",
+  analogy:"🏥 Like a doctor visiting different departments: the doctor (visitor) performs an operation on each department (element) without the departments changing their structure.",
+  what:"Represents an operation to be performed on elements of an object structure. Lets you define new operations without changing the classes of the elements it operates on.",
+  why:"Add new operations to a class hierarchy without modifying those classes. Separates algorithm from object structure.",
+  when:["Many distinct operations on an object structure","Classes of object structure rarely change but operations change often","Accumulating state while traversing a structure","Separating logic from data models"],
+  how:"Visitor interface declares Visit methods for each element type. ConcreteVisitor implements operations. Element declares Accept(visitor). ConcreteElement calls visitor.Visit(this).",
+  solid:["O","S"],
+  withoutPattern:`// Adding a new operation (TaxCalculation) requires modifying ALL classes
+public abstract class ShapeElement {
+    public abstract double GetArea();
+    public abstract double GetPerimeter();
+    // Need tax calculation? Add to EVERY class ← violation of Open/Closed
+    // public abstract double CalculateTax(); // 😩
+}`,
+  withPattern:`// Element interface
+public interface IShapeVisitable {
+    void Accept(IShapeVisitor visitor);
+    double Area { get; }
+}
+
+// Concrete elements (never need to change!)
+public class Circle : IShapeVisitable {
+    public double Radius { get; }
+    public double Area => Math.PI * Radius * Radius;
+    public Circle(double r) => Radius = r;
+    public void Accept(IShapeVisitor v) => v.VisitCircle(this);
+}
+
+public class Rectangle : IShapeVisitable {
+    public double Width { get; }
+    public double Height { get; }
+    public double Area => Width * Height;
+    public Rectangle(double w, double h) { Width=w; Height=h; }
+    public void Accept(IShapeVisitor v) => v.VisitRectangle(this);
+}
+
+public class Triangle : IShapeVisitable {
+    public double Base { get; }
+    public double Height { get; }
+    public double Area => 0.5 * Base * Height;
+    public Triangle(double b, double h) { Base=b; Height=h; }
+    public void Accept(IShapeVisitor v) => v.VisitTriangle(this);
+}
+
+// Visitor interface
+public interface IShapeVisitor {
+    void VisitCircle(Circle c);
+    void VisitRectangle(Rectangle r);
+    void VisitTriangle(Triangle t);
+}
+
+// NEW operations added WITHOUT touching shape classes!
+public class AreaCalculatorVisitor : IShapeVisitor {
+    public double TotalArea { get; private set; }
+    public void VisitCircle(Circle c)    => TotalArea += c.Area;
+    public void VisitRectangle(Rectangle r) => TotalArea += r.Area;
+    public void VisitTriangle(Triangle t)   => TotalArea += t.Area;
+}
+
+public class SvgExportVisitor : IShapeVisitor {
+    public string Svg { get; private set; } = "";
+    public void VisitCircle(Circle c) 
+        => Svg += $"<circle r='{c.Radius}'/>";
+    public void VisitRectangle(Rectangle r) 
+        => Svg += $"<rect w='{r.Width}' h='{r.Height}'/>";
+    public void VisitTriangle(Triangle t) 
+        => Svg += $"<polygon/>";
+}
+
+// Usage — add NEW operations without touching elements ✅
+var shapes = new List<IShapeVisitable> {
+    new Circle(5), new Rectangle(4,6), new Triangle(3,4)
+};
+
+var areaCalc = new AreaCalculatorVisitor();
+shapes.ForEach(s => s.Accept(areaCalc));
+Console.WriteLine($"Total area: {areaCalc.TotalArea:F2}");
+
+var svgExport = new SvgExportVisitor();
+shapes.ForEach(s => s.Accept(svgExport));
+Console.WriteLine(svgExport.Svg);`,
+  enterprise:["Compiler AST operations (type checking, code gen, optimization)","Tax calculation across product types","Report generators for heterogeneous data","Serialization frameworks (JSON, XML visitors)"],
+  flow:[
+    {id:"vis",label:"IVisitor",x:50,y:10,special:true},
+    {id:"v1",label:"AreaCalc",x:30,y:30},
+    {id:"v2",label:"SvgExport",x:70,y:30},
+    {id:"e1",label:"Circle\\nAccept(v)",x:15,y:65},
+    {id:"e2",label:"Rectangle\\nAccept(v)",x:45,y:65},
+    {id:"e3",label:"Triangle\\nAccept(v)",x:75,y:65},
+  ],
+  arrows:[["vis","v1"],["vis","v2"],["v1","e1"],["v1","e2"],["v1","e3"],["v2","e1"],["v2","e2"]],
+},
+{
+  id:"interpreter", name:"Interpreter", cat:"behavioral", emoji:"📜", num:23,
+  tagline:"Define a grammar and an interpreter for a language",
+  analogy:"🗣️ Like a translator: given a sentence in Language A (SQL query, math expression), the interpreter parses grammar rules and produces meaning (results).",
+  what:"Given a language, define a representation for its grammar along with an interpreter that uses the representation to interpret sentences in the language.",
+  why:"Makes it easy to change and extend the grammar. Implementing the grammar is straightforward. Each grammar rule becomes a class.",
+  when:["Implementing a simple scripting language","Parsing/evaluating expressions","SQL-like query languages","Regular expressions","Configuration DSLs"],
+  how:"Abstract Expression declares Interpret(). TerminalExpression handles basic grammar elements. NonTerminalExpression handles composite grammar rules.",
+  solid:["O"],
+  withoutPattern:`// Hard-coded expression evaluation — no grammar, not extendable
+public int Evaluate(string expr) {
+    // Custom parsing with string splitting — brittle, limited
+    if (expr.Contains("+")) {
+        var parts = expr.Split('+');
+        return int.Parse(parts[0]) + int.Parse(parts[1]);
+    }
+    // What about nested? (1+2)*3? Give up 😅
+    return int.Parse(expr);
+}`,
+  withPattern:`// Abstract expression
+public interface IExpression {
+    int Interpret(Dictionary<string, int> context);
+}
+
+// Terminal expressions (literals, variables)
+public class NumberExpression : IExpression {
+    private int _value;
+    public NumberExpression(int val) => _value = val;
+    public int Interpret(Dictionary<string, int> ctx) => _value;
+}
+
+public class VariableExpression : IExpression {
+    private string _name;
+    public VariableExpression(string name) => _name = name;
+    public int Interpret(Dictionary<string, int> ctx) 
+        => ctx.TryGetValue(_name, out var v) ? v : 0;
+}
+
+// Non-terminal expressions (composite grammar rules)
+public class AddExpression : IExpression {
+    private IExpression _left, _right;
+    public AddExpression(IExpression l, IExpression r) { _left=l; _right=r; }
+    public int Interpret(Dictionary<string, int> ctx) 
+        => _left.Interpret(ctx) + _right.Interpret(ctx);
+}
+
+public class MultiplyExpression : IExpression {
+    private IExpression _left, _right;
+    public MultiplyExpression(IExpression l, IExpression r) { _left=l; _right=r; }
+    public int Interpret(Dictionary<string, int> ctx) 
+        => _left.Interpret(ctx) * _right.Interpret(ctx);
+}
+
+public class SubtractExpression : IExpression {
+    private IExpression _left, _right;
+    public SubtractExpression(IExpression l, IExpression r) { _left=l; _right=r; }
+    public int Interpret(Dictionary<string, int> ctx)
+        => _left.Interpret(ctx) - _right.Interpret(ctx);
+}
+
+// Client builds expression trees
+// Represents: (x + 5) * (y - 2)
+var context = new Dictionary<string, int> { ["x"] = 10, ["y"] = 8 };
+
+IExpression expr = new MultiplyExpression(
+    new AddExpression(
+        new VariableExpression("x"),    // x = 10
+        new NumberExpression(5)),        // 5
+    new SubtractExpression(
+        new VariableExpression("y"),    // y = 8
+        new NumberExpression(2)));       // 2
+
+// (10 + 5) * (8 - 2) = 15 * 6 = 90
+Console.WriteLine($"Result: {expr.Interpret(context)}"); // 90 ✅`,
+  enterprise:["SQL query parsers","Business rule engines (Drools-like)","Template engines (Razor, Handlebars)","Mathematical expression evaluators","Configuration DSL parsers"],
+  flow:[
+    {id:"root",label:"Multiply\\n(Root)",x:45,y:10,special:true},
+    {id:"add",label:"Add\\n(x+5)",x:20,y:40},
+    {id:"sub",label:"Subtract\\n(y-2)",x:70,y:40},
+    {id:"x",label:"x=10",x:8,y:75},
+    {id:"n5",label:"5",x:30,y:75},
+    {id:"y",label:"y=8",x:58,y:75},
+    {id:"n2",label:"2",x:80,y:75},
+  ],
+  arrows:[["root","add"],["root","sub"],["add","x"],["add","n5"],["sub","y"],["sub","n2"]],
+},
+];
+
+// ─── FLOW DIAGRAM COMPONENT ────────────────────────────────────────────────
+function FlowDiagram({ pattern, color }) {
+  const { flow, arrows } = pattern;
+  if (!flow) return null;
+  const nodeMap = {};
+  flow.forEach(n => { nodeMap[n.id] = n; });
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setTick(x => x+1), 1800);
+    return () => clearInterval(t);
+  }, []);
+  const activeArrow = tick % arrows.length;
+
+  return (
+    <div style={{ position:"relative", height:"160px", background:"rgba(0,0,0,0.3)", borderRadius:"12px", border:`1px solid ${color}33`, overflow:"hidden", marginTop:"12px" }}>
+      <svg style={{position:"absolute",top:0,left:0,width:"100%",height:"100%"}}>
+        <defs>
+          <marker id={`arrow-${pattern.id}`} markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill={color} />
+          </marker>
+        </defs>
+        {arrows.map(([from, to], i) => {
+          const f = nodeMap[from], t2 = nodeMap[to];
+          if (!f || !t2) return null;
+          const x1 = f.x + 7, y1 = f.y, x2 = t2.x - 3, y2 = t2.y;
+          const isActive = i === activeArrow;
+          return (
+            <g key={i}>
+              <line x1={`${x1}%`} y1={`${y1}%`} x2={`${x2}%`} y2={`${y2}%`}
+                stroke={isActive ? color : `${color}44`}
+                strokeWidth={isActive ? 2 : 1}
+                strokeDasharray={isActive ? "6 3" : "none"}
+                style={isActive ? {animation:"flowRight 0.8s linear infinite"} : {}}
+                markerEnd={`url(#arrow-${pattern.id})`}
+              />
+              {isActive && (
+                <circle r="4" fill={color} opacity="0.9" style={{filter:`drop-shadow(0 0 6px ${color})`}}>
+                  <animateMotion dur="1.2s" repeatCount="indefinite"
+                    path={`M ${x1}% ${y1}% L ${x2}% ${y2}%`} />
+                </circle>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+      {flow.map(node => (
+        <div key={node.id} style={{
+          position:"absolute", left:`${node.x}%`, top:`${node.y}%`,
+          transform:"translate(-50%,-50%)",
+          background: node.special ? color : "rgba(20,20,40,0.9)",
+          border: `1px solid ${node.special ? color : `${color}55`}`,
+          color: node.special ? "#000" : "#fff",
+          padding:"4px 8px", borderRadius:"8px",
+          fontSize:"9px", fontWeight:"700", fontFamily:"JetBrains Mono,monospace",
+          textAlign:"center", whiteSpace:"pre-line", lineHeight:"1.2",
+          boxShadow: node.special ? `0 0 12px ${color}88` : "none",
+          minWidth:"55px", zIndex:2,
+          animation: node.special ? "glow 2s ease-in-out infinite" : "none",
+          "--glow": color,
+        }}>
+          {node.label}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── CODE BLOCK ─────────────────────────────────────────────────────────────
+function CodeBlock({ code, color }) {
+  const [copied, setCopied] = useState(false);
+  const kw = ["public","private","protected","abstract","sealed","override","virtual","class","interface","new","return","var","string","int","decimal","bool","List","Dictionary","void","static","readonly","get","set","null","true","false","this","base","foreach","if","else","while","using","namespace","async","await","throw","try","catch"];
+  const highlighted = code.split('\n').map((line, li) => {
+    const parts = line.split(/\b/);
+    return (
+      <div key={li} style={{lineHeight:"1.7"}}>
+        {parts.map((p, i) => (
+          <span key={i} style={{
+            color: kw.includes(p) ? color :
+                   p.match(/^".*"$/) || p.match(/^'.*'$/) ? "#86efac" :
+                   p.match(/^\d+$/) ? "#fbbf24" :
+                   p.match(/^\/\//) ? "#6b7280" :
+                   p.match(/^[A-Z][a-zA-Z]+$/) ? "#93c5fd" : "#e2e8f0"
+          }}>{p}</span>
+        ))}
+      </div>
+    );
+  });
+  return (
+    <div style={{position:"relative"}}>
+      <div style={{
+        background:"#0d1117", border:`1px solid ${color}33`, borderRadius:"10px",
+        padding:"16px 16px 16px 16px", fontFamily:"JetBrains Mono,monospace",
+        fontSize:"11px", lineHeight:"1.6", overflowX:"auto",
+        maxHeight:"380px", overflowY:"auto",
+        boxShadow:`inset 0 0 30px rgba(0,0,0,0.5)`,
+      }}>
+        <div style={{color:"#6b7280",marginBottom:"8px",fontSize:"10px",borderBottom:`1px solid ${color}22`,paddingBottom:"6px"}}>
+          <span style={{color:color}}>●</span> C# · .NET
+        </div>
+        <div style={{counterReset:"line"}}>
+          {highlighted}
+        </div>
+      </div>
+      <button onClick={() => { navigator.clipboard?.writeText(code); setCopied(true); setTimeout(()=>setCopied(false),2000); }}
+        style={{position:"absolute",top:"8px",right:"8px",background:copied?`${color}33`:"rgba(255,255,255,0.05)",
+          border:`1px solid ${color}44`,color:copied?color:"#666",padding:"4px 10px",
+          borderRadius:"6px",cursor:"pointer",fontSize:"10px",fontFamily:"JetBrains Mono,monospace"}}>
+        {copied?"✅ Copied":"Copy"}
+      </button>
+    </div>
+  );
+}
+
+// ─── SOLID BADGES ───────────────────────────────────────────────────────────
+function SolidBadges({ solidPrinciples }) {
+  return (
+    <div style={{display:"flex",flexWrap:"wrap",gap:"8px",marginTop:"8px"}}>
+      {solidPrinciples.map(key => (
+        <div key={key} style={{
+          background:`${SOLID_MAP[key].color}15`,
+          border:`1px solid ${SOLID_MAP[key].color}55`,
+          borderRadius:"8px", padding:"8px 14px", flex:"1", minWidth:"140px"
+        }}>
+          <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"4px"}}>
+            <div style={{width:"28px",height:"28px",borderRadius:"50%",
+              background:SOLID_MAP[key].color,display:"flex",alignItems:"center",
+              justifyContent:"center",fontWeight:"900",color:"#000",fontSize:"13px",flexShrink:0}}>
+              {key}
+            </div>
+            <span style={{color:SOLID_MAP[key].color,fontWeight:"700",fontSize:"12px"}}>
+              {SOLID_MAP[key].label}
+            </span>
+          </div>
+          <p style={{color:"#9ca3af",fontSize:"11px",margin:0}}>{SOLID_MAP[key].desc}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── PATTERN DETAIL ─────────────────────────────────────────────────────────
+function PatternDetail({ pattern }) {
+  const [tab, setTab] = useState("overview");
+  const col = CAT_COLORS[pattern.cat];
+  const tabs = ["overview","code","flow","solid","enterprise"];
+  const tabIcons = { overview:"🧭", code:"💻", flow:"⚡", solid:"🏗️", enterprise:"🏢" };
+
+  return (
+    <div key={pattern.id} style={{animation:"slideUp 0.4s ease both"}}>
+      {/* Header */}
+      <div style={{
+        background:`linear-gradient(135deg, ${col.bg} 0%, rgba(0,0,0,0.2) 100%)`,
+        border:`1px solid ${col.border}`, borderRadius:"16px", padding:"24px",
+        marginBottom:"16px", position:"relative", overflow:"hidden"
+      }}>
+        <div style={{position:"absolute",right:"24px",top:"50%",transform:"translateY(-50%)",
+          fontSize:"80px",opacity:0.07}}>{pattern.emoji}</div>
+        <div style={{display:"flex",alignItems:"flex-start",gap:"16px"}}>
+          <div style={{fontSize:"42px",lineHeight:1}}>{pattern.emoji}</div>
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"4px"}}>
+              <span style={{background:`${col.primary}22`,color:col.primary,
+                padding:"2px 10px",borderRadius:"20px",fontSize:"11px",fontWeight:"700",fontFamily:"JetBrains Mono,monospace",
+                border:`1px solid ${col.primary}44`}}>
+                #{String(pattern.num).padStart(2,'0')} {pattern.cat.toUpperCase()}
+              </span>
+            </div>
+            <h2 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"800",
+              fontSize:"clamp(20px,3vw,28px)",margin:"0 0 6px 0",letterSpacing:"-0.5px"}}>
+              {pattern.name}
+            </h2>
+            <p style={{color:col.primary,fontWeight:"500",fontSize:"14px",margin:"0 0 10px 0",fontFamily:"Inter,sans-serif"}}>
+              {pattern.tagline}
+            </p>
+            <div style={{background:"rgba(0,0,0,0.3)",borderRadius:"8px",padding:"10px 14px",
+              fontSize:"13px",color:"#d1d5db",fontFamily:"Inter,sans-serif",
+              borderLeft:`3px solid ${col.primary}`}}>
+              {pattern.analogy}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{display:"flex",gap:"4px",marginBottom:"16px",flexWrap:"wrap"}}>
+        {tabs.map(t => (
+          <button key={t} onClick={() => setTab(t)} style={{
+            padding:"8px 16px", border:"none", cursor:"pointer",
+            borderRadius:"8px", fontFamily:"Inter,sans-serif",
+            fontWeight: tab===t ? "700" : "400",
+            fontSize:"12px", transition:"all 0.2s",
+            background: tab===t ? col.primary : "rgba(255,255,255,0.05)",
+            color: tab===t ? "#000" : "#9ca3af",
+            boxShadow: tab===t ? `0 0 16px ${col.primary}44` : "none",
+          }}>
+            {tabIcons[t]} {t.charAt(0).toUpperCase()+t.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div style={{animation:"fadeIn 0.25s ease"}}>
+        {tab === "overview" && (
+          <div style={{display:"flex",flexDirection:"column",gap:"14px"}}>
+            {[
+              ["📖 What is it?", pattern.what, col.primary],
+              ["❓ Why use it?", pattern.why, "#60a5fa"],
+            ].map(([title, content, c]) => (
+              <div key={title} style={{background:"rgba(255,255,255,0.03)",border:`1px solid rgba(255,255,255,0.08)`,
+                borderRadius:"12px",padding:"16px",borderLeft:`3px solid ${c}`}}>
+                <h4 style={{color:c,margin:"0 0 8px 0",fontFamily:"Syne,sans-serif",fontSize:"14px"}}>{title}</h4>
+                <p style={{color:"#d1d5db",margin:0,lineHeight:"1.7",fontSize:"13px",fontFamily:"Inter,sans-serif"}}>{content}</p>
+              </div>
+            ))}
+            <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"12px",padding:"16px"}}>
+              <h4 style={{color:"#34d399",margin:"0 0 10px 0",fontFamily:"Syne,sans-serif",fontSize:"14px"}}>⏰ When to use?</h4>
+              <ul style={{margin:0,paddingLeft:"20px",display:"flex",flexDirection:"column",gap:"6px"}}>
+                {pattern.when.map((w,i) => (
+                  <li key={i} style={{color:"#d1d5db",fontSize:"13px",lineHeight:"1.5",fontFamily:"Inter,sans-serif"}}>{w}</li>
+                ))}
+              </ul>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}}>
+              <div style={{background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:"12px",padding:"16px"}}>
+                <h4 style={{color:"#ef4444",margin:"0 0 8px 0",fontSize:"13px",fontFamily:"Syne,sans-serif"}}>❌ Without Pattern</h4>
+                <pre style={{color:"#fca5a5",fontSize:"10px",fontFamily:"JetBrains Mono,monospace",
+                  whiteSpace:"pre-wrap",margin:0,lineHeight:"1.6",opacity:0.85}}>{pattern.withoutPattern}</pre>
+              </div>
+              <div style={{background:`${col.bg}`,border:`1px solid ${col.border}`,borderRadius:"12px",padding:"16px"}}>
+                <h4 style={{color:col.primary,margin:"0 0 8px 0",fontSize:"13px",fontFamily:"Syne,sans-serif"}}>✅ With Pattern</h4>
+                <p style={{color:"#d1d5db",fontSize:"12px",fontFamily:"Inter,sans-serif",margin:0,lineHeight:"1.6"}}>
+                  Clean, extensible, and maintainable code using {pattern.name} pattern.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        {tab === "code" && (
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"12px"}}>
+              <span style={{fontSize:"20px"}}>💻</span>
+              <h3 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"700",margin:0,fontSize:"16px"}}>
+                C# Implementation
+              </h3>
+            </div>
+            <CodeBlock code={pattern.withPattern} color={col.primary} />
+          </div>
+        )}
+        {tab === "flow" && (
+          <div>
+            <h3 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"700",margin:"0 0 12px 0",fontSize:"16px"}}>
+              ⚡ Animated Data Flow
+            </h3>
+            <FlowDiagram pattern={pattern} color={col.primary} />
+            <div style={{marginTop:"16px",background:"rgba(255,255,255,0.03)",border:`1px solid ${col.border}`,
+              borderRadius:"12px",padding:"16px"}}>
+              <h4 style={{color:col.primary,margin:"0 0 10px 0",fontFamily:"Syne,sans-serif",fontSize:"13px"}}>🔍 How it works:</h4>
+              <p style={{color:"#d1d5db",margin:0,fontSize:"13px",lineHeight:"1.7",fontFamily:"Inter,sans-serif"}}>{pattern.how}</p>
+            </div>
+          </div>
+        )}
+        {tab === "solid" && (
+          <div>
+            <h3 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"700",margin:"0 0 6px 0",fontSize:"16px"}}>
+              🏗️ SOLID Principles Applied
+            </h3>
+            <p style={{color:"#6b7280",fontSize:"13px",marginBottom:"14px",fontFamily:"Inter,sans-serif"}}>
+              This pattern supports {pattern.solid.length} of the 5 SOLID principles:
+            </p>
+            <SolidBadges solidPrinciples={pattern.solid} />
+            <div style={{marginTop:"16px",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"12px",padding:"16px"}}>
+              <h4 style={{color:"#f59e0b",margin:"0 0 10px 0",fontFamily:"Syne,sans-serif",fontSize:"13px"}}>📊 SOLID Coverage Score</h4>
+              <div style={{display:"flex",gap:"6px",alignItems:"center"}}>
+                {["S","O","L","I","D"].map(k => (
+                  <div key={k} style={{flex:1,textAlign:"center"}}>
+                    <div style={{width:"100%",height:"8px",borderRadius:"4px",
+                      background: pattern.solid.includes(k) ? SOLID_MAP[k].color : "#1f2937",
+                      boxShadow: pattern.solid.includes(k) ? `0 0 8px ${SOLID_MAP[k].color}` : "none",
+                      marginBottom:"4px"}} />
+                    <span style={{fontSize:"10px",fontWeight:"700",
+                      color: pattern.solid.includes(k) ? SOLID_MAP[k].color : "#374151",
+                      fontFamily:"JetBrains Mono,monospace"}}>{k}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        {tab === "enterprise" && (
+          <div>
+            <h3 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"700",margin:"0 0 6px 0",fontSize:"16px"}}>
+              🏢 Enterprise Use Cases
+            </h3>
+            <p style={{color:"#6b7280",fontSize:"13px",marginBottom:"14px",fontFamily:"Inter,sans-serif"}}>
+              Real-world applications of {pattern.name} in production systems:
+            </p>
+            <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
+              {pattern.enterprise.map((uc, i) => (
+                <div key={i} style={{
+                  display:"flex",alignItems:"flex-start",gap:"12px",
+                  background:"rgba(255,255,255,0.03)",border:`1px solid ${col.border}`,
+                  borderRadius:"10px",padding:"12px 16px"
+                }}>
+                  <div style={{width:"28px",height:"28px",borderRadius:"50%",
+                    background:col.bg,border:`1px solid ${col.primary}`,
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    color:col.primary,fontWeight:"900",fontSize:"12px",flexShrink:0,
+                    fontFamily:"JetBrains Mono,monospace"}}>
+                    {String(i+1).padStart(2,'0')}
+                  </div>
+                  <div>
+                    <p style={{color:"#e2e8f0",margin:0,fontSize:"13px",lineHeight:"1.6",fontFamily:"Inter,sans-serif"}}>
+                      {uc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── INTRO PAGE ──────────────────────────────────────────────────────────────
+function IntroPage() {
+  const [activeTab, setActiveTab] = useState("what");
+  const tabs = [
+    {id:"what",    label:"📖 What",       title:"What are Design Patterns?"},
+    {id:"history", label:"📜 History",     title:"Gang of Four Origin Story"},
+    {id:"why",     label:"💡 Why",         title:"Why Learn Design Patterns?"},
+    {id:"types",   label:"🗂️ Categories",  title:"Three Categories Explained"},
+    {id:"vs",      label:"⚖️ Patterns vs Principles", title:"Patterns vs Principles"},
+    {id:"analogy", label:"🌍 Real World",  title:"Real World Analogies"},
+  ];
+
+  const PRINCIPLES_DATA = [
+    {
+      name:"SOLID Principles", icon:"🏗️", color:"#34d399",
+      type:"principle",
+      def:"A set of 5 design guidelines for writing maintainable OOP code.",
+      scope:"Code-level: how you write a single class or method",
+      granularity:"Fine-grained rules (e.g. 'a class should do one thing')",
+      solves:"Bad code structure, tight coupling, fragile code",
+      example:"Single Responsibility: OrderService only handles orders, not emails.",
+      analogy:"🏋️ Like fitness principles: 'eat protein, sleep 8hrs, rest days'. Rules to follow every day.",
+      changeable:"Yes — always apply these everywhere",
+      concrete:"No concrete implementation, just guidelines",
+    },
+    {
+      name:"Design Patterns", icon:"🎨", color:"#f59e0b",
+      type:"pattern",
+      def:"Reusable solution templates for specific recurring design problems.",
+      scope:"Architecture-level: how objects collaborate and communicate",
+      granularity:"Coarse-grained solutions (e.g. 'use this class structure')",
+      solves:"Specific structural/behavioral problems (notification, caching, undo)",
+      example:"Observer: when stock price changes, notify ALL registered listeners.",
+      analogy:"🏗️ Like building blueprints: a specific plan for a specific structure (hospital vs hotel).",
+      changeable:"No — apply only when you have the specific problem",
+      concrete:"Yes — has specific class/interface structure to implement",
+    },
+  ];
+
+  const COMPARISON_TABLE = [
+    {aspect:"What it is",        principle:"Abstract guideline / rule",        pattern:"Concrete solution template"},
+    {aspect:"Scope",             principle:"Single class or method level",     pattern:"Multiple collaborating classes"},
+    {aspect:"When to apply",     principle:"Always — in every class you write",pattern:"Only when the specific problem exists"},
+    {aspect:"Form",              principle:"A statement: 'A class should...'", pattern:"Named UML/code structure"},
+    {aspect:"Example",           principle:"Open/Closed: don't modify, extend",pattern:"Strategy: swap algorithms at runtime"},
+    {aspect:"Invented by",       principle:"Robert C. Martin (Uncle Bob)",     pattern:"Gang of Four (1994)"},
+    {aspect:"Number of rules",   principle:"5 (SOLID) + DRY, KISS, YAGNI",    pattern:"23 GoF + many more"},
+    {aspect:"Teaches you",       principle:"HOW to write good code",           pattern:"HOW to structure object relationships"},
+    {aspect:"Without it",        principle:"Spaghetti code, huge classes",     pattern:"Reinventing the wheel, no shared vocabulary"},
+  ];
+
+  const REAL_WORLD = [
+    {
+      domain:"🛒 E-Commerce Platform",color:"#f59e0b",
+      patterns:[
+        {p:"Observer",   use:"Customer subscribes to 'back in stock'. When stock added → all subscribers notified automatically."},
+        {p:"Strategy",   use:"Checkout uses different payment strategies: CreditCard, PayPal, Crypto — swappable at runtime."},
+        {p:"Decorator",  use:"Shipping cost calculator: base cost + overnight wrap + insurance wrap + tracking wrap."},
+        {p:"Facade",     use:"OrderFacade.PlaceOrder() hides: inventory check + payment + DB save + email + shipping."},
+      ]
+    },
+    {
+      domain:"🏦 Banking System",color:"#06b6d4",
+      patterns:[
+        {p:"Singleton",  use:"Single transaction log — all services write to the same audit log instance."},
+        {p:"Chain of Responsibility", use:"Fraud detection: RulesEngine → MLModel → ManualReview. Each handles or escalates."},
+        {p:"Command",    use:"Fund transfer encapsulated as a Command — supports undo (reversal) and audit trail."},
+        {p:"Proxy",      use:"Account access proxy checks balance limits and logs every access before delegating."},
+      ]
+    },
+    {
+      domain:"🎮 Game Engine",color:"#a855f7",
+      patterns:[
+        {p:"Flyweight",  use:"Forest of 1M trees — all share ONE TreeType object (texture, model). Only position is unique."},
+        {p:"State",      use:"Player.state = Idle/Running/Jumping/Dead. Same Update() call behaves differently per state."},
+        {p:"Prototype",  use:"Clone pre-loaded enemy objects cheaply instead of loading textures from disk each time."},
+        {p:"Composite",  use:"Scene graph: World contains Zones, Zones contain Groups, Groups contain Entities — same interface."},
+      ]
+    },
+  ];
+
+  return (
+    <div style={{animation:"slideUp 0.4s ease"}}>
+      {/* Hero */}
+      <div style={{
+        background:"linear-gradient(135deg,rgba(245,158,11,0.1),rgba(6,182,212,0.08),rgba(168,85,247,0.1))",
+        border:"1px solid rgba(255,255,255,0.08)", borderRadius:"20px",
+        padding:"32px 28px", marginBottom:"20px", textAlign:"center", position:"relative",overflow:"hidden"
+      }}>
+        <div style={{position:"absolute",top:"-40px",right:"-40px",fontSize:"180px",opacity:0.04,userSelect:"none"}}>🎨</div>
+        <div style={{fontSize:"52px",marginBottom:"12px"}}>🎨</div>
+        <h1 style={{fontFamily:"Syne,sans-serif",fontWeight:"800",
+          fontSize:"clamp(22px,4vw,36px)",margin:"0 0 10px",letterSpacing:"-1px",
+          background:"linear-gradient(90deg,#f59e0b,#06b6d4,#a855f7)",
+          WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>
+          Design Patterns — The Complete Foundation
+        </h1>
+        <p style={{color:"#9ca3af",fontFamily:"Inter,sans-serif",fontSize:"14px",maxWidth:"560px",margin:"0 auto 20px",lineHeight:"1.7"}}>
+          Before diving into 23 patterns, understand the foundation — what they are, why they exist, 
+          and how they differ from principles. This context makes every pattern click instantly.
+        </p>
+        <div style={{display:"flex",gap:"10px",justifyContent:"center",flexWrap:"wrap"}}>
+          {[["📅","1994","Year Created"],["👥","4","Authors (GoF)"],["🎯","23","Total Patterns"],["📚","3","Categories"]].map(([e,n,l])=>(
+            <div key={l} style={{background:"rgba(0,0,0,0.3)",border:"1px solid rgba(255,255,255,0.1)",
+              borderRadius:"12px",padding:"10px 18px",textAlign:"center"}}>
+              <div style={{fontSize:"18px",marginBottom:"2px"}}>{e}</div>
+              <div style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"22px",lineHeight:1}}>{n}</div>
+              <div style={{color:"#6b7280",fontFamily:"Inter,sans-serif",fontSize:"10px",marginTop:"2px"}}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab bar */}
+      <div style={{display:"flex",gap:"4px",marginBottom:"16px",flexWrap:"wrap"}}>
+        {tabs.map(t=>(
+          <button key={t.id} onClick={()=>setActiveTab(t.id)} style={{
+            padding:"8px 14px",border:"none",cursor:"pointer",borderRadius:"8px",
+            fontFamily:"Inter,sans-serif",fontWeight:activeTab===t.id?"700":"400",fontSize:"12px",transition:"all 0.2s",
+            background:activeTab===t.id?"linear-gradient(135deg,#f59e0b,#f97316)":"rgba(255,255,255,0.05)",
+            color:activeTab===t.id?"#000":"#9ca3af",
+            boxShadow:activeTab===t.id?"0 0 16px rgba(245,158,11,0.4)":"none",
+          }}>{t.label}</button>
+        ))}
+      </div>
+
+      {/* ── WHAT ── */}
+      {activeTab==="what" && (
+        <div style={{display:"flex",flexDirection:"column",gap:"14px",animation:"fadeIn 0.25s ease"}}>
+          <div style={{background:"rgba(245,158,11,0.06)",border:"1px solid rgba(245,158,11,0.25)",borderRadius:"14px",padding:"22px"}}>
+            <h2 style={{color:"#f59e0b",fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"20px",margin:"0 0 12px"}}>
+              📖 Definition
+            </h2>
+            <p style={{color:"#e2e8f0",fontFamily:"Inter,sans-serif",fontSize:"14px",lineHeight:"1.8",margin:"0 0 16px"}}>
+              A <strong style={{color:"#f59e0b"}}>Design Pattern</strong> is a <em>general, reusable solution</em> to a
+              commonly occurring problem in software design. It is <strong>not</strong> a finished piece of code you copy-paste —
+              it is a <strong>template</strong> or <strong>blueprint</strong> that describes how to solve a problem that
+              can be applied in many different situations.
+            </p>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"10px"}}>
+              {[
+                {icon:"🔁",t:"Reusable",d:"Same pattern solves the same class of problem across different projects"},
+                {icon:"🗣️",t:"Vocabulary",d:"Shared language between developers: 'Use Observer here' = everyone understands"},
+                {icon:"✅",t:"Battle-tested",d:"Proven solutions refined over decades of software engineering practice"},
+                {icon:"🏗️",t:"Template",d:"Not copy-paste code — a structural blueprint adapted to your specific context"},
+              ].map(c=>(
+                <div key={c.t} style={{background:"rgba(0,0,0,0.3)",borderRadius:"10px",padding:"14px",border:"1px solid rgba(255,255,255,0.06)"}}>
+                  <div style={{fontSize:"22px",marginBottom:"6px"}}>{c.icon}</div>
+                  <div style={{color:"#f59e0b",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"13px",marginBottom:"4px"}}>{c.t}</div>
+                  <div style={{color:"#9ca3af",fontFamily:"Inter,sans-serif",fontSize:"11px",lineHeight:"1.5"}}>{c.d}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"14px",padding:"22px"}}>
+            <h3 style={{color:"#60a5fa",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"16px",margin:"0 0 14px"}}>
+              🧩 Anatomy of a Design Pattern
+            </h3>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:"10px"}}>
+              {[
+                {n:"Name",      d:"A memorable handle: 'Singleton', 'Observer'",c:"#f59e0b"},
+                {n:"Intent",    d:"What problem does it solve and what is the result?",c:"#34d399"},
+                {n:"Motivation",d:"A scenario illustrating where the pattern is useful",c:"#06b6d4"},
+                {n:"Structure", d:"UML diagram of the classes and their relationships",c:"#a855f7"},
+                {n:"Participants",d:"The classes/interfaces and their responsibilities",c:"#f472b6"},
+                {n:"Consequences",d:"Trade-offs and results of applying the pattern",c:"#fb923c"},
+              ].map(p=>(
+                <div key={p.n} style={{borderLeft:`3px solid ${p.c}`,paddingLeft:"12px",paddingTop:"4px",paddingBottom:"4px"}}>
+                  <div style={{color:p.c,fontFamily:"JetBrains Mono,monospace",fontWeight:"700",fontSize:"12px",marginBottom:"3px"}}>{p.n}</div>
+                  <div style={{color:"#9ca3af",fontFamily:"Inter,sans-serif",fontSize:"11px",lineHeight:"1.5"}}>{p.d}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{background:"rgba(239,68,68,0.06)",border:"1px solid rgba(239,68,68,0.25)",borderRadius:"14px",padding:"22px"}}>
+            <h3 style={{color:"#ef4444",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"16px",margin:"0 0 10px"}}>
+              ❌ Common Misconceptions
+            </h3>
+            <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+              {[
+                ["Design patterns are ready-made code you copy","They're templates — you adapt them to your context"],
+                ["More patterns = better code","Use only when the problem warrants it — over-engineering is real"],
+                ["You must follow patterns strictly","They're guidelines — real code often combines or adapts patterns"],
+                ["Patterns solve all design problems","They solve common problems; unique problems need custom solutions"],
+              ].map(([wrong,right],i)=>(
+                <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+                  <div style={{background:"rgba(239,68,68,0.08)",borderRadius:"8px",padding:"10px 12px",fontSize:"12px",color:"#fca5a5",fontFamily:"Inter,sans-serif"}}>
+                    ❌ {wrong}
+                  </div>
+                  <div style={{background:"rgba(52,211,153,0.08)",borderRadius:"8px",padding:"10px 12px",fontSize:"12px",color:"#6ee7b7",fontFamily:"Inter,sans-serif"}}>
+                    ✅ {right}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── HISTORY ── */}
+      {activeTab==="history" && (
+        <div style={{display:"flex",flexDirection:"column",gap:"14px",animation:"fadeIn 0.25s ease"}}>
+          <div style={{background:"linear-gradient(135deg,rgba(168,85,247,0.08),rgba(6,182,212,0.06))",
+            border:"1px solid rgba(168,85,247,0.25)",borderRadius:"14px",padding:"24px"}}>
+            <h2 style={{color:"#a855f7",fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"20px",margin:"0 0 16px"}}>
+              📜 The Gang of Four Story
+            </h2>
+            <div style={{display:"flex",gap:"16px",flexWrap:"wrap",marginBottom:"20px"}}>
+              {[
+                {name:"Erich Gamma",    role:"Architect",     emoji:"🇨🇭",color:"#f59e0b"},
+                {name:"Richard Helm",   role:"Researcher",    emoji:"🇦🇺",color:"#06b6d4"},
+                {name:"Ralph Johnson",  role:"Professor",     emoji:"🇺🇸",color:"#34d399"},
+                {name:"John Vlissides", role:"Engineer",      emoji:"🇺🇸",color:"#a855f7"},
+              ].map(a=>(
+                <div key={a.name} style={{flex:"1",minWidth:"130px",background:"rgba(0,0,0,0.3)",
+                  borderRadius:"12px",padding:"14px",textAlign:"center",border:`1px solid ${a.color}33`}}>
+                  <div style={{fontSize:"28px",marginBottom:"6px"}}>{a.emoji}</div>
+                  <div style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"12px",marginBottom:"3px"}}>{a.name}</div>
+                  <div style={{color:a.color,fontFamily:"Inter,sans-serif",fontSize:"10px"}}>{a.role}</div>
+                </div>
+              ))}
+            </div>
+            {/* Timeline */}
+            <div style={{position:"relative",paddingLeft:"20px"}}>
+              <div style={{position:"absolute",left:"7px",top:0,bottom:0,width:"2px",background:"linear-gradient(180deg,#a855f7,#06b6d4,#f59e0b)"}} />
+              {[
+                {year:"1977",color:"#34d399",title:"Christopher Alexander",desc:"Architect Christopher Alexander introduces 'patterns' in building design — the original inspiration for software patterns."},
+                {year:"1987",color:"#06b6d4",title:"Smalltalk & MVC",desc:"Kent Beck & Ward Cunningham adapt Alexander's ideas to software, introducing pattern thinking to the programming world."},
+                {year:"1990",color:"#a855f7",title:"GoF Begin",desc:"Gamma, Helm, Johnson, Vlissides start cataloguing recurring solutions they noticed independently across large OOP codebases."},
+                {year:"1994",color:"#f59e0b",title:"📚 The Book Published",desc:"'Design Patterns: Elements of Reusable Object-Oriented Software' published. 23 patterns. Still a bestseller 30 years later."},
+                {year:"2000s",color:"#f472b6",title:"Industry Adoption",desc:"Patterns enter mainstream: Java EE, .NET frameworks built around patterns. Every senior dev interview asks about them."},
+                {year:"Today",color:"#fb923c",title:"Modern Relevance",desc:"Patterns in React hooks, microservices, cloud architecture. Language-native: C# events=Observer, LINQ=Iterator, middleware=Chain."},
+              ].map((e,i)=>(
+                <div key={i} style={{marginBottom:"16px",position:"relative"}}>
+                  <div style={{position:"absolute",left:"-16px",top:"4px",width:"10px",height:"10px",
+                    borderRadius:"50%",background:e.color,boxShadow:`0 0 8px ${e.color}`}} />
+                  <div style={{background:"rgba(0,0,0,0.3)",borderRadius:"10px",padding:"12px 14px",
+                    border:`1px solid ${e.color}33`}}>
+                    <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"6px"}}>
+                      <span style={{color:e.color,fontFamily:"JetBrains Mono,monospace",fontWeight:"700",fontSize:"12px",
+                        background:`${e.color}15`,padding:"2px 8px",borderRadius:"20px"}}>{e.year}</span>
+                      <span style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"13px"}}>{e.title}</span>
+                    </div>
+                    <p style={{color:"#9ca3af",fontFamily:"Inter,sans-serif",fontSize:"12px",margin:0,lineHeight:"1.6"}}>{e.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── WHY ── */}
+      {activeTab==="why" && (
+        <div style={{display:"flex",flexDirection:"column",gap:"14px",animation:"fadeIn 0.25s ease"}}>
+          <div style={{background:"rgba(52,211,153,0.06)",border:"1px solid rgba(52,211,153,0.25)",borderRadius:"14px",padding:"22px"}}>
+            <h2 style={{color:"#34d399",fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"20px",margin:"0 0 16px"}}>
+              💡 Why Every Developer Must Know Design Patterns
+            </h2>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"12px"}}>
+              {[
+                {icon:"🗣️",t:"Shared Vocabulary",c:"#f59e0b",d:"Say 'Observer' and any dev on your team instantly understands the entire structure. No long explanation needed."},
+                {icon:"♻️",t:"Proven Solutions",c:"#06b6d4",d:"Stop reinventing the wheel. Patterns are battle-tested across thousands of codebases and decades of real use."},
+                {icon:"🚀",t:"Faster Development",c:"#a855f7",d:"Recognize the pattern → apply the known solution → done. Skip weeks of trial-and-error design iteration."},
+                {icon:"🔧",t:"Maintainable Code",c:"#34d399",d:"Patterns explicitly enforce separation of concerns, reducing the chance of spaghetti code in complex systems."},
+                {icon:"💼",t:"Career Growth",c:"#f472b6",d:"Patterns are asked in every senior/staff engineer interview. Essential for architecting large-scale enterprise systems."},
+                {icon:"📖",t:"Read Others' Code",c:"#fb923c",d:"Spot patterns in ASP.NET Core, React, Entity Framework. You'll understand WHY they are designed the way they are."},
+              ].map(r=>(
+                <div key={r.t} style={{background:"rgba(0,0,0,0.3)",borderRadius:"12px",padding:"16px",
+                  border:`1px solid ${r.c}22`,borderTop:`3px solid ${r.c}`}}>
+                  <div style={{fontSize:"24px",marginBottom:"8px"}}>{r.icon}</div>
+                  <div style={{color:r.c,fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"13px",marginBottom:"6px"}}>{r.t}</div>
+                  <div style={{color:"#9ca3af",fontFamily:"Inter,sans-serif",fontSize:"12px",lineHeight:"1.6"}}>{r.d}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"14px",padding:"22px"}}>
+            <h3 style={{color:"#60a5fa",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"16px",margin:"0 0 14px"}}>
+              📊 With vs Without Patterns — Real Impact
+            </h3>
+            <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+              {[
+                {metric:"Adding new payment method",without:"Edit 5 files, risk breaking existing code",with:"Add 1 new class, zero existing code touched",p:"Strategy"},
+                {metric:"Notification to 10 services",without:"Tightly coupled: NotifService knows all 10",with:"Observer: NotifService knows nobody, services subscribe",p:"Observer"},
+                {metric:"Undo in text editor",without:"Store entire doc history = 100MB RAM",with:"Command: store only operation objects = 1KB",p:"Command"},
+                {metric:"DB connection per request",without:"1000 req/sec = 1000 connections → DB crashes",with:"Singleton pool: 10 connections handle everything",p:"Singleton"},
+              ].map((r,i)=>(
+                <div key={i} style={{display:"grid",gridTemplateColumns:"1.5fr 1fr 1fr",gap:"8px",alignItems:"center"}}>
+                  <div style={{color:"#e2e8f0",fontFamily:"Inter,sans-serif",fontSize:"12px",fontWeight:"600",
+                    display:"flex",alignItems:"center",gap:"8px"}}>
+                    <span style={{background:"rgba(245,158,11,0.15)",color:"#f59e0b",padding:"2px 8px",
+                      borderRadius:"20px",fontSize:"10px",fontFamily:"JetBrains Mono,monospace",whiteSpace:"nowrap"}}>{r.p}</span>
+                    {r.metric}
+                  </div>
+                  <div style={{background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.2)",
+                    borderRadius:"8px",padding:"8px 10px",fontSize:"11px",color:"#fca5a5",fontFamily:"Inter,sans-serif",lineHeight:"1.4"}}>
+                    ❌ {r.without}
+                  </div>
+                  <div style={{background:"rgba(52,211,153,0.08)",border:"1px solid rgba(52,211,153,0.2)",
+                    borderRadius:"8px",padding:"8px 10px",fontSize:"11px",color:"#6ee7b7",fontFamily:"Inter,sans-serif",lineHeight:"1.4"}}>
+                    ✅ {r.with}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TYPES ── */}
+      {activeTab==="types" && (
+        <div style={{display:"flex",flexDirection:"column",gap:"14px",animation:"fadeIn 0.25s ease"}}>
+          {[
+            {
+              cat:"creational", emoji:"🏗️", title:"Creational Patterns", count:5, color:"#f59e0b",
+              intent:"Control HOW objects are created — abstract the instantiation process.",
+              question:"Who creates the object and how?",
+              patterns:["Singleton","Factory Method","Abstract Factory","Builder","Prototype"],
+              analogy:"🏭 Like a manufacturing plant: you don't assemble a car by hand. The factory controls HOW cars are created.",
+              useWhen:"When object creation is complex, expensive, or should be decoupled from usage.",
+            },
+            {
+              cat:"structural", emoji:"🏛️", title:"Structural Patterns", count:7, color:"#06b6d4",
+              intent:"Control HOW objects are composed — how classes and objects form larger structures.",
+              question:"How do objects fit together?",
+              patterns:["Adapter","Bridge","Composite","Decorator","Facade","Flyweight","Proxy"],
+              analogy:"🏛️ Like architecture: how you combine columns, beams, and walls to build a stable, functional building.",
+              useWhen:"When you need to compose objects into larger structures or adapt incompatible interfaces.",
+            },
+            {
+              cat:"behavioral", emoji:"🎭", title:"Behavioral Patterns", count:11, color:"#a855f7",
+              intent:"Control HOW objects communicate — how responsibilities are distributed between objects.",
+              question:"How do objects talk to each other?",
+              patterns:["Chain of Responsibility","Command","Iterator","Mediator","Memento","Observer","State","Strategy","Template Method","Visitor","Interpreter"],
+              analogy:"🎭 Like a theater production: script (algorithm), actors (objects), director (mediator) — all coordinated.",
+              useWhen:"When you need to define complex communication patterns or distribute responsibilities cleanly.",
+            },
+          ].map(c=>(
+            <div key={c.cat} style={{background:`${CAT_COLORS[c.cat].bg}`,
+              border:`1px solid ${CAT_COLORS[c.cat].border}`,borderRadius:"14px",padding:"22px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"14px"}}>
+                <div style={{fontSize:"32px"}}>{c.emoji}</div>
+                <div>
+                  <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+                    <h3 style={{color:c.color,fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"18px",margin:0}}>{c.title}</h3>
+                    <span style={{background:`${c.color}22`,color:c.color,padding:"2px 10px",borderRadius:"20px",
+                      fontSize:"11px",fontFamily:"JetBrains Mono,monospace",border:`1px solid ${c.color}44`}}>
+                      {c.count} patterns
+                    </span>
+                  </div>
+                  <p style={{color:"#9ca3af",fontFamily:"Inter,sans-serif",fontSize:"12px",margin:"4px 0 0"}}>
+                    Key question: <em style={{color:c.color}}>{c.question}</em>
+                  </p>
+                </div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"14px"}}>
+                <div style={{background:"rgba(0,0,0,0.3)",borderRadius:"10px",padding:"12px",borderLeft:`3px solid ${c.color}`}}>
+                  <div style={{color:c.color,fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"12px",marginBottom:"6px"}}>🎯 Intent</div>
+                  <p style={{color:"#d1d5db",fontFamily:"Inter,sans-serif",fontSize:"12px",margin:0,lineHeight:"1.6"}}>{c.intent}</p>
+                </div>
+                <div style={{background:"rgba(0,0,0,0.3)",borderRadius:"10px",padding:"12px",borderLeft:"3px solid #6b7280"}}>
+                  <div style={{color:"#9ca3af",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"12px",marginBottom:"6px"}}>🌍 Analogy</div>
+                  <p style={{color:"#d1d5db",fontFamily:"Inter,sans-serif",fontSize:"12px",margin:0,lineHeight:"1.6"}}>{c.analogy}</p>
+                </div>
+              </div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:"6px"}}>
+                {c.patterns.map(p=>(
+                  <span key={p} style={{background:`${c.color}12`,border:`1px solid ${c.color}33`,
+                    color:c.color,padding:"4px 10px",borderRadius:"20px",
+                    fontSize:"11px",fontFamily:"Inter,sans-serif",fontWeight:"500"}}>{p}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── PATTERNS VS PRINCIPLES ── */}
+      {activeTab==="vs" && (
+        <div style={{display:"flex",flexDirection:"column",gap:"16px",animation:"fadeIn 0.25s ease"}}>
+          <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"14px",padding:"22px"}}>
+            <h2 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"20px",margin:"0 0 6px"}}>
+              ⚖️ Design Patterns vs Design Principles
+            </h2>
+            <p style={{color:"#6b7280",fontFamily:"Inter,sans-serif",fontSize:"13px",margin:"0 0 20px",lineHeight:"1.7"}}>
+              This is one of the most confused topics in software engineering. They are <strong style={{color:"#fff"}}>complementary, not competing</strong>.
+              Principles guide HOW you write code. Patterns give you proven STRUCTURES to solve specific problems.
+            </p>
+            {/* Side by side cards */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"14px",marginBottom:"20px"}}>
+              {PRINCIPLES_DATA.map(d=>(
+                <div key={d.name} style={{background:`${d.color}08`,border:`2px solid ${d.color}33`,borderRadius:"14px",padding:"20px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"14px"}}>
+                    <span style={{fontSize:"24px"}}>{d.icon}</span>
+                    <div>
+                      <div style={{color:d.color,fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"15px"}}>{d.name}</div>
+                      <div style={{color:"#6b7280",fontFamily:"Inter,sans-serif",fontSize:"10px",
+                        textTransform:"uppercase",letterSpacing:"1px"}}>{d.type}</div>
+                    </div>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+                    {[
+                      ["📖 Definition",d.def],
+                      ["🎯 Scope",d.scope],
+                      ["📏 Granularity",d.granularity],
+                      ["🔧 Solves",d.solves],
+                      ["💡 Example",d.example],
+                      ["🌍 Analogy",d.analogy],
+                    ].map(([k,v])=>(
+                      <div key={k} style={{borderBottom:"1px solid rgba(255,255,255,0.05)",paddingBottom:"7px"}}>
+                        <div style={{color:d.color,fontFamily:"JetBrains Mono,monospace",fontSize:"10px",fontWeight:"700",marginBottom:"3px"}}>{k}</div>
+                        <div style={{color:"#d1d5db",fontFamily:"Inter,sans-serif",fontSize:"11px",lineHeight:"1.5"}}>{v}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Comparison table */}
+            <h3 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"15px",margin:"0 0 12px"}}>
+              📊 Head-to-Head Comparison
+            </h3>
+            <div style={{overflowX:"auto"}}>
+              <table style={{width:"100%",borderCollapse:"collapse",fontFamily:"Inter,sans-serif",fontSize:"12px"}}>
+                <thead>
+                  <tr>
+                    {["Aspect","🏗️ Principles","🎨 Patterns"].map((h,i)=>(
+                      <th key={h} style={{padding:"10px 14px",textAlign:"left",
+                        background:i===0?"rgba(255,255,255,0.05)":i===1?"rgba(52,211,153,0.1)":"rgba(245,158,11,0.1)",
+                        color:i===0?"#9ca3af":i===1?"#34d399":"#f59e0b",
+                        fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"12px",
+                        borderBottom:`2px solid ${i===0?"rgba(255,255,255,0.1)":i===1?"rgba(52,211,153,0.3)":"rgba(245,158,11,0.3)"}`}}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {COMPARISON_TABLE.map((row,i)=>(
+                    <tr key={i} style={{background:i%2===0?"rgba(0,0,0,0.2)":"transparent"}}>
+                      <td style={{padding:"9px 14px",color:"#9ca3af",fontWeight:"600",borderRight:"1px solid rgba(255,255,255,0.06)"}}>{row.aspect}</td>
+                      <td style={{padding:"9px 14px",color:"#d1d5db",borderRight:"1px solid rgba(255,255,255,0.06)"}}>{row.principle}</td>
+                      <td style={{padding:"9px 14px",color:"#d1d5db"}}>{row.pattern}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {/* Relationship diagram */}
+          <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"14px",padding:"22px"}}>
+            <h3 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"15px",margin:"0 0 14px"}}>
+              🔗 How They Work Together
+            </h3>
+            <div style={{display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap",justifyContent:"center",padding:"16px 0"}}>
+              {[
+                {label:"SOLID\nPrinciples",sub:"Rules for writing each class",c:"#34d399"},
+                {label:"→",sub:"",c:"#6b7280",plain:true},
+                {label:"Design\nPatterns",sub:"Structures built using principles",c:"#f59e0b"},
+                {label:"→",sub:"",c:"#6b7280",plain:true},
+                {label:"Clean\nArchitecture",sub:"Entire system organized with both",c:"#a855f7"},
+                {label:"→",sub:"",c:"#6b7280",plain:true},
+                {label:"Maintainable\nSoftware",sub:"The goal",c:"#06b6d4"},
+              ].map((n,i)=>(
+                n.plain
+                  ? <div key={i} style={{color:"#6b7280",fontSize:"22px",fontWeight:"300"}}>{n.label}</div>
+                  : <div key={i} style={{background:`${n.c}10`,border:`1px solid ${n.c}44`,borderRadius:"12px",
+                      padding:"14px 16px",textAlign:"center",minWidth:"110px",flex:"1"}}>
+                      <div style={{color:n.c,fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"13px",
+                        whiteSpace:"pre-line",lineHeight:"1.3",marginBottom:"6px"}}>{n.label}</div>
+                      <div style={{color:"#6b7280",fontFamily:"Inter,sans-serif",fontSize:"10px",lineHeight:"1.4"}}>{n.sub}</div>
+                    </div>
+              ))}
+            </div>
+            <div style={{background:"rgba(245,158,11,0.08)",borderRadius:"10px",padding:"14px 16px",
+              borderLeft:"3px solid #f59e0b",marginTop:"8px"}}>
+              <p style={{color:"#d1d5db",fontFamily:"Inter,sans-serif",fontSize:"13px",margin:0,lineHeight:"1.7"}}>
+                <strong style={{color:"#f59e0b"}}>Think of it this way:</strong> SOLID principles are the <em>grammar rules</em> of programming 
+                (always follow them). Design patterns are <em>sentence structures</em> (use when the context calls for it). 
+                A well-written program follows the grammar everywhere AND uses elegant structures where appropriate.
+              </p>
+            </div>
+          </div>
+          {/* SOLID quick ref */}
+          <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"14px",padding:"22px"}}>
+            <h3 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"15px",margin:"0 0 14px"}}>
+              🏗️ SOLID Principles — Quick Reference
+            </h3>
+            <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+              {Object.entries(SOLID_MAP).map(([k,v])=>(
+                <div key={k} style={{display:"flex",gap:"12px",alignItems:"flex-start",
+                  background:`${v.color}08`,border:`1px solid ${v.color}22`,borderRadius:"10px",padding:"12px 14px"}}>
+                  <div style={{width:"32px",height:"32px",borderRadius:"50%",background:v.color,
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    fontWeight:"900",color:"#000",fontSize:"14px",flexShrink:0,
+                    boxShadow:`0 0 12px ${v.color}55`}}>{k}</div>
+                  <div>
+                    <div style={{color:v.color,fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"13px",marginBottom:"3px"}}>{v.label}</div>
+                    <div style={{color:"#9ca3af",fontFamily:"Inter,sans-serif",fontSize:"12px",marginBottom:"6px"}}>{v.desc}</div>
+                    <div style={{color:"#6b7280",fontFamily:"Inter,sans-serif",fontSize:"11px",lineHeight:"1.5"}}>
+                      {k==="S" && "🍕 A pizza chef only makes pizza. Billing handled by cashier, delivery by courier."}
+                      {k==="O" && "🔌 USB ports: add new devices (extension) without redesigning the laptop (modification)."}
+                      {k==="L" && "🦆 If it quacks like a duck, it should work wherever a duck is expected — no surprises."}
+                      {k==="I" && "🎮 A game controller interface shouldn't force a TV remote to implement 'shoot' button."}
+                      {k==="D" && "💡 Light switch depends on 'electricity concept', not a specific power plant brand."}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── REAL WORLD ── */}
+      {activeTab==="analogy" && (
+        <div style={{display:"flex",flexDirection:"column",gap:"16px",animation:"fadeIn 0.25s ease"}}>
+          <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"14px",padding:"22px"}}>
+            <h2 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"20px",margin:"0 0 6px"}}>
+              🌍 Real World: Patterns in Production
+            </h2>
+            <p style={{color:"#6b7280",fontFamily:"Inter,sans-serif",fontSize:"13px",margin:"0 0 20px",lineHeight:"1.7"}}>
+              These are real patterns used in production systems you interact with every day.
+            </p>
+            {REAL_WORLD.map(domain=>(
+              <div key={domain.domain} style={{marginBottom:"16px",background:`${domain.color}06`,
+                border:`1px solid ${domain.color}25`,borderRadius:"14px",padding:"18px"}}>
+                <h3 style={{color:domain.color,fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"16px",margin:"0 0 12px"}}>
+                  {domain.domain}
+                </h3>
+                <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+                  {domain.patterns.map(({p,use},i)=>(
+                    <div key={i} style={{display:"flex",gap:"10px",alignItems:"flex-start",
+                      background:"rgba(0,0,0,0.25)",borderRadius:"8px",padding:"10px 12px"}}>
+                      <span style={{background:`${domain.color}18`,color:domain.color,
+                        padding:"3px 10px",borderRadius:"20px",fontSize:"10px",
+                        fontFamily:"JetBrains Mono,monospace",fontWeight:"700",
+                        whiteSpace:"nowrap",flexShrink:0,marginTop:"1px"}}>{p}</span>
+                      <p style={{color:"#d1d5db",fontFamily:"Inter,sans-serif",fontSize:"12px",margin:0,lineHeight:"1.6"}}>{use}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* .NET built-in patterns */}
+          <div style={{background:"rgba(96,165,250,0.06)",border:"1px solid rgba(96,165,250,0.25)",borderRadius:"14px",padding:"22px"}}>
+            <h3 style={{color:"#60a5fa",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"16px",margin:"0 0 14px"}}>
+              🔷 .NET & C# — Patterns You Already Use
+            </h3>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"10px"}}>
+              {[
+                {f:"C# Events / Delegates",p:"Observer",c:"#a855f7",d:"button.Click += handler is Observer. The button notifies all registered handlers."},
+                {f:"IEnumerable / foreach",p:"Iterator",c:"#06b6d4",d:"Every foreach loop uses the Iterator pattern via IEnumerable / IEnumerator."},
+                {f:"ASP.NET Core Middleware",p:"Chain of Responsibility",c:"#f59e0b",d:"app.Use(...) chains middleware. Each handles or passes to next."},
+                {f:"LINQ",p:"Iterator + Strategy",c:"#34d399",d:"LINQ chains lazy iterators. OrderBy() is Strategy — swap sort algorithm."},
+                {f:"Entity Framework Lazy Loading",p:"Proxy",c:"#f472b6",d:"EF wraps entities in proxy objects that intercept property access."},
+                {f:"StringBuilder",p:"Builder",c:"#fb923c",d:"Fluent API: sb.Append().AppendLine().Insert() — building complex string step by step."},
+              ].map(item=>(
+                <div key={item.f} style={{background:"rgba(0,0,0,0.3)",borderRadius:"10px",padding:"14px",border:`1px solid ${item.c}22`}}>
+                  <div style={{background:`${item.c}18`,color:item.c,display:"inline-block",
+                    padding:"2px 10px",borderRadius:"20px",fontSize:"10px",
+                    fontFamily:"JetBrains Mono,monospace",fontWeight:"700",marginBottom:"8px"}}>{item.p}</div>
+                  <div style={{color:"#fff",fontFamily:"Inter,sans-serif",fontWeight:"600",fontSize:"12px",marginBottom:"5px"}}>{item.f}</div>
+                  <div style={{color:"#9ca3af",fontFamily:"Inter,sans-serif",fontSize:"11px",lineHeight:"1.5"}}>{item.d}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── BLOG GUIDE PAGE ─────────────────────────────────────────────────────────
+function BlogGuidePage() {
+  const [copiedIdx, setCopiedIdx] = useState(null);
+  const copy = (text, idx) => {
+    navigator.clipboard?.writeText(text);
+    setCopiedIdx(idx);
+    setTimeout(()=>setCopiedIdx(null),2000);
+  };
+
+  const METHODS = [
+    {
+      id:1, icon:"🌐", title:"Embed via iframe (Easiest — Any Blog)",
+      color:"#34d399", time:"5 min",
+      desc:"Host on Vercel/Netlify (free), then embed the live URL as an iframe into any blog post — WordPress, Ghost, Hashnode, Medium (via HTML embed block), Notion, etc.",
+      steps:[
+        "Deploy to Vercel: go to vercel.com → New Project → paste your GitHub repo with this file",
+        "Copy your deployment URL e.g. https://design-patterns-xyz.vercel.app",
+        "In your blog editor, add an HTML block and paste the iframe code below",
+        "Adjust height to your preference (600px–900px works well)",
+      ],
+      code:`<!-- Paste this in any blog HTML block -->
+<iframe 
+  src="https://YOUR-VERCEL-URL.vercel.app"
+  width="100%" 
+  height="800px"
+  style="border:none; border-radius:12px; overflow:hidden;"
+  title="Design Patterns Interactive Guide"
+  loading="lazy"
+></iframe>`,
+    },
+    {
+      id:2, icon:"⚡", title:"Deploy to Vercel in 3 Minutes",
+      color:"#f59e0b", time:"3 min",
+      desc:"The fastest way to get a live URL for your React app. Vercel gives you a free subdomain and auto-deploys on every git push.",
+      steps:[
+        "Push code to GitHub: create a repo, push your Vite React project",
+        "Go to vercel.com → Sign up with GitHub → New Project → Import your repo",
+        "Vercel auto-detects Vite — just click Deploy",
+        "Your app is live at: https://your-project-name.vercel.app",
+      ],
+      code:`# 1. Install Vercel CLI (optional, for terminal deploy)
+npm install -g vercel
+
+# 2. In your project folder:
+vercel
+
+# 3. Follow prompts — done! URL printed in terminal
+# OR just push to GitHub and Vercel auto-deploys`,
+    },
+    {
+      id:3, icon:"📝", title:"WordPress — HTML Block Embed",
+      color:"#06b6d4", time:"2 min",
+      desc:"Works with WordPress.com (Business plan) and self-hosted WordPress. Use the HTML block to embed your iframe.",
+      steps:[
+        "In the WordPress block editor, click '+' to add a new block",
+        "Search for 'Custom HTML' block and insert it",
+        "Paste the iframe code with your Vercel URL",
+        "For WordPress.com: upgrade to Business plan for custom HTML support",
+      ],
+      code:`<!-- WordPress Custom HTML Block -->
+<div style="border-radius:12px;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+  <iframe 
+    src="https://YOUR-APP.vercel.app"
+    width="100%" 
+    height="850px"
+    frameborder="0"
+    scrolling="yes"
+    title="Design Patterns Guide"
+  ></iframe>
+</div>`,
+    },
+    {
+      id:4, icon:"👻", title:"Ghost Blog — HTML Card",
+      color:"#a855f7", time:"2 min",
+      desc:"Ghost is developer-friendly and supports HTML cards natively. Perfect for tech blogs.",
+      steps:[
+        "In your Ghost post editor, type '/' to open card picker",
+        "Select 'HTML' card from the menu",
+        "Paste the iframe code below into the HTML card",
+        "Click outside to preview — you'll see the interactive app inline",
+      ],
+      code:`<!-- Ghost HTML Card -->
+<html>
+<head>
+  <style>
+    .pattern-embed {
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,.1),
+                  0 20px 25px -5px rgba(0,0,0,.2);
+    }
+  </style>
+</head>
+<body>
+  <iframe 
+    class="pattern-embed"
+    src="https://YOUR-APP.vercel.app"
+    height="900px"
+    frameborder="0">
+  </iframe>
+</body>
+</html>`,
+    },
+    {
+      id:5, icon:"🔶", title:"Hashnode — Markdown Embed",
+      color:"#fb923c", time:"2 min",
+      desc:"Hashnode supports %[url] embeds and HTML in posts. Use either method.",
+      steps:[
+        "In Hashnode editor, use the 'Embed' option from the toolbar",
+        "Paste your Vercel URL directly for link preview",
+        "OR switch to markdown mode and use HTML iframe tag",
+        "Hashnode also supports CodeSandbox/StackBlitz embeds natively",
+      ],
+      code:`<!-- Hashnode markdown mode — HTML embed -->
+<iframe 
+  src="https://YOUR-APP.vercel.app"
+  width="100%" 
+  height="800"
+  frameborder="0"
+  style="border-radius:12px">
+</iframe>
+
+<!-- OR: link to StackBlitz project directly -->
+<!-- Hashnode will auto-embed StackBlitz links as interactive -->`,
+    },
+    {
+      id:6, icon:"🌊", title:"Build as Static HTML (Zero Dependencies)",
+      color:"#f472b6", time:"10 min",
+      desc:"Convert to pure HTML/JS/CSS and host anywhere — GitHub Pages, Netlify Drop, S3 bucket. No Node.js needed on the server.",
+      steps:[
+        "In your Vite project, run: npm run build — generates dist/ folder",
+        "The dist/ folder contains pure HTML+JS+CSS (no React needed to serve)",
+        "Drag & drop the dist/ folder to netlify.com/drop for instant deploy",
+        "OR push to GitHub and enable GitHub Pages in repo Settings → Pages",
+      ],
+      code:`# Build optimized static files
+npm run build
+
+# Output: dist/
+#   ├── index.html
+#   ├── assets/
+#   │   ├── index-abc123.js  (React bundled)
+#   │   └── index-abc123.css
+
+# Deploy to GitHub Pages:
+npm install -D gh-pages
+# In package.json add:
+# "homepage": "https://USERNAME.github.io/REPO-NAME",
+# "predeploy": "npm run build",
+# "deploy": "gh-pages -d dist"
+npm run deploy`,
+    },
+  ];
+
+  return (
+    <div style={{animation:"slideUp 0.4s ease"}}>
+      {/* Hero */}
+      <div style={{background:"linear-gradient(135deg,rgba(52,211,153,0.1),rgba(6,182,212,0.08))",
+        border:"1px solid rgba(52,211,153,0.25)",borderRadius:"20px",padding:"28px",marginBottom:"20px",textAlign:"center"}}>
+        <div style={{fontSize:"48px",marginBottom:"12px"}}>🚀</div>
+        <h1 style={{fontFamily:"Syne,sans-serif",fontWeight:"800",
+          fontSize:"clamp(20px,3vw,32px)",color:"#fff",margin:"0 0 10px",letterSpacing:"-0.5px"}}>
+          Add This to Your Blog
+        </h1>
+        <p style={{color:"#9ca3af",fontFamily:"Inter,sans-serif",fontSize:"14px",
+          maxWidth:"520px",margin:"0 auto 18px",lineHeight:"1.7"}}>
+          6 methods to embed this interactive guide into your blog. 
+          Choose based on your platform — most take under 5 minutes.
+        </p>
+        <div style={{display:"flex",gap:"8px",justifyContent:"center",flexWrap:"wrap"}}>
+          {[["🆓","Free Hosting"],["⚡","Instant Deploy"],["📱","Mobile Responsive"],["🎨","Interactive"]].map(([e,l])=>(
+            <span key={l} style={{background:"rgba(52,211,153,0.12)",border:"1px solid rgba(52,211,153,0.3)",
+              color:"#34d399",padding:"5px 14px",borderRadius:"20px",
+              fontSize:"11px",fontFamily:"Inter,sans-serif",fontWeight:"600"}}>
+              {e} {l}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Platform quick guide */}
+      <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"14px",padding:"18px",marginBottom:"16px"}}>
+        <h3 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"14px",margin:"0 0 12px"}}>
+          🗺️ Quick Pick — Choose Your Platform
+        </h3>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:"8px"}}>
+          {[
+            {p:"WordPress",e:"📝",m:"Method 3",c:"#06b6d4"},
+            {p:"Ghost",e:"👻",m:"Method 4",c:"#a855f7"},
+            {p:"Hashnode",e:"🔶",m:"Method 5",c:"#fb923c"},
+            {p:"Medium",e:"Ⓜ️",m:"Method 1 (iframe)",c:"#34d399"},
+            {p:"Notion",e:"◾",m:"Method 1 (iframe)",c:"#9ca3af"},
+            {p:"Dev.to",e:"👩‍💻",m:"Method 1 (iframe)",c:"#f59e0b"},
+            {p:"GitHub Pages",e:"🐙",m:"Method 6",c:"#f472b6"},
+            {p:"Any HTML site",e:"🌐",m:"Method 1",c:"#60a5fa"},
+          ].map(item=>(
+            <div key={item.p} style={{background:`${item.c}10`,border:`1px solid ${item.c}30`,
+              borderRadius:"8px",padding:"10px",textAlign:"center"}}>
+              <div style={{fontSize:"18px",marginBottom:"4px"}}>{item.e}</div>
+              <div style={{color:"#fff",fontFamily:"Inter,sans-serif",fontSize:"11px",fontWeight:"600",marginBottom:"2px"}}>{item.p}</div>
+              <div style={{color:item.c,fontFamily:"JetBrains Mono,monospace",fontSize:"10px"}}>{item.m}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Methods */}
+      {METHODS.map((m,i)=>(
+        <div key={m.id} style={{background:"rgba(255,255,255,0.02)",border:`1px solid ${m.color}22`,
+          borderRadius:"14px",padding:"20px",marginBottom:"12px",borderLeft:`3px solid ${m.color}`}}>
+          <div style={{display:"flex",alignItems:"flex-start",gap:"14px",marginBottom:"14px"}}>
+            <div style={{fontSize:"28px",flexShrink:0}}>{m.icon}</div>
+            <div style={{flex:1}}>
+              <div style={{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap",marginBottom:"4px"}}>
+                <span style={{background:`${m.color}15`,color:m.color,border:`1px solid ${m.color}44`,
+                  padding:"2px 8px",borderRadius:"20px",fontSize:"10px",fontFamily:"JetBrains Mono,monospace",fontWeight:"700"}}>
+                  Method {m.id}
+                </span>
+                <span style={{background:"rgba(255,255,255,0.05)",color:"#9ca3af",padding:"2px 8px",
+                  borderRadius:"20px",fontSize:"10px",fontFamily:"Inter,sans-serif"}}>⏱️ {m.time}</span>
+              </div>
+              <h3 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"15px",margin:"0 0 6px"}}>{m.title}</h3>
+              <p style={{color:"#9ca3af",fontFamily:"Inter,sans-serif",fontSize:"12px",margin:0,lineHeight:"1.6"}}>{m.desc}</p>
+            </div>
+          </div>
+          {/* Steps */}
+          <div style={{marginBottom:"14px"}}>
+            <div style={{color:m.color,fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"12px",marginBottom:"8px"}}>📋 Steps:</div>
+            <div style={{display:"flex",flexDirection:"column",gap:"5px"}}>
+              {m.steps.map((s,si)=>(
+                <div key={si} style={{display:"flex",gap:"8px",alignItems:"flex-start"}}>
+                  <span style={{background:`${m.color}20`,color:m.color,borderRadius:"50%",
+                    width:"18px",height:"18px",display:"flex",alignItems:"center",justifyContent:"center",
+                    fontSize:"10px",fontWeight:"900",flexShrink:0,fontFamily:"JetBrains Mono,monospace",marginTop:"1px"}}>{si+1}</span>
+                  <span style={{color:"#d1d5db",fontFamily:"Inter,sans-serif",fontSize:"12px",lineHeight:"1.5"}}>{s}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Code */}
+          <div style={{position:"relative"}}>
+            <div style={{background:"#0d1117",borderRadius:"10px",padding:"14px",
+              fontFamily:"JetBrains Mono,monospace",fontSize:"11px",color:"#e2e8f0",
+              lineHeight:"1.7",overflowX:"auto",border:`1px solid ${m.color}22`}}>
+              <div style={{color:"#6b7280",marginBottom:"8px",fontSize:"10px",
+                borderBottom:"1px solid rgba(255,255,255,0.06)",paddingBottom:"6px"}}>
+                <span style={{color:m.color}}>●</span> Code
+              </div>
+              <pre style={{margin:0,whiteSpace:"pre-wrap",wordBreak:"break-word"}}>{m.code}</pre>
+            </div>
+            <button onClick={()=>copy(m.code,i)} style={{
+              position:"absolute",top:"8px",right:"8px",
+              background:copiedIdx===i?`${m.color}25`:"rgba(255,255,255,0.05)",
+              border:`1px solid ${m.color}44`,color:copiedIdx===i?m.color:"#666",
+              padding:"4px 10px",borderRadius:"6px",cursor:"pointer",
+              fontSize:"10px",fontFamily:"JetBrains Mono,monospace"}}>
+              {copiedIdx===i?"✅ Copied":"Copy"}
+            </button>
+          </div>
+        </div>
+      ))}
+
+      {/* SEO Tips */}
+      <div style={{background:"rgba(168,85,247,0.06)",border:"1px solid rgba(168,85,247,0.25)",borderRadius:"14px",padding:"20px",marginBottom:"12px"}}>
+        <h3 style={{color:"#a855f7",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"15px",margin:"0 0 12px"}}>
+          🔍 SEO Tips for Your Blog Post
+        </h3>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"10px"}}>
+          {[
+            {t:"Title",d:"'Complete Guide to GoF 23 Design Patterns with C# Examples'",c:"#34d399"},
+            {t:"Keywords",d:"design patterns c#, gang of four patterns, singleton, observer pattern .net",c:"#06b6d4"},
+            {t:"Description",d:"Explain that it's interactive, has live code, animations, and real enterprise examples",c:"#f59e0b"},
+            {t:"Alt text",d:"Add 'Interactive Design Patterns Guide' as iframe title attribute for accessibility",c:"#f472b6"},
+          ].map(tip=>(
+            <div key={tip.t} style={{background:"rgba(0,0,0,0.3)",borderRadius:"10px",padding:"12px",border:`1px solid ${tip.c}22`}}>
+              <div style={{color:tip.c,fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"12px",marginBottom:"5px"}}>📌 {tip.t}</div>
+              <div style={{color:"#9ca3af",fontFamily:"Inter,sans-serif",fontSize:"11px",lineHeight:"1.5"}}>{tip.d}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Final checklist */}
+      <div style={{background:"rgba(52,211,153,0.06)",border:"1px solid rgba(52,211,153,0.25)",borderRadius:"14px",padding:"20px"}}>
+        <h3 style={{color:"#34d399",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"15px",margin:"0 0 12px"}}>
+          ✅ Launch Checklist
+        </h3>
+        {[
+          "Create Vite React project and paste the .jsx file into src/App.jsx",
+          "Run npm install && npm run dev — verify it works at localhost:5173",
+          "Push to GitHub repository (public or private)",
+          "Connect GitHub repo to Vercel → Deploy → get your live URL",
+          "Test the live URL on mobile and desktop",
+          "Write your blog post introducing the guide",
+          "Embed using the iframe method for your blog platform",
+          "Share on LinkedIn, Twitter/X, and dev communities (Hashnode, Dev.to, Reddit r/csharp)",
+        ].map((item,i)=>(
+          <div key={i} style={{display:"flex",gap:"10px",alignItems:"flex-start",
+            padding:"8px 0",borderBottom:i<7?"1px solid rgba(255,255,255,0.05)":"none"}}>
+            <div style={{width:"20px",height:"20px",border:"1px solid rgba(52,211,153,0.4)",borderRadius:"4px",
+              display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
+              background:"rgba(52,211,153,0.08)",marginTop:"1px"}}>
+              <span style={{color:"#34d399",fontSize:"11px"}}>✓</span>
+            </div>
+            <span style={{color:"#d1d5db",fontFamily:"Inter,sans-serif",fontSize:"12px",lineHeight:"1.5"}}>{item}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── SIDEBAR ─────────────────────────────────────────────────────────────────
+function Sidebar({ selectedId, onSelect }) {
+  const cats = [
+    { key:"creational", label:"Creational", emoji:"🏗️", desc:"Object Creation" },
+    { key:"structural",  label:"Structural",  emoji:"🏛️", desc:"Object Composition" },
+    { key:"behavioral",  label:"Behavioral",  emoji:"🎭", desc:"Object Communication" },
+  ];
+  const [open, setOpen] = useState({creational:true,structural:true,behavioral:true});
+
+  return (
+    <div style={{width:"240px",minWidth:"200px",background:"#0d0d1a",
+      borderRight:"1px solid rgba(255,255,255,0.06)",
+      overflowY:"auto",flexShrink:0,padding:"12px 8px"}}>
+      {/* Top-level nav */}
+      <div style={{marginBottom:"12px",borderBottom:"1px solid rgba(255,255,255,0.06)",paddingBottom:"10px"}}>
+        {[
+          {id:"intro", emoji:"🎨", label:"Introduction",  sub:"What, Why, History"},
+        ].map(item=>(
+          <button key={item.id} onClick={()=>onSelect(item.id)} style={{
+            width:"100%",display:"flex",alignItems:"center",gap:"8px",
+            padding:"8px 10px",border:"none",cursor:"pointer",borderRadius:"8px",
+            textAlign:"left",transition:"all 0.15s",marginBottom:"3px",
+            background:selectedId===item.id?"rgba(255,255,255,0.08)":"transparent",
+            borderLeft:selectedId===item.id?"2px solid #ffffff":"2px solid transparent",
+          }}>
+            <span style={{fontSize:"15px"}}>{item.emoji}</span>
+            <div>
+              <div style={{color:selectedId===item.id?"#fff":"#9ca3af",
+                fontFamily:"Inter,sans-serif",fontSize:"11px",fontWeight:selectedId===item.id?"700":"500"}}>{item.label}</div>
+              <div style={{color:"#4b5563",fontFamily:"Inter,sans-serif",fontSize:"9px"}}>{item.sub}</div>
+            </div>
+          </button>
+        ))}
+      </div>
+      {cats.map(cat => {
+        const col = CAT_COLORS[cat.key];
+        const patterns = ALL_PATTERNS.filter(p => p.cat === cat.key);
+        return (
+          <div key={cat.key} style={{marginBottom:"8px"}}>
+            <button onClick={() => setOpen(o=>({...o,[cat.key]:!o[cat.key]}))} style={{
+              width:"100%", background:open[cat.key]?col.bg:"transparent",
+              border:`1px solid ${open[cat.key]?col.border:"transparent"}`,
+              borderRadius:"8px", padding:"8px 10px",
+              display:"flex",alignItems:"center",gap:"8px", cursor:"pointer",
+              marginBottom:"4px",transition:"all 0.2s",
+            }}>
+              <span style={{fontSize:"16px"}}>{cat.emoji}</span>
+              <div style={{flex:1,textAlign:"left"}}>
+                <div style={{color:col.primary,fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"12px"}}>{cat.label}</div>
+                <div style={{color:"#4b5563",fontSize:"10px",fontFamily:"Inter,sans-serif"}}>{cat.desc}</div>
+              </div>
+              <span style={{color:col.primary,fontSize:"10px"}}>{open[cat.key]?"▼":"▶"}</span>
+            </button>
+            {open[cat.key] && patterns.map(p => (
+              <button key={p.id} onClick={() => onSelect(p.id)} style={{
+                width:"100%", display:"flex", alignItems:"center", gap:"8px",
+                padding:"7px 10px", border:"none", cursor:"pointer",
+                borderRadius:"7px", textAlign:"left", transition:"all 0.15s",
+                background: selectedId===p.id ? `${col.primary}18` : "transparent",
+                borderLeft: selectedId===p.id ? `2px solid ${col.primary}` : "2px solid transparent",
+                marginLeft:"4px", marginBottom:"1px",
+              }}>
+                <span style={{fontSize:"13px"}}>{p.emoji}</span>
+                <span style={{
+                  color: selectedId===p.id ? col.primary : "#6b7280",
+                  fontFamily:"Inter,sans-serif", fontSize:"11px",
+                  fontWeight: selectedId===p.id ? "600" : "400",
+                  lineHeight:"1.3",
+                }}>
+                  {p.name}
+                </span>
+                <span style={{marginLeft:"auto",color:selectedId===p.id?col.primary:"#374151",
+                  fontSize:"9px",fontFamily:"JetBrains Mono,monospace"}}>
+                  #{String(p.num).padStart(2,'0')}
+                </span>
+              </button>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function RightSidebar({ selectedId, selectedPattern, scrollPct, onSelect, onScrollTop }) {
+  const totalPatterns = ALL_PATTERNS.length;
+  const counts = {
+    creational: ALL_PATTERNS.filter(p => p.cat === "creational").length,
+    structural: ALL_PATTERNS.filter(p => p.cat === "structural").length,
+    behavioral: ALL_PATTERNS.filter(p => p.cat === "behavioral").length,
+  };
+
+  const categoryMeta = [
+    { key: "creational", label: "Creational", count: counts.creational },
+    { key: "structural", label: "Structural", count: counts.structural },
+    { key: "behavioral", label: "Behavioral", count: counts.behavioral },
+  ];
+
+  const progressAngle = Math.max(0, Math.min(100, scrollPct)) * 3.6;
+  const currentLabel = selectedPattern
+    ? selectedPattern.name
+    : selectedId === "intro"
+      ? "Introduction"
+      : "All 23 Patterns";
+
+  const recommended = selectedPattern
+    ? ALL_PATTERNS.filter(p => p.cat === selectedPattern.cat && p.id !== selectedPattern.id).slice(0, 3)
+    : [
+        ALL_PATTERNS.find(p => p.id === "singleton"),
+        ALL_PATTERNS.find(p => p.id === "adapter"),
+        ALL_PATTERNS.find(p => p.id === "strategy"),
+      ].filter(Boolean);
+  const quickActions = [
+    {
+      label:"Introduction",
+      icon:"☀️",
+      action:() => onSelect("intro"),
+      colors:{ bg:"rgba(59,130,246,0.08)", border:"rgba(125,211,252,0.55)", text:"#3b82f6" },
+    },
+    {
+      label:"All Patterns",
+      icon:"◫",
+      action:() => onSelect(null),
+      colors:{ bg:"rgba(148,163,184,0.08)", border:"rgba(148,163,184,0.36)", text:"#475569" },
+    },
+    {
+      label:"Print",
+      icon:"🖨️",
+      action:() => window.print(),
+      colors:{ bg:"rgba(239,68,68,0.07)", border:"rgba(252,165,165,0.5)", text:"#ef4444" },
+    },
+    {
+      label:"Top",
+      icon:"↑",
+      action:onScrollTop,
+      colors:{ bg:"rgba(139,92,246,0.08)", border:"rgba(196,181,253,0.55)", text:"#7c3aed" },
+    },
+  ];
+
+  return (
+    <aside style={{
+      width:"280px",
+      minWidth:"280px",
+      background:"#0d0d1a",
+      borderLeft:"1px solid rgba(255,255,255,0.06)",
+      overflowY:"auto",
+      flexShrink:0,
+      padding:"18px 16px 22px",
+    }}>
+      <div style={{marginBottom:"18px"}}>
+        <div style={{color:"#64748b",fontFamily:"JetBrains Mono,monospace",fontSize:"11px",fontWeight:"700",letterSpacing:"3px",textTransform:"uppercase",marginBottom:"14px"}}>
+          Quick Actions
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}}>
+          {quickActions.map(item => (
+            <button key={item.label} onClick={item.action} style={{
+              border:`1px solid ${item.colors.border}`,
+              background:item.colors.bg,
+              color:item.colors.text,
+              borderRadius:"18px",
+              minHeight:"102px",
+              padding:"18px 10px",
+              cursor:"pointer",
+              fontFamily:"JetBrains Mono,monospace",
+              fontSize:"11px",
+              fontWeight:"700",
+              letterSpacing:"0.08em",
+              display:"flex",
+              alignItems:"center",
+              justifyContent:"center",
+              flexDirection:"column",
+              gap:"10px",
+              boxShadow:"0 8px 24px rgba(15,23,42,0.08)",
+            }}>
+              <span style={{fontSize:"24px",lineHeight:1}}>{item.icon}</span>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{
+        background:"rgba(255,255,255,0.03)",
+        border:"1px solid rgba(255,255,255,0.08)",
+        borderRadius:"16px",
+        padding:"16px",
+        marginBottom:"18px",
+      }}>
+        <div style={{display:"flex",justifyContent:"center",marginBottom:"12px"}}>
+          <div style={{
+            width:"110px",
+            height:"110px",
+            borderRadius:"50%",
+            background:`conic-gradient(#f59e0b 0deg ${progressAngle}deg, rgba(255,255,255,0.08) ${progressAngle}deg 360deg)`,
+            display:"flex",
+            alignItems:"center",
+            justifyContent:"center",
+            boxShadow:"inset 0 0 0 1px rgba(255,255,255,0.06)",
+          }}>
+            <div style={{
+              width:"82px",
+              height:"82px",
+              borderRadius:"50%",
+              background:"#0d0d1a",
+              display:"flex",
+              alignItems:"center",
+              justifyContent:"center",
+              flexDirection:"column",
+              border:"1px solid rgba(255,255,255,0.06)",
+            }}>
+              <div style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"22px",lineHeight:"1"}}>{Math.round(scrollPct)}%</div>
+              <div style={{color:"#6b7280",fontFamily:"JetBrains Mono,monospace",fontSize:"9px",letterSpacing:"0.8px",textTransform:"uppercase",marginTop:"4px"}}>Read</div>
+            </div>
+          </div>
+        </div>
+        <div style={{textAlign:"center"}}>
+          <div style={{color:"#d1d5db",fontFamily:"Inter,sans-serif",fontSize:"12px",fontWeight:"600"}}>Page Progress</div>
+          <div style={{color:"#6b7280",fontFamily:"JetBrains Mono,monospace",fontSize:"10px",marginTop:"4px"}}>{currentLabel}</div>
+        </div>
+      </div>
+
+      <div style={{marginBottom:"18px"}}>
+        <div style={{color:"#4b5563",fontFamily:"JetBrains Mono,monospace",fontSize:"10px",letterSpacing:"1.2px",textTransform:"uppercase",marginBottom:"10px"}}>
+          Series Progress
+        </div>
+        {categoryMeta.map(item => {
+          const color = CAT_COLORS[item.key].primary;
+          const pct = Math.round((item.count / totalPatterns) * 100);
+          return (
+            <button key={item.key} onClick={() => onSelect(item.key === "creational" ? "singleton" : item.key === "structural" ? "adapter" : "observer")} style={{
+              width:"100%",
+              background:"rgba(255,255,255,0.03)",
+              border:"1px solid rgba(255,255,255,0.06)",
+              borderRadius:"12px",
+              padding:"10px 12px",
+              marginBottom:"8px",
+              cursor:"pointer",
+              textAlign:"left",
+            }}>
+              <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
+                <div style={{width:"8px",height:"8px",borderRadius:"50%",background:color,flexShrink:0}} />
+                <span style={{color:"#e5e7eb",fontFamily:"Inter,sans-serif",fontSize:"12px",fontWeight:"600",flex:1}}>{item.label}</span>
+                <span style={{color:"#6b7280",fontFamily:"JetBrains Mono,monospace",fontSize:"10px"}}>{item.count}/{totalPatterns}</span>
+              </div>
+              <div style={{height:"6px",background:"rgba(255,255,255,0.05)",borderRadius:"999px",overflow:"hidden"}}>
+                <div style={{height:"100%",width:`${pct}%`,background:color,borderRadius:"999px"}} />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{marginBottom:"18px"}}>
+        <div style={{color:"#4b5563",fontFamily:"JetBrains Mono,monospace",fontSize:"10px",letterSpacing:"1.2px",textTransform:"uppercase",marginBottom:"10px"}}>
+          Recommended Next
+        </div>
+        {recommended.map(item => (
+          <button key={item.id} onClick={() => onSelect(item.id)} style={{
+            width:"100%",
+            background:"rgba(255,255,255,0.03)",
+            border:"1px solid rgba(255,255,255,0.06)",
+            borderRadius:"12px",
+            padding:"12px",
+            marginBottom:"8px",
+            cursor:"pointer",
+            textAlign:"left",
+          }}>
+            <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"6px"}}>
+              <span style={{fontSize:"16px"}}>{item.emoji}</span>
+              <span style={{color:CAT_COLORS[item.cat].primary,fontFamily:"JetBrains Mono,monospace",fontSize:"10px",textTransform:"uppercase"}}>
+                {item.cat}
+              </span>
+            </div>
+            <div style={{color:"#fff",fontFamily:"Inter,sans-serif",fontSize:"12px",fontWeight:"600",marginBottom:"4px"}}>
+              {item.name}
+            </div>
+            <div style={{color:"#6b7280",fontFamily:"Inter,sans-serif",fontSize:"10px",lineHeight:"1.5"}}>
+              {item.tagline}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <div style={{
+        background:"rgba(255,255,255,0.03)",
+        border:"1px solid rgba(255,255,255,0.08)",
+        borderRadius:"16px",
+        padding:"14px",
+      }}>
+        <div style={{color:"#4b5563",fontFamily:"JetBrains Mono,monospace",fontSize:"10px",letterSpacing:"1.2px",textTransform:"uppercase",marginBottom:"10px"}}>
+          Series Stats
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}}>
+          {[
+            { value:"23", label:"Patterns", color:"#f59e0b" },
+            { value:"C#", label:"Examples", color:"#06b6d4" },
+            { value:"SOLID", label:"Mapped", color:"#34d399" },
+            { value:"2026", label:"Guide", color:"#a855f7" },
+          ].map(item => (
+            <div key={item.label} style={{background:"rgba(0,0,0,0.24)",borderRadius:"10px",padding:"10px",textAlign:"center"}}>
+              <div style={{color:item.color,fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"18px"}}>{item.value}</div>
+              <div style={{color:"#6b7280",fontFamily:"JetBrains Mono,monospace",fontSize:"9px",textTransform:"uppercase",marginTop:"2px"}}>{item.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+// ─── HOME / OVERVIEW ─────────────────────────────────────────────────────────
+function Home({ onSelect }) {
+  const stats = [
+    {n:"23",l:"Design Patterns",c:"#f59e0b",e:"🎨"},
+    {n:"5",l:"Creational",c:"#f59e0b",e:"🏗️"},
+    {n:"7",l:"Structural",c:"#06b6d4",e:"🏛️"},
+    {n:"11",l:"Behavioral",c:"#a855f7",e:"🎭"},
+  ];
+  return (
+    <div style={{animation:"slideUp 0.5s ease"}}>
+      <div style={{textAlign:"center",padding:"32px 0 24px",position:"relative"}}>
+        <div style={{fontSize:"60px",marginBottom:"12px",animation:"bounce 2s ease-in-out infinite"}}>🎯</div>
+        <h1 style={{fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"clamp(24px,4vw,42px)",
+          color:"#fff",margin:"0 0 8px 0",letterSpacing:"-1px",
+          background:"linear-gradient(135deg,#f59e0b,#06b6d4,#a855f7)",
+          WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>
+          Gang of Four Design Patterns
+        </h1>
+        <p style={{color:"#6b7280",fontFamily:"Inter,sans-serif",fontSize:"15px",maxWidth:"500px",margin:"0 auto 24px"}}>
+          All 23 patterns with C# code, animations, SOLID principles & enterprise examples
+        </p>
+        <div style={{display:"flex",gap:"12px",justifyContent:"center",flexWrap:"wrap"}}>
+          {stats.map(s => (
+            <div key={s.n+s.l} style={{background:`${s.c}12`,border:`1px solid ${s.c}33`,borderRadius:"12px",
+              padding:"12px 20px",textAlign:"center",minWidth:"100px"}}>
+              <div style={{color:s.c,fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"28px"}}>{s.n}</div>
+              <div style={{color:"#9ca3af",fontFamily:"Inter,sans-serif",fontSize:"11px"}}>{s.l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {["creational","structural","behavioral"].map(cat => {
+        const col = CAT_COLORS[cat];
+        const patterns = ALL_PATTERNS.filter(p => p.cat === cat);
+        const catEmoji = cat==="creational"?"🏗️":cat==="structural"?"🏛️":"🎭";
+        return (
+          <div key={cat} style={{marginBottom:"20px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"12px",
+              paddingLeft:"4px",borderLeft:`3px solid ${col.primary}`,paddingBottom:"2px"}}>
+              <span style={{fontSize:"18px"}}>{catEmoji}</span>
+              <h2 style={{color:col.primary,fontFamily:"Syne,sans-serif",fontWeight:"700",margin:0,fontSize:"16px"}}>
+                {cat.charAt(0).toUpperCase()+cat.slice(1)} Patterns ({patterns.length})
+              </h2>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:"8px"}}>
+              {patterns.map(p => (
+                <button key={p.id} onClick={() => onSelect(p.id)} style={{
+                  background:col.bg, border:`1px solid ${col.border}`,
+                  borderRadius:"10px", padding:"12px", cursor:"pointer",
+                  textAlign:"left", transition:"all 0.2s",
+                  ":hover":{transform:"translateY(-2px)"}
+                }}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor=col.primary;e.currentTarget.style.transform="translateY(-2px)"}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor=col.border;e.currentTarget.style.transform="translateY(0)"}}>
+                  <div style={{fontSize:"22px",marginBottom:"6px"}}>{p.emoji}</div>
+                  <div style={{color:"#fff",fontFamily:"Inter,sans-serif",fontWeight:"600",fontSize:"12px",marginBottom:"3px"}}>
+                    {p.name}
+                  </div>
+                  <div style={{color:"#6b7280",fontFamily:"Inter,sans-serif",fontSize:"10px",lineHeight:"1.4"}}>
+                    {p.tagline}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── ROOT APP ────────────────────────────────────────────────────────────────
+function App() {
+  const [selectedId, setSelectedId] = useState("intro");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
+  const [scrollPct, setScrollPct] = useState(0);
+  const contentRef = useRef(null);
+  const selectedPattern = ALL_PATTERNS.find(p => p.id === selectedId);
+  const showRightSidebar = viewportWidth >= 1200;
+
+  useEffect(() => {
+    const onResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    const node = contentRef.current;
+    if (!node) return;
+
+    const updateProgress = () => {
+      const maxScroll = node.scrollHeight - node.clientHeight;
+      const pct = maxScroll <= 0 ? 0 : (node.scrollTop / maxScroll) * 100;
+      setScrollPct(Math.max(0, Math.min(100, pct)));
+    };
+
+    updateProgress();
+    node.addEventListener("scroll", updateProgress);
+    return () => node.removeEventListener("scroll", updateProgress);
+  }, []);
+
+  useEffect(() => {
+    const node = contentRef.current;
+    if (!node) return;
+    node.scrollTo({ top: 0, behavior: "smooth" });
+    setScrollPct(0);
+  }, [selectedId]);
+
+  const topBarLabel = selectedPattern
+    ? `${selectedPattern.emoji} ${selectedPattern.name}`
+    : selectedId === "intro" ? "🎨 Introduction"
+    : selectedId === "blog"  ? "🚀 Add to Blog"
+    : "🎯 GoF Design Patterns · All 23";
+
+  const showBack = selectedId !== null && selectedId !== "intro";
+
+  return (
+    <>
+      <style>{INJECTED_STYLES}</style>
+      <div style={{display:"flex",height:"100vh",background:"#0a0a0f",overflow:"hidden",fontFamily:"Inter,sans-serif"}}>
+        {sidebarOpen && (
+          <Sidebar selectedId={selectedId} onSelect={id => setSelectedId(id)} />
+        )}
+        <div ref={contentRef} style={{flex:1,overflowY:"auto",background:"#0a0a0f",minWidth:0}}>
+          {/* Top bar */}
+          <div style={{position:"sticky",top:0,zIndex:10,background:"rgba(10,10,15,0.95)",
+            backdropFilter:"blur(10px)",borderBottom:"1px solid rgba(255,255,255,0.06)",
+            padding:"10px 16px",display:"flex",alignItems:"center",gap:"12px"}}>
+            <button onClick={() => setSidebarOpen(o=>!o)} style={{
+              background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",
+              color:"#9ca3af",padding:"6px 10px",borderRadius:"6px",cursor:"pointer",fontSize:"14px"}}>
+              ☰
+            </button>
+            {showBack && (
+              <button onClick={() => setSelectedId(null)} style={{
+                background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",
+                color:"#9ca3af",padding:"6px 10px",borderRadius:"6px",cursor:"pointer",fontSize:"12px",fontFamily:"Inter,sans-serif"}}>
+                ← All Patterns
+              </button>
+            )}
+            <span style={{color:"#374151",fontSize:"12px",fontFamily:"JetBrains Mono,monospace"}}>
+              {topBarLabel}
+            </span>
+            <div style={{marginLeft:"auto",display:"flex",gap:"6px"}}>
+              {["creational","structural","behavioral"].map(cat => (
+                <span key={cat} style={{
+                  background:`${CAT_COLORS[cat].primary}15`,
+                  color:CAT_COLORS[cat].primary,
+                  border:`1px solid ${CAT_COLORS[cat].primary}33`,
+                  padding:"3px 8px",borderRadius:"20px",fontSize:"10px",fontFamily:"Inter,sans-serif",fontWeight:"600"
+                }}>
+                  {cat==="creational"?"5":cat==="structural"?"7":"11"} {cat.slice(0,3)}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Content router */}
+          <div style={{padding:"20px",maxWidth:showRightSidebar?"980px":"960px",margin:"0 auto"}}>
+            {selectedId === "intro"    ? <IntroPage /> :
+             selectedId === "blog"     ? <BlogGuidePage /> :
+             selectedPattern           ? <PatternDetail pattern={selectedPattern} /> :
+                                         <Home onSelect={setSelectedId} />}
+          </div>
+        </div>
+        {showRightSidebar && (
+          <RightSidebar
+            selectedId={selectedId}
+            selectedPattern={selectedPattern}
+            scrollPct={scrollPct}
+            onSelect={setSelectedId}
+            onScrollTop={() => contentRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+          />
+        )}
+      </div>
+    </>
+  );
+}
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>

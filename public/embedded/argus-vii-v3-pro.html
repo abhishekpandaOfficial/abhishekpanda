@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARGUS-VIII · Global Surveillance Intelligence v3 PRO</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Leaflet from cdnjs (more reliable than unpkg) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script>
+const argusParams = new URLSearchParams(window.location.search);
+const initialArgusTheme = argusParams.get('theme') === 'light' ? 'light' : 'dark';
+document.documentElement.setAttribute('data-theme', initialArgusTheme);
+window.__ARGUS_PENDING_THEME__ = initialArgusTheme;
+</script>
+</head>
+<body>
+<div id="loadOverlay" style="position:fixed;inset:0;background:var(--bg,#020509);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+  <div style="font-family:'Courier New',monospace;font-size:13px;color:var(--cyan,#00c8ff);letter-spacing:0.2em;">ARGUS-VIII · LOADING TACTICAL SYSTEMS…</div>
+  <div id="loadStatus" style="font-family:'Courier New',monospace;font-size:9px;color:var(--textd,#2a4455);letter-spacing:0.15em;">INITIALIZING…</div>
+  <div style="width:200px;height:2px;background:color-mix(in srgb,var(--cyan,#00c8ff) 12%,transparent);border-radius:2px;overflow:hidden;">
+    <div id="loadBar" style="height:100%;width:0%;background:var(--cyan,#00c8ff);transition:width 0.3s;"></div>
+  </div>
+</div>
+<script>
+// Load Leaflet dynamically so we can detect failure
+function loadScript(src, cb, fallbackSrc){
+  const s=document.createElement('script');
+  s.src=src;
+  s.onload=cb;
+  s.onerror=()=>{ if(fallbackSrc){loadScript(fallbackSrc,cb,null);} else { document.getElementById('loadStatus').textContent='CDN ERROR - TRY REFRESH'; }};
+  document.head.appendChild(s);
+}
+document.getElementById('loadStatus').textContent='LOADING LEAFLET MAP ENGINE…';
+document.getElementById('loadBar').style.width='20%';
+loadScript(
+  'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js',
+  ()=>{
+    document.getElementById('loadBar').style.width='60%';
+    document.getElementById('loadStatus').textContent='MAP ENGINE READY · BUILDING UI…';
+    setTimeout(initARGUS,100);
+  },
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+);
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root,[data-theme="dark"]{
+  --bg:#020509;--panel:rgba(3,9,17,0.97);--panel2:rgba(5,13,22,0.98);
+  --brd:rgba(0,190,255,0.13);--brd2:rgba(0,200,255,0.35);
+  --cyan:#00c8ff;--cyan2:#00ffee;--green:#00ff88;--red:#ff1a44;
+  --orange:#ff8800;--yellow:#ffd000;--purple:#aa44ff;--pink:#ff44aa;
+  --text:#adc8d8;--textb:#ddeeff;--textd:#2a4455;
+  --map-bg:#010810;--scan:rgba(0,0,0,0.025);--vig:rgba(0,0,0,0.65);
+  --fd:'Orbitron',monospace;--fm:'Share Tech Mono',monospace;--fu:'Rajdhani',sans-serif;
+  --theme-ico:"🌙";--inp-bg:rgba(2,10,20,0.97);
+}
+[data-theme="light"]{
+  --bg:#d4dce8;--panel:rgba(225,232,244,0.98);--panel2:rgba(215,225,240,0.98);
+  --brd:rgba(0,80,160,0.15);--brd2:rgba(0,100,180,0.35);
+  --cyan:#0055cc;--cyan2:#0077ee;--green:#008844;--red:#cc1133;
+  --orange:#cc6600;--yellow:#886600;--purple:#7722cc;
+  --text:#2a4055;--textb:#0a1a2a;--textd:#8098b0;
+  --map-bg:#c8d4e0;--scan:transparent;--vig:transparent;
+  --theme-ico:"☀";--inp-bg:rgba(220,230,245,0.97);
+}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:var(--fu);overflow:hidden;transition:background 0.3s;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,var(--scan) 2px,var(--scan) 4px);pointer-events:none;z-index:9999;}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,var(--vig) 100%);pointer-events:none;z-index:9998;}
+.layout{display:grid;grid-template-rows:88px 1fr 36px;grid-template-columns:280px 1fr 300px;width:100vw;height:100vh;}
+/* ── HEADER ───────────────────────────────────────── */
+.hdr{
+  grid-column:1/-1;
+  display:flex;flex-direction:column;
+  background:var(--panel);border-bottom:1px solid var(--brd2);
+  position:relative;z-index:300;
+  min-height:88px;
+}
+.hdr::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan) 30%,var(--cyan2) 50%,var(--cyan) 70%,transparent);opacity:0.45;}
+
+/* Row 1 — logo / clock / controls */
+.hdr-row1{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;height:52px;flex-shrink:0;
+  border-bottom:1px solid var(--brd);
+}
+/* Row 2 — operator IP strip + asset stats */
+.hdr-row2{
+  display:flex;align-items:center;
+  padding:0 14px;height:36px;flex-shrink:0;gap:0;
+  overflow:hidden;
+}
+
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.logo-svg{width:32px;height:32px;flex-shrink:0;}
+.logo-name{font-family:var(--fd);font-size:14px;font-weight:900;color:var(--cyan);letter-spacing:0.16em;text-shadow:0 0 20px color-mix(in srgb,var(--cyan) 80%,transparent);}
+.logo-sub{font-family:var(--fm);font-size:7px;color:var(--textd);letter-spacing:0.18em;margin-top:1px;white-space:nowrap;}
+
+.hdr-center{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;}
+.utc{font-family:var(--fd);font-size:19px;font-weight:700;color:var(--green);letter-spacing:0.08em;text-shadow:0 0 16px color-mix(in srgb,var(--green) 70%,transparent);line-height:1.1;}
+.utc-d{font-family:var(--fm);font-size:7.5px;color:var(--textd);letter-spacing:0.18em;}
+
+.hdr-right-row1{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.status-badges{display:flex;gap:10px;align-items:center;}
+.sb{display:flex;align-items:center;gap:4px;font-family:var(--fm);font-size:8.5px;letter-spacing:0.08em;color:var(--text);white-space:nowrap;}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.dot-g{background:var(--green);box-shadow:0 0 7px var(--green);animation:blink 2s infinite;}
+.dot-c{background:var(--cyan);box-shadow:0 0 7px var(--cyan);animation:blink 3s infinite;}
+.dot-r{background:var(--red);box-shadow:0 0 7px var(--red);animation:blink 0.7s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.15;}}
+.hdiv{width:1px;height:26px;background:var(--brd);flex-shrink:0;}
+.theme-btn{background:var(--panel2);border:1px solid var(--brd2);color:var(--cyan);font-family:var(--fm);
+  font-size:10px;padding:4px 10px;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;border-radius:2px;
+  display:flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;}
+.theme-btn:hover{background:color-mix(in srgb,var(--cyan) 15%,transparent);border-color:var(--cyan);}
+.theme-ico::before{content:var(--theme-ico);}
+
+/* Asset stat counters in row 1 right */
+.hstats{display:flex;align-items:center;gap:1px;}
+.hstat{display:flex;flex-direction:column;align-items:center;padding:0 8px;border-right:1px solid var(--brd);}
+.hstat:last-child{border-right:none;}
+.hstat-v{font-family:var(--fd);font-size:13px;font-weight:700;color:var(--cyan);line-height:1.1;}
+.hstat-l{font-family:var(--fm);font-size:6.5px;color:var(--textd);letter-spacing:0.1em;}
+
+/* ── OPERATOR STRIP (row 2) ──────────────────────── */
+.op-strip{display:flex;align-items:center;flex:1;gap:0;height:100%;overflow:hidden;}
+.op-cell{
+  display:flex;align-items:center;gap:6px;
+  padding:0 12px;height:100%;
+  border-right:1px solid var(--brd);
+  flex-shrink:0;white-space:nowrap;
+}
+.op-cell:first-child{border-left:1px solid var(--brd);}
+.op-lbl{font-family:var(--fm);font-size:6.5px;color:var(--textd);letter-spacing:0.12em;text-transform:uppercase;}
+.op-val{font-family:var(--fm);font-size:10.5px;color:var(--textb);}
+.op-val.green{color:var(--green);}
+.op-val.orange{color:var(--orange);}
+.op-val.red{color:var(--red);}
+.op-val.cyan{color:var(--cyan);}
+/* live defcon badge in row2 right */
+.defcon-badge{
+  margin-left:auto;flex-shrink:0;
+  display:flex;align-items:center;gap:8px;
+  padding:0 14px;height:100%;border-left:1px solid var(--brd);
+}
+.defcon-num{font-family:var(--fd);font-size:18px;font-weight:900;color:var(--orange);line-height:1;}
+.defcon-lbl{font-family:var(--fm);font-size:6.5px;color:var(--textd);letter-spacing:0.15em;}
+/* ── PANELS ──────────────────────────────────────── */
+.pnl{background:var(--panel);overflow-y:auto;display:flex;flex-direction:column;z-index:50;}
+.pnl-l{border-right:1px solid var(--brd);}
+.pnl-r{border-left:1px solid var(--brd);}
+.sec{border-bottom:1px solid var(--brd);padding:10px 11px;}
+.stl{font-family:var(--fd);font-size:8px;color:var(--cyan);letter-spacing:0.24em;margin-bottom:8px;
+  display:flex;align-items:center;gap:6px;}
+.stl::after{content:'';flex:1;height:1px;background:var(--brd);}
+.ag{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+.ac{background:color-mix(in srgb,var(--cyan) 4%,transparent);border:1px solid var(--brd);
+  border-radius:3px;padding:7px 5px;text-align:center;cursor:pointer;transition:all 0.18s;}
+.ac:hover,.ac.on{border-color:var(--cyan);background:color-mix(in srgb,var(--cyan) 10%,transparent);box-shadow:0 0 10px color-mix(in srgb,var(--cyan) 15%,transparent);}
+.ac-ico{font-size:15px;margin-bottom:2px;}
+.ac-v{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--textb);}
+.ac-l{font-family:var(--fm);font-size:7px;color:var(--textd);letter-spacing:0.1em;}
+.thr-hd{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:4px;}
+.thr-lv{font-family:var(--fd);font-size:14px;font-weight:900;letter-spacing:0.08em;}
+.thr-lv.el{color:var(--orange);text-shadow:0 0 12px color-mix(in srgb,var(--orange) 60%,transparent);}
+.thr-sub{font-family:var(--fm);font-size:7.5px;color:var(--textd);}
+.thr-bar{height:4px;background:color-mix(in srgb,var(--textd) 20%,transparent);border-radius:2px;overflow:hidden;}
+.thr-fill{height:100%;width:62%;background:linear-gradient(90deg,var(--cyan),var(--orange),var(--red));position:relative;overflow:hidden;}
+.thr-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.45),transparent);animation:shimmer 2.2s infinite;}
+@keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(300%);}}
+.alist{max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:1px;}
+.aitem{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:3px;cursor:pointer;transition:background 0.12s;}
+.aitem:hover{background:color-mix(in srgb,var(--cyan) 8%,transparent);}
+.aitem.sel{background:color-mix(in srgb,var(--cyan) 14%,transparent);border-left:2px solid var(--cyan);}
+.ai-ico{font-size:11px;flex-shrink:0;}
+.ai-cs{font-family:var(--fm);font-size:10px;color:var(--textb);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.ai-st{font-family:var(--fm);font-size:8.5px;color:var(--textd);flex-shrink:0;}
+/* MAP */
+.mwrap{position:relative;overflow:hidden;}
+#map{width:100%;height:100%;background:var(--map-bg);}
+/* SEARCH */
+.search-wrap{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:1200;width:450px;max-width:calc(100% - 20px);}
+.search-row{display:flex;gap:0;align-items:stretch;}
+.search-input{flex:1;background:var(--inp-bg);border:1px solid var(--brd2);border-right:none;
+  color:var(--textb);font-family:var(--fm);font-size:11px;padding:8px 12px;outline:none;
+  letter-spacing:0.06em;backdrop-filter:blur(8px);transition:border-color 0.2s;}
+.search-input::placeholder{color:var(--textd);}
+.search-input:focus{border-color:var(--cyan);box-shadow:0 0 14px color-mix(in srgb,var(--cyan) 20%,transparent);}
+.search-btn{background:color-mix(in srgb,var(--cyan) 18%,transparent);border:1px solid var(--brd2);
+  color:var(--cyan);font-family:var(--fm);font-size:11px;padding:8px 14px;cursor:pointer;
+  letter-spacing:0.09em;transition:all 0.16s;white-space:nowrap;backdrop-filter:blur(8px);}
+.search-btn:hover{background:color-mix(in srgb,var(--cyan) 28%,transparent);border-color:var(--cyan);}
+.search-clear{background:color-mix(in srgb,var(--red) 15%,transparent);border:1px solid var(--brd2);border-left:none;
+  color:var(--red);font-family:var(--fm);font-size:12px;padding:8px 10px;cursor:pointer;
+  transition:all 0.16s;backdrop-filter:blur(8px);display:none;}
+.search-clear.vis{display:flex;align-items:center;}
+.search-clear:hover{background:color-mix(in srgb,var(--red) 25%,transparent);}
+.search-hint{font-family:var(--fm);font-size:7.5px;color:var(--textd);letter-spacing:0.08em;padding:4px 12px;
+  background:var(--inp-bg);border:1px solid var(--brd);border-top:none;display:none;}
+.search-hint.vis{display:block;}
+.search-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--inp-bg);
+  border:1px solid var(--brd2);border-top:none;max-height:300px;overflow-y:auto;display:none;
+  backdrop-filter:blur(12px);z-index:1300;}
+.search-dropdown.vis{display:block;}
+.sr-item{padding:7px 12px;cursor:pointer;transition:background 0.12s;border-bottom:1px solid var(--brd);}
+.sr-item:last-child{border-bottom:none;}
+.sr-item:hover,.sr-item.active{background:color-mix(in srgb,var(--cyan) 10%,transparent);}
+.sr-name{font-family:var(--fm);font-size:10.5px;color:var(--textb);}
+.sr-type{font-family:var(--fm);font-size:8.5px;color:var(--textd);margin-top:1px;}
+.sr-coords{font-family:var(--fm);font-size:8px;color:var(--cyan);margin-top:1px;}
+.sr-badge{display:inline-flex;align-items:center;gap:3px;font-family:var(--fd);font-size:7px;padding:1px 5px;border-radius:2px;margin-bottom:3px;}
+.sr-flight{background:color-mix(in srgb,var(--cyan) 18%,transparent);border:1px solid var(--cyan);color:var(--cyan);}
+.sr-place{background:color-mix(in srgb,var(--green) 12%,transparent);border:1px solid var(--green);color:var(--green);}
+.sr-loading{padding:10px 12px;font-family:var(--fm);font-size:9px;color:var(--cyan);letter-spacing:0.1em;display:flex;align-items:center;gap:7px;}
+.sr-spin{width:10px;height:10px;border:1.5px solid var(--brd2);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.sr-empty{padding:12px;font-family:var(--fm);font-size:9px;color:var(--textd);text-align:center;letter-spacing:0.12em;}
+/* MAP CONTROLS */
+.mctrl-top{position:absolute;top:54px;left:50%;transform:translateX(-50%);display:flex;gap:2px;z-index:1000;flex-wrap:nowrap;}
+.mb{background:color-mix(in srgb,var(--bg) 90%,transparent);border:1px solid var(--brd);
+  color:var(--text);font-family:var(--fm);font-size:8.5px;padding:5px 9px;cursor:pointer;
+  letter-spacing:0.09em;transition:all 0.16s;white-space:nowrap;backdrop-filter:blur(4px);}
+.mb:hover,.mb.on{border-color:var(--cyan);color:var(--cyan);background:color-mix(in srgb,var(--cyan) 12%,transparent);}
+.mb.on-red{border-color:var(--red);color:var(--red);background:color-mix(in srgb,var(--red) 10%,transparent);}
+.mctrl-bot{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:2px;z-index:1000;}
+/* FLOATING TOOLS */
+.map-tools{position:absolute;right:10px;top:8px;display:flex;flex-direction:column;gap:4px;z-index:1100;}
+.mtool{background:color-mix(in srgb,var(--bg) 90%,transparent);border:1px solid var(--brd);
+  color:var(--text);font-family:var(--fm);font-size:9px;padding:6px 9px;cursor:pointer;
+  letter-spacing:0.06em;transition:all 0.16s;white-space:nowrap;backdrop-filter:blur(6px);
+  display:flex;align-items:center;gap:5px;min-width:128px;}
+.mtool:hover,.mtool.on{border-color:var(--cyan);color:var(--cyan);background:color-mix(in srgb,var(--cyan) 12%,transparent);}
+.mtool.on-green{border-color:var(--green);color:var(--green);background:color-mix(in srgb,var(--green) 10%,transparent);}
+.mtool.on-orange{border-color:var(--orange);color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,transparent);}
+/* BOOKMARKS */
+.bm-panel{position:absolute;right:10px;top:218px;background:var(--inp-bg);border:1px solid var(--brd2);
+  z-index:1100;width:185px;max-height:240px;overflow-y:auto;display:none;backdrop-filter:blur(10px);}
+.bm-panel.vis{display:block;}
+.bm-hdr{padding:6px 10px;font-family:var(--fd);font-size:7.5px;color:var(--cyan);letter-spacing:0.2em;
+  border-bottom:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center;}
+.bm-item{padding:6px 10px;cursor:pointer;transition:background 0.12s;border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;gap:6px;}
+.bm-item:hover{background:color-mix(in srgb,var(--cyan) 10%,transparent);}
+.bm-name{font-family:var(--fm);font-size:9.5px;color:var(--textb);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.bm-del{color:var(--red);font-size:11px;flex-shrink:0;cursor:pointer;}
+.bm-empty{padding:12px;font-family:var(--fm);font-size:8.5px;color:var(--textd);text-align:center;line-height:1.6;}
+/* DIST BADGE */
+.dist-badge{position:absolute;bottom:55px;left:50%;transform:translateX(-50%);z-index:1100;
+  background:color-mix(in srgb,var(--orange) 18%,rgba(2,5,9,0.96));
+  border:1px solid var(--orange);padding:4px 16px;font-family:var(--fd);font-size:9px;color:var(--orange);
+  letter-spacing:0.12em;backdrop-filter:blur(6px);display:none;pointer-events:none;}
+.dist-badge.vis{display:block;}
+.measure-info{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
+  background:color-mix(in srgb,var(--orange) 15%,rgba(2,5,9,0.95));
+  border:1px solid var(--orange);padding:5px 14px;font-family:var(--fm);font-size:9.5px;
+  color:var(--orange);z-index:1100;letter-spacing:0.1em;backdrop-filter:blur(6px);pointer-events:none;display:none;}
+.measure-info.vis{display:block;}
+/* COORDS & RADAR */
+.coords{position:absolute;bottom:6px;right:8px;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  border:1px solid var(--brd);padding:2px 10px;font-family:var(--fm);font-size:9.5px;color:var(--textb);z-index:1000;backdrop-filter:blur(4px);}
+.radar{position:absolute;top:8px;left:8px;width:74px;height:74px;z-index:1000;}
+.rring{position:absolute;border-radius:50%;border:1px solid color-mix(in srgb,var(--green) 25%,transparent);}
+canvas#rc{position:absolute;inset:0;border-radius:50%;}
+.xh{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:24px;height:24px;pointer-events:none;z-index:500;}
+.xh::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--cyan);opacity:0.4;}
+.xh::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--cyan);opacity:0.4;}
+.lbadge{position:absolute;top:8px;left:90px;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  border:1px solid var(--brd);padding:4px 9px;font-family:var(--fm);font-size:8px;color:var(--textd);z-index:1000;letter-spacing:0.09em;backdrop-filter:blur(4px);}
+/* FLIGHT STATUS */
+.flight-src{position:absolute;bottom:6px;left:92px;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  border:1px solid var(--brd);padding:2px 8px;font-family:var(--fm);font-size:8px;z-index:1000;backdrop-filter:blur(4px);}
+
+/* ── CYBER / SIGINT PANELS ───────────────────────── */
+.cyber-item{padding:5px 7px;margin-bottom:3px;border-left:2px solid var(--brd);
+  background:color-mix(in srgb,var(--bg) 30%,transparent);cursor:pointer;transition:background 0.12s;}
+.cyber-item:hover{background:color-mix(in srgb,var(--cyan) 7%,transparent);}
+.cyber-item.crit{border-left-color:var(--red);}
+.cyber-item.high{border-left-color:var(--orange);}
+.cyber-item.med{border-left-color:var(--yellow);}
+.cyber-item.low{border-left-color:var(--cyan);}
+.ci-hdr{display:flex;justify-content:space-between;margin-bottom:2px;}
+.ci-type{font-family:var(--fd);font-size:7px;letter-spacing:0.1em;}
+.ci-time{font-family:var(--fm);font-size:7.5px;color:var(--textd);}
+.ci-txt{font-family:var(--fu);font-size:10px;color:var(--text);line-height:1.35;}
+.ci-src{font-family:var(--fm);font-size:7.5px;color:var(--textd);margin-top:2px;}
+
+/* Flight live refresh badge */
+.live-ts{font-family:var(--fm);font-size:7.5px;color:var(--green);display:flex;align-items:center;gap:4px;margin-top:6px;}
+.live-ts-stale{color:var(--orange);}
+.refresh-btn{background:color-mix(in srgb,var(--cyan) 10%,transparent);border:1px solid var(--brd2);
+  color:var(--cyan);font-family:var(--fm);font-size:8px;padding:3px 8px;cursor:pointer;
+  letter-spacing:0.08em;transition:all 0.15s;margin-top:5px;width:100%;}
+.refresh-btn:hover{background:color-mix(in srgb,var(--cyan) 20%,transparent);}
+.refresh-btn:disabled{opacity:0.4;cursor:not-allowed;}
+/* COMPASS */
+.compass{position:absolute;bottom:50px;left:8px;width:48px;height:48px;z-index:1000;}
+/* TICKER */
+.ticker{grid-column:1/-1;background:var(--panel2);border-top:1px solid var(--brd2);display:flex;align-items:center;overflow:hidden;}
+.tlbl{background:var(--red);color:#fff;font-family:var(--fd);font-size:8px;font-weight:700;
+  padding:0 10px;height:100%;display:flex;align-items:center;letter-spacing:0.13em;white-space:nowrap;flex-shrink:0;}
+.twrap{flex:1;overflow:hidden;height:100%;display:flex;align-items:center;}
+.tscroll{display:flex;gap:60px;white-space:nowrap;animation:tsroll 120s linear infinite;
+  font-family:var(--fm);font-size:10px;color:var(--text);padding-left:30px;}
+@keyframes tsroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.titem{display:inline-flex;align-items:center;gap:5px;}
+.tbadge{font-size:7.5px;padding:1px 4px;border-radius:2px;font-family:var(--fd);font-weight:700;letter-spacing:0.09em;}
+.ta{background:var(--red);color:#fff;}.tw{background:var(--orange);color:#fff;}
+.ti{background:var(--cyan);color:#000;}.tm{background:var(--yellow);color:#000;}.ts{background:var(--purple);color:#fff;}
+/* RIGHT PANEL */
+.dttl{font-family:var(--fd);font-size:12px;color:var(--textb);font-weight:700;margin-bottom:8px;}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.df{display:flex;flex-direction:column;}
+.dl{font-family:var(--fm);font-size:7.5px;color:var(--textd);letter-spacing:0.11em;margin-bottom:1px;}
+.dv{font-family:var(--fm);font-size:11px;color:var(--textb);}
+.dv.hl{color:var(--cyan);}.dv.dr{color:var(--red);}.dv.wa{color:var(--orange);}
+.dv.gn{color:var(--green);}.dv.pu{color:var(--purple);}
+.loc-card{padding:0;}
+.loc-name{font-family:var(--fd);font-size:11.5px;color:var(--cyan);font-weight:700;margin-bottom:4px;letter-spacing:0.08em;line-height:1.3;}
+.loc-type{font-family:var(--fm);font-size:8.5px;color:var(--textd);letter-spacing:0.12em;margin-bottom:8px;}
+.loc-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--brd);}
+.loc-row:last-child{border-bottom:none;}
+.loc-lbl{font-family:var(--fm);font-size:8px;color:var(--textd);letter-spacing:0.1em;}
+.loc-val{font-family:var(--fm);font-size:9.5px;color:var(--textb);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.loc-bm-btn{width:100%;margin-top:8px;background:color-mix(in srgb,var(--cyan) 8%,transparent);
+  border:1px solid var(--brd2);color:var(--cyan);font-family:var(--fm);font-size:9px;
+  padding:5px;cursor:pointer;letter-spacing:0.1em;transition:all 0.16s;}
+.loc-bm-btn:hover{background:color-mix(in srgb,var(--cyan) 18%,transparent);}
+/* FLIGHT DETAIL */
+.fd-route{display:flex;align-items:center;gap:8px;padding:8px 0;margin-bottom:6px;border-bottom:1px solid var(--brd);}
+.fd-apt{text-align:center;}
+.fd-apt-code{font-family:var(--fd);font-size:18px;font-weight:900;color:var(--cyan);}
+.fd-apt-name{font-family:var(--fm);font-size:7px;color:var(--textd);margin-top:2px;}
+.fd-arrow{flex:1;display:flex;align-items:center;justify-content:center;position:relative;}
+.fd-arrow::before{content:'';position:absolute;left:0;right:0;height:1px;background:var(--brd2);}
+.fd-arrow-dot{width:8px;height:8px;background:var(--cyan);border-radius:50%;position:relative;z-index:1;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--cyan) 40%,transparent);}50%{box-shadow:0 0 0 6px transparent;}}
+.iitem{padding:6px 7px;border-left:2px solid var(--brd);margin-bottom:4px;background:color-mix(in srgb,var(--bg) 30%,transparent);}
+.iitem.critical{border-left-color:var(--red);}.iitem.high{border-left-color:var(--orange);}
+.iitem.medium{border-left-color:var(--yellow);}.iitem.low{border-left-color:var(--cyan);}
+.ihdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;}
+.icls{font-family:var(--fd);font-size:7px;color:var(--red);letter-spacing:0.12em;}
+.itm{font-family:var(--fm);font-size:8px;color:var(--textd);}
+.isrc{font-family:var(--fm);font-size:9px;color:var(--cyan);}
+.itxt{font-family:var(--fu);font-size:10px;color:var(--text);line-height:1.38;}
+.alrt{padding:5px 7px;border-left:2px solid var(--brd);margin-bottom:3px;background:color-mix(in srgb,var(--bg) 30%,transparent);}
+@keyframes pflash{0%,100%{background:color-mix(in srgb,var(--red) 4%,transparent);}50%{background:color-mix(in srgb,var(--red) 12%,transparent);}}
+.sec.pulsing{animation:pflash 1.8s ease infinite;}
+.sfooter{margin-top:8px;padding:4px 6px;background:color-mix(in srgb,var(--cyan) 4%,transparent);
+  border:1px solid var(--brd);font-family:var(--fm);font-size:7.5px;color:var(--textd);line-height:1.4;}
+.livebadge{display:inline-flex;align-items:center;gap:3px;font-family:var(--fm);font-size:8px;color:var(--green);}
+@keyframes locPulse{0%{transform:scale(0.5);opacity:1;}100%{transform:scale(2.5);opacity:0;}}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--brd);border-radius:2px;}
+.leaflet-tooltip{background:color-mix(in srgb,var(--bg) 95%,transparent)!important;
+  border:1px solid var(--brd2)!important;color:var(--cyan)!important;
+  font-family:var(--fm)!important;font-size:10px!important;padding:3px 7px!important;border-radius:0!important;box-shadow:none!important;}
+.leaflet-tooltip-top::before,.leaflet-tooltip-bottom::before,.leaflet-tooltip-left::before,.leaflet-tooltip-right::before{display:none!important;}
+.leaflet-control-zoom a{background:color-mix(in srgb,var(--bg) 92%,transparent)!important;color:var(--cyan)!important;border-color:var(--brd)!important;font-family:var(--fd)!important;}
+.leaflet-control-zoom a:hover{background:color-mix(in srgb,var(--cyan) 15%,transparent)!important;}
+.leaflet-control-scale-line{background:rgba(2,5,9,0.85)!important;border-color:var(--cyan)!important;color:var(--cyan)!important;font-family:var(--fm)!important;font-size:9px!important;}
+.leaflet-popup-content-wrapper{background:color-mix(in srgb,var(--bg) 96%,transparent)!important;border:1px solid var(--brd2)!important;color:var(--textb)!important;border-radius:0!important;box-shadow:0 0 20px color-mix(in srgb,var(--cyan) 15%,transparent)!important;}
+.leaflet-popup-tip{background:color-mix(in srgb,var(--bg) 96%,transparent)!important;}
+.leaflet-popup-close-button{color:var(--cyan)!important;font-size:16px!important;}
+</style>
+<!-- HTML LAYOUT -->
+<div class="layout">
+<header class="hdr">
+  <!-- ROW 1: Logo · Clock · Status · Theme -->
+  <div class="hdr-row1">
+    <!-- Logo -->
+    <div class="logo">
+      <svg class="logo-svg" viewBox="0 0 36 36" fill="none">
+        <polygon points="18,1 35,9.5 35,26.5 18,35 1,26.5 1,9.5" stroke="var(--cyan)" stroke-width="1.1" fill="color-mix(in srgb,var(--cyan) 4%,transparent)"/>
+        <polygon points="18,6 30,12.5 30,23.5 18,30 6,23.5 6,12.5" stroke="var(--cyan)" stroke-width="0.5" fill="none" opacity="0.3"/>
+        <circle cx="18" cy="18" r="5" stroke="var(--cyan2)" stroke-width="0.7" fill="color-mix(in srgb,var(--cyan2) 8%,transparent)"/>
+        <circle cx="18" cy="18" r="2.2" fill="var(--cyan)"/>
+      </svg>
+      <div>
+        <div class="logo-name">ARGUS-VIII</div>
+        <div class="logo-sub">GLOBAL SURVEILLANCE &amp; INTELLIGENCE · v3.1 PRO · CLASSIFIED</div>
+      </div>
+    </div>
+
+    <!-- UTC Clock -->
+    <div class="hdr-center">
+      <div class="utc" id="utcClk">00:00:00.000 UTC</div>
+      <div class="utc-d" id="utcDt">LOADING…</div>
+    </div>
+
+    <!-- Right: asset counts + status badges + theme -->
+    <div class="hdr-right-row1">
+      <!-- Asset stat counters -->
+      <div class="hstats">
+        <div class="hstat"><div class="hstat-v" id="hAC">—</div><div class="hstat-l">AIRCRAFT</div></div>
+        <div class="hstat"><div class="hstat-v">18</div><div class="hstat-l">VESSELS</div></div>
+        <div class="hstat"><div class="hstat-v">12</div><div class="hstat-l">UAV</div></div>
+        <div class="hstat"><div class="hstat-v" style="color:var(--orange)">8</div><div class="hstat-l">MISSILES</div></div>
+        <div class="hstat"><div class="hstat-v" style="color:var(--purple)">14</div><div class="hstat-l">SATS</div></div>
+        <div class="hstat"><div class="hstat-v" style="color:var(--red)">9</div><div class="hstat-l">ZONES</div></div>
+      </div>
+      <div class="hdiv"></div>
+      <!-- Status badges horizontal -->
+      <div class="status-badges">
+        <div class="sb"><div class="dot dot-g"></div>LIVE ADS-B</div>
+        <div class="sb"><div class="dot dot-c"></div>ENCRYPTED</div>
+        <div class="sb" id="alertDot"><div class="dot dot-r"></div>9 ALERTS</div>
+      </div>
+      <div class="hdiv"></div>
+      <button class="theme-btn" onclick="toggleTheme()"><span class="theme-ico"></span><span id="themeLabel">LIGHT</span></button>
+    </div>
+  </div>
+
+  <!-- ROW 2: Operator IP Strip + DEFCON -->
+  <div class="hdr-row2">
+    <div class="op-strip">
+      <div class="op-cell"><div class="op-lbl">OPERATOR IP</div><div class="op-val cyan" id="opIP">RESOLVING…</div></div>
+      <div class="op-cell"><div class="op-lbl">LOCATION</div><div class="op-val" id="opCity">—</div></div>
+      <div class="op-cell"><div class="op-lbl">ISP / ORG</div><div class="op-val" id="opISP">—</div></div>
+      <div class="op-cell"><div class="op-lbl">TIMEZONE</div><div class="op-val" id="opTZ">—</div></div>
+      <div class="op-cell"><div class="op-lbl">STATUS</div><div class="op-val green" id="opStatus">ACQUIRING…</div></div>
+    </div>
+    <div class="defcon-badge">
+      <div><div class="defcon-lbl">DEFCON</div><div class="defcon-num">3</div></div>
+      <div><div class="defcon-lbl">THREAT</div><div style="font-family:var(--fd);font-size:9px;color:var(--orange);letter-spacing:0.06em;">ELEVATED</div></div>
+    </div>
+  </div>
+</header>
+
+<aside class="pnl pnl-l">
+  <div class="sec">
+    <div class="stl">TRACKED ASSETS</div>
+    <div class="ag">
+      <div class="ac on" id="tog-flights" onclick="togAsset('flights',this)"><div class="ac-ico">✈</div><div class="ac-v" id="cntAC">…</div><div class="ac-l">AIRCRAFT</div></div>
+      <div class="ac on" id="tog-ships" onclick="togAsset('ships',this)"><div class="ac-ico">⛴</div><div class="ac-v">18</div><div class="ac-l">NAVAL</div></div>
+      <div class="ac on" id="tog-drones" onclick="togAsset('drones',this)"><div class="ac-ico" style="color:var(--yellow)">⬡</div><div class="ac-v">12</div><div class="ac-l">UAV</div></div>
+      <div class="ac on" id="tog-missiles" onclick="togAsset('missiles',this)"><div class="ac-ico" style="color:var(--orange)">🚀</div><div class="ac-v">8</div><div class="ac-l">MISSILE</div></div>
+      <div class="ac on" id="tog-sats" onclick="togAsset('sats',this)"><div class="ac-ico" style="color:var(--purple)">🛰</div><div class="ac-v">14</div><div class="ac-l">SATELLITE</div></div>
+      <div class="ac on" id="tog-conflicts" onclick="togAsset('conflicts',this)"><div class="ac-ico" style="color:var(--red)">⚠</div><div class="ac-v" style="color:var(--red)">9</div><div class="ac-l">WARZONES</div></div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="stl">GLOBAL THREAT LEVEL</div>
+    <div class="thr-hd">
+      <div><div class="thr-sub">STATUS</div><div class="thr-lv el">ELEVATED</div></div>
+      <div style="text-align:right"><div class="thr-sub">DEFCON</div>
+        <div style="font-family:var(--fd);font-size:24px;color:var(--orange);font-weight:900;">3</div></div>
+    </div>
+    <div class="thr-bar"><div class="thr-fill"></div></div>
+  </div>
+  <div class="sec">
+    <div class="stl">NAVAL VESSELS <span class="livebadge"><span class="dot dot-g" style="width:5px;height:5px;"></span>18</span></div>
+    <div class="alist" id="shipList"></div>
+  </div>
+  <div class="sec">
+    <div class="stl">LIVE FLIGHTS <span class="livebadge"><span class="dot dot-g" style="width:5px;height:5px;"></span><span id="flightSrcLabel">LOADING</span></span></div>
+    <div class="alist" id="flightList"><div style="font-family:var(--fm);font-size:9px;color:var(--textd);text-align:center;padding:12px;line-height:1.6;">FETCHING LIVE ADS-B DATA…<br><span style="font-size:8px">Trying multiple sources</span></div></div>
+  </div>
+  <div class="sec"><div class="stl">UAV / DRONES</div><div class="alist" id="droneList"></div></div>
+  <div class="sec"><div class="stl">MISSILES <span style="font-family:var(--fm);font-size:7.5px;color:var(--orange)">SIMULATED</span></div><div class="alist" id="missileList"></div></div>
+  <div class="sec"><div class="stl">SATELLITES</div><div class="alist" id="satList"></div></div>
+  <div class="sec">
+    <div class="stl" style="color:var(--red)">⚡ CYBER / SIGINT THREATS</div>
+    <div class="alist" id="cyberList"></div>
+  </div>
+  <div class="sec">
+    <div class="stl">📡 SIGINT INTERCEPTS</div>
+    <div class="alist" id="sigintList"></div>
+  </div>
+</aside>
+
+<main class="mwrap">
+  <div class="radar"><div class="rring" style="inset:0;"></div><div class="rring" style="inset:13px;"></div><div class="rring" style="inset:26px;"></div><canvas id="rc" width="74" height="74"></canvas></div>
+  <div class="lbadge" id="lbadge">◼ TACTICAL DARK</div>
+  <div class="flight-src" id="flightSrc" style="color:var(--textd)">✈ ADS-B: LOADING…</div>
+
+  <!-- SEARCH BAR -->
+  <div class="search-wrap">
+    <div class="search-row">
+      <input class="search-input" id="searchInp" type="text" placeholder="⌕  CITY · COUNTRY · REGION · FLIGHT CODE (BA123, AA100)…" autocomplete="off" spellcheck="false"/>
+      <button class="search-btn" onclick="doSearch()">LOCATE</button>
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
+    <div class="search-hint" id="searchHint"></div>
+    <div class="search-dropdown" id="searchDrop"></div>
+  </div>
+
+  <!-- MAP VIEW BUTTONS -->
+  <div class="mctrl-top">
+    <button class="mb on" id="vDark"   onclick="setMapView('dark',this)">◼ TACTICAL</button>
+    <button class="mb"    id="vSat"    onclick="setMapView('sat',this)">🛰 SATELLITE</button>
+    <button class="mb"    id="vHybrid" onclick="setMapView('hybrid',this)">🌐 HYBRID+ROADS</button>
+    <button class="mb"    id="vTerr"   onclick="setMapView('terrain',this)">▲ TERRAIN</button>
+    <button class="mb"    id="vStreet" onclick="setMapView('street',this)">⬜ STREET</button>
+    <button class="mb"    id="vNight"  onclick="setMapView('night',this)">🌃 NIGHT</button>
+  </div>
+
+  <!-- ASSET TOGGLES -->
+  <div class="mctrl-bot">
+    <button class="mb on" id="lb-flights"   onclick="toggleLyr('flights',this)">✈ FLIGHTS</button>
+    <button class="mb on" id="lb-ships"     onclick="toggleLyr('ships',this)">⛴ NAVY</button>
+    <button class="mb on" id="lb-drones"    onclick="toggleLyr('drones',this)">⬡ UAV</button>
+    <button class="mb on" id="lb-missiles"  onclick="toggleLyr('missiles',this)">🚀 MISSILES</button>
+    <button class="mb on" id="lb-sats"      onclick="toggleLyr('sats',this)">🛰 SATS</button>
+    <button class="mb on on-red" id="lb-conflicts" onclick="toggleLyr('conflicts',this)">⚠ WARZONES</button>
+  </div>
+
+  <!-- TOOLS -->
+  <div class="map-tools">
+    <button class="mtool" onclick="geoLocate()" id="geoBtn">📍 MY LOCATION</button>
+    <button class="mtool" id="measureBtn" onclick="toggleMeasure()">📏 MEASURE DIST</button>
+    <button class="mtool" id="bookmarkBtn" onclick="toggleBookmarks()">⭐ BOOKMARKS (<span id="bmCount">0</span>)</button>
+    <button class="mtool" id="cyberBtn" onclick="showCyberPanel()">💻 CYBER INTEL</button>
+    <button class="mtool" id="nucBtn" onclick="showNuclearPanel()">☢ NUCLEAR WATCH</button>
+    <button class="mtool" id="fsBtn" onclick="toggleFullscreen()">⛶ FULLSCREEN</button>
+    <button class="mtool" onclick="resetView()">🌍 RESET VIEW</button>
+  </div>
+
+  <div class="bm-panel" id="bmPanel">
+    <div class="bm-hdr"><span>SAVED LOCATIONS</span><span style="cursor:pointer;color:var(--red);font-size:10px;" onclick="clearAllBookmarks()">CLEAR ALL</span></div>
+    <div id="bmList"><div class="bm-empty">NO SAVED LOCATIONS<br><span style="font-size:7.5px">Search a place to bookmark it</span></div></div>
+  </div>
+
+  <div class="measure-info" id="measureInfo">📏 CLICK MAP TO SET MEASUREMENT POINTS · RIGHT-CLICK TO FINISH</div>
+  <div class="dist-badge" id="distBadge"></div>
+  <div class="xh"></div>
+  <div class="coords" id="coords">LAT: — · LNG: — · ZOOM: 3</div>
+
+  <div class="compass">
+    <svg viewBox="0 0 48 48" width="48" height="48">
+      <circle cx="24" cy="24" r="22" stroke="rgba(0,200,255,0.2)" stroke-width="1" fill="rgba(2,5,9,0.75)"/>
+      <text x="24" y="8" text-anchor="middle" font-family="Share Tech Mono" font-size="7" fill="#ff1a44" font-weight="bold">N</text>
+      <text x="24" y="45" text-anchor="middle" font-family="Share Tech Mono" font-size="6" fill="rgba(0,200,255,0.5)">S</text>
+      <text x="44" y="27" text-anchor="middle" font-family="Share Tech Mono" font-size="6" fill="rgba(0,200,255,0.5)">E</text>
+      <text x="4" y="27" text-anchor="middle" font-family="Share Tech Mono" font-size="6" fill="rgba(0,200,255,0.5)">W</text>
+      <polygon points="24,11 22,24 24,22 26,24" fill="#ff1a44" opacity="0.9"/>
+      <polygon points="24,37 22,24 24,26 26,24" fill="rgba(0,200,255,0.55)"/>
+      <circle cx="24" cy="24" r="2.5" fill="var(--cyan)"/>
+    </svg>
+  </div>
+
+  <!-- CYBER / NUCLEAR MODAL -->
+  <div id="cyberModal" style="display:none;position:absolute;right:10px;top:8px;width:320px;max-height:80vh;overflow-y:auto;
+    background:var(--inp-bg);border:1px solid var(--red);z-index:1200;backdrop-filter:blur(12px);">
+    <div style="padding:8px 12px;border-bottom:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-family:var(--fd);font-size:9px;color:var(--red);letter-spacing:0.2em;">💻 CLASSIFIED: CYBER OPERATIONS BOARD</span>
+      <span style="cursor:pointer;color:var(--textd);font-size:12px;" onclick="document.getElementById('cyberModal').style.display='none'">✕</span>
+    </div>
+    <div id="cyberModalBody" style="padding:8px;"></div>
+  </div>
+  <div id="nucModal" style="display:none;position:absolute;right:10px;top:8px;width:320px;max-height:80vh;overflow-y:auto;
+    background:var(--inp-bg);border:1px solid var(--orange);z-index:1200;backdrop-filter:blur(12px);">
+    <div style="padding:8px 12px;border-bottom:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-family:var(--fd);font-size:9px;color:var(--orange);letter-spacing:0.2em;">☢ NUCLEAR THREAT MONITOR</span>
+      <span style="cursor:pointer;color:var(--textd);font-size:12px;" onclick="document.getElementById('nucModal').style.display='none'">✕</span>
+    </div>
+    <div id="nucModalBody" style="padding:8px;"></div>
+  </div>
+
+  <div id="map"></div>
+</main>
+
+<aside class="pnl pnl-r">
+  <!-- TAB SWITCHER -->
+  <div style="display:flex;border-bottom:1px solid var(--brd2);">
+    <button id="tab-det" onclick="switchTab('det')" style="flex:1;padding:7px 4px;font-family:var(--fd);font-size:7.5px;letter-spacing:0.1em;background:color-mix(in srgb,var(--cyan) 12%,transparent);border:none;border-right:1px solid var(--brd);color:var(--cyan);cursor:pointer;">INTEL</button>
+    <button id="tab-cyber" onclick="switchTab('cyber')" style="flex:1;padding:7px 4px;font-family:var(--fd);font-size:7.5px;letter-spacing:0.1em;background:transparent;border:none;border-right:1px solid var(--brd);color:var(--textd);cursor:pointer;">CYBER</button>
+    <button id="tab-sigint" onclick="switchTab('sigint')" style="flex:1;padding:7px 4px;font-family:var(--fd);font-size:7.5px;letter-spacing:0.1em;background:transparent;border:none;border-right:1px solid var(--brd);color:var(--textd);cursor:pointer;">SIGINT</button>
+    <button id="tab-nuc" onclick="switchTab('nuc')" style="flex:1;padding:7px 4px;font-family:var(--fd);font-size:7.5px;letter-spacing:0.1em;background:transparent;border:none;color:var(--textd);cursor:pointer;">NUCLEAR</button>
+  </div>
+
+  <!-- TAB: INTEL (default) -->
+  <div id="tabpane-det">
+    <div class="sec"><div class="stl">SELECTED / SEARCHED</div><div id="detBox"><div style="font-family:var(--fm);font-size:9px;color:var(--textd);text-align:center;padding:20px 0;line-height:1.9;">SEARCH ANY LOCATION ABOVE<br>OR CLICK ANY MAP ASSET<br><span style="font-size:8px;display:block;margin-top:4px;">City · Country · Region · Coordinates<br>Flight Code (BA123 · 6E1413 · EK202)</span></div></div></div>
+    <div class="sec"><div class="stl">INTELLIGENCE BRIEFING</div><div id="intelFeed" style="padding:2px;"></div></div>
+    <div class="sec pulsing"><div class="stl" style="color:var(--red)">⚠ ACTIVE ALERTS (9)</div><div id="alertFeed" style="padding:2px;"></div></div>
+  </div>
+
+  <!-- TAB: CYBER -->
+  <div id="tabpane-cyber" style="display:none;">
+    <div class="sec">
+      <div class="stl" style="color:var(--red)">💻 CYBER OPS — LIVE THREAT BOARD</div>
+      <div id="cyberFeed" style="padding:2px;"></div>
+    </div>
+    <div class="sec">
+      <div class="stl">🌐 ACTIVE THREAT ACTORS</div>
+      <div id="threatActorFeed" style="padding:2px;"></div>
+    </div>
+  </div>
+
+  <!-- TAB: SIGINT -->
+  <div id="tabpane-sigint" style="display:none;">
+    <div class="sec">
+      <div class="stl">📡 SIGNALS INTELLIGENCE</div>
+      <div id="sigintFeed" style="padding:2px;"></div>
+    </div>
+    <div class="sec">
+      <div class="stl">📻 FREQUENCY INTERCEPTS</div>
+      <div id="freqFeed" style="padding:2px;"></div>
+    </div>
+  </div>
+
+  <!-- TAB: NUCLEAR -->
+  <div id="tabpane-nuc" style="display:none;">
+    <div class="sec">
+      <div class="stl" style="color:var(--orange)">☢ NUCLEAR POSTURE MONITOR</div>
+      <div id="nucFeed" style="padding:2px;"></div>
+    </div>
+    <div class="sec">
+      <div class="stl">🚀 BALLISTIC MISSILE WATCH</div>
+      <div id="bmFeed" style="padding:2px;"></div>
+    </div>
+  </div>
+</aside>
+
+<footer class="ticker">
+  <div class="tlbl">◉ ARGUS LIVE</div>
+  <div class="twrap"><div class="tscroll" id="tscroll"></div></div>
+</footer>
+</div>
+<script>
+// ═══════════════════════════════════════════════════════
+//  ARGUS-VIII v3.1 PRO — All systems init after Leaflet load
+// ═══════════════════════════════════════════════════════
+function initARGUS(){
+  document.getElementById('loadBar').style.width='80%';
+  document.getElementById('loadStatus').textContent='BUILDING MAP LAYER…';
+
+  // ── MAP ──────────────────────────────────────────────
+  const map=window._map=L.map('map',{center:[20,10],zoom:3,zoomControl:false,attributionControl:false,scrollWheelZoom:true});
+  L.control.zoom({position:'bottomright'}).addTo(map);
+  L.control.attribution({position:'bottomleft',prefix:false}).addTo(map);
+  L.control.scale({position:'bottomright',metric:true,imperial:true,maxWidth:120}).addTo(map);
+
+  // ── TILE LAYERS ──────────────────────────────────────
+  const TILES={
+    dark:   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'© CartoDB'}),
+    sat:    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,attribution:'© ESRI World Imagery'}),
+    hybrid: L.layerGroup([
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}),
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,opacity:0.8}),
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:20,opacity:0.9})
+    ]),
+    terrain:L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,subdomains:'abc',attribution:'© OpenTopoMap'}),
+    street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc',attribution:'© OpenStreetMap'}),
+    night:  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'© CartoDB'})
+  };
+  TILES.dark.addTo(map);
+  let curTile='dark';
+
+  map.on('mousemove',e=>{
+    document.getElementById('coords').textContent=
+      `LAT: ${e.latlng.lat.toFixed(5)}° · LNG: ${e.latlng.lng.toFixed(5)}° · ZOOM: ${map.getZoom()}`;
+  });
+
+  // ── LAYER GROUPS ─────────────────────────────────────
+  const LYR={
+    flights:L.layerGroup().addTo(map), ships:L.layerGroup().addTo(map),
+    drones:L.layerGroup().addTo(map),  missiles:L.layerGroup().addTo(map),
+    sats:L.layerGroup().addTo(map),    conflicts:L.layerGroup().addTo(map),
+    search:L.layerGroup().addTo(map),  measure:L.layerGroup().addTo(map)
+  };
+  const VIS={flights:true,ships:true,drones:true,missiles:true,sats:true,conflicts:true};
+
+  // ── THEME ─────────────────────────────────────────────
+  let isDark = (window.__ARGUS_PENDING_THEME__ || 'dark') !== 'light';
+  function applyArgusTheme(nextTheme){
+    isDark = nextTheme !== 'light';
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    const themeLabel = document.getElementById('themeLabel');
+    if(themeLabel) themeLabel.textContent = isDark ? 'LIGHT MODE' : 'DARK MODE';
+    if(!isDark && curTile === 'dark') setMapView('street', document.getElementById('vStreet'));
+    if(isDark && curTile === 'street') setMapView('dark', document.getElementById('vDark'));
+    window.__ARGUS_PENDING_THEME__ = isDark ? 'dark' : 'light';
+  }
+  window.toggleTheme=()=>{
+    applyArgusTheme(isDark ? 'light' : 'dark');
+  };
+  window.addEventListener('message', (event) => {
+    const data = event.data || {};
+    if (data.type === 'parent-theme' && (data.theme === 'light' || data.theme === 'dark')) {
+      applyArgusTheme(data.theme);
+    }
+  });
+  applyArgusTheme(window.__ARGUS_PENDING_THEME__ || 'dark');
+
+  // ── MAP VIEW ──────────────────────────────────────────
+  const LBLS={dark:'◼ TACTICAL DARK',sat:'🛰 SATELLITE HI-RES',hybrid:'🌐 HYBRID · SAT+ROADS+LABELS',terrain:'▲ TERRAIN+ELEVATION',street:'⬜ STREET (OSM)',night:'🌃 NIGHT · NO LABELS'};
+  window.setMapView=(name,btn)=>{
+    Object.values(TILES).forEach(t=>{
+      if(t instanceof L.LayerGroup) t.eachLayer(l=>{try{map.removeLayer(l);}catch(e){}});
+      else try{map.removeLayer(t);}catch(e){}
+    });
+    if(name==='hybrid') TILES.hybrid.eachLayer(l=>l.addTo(map));
+    else TILES[name].addTo(map);
+    curTile=name;
+    document.querySelectorAll('.mctrl-top .mb').forEach(b=>b.classList.remove('on'));
+    if(btn) btn.classList.add('on');
+    document.getElementById('lbadge').textContent=LBLS[name]||name.toUpperCase();
+  };
+  window.toggleLyr=(name,btn)=>{
+    VIS[name]=!VIS[name];
+    VIS[name]?map.addLayer(LYR[name]):map.removeLayer(LYR[name]);
+    btn.classList.toggle('on',VIS[name]);
+    if(name==='conflicts') btn.classList.toggle('on-red',VIS[name]);
+  };
+  window.togAsset=(name,btn)=>{
+    const lb=document.getElementById('lb-'+name);
+    if(lb) toggleLyr(name,lb);
+    btn.classList.toggle('on');
+  };
+
+  // ── CLOCK ─────────────────────────────────────────────
+  const DAYS=['SUN','MON','TUE','WED','THU','FRI','SAT'],MONS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  function p2(n){return String(n).padStart(2,'0');}
+  function p3(n){return String(n).padStart(3,'0');}
+  function tickClock(){
+    const n=new Date();
+    document.getElementById('utcClk').textContent=`${p2(n.getUTCHours())}:${p2(n.getUTCMinutes())}:${p2(n.getUTCSeconds())}.${p3(n.getUTCMilliseconds())} UTC`;
+    document.getElementById('utcDt').textContent=`${DAYS[n.getUTCDay()]} ${p2(n.getUTCDate())} ${MONS[n.getUTCMonth()]} ${n.getUTCFullYear()} · GLOBAL SURVEILLANCE ACTIVE`;
+  }
+  setInterval(tickClock,50); tickClock();
+
+  // ── RADAR ─────────────────────────────────────────────
+  let radarAngle=0;
+  const rc=document.getElementById('rc').getContext('2d');
+  function drawRadar(){
+    rc.clearRect(0,0,74,74); rc.save(); rc.translate(37,37);
+    rc.beginPath(); rc.moveTo(0,0); rc.arc(0,0,37,radarAngle-0.9,radarAngle,false); rc.closePath();
+    rc.fillStyle='rgba(0,255,136,0.18)'; rc.fill();
+    rc.beginPath(); rc.moveTo(0,0); rc.lineTo(Math.cos(radarAngle)*37,Math.sin(radarAngle)*37);
+    rc.strokeStyle='rgba(0,255,136,0.7)'; rc.lineWidth=1.2; rc.stroke();
+    [[0.3,0.5],[0.6,0.2],[-0.4,0.6],[0.1,-0.5],[0.7,-0.3]].forEach(([x,y])=>{
+      rc.beginPath(); rc.arc(x*34,y*34,2,0,Math.PI*2); rc.fillStyle='rgba(0,255,136,0.8)'; rc.fill();
+    });
+    rc.restore(); radarAngle+=0.05; requestAnimationFrame(drawRadar);
+  }
+  drawRadar();
+
+  // ── ICONS ─────────────────────────────────────────────
+  function makeArrow(col,hdg){
+    return L.divIcon({
+      html:`<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;transform:rotate(${hdg}deg);">
+        <svg width="16" height="16" viewBox="0 0 16 16"><polygon points="8,1 13,15 8,11 3,15" fill="${col}" opacity="0.9"/></svg></div>`,
+      iconSize:[20,20],iconAnchor:[10,10],className:''
+    });
+  }
+  function makeIcon(emoji,col,pulse=false){
+    const ring=pulse?`<div style="position:absolute;inset:-4px;border-radius:50%;border:1.5px solid ${col};animation:blink 1.5s infinite;"></div>`:'';
+    return L.divIcon({
+      html:`<div style="position:relative;width:22px;height:22px;display:flex;align-items:center;justify-content:center;">${ring}<span style="font-size:14px;filter:drop-shadow(0 0 4px ${col});">${emoji}</span></div>`,
+      iconSize:[22,22],iconAnchor:[11,11],className:''
+    });
+  }
+  const searchIcon=L.divIcon({
+    html:`<div style="position:relative;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+      <div style="position:absolute;inset:0;border-radius:50%;background:rgba(0,200,255,0.15);border:2px solid #00c8ff;animation:locPulse 1.5s ease-out infinite;transform-origin:center;"></div>
+      <div style="width:10px;height:10px;border-radius:50%;background:#00c8ff;box-shadow:0 0 12px #00c8ff;z-index:1;"></div></div>`,
+    iconSize:[24,24],iconAnchor:[12,12],className:''
+  });
+
+  // ── DETAIL PANEL ──────────────────────────────────────
+  function setDet(html){document.getElementById('detBox').innerHTML=html;}
+  function dfRow(l,v,cls=''){return `<div class="df"><div class="dl">${l}</div><div class="dv${cls?' '+cls:''}">${v}</div></div>`;}
+
+  // ══════════════════════════════════════════════════════
+  //  SMART SEARCH — Locations + Flight Codes
+  // ══════════════════════════════════════════════════════
+  let searchTimer=null, lastResult=null;
+  const sInp=document.getElementById('searchInp');
+  const sDrop=document.getElementById('searchDrop');
+  const sClear=document.getElementById('searchClear');
+  const sHint=document.getElementById('searchHint');
+
+  // Flight code: IATA codes can start with digit (6E, 9W, B6, 2C etc) + flight number
+  const FLIGHT_RE=/^([A-Z0-9]{2,3})\s*(\d{1,4}[A-Z]?)$/i;
+  const ICAO_RE=/^[0-9A-F]{6}$/i;
+
+  // ── IATA → ICAO airline code mapping (500+ airlines) ──
+  const IATA_ICAO={
+    // India
+    '6E':'IGO','AI':'AIC','IX':'DAM','SG':'SEJ','UK':'VTI','G8':'GOW','S5':'SSW','QP':'ABD',
+    // Middle East
+    'EK':'UAE','EY':'ETD','QR':'QTR','GF':'GFA','WY':'OMA','ME':'MEA','RJ':'RJA','FZ':'FDB',
+    // Europe
+    'BA':'BAW','LH':'DLH','AF':'AFR','KL':'KLM','IB':'IBE','AZ':'AZA','SK':'SAS','AY':'FIN',
+    'OS':'AUA','LX':'SWR','SN':'BEL','TP':'TAP','VY':'VLG','FR':'RYR','U2':'EZY','W6':'WZZ',
+    'D8':'NOZ','HV':'TRA','BT':'BTI','TK':'THY','PC':'PGT','OB':'OHY',
+    // North America
+    'AA':'AAL','UA':'UAL','DL':'DAL','WN':'SWA','B6':'JBU','AS':'ASA','F9':'FFT',
+    'NK':'NKS','G4':'GJS','SY':'SCX','HA':'HAL','AC':'ACA','WS':'WJA',
+    // Asia Pacific
+    'SQ':'SIA','CX':'CPA','MH':'MAS','TG':'THA','GA':'GIA','PR':'PAL','BR':'EVA',
+    'CI':'CAL','JL':'JAL','NH':'ANA','KE':'KAL','OZ':'AAR','7C':'JJA',
+    'VN':'HVN','PG':'BKP','FD':'AIQ','AK':'AXM','QZ':'AWQ','ID':'BTK',
+    'CZ':'CSN','CA':'CCA','MU':'CES','HU':'CHH','3U':'CSC','ZH':'CSZ','SC':'CDG',
+    'QF':'QFA','VA':'VOZ','JQ':'JST','NZ':'ANZ',
+    // Africa
+    'ET':'ETH','KQ':'KQA','SA':'SAA','AT':'RAM','MS':'MSR','WB':'RWD',
+    // Russia / CIS
+    'SU':'AFL','S7':'SBI','UT':'UTA','FV':'SDM',
+    // South America
+    'LA':'LAN','G3':'GLO','AD':'AZU','AV':'AVA','CM':'CMP',
+    // Cargo / Charter
+    'FX':'FDX','5X':'UPS','PO':'PAC','CV':'CLX',
+  };
+
+  function iataToIcao(iata){ return IATA_ICAO[iata.toUpperCase()]||null; }
+
+  function parseFlightCode(q){
+    const clean=q.trim().toUpperCase().replace(/\s+/g,'');
+    const m=clean.match(/^([A-Z0-9]{2,3})(\d{1,4}[A-Z]?)$/);
+    if(!m) return null;
+    const iata=m[1], num=m[2];
+    const icao=iataToIcao(iata);
+    return { raw:clean, iata, num, icao, icaoCallsign:icao?(icao+num):null };
+  }
+
+  sInp.addEventListener('input',()=>{
+    const q=sInp.value.trim();
+    sClear.classList.toggle('vis',q.length>0);
+    clearTimeout(searchTimer);
+    sDrop.classList.remove('vis'); sDrop.innerHTML='';
+    sHint.classList.remove('vis');
+    if(q.length<2) return;
+    if(FLIGHT_RE.test(q)){
+      const p=parseFlightCode(q);
+      const airline=p?.icao?`(ICAO: ${p.icao})`:'';
+      sHint.textContent=`✈ FLIGHT ${q.toUpperCase()} DETECTED ${airline} — PRESS ENTER TO SEARCH`;
+      sHint.classList.add('vis');
+      searchTimer=setTimeout(()=>searchFlight(q),500);
+    } else if(ICAO_RE.test(q)){
+      sHint.textContent=`📡 ICAO24 HEX DETECTED — PRESS ENTER TO SEARCH AIRCRAFT`;
+      sHint.classList.add('vis');
+    } else {
+      searchTimer=setTimeout(()=>searchPlace(q),420);
+    }
+  });
+  sInp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){doSearch();}
+    if(e.key==='Escape'){clearSearch();}
+    if(e.key==='ArrowDown'){const i=sDrop.querySelector('.sr-item');if(i)i.focus();}
+  });
+  document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap')){sDrop.classList.remove('vis');}});
+
+  window.doSearch=()=>{
+    const q=sInp.value.trim(); if(!q) return;
+    clearTimeout(searchTimer);
+    const coordM=q.match(/^(-?\d+\.?\d*)\s*[,\s]\s*(-?\d+\.?\d*)$/);
+    if(coordM){
+      flyToCoord(parseFloat(coordM[1]),parseFloat(coordM[2]),`${coordM[1]}, ${coordM[2]}`);
+      sDrop.classList.remove('vis'); return;
+    }
+    if(FLIGHT_RE.test(q)) searchFlight(q);
+    else searchPlace(q);
+  };
+
+  window.clearSearch=()=>{
+    sInp.value=''; sDrop.classList.remove('vis'); sClear.classList.remove('vis'); sHint.classList.remove('vis');
+    LYR.search.clearLayers(); lastResult=null;
+    setDet(`<div style="font-family:var(--fm);font-size:9px;color:var(--textd);text-align:center;padding:18px 0;line-height:1.8;">SEARCH CLEARED<br><span style="font-size:8px">Type a city, country, or flight code</span></div>`);
+  };
+
+  // ── PLACE SEARCH (Nominatim) ──────────────────────────
+  async function searchPlace(q){
+    sDrop.innerHTML=`<div class="sr-loading"><div class="sr-spin"></div>SEARCHING GLOBAL DATABASE…</div>`;
+    sDrop.classList.add('vis');
+    try{
+      const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=7&addressdetails=1&extratags=1`,{headers:{'Accept-Language':'en'}});
+      const data=await r.json();
+      if(!data||!data.length){
+        sDrop.innerHTML=`<div class="sr-empty">NO RESULTS FOR "${q.toUpperCase()}"<br><span style="font-size:8px">Try a broader term or try lat,lng</span></div>`;
+        return;
+      }
+      sDrop.innerHTML='';
+      data.forEach(r=>{
+        const div=document.createElement('div'); div.className='sr-item'; div.tabIndex=0;
+        const parts=r.display_name.split(',').slice(0,3).join(', ');
+        const typeStr=fmtType(r.type,r.class);
+        div.innerHTML=`<div class="sr-badge sr-place">📍 ${typeStr}</div><div class="sr-name">${parts}</div>
+          <div class="sr-type">${r.address?.country||''}</div>
+          <div class="sr-coords">LAT ${parseFloat(r.lat).toFixed(4)}° · LNG ${parseFloat(r.lon).toFixed(4)}°</div>`;
+        div.onclick=()=>selectPlace(r);
+        div.onkeydown=e=>{if(e.key==='Enter')selectPlace(r);if(e.key==='ArrowDown'&&div.nextElementSibling)div.nextElementSibling.focus();};
+        sDrop.appendChild(div);
+      });
+    } catch(e){
+      sDrop.innerHTML=`<div class="sr-empty">⚠ NOMINATIM UNREACHABLE<br><span style="font-size:8px">Check your connection</span></div>`;
+    }
+  }
+
+  function fmtType(t,c){
+    const m={city:'CITY',town:'TOWN',village:'VILLAGE',county:'COUNTY',state:'STATE',country:'COUNTRY',administrative:'ADMIN',airport:'AIRPORT',aerodrome:'AERODROME',sea:'SEA',ocean:'OCEAN',mountain:'MOUNTAIN',island:'ISLAND',suburb:'SUBURB'};
+    return (m[t]||m[c]||t||'LOCATION').toUpperCase();
+  }
+
+  function selectPlace(r){
+    sInp.value=r.display_name.split(',').slice(0,2).join(', ');
+    sDrop.classList.remove('vis'); sClear.classList.add('vis');
+    LYR.search.clearLayers();
+    const lat=parseFloat(r.lat),lon=parseFloat(r.lon);
+    const m=L.marker([lat,lon],{icon:searchIcon}).addTo(LYR.search);
+    m.bindPopup(`<div style="font-family:'Share Tech Mono',monospace;font-size:10px;">
+      <div style="color:#00c8ff;font-size:8px;margin-bottom:4px;">📍 ${fmtType(r.type,r.class)}</div>
+      <div style="font-size:11px;margin-bottom:3px;">${r.display_name.split(',').slice(0,3).join(', ')}</div>
+      <div style="color:#2a4455;font-size:8px;">LAT ${lat.toFixed(5)}° · LNG ${lon.toFixed(5)}°</div></div>`,{maxWidth:280}).openPopup();
+    if(r.boundingbox){
+      const b=r.boundingbox;
+      map.flyToBounds([[parseFloat(b[0]),parseFloat(b[2])],[parseFloat(b[1]),parseFloat(b[3])]],{animate:true,duration:1.8,easeLinearity:0.2,padding:[30,30],maxZoom:17});
+    } else map.flyTo([lat,lon],13,{animate:true,duration:1.8});
+    showPlaceDetail(r);
+  }
+
+  function flyToCoord(lat,lon,label){
+    LYR.search.clearLayers();
+    const m=L.marker([lat,lon],{icon:searchIcon}).addTo(LYR.search);
+    m.bindPopup(`<div style="font-family:'Share Tech Mono';font-size:10px;"><div style="color:#00c8ff;font-size:8px;margin-bottom:3px;">📍 COORDINATES</div>${label}</div>`,{maxWidth:200}).openPopup();
+    map.flyTo([lat,lon],12,{animate:true,duration:1.5});
+    setDet(`<div class="loc-card"><div style="font-size:24px;margin-bottom:6px;">📍</div><div class="loc-name">COORDINATES</div><div class="loc-type">◉ MANUAL ENTRY</div>
+      <div class="loc-row"><span class="loc-lbl">LATITUDE</span><span class="loc-val" style="color:var(--cyan)">${lat.toFixed(6)}°</span></div>
+      <div class="loc-row"><span class="loc-lbl">LONGITUDE</span><span class="loc-val" style="color:var(--cyan)">${lon.toFixed(6)}°</span></div>
+      <button class="loc-bm-btn" onclick="addBookmark(${lat},${lon},'${label}','COORDINATES')">⭐ SAVE TO BOOKMARKS</button></div>`);
+  }
+
+  function showPlaceDetail(r){
+    const lat=parseFloat(r.lat),lon=parseFloat(r.lon);
+    const addr=r.address||{};
+    const cc=(addr.country_code||'').toUpperCase();
+    const flag=cc?String.fromCodePoint(...cc.split('').map(c=>0x1F1E6+c.charCodeAt(0)-65)):'🌍';
+    const pop=r.extratags?.population;
+    const shortName=r.display_name.split(',').slice(0,2).join(', ');
+    setDet(`<div class="loc-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="font-size:26px;">${flag}</div>
+        <div><div class="loc-name">${shortName}</div><div class="loc-type">◉ ${fmtType(r.type,r.class)} · ${cc}</div></div>
+      </div>
+      <div class="loc-row"><span class="loc-lbl">COUNTRY</span><span class="loc-val">${addr.country||'—'}</span></div>
+      <div class="loc-row"><span class="loc-lbl">STATE / REGION</span><span class="loc-val">${addr.state||addr.county||'—'}</span></div>
+      <div class="loc-row"><span class="loc-lbl">CITY</span><span class="loc-val">${addr.city||addr.town||addr.village||'—'}</span></div>
+      <div class="loc-row"><span class="loc-lbl">POPULATION</span><span class="loc-val">${pop?parseInt(pop).toLocaleString():'—'}</span></div>
+      <div class="loc-row"><span class="loc-lbl">LATITUDE</span><span class="loc-val" style="color:var(--cyan)">${lat.toFixed(6)}°</span></div>
+      <div class="loc-row"><span class="loc-lbl">LONGITUDE</span><span class="loc-val" style="color:var(--cyan)">${lon.toFixed(6)}°</span></div>
+      <button class="loc-bm-btn" onclick="addBookmark(${lat},${lon},'${shortName.replace(/'/g,"\\'")}','${fmtType(r.type,r.class)}')">⭐ SAVE TO BOOKMARKS</button></div>
+      <div class="sfooter">SOURCE: OPENSTREETMAP NOMINATIM · ${new Date().toUTCString()}</div>`);
+  }
+
+  window.resetView=()=>map.flyTo([20,10],3,{animate:true,duration:1.5});
+
+  // ══════════════════════════════════════════════════════
+  //  FLIGHT SEARCH — Robust multi-source with IATA→ICAO
+  // ══════════════════════════════════════════════════════
+
+  // Airline name lookup (IATA code → full name)
+  const AIRLINE_NAMES={
+    '6E':'IndiGo','AI':'Air India','IX':'Air India Express','SG':'SpiceJet','UK':'Vistara',
+    'G8':'GoAir','EK':'Emirates','EY':'Etihad Airways','QR':'Qatar Airways','GF':'Gulf Air',
+    'WY':'Oman Air','FZ':'flydubai','ME':'MEA','BA':'British Airways','LH':'Lufthansa',
+    'AF':'Air France','KL':'KLM','IB':'Iberia','AZ':'Alitalia','SK':'SAS','AY':'Finnair',
+    'OS':'Austrian Airlines','LX':'Swiss','TK':'Turkish Airlines','FR':'Ryanair','U2':'easyJet',
+    'W6':'Wizz Air','AA':'American Airlines','UA':'United Airlines','DL':'Delta Air Lines',
+    'WN':'Southwest Airlines','B6':'JetBlue','AS':'Alaska Airlines','AC':'Air Canada',
+    'SQ':'Singapore Airlines','CX':'Cathay Pacific','MH':'Malaysia Airlines','TG':'Thai Airways',
+    'JL':'Japan Airlines','NH':'ANA','KE':'Korean Air','OZ':'Asiana Airlines',
+    'QF':'Qantas','NZ':'Air New Zealand','ET':'Ethiopian Airlines','SA':'South African Airways',
+    'SU':'Aeroflot','S7':'S7 Airlines','LA':'LATAM','G3':'Gol','AV':'Avianca',
+    'CZ':'China Southern','CA':'Air China','MU':'China Eastern','HU':'Hainan Airlines',
+  };
+
+  function getAirlineName(iata){ return AIRLINE_NAMES[iata.toUpperCase()]||iata.toUpperCase(); }
+
+  async function searchFlight(q){
+    const parsed=parseFlightCode(q);
+    if(!parsed){
+      searchPlace(q); return;
+    }
+    const {raw:callsign, iata, num, icao, icaoCallsign}=parsed;
+    const airlineName=getAirlineName(iata);
+    const displayCS=icaoCallsign||callsign;
+
+    sDrop.innerHTML=`<div class="sr-loading"><div class="sr-spin"></div>SEARCHING ${callsign} (${airlineName} ${num})…</div>`;
+    sDrop.classList.add('vis');
+    setDet(`<div style="font-family:var(--fm);font-size:9px;color:var(--cyan);text-align:center;padding:20px 0;line-height:1.9;">
+      <div class="sr-spin" style="margin:0 auto 10px;"></div>
+      <div style="color:var(--textb);font-size:11px;">✈ ${callsign}</div>
+      <div style="margin-top:4px;">${airlineName} · FLIGHT ${num}</div>
+      <div style="color:var(--textd);margin-top:4px;font-size:8px;">QUERYING MULTIPLE SOURCES…</div></div>`);
+
+    // ── Step 1: search live ADS-B data (already loaded) ──
+    // Try both IATA callsign and ICAO callsign in live data
+    const liveData=window.liveFlightData||[];
+    const tryCallsigns=[callsign, icaoCallsign, iata+num].filter(Boolean).map(s=>s.toUpperCase());
+    let liveMatch=null;
+    for(const cs of tryCallsigns){
+      liveMatch=liveData.find(s=>(s[1]||'').trim().toUpperCase()===cs);
+      if(liveMatch) break;
+    }
+    if(liveMatch){
+      plotLiveFlight(liveMatch, callsign, airlineName, num);
+      sDrop.classList.remove('vis');
+      return;
+    }
+
+    // ── Step 2: adsbdb.com — try both ICAO callsign and IATA callsign ──
+    // adsbdb uses ICAO callsigns (e.g. IGO1413 for 6E1413)
+    const adsbdbCandidates=[icaoCallsign, callsign, iata+num].filter(Boolean);
+    for(const cs of adsbdbCandidates){
+      try{
+        const r=await fetch(`https://api.adsbdb.com/v0/callsign/${cs}`,{signal:AbortSignal.timeout(7000)});
+        if(r.ok){
+          const data=await r.json();
+          const fInfo=data?.response?.flightroute;
+          if(fInfo){
+            plotRouteFromAdsbdb(callsign, airlineName, fInfo);
+            sDrop.classList.remove('vis');
+            return;
+          }
+        }
+      } catch(e){}
+    }
+
+    // ── Step 3: OpenSky via multiple CORS proxies ──
+    const corsBase='https://corsproxy.io/?';
+    const allOriginsBase='https://api.allorigins.win/raw?url=';
+    for(const cs of adsbdbCandidates){
+      const padded=cs.padEnd(8,' ');
+      const osUrl=`https://opensky-network.org/api/states/all?callsign=${encodeURIComponent(padded)}`;
+      const proxyUrls=[
+        corsBase+encodeURIComponent(osUrl),
+        allOriginsBase+encodeURIComponent(osUrl),
+      ];
+      for(const url of proxyUrls){
+        try{
+          const r=await fetch(url,{signal:AbortSignal.timeout(7000)});
+          if(!r.ok) continue;
+          const data=await r.json();
+          const states=(data?.states||[]).filter(s=>s[5]!=null&&s[6]!=null);
+          if(states.length>0){
+            const s=states[0];
+            plotLiveFlight(s, callsign, airlineName, num);
+            sDrop.classList.remove('vis');
+            return;
+          }
+        } catch(e){}
+      }
+    }
+
+    // ── Step 4: No live data — show airline info + message ──
+    showFlightNotFound(callsign, iata, num, airlineName, icaoCallsign);
+  }
+
+  function plotLiveFlight(s, callsign, airlineName, num){
+    const lat=s[6], lng=s[5], hdg=s[10]||0;
+    const alt=Math.round(s[7]||s[13]||0);
+    const spd=Math.round((s[9]||0)*1.94);
+    LYR.search.clearLayers();
+    const m=L.marker([lat,lng],{icon:makeArrow('#00ffee',hdg)}).addTo(LYR.search);
+    // Pulsing ring around live aircraft
+    const ring=L.circle([lat,lng],{radius:80000,color:'#00c8ff',weight:1,fillOpacity:0.04,dashArray:'4,4'}).addTo(LYR.search);
+    m.bindPopup(`<div style="font-family:'Share Tech Mono';font-size:10px;min-width:160px;">
+      <div style="color:#00c8ff;font-size:8px;margin-bottom:5px;letter-spacing:0.12em;">✈ LIVE TRACK</div>
+      <div style="color:#ddeeff;font-size:13px;font-weight:bold;margin-bottom:4px;">${callsign}</div>
+      <div style="color:#adc8d8;">${airlineName} · Flight ${num}</div>
+      <hr style="border-color:rgba(0,200,255,0.15);margin:6px 0;">
+      <div>ALT <b style="color:#00c8ff">${alt}m</b> · SPD <b style="color:#00c8ff">${spd}kt</b></div>
+      <div>HDG <b style="color:#00c8ff">${Math.round(hdg)}°</b></div></div>`,{maxWidth:260}).openPopup();
+    map.flyTo([lat,lng],8,{animate:true,duration:1.5});
+    setDet(`<div class="dttl" style="color:var(--cyan);">✈ ${callsign}</div>
+      <div style="font-family:var(--fm);font-size:9px;color:var(--green);margin-bottom:8px;display:flex;align-items:center;gap:5px;">
+        <div class="dot dot-g"></div> LIVE POSITION ACQUIRED</div>
+      <div class="dgrid">
+        ${dfRow('CALLSIGN',callsign,'hl')}${dfRow('AIRLINE',airlineName,'')}
+        ${dfRow('FLIGHT NO',num,'')}${dfRow('COUNTRY',s[2]||'—','')}
+        ${dfRow('ALTITUDE',alt+'m / FL'+Math.round(alt/30.48),'')}${dfRow('SPEED',spd+' kt','')}
+        ${dfRow('HEADING',Math.round(hdg)+'°','')}${dfRow('ON GROUND',s[8]?'YES':'NO','')}
+        ${dfRow('LATITUDE',lat.toFixed(5)+'°','')}${dfRow('LONGITUDE',lng.toFixed(5)+'°','')}
+      </div>
+      <div class="sfooter">SOURCE: ADS-B LIVE · ICAO24: ${s[0]||'—'} · ${new Date().toUTCString()}</div>`);
+  }
+
+  function plotRouteFromAdsbdb(callsign, airlineName, fInfo){
+    const origin=fInfo.origin, dest=fInfo.destination, ac=fInfo.aircraft;
+    const oLat=origin?.latitude, oLng=origin?.longitude;
+    const dLat=dest?.latitude, dLng=dest?.longitude;
+    LYR.search.clearLayers();
+    if(oLat&&oLng){
+      const oMk=L.marker([oLat,oLng],{icon:makeIcon('🛫','#00c8ff')}).addTo(LYR.search);
+      oMk.bindTooltip(`${origin.iata_code||'?'} · ${origin.municipality||''}`);
+    }
+    if(dLat&&dLng){
+      const dMk=L.marker([dLat,dLng],{icon:makeIcon('🛬','#00ff88')}).addTo(LYR.search);
+      dMk.bindTooltip(`${dest.iata_code||'?'} · ${dest.municipality||''}`);
+    }
+    if(oLat&&oLng&&dLat&&dLng){
+      // Curved great-circle approximation
+      const pts=[];
+      for(let i=0;i<=20;i++){
+        const t=i/20;
+        pts.push([oLat+(dLat-oLat)*t, oLng+(dLng-oLng)*t]);
+      }
+      L.polyline(pts,{color:'#00c8ff',weight:2,dashArray:'6,4',opacity:0.7}).addTo(LYR.search);
+      // Animated aircraft at midpoint
+      const midLat=(oLat+dLat)/2, midLng=(oLng+dLng)/2;
+      const hdg=Math.atan2(dLng-oLng,dLat-oLat)*180/Math.PI;
+      const midMk=L.marker([midLat,midLng],{icon:makeArrow('#00ffee',hdg)}).addTo(LYR.search);
+      midMk.bindPopup(`<div style="font-family:'Share Tech Mono';font-size:10px;">
+        <div style="color:#00c8ff;font-size:8px;margin-bottom:4px;">✈ ${callsign} · ROUTE DATA</div>
+        <div>${origin?.iata_code||'?'} → ${dest?.iata_code||'?'}</div>
+        <div style="color:#2a4455;font-size:8px;margin-top:3px;">Estimated position shown</div></div>`).openPopup();
+      map.flyToBounds([[Math.min(oLat,dLat),Math.min(oLng,dLng)],[Math.max(oLat,dLat),Math.max(oLng,dLng)]],
+        {animate:true,duration:1.8,padding:[60,60]});
+    } else if(oLat&&oLng){
+      map.flyTo([oLat,oLng],8,{animate:true,duration:1.5});
+    }
+    // Right panel
+    setDet(`<div class="dttl" style="color:var(--cyan);">✈ ${callsign}</div>
+      <div class="fd-route">
+        <div class="fd-apt">
+          <div class="fd-apt-code">${origin?.iata_code||'???'}</div>
+          <div class="fd-apt-name">${(origin?.municipality||'ORIGIN').substring(0,11)}</div>
+        </div>
+        <div class="fd-arrow"><div class="fd-arrow-dot"></div></div>
+        <div class="fd-apt">
+          <div class="fd-apt-code">${dest?.iata_code||'???'}</div>
+          <div class="fd-apt-name">${(dest?.municipality||'DEST').substring(0,11)}</div>
+        </div>
+      </div>
+      <div class="dgrid">
+        ${dfRow('AIRLINE',fInfo.airline?.name||airlineName,'')}
+        ${dfRow('AIRCRAFT',ac?.icao_type||'—','')}
+        ${dfRow('REG',ac?.registration||'—','hl')}
+        ${dfRow('ICAO CALL',fInfo.callsign_icao||'—','')}
+        ${dfRow('ORIGIN',origin?.name?.substring(0,18)||'—','')}
+        ${dfRow('DESTINATION',dest?.name?.substring(0,18)||'—','')}
+        ${dfRow('ORIG COUNTRY',origin?.country?.name?.substring(0,12)||'—','')}
+        ${dfRow('DEST COUNTRY',dest?.country?.name?.substring(0,12)||'—','')}
+      </div>
+      <div class="sfooter">SOURCE: ADSBDB ROUTE DB · ${new Date().toUTCString()}</div>`);
+  }
+
+  function showFlightNotFound(callsign, iata, num, airlineName, icaoCallsign){
+    sDrop.innerHTML=`<div class="sr-item">
+      <div class="sr-badge sr-flight">✈ FLIGHT</div>
+      <div class="sr-name">${callsign} · ${airlineName}</div>
+      <div class="sr-type" style="color:var(--orange);">⚠ NOT IN LIVE ADS-B — AIRLINE INFO BELOW</div>
+      <div class="sr-coords">ICAO CALLSIGN: ${icaoCallsign||'N/A'}</div>
+    </div>`;
+    setDet(`<div class="dttl" style="color:var(--cyan);">✈ ${callsign}</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;padding:6px 8px;background:color-mix(in srgb,var(--orange) 8%,transparent);border:1px solid color-mix(in srgb,var(--orange) 25%,transparent);">
+        <span style="font-size:14px;">⚠</span>
+        <span style="font-family:var(--fm);font-size:8.5px;color:var(--orange);">NOT IN LIVE ADS-B DATA</span>
+      </div>
+      <div class="dgrid">
+        ${dfRow('IATA CODE',iata,'hl')}${dfRow('FLIGHT NO',num,'')}
+        ${dfRow('AIRLINE',airlineName,'')}${dfRow('ICAO CALL',icaoCallsign||'N/A','')}
+      </div>
+      <div style="margin-top:8px;font-family:var(--fm);font-size:8px;color:var(--textd);line-height:1.8;padding:6px 8px;border:1px solid var(--brd);">
+        POSSIBLE REASONS:<br>
+        · Flight currently on ground<br>
+        · ADS-B not equipped / transponder off<br>
+        · Outside ADS-B coverage area<br>
+        · Flight completed for today<br>
+        · OpenSky rate-limited (try again)
+      </div>
+      <div class="sfooter" style="margin-top:8px;">
+        LIVE DATA: opensky-network.org<br>
+        ROUTE DATA: api.adsbdb.com · QUERIED ${new Date().toUTCString()}
+      </div>`);
+  }
+
+  // ══════════════════════════════════════════════════════
+  //  LIVE FLIGHTS — Multi-source with realistic fallback
+  // ══════════════════════════════════════════════════════
+
+  // Realistic dense flight simulation (for when ADS-B is unavailable)
+  function generateSimFlights(){
+    const routes=[
+      // Transatlantic
+      {cs:'BAW101',from:[51.5,0],to:[40.6,-73.8]},{cs:'DAL1',from:[40.6,-73.8],to:[51.5,0]},
+      {cs:'UAL902',from:[40.6,-73.8],to:[48.8,2.3]},{cs:'AFR83',from:[48.8,2.3],to:[40.6,-73.8]},
+      {cs:'EIN104',from:[53.4,-6.3],to:[40.6,-73.8]},{cs:'BAW117',from:[51.5,0],to:[25.2,55.4]},
+      {cs:'AAL100',from:[40.6,-73.8],to:[51.5,0]},{cs:'LH400',from:[50.0,8.6],to:[40.6,-73.8]},
+      // Europe-Middle East
+      {cs:'EK3',from:[25.2,55.4],to:[51.5,0]},{cs:'EK5',from:[25.2,55.4],to:[48.8,2.3]},
+      {cs:'EK31',from:[25.2,55.4],to:[50.0,8.6]},{cs:'QR2',from:[25.3,51.6],to:[51.5,0]},
+      {cs:'TK1',from:[40.9,28.8],to:[51.5,0]},{cs:'THY78',from:[40.9,28.8],to:[48.8,2.3]},
+      // Asia routes
+      {cs:'CPA001',from:[22.3,113.9],to:[51.5,0]},{cs:'SQ21',from:[1.4,103.9],to:[51.5,0]},
+      {cs:'JAL7',from:[35.7,139.8],to:[51.5,0]},{cs:'ANH5',from:[35.7,139.8],to:[40.6,-73.8]},
+      {cs:'KAL001',from:[37.4,126.4],to:[40.6,-73.8]},{cs:'CCA981',from:[39.5,116.4],to:[51.5,0]},
+      {cs:'MAS2',from:[2.7,101.7],to:[51.5,0]},{cs:'THA001',from:[13.7,100.7],to:[51.5,0]},
+      {cs:'UAE3',from:[25.2,55.4],to:[35.7,139.8]},{cs:'SQ26',from:[1.4,103.9],to:[40.6,-73.8]},
+      // US domestic
+      {cs:'UAL1',from:[41.9,-87.9],to:[37.6,-122.4]},{cs:'AAL2',from:[33.9,-118.4],to:[40.6,-73.8]},
+      {cs:'DAL2232',from:[33.6,-84.4],to:[40.6,-73.8]},{cs:'SWA205',from:[29.9,-95.3],to:[33.9,-118.4]},
+      {cs:'UAL328',from:[37.6,-122.4],to:[47.4,-122.3]},{cs:'AAL401',from:[26.1,-80.2],to:[40.6,-73.8]},
+      // Africa
+      {cs:'ETH508',from:[8.9,38.8],to:[51.5,0]},{cs:'SAA204',from:[-26.1,28.2],to:[51.5,0]},
+      // Oceania
+      {cs:'QFA1',from:[-33.9,151.2],to:[1.4,103.9]},{cs:'ANZ7',from:[-36.9,174.8],to:[-33.9,151.2]},
+      // South America
+      {cs:'TAM8020',from:[-23.4,-46.5],to:[40.6,-73.8]},{cs:'AVA28',from:[4.7,-74.1],to:[25.8,-80.3]},
+      // Additional
+      {cs:'RYR1',from:[53.4,-6.3],to:[48.8,2.3]},{cs:'EZY401',from:[51.5,0],to:[41.3,2.1]},
+      {cs:'VLG2001',from:[41.3,2.1],to:[53.4,-6.3]},{cs:'WZZ301',from:[52.2,21.0],to:[48.8,2.3]},
+      {cs:'FIN3',from:[60.3,24.9],to:[51.5,0]},{cs:'SAS901',from:[59.6,17.9],to:[51.5,0]},
+      {cs:'NAX3801',from:[59.9,10.6],to:[48.8,2.3]},{cs:'IBE3163',from:[40.4,-3.7],to:[41.3,2.1]},
+      {cs:'AUA619',from:[48.1,16.6],to:[52.5,13.4]},{cs:'CSN3001',from:[23.1,113.3],to:[1.4,103.9]},
+    ];
+    const now=Date.now()/1000;
+    return routes.map((r,i)=>{
+      const prog=((now/3600)+i*0.13)%1;
+      const lat=r.from[0]+(r.to[0]-r.from[0])*prog + (Math.random()-0.5)*0.8;
+      const lng=r.from[1]+(r.to[1]-r.from[1])*prog + (Math.random()-0.5)*0.8;
+      const hdg=Math.atan2(r.to[1]-r.from[1],r.to[0]-r.from[0])*180/Math.PI;
+      return [r.cs.toLowerCase()+'00',r.cs,'US',null,null,lng,lat,10600,false,245,hdg,null,null,10600];
+    });
+  }
+
+  let flightRefreshInterval=null;
+  let usingSimFlights=false;
+
+  async function fetchFlights(){
+    const srcEl=document.getElementById('flightSrc');
+    const srcLabel=document.getElementById('flightSrcLabel');
+    srcEl.style.color='var(--cyan)';
+    srcEl.textContent='✈ ADS-B: FETCHING…';
+
+    // Sources to try in order
+    const sources=[
+      {name:'OpenSky Direct',url:'https://opensky-network.org/api/states/all'},
+      {name:'CORS Proxy 1',url:'https://corsproxy.io/?https://opensky-network.org/api/states/all'},
+      {name:'AllOrigins',url:'https://api.allorigins.win/raw?url='+encodeURIComponent('https://opensky-network.org/api/states/all')},
+      {name:'ADS-B Exchange',url:'https://corsproxy.io/?https://adsbexchange-com1.p.rapidapi.com/v2/json'},
+    ];
+
+    for(const src of sources){
+      try{
+        const r=await fetch(src.url,{signal:AbortSignal.timeout(10000)});
+        if(!r.ok) continue;
+        const data=await r.json();
+        const states=(data?.states||[]).filter(s=>s[5]!=null&&s[6]!=null&&!s[8]);
+        if(states.length>10){
+          window.liveFlightData=states;
+          usingSimFlights=false;
+          renderFlights(states,src.name);
+          srcEl.style.color='var(--green)';
+          srcEl.textContent=`✈ ADS-B LIVE · ${states.length} AC · ${src.name}`;
+          srcLabel.textContent='LIVE '+src.name.toUpperCase();
+          return;
+        }
+      } catch(e){}
+    }
+
+    // All sources failed — use simulation
+    const simFlights=generateSimFlights();
+    window.liveFlightData=simFlights;
+    usingSimFlights=true;
+    renderFlights(simFlights,'SIMULATED');
+    srcEl.style.color='var(--orange)';
+    srcEl.textContent='✈ ADS-B: SIMULATED (API offline)';
+    srcLabel.textContent='SIMULATED';
+  }
+
+  function renderFlights(states,source){
+    LYR.flights.clearLayers();
+    const list=document.getElementById('flightList'); list.innerHTML='';
+    const shown=states.slice(0,400);
+    shown.forEach(s=>{
+      const cs=(s[1]||'').trim()||'UNKN';
+      const lat=s[6],lng=s[5],hdg=s[10]||0;
+      const m=L.marker([lat,lng],{icon:makeArrow('#00c8ff',hdg)}).addTo(LYR.flights);
+      m.bindTooltip(`✈ ${cs}`);
+      m.on('click',()=>showFlight(s,cs));
+    });
+    document.getElementById('cntAC').textContent=states.length;
+    document.getElementById('hAC').textContent=states.length;
+    // List top 20
+    states.slice(0,20).forEach(s=>{
+      const cs=(s[1]||'').trim()||'UNKN';
+      const lat=s[6],lng=s[5];
+      const it=document.createElement('div'); it.className='aitem';
+      it.innerHTML=`<span class="ai-ico">✈</span><span class="ai-cs">${cs}</span><span class="ai-st">${s[2]||'—'}</span>`;
+      it.onclick=()=>{map.flyTo([lat,lng],9,{animate:true,duration:1.2});showFlight(s,cs);};
+      list.appendChild(it);
+    });
+    if(source==='SIMULATED'){
+      const info=document.createElement('div');
+      info.style.cssText='font-family:var(--fm);font-size:8px;color:var(--orange);padding:6px;text-align:center;border-top:1px solid var(--brd);';
+      info.textContent='⚠ SIMULATED — ADS-B APIS OFFLINE';
+      list.appendChild(info);
+    }
+  }
+
+  // ── ASSET DATA ──────────────────────────────────────
+  const SHIPS=[
+    {id:'CVN-71',name:'USS THEODORE ROOSEVELT',type:'Carrier Strike Group',flag:'🇺🇸',lat:36.2,lng:-10.5,hdg:95,spd:18,stat:'PATROL',cls:'SURFACE'},
+    {id:'CVN-76',name:'USS RONALD REAGAN',type:'Carrier Strike Group',flag:'🇺🇸',lat:25.1,lng:125.8,hdg:220,spd:22,stat:'TRANSIT',cls:'SURFACE'},
+    {id:'DDG-109',name:'USS JASON DUNHAM',type:'Arleigh Burke DDG',flag:'🇺🇸',lat:33.5,lng:32.8,hdg:180,spd:28,stat:'ALERT',cls:'SURFACE'},
+    {id:'SSN-21',name:'USS SEAWOLF',type:'Attack Submarine',flag:'🇺🇸',lat:52.3,lng:-25.1,hdg:270,spd:15,stat:'SUBMERGED',cls:'SUBSURFACE'},
+    {id:'AD-KUZNETSOV',name:'ADMIRAL KUZNETSOV',type:'Heavy Carrier',flag:'🇷🇺',lat:69.2,lng:28.4,hdg:190,spd:12,stat:'PATROL',cls:'SURFACE'},
+    {id:'CRU-USTINOV',name:'MARSHAL USTINOV',type:'Slava Cruiser',flag:'🇷🇺',lat:35.8,lng:28.6,hdg:45,spd:20,stat:'TRANSIT',cls:'SURFACE'},
+    {id:'CV-16',name:'LIAONING (CV-16)',type:'Aircraft Carrier',flag:'🇨🇳',lat:20.5,lng:114.2,hdg:135,spd:16,stat:'EXERCISES',cls:'SURFACE'},
+    {id:'CV-17',name:'SHANDONG (CV-17)',type:'Aircraft Carrier',flag:'🇨🇳',lat:23.7,lng:119.4,hdg:280,spd:18,stat:'PATROL',cls:'SURFACE'},
+    {id:'R08-QE',name:'HMS QUEEN ELIZABETH',type:'Carrier Strike Group',flag:'🇬🇧',lat:51.2,lng:-4.8,hdg:350,spd:14,stat:'TRANSIT',cls:'SURFACE'},
+    {id:'K-561',name:'KAZAN (K-561)',type:'Yasen-M SSN',flag:'🇷🇺',lat:71.5,lng:30.2,hdg:330,spd:12,stat:'SUBMERGED',cls:'SUBSURFACE'},
+    {id:'R91-CDG',name:'FS CHARLES DE GAULLE',type:'Nuclear Carrier',flag:'🇫🇷',lat:43.2,lng:6.8,hdg:200,spd:15,stat:'PATROL',cls:'SURFACE'},
+    {id:'R11-VIKRA',name:'INS VIKRAMADITYA',type:'Aircraft Carrier',flag:'🇮🇳',lat:14.8,lng:68.4,hdg:120,spd:18,stat:'EXERCISES',cls:'SURFACE'},
+    {id:'DDG-SEJONG',name:'ROKS SEJONG THE GREAT',type:'Aegis Destroyer',flag:'🇰🇷',lat:37.4,lng:128.9,hdg:90,spd:25,stat:'ALERT',cls:'SURFACE'},
+    {id:'DDH-183',name:'JS IZUMO (DDH-183)',type:'Helicopter Carrier',flag:'🇯🇵',lat:34.8,lng:135.2,hdg:310,spd:20,stat:'PATROL',cls:'SURFACE'},
+    {id:'FFH-154',name:'HMAS SYDNEY',type:'Anzac Frigate',flag:'🇦🇺',lat:-28.5,lng:116.8,hdg:245,spd:22,stat:'PATROL',cls:'SURFACE'},
+    {id:'T093',name:'TYPE 093 SHANG',type:'Nuclear SSN',flag:'🇨🇳',lat:18.3,lng:120.7,hdg:60,spd:10,stat:'SUBMERGED',cls:'SUBSURFACE'},
+    {id:'F-75',name:'DENA (F-75)',type:'IRIN Frigate',flag:'🇮🇷',lat:25.3,lng:58.5,hdg:155,spd:18,stat:'PATROL',cls:'SURFACE'},
+    {id:'DDG-RIYADH',name:'HMGS AL RIYADH',type:'Al-Riyadh Class',flag:'🇸🇦',lat:24.1,lng:48.6,hdg:200,spd:20,stat:'PATROL',cls:'SURFACE'},
+  ];
+  const DRONES=[
+    {id:'MQ9-001',name:'MQ-9 REAPER',type:'Combat UAV',flag:'🇺🇸',lat:36.2,lng:43.5,hdg:80,alt:15000,stat:'ACTIVE',spd:240},
+    {id:'RQ4-002',name:'RQ-4B GLOBAL HAWK',type:'HALE ISR UAV',flag:'🇺🇸',lat:48.5,lng:22.3,hdg:270,alt:60000,stat:'ISR OPS',spd:340},
+    {id:'TB2-001',name:'BAYRAKTAR TB2',type:'MALE Combat UAV',flag:'🇺🇦',lat:49.8,lng:36.2,hdg:90,alt:8000,stat:'ACTIVE',spd:120},
+    {id:'TB2-002',name:'BAYRAKTAR TB2',type:'MALE Combat UAV',flag:'🇺🇦',lat:47.3,lng:32.6,hdg:140,alt:7500,stat:'ACTIVE',spd:115},
+    {id:'CH4-001',name:'CAIHONG CH-4',type:'Combat UAV',flag:'🇨🇳',lat:22.5,lng:118.2,hdg:45,alt:12000,stat:'PATROL',spd:200},
+    {id:'S70-001',name:'S-70 OKHOTNIK',type:'Stealth UCAV',flag:'🇷🇺',lat:55.8,lng:73.4,hdg:0,alt:20000,stat:'TESTING',spd:950},
+    {id:'MQ9-003',name:'MQ-9 REAPER',type:'Combat UAV',flag:'🇺🇸',lat:23.4,lng:57.8,hdg:190,alt:14000,stat:'ACTIVE',spd:250},
+    {id:'HAROP-01',name:'IAI HAROP',type:'Loitering Munition',flag:'🇮🇱',lat:31.5,lng:34.5,hdg:270,alt:6000,stat:'STANDBY',spd:180},
+    {id:'RQ180-01',name:'RQ-180',type:'Stealth HALE ISR',flag:'🇺🇸',lat:40.2,lng:58.6,hdg:180,alt:65000,stat:'CLASSIFIED',spd:700},
+    {id:'WJ700-01',name:'WJ-700',type:'Supersonic UCAV',flag:'🇨🇳',lat:34.5,lng:108.2,hdg:60,alt:35000,stat:'TESTING',spd:1200},
+    {id:'SHD-001',name:'SHAHED-136',type:'Loitering Munition',flag:'🇮🇷',lat:32.1,lng:51.7,hdg:315,alt:3000,stat:'ACTIVE',spd:185},
+    {id:'MQ1-004',name:'MQ-1C GRAY EAGLE',type:'Combat UAV',flag:'🇺🇸',lat:15.2,lng:45.3,hdg:240,alt:25000,stat:'ISR OPS',spd:220},
+  ];
+  const MISSILES=[
+    {id:'ICBM-NK01',name:'HWASONG-17',type:'ICBM (TEST)',flag:'🇰🇵',lat:40.0,lng:126.5,tlat:40.8,tlng:129.2,stat:'TEST',phase:'BOOST'},
+    {id:'CRUISE-RU01',name:'KALIBR CRUISE',type:'LACM',flag:'🇷🇺',lat:46.8,lng:32.1,tlat:49.2,tlng:36.4,stat:'IN FLIGHT',phase:'CRUISE'},
+    {id:'CRUISE-RU02',name:'KALIBR CRUISE',type:'LACM',flag:'🇷🇺',lat:47.2,lng:33.5,tlat:50.1,tlng:37.8,stat:'IN FLIGHT',phase:'CRUISE'},
+    {id:'SRBM-IR01',name:'SHAHAB-3',type:'MRBM',flag:'🇮🇷',lat:32.5,lng:53.2,tlat:33.2,tlng:44.5,stat:'STANDBY',phase:'STATIC'},
+    {id:'ATCM-US01',name:'TOMAHAWK BGM-109',type:'LACM',flag:'🇺🇸',lat:33.8,lng:34.2,tlat:33.5,tlng:36.2,stat:'SALVO ACTIVE',phase:'CRUISE'},
+    {id:'ATCM-US02',name:'TOMAHAWK BGM-109',type:'LACM',flag:'🇺🇸',lat:33.6,lng:34.0,tlat:33.3,tlng:35.8,stat:'SALVO ACTIVE',phase:'CRUISE'},
+    {id:'SRBM-CN01',name:'DF-21D (ASBM)',type:'ASBM',flag:'🇨🇳',lat:26.8,lng:117.3,tlat:24.5,tlng:123.8,stat:'ALERT POSTURE',phase:'READY'},
+    {id:'AAM-RU01',name:'S-400 INTERCEPTOR',type:'SAM',flag:'🇷🇺',lat:55.5,lng:37.2,tlat:57.2,tlng:35.8,stat:'ACTIVE DEFENSE',phase:'INTERCEPT'},
+  ];
+  const SATS=[
+    {id:'USA-315',name:'KH-11 KEYHOLE',type:'Optical IMINT',flag:'🇺🇸',lat:48.2,lng:55.3,alt:'LEO 470km',inc:97.9,stat:'ACTIVE',orbit:'SSO'},
+    {id:'USA-316',name:'KH-11 KEYHOLE',type:'Optical IMINT',flag:'🇺🇸',lat:22.4,lng:88.6,alt:'LEO 475km',inc:97.9,stat:'ACTIVE',orbit:'SSO'},
+    {id:'USA-202',name:'NROL-44 (SIGINT)',type:'SIGINT',flag:'🇺🇸',lat:35.5,lng:45.2,alt:'GEO 35786km',inc:0.0,stat:'ACTIVE',orbit:'GEO'},
+    {id:'COSMOS-2558',name:'KOSMOS-2558',type:'ISR',flag:'🇷🇺',lat:56.2,lng:90.5,alt:'LEO 545km',inc:97.3,stat:'ACTIVE',orbit:'SSO'},
+    {id:'YAOGAN-34',name:'YAOGAN-34',type:'Optical/SAR',flag:'🇨🇳',lat:18.8,lng:112.4,alt:'LEO 500km',inc:97.4,stat:'ACTIVE',orbit:'SSO'},
+    {id:'YAOGAN-36',name:'YAOGAN-36',type:'Optical/SAR',flag:'🇨🇳',lat:30.2,lng:125.6,alt:'LEO 500km',inc:97.4,stat:'ACTIVE',orbit:'SSO'},
+    {id:'OFEK-16',name:'OFEK-16',type:'SAR',flag:'🇮🇱',lat:32.5,lng:40.2,alt:'LEO 600km',inc:141.0,stat:'ACTIVE',orbit:'RETROGRADE'},
+    {id:'SAR-X01',name:'SAR-LUPE 2',type:'SAR IMINT',flag:'🇩🇪',lat:50.1,lng:8.5,alt:'LEO 495km',inc:98.2,stat:'ACTIVE',orbit:'SSO'},
+    {id:'GPS-IIF-10',name:'GPS IIF-10',type:'Navigation',flag:'🇺🇸',lat:18.2,lng:-75.4,alt:'MEO 20200km',inc:55.0,stat:'ACTIVE',orbit:'MEO'},
+    {id:'GPS-IIF-11',name:'GPS IIF-11',type:'Navigation',flag:'🇺🇸',lat:38.5,lng:28.6,alt:'MEO 20200km',inc:55.0,stat:'ACTIVE',orbit:'MEO'},
+    {id:'GLONASS-M55',name:'GLONASS-M 755',type:'Navigation',flag:'🇷🇺',lat:64.2,lng:58.8,alt:'MEO 19100km',inc:64.8,stat:'ACTIVE',orbit:'MEO'},
+    {id:'BEIDOU-G4',name:'BEIDOU G-4',type:'Navigation/ISR',flag:'🇨🇳',lat:5.2,lng:80.0,alt:'GEO 35786km',inc:0.1,stat:'ACTIVE',orbit:'GEO'},
+    {id:'HELIOS-2A',name:'HELIOS-2A',type:'Optical IMINT',flag:'🇫🇷',lat:44.5,lng:2.1,alt:'LEO 680km',inc:98.1,stat:'ACTIVE',orbit:'SSO'},
+    {id:'PLEIADES-1A',name:'PLEIADES NEO-1',type:'Commercial IMINT',flag:'🇫🇷',lat:28.5,lng:72.3,alt:'LEO 620km',inc:98.2,stat:'ACTIVE',orbit:'SSO'},
+  ];
+  const CONFLICTS=[
+    {id:'CZ-UA',name:'UKRAINE CONFLICT ZONE',sev:'critical',stat:'ACTIVE CONFLICT',cas:'HIGH',poly:[[52.4,22.5],[52.6,33.0],[50.5,38.2],[47.8,38.5],[46.2,35.5],[46.0,33.0],[47.5,28.0],[49.2,24.0],[51.0,22.0]]},
+    {id:'CZ-ME',name:'MIDDLE EAST THEATER',sev:'critical',stat:'ACTIVE HOSTILITIES',cas:'HIGH',poly:[[33.5,34.5],[34.5,36.8],[33.0,38.2],[31.2,36.5],[29.8,34.0],[30.5,32.0],[31.8,33.5]]},
+    {id:'CZ-TW',name:'TAIWAN STRAIT TENSION',sev:'high',stat:'ELEVATED TENSION',cas:'NONE',poly:[[26.4,120.0],[26.4,122.5],[23.8,122.5],[22.0,120.5],[22.0,119.5],[23.5,119.0],[25.0,119.2]]},
+    {id:'CZ-SCS',name:'SOUTH CHINA SEA DISPUTE',sev:'high',stat:'TERRITORIAL DISPUTE',cas:'NONE',poly:[[20.5,111.0],[21.0,117.5],[17.0,119.5],[12.0,117.0],[9.5,113.0],[10.0,108.0],[14.0,108.5],[18.0,110.0]]},
+    {id:'CZ-KP',name:'KOREAN PENINSULA',sev:'high',stat:'ELEVATED READINESS',cas:'NONE',poly:[[38.8,124.5],[38.8,128.5],[37.8,129.5],[37.5,126.5],[37.8,124.5]]},
+    {id:'CZ-HZ',name:'STRAIT OF HORMUZ',sev:'medium',stat:'MARITIME TENSION',cas:'NONE',poly:[[27.2,54.5],[27.5,57.5],[26.0,57.8],[25.5,56.5],[25.3,55.0],[26.0,54.0]]},
+    {id:'CZ-SA',name:'SAHEL INSURGENCY BELT',sev:'medium',stat:'INSURGENCY ACTIVE',cas:'MODERATE',poly:[[20.0,-6.0],[20.0,10.0],[14.0,15.5],[10.0,14.5],[10.5,3.0],[14.0,-2.0],[18.0,-5.5]]},
+    {id:'CZ-MM',name:'MYANMAR CIVIL WAR',sev:'high',stat:'ACTIVE CONFLICT',cas:'HIGH',poly:[[28.0,95.0],[27.5,98.0],[23.5,99.5],[19.5,99.5],[16.0,98.5],[16.0,96.5],[19.0,93.5],[24.0,92.5],[26.5,93.0]]},
+    {id:'CZ-HN',name:'HORN OF AFRICA',sev:'medium',stat:'INSURGENCY & PIRACY',cas:'MODERATE',poly:[[15.5,41.0],[15.5,44.0],[12.0,48.0],[8.0,47.5],[5.0,44.5],[4.5,42.0],[8.0,42.0],[12.0,42.5]]},
+  ];
+
+  // ── RENDER ASSETS ──────────────────────────────────
+  function renderConflicts(){
+    LYR.conflicts.clearLayers();
+    const CLR={critical:'#ff1a44',high:'#ff8800',medium:'#ffd000'};
+    CONFLICTS.forEach(z=>{
+      const c=CLR[z.sev]||'#ffd000';
+      const poly=L.polygon(z.poly,{color:c,weight:1.5,fillColor:c,fillOpacity:0.1,dashArray:'6,4'}).addTo(LYR.conflicts);
+      poly.on('click',()=>showConflict(z));
+      poly.bindTooltip(`<b style="color:${c}">${z.name}</b>`,{sticky:true});
+    });
+  }
+
+  function renderShips(){
+    LYR.ships.clearLayers();
+    const list=document.getElementById('shipList'); list.innerHTML='';
+    SHIPS.forEach(s=>{
+      const col=s.cls==='SUBSURFACE'?'#aa44ff':'#00c8ff';
+      const m=L.marker([s.lat,s.lng],{icon:makeArrow(col,s.hdg)}).addTo(LYR.ships);
+      m.bindTooltip(`${s.flag} ${s.id} · ${s.stat}`);
+      m.on('click',()=>showShip(s));
+      const it=document.createElement('div'); it.className='aitem';
+      it.innerHTML=`<span class="ai-ico">${s.cls==='SUBSURFACE'?'🔵':'⛴'}</span><span class="ai-cs">${s.flag} ${s.id}</span><span class="ai-st">${s.stat}</span>`;
+      it.onclick=()=>{map.flyTo([s.lat,s.lng],7,{animate:true,duration:1.2});showShip(s);};
+      list.appendChild(it);
+    });
+  }
+
+  function renderDrones(){
+    LYR.drones.clearLayers();
+    const list=document.getElementById('droneList'); list.innerHTML='';
+    DRONES.forEach(d=>{
+      const m=L.marker([d.lat,d.lng],{icon:makeIcon('⬡','#ffd000')}).addTo(LYR.drones);
+      m.bindTooltip(`${d.flag} ${d.id}`);
+      m.on('click',()=>showDrone(d));
+      const it=document.createElement('div'); it.className='aitem';
+      it.innerHTML=`<span class="ai-ico" style="color:var(--yellow)">⬡</span><span class="ai-cs">${d.flag} ${d.id}</span><span class="ai-st">${d.stat}</span>`;
+      it.onclick=()=>{map.flyTo([d.lat,d.lng],7,{animate:true,duration:1.2});showDrone(d);};
+      list.appendChild(it);
+    });
+  }
+
+  function renderMissiles(){
+    LYR.missiles.clearLayers();
+    const list=document.getElementById('missileList'); list.innerHTML='';
+    MISSILES.forEach(m=>{
+      const col=m.phase==='BOOST'?'#ff1a44':m.phase==='CRUISE'?'#ff8800':'#ffd000';
+      const mk=L.marker([m.lat,m.lng],{icon:makeIcon('🚀',col,m.phase!=='STATIC')}).addTo(LYR.missiles);
+      mk.bindTooltip(`${m.flag} ${m.id} · ${m.stat}`);
+      mk.on('click',()=>showMissile(m));
+      if(m.phase==='CRUISE'||m.phase==='BOOST')
+        L.polyline([[m.lat,m.lng],[m.tlat,m.tlng]],{color:col,weight:1,dashArray:'4,3',opacity:0.5}).addTo(LYR.missiles);
+      const it=document.createElement('div'); it.className='aitem';
+      it.innerHTML=`<span class="ai-ico">🚀</span><span class="ai-cs">${m.flag} ${m.name}</span><span class="ai-st" style="color:${col}">${m.phase}</span>`;
+      it.onclick=()=>{map.flyTo([m.lat,m.lng],6,{animate:true,duration:1.2});showMissile(m);};
+      list.appendChild(it);
+    });
+  }
+
+  function renderSats(){
+    LYR.sats.clearLayers();
+    const list=document.getElementById('satList'); list.innerHTML='';
+    SATS.forEach(s=>{
+      const m=L.marker([s.lat,s.lng],{icon:makeIcon('🛰','#aa44ff')}).addTo(LYR.sats);
+      m.bindTooltip(`${s.flag} ${s.id} · ${s.orbit}`);
+      m.on('click',()=>showSat(s));
+      const it=document.createElement('div'); it.className='aitem';
+      it.innerHTML=`<span class="ai-ico">🛰</span><span class="ai-cs">${s.flag} ${s.id}</span><span class="ai-st" style="color:var(--purple)">${s.orbit}</span>`;
+      it.onclick=()=>{map.flyTo([s.lat,s.lng],5,{animate:true,duration:1.2});showSat(s);};
+      list.appendChild(it);
+    });
+  }
+
+  // ── DETAIL SHOW FUNCTIONS ──────────────────────────
+  function showShip(s){
+    setDet(`<div class="dttl">${s.flag} ${s.id}</div><div class="dgrid">
+      ${dfRow('CLASS',s.cls,s.cls==='SUBSURFACE'?'pu':'hl')}${dfRow('STATUS',s.stat,s.stat==='ALERT'?'dr':'gn')}
+      ${dfRow('SPEED',s.spd+' kt','')}${dfRow('HEADING',s.hdg+'°','')}
+      ${dfRow('TYPE',s.type,'')}${dfRow('OPERATOR',s.flag,'')}
+      ${dfRow('LAT',s.lat.toFixed(3)+'°','')}${dfRow('LNG',s.lng.toFixed(3)+'°','')}
+    </div><div style="margin-top:6px;"><div class="dl">VESSEL NAME</div><div style="font-family:var(--fu);font-size:12px;color:var(--textb);">${s.name}</div></div>
+    <div class="sfooter">NAVAL TRACK · SIMULATED · ${new Date().toUTCString()}</div>`);
+  }
+  function showDrone(d){
+    setDet(`<div class="dttl">${d.flag} ${d.id}</div><div class="dgrid">
+      ${dfRow('STATUS',d.stat,'gn')}${dfRow('SPEED',d.spd+' kt','')}
+      ${dfRow('ALT',d.alt.toLocaleString()+' ft','')}${dfRow('HDG',d.hdg+'°','')}
+      ${dfRow('TYPE',d.type,'')}${dfRow('LAT',d.lat.toFixed(3)+'°','')}
+    </div><div style="margin-top:6px;"><div class="dl">SYSTEM</div><div style="font-family:var(--fu);font-size:12px;color:var(--textb);">${d.name}</div></div>
+    <div class="sfooter">UAV TRACK · SIMULATED · ${new Date().toUTCString()}</div>`);
+  }
+  function showMissile(m){
+    const col=m.phase==='BOOST'?'dr':m.phase==='CRUISE'?'wa':'';
+    setDet(`<div class="dttl" style="color:var(--orange)">${m.flag} ${m.name}</div><div class="dgrid">
+      ${dfRow('PHASE',m.phase,'wa')}${dfRow('STATUS',m.stat,'dr')}
+      ${dfRow('TYPE',m.type,'')}${dfRow('ID',m.id,'')}
+      ${dfRow('ORIG LAT',m.lat.toFixed(3)+'°','')}${dfRow('ORIG LNG',m.lng.toFixed(3)+'°','')}
+      ${dfRow('TGT LAT',m.tlat.toFixed(3)+'°','')}${dfRow('TGT LNG',m.tlng.toFixed(3)+'°','')}
+    </div><div class="sfooter">MISSILE TRACK · SIMULATED · ${new Date().toUTCString()}</div>`);
+  }
+  function showSat(s){
+    setDet(`<div class="dttl" style="color:var(--purple)">${s.flag} ${s.id}</div><div class="dgrid">
+      ${dfRow('TYPE',s.type,'')}${dfRow('STATUS',s.stat,'gn')}
+      ${dfRow('ORBIT',s.orbit,'pu')}${dfRow('ALT',s.alt,'')}
+      ${dfRow('INC',s.inc+'°','')}${dfRow('OPERATOR',s.flag,'')}
+      ${dfRow('GND LAT',s.lat.toFixed(2)+'°','')}${dfRow('GND LNG',s.lng.toFixed(2)+'°','')}
+    </div><div class="sfooter">SAT TRACK · SIMULATED · ${new Date().toUTCString()}</div>`);
+  }
+  function showConflict(z){
+    const CLR={critical:'var(--red)',high:'var(--orange)',medium:'var(--yellow)'};
+    setDet(`<div class="dttl" style="color:var(--red)">⚠ ${z.name}</div><div class="dgrid">
+      ${dfRow('STATUS',z.stat,'dr')}${dfRow('SEVERITY',z.sev.toUpperCase(),'dr')}
+      ${dfRow('CASUALTIES',z.cas,'wa')}${dfRow('ZONE ID',z.id,'')}
+    </div><div class="sfooter">ACLED / GDELT CONFLICT DB · ${new Date().toUTCString()}</div>`);
+  }
+  function showFlight(s,callsign){
+    const cs=callsign||(s[1]||'UNKN').trim();
+    const alt=s[13]||s[7]||0;
+    setDet(`<div class="dttl">✈ ${cs}</div><div class="dgrid">
+      ${dfRow('CALLSIGN',cs,'hl')}${dfRow('COUNTRY',s[2]||'—','')}
+      ${dfRow('ALT',Math.round(alt)+'m / FL'+Math.round(alt/30.48),'')}${dfRow('SPD',Math.round((s[9]||0)*1.94)+' kt','')}
+      ${dfRow('HDG',Math.round(s[10]||0)+'°','')}${dfRow('ON GND',s[8]?'YES':'NO','')}
+      ${dfRow('LAT',s[6]?s[6].toFixed(5)+'°':'—','')}${dfRow('LNG',s[5]?s[5].toFixed(5)+'°':'—','')}
+    </div><div class="sfooter">SOURCE: ADS-B LIVE · ICAO24: ${s[0]||'—'} · ${new Date().toUTCString()}</div>`);
+  }
+
+  // ── GEOLOCATION ────────────────────────────────────
+  window.geoLocate=()=>{
+    const btn=document.getElementById('geoBtn');
+    btn.textContent='📍 LOCATING…'; btn.classList.add('on-green');
+    if(!navigator.geolocation){btn.textContent='📍 NOT SUPPORTED';return;}
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const lat=pos.coords.latitude,lon=pos.coords.longitude;
+      LYR.search.clearLayers();
+      const myIco=L.divIcon({html:`<div style="width:16px;height:16px;border-radius:50%;background:#00ff88;border:3px solid #fff;box-shadow:0 0 20px #00ff88;"></div>`,iconSize:[16,16],iconAnchor:[8,8],className:''});
+      L.marker([lat,lon],{icon:myIco}).addTo(LYR.search).bindPopup(`<div style="font-family:'Share Tech Mono';font-size:10px;"><div style="color:#00ff88;font-size:8px;margin-bottom:3px;">📍 YOUR LOCATION</div>LAT: ${lat.toFixed(5)}°<br>LNG: ${lon.toFixed(5)}°<br><span style="color:#2a4455;font-size:7.5px;">±${Math.round(pos.coords.accuracy)}m accuracy</span></div>`).openPopup();
+      map.flyTo([lat,lon],14,{animate:true,duration:1.5});
+      btn.textContent='📍 MY LOCATION'; btn.classList.remove('on-green');
+      setDet(`<div class="loc-card"><div style="font-size:24px;margin-bottom:6px;">🧭</div><div class="loc-name">YOUR POSITION</div><div class="loc-type">◉ GPS GEOLOCATION</div>
+        <div class="loc-row"><span class="loc-lbl">LATITUDE</span><span class="loc-val" style="color:var(--green)">${lat.toFixed(6)}°</span></div>
+        <div class="loc-row"><span class="loc-lbl">LONGITUDE</span><span class="loc-val" style="color:var(--green)">${lon.toFixed(6)}°</span></div>
+        <div class="loc-row"><span class="loc-lbl">ACCURACY</span><span class="loc-val">±${Math.round(pos.coords.accuracy)}m</span></div>
+        <button class="loc-bm-btn" onclick="addBookmark(${lat},${lon},'My Location','GPS')">⭐ SAVE POSITION</button></div>`);
+    },()=>{btn.textContent='📍 DENIED';btn.classList.remove('on-green');setTimeout(()=>{btn.textContent='📍 MY LOCATION';},3000);},{enableHighAccuracy:true,timeout:10000});
+  };
+
+  // ── MEASURE DISTANCE ───────────────────────────────
+  let measuring=false, measurePts=[], measureLine=null;
+  window.toggleMeasure=()=>{
+    measuring=!measuring;
+    const btn=document.getElementById('measureBtn');
+    const info=document.getElementById('measureInfo');
+    if(measuring){
+      btn.classList.add('on-orange'); btn.textContent='📏 MEASURING… (right-click finish)';
+      info.classList.add('vis'); measurePts=[]; LYR.measure.clearLayers();
+      if(measureLine){map.removeLayer(measureLine);measureLine=null;}
+      map.on('click',onMeasureClick); map.on('contextmenu',stopMeasure);
+      map.getContainer().style.cursor='crosshair';
+    } else stopMeasure();
+  };
+  function onMeasureClick(e){
+    measurePts.push(e.latlng);
+    const dot=L.divIcon({html:`<div style="width:8px;height:8px;border-radius:50%;background:#ff8800;border:2px solid #fff;"></div>`,iconSize:[8,8],iconAnchor:[4,4],className:''});
+    L.marker(e.latlng,{icon:dot}).addTo(LYR.measure);
+    if(measurePts.length>1){
+      if(measureLine) map.removeLayer(measureLine);
+      measureLine=L.polyline(measurePts,{color:'#ff8800',weight:2,dashArray:'6,4',opacity:0.9}).addTo(map);
+      let total=0;
+      for(let i=1;i<measurePts.length;i++) total+=measurePts[i-1].distanceTo(measurePts[i]);
+      const badge=document.getElementById('distBadge');
+      badge.textContent=`📏 ${(total/1000).toFixed(2)} km · ${(total/1852).toFixed(2)} nm · ${(total/1609.34).toFixed(2)} mi`;
+      badge.classList.add('vis');
+    }
+  }
+  function stopMeasure(){
+    measuring=false;
+    const btn=document.getElementById('measureBtn');
+    btn.classList.remove('on-orange'); btn.textContent='📏 MEASURE DIST';
+    document.getElementById('measureInfo').classList.remove('vis');
+    map.off('click',onMeasureClick); map.off('contextmenu',stopMeasure);
+    map.getContainer().style.cursor='';
+  }
+
+  // ── BOOKMARKS ─────────────────────────────────────
+  let bookmarks=[];
+  window.toggleBookmarks=()=>{
+    const p=document.getElementById('bmPanel');
+    p.classList.toggle('vis');
+    document.getElementById('bookmarkBtn').classList.toggle('on',p.classList.contains('vis'));
+  };
+  window.addBookmark=(lat,lon,name,type)=>{
+    bookmarks.push({lat,lon,name,type,id:Date.now()});
+    renderBM();
+    document.getElementById('bmCount').textContent=bookmarks.length;
+    document.getElementById('bmPanel').classList.add('vis');
+    document.getElementById('bookmarkBtn').classList.add('on');
+  };
+  function renderBM(){
+    const list=document.getElementById('bmList');
+    if(!bookmarks.length){list.innerHTML='<div class="bm-empty">NO SAVED LOCATIONS</div>';return;}
+    list.innerHTML=bookmarks.map(b=>`<div class="bm-item" onclick="flyBM(${b.lat},${b.lon},'${b.name.replace(/'/g,"\\'")}')">
+      <span style="font-size:12px;">📍</span><span class="bm-name" title="${b.name}">${b.name}</span>
+      <span class="bm-del" onclick="event.stopPropagation();delBM(${b.id})">✕</span></div>`).join('');
+  }
+  window.flyBM=(lat,lon,name)=>{
+    LYR.search.clearLayers();
+    L.marker([lat,lon],{icon:searchIcon}).addTo(LYR.search).bindPopup(`<div style="font-family:'Share Tech Mono';font-size:10px;">⭐ ${name}</div>`).openPopup();
+    map.flyTo([lat,lon],12,{animate:true,duration:1.5});
+  };
+  window.delBM=(id)=>{bookmarks=bookmarks.filter(b=>b.id!==id);renderBM();document.getElementById('bmCount').textContent=bookmarks.length;};
+  window.clearAllBookmarks=()=>{bookmarks=[];renderBM();document.getElementById('bmCount').textContent=0;};
+
+  // ── FULLSCREEN ────────────────────────────────────
+  window.toggleFullscreen=()=>{
+    const btn=document.getElementById('fsBtn');
+    if(!document.fullscreenElement){
+      document.documentElement.requestFullscreen().then(()=>{btn.textContent='⛶ EXIT FULLSCREEN';btn.classList.add('on');});
+    } else {
+      document.exitFullscreen().then(()=>{btn.textContent='⛶ FULLSCREEN';btn.classList.remove('on');});
+    }
+  };
+
+  // ── INTEL / ALERTS / TICKER ───────────────────────
+  const INTEL=[
+    {cls:'TOP SECRET//SCI',src:'SIGINT',sev:'critical',txt:'Encrypted comms burst — Hormuz Strait. Pattern consistent with naval strike coordination. Corroboration requested.'},
+    {cls:'SECRET',src:'GEOINT',sev:'high',txt:'Sat imagery: 40+ armored vehicles near Suwalki Gap. Thermal: engine-warm readiness. +72hr baseline change.'},
+    {cls:'SECRET',src:'HUMINT',sev:'high',txt:'Source CARDINAL-7: elevated SSN activity North Atlantic. Two unidentified contacts — GIUK Gap.'},
+    {cls:'TOP SECRET',src:'MASINT',sev:'critical',txt:'Seismic sensors triggered at [REDACTED COORD]. Signature consistent with subterranean detonation 2–5kt.'},
+    {cls:'CONFIDENTIAL',src:'OSINT',sev:'medium',txt:'Social media analysis: large-scale mobilization northeastern theater. HIGH credibility.'},
+    {cls:'SECRET',src:'GEOINT',sev:'medium',txt:'New phased-array radar installation 38.4°N 127.8°E — OTH/ABM class. 30-day activation window.'},
+    {cls:'CONFIDENTIAL',src:'SIGINT',sev:'low',txt:'SCS maritime traffic +23% above 30-day baseline. Naval vessels: 31% of increase.'},
+    {cls:'TOP SECRET',src:'HUMINT',sev:'high',txt:'Source MERCURY: carrier-based strike exercise window 72–96hr. Assets pre-positioned.'},
+  ];
+  const ALERTS=[
+    {sev:'CRITICAL',txt:'Air defense radar surge — Northern Fleet sector 7',t:'-2m'},
+    {sev:'HIGH',txt:'Unidentified SSN contact — GIUK Gap, Sector 7',t:'-8m'},
+    {sev:'HIGH',txt:'Ballistic missile test window open — Eastern theater',t:'-14m'},
+    {sev:'MEDIUM',txt:'USS DDG-109 entering disputed maritime zone',t:'-22m'},
+    {sev:'HIGH',txt:'EW / RF jamming active — Baltic region',t:'-31m'},
+    {sev:'MEDIUM',txt:'Drone incursion near [REDACTED] air installation',t:'-44m'},
+    {sev:'CRITICAL',txt:'Track loss: nuclear SSN — Norwegian Sea',t:'-1h'},
+    {sev:'MEDIUM',txt:'Cyber intrusion detected on critical infrastructure',t:'-1.5h'},
+    {sev:'LOW',txt:'Anomalous fishing vessel near undersea cable route',t:'-2h'},
+  ];
+  function renderIntel(){
+    const feed=document.getElementById('intelFeed'); feed.innerHTML='';
+    const now=new Date();
+    INTEL.slice(0,5).forEach(b=>{
+      const ts=`${p2(now.getUTCHours())}:${p2(now.getUTCMinutes())}Z`;
+      const el=document.createElement('div'); el.className=`iitem ${b.sev}`;
+      el.innerHTML=`<div class="ihdr"><span class="icls">◉ ${b.cls}</span><span class="itm">${ts}</span></div><span class="isrc">[${b.src}] </span><span class="itxt">${b.txt}</span>`;
+      feed.appendChild(el);
+    });
+  }
+  function renderAlerts(){
+    const feed=document.getElementById('alertFeed'); feed.innerHTML='';
+    const CLR={CRITICAL:'var(--red)',HIGH:'var(--orange)',MEDIUM:'var(--yellow)',LOW:'var(--cyan)'};
+    ALERTS.forEach(a=>{
+      const el=document.createElement('div'); el.className='alrt';
+      el.style.borderLeftColor=CLR[a.sev];
+      el.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-family:var(--fd);font-size:7px;color:${CLR[a.sev]};letter-spacing:0.1em;">◉ ${a.sev}</span><span style="font-family:var(--fm);font-size:8px;color:var(--textd);">${a.t}</span></div><span style="font-family:var(--fu);font-size:10px;color:var(--text);">${a.txt}</span>`;
+      feed.appendChild(el);
+    });
+  }
+  const TICKS=[
+    {s:'ta',t:'AIR DEFENSE RADARS SURGE — NORTHERN FLEET SECTOR 7'},
+    {s:'tm',t:'CVN-71 COURSE CHANGE — HEADING 095 · 22KT'},
+    {s:'tw',t:'EW JAMMING ACTIVE — BALTIC SECTOR'},
+    {s:'ti',t:'NOTAM: FL180–FL350 CLOSURE — E. MEDITERRANEAN'},
+    {s:'ta',t:'BALLISTIC MISSILE TEST WINDOW OPEN — EASTERN THEATER'},
+    {s:'tm',t:'RUSSIAN K-561 SSN CONTACT — GIUK GAP SECTOR 7'},
+    {s:'tw',t:'MARITIME EXCLUSION ZONE — HORMUZ NORTH APPROACH'},
+    {s:'ti',t:'NATO EXERCISE STEADFAST DEFENDER · ACTIVE'},
+    {s:'ta',t:'CYBER INCIDENT — CRITICAL INFRASTRUCTURE NETWORK'},
+    {s:'ts',t:'KH-11 KEYHOLE OVERPASS — UKRAINE THEATER · 0312Z'},
+    {s:'tm',t:'CHINESE TYPE-052D TRANSITING FIRST ISLAND CHAIN'},
+    {s:'ti',t:'ADS-B: LIVE GLOBAL AIRCRAFT TRACKS ACTIVE'},
+    {s:'ta',t:'INTERCEPT: ENCRYPTED BURST — HORMUZ STRAIT'},
+    {s:'ts',t:'YAOGAN-36 OVERPASS — TAIWAN STRAIT · 0218Z'},
+    {s:'tm',t:'INS VIKRAMADITYA — COURSE 120 · 18KT · ARABIAN SEA'},
+    {s:'tw',t:'CHINESE CARRIER EXERCISES 80NM EAST OF TAIWAN'},
+    {s:'ti',t:'ARGUS-VIII v3.1 PRO · FLIGHT SEARCH + NOMINATIM ACTIVE'},
+    {s:'ti',t:'ESRI HYBRID TILES · SATELLITE + ROADS + LABELS'},
+    {s:'ta',t:'KALIBR CRUISE MISSILES ACTIVE — SOUTHERN UKRAINE'},
+    {s:'ti',t:'GDELT: 340 CONFLICT EVENTS LAST 24HR GLOBAL'},
+  ];
+  function renderTicker(){
+    const el=document.getElementById('tscroll');
+    const msgs=[...TICKS,...TICKS];
+    el.innerHTML=msgs.map(m=>`<span class="titem"><span class="tbadge ${m.s}">${m.s.toUpperCase()}</span>${m.t}</span>`).join('');
+  }
+
+  // ── DRIFT ─────────────────────────────────────────
+  function driftAll(){
+    SHIPS.forEach(s=>{const r=s.hdg*Math.PI/180,sp=s.spd*0.000015;s.lat+=Math.cos(r)*sp;s.lng+=Math.sin(r)*sp;});
+    DRONES.forEach(d=>{const r=d.hdg*Math.PI/180,sp=0.0004;d.lat+=Math.cos(r)*sp;d.lng+=Math.sin(r)*sp;});
+    MISSILES.forEach(m=>{
+      if(m.phase==='CRUISE'||m.phase==='BOOST'){
+        const r=Math.atan2(m.tlat-m.lat,m.tlng-m.lng),sp=0.0015;
+        m.lat+=Math.cos(r)*sp; m.lng+=Math.sin(r)*sp;
+        if(Math.abs(m.lat-m.tlat)<0.05&&Math.abs(m.lng-m.tlng)<0.05){const t=[m.lat,m.lng];m.lat=m.tlat;m.lng=m.tlng;m.tlat=t[0];m.tlng=t[1];}
+      }
+    });
+    SATS.forEach(s=>{s.lng=(s.lng+0.4)%360;});
+    renderShips(); renderDrones(); renderMissiles(); renderSats();
+  }
+
+  // ── TAB SWITCHER ──────────────────────────────────
+  window.switchTab=(tab)=>{
+    ['det','cyber','sigint','nuc'].forEach(t=>{
+      const pane=document.getElementById('tabpane-'+t);
+      const btn=document.getElementById('tab-'+t);
+      if(pane) pane.style.display=t===tab?'block':'none';
+      if(btn){
+        btn.style.background=t===tab?'color-mix(in srgb,var(--cyan) 12%,transparent)':'transparent';
+        btn.style.color=t===tab?'var(--cyan)':'var(--textd)';
+      }
+    });
+  };
+
+  // ── OPERATOR IP / GEOLOCATION (no prompt) ────────
+  async function fetchOperatorIP(){
+    const setField=(id,val,cls='')=>{
+      const el=document.getElementById(id); if(!el) return;
+      el.textContent=val; if(cls) el.className='op-val '+cls;
+    };
+    const sources=[
+      'https://ipapi.co/json/',
+      'https://ip-api.com/json/?fields=status,message,country,countryCode,regionName,city,isp,org,as,query,timezone,lat,lon',
+      'https://ipwhois.app/json/'
+    ];
+    for(const url of sources){
+      try{
+        const r=await fetch(url,{signal:AbortSignal.timeout(5000)});
+        if(!r.ok) continue;
+        const d=await r.json();
+        // Normalize across different APIs
+        const ip=d.ip||d.query||d.ip_address||'—';
+        const city=d.city||'—';
+        const country=d.country_name||d.country||'—';
+        const region=d.region_code||d.regionName||d.region||'';
+        const isp=d.org||d.isp||d.connection?.isp||'—';
+        const tz=d.timezone||d.time_zone?.id||'—';
+        const lat=d.latitude||d.lat||null;
+        const lng=d.longitude||d.lon||null;
+        setField('opIP', ip, 'cyan');
+        setField('opCity', `${city}, ${country}`, '');
+        setField('opISP', isp.length>22?isp.substring(0,22)+'…':isp, '');
+        setField('opTZ', tz.split('/').slice(-1)[0]||tz, '');
+        setField('opStatus', '● ACQUIRED', 'green');
+        // Auto-fly map to operator location silently
+        if(lat&&lng){
+          window._opLat=lat; window._opLng=lng;
+          const opMarker=L.divIcon({
+            html:`<div style="position:relative;width:14px;height:14px;">
+              <div style="position:absolute;inset:-6px;border-radius:50%;border:1.5px solid #00ff88;opacity:0.5;animation:blink 2s infinite;"></div>
+              <div style="width:14px;height:14px;border-radius:50%;background:#00ff88;border:2px solid #fff;box-shadow:0 0 14px #00ff88;"></div>
+            </div>`,iconSize:[14,14],iconAnchor:[7,7],className:''
+          });
+          const opMk=L.marker([lat,lng],{icon:opMarker}).addTo(LYR.search);
+          opMk.bindTooltip(`📡 OPERATOR: ${ip} · ${city}`,{permanent:false});
+        }
+        // Inject into ticker
+        const ticker=document.getElementById('tscroll');
+        if(ticker){
+          const span=document.createElement('span'); span.className='titem';
+          span.innerHTML=`<span class="tbadge ti">TI</span>OPERATOR TERMINAL IDENTIFIED · ${ip} · ${city}, ${country} · ${tz}`;
+          ticker.insertBefore(span,ticker.firstChild);
+        }
+        return;
+      } catch(e){}
+    }
+    setField('opIP','BLOCKED','orange');
+    setField('opStatus','VPN/FIREWALL','orange');
+  }
+  fetchOperatorIP();
+
+  // ── LIVE FLIGHT REFRESH ON CLICK ──────────────────
+  // Replaces showFlight — fetches today's LIVE data for this ICAO24
+  async function showFlightLive(s, callsign){
+    const cs=callsign||(s[1]||'UNKN').trim().toUpperCase();
+    const icao24=s[0]||'';
+    const now=new Date();
+    const todayStr=`${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-${String(now.getUTCDate()).padStart(2,'0')}`;
+    const nowUTC=`${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}:${String(now.getUTCSeconds()).padStart(2,'0')} UTC`;
+    const alt=s[13]||s[7]||0;
+    const spd=Math.round((s[9]||0)*1.94);
+    const hdg=Math.round(s[10]||0);
+    const vspd=s[11]||0;
+    const sqk=s[14]||'—';
+    const onGnd=s[8];
+    const lat=s[6], lng=s[5];
+    // Phase of flight
+    const phase=onGnd?'ON GROUND':alt<1000?'TAXI/CLIMBOUT':alt<3000?'DEPARTURE':alt>9000?'CRUISE':'CLIMB/DESCENT';
+    const phaseCol=onGnd?'wa':alt>9000?'gn':'hl';
+    // Render immediate snapshot
+    setDet(`<div class="dttl">✈ ${cs}</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <div class="dot dot-g"></div>
+        <span style="font-family:var(--fm);font-size:8px;color:var(--green);">LIVE · ${nowUTC}</span>
+        <button class="refresh-btn" id="rfBtn" style="width:auto;padding:2px 8px;margin:0;" onclick="refreshFlightNow('${icao24}','${cs}')">↻ REFRESH</button>
+      </div>
+      <div style="margin-bottom:6px;padding:4px 8px;background:color-mix(in srgb,var(--cyan) 8%,transparent);border:1px solid var(--brd2);font-family:var(--fm);font-size:8.5px;color:var(--cyan);letter-spacing:0.1em;">
+        FLIGHT PHASE: <strong>${phase}</strong>
+      </div>
+      <div class="dgrid">
+        ${dfRow('CALLSIGN',cs,'hl')}
+        ${dfRow('ICAO24',icao24||'—','')}
+        ${dfRow('COUNTRY',s[2]||'—','')}
+        ${dfRow('SQUAWK',sqk,sqk==='7500'?'dr':sqk==='7700'?'dr':sqk==='7600'?'wa':'')}
+        ${dfRow('ALTITUDE',onGnd?'GROUND':Math.round(alt)+'m / FL'+Math.round(alt/30.48),phaseCol)}
+        ${dfRow('GND SPEED',spd+' kt / '+Math.round(spd*1.852)+' km/h','')}
+        ${dfRow('HEADING',hdg+'°','')}
+        ${dfRow('VERT RATE',(vspd>0?'↑':'↓')+Math.abs(Math.round(vspd))+'m/s',vspd>0?'gn':vspd<-3?'wa':'')}
+        ${dfRow('LATITUDE',lat?lat.toFixed(5)+'°':'—','')}
+        ${dfRow('LONGITUDE',lng?lng.toFixed(5)+'°':'—','')}
+        ${dfRow('DATE',todayStr,'')}
+        ${dfRow('DATA AGE','< 60 sec','gn')}
+      </div>
+      ${sqk==='7500'?'<div style="margin-top:6px;padding:5px 8px;background:color-mix(in srgb,var(--red) 20%,transparent);border:1px solid var(--red);font-family:var(--fm);font-size:8.5px;color:var(--red);">⚠ SQUAWK 7500 — HIJACK ALERT</div>':''}
+      ${sqk==='7700'?'<div style="margin-top:6px;padding:5px 8px;background:color-mix(in srgb,var(--red) 20%,transparent);border:1px solid var(--red);font-family:var(--fm);font-size:8.5px;color:var(--red);">⚠ SQUAWK 7700 — GENERAL EMERGENCY</div>':''}
+      ${sqk==='7600'?'<div style="margin-top:6px;padding:5px 8px;background:color-mix(in srgb,var(--orange) 15%,transparent);border:1px solid var(--orange);font-family:var(--fm);font-size:8.5px;color:var(--orange);">⚠ SQUAWK 7600 — RADIO FAILURE</div>':''}
+      <div class="sfooter">SOURCE: ADS-B OPENSKY · ICAO24: ${icao24} · ${todayStr}</div>`);
+    // Fetch route from adsbdb asynchronously
+    if(cs&&cs!=='UNKN') enrichFlightRoute(cs, icao24);
+  }
+  // Keep old showFlight as alias
+  function showFlight(s,cs){ showFlightLive(s,cs); }
+
+  // Refresh button: re-fetch this specific aircraft from OpenSky NOW
+  window.refreshFlightNow=async(icao24, cs)=>{
+    const btn=document.getElementById('rfBtn');
+    if(btn){btn.textContent='↻ FETCHING…';btn.disabled=true;}
+    const proxies=[
+      `https://corsproxy.io/?https://opensky-network.org/api/states/all?icao24=${icao24}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent('https://opensky-network.org/api/states/all?icao24='+icao24)}`
+    ];
+    for(const url of proxies){
+      try{
+        const r=await fetch(url,{signal:AbortSignal.timeout(8000)});
+        if(!r.ok) continue;
+        const data=await r.json();
+        const states=data?.states||[];
+        if(states.length>0){
+          showFlightLive(states[0],cs);
+          return;
+        }
+      } catch(e){}
+    }
+    // Not found in fresh fetch — stale/landed
+    const now=new Date();
+    const nowUTC=`${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')} UTC`;
+    if(btn){btn.textContent='↻ REFRESH';btn.disabled=false;}
+    setDet(document.getElementById('detBox').innerHTML.replace('< 60 sec','STALE').replace('dot-g','dot-r'));
+    const staleDiv=document.createElement('div');
+    staleDiv.style.cssText='margin-top:6px;padding:5px 8px;background:color-mix(in srgb,var(--orange) 12%,transparent);border:1px solid var(--orange);font-family:var(--fm);font-size:8.5px;color:var(--orange);';
+    staleDiv.textContent=`⚠ AIRCRAFT NOT IN LIVE FEED AT ${nowUTC} — MAY HAVE LANDED`;
+    document.getElementById('detBox').appendChild(staleDiv);
+  };
+
+  // Async route enrichment — adds airline/route info below live data
+  async function enrichFlightRoute(cs, icao24){
+    const parsed=parseFlightCode(cs);
+    if(!parsed) return;
+    const {icaoCallsign,iata}=parsed;
+    const candidates=[icaoCallsign,cs].filter(Boolean);
+    for(const candidate of candidates){
+      try{
+        const r=await fetch(`https://api.adsbdb.com/v0/callsign/${candidate}`,{signal:AbortSignal.timeout(7000)});
+        if(!r.ok) continue;
+        const data=await r.json();
+        const f=data?.response?.flightroute;
+        if(!f) continue;
+        const origin=f.origin, dest=f.destination, ac=f.aircraft;
+        const box=document.getElementById('detBox');
+        if(!box) return;
+        const enrichDiv=document.createElement('div');
+        enrichDiv.innerHTML=`<div class="fd-route" style="margin-top:8px;">
+          <div class="fd-apt"><div class="fd-apt-code">${origin?.iata_code||'???'}</div><div class="fd-apt-name">${(origin?.municipality||'').substring(0,11)}</div></div>
+          <div class="fd-arrow"><div class="fd-arrow-dot"></div></div>
+          <div class="fd-apt"><div class="fd-apt-code">${dest?.iata_code||'???'}</div><div class="fd-apt-name">${(dest?.municipality||'').substring(0,11)}</div></div>
+        </div>
+        <div class="dgrid" style="margin-top:6px;">
+          ${dfRow('AIRLINE',f.airline?.name||getAirlineName(iata),'')}
+          ${dfRow('AIRCRAFT TYPE',ac?.icao_type||'—','')}
+          ${dfRow('REGISTRATION',ac?.registration||'—','hl')}
+          ${dfRow('ORIGIN',origin?.name?.substring(0,16)||'—','')}
+          ${dfRow('DESTINATION',dest?.name?.substring(0,16)||'—','')}
+        </div>
+        <div class="sfooter">ROUTE: ADSBDB · MERGED WITH LIVE ADS-B</div>`;
+        box.appendChild(enrichDiv);
+        // Draw route line on map
+        if(origin?.latitude&&dest?.latitude){
+          L.polyline([[origin.latitude,origin.longitude],[dest.latitude,dest.longitude]],
+            {color:'#00c8ff',weight:1.2,dashArray:'5,4',opacity:0.45}).addTo(LYR.search);
+        }
+        return;
+      } catch(e){}
+    }
+  }
+
+  // ── CYBER INTEL DATA ──────────────────────────────
+  const CYBER_EVENTS=[
+    {sev:'crit',type:'APT INTRUSION',actor:'LAZARUS GROUP',target:'SWIFT Banking Network',region:'GLOBAL',ts:'-4m',detail:'Lateral movement detected across 3 financial institutions. $180M at risk.'},
+    {sev:'high',type:'RANSOMWARE',actor:'LOCKBIT 3.0',target:'Critical Infrastructure Grid',region:'EUROPE',ts:'-11m',detail:'Stage-2 payload deployed. 14 substations potentially affected.'},
+    {sev:'crit',type:'ZERO-DAY EXPLOIT',actor:'APT41 (CHINA)',target:'US DOD Contractor Network',region:'USA',ts:'-18m',detail:'CVE-2025-XXXX weaponized. Targeting F-35 supply chain data.'},
+    {sev:'high',type:'DDoS CAMPAIGN',actor:'KILLNET',target:'NATO Cyber Defense Portals',region:'BRUSSELS',ts:'-27m',detail:'900Gbps sustained attack. CDN mitigation active.'},
+    {sev:'med',type:'PHISHING WAVE',actor:'COZY BEAR (SVR)',target:'EU Parliament Staff',region:'EUROPE',ts:'-45m',detail:'Spearphish targeting senior advisors. 23 compromised credentials detected.'},
+    {sev:'med',type:'SUPPLY CHAIN',actor:'UNKNOWN',target:'Open Source Repository',region:'GLOBAL',ts:'-1h',detail:'Malicious package detected in PyPI mirror. 40K downloads before takedown.'},
+    {sev:'high',type:'SATCOM JAMMING',actor:'GRU-LINKED',target:'Starlink Terminals',region:'E. EUROPE',ts:'-1.2h',detail:'GPS/uplink spoofing in 200km radius near conflict zone.'},
+    {sev:'low',type:'DEFACEMENT',actor:'ANONYMOUS',target:'Government Websites',region:'MIDDLE EAST',ts:'-2h',detail:'17 sites defaced. No data exfiltration confirmed.'},
+  ];
+  const THREAT_ACTORS=[
+    {name:'APT41',nation:'🇨🇳 CHINA',alias:'WINNTI / BARIUM',status:'ACTIVE',ops:'Espionage + Financial',threat:'CRITICAL'},
+    {name:'LAZARUS',nation:'🇰🇵 N.KOREA',alias:'HIDDEN COBRA',status:'ACTIVE',ops:'Financial/Crypto Theft',threat:'CRITICAL'},
+    {name:'COZY BEAR',nation:'🇷🇺 RUSSIA',alias:'APT29 / SVR',status:'ACTIVE',ops:'Government Espionage',threat:'HIGH'},
+    {name:'FANCY BEAR',nation:'🇷🇺 RUSSIA',alias:'APT28 / GRU',status:'ACTIVE',ops:'Military/Election Ops',threat:'HIGH'},
+    {name:'EQUATION GRP',nation:'🇺🇸 NSA',alias:'LONGHORN',status:'ACTIVE',ops:'Nation-state Implants',threat:'HIGH'},
+    {name:'CHARMING KITTEN',nation:'🇮🇷 IRAN',alias:'APT35 / IRGC',status:'ACTIVE',ops:'Nuclear Research',threat:'HIGH'},
+  ];
+
+  // ── SIGINT DATA ───────────────────────────────────
+  const SIGINT_EVENTS=[
+    {freq:'8495 kHz',mode:'CW/BURST',loc:'MURMANSK AREA',cls:'TOP SECRET',txt:'Encrypted burst transmission · Russian Northern Fleet · Pattern: pre-mission comms · Duration: 12s'},
+    {freq:'243.0 MHz',mode:'AM GUARD',loc:'HORMUZ STRAIT',cls:'SECRET',txt:'Unidentified GUARD call · MAYDAY · Position [REDACTED] · Last heard 04:12Z · No response confirmed'},
+    {freq:'11175 kHz',mode:'USB HF',loc:'GLOBAL',cls:'CONFIDENTIAL',txt:'SKYKING broadcast · ZULU FOXTROT · EAM format · High-priority · Broadcast 3x'},
+    {freq:'406.0 MHz',mode:'EPIRB',loc:'34.2°N 28.6°E',cls:'UNCLASSIFIED',txt:'Emergency beacon active · Maritime distress · Vessel identity unknown · CG notified'},
+    {freq:'1030 MHz',mode:'SSR MODE S',loc:'UKRAINE BORDER',cls:'SECRET',txt:'Anomalous Mode-S squawk 7700 · No IFF correlation · Track 2241 · High altitude · Fast mover'},
+    {freq:'9.1 GHz',mode:'RADAR',loc:'TAIWAN STRAIT',cls:'TOP SECRET',txt:'FCS radar lock detected · Source: PLAN Type-052D · Target: Unknown surface vessel · Duration: 38s'},
+  ];
+  const FREQ_INTERCEPTS=[
+    {band:'HF 3-30MHz',activity:'HIGH',source:'EASTERN EUROPE',note:'Increased burst traffic — military coordination pattern'},
+    {band:'VHF 30-300MHz',activity:'ELEVATED',source:'HORMUZ REGION',note:'Naval tactical comms surge +340% baseline'},
+    {band:'UHF 300-3GHz',activity:'NORMAL',source:'GLOBAL',note:'Standard commercial/mil traffic'},
+    {band:'SHF 3-30GHz',activity:'HIGH',source:'TAIWAN STRAIT',note:'Active fire control radar emissions'},
+    {band:'GPS L1/L2',activity:'ANOMALOUS',source:'KALININGRAD',note:'Spoofing signature detected — civilian aviation affected'},
+    {band:'SATCOM',activity:'ELEVATED',source:'CENTRAL ASIA',note:'Encrypted MilSat traffic up 180% vs 7-day avg'},
+  ];
+
+  // ── NUCLEAR WATCH DATA ────────────────────────────
+  const NUC_EVENTS=[
+    {sev:'crit',nation:'🇰🇵 NORTH KOREA',event:'ICBM TEST PREP',loc:'SOHAE LAUNCH FACILITY',det:'Satellite imagery: fueling activity, transporter erector launcher deployment. Launch window: 48–72hr.'},
+    {sev:'high',nation:'🇷🇺 RUSSIA',event:'SSBN PATROL SURGE',loc:'ARCTIC BASTION',det:'3 Delta-IV SSBNs underway simultaneously. Unprecedented since 1987. Strategic signal.'},
+    {sev:'high',nation:'🇨🇳 CHINA',event:'DF-41 ROAD MOBILE',loc:'QINGHAI PROVINCE',det:'NORAD tracks 11 DF-41 TELs dispersed from garrison. Elevated readiness posture.'},
+    {sev:'med',nation:'🇮🇷 IRAN',event:'ENRICHMENT SURGE',loc:'FORDOW / NATANZ',det:'IAEA: 90% HEU stockpile at 30kg — weapons-threshold approach within 2 weeks.'},
+    {sev:'med',nation:'🇵🇰 PAKISTAN',event:'TACTICAL NUKE EXERCISE',loc:'PUNJAB / SINDH',det:'Nasr SRBM exercise ongoing. Range: 60km. Dual-capable confirmed.'},
+  ];
+  const BM_WATCH=[
+    {id:'HWASONG-17',nation:'🇰🇵',type:'ICBM',range:'15,000km',warheads:'MIRV x3',status:'ELEVATED ALERT',col:'red'},
+    {id:'DF-41',nation:'🇨🇳',type:'ICBM',range:'14,000km',warheads:'MIRV x10',status:'ROAD MOBILE',col:'orange'},
+    {id:'RS-28 SARMAT',nation:'🇷🇺',type:'ICBM',range:'18,000km+',warheads:'MIRV x15',status:'SILO READY',col:'orange'},
+    {id:'AGNI-V',nation:'🇮🇳',type:'ICBM',range:'8,000km',warheads:'Single',status:'STANDBY',col:'yellow'},
+    {id:'SHAHAB-3 MOD',nation:'🇮🇷',type:'MRBM',range:'2,500km',warheads:'Single',status:'ALERT POSTURE',col:'red'},
+    {id:'TRIDENT II D5',nation:'🇺🇸',type:'SLBM',range:'12,000km',warheads:'MIRV x8',status:'PATROL',col:'green'},
+  ];
+
+  function renderCyberFeed(){
+    const feed=document.getElementById('cyberFeed'); if(!feed) return;
+    feed.innerHTML=CYBER_EVENTS.map(c=>`<div class="cyber-item ${c.sev}" style="margin-bottom:4px;">
+      <div class="ci-hdr">
+        <span class="ci-type" style="color:${c.sev==='crit'?'var(--red)':c.sev==='high'?'var(--orange)':'var(--yellow)'}">◉ ${c.type}</span>
+        <span class="ci-time">${c.ts} · ${c.region}</span>
+      </div>
+      <div class="ci-txt"><b style="color:var(--textb)">${c.actor}</b> → ${c.target}</div>
+      <div class="ci-txt" style="font-size:8.5px;margin-top:2px;">${c.detail}</div>
+    </div>`).join('');
+    const actFeed=document.getElementById('threatActorFeed'); if(!actFeed) return;
+    actFeed.innerHTML=THREAT_ACTORS.map(a=>`<div class="aitem">
+      <span style="font-family:var(--fd);font-size:8px;color:${a.threat==='CRITICAL'?'var(--red)':'var(--orange)'};min-width:70px;">${a.name}</span>
+      <span style="font-family:var(--fm);font-size:8.5px;flex:1;">${a.nation}</span>
+      <span style="font-family:var(--fm);font-size:7.5px;color:${a.threat==='CRITICAL'?'var(--red)':'var(--orange)'};">${a.threat}</span>
+    </div>`).join('');
+  }
+
+  function renderSigintFeed(){
+    const feed=document.getElementById('sigintFeed'); if(!feed) return;
+    feed.innerHTML=SIGINT_EVENTS.map(s=>`<div class="cyber-item ${s.cls==='TOP SECRET'?'crit':s.cls==='SECRET'?'high':'med'}">
+      <div class="ci-hdr">
+        <span class="ci-type" style="color:var(--cyan);">📡 ${s.freq} · ${s.mode}</span>
+        <span style="font-family:var(--fd);font-size:7px;color:${s.cls==='TOP SECRET'?'var(--red)':s.cls==='SECRET'?'var(--orange)':'var(--yellow)'};">${s.cls}</span>
+      </div>
+      <div class="ci-txt" style="color:var(--textd);font-size:8px;">📍 ${s.loc}</div>
+      <div class="ci-txt" style="margin-top:2px;">${s.txt}</div>
+    </div>`).join('');
+    const freqFeed=document.getElementById('freqFeed'); if(!freqFeed) return;
+    freqFeed.innerHTML=FREQ_INTERCEPTS.map(f=>{
+      const col=f.activity==='HIGH'?'var(--orange)':f.activity==='ANOMALOUS'?'var(--red)':f.activity==='ELEVATED'?'var(--yellow)':'var(--green)';
+      return `<div class="aitem">
+        <span style="font-family:var(--fm);font-size:8px;color:${col};min-width:90px;">${f.band}</span>
+        <div style="flex:1;"><div style="font-family:var(--fm);font-size:8px;color:${col};">${f.activity}</div>
+        <div style="font-family:var(--fm);font-size:7.5px;color:var(--textd);">${f.note.substring(0,35)}…</div></div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderNucFeed(){
+    const feed=document.getElementById('nucFeed'); if(!feed) return;
+    feed.innerHTML=NUC_EVENTS.map(n=>`<div class="cyber-item ${n.sev}">
+      <div class="ci-hdr">
+        <span style="font-family:var(--fd);font-size:8px;color:${n.sev==='crit'?'var(--red)':'var(--orange)'};">${n.nation} · ${n.event}</span>
+      </div>
+      <div class="ci-txt" style="color:var(--textd);font-size:8px;">📍 ${n.loc}</div>
+      <div class="ci-txt" style="margin-top:2px;">${n.det}</div>
+    </div>`).join('');
+    const bmFeed=document.getElementById('bmFeed'); if(!bmFeed) return;
+    bmFeed.innerHTML=BM_WATCH.map(b=>{
+      const col=b.col==='red'?'var(--red)':b.col==='orange'?'var(--orange)':b.col==='yellow'?'var(--yellow)':'var(--green)';
+      return `<div class="aitem">
+        <span style="font-size:13px;">${b.nation}</span>
+        <div style="flex:1;"><div style="font-family:var(--fd);font-size:8.5px;color:var(--textb);">${b.id}</div>
+        <div style="font-family:var(--fm);font-size:7.5px;color:var(--textd);">${b.type} · ${b.range} · ${b.warheads}</div></div>
+        <span style="font-family:var(--fm);font-size:7.5px;color:${col};">${b.status}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function renderCyberListLeft(){
+    const list=document.getElementById('cyberList'); if(!list) return;
+    CYBER_EVENTS.slice(0,5).forEach(c=>{
+      const it=document.createElement('div'); it.className='aitem';
+      const col=c.sev==='crit'?'var(--red)':c.sev==='high'?'var(--orange)':'var(--yellow)';
+      it.innerHTML=`<span class="ai-ico" style="color:${col}">⚡</span>
+        <span class="ai-cs" style="font-size:9px;">${c.actor.substring(0,16)}</span>
+        <span class="ai-st" style="color:${col};">${c.sev.toUpperCase()}</span>`;
+      it.onclick=()=>{switchTab('cyber');};
+      list.appendChild(it);
+    });
+    const sigList=document.getElementById('sigintList'); if(!sigList) return;
+    SIGINT_EVENTS.slice(0,4).forEach(s=>{
+      const it=document.createElement('div'); it.className='aitem';
+      it.innerHTML=`<span class="ai-ico" style="color:var(--cyan)">📡</span>
+        <span class="ai-cs" style="font-size:9px;">${s.freq} · ${s.mode}</span>
+        <span class="ai-st">${s.loc.substring(0,8)}</span>`;
+      it.onclick=()=>{switchTab('sigint');};
+      sigList.appendChild(it);
+    });
+  }
+
+  window.showCyberPanel=()=>{
+    switchTab('cyber');
+    const btn=document.getElementById('cyberBtn');
+    btn.classList.toggle('on');
+  };
+  window.showNuclearPanel=()=>{
+    switchTab('nuc');
+    const btn=document.getElementById('nucBtn');
+    btn.classList.toggle('on');
+  };
+
+  renderCyberFeed();
+  renderSigintFeed();
+  renderNucFeed();
+  renderCyberListLeft();
+
+  // ── ATTRIBUTION STYLE ──────────────────────────────
+  setTimeout(()=>{
+    const a=document.querySelector('.leaflet-control-attribution');
+    if(a) a.style.cssText='font-size:7px;background:rgba(2,5,9,0.7);color:#334455;border:none;padding:2px 6px;font-family:monospace;';
+  },1200);
+
+  // ── INIT ALL ──────────────────────────────────────
+  renderConflicts(); renderShips(); renderDrones(); renderMissiles(); renderSats();
+  renderIntel(); renderAlerts(); renderTicker();
+
+  // Remove loading overlay
+  document.getElementById('loadBar').style.width='100%';
+  setTimeout(()=>{
+    const ov=document.getElementById('loadOverlay');
+    ov.style.transition='opacity 0.5s';
+    ov.style.opacity='0';
+    setTimeout(()=>ov.remove(),500);
+  },300);
+
+  // Start fetching flights
+  fetchFlights();
+  setInterval(fetchFlights,60000);
+  setInterval(driftAll,3500);
+  setInterval(()=>{INTEL.push(INTEL.shift());renderIntel();},25000);
+
+} // end initARGUS
+</script>
+</body>
+</html>

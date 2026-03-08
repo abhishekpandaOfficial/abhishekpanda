@@ -48,6 +48,9 @@ const OpenOwlLanding = lazy(() => import("./pages/OpenOwlLanding"));
 const OpenOwlAssistant = lazy(() => import("./pages/OpenOwlAssistant"));
 const LLMVisualizer = lazy(() => import("./pages/llm-visualizer"));
 const DotnetMasteryTOC = lazy(() => import("./pages/DotnetMasteryTOC"));
+const DesignPatternsGuide = lazy(() => import("./pages/DesignPatternsGuide"));
+const SolidPrinciplesGuide = lazy(() => import("./pages/SolidPrinciplesGuide"));
+const Classified = lazy(() => import("./pages/Classified"));
 const Scriptures = lazy(() => import("./pages/Scriptures"));
 
 const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
@@ -183,6 +186,12 @@ const App = () => {
                 <Route path="/open-owl" element={<Navigate to="/openowl" replace />} />
                 <Route path="/llm-visualizer" element={<LLMVisualizer />} />
                 <Route path="/dotnet-mastery-toc" element={<DotnetMasteryTOC />} />
+                <Route path="/design-patterns-guide" element={<DesignPatternsGuide />} />
+                <Route path="/blogs/solid-principles" element={<SolidPrinciplesGuide />} />
+                <Route path="/blogs/solid-principle" element={<Navigate to="/blogs/solid-principles" replace />} />
+                <Route path="/solid-principles-guide" element={<Navigate to="/blogs/solid-principles" replace />} />
+                <Route path="/classified" element={<Classified />} />
+                <Route path="/classified-preview" element={<Navigate to="/classified" replace />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/account" element={<Account />} />
 

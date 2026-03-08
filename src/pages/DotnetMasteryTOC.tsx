@@ -1,8 +1,36 @@
 import { useEffect, useRef, useMemo, useState } from "react";
 import { Navigation } from "@/components/layout/Navigation";
 import { useTheme } from "@/components/ThemeProvider";
+import { syncThemeToEmbeddedFrame } from "@/lib/embeddedFrame";
+import { ARTICLES } from "@/content/articles";
 
 const STATIC_TOC_VERSION = "2026-03-05-static-html-v2";
+
+const newestArticles = (() => {
+  const timestamps = ARTICLES.map((article) => new Date(article.publishedAt).getTime()).filter((value) => Number.isFinite(value));
+  const uniqueTimestamps = Array.from(new Set(timestamps));
+  const maxTimestamp = uniqueTimestamps.length ? Math.max(...uniqueTimestamps) : 0;
+
+  return ARTICLES.map((article, index) => {
+    const articleTimestamp = new Date(article.publishedAt).getTime();
+    const isNew =
+      uniqueTimestamps.length > 1
+        ? articleTimestamp === maxTimestamp
+        : index < 2;
+
+    return {
+      slug: article.slug,
+      title: article.title,
+      description: article.description,
+      href: `/articles/${article.slug}`,
+      publishedAt: article.publishedAt,
+      readMinutes: article.readMinutes,
+      eyebrow: article.eyebrow,
+      tags: article.tags.slice(0, 3),
+      isNew,
+    };
+  });
+})();
 
 const DotnetMasteryTOC = () => {
   const { theme } = useTheme();
@@ -42,14 +70,24 @@ const DotnetMasteryTOC = () => {
     [],
   );
 
-  const postTheme = (t: string) => {
+  const postTheme = (t: "light" | "dark") => {
+    syncThemeToEmbeddedFrame(iframeRef.current, t);
+  };
+
+  const postArticles = () => {
     iframeRef.current?.contentWindow?.postMessage(
-      { type: "parent-theme", theme: t },
+      {
+        type: "site-articles",
+        articles: newestArticles,
+      },
       window.location.origin,
     );
   };
 
-  useEffect(() => { postTheme(theme); }, [theme]);
+  useEffect(() => {
+    postTheme(theme);
+    postArticles();
+  }, [theme]);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
@@ -88,7 +126,11 @@ const DotnetMasteryTOC = () => {
           className="block w-full border-0"
           style={{ height: iframeHeight }}
           allow="same-origin"
-          onLoad={() => postTheme(theme)}
+          onLoad={() => {
+            postTheme(theme);
+            postArticles();
+            window.setTimeout(postArticles, 120);
+          }}
         />
       </main>
     </div>
