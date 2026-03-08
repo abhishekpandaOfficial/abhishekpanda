@@ -670,8 +670,8 @@ function initARGUS(){
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     const themeLabel = document.getElementById('themeLabel');
     if(themeLabel) themeLabel.textContent = isDark ? 'LIGHT MODE' : 'DARK MODE';
-    if(!isDark && curTile === 'dark') setMapView('street', document.getElementById('vStreet'));
-    if(isDark && curTile === 'street') setMapView('dark', document.getElementById('vDark'));
+    if(!isDark && curTile === 'dark' && typeof window.setMapView === 'function') window.setMapView('street', document.getElementById('vStreet'));
+    if(isDark && curTile === 'street' && typeof window.setMapView === 'function') window.setMapView('dark', document.getElementById('vDark'));
     window.__ARGUS_PENDING_THEME__ = isDark ? 'dark' : 'light';
   }
   window.toggleTheme=()=>{
@@ -683,8 +683,6 @@ function initARGUS(){
       applyArgusTheme(data.theme);
     }
   });
-  applyArgusTheme(window.__ARGUS_PENDING_THEME__ || 'dark');
-
   // ── MAP VIEW ──────────────────────────────────────────
   const LBLS={dark:'◼ TACTICAL DARK',sat:'🛰 SATELLITE HI-RES',hybrid:'🌐 HYBRID · SAT+ROADS+LABELS',terrain:'▲ TERRAIN+ELEVATION',street:'⬜ STREET (OSM)',night:'🌃 NIGHT · NO LABELS'};
   window.setMapView=(name,btn)=>{
@@ -699,6 +697,7 @@ function initARGUS(){
     if(btn) btn.classList.add('on');
     document.getElementById('lbadge').textContent=LBLS[name]||name.toUpperCase();
   };
+  applyArgusTheme(window.__ARGUS_PENDING_THEME__ || 'dark');
   window.toggleLyr=(name,btn)=>{
     VIS[name]=!VIS[name];
     VIS[name]?map.addLayer(LYR[name]):map.removeLayer(LYR[name]);
