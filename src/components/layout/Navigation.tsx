@@ -16,13 +16,13 @@ import {
   Cpu,
   FolderOpen,
   Target,
-  BookOpenText
+  BookOpenText,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AbhishekAnimatedLogo } from "@/components/ui/AbhishekAnimatedLogo";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -66,13 +66,22 @@ export const Navigation = () => {
     location.pathname.startsWith("/blog") ||
     location.pathname.startsWith("/blogs") ||
     location.pathname.startsWith("/tech") ||
-    location.pathname === "/dotnet-mastery-toc";
+    location.pathname === "/dotnet-mastery-toc" ||
+    location.pathname === "/design-patterns-guide" ||
+    location.pathname === "/solid-principles-guide" ||
+    location.pathname === "/blogs/solid-principles";
   const isArticlesActive = location.pathname.startsWith("/articles");
   const isScripturesActive = location.pathname.startsWith("/scriptures");
   const isCoursesActive = location.pathname === "/courses" || location.pathname.startsWith("/courses/");
   const isCaseStudiesActive = location.pathname.startsWith("/case-studies");
   const isInterviewActive = location.pathname.startsWith("/interview");
   const isProjectsActive = location.pathname.startsWith("/projects");
+  const isClassifiedActive = location.pathname.startsWith("/classified");
+  const desktopNavItemClass =
+    "relative flex items-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all duration-300 group xl:gap-2.5 xl:px-3 xl:py-2.5 xl:text-[13px] 2xl:rounded-xl 2xl:px-3.5 2xl:text-sm";
+  const desktopNavIconClass = "h-4 w-4 shrink-0 transition-transform group-hover:scale-110 xl:h-[17px] xl:w-[17px] 2xl:h-[18px] 2xl:w-[18px]";
+  const mobileNavItemClass = "flex items-center gap-3.5 rounded-xl px-4 py-3.5 text-base font-medium transition-all duration-200";
+  const mobileNavIconClass = "h-5 w-5 shrink-0";
 
   return (
     <>
@@ -87,7 +96,7 @@ export const Navigation = () => {
         )}
       >
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16 md:h-20">
+          <div className="flex items-center justify-between h-16 md:h-[4.5rem] 2xl:h-20">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 group">
               <div className="group-hover:scale-110 transition-transform duration-300">
@@ -100,14 +109,14 @@ export const Navigation = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden xl:flex items-center gap-0.5 flex-nowrap">
+            <nav className="hidden xl:flex items-center gap-0 flex-nowrap 2xl:gap-0.5">
               {/* About */}
               {navLinks.slice(0, 1).map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
                   className={cn(
-                    "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                    desktopNavItemClass,
                     location.pathname === link.path
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground"
@@ -116,7 +125,7 @@ export const Navigation = () => {
                   <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
                   <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                   <span className="relative flex items-center gap-2">
-                    <link.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    <link.icon className={desktopNavIconClass} />
                     {link.name}
                   </span>
                 </Link>
@@ -126,7 +135,7 @@ export const Navigation = () => {
               <Link
                 to="/courses"
                 className={cn(
-                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                  desktopNavItemClass,
                   isCoursesActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
@@ -135,7 +144,7 @@ export const Navigation = () => {
                 <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
                 <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                 <span className="relative flex items-center gap-2">
-                  <GraduationCap className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  <GraduationCap className={desktopNavIconClass} />
                   Courses
                 </span>
               </Link>
@@ -143,7 +152,7 @@ export const Navigation = () => {
               <Link
                 to="/articles"
                 className={cn(
-                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                  desktopNavItemClass,
                   isArticlesActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
@@ -152,7 +161,7 @@ export const Navigation = () => {
                 <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
                 <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                 <span className="relative flex items-center gap-2">
-                  <Newspaper className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  <Newspaper className={desktopNavIconClass} />
                   Articles
                 </span>
               </Link>
@@ -160,7 +169,7 @@ export const Navigation = () => {
               <Link
                 to="/blogs"
                 className={cn(
-                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                  desktopNavItemClass,
                   isBlogActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
@@ -169,7 +178,7 @@ export const Navigation = () => {
                 <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
                 <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                 <span className="relative flex items-center gap-2">
-                  <FileText className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  <FileText className={desktopNavIconClass} />
                   Blogs
                 </span>
               </Link>
@@ -177,7 +186,7 @@ export const Navigation = () => {
               <Link
                 to="/case-studies"
                 className={cn(
-                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                  desktopNavItemClass,
                   isCaseStudiesActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
@@ -186,7 +195,7 @@ export const Navigation = () => {
                 <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
                 <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                 <span className="relative flex items-center gap-2">
-                  <FileText className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  <FileText className={desktopNavIconClass} />
                   Case Studies
                 </span>
               </Link>
@@ -194,7 +203,7 @@ export const Navigation = () => {
               <Link
                 to="/interview"
                 className={cn(
-                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                  desktopNavItemClass,
                   isInterviewActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
@@ -203,7 +212,7 @@ export const Navigation = () => {
                 <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
                 <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                 <span className="relative flex items-center gap-2">
-                  <Target className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  <Target className={desktopNavIconClass} />
                   Interview
                 </span>
               </Link>
@@ -211,7 +220,8 @@ export const Navigation = () => {
               <Link
                 to="/projects"
                 className={cn(
-                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                  desktopNavItemClass,
+                  "hidden min-[1380px]:flex",
                   isProjectsActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
@@ -220,8 +230,26 @@ export const Navigation = () => {
                 <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
                 <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                 <span className="relative flex items-center gap-2">
-                  <FolderOpen className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  <FolderOpen className={desktopNavIconClass} />
                   Projects
+                </span>
+              </Link>
+
+              <Link
+                to="/classified"
+                className={cn(
+                  desktopNavItemClass,
+                  "hidden min-[1480px]:flex",
+                  isClassifiedActive
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                <span className="relative flex items-center gap-2">
+                  <Shield className={desktopNavIconClass} />
+                  Classified
                 </span>
               </Link>
 
@@ -231,7 +259,8 @@ export const Navigation = () => {
                   key={link.path}
                   to={link.path}
                   className={cn(
-                    "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                    desktopNavItemClass,
+                    "hidden min-[1680px]:flex",
                     location.pathname === link.path
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground"
@@ -240,19 +269,20 @@ export const Navigation = () => {
                   <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
                   <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                   <span className="relative flex items-center gap-2">
-                    <link.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    <link.icon className={desktopNavIconClass} />
                     {link.name}
                   </span>
                 </Link>
               ))}
 
               {/* LLM Galaxy Dropdown */}
+              <div className="hidden min-[1560px]:block">
               <NavigationMenu>
                 <NavigationMenuList>
                   <NavigationMenuItem>
                     <NavigationMenuTrigger
                       className={cn(
-                        "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 bg-transparent data-[state=open]:bg-transparent group",
+                        "relative whitespace-nowrap rounded-xl bg-transparent px-3.5 py-2.5 text-sm font-medium transition-all duration-300 group data-[state=open]:bg-transparent",
                         isGalaxyActive
                           ? "text-primary bg-primary/10"
                           : "text-muted-foreground hover:text-foreground"
@@ -261,7 +291,7 @@ export const Navigation = () => {
                       <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
                       <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                       <span className="relative flex items-center gap-2">
-                        <Brain className="w-4 h-4 transition-transform group-hover:scale-110" />
+                        <Brain className={desktopNavIconClass} />
                         LLM Galaxy
                       </span>
                     </NavigationMenuTrigger>
@@ -285,11 +315,13 @@ export const Navigation = () => {
                   </NavigationMenuItem>
                 </NavigationMenuList>
               </NavigationMenu>
+              </div>
 
               <Link
                 to="/scriptures"
                 className={cn(
-                  "relative whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-300 flex items-center gap-2 group",
+                  desktopNavItemClass,
+                  "hidden min-[1620px]:flex",
                   isScripturesActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
@@ -298,23 +330,18 @@ export const Navigation = () => {
                 <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
                 <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                 <span className="relative flex items-center gap-2">
-                  <BookOpenText className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  <BookOpenText className={desktopNavIconClass} />
                   Scriptures
                 </span>
               </Link>
             </nav>
 
-            {/* CTA Buttons */}
-            <div className="hidden min-[1520px]:flex items-center gap-3">
-              <ThemeToggle />
-            </div>
-
-            {/* Mobile Menu Button */}
-            <div className="flex items-center gap-2 min-[1520px]:hidden">
+            <div className="flex items-center gap-2">
               <ThemeToggle />
               <Button
                 variant="ghost"
                 size="icon"
+                className="h-10 w-10 min-[1680px]:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 {isMobileMenuOpen ? <X /> : <Menu />}
@@ -331,7 +358,7 @@ export const Navigation = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 min-[1520px]:hidden pt-20"
+            className="fixed inset-0 z-40 min-[1680px]:hidden pt-20"
           >
             <div className="absolute inset-0 bg-background/95 backdrop-blur-xl" />
             <nav className="relative container mx-auto px-4 py-8 flex flex-col gap-2 max-h-[calc(100vh-5rem)] overflow-y-auto">
@@ -346,13 +373,13 @@ export const Navigation = () => {
                   <Link
                     to={link.path}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                      mobileNavItemClass,
                       location.pathname === link.path
                         ? "text-primary bg-primary/10"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     )}
                   >
-                    <link.icon className="w-5 h-5" />
+                    <link.icon className={mobileNavIconClass} />
                     {link.name}
                   </Link>
                 </motion.div>
@@ -367,13 +394,13 @@ export const Navigation = () => {
                 <Link
                   to="/courses"
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    mobileNavItemClass,
                     isCoursesActive
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  <GraduationCap className="w-5 h-5" />
+                  <GraduationCap className={mobileNavIconClass} />
                   Courses
                 </Link>
               </motion.div>
@@ -386,13 +413,13 @@ export const Navigation = () => {
                 <Link
                   to="/articles"
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    mobileNavItemClass,
                     isArticlesActive
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  <Newspaper className="w-5 h-5" />
+                  <Newspaper className={mobileNavIconClass} />
                   Articles
                 </Link>
               </motion.div>
@@ -405,13 +432,13 @@ export const Navigation = () => {
                 <Link
                   to="/blogs"
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    mobileNavItemClass,
                     isBlogActive
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  <FileText className="w-5 h-5" />
+                  <FileText className={mobileNavIconClass} />
                   Blogs
                 </Link>
               </motion.div>
@@ -424,13 +451,13 @@ export const Navigation = () => {
                 <Link
                   to="/scriptures"
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    mobileNavItemClass,
                     isScripturesActive
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  <BookOpenText className="w-5 h-5" />
+                  <BookOpenText className={mobileNavIconClass} />
                   Scriptures
                 </Link>
               </motion.div>
@@ -443,14 +470,33 @@ export const Navigation = () => {
                 <Link
                   to="/case-studies"
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    mobileNavItemClass,
                     isCaseStudiesActive
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  <FileText className="w-5 h-5" />
+                  <FileText className={mobileNavIconClass} />
                   Case Studies
+                </Link>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.16 }}
+              >
+                <Link
+                  to="/classified"
+                  className={cn(
+                    mobileNavItemClass,
+                    isClassifiedActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <Shield className={mobileNavIconClass} />
+                  Classified
                 </Link>
               </motion.div>
 
@@ -462,13 +508,13 @@ export const Navigation = () => {
                 <Link
                   to="/interview"
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    mobileNavItemClass,
                     isInterviewActive
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  <Target className="w-5 h-5" />
+                  <Target className={mobileNavIconClass} />
                   Interview
                 </Link>
               </motion.div>
@@ -481,13 +527,13 @@ export const Navigation = () => {
                 <Link
                   to="/projects"
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                    mobileNavItemClass,
                     isProjectsActive
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  <FolderOpen className="w-5 h-5" />
+                  <FolderOpen className={mobileNavIconClass} />
                   Projects
                 </Link>
               </motion.div>
@@ -503,13 +549,13 @@ export const Navigation = () => {
                   <Link
                     to={link.path}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                      mobileNavItemClass,
                       location.pathname === link.path
                         ? "text-primary bg-primary/10"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     )}
                   >
-                    <link.icon className="w-5 h-5" />
+                    <link.icon className={mobileNavIconClass} />
                     {link.name}
                   </Link>
                 </motion.div>

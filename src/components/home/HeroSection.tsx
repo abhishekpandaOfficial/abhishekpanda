@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, Code2, Cloud, Brain, Database, Cpu, ArrowRight, Briefcase, BookOpen, ScrollText, Newspaper } from "lucide-react";
+import { Sparkles, Code2, Cloud, Brain, Database, Cpu, ArrowRight, Newspaper, Shield, Headphones, Car } from "lucide-react";
 import abhishekAvatar from "@/assets/abhishek-avatar.png";
 import abhishekAvatarAlt from "@/assets/abhishek-avatar-alt.png";
 import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
@@ -68,6 +68,33 @@ const nameTypographyVariants = [
   "typo-ap-7",
   "typo-ap-8",
   "typo-ap-9",
+];
+
+const projectCtas = [
+  {
+    label: "Newstack",
+    href: "https://newstack.live",
+    icon: Newspaper,
+    className: "border-border/60 bg-card/80 text-foreground hover:border-primary/35 hover:text-primary",
+  },
+  {
+    label: "Groovify",
+    icon: Headphones,
+    disabled: true,
+    className: "border-border/50 bg-muted/50 text-muted-foreground/80",
+  },
+  {
+    label: "Drivanaa",
+    icon: Car,
+    disabled: true,
+    className: "border-border/50 bg-muted/50 text-muted-foreground/80",
+  },
+  {
+    label: "Phantom VPN",
+    href: "https://phantom.origixcloud.com/",
+    icon: Shield,
+    className: "border-border/60 bg-card/80 text-foreground hover:border-primary/35 hover:text-primary",
+  },
 ];
 
 export const HeroSection = () => {
@@ -324,42 +351,56 @@ export const HeroSection = () => {
             className="mb-5"
           >
             <div className="flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
-              <Link
-                to="/scriptures"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/80 px-5 py-3 text-sm font-semibold text-foreground backdrop-blur-xl transition hover:border-primary/35 hover:text-primary"
-              >
-                <ScrollText className="h-4 w-4" />
-                Explore Scriptures
-              </Link>
-              <Link
-                to="/articles"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/80 px-5 py-3 text-sm font-semibold text-foreground backdrop-blur-xl transition hover:border-primary/35 hover:text-primary"
-              >
-                <Newspaper className="h-4 w-4" />
-                Explore Articles
-              </Link>
-              <Link
-                to="/case-studies"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/80 px-5 py-3 text-sm font-semibold text-foreground backdrop-blur-xl transition hover:border-primary/35 hover:text-primary"
-              >
-                <Briefcase className="h-4 w-4" />
-                Explore Case Studies
-              </Link>
-              <Link
-                to="/ebooks"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-primary/25 bg-primary/10 px-5 py-3 text-sm font-semibold text-primary backdrop-blur-xl transition hover:border-primary/40 hover:bg-primary/15"
-              >
-                <BookOpen className="h-4 w-4" />
-                Browse Ebooks
-              </Link>
-              <Link
-                to="/mentorship"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_rgba(59,130,246,0.25)] transition hover:translate-y-[-1px] hover:bg-primary/90"
-              >
-                <Briefcase className="h-4 w-4" />
-                Book Mentorship
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+              {projectCtas.map((cta) => {
+                const content = (
+                  <>
+                    <cta.icon className="h-4 w-4 shrink-0 md:h-[18px] md:w-[18px]" />
+                    <span className="min-w-0">
+                      {cta.label}
+                      {cta.disabled ? <span className="ml-2 text-xs uppercase tracking-wide text-muted-foreground">Coming Soon</span> : null}
+                    </span>
+                    {!cta.disabled ? (
+                      <ArrowRight className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:translate-x-1" />
+                    ) : null}
+                  </>
+                );
+
+                const className = `group inline-flex items-center justify-center gap-2 rounded-2xl border px-5 py-3 text-sm font-semibold backdrop-blur-xl transition sm:flex-1 sm:basis-[calc(50%-0.375rem)] lg:flex-none ${cta.className}`;
+
+                if (cta.disabled) {
+                  return (
+                    <button
+                      key={cta.label}
+                      type="button"
+                      disabled
+                      aria-disabled="true"
+                      className={`${className} cursor-not-allowed opacity-70`}
+                    >
+                      {content}
+                    </button>
+                  );
+                }
+
+                if (cta.href) {
+                  return (
+                    <a
+                      key={cta.label}
+                      href={cta.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={className}
+                    >
+                      {content}
+                    </a>
+                  );
+                }
+
+                return (
+                  <Link key={cta.label} to={cta.to} className={className}>
+                    {content}
+                  </Link>
+                );
+              })}
             </div>
           </motion.div>
 

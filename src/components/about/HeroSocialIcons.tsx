@@ -29,7 +29,7 @@ export const HeroSocialIcons = ({ profiles: providedProfiles, className }: HeroS
   };
 
   return (
-    <div className={cn("flex flex-wrap items-center justify-start gap-2", className)}>
+    <div className={cn("flex flex-wrap items-center justify-start gap-2.5 sm:gap-3", className)}>
       {visible.map((p, index: number) => {
         const Icon: any = iconForKey(p.icon_key);
         const iconColor = resolvedIconColor(p.brand_color);
@@ -45,11 +45,11 @@ export const HeroSocialIcons = ({ profiles: providedProfiles, className }: HeroS
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.04 }}
                 whileHover={{ scale: 1.08, y: -3 }}
-                className="group relative h-11 w-11 rounded-xl border border-white/55 bg-white/65 backdrop-blur-lg flex items-center justify-center shadow-[0_8px_20px_rgba(15,23,42,0.12)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(59,130,246,0.35)] dark:border-white/20 dark:bg-slate-900/65 dark:shadow-[0_8px_22px_rgba(2,6,23,0.55)]"
+                className="group relative flex h-12 w-12 items-center justify-center rounded-2xl border border-white/55 bg-white/65 backdrop-blur-lg shadow-[0_8px_20px_rgba(15,23,42,0.12)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(59,130,246,0.35)] sm:h-14 sm:w-14 dark:border-white/20 dark:bg-slate-900/65 dark:shadow-[0_8px_22px_rgba(2,6,23,0.55)]"
                 title={p.display_name}
               >
-                <span className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/15 via-transparent to-secondary/15 opacity-70 group-hover:opacity-100 transition-opacity" />
-                <Icon className="relative h-5 w-5 transition-transform group-hover:scale-110" style={{ color: iconColor }} />
+                <span className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/15 via-transparent to-secondary/15 opacity-70 transition-opacity group-hover:opacity-100" />
+                <Icon className="relative h-5 w-5 transition-transform group-hover:scale-110 sm:h-6 sm:w-6" style={{ color: iconColor }} />
               </motion.a>
             </TooltipTrigger>
             <TooltipContent>{p.display_name}</TooltipContent>
