@@ -45,7 +45,35 @@ export function ThemeProvider({
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
+    root.style.colorScheme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== storageKey) return;
+      setTheme(resolveInitialTheme(event.newValue, defaultTheme));
+    };
+
+    let channel: BroadcastChannel | null = null;
+    const onBroadcastMessage = (event: MessageEvent<{ type?: string; theme?: Theme }>) => {
+      if (event.data?.type !== "theme-change") return;
+      if (event.data.theme === "dark" || event.data.theme === "light") {
+        setTheme(event.data.theme);
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    try {
+      channel = new BroadcastChannel("abhishekpanda-theme");
+      channel.addEventListener("message", onBroadcastMessage);
+    } catch {}
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      channel?.removeEventListener("message", onBroadcastMessage);
+      channel?.close();
+    };
+  }, [defaultTheme, storageKey]);
 
   const value = {
     theme,

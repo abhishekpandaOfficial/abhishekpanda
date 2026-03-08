@@ -52,12 +52,12 @@ export function BrandLogo({ variant, alt, className, imageClassName, size = "md"
     if (variant === "openowl") {
       return theme === "dark"
         ? "grayscale(1) invert(1) contrast(1.25) brightness(1.16)"
-        : "grayscale(1) contrast(1.25) brightness(0.2)";
+        : "grayscale(1) contrast(1.12) brightness(0.55)";
     }
     if (variant === "originx" || variant === "proxinex") {
       return theme === "dark"
         ? "grayscale(1) invert(1) contrast(1.18) brightness(1.1)"
-        : "grayscale(1) contrast(1.22) brightness(0.16)";
+        : "grayscale(1) contrast(1.14) brightness(0.42)";
     }
     return undefined;
   }, [theme, variant]);

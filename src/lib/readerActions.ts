@@ -33,7 +33,7 @@ const PRINT_BASE_STYLES = `
 
 const EPUB_BASE_STYLES = `
   body {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
     line-height: 1.7;
     color: #0f172a;
     background: #ffffff;
@@ -53,7 +53,7 @@ const EPUB_BASE_STYLES = `
     color: #334155;
   }
   pre, code {
-    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   }
   pre {
     white-space: pre-wrap;
@@ -282,6 +282,7 @@ export const buildIframeExportPayload = (
 export const buildHtmlExportPayload = (payload: ReaderExportPayload) => payload;
 
 export const applyEmbeddedThemeBridge = (doc: Document, theme: ReaderTheme) => {
+  const isDesignPatternsGuide = /design patterns/i.test(doc.title);
   const palette =
     theme === "dark"
       ? {
@@ -332,9 +333,23 @@ export const applyEmbeddedThemeBridge = (doc: Document, theme: ReaderTheme) => {
     html, body {
       background: var(--bg) !important;
       color: var(--text) !important;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif !important;
+    }
+    body {
+      overflow-x: hidden;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif !important;
+      letter-spacing: -0.03em;
     }
     body, p, li, td, th, dd, figcaption, .hero-desc, .cs-lead, .card p, .card ul li, .nav-a, .sb-sub, .nav-num, .stat-pill, .code-file, .code-tag {
       color: var(--text2) !important;
+    }
+    p, li, td, th, dd, figcaption, span, div:not([class*="code"]):not([class*="mono"]) {
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    }
+    pre, code, kbd, samp, .code, .code *, [class*="code"], [class*="mono"] {
+      font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace !important;
     }
     h1, h2, h3, h4, h5, h6, .hero h1, .cs-title, .sb-title, .card h3 {
       color: var(--text) !important;
@@ -358,6 +373,33 @@ export const applyEmbeddedThemeBridge = (doc: Document, theme: ReaderTheme) => {
     svg text[fill="#fff"], svg text[fill="#ffffff"] {
       fill: var(--text) !important;
     }
+    img, picture, svg, video, canvas, iframe {
+      max-width: 100% !important;
+      visibility: visible !important;
+    }
+    img, video, canvas {
+      height: auto;
+      object-fit: contain;
+      opacity: 1 !important;
+    }
+    img[alt*="logo" i], .logo img, [class*="logo"] img {
+      object-fit: contain !important;
+    }
+    ${isDesignPatternsGuide && theme === "light"
+      ? `
+    html[data-ap-theme="light"] body {
+      filter: invert(1) hue-rotate(180deg);
+      background: #f8fafc !important;
+    }
+    html[data-ap-theme="light"] img,
+    html[data-ap-theme="light"] picture,
+    html[data-ap-theme="light"] svg,
+    html[data-ap-theme="light"] video,
+    html[data-ap-theme="light"] canvas,
+    html[data-ap-theme="light"] iframe {
+      filter: invert(1) hue-rotate(180deg) !important;
+    }`
+      : ""}
   `;
 
   let styleNode = doc.getElementById("ap-theme-bridge") as HTMLStyleElement | null;

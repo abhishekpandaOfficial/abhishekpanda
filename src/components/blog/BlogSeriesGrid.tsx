@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Layers3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BLOG_SERIES, getBlogSeriesHref } from "@/lib/blogSeries";
+import { getBlogSeriesVisual } from "@/lib/blogVisuals";
 
 const MotionLink = motion.create(Link);
 
@@ -19,6 +20,7 @@ export function BlogSeriesGrid({ counts, selectedSlug, seriesList = BLOG_SERIES 
         const to = getBlogSeriesHref(series);
         const count = counts.get(series.slug) ?? 0;
         const isSelected = selectedSlug === series.slug;
+        const visual = getBlogSeriesVisual(series);
 
         return (
           <MotionLink
@@ -45,32 +47,23 @@ export function BlogSeriesGrid({ counts, selectedSlug, seriesList = BLOG_SERIES 
             />
 
             <div className="relative flex h-full flex-col">
-              <div
-                className="relative mb-4 overflow-hidden rounded-2xl border border-white/20 p-3"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(var(--series-rgb),0.92) 0%, rgba(var(--series-rgb),0.72) 40%, rgba(var(--series-rgb),0.56) 100%)",
-                }}
-              >
-                <div
-                  className="absolute inset-0 opacity-30 dark:opacity-25 bg-[linear-gradient(rgba(15,23,42,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.2)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:16px_16px]"
-                />
-                <div className="relative flex items-center justify-between gap-3">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/60 bg-black/35 text-sm font-black text-white dark:border-white/40 dark:bg-white/15">
+              <div className="relative mb-4 aspect-[16/10] overflow-hidden rounded-2xl border border-white/20">
+                <img src={visual} alt={series.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/72 via-slate-950/18 to-transparent" />
+                <div className="absolute left-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/60 bg-black/35 text-sm font-black text-white dark:border-white/40 dark:bg-white/15">
                     {String(index + 1).padStart(2, "0")}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    {series.logos.slice(0, 2).map((logo, logoIndex) => (
-                      <span
-                        key={`${series.slug}-header-${logoIndex}`}
-                        className="flex h-8 w-8 items-center justify-center rounded-full border border-white/60 bg-black/30 p-1.5 backdrop-blur-sm dark:border-white/40 dark:bg-white/20"
-                      >
-                        <img src={logo} alt="" className="h-full w-full object-contain" loading="lazy" />
-                      </span>
-                    ))}
-                  </div>
                 </div>
-                <div className="relative mt-3 flex items-center justify-between gap-2">
+                <div className="absolute right-3 top-3 flex items-center gap-1.5">
+                  {series.logos.slice(0, 2).map((logo, logoIndex) => (
+                    <span
+                      key={`${series.slug}-header-${logoIndex}`}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-white/60 bg-black/30 p-1.5 backdrop-blur-sm dark:border-white/40 dark:bg-white/20"
+                    >
+                      <img src={logo} alt="" className="h-full w-full object-contain" loading="lazy" />
+                    </span>
+                  ))}
+                </div>
+                <div className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-2">
                   <div className="flex flex-wrap gap-1.5">
                     {series.tags.slice(0, 2).map((tag) => (
                       <span

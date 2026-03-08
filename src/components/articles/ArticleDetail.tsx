@@ -352,6 +352,53 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
       </Sheet>
 
       <article className="min-w-0 space-y-6">
+        <section className="relative overflow-hidden rounded-[2rem] border border-border/70 bg-card/90 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.45)]">
+          <div className="relative aspect-[16/8] min-h-[280px] w-full md:min-h-[360px]">
+            <img
+              src={article.heroImage}
+              alt={article.title}
+              className="h-full w-full object-cover"
+              loading="eager"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent dark:from-background dark:via-slate-950/40 dark:to-transparent" />
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.14),transparent_40%,rgba(15,23,42,0.12))] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_40%,rgba(2,6,23,0.34))]" />
+          </div>
+
+          <div className="relative -mt-24 px-5 pb-5 md:px-8 md:pb-8">
+            <div className="rounded-[1.75rem] border border-border/70 bg-background/88 p-5 shadow-xl backdrop-blur-xl dark:bg-slate-950/72 md:p-7">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+                  {article.eyebrow}
+                </span>
+                <span className="rounded-full border border-border/70 bg-card/80 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
+                  {article.publishedAt}
+                </span>
+                <span className="rounded-full border border-border/70 bg-card/80 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
+                  {article.readMinutes} min read
+                </span>
+              </div>
+
+              <h1 className="mt-4 max-w-4xl text-3xl font-black tracking-tight text-foreground md:text-5xl">
+                {article.title}
+              </h1>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground md:text-base">
+                {article.description}
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                {article.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full border border-sky-500/15 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold text-foreground/85"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         <iframe
           ref={iframeRef}
           title={article.title}

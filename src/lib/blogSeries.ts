@@ -44,13 +44,15 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     actionLabel: "Open TOC",
   },
   {
-    slug: "solid-patterns",
-    title: "SOLID Patterns",
+    slug: "solid-principles",
+    title: "SOLID Principles",
     subtitle: "Design principles, refactoring moves, and maintainable object-oriented architecture.",
     tags: ["SOLID", "Architecture", "OOP"],
     keywords: ["solid", "single responsibility", "open closed", "liskov", "interface segregation", "dependency inversion"],
     logos: ["/brand-logos/stacks/csharp.svg", "/brand-logos/stacks/dotnet.svg"],
     rgb: "56 189 248",
+    href: "/blogs/solid-principles",
+    actionLabel: "Open Guide",
   },
   {
     slug: "design-patterns",
@@ -60,6 +62,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     keywords: ["design pattern", "factory", "strategy", "observer", "builder", "decorator", "adapter"],
     logos: ["/brand-logos/stacks/csharp.svg", "/brand-logos/stacks/dotnet.svg"],
     rgb: "251 146 60",
+    href: "/design-patterns-guide",
+    actionLabel: "Open Guide",
   },
   {
     slug: "microservices-mastery",

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CourseCatalogItem } from "@/content/courses";
 import { cn } from "@/lib/utils";
+import { getCourseVisual } from "@/lib/courseVisuals";
 
 type CourseCoverProps = {
   course: Pick<CourseCatalogItem, "slug" | "title" | "category" | "tags" | "thumbnail">;
@@ -87,6 +88,7 @@ export function CourseCover({
     [sessionTitles, previewIndex],
   );
   const stackLogos = useMemo(() => resolveStackLogos(course.tags), [course.tags]);
+  const visual = useMemo(() => getCourseVisual(course), [course]);
 
   useEffect(() => {
     if (!isHovered || sessionTitles.length <= 1) return;
@@ -96,7 +98,7 @@ export function CourseCover({
     return () => window.clearInterval(interval);
   }, [isHovered, sessionTitles.length]);
 
-  if (course.thumbnail && !imageFailed) {
+  if (visual && !imageFailed) {
     return (
       <div
         className={cn("relative overflow-hidden bg-muted", className)}
@@ -104,7 +106,7 @@ export function CourseCover({
         onMouseLeave={() => setIsHovered(false)}
       >
         <img
-          src={course.thumbnail}
+          src={visual}
           alt={course.title}
           className="h-full w-full object-cover"
           loading="lazy"

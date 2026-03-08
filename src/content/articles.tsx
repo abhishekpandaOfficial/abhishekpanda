@@ -59,6 +59,7 @@ export type ArticleRecord = {
   rawHtml: string;
   plainText: string;
   assetUrl: string;
+  heroImage: string;
 };
 
 const MAX_ARTICLE_TAGS = 4;
@@ -77,6 +78,15 @@ const articleAssetUrls = import.meta.glob("./Articles/*.html", {
   import: "default",
   eager: true,
 }) as Record<string, string>;
+
+const CUSTOM_ARTICLE_HERO_IMAGES: Record<string, string> = {
+  "12-ai-architectures": "/article-heroes/12-ai-architectures.svg",
+  "15-case-studies-dotnet": "/article-heroes/15-case-studies-dotnet.svg",
+  "digital-privacy-dashboard": "/article-heroes/digital-privacy-dashboard.svg",
+  "dotnet-mastery-2026": "/article-heroes/dotnet-mastery-2026.svg",
+  "microservices-patterns-dotnet": "/article-heroes/microservices-patterns-dotnet.svg",
+  "solid-principles-guide": "/article-heroes/solid-principles-guide.svg",
+};
 
 const FALLBACK_DATE = new Date("2026-03-06T00:00:00").toLocaleDateString("en-US", {
   month: "long",
@@ -402,6 +412,229 @@ const extractParagraphs = (bodyHtml: string) => {
     .slice(0, 6);
 };
 
+const resolveMediaUrl = (src: string, assetUrl: string) => {
+  if (!src) return "";
+  if (/^(https?:)?\/\//i.test(src) || src.startsWith("data:")) return src;
+
+  try {
+    return new URL(src, assetUrl).toString();
+  } catch {
+    return src;
+  }
+};
+
+const escapeXml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+
+const splitTitleForCover = (title: string) => {
+  const words = title.trim().split(/\s+/);
+  const midpoint = Math.max(2, Math.ceil(words.length / 2));
+  return [words.slice(0, midpoint).join(" "), words.slice(midpoint).join(" ")].filter(Boolean);
+};
+
+const getHeroPalette = (tags: string[], title: string, description: string) => {
+  const source = `${tags.join(" ")} ${title} ${description}`.toLowerCase();
+
+  if (/\bprivacy|security|risk|threat|tracking|surveillance\b/.test(source)) {
+    return {
+      from: "#020617",
+      via: "#0f766e",
+      to: "#0f172a",
+      accent: "#2dd4bf",
+      accentSoft: "#99f6e4",
+      panel: "rgba(15, 23, 42, 0.34)",
+      line: "rgba(153, 246, 228, 0.22)",
+    };
+  }
+
+  if (/\bai|llm|agentic|architecture|system design\b/.test(source)) {
+    return {
+      from: "#111827",
+      via: "#4f46e5",
+      to: "#0f172a",
+      accent: "#a78bfa",
+      accentSoft: "#c4b5fd",
+      panel: "rgba(30, 27, 75, 0.32)",
+      line: "rgba(196, 181, 253, 0.22)",
+    };
+  }
+
+  if (/\bcase studies|microservices|distributed|messaging|cloud native\b/.test(source)) {
+    return {
+      from: "#082f49",
+      via: "#0369a1",
+      to: "#0f172a",
+      accent: "#38bdf8",
+      accentSoft: "#7dd3fc",
+      panel: "rgba(12, 74, 110, 0.32)",
+      line: "rgba(125, 211, 252, 0.24)",
+    };
+  }
+
+  if (/\bsolid|\.net|c#|design|oop\b/.test(source)) {
+    return {
+      from: "#1e1b4b",
+      via: "#7c3aed",
+      to: "#1f2937",
+      accent: "#c084fc",
+      accentSoft: "#ddd6fe",
+      panel: "rgba(76, 29, 149, 0.3)",
+      line: "rgba(221, 214, 254, 0.24)",
+    };
+  }
+
+  return {
+    from: "#0f172a",
+    via: "#1d4ed8",
+    to: "#0891b2",
+    accent: "#38bdf8",
+    accentSoft: "#bae6fd",
+    panel: "rgba(15, 23, 42, 0.3)",
+    line: "rgba(186, 230, 253, 0.22)",
+  };
+};
+
+const getHeroPattern = (tags: string[], title: string, description: string, accent: string, line: string) => {
+  const source = `${tags.join(" ")} ${title} ${description}`.toLowerCase();
+
+  if (/\bprivacy|security|risk|threat|tracking|surveillance\b/.test(source)) {
+    return `
+      <g opacity="0.82">
+        <path d="M860 164h180" stroke="${line}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M900 214h140" stroke="${line}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M842 262h198" stroke="${line}" stroke-width="3" stroke-linecap="round"/>
+        <rect x="805" y="112" width="280" height="210" rx="32" fill="rgba(255,255,255,0.05)" stroke="${line}" />
+        <path d="M945 156c31 0 56 25 56 56v20h-112v-20c0-31 25-56 56-56Z" fill="none" stroke="${accent}" stroke-width="12"/>
+        <rect x="884" y="225" width="122" height="86" rx="22" fill="rgba(255,255,255,0.08)" stroke="${accent}" stroke-width="8"/>
+        <circle cx="945" cy="260" r="14" fill="${accent}" />
+      </g>
+    `;
+  }
+
+  if (/\bai|llm|agentic|architecture|system design\b/.test(source)) {
+    return `
+      <g opacity="0.88">
+        <circle cx="930" cy="194" r="84" fill="rgba(255,255,255,0.06)" stroke="${line}" />
+        <circle cx="930" cy="194" r="28" fill="${accent}" />
+        <path d="M930 110v-46M930 324v-46M846 194h-46M1060 194h-46M873 137l-34-34M1021 285l-34-34M1021 103l-34 34M873 251l-34 34" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>
+        <path d="M760 336c84-72 176-104 276-94" stroke="${line}" stroke-width="4" fill="none" />
+        <path d="M788 384c108-54 198-73 286-56" stroke="${line}" stroke-width="4" fill="none" />
+      </g>
+    `;
+  }
+
+  if (/\bcase studies|microservices|distributed|messaging|cloud native\b/.test(source)) {
+    return `
+      <g opacity="0.9">
+        <rect x="792" y="122" width="104" height="72" rx="18" fill="rgba(255,255,255,0.08)" stroke="${line}" />
+        <rect x="950" y="122" width="104" height="72" rx="18" fill="rgba(255,255,255,0.08)" stroke="${line}" />
+        <rect x="872" y="246" width="104" height="72" rx="18" fill="rgba(255,255,255,0.08)" stroke="${line}" />
+        <rect x="784" y="370" width="104" height="72" rx="18" fill="rgba(255,255,255,0.08)" stroke="${line}" />
+        <rect x="960" y="370" width="104" height="72" rx="18" fill="rgba(255,255,255,0.08)" stroke="${line}" />
+        <path d="M896 158h54M922 194v52M924 318v52M888 406h72M976 158h-26" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>
+        <path d="M844 194v176M1002 194v176" stroke="${line}" stroke-width="4" />
+      </g>
+    `;
+  }
+
+  if (/\bsolid|\.net|c#|design|oop\b/.test(source)) {
+    return `
+      <g opacity="0.92">
+        <path d="M820 420 948 132l128 288" fill="none" stroke="${accent}" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M874 292h148" fill="none" stroke="${line}" stroke-width="10" stroke-linecap="round"/>
+        <circle cx="820" cy="420" r="18" fill="${accent}" />
+        <circle cx="948" cy="132" r="18" fill="${accent}" />
+        <circle cx="1076" cy="420" r="18" fill="${accent}" />
+        <path d="M780 504c90-46 186-46 336 0" fill="none" stroke="${line}" stroke-width="6" stroke-linecap="round"/>
+      </g>
+    `;
+  }
+
+  return `
+    <g opacity="0.88">
+      <circle cx="936" cy="202" r="112" fill="rgba(255,255,255,0.06)" />
+      <path d="M820 334c60-82 125-126 224-138" stroke="${accent}" stroke-width="12" stroke-linecap="round" fill="none"/>
+      <path d="M794 408c100-58 196-82 284-72" stroke="${line}" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <path d="M770 478c122-34 226-35 330 0" stroke="${line}" stroke-width="6" stroke-linecap="round" fill="none"/>
+    </g>
+  `;
+};
+
+const createFallbackHeroImage = (title: string, tags: string[], eyebrow: string, description: string) => {
+  const palette = getHeroPalette(tags, title, description);
+  const titleLines = splitTitleForCover(title).slice(0, 2).map(escapeXml);
+  const safeEyebrow = escapeXml(eyebrow || tags[0] || "Article");
+  const safeLabel = escapeXml(tags.slice(0, 2).join(" • ") || "Engineering Article");
+  const summary = escapeXml(description).slice(0, 120);
+  const pattern = getHeroPattern(tags, title, description, palette.accent, palette.line);
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="${escapeXml(title)}">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="${palette.from}" />
+          <stop offset="52%" stop-color="${palette.via}" />
+          <stop offset="100%" stop-color="${palette.to}" />
+        </linearGradient>
+        <radialGradient id="glowA" cx="20%" cy="20%" r="55%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.30" />
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="glowB" cx="85%" cy="80%" r="45%">
+          <stop offset="0%" stop-color="${palette.accentSoft}" stop-opacity="0.54" />
+          <stop offset="100%" stop-color="${palette.accentSoft}" stop-opacity="0" />
+        </radialGradient>
+        <linearGradient id="panelGlow" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.14)" />
+          <stop offset="100%" stop-color="rgba(255,255,255,0.02)" />
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="720" fill="url(#bg)" />
+      <rect width="1200" height="720" fill="url(#glowA)" />
+      <rect width="1200" height="720" fill="url(#glowB)" />
+      <g opacity="0.18">
+        <path d="M0 102h1200M0 210h1200M0 318h1200M0 426h1200M0 534h1200M0 642h1200" stroke="white" />
+        <path d="M114 0v720M282 0v720M450 0v720M618 0v720M786 0v720M954 0v720" stroke="white" />
+      </g>
+      <rect x="66" y="70" rx="34" ry="34" width="610" height="580" fill="${palette.panel}" />
+      <rect x="66" y="70" rx="34" ry="34" width="610" height="580" fill="url(#panelGlow)" stroke="rgba(255,255,255,0.12)" />
+      <rect x="104" y="108" rx="24" ry="24" width="250" height="54" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.18)" />
+      <text x="132" y="143" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="white" opacity="0.92">${safeLabel}</text>
+      <text x="106" y="222" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="4" fill="${palette.accentSoft}" opacity="0.95">${safeEyebrow.toUpperCase()}</text>
+      <text x="104" y="308" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="800" fill="white">${titleLines[0] || ""}</text>
+      ${titleLines[1] ? `<text x="104" y="376" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="800" fill="white">${titleLines[1]}</text>` : ""}
+      <text x="104" y="${titleLines[1] ? 448 : 396}" font-family="Inter, Arial, sans-serif" font-size="24" fill="white" opacity="0.82">${summary}</text>
+      <rect x="104" y="536" rx="20" ry="20" width="210" height="58" fill="rgba(255,255,255,0.08)" stroke="${palette.line}" />
+      <circle cx="142" cy="565" r="10" fill="${palette.accent}" />
+      <text x="168" y="572" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="white">${safeEyebrow}</text>
+      ${pattern}
+    </svg>
+  `;
+
+  return svgLogo(svg);
+};
+
+const extractHeroImage = (html: string, assetUrl: string, title: string, tags: string[], eyebrow: string, description: string) => {
+  const ogImage =
+    matchFirst(html, /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ||
+    matchFirst(html, /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
+
+  if (ogImage) return resolveMediaUrl(ogImage, assetUrl);
+
+  const firstImg =
+    matchFirst(html, /<img[^>]+src=["']([^"']+)["'][^>]*class=["'][^"']*(?:hero|cover|banner|featured|thumbnail)[^"']*["'][^>]*>/i) ||
+    matchFirst(html, /<img[^>]+class=["'][^"']*(?:hero|cover|banner|featured|thumbnail)[^"']*["'][^>]+src=["']([^"']+)["']/i) ||
+    matchFirst(html, /<img[^>]+src=["']([^"']+)["']/i);
+
+  if (firstImg) return resolveMediaUrl(firstImg, assetUrl);
+
+  return createFallbackHeroImage(title, tags, eyebrow, description);
+};
+
 const unique = <T,>(items: T[]) => Array.from(new Set(items));
 
 const countMatches = (source: string, pattern: RegExp) => {
@@ -550,6 +783,9 @@ const buildArticleRecord = (filePath: string, html: string, assetUrl: string): A
   const normalizedKeyPoints = unique([...headings.slice(1), ...paragraphs.slice(0, 3)])
     .filter((point) => point && point.length <= 140)
     .slice(0, MAX_ARTICLE_KEY_POINTS);
+  const heroImage =
+    CUSTOM_ARTICLE_HERO_IMAGES[slug] ||
+    extractHeroImage(safeHtml, assetUrl, title, tags, heroTag || headings[0] || "Articles Hub", description);
 
   return {
     slug,
@@ -568,6 +804,7 @@ const buildArticleRecord = (filePath: string, html: string, assetUrl: string): A
     rawHtml: safeHtml,
     plainText,
     assetUrl,
+    heroImage,
   };
 };
 

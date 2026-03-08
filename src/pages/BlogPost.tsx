@@ -771,7 +771,7 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
     if (!canDownload || !exportRef.current) return;
     const title = meta?.title || "Blog Post";
     const html = exportRef.current.innerHTML;
-    const epubContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title><style>body{font-family:Georgia,serif;max-width:700px;margin:0 auto;padding:2rem;line-height:1.7}h1,h2,h3{font-weight:700}pre{background:#f4f4f4;padding:1rem;overflow-x:auto}code{font-family:monospace}img{max-width:100%}</style></head><body><h1>${title}</h1>${html}</body></html>`;
+    const epubContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title><style>body{font-family:Inter,ui-sans-serif,system-ui,sans-serif;max-width:700px;margin:0 auto;padding:2rem;line-height:1.7}h1,h2,h3{font-weight:700}pre{background:#f4f4f4;padding:1rem;overflow-x:auto}code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}img{max-width:100%}</style></head><body><h1>${title}</h1>${html}</body></html>`;
     const blob = new Blob([epubContent], { type: "application/epub+zip" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);

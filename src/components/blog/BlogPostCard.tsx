@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Clock, Eye, Lock } from "lucide-react";
 import { titleCaseLevel, type BlogIndexRow } from "@/hooks/usePublishedPersonalBlogs";
+import { getBlogPostVisual } from "@/lib/blogVisuals";
 
 type BlogPostCardProps = {
   post: BlogIndexRow;
@@ -90,6 +91,7 @@ export function BlogPostCard({ post, index = 0, getTagStyle }: BlogPostCardProps
     new Date(updatedAt).getTime() > new Date(originalPublishedAt).getTime();
   const source = `${post.title} ${post.excerpt || ""} ${(post.tags || []).join(" ")}`;
   const techLogos = STACK_LOGO_RULES.filter((rule) => rule.match.test(source)).slice(0, 3);
+  const coverImage = getBlogPostVisual(post);
 
   return (
     <motion.article
@@ -104,19 +106,17 @@ export function BlogPostCard({ post, index = 0, getTagStyle }: BlogPostCardProps
         >
           <div
             className="aspect-video relative overflow-hidden"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(var(--brand-rgb),0.92) 0%, rgba(var(--brand-rgb),0.72) 38%, rgba(var(--brand-rgb),0.58) 100%)",
-            }}
           >
+            <img
+              src={coverImage}
+              alt={post.title}
+              className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+              loading="lazy"
+            />
             <div
-              className="absolute inset-0 opacity-30 dark:opacity-25 bg-[linear-gradient(rgba(15,23,42,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.2)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:18px_18px]"
+              className="absolute inset-0 opacity-18 bg-[linear-gradient(rgba(255,255,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.18)_1px,transparent_1px)] [background-size:18px_18px] dark:opacity-10"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/10 to-black/45 dark:from-black/10 dark:via-transparent dark:to-black/35" />
-
-            {post.hero_image ? (
-              <img src={post.hero_image} alt={post.title} className="absolute inset-0 h-full w-full object-cover opacity-20 mix-blend-soft-light" />
-            ) : null}
 
             <div className="editorial-title absolute right-4 top-2 text-4xl font-black text-white/40 dark:text-white/28">
               {serial}
@@ -159,11 +159,6 @@ export function BlogPostCard({ post, index = 0, getTagStyle }: BlogPostCardProps
               </div>
             ) : null}
 
-            {!post.hero_image ? (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-5xl font-black text-white/20">{post.tags?.[0]?.charAt(0) || "B"}</span>
-              </div>
-            ) : null}
             <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
               <span className="px-2 py-1 rounded-full text-[11px] font-semibold border border-primary/30 bg-primary/15 text-primary">
                 {level}
