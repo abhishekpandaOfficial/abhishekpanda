@@ -34,14 +34,26 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
   {
     slug: "csharp-mastery",
     title: "C# Mastery",
-    detailTitle: "C# & .NET Engineering Mastery Series",
-    subtitle: "A complete engineering path across C#, ASP.NET Core, architecture, APIs, clean code, testing, and production-grade .NET delivery.",
+    detailTitle: "C# Mastery",
+    subtitle: "Reserved route for the upcoming C# mastery syllabus and chapter structure.",
     tags: ["C#", ".NET", "Series"],
     keywords: ["c#", ".net", "dotnet", "asp.net", "entity framework", "blazor"],
     logos: ["/brand-logos/stacks/csharp.svg", "/brand-logos/stacks/dotnet.svg"],
     rgb: "99 102 241",
-    href: "/dotnet-mastery-toc",
-    actionLabel: "Open TOC",
+    href: "/csharp-mastery",
+    actionLabel: "Open C# Mastery",
+  },
+  {
+    slug: "efcore-mastery",
+    title: "EF Core Mastery",
+    detailTitle: "EF Core Mastery",
+    subtitle: "Structured EF Core syllabus covering fundamentals, modeling, queries, performance, and production data patterns.",
+    tags: ["EF Core", "Data", "Series"],
+    keywords: ["ef core", "entity framework core", "orm", "linq", "migrations", "performance"],
+    logos: ["/brand-logos/stacks/dotnet.svg", "/brand-logos/stacks/postgresql.svg"],
+    rgb: "16 185 129",
+    href: "/efcore-mastery",
+    actionLabel: "Open EF Core Mastery",
   },
   {
     slug: "solid-principles",
@@ -51,7 +63,7 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     keywords: ["solid", "single responsibility", "open closed", "liskov", "interface segregation", "dependency inversion"],
     logos: ["/brand-logos/stacks/csharp.svg", "/brand-logos/stacks/dotnet.svg"],
     rgb: "56 189 248",
-    href: "/blogs/solid-principles",
+    href: "/cheatsheets/solid-principles",
     actionLabel: "Open Guide",
   },
   {
@@ -244,7 +256,7 @@ export const matchesBlogSeries = (series: BlogSeriesTrack, candidate: SeriesMatc
 
 export const getBlogSeriesDisplayTitle = (series: BlogSeriesTrack) => series.detailTitle || series.title;
 
-export const getBlogSeriesHref = (series: BlogSeriesTrack) => series.href || `/blogs/${series.slug}`;
+export const getBlogSeriesHref = (series: BlogSeriesTrack) => series.href || `/cheatsheets/${series.slug}`;
 
 type SeriesKind =
   | "engineering"

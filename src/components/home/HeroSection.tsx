@@ -7,7 +7,7 @@ import abhishekAvatarAlt from "@/assets/abhishek-avatar-alt.png";
 import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
 
 const badges = [
-  { icon: Code2, label: ".NET Architect", color: "from-primary to-secondary", to: "/dotnet-mastery-toc" },
+  { icon: Code2, label: "C# Architect", color: "from-primary to-secondary", to: "/csharp-mastery" },
   { icon: Brain, label: "AI/ML Engineer", color: "from-secondary to-purple" },
   { icon: Cloud, label: "Cloud Specialist", color: "from-sky to-primary" },
 ];

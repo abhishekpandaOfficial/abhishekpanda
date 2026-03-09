@@ -4,12 +4,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route, useParams } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Index from "./pages/Index";
 import { RouteSeo } from "@/components/seo/RouteSeo";
 import { BrandIntro } from "@/components/BrandIntro";
+import AdminWebVault from "@/components/admin/AdminWebVault";
 
 const About = lazy(() => import("./pages/About"));
 const Blog = lazy(() => import("./pages/Blog"));
@@ -47,7 +48,10 @@ const TechHub = lazy(() => import("./pages/TechHub"));
 const OpenOwlLanding = lazy(() => import("./pages/OpenOwlLanding"));
 const OpenOwlAssistant = lazy(() => import("./pages/OpenOwlAssistant"));
 const LLMVisualizer = lazy(() => import("./pages/llm-visualizer"));
-const DotnetMasteryTOC = lazy(() => import("./pages/DotnetMasteryTOC"));
+const CSharpMastery = lazy(() => import("./pages/CSharpMastery"));
+const EFCoreMastery = lazy(() => import("./pages/EFCoreMastery"));
+const AzureMasteryGuide = lazy(() => import("./pages/AzureMasteryGuide"));
+const AngularMasteryGuide = lazy(() => import("./pages/AngularMasteryGuide"));
 const DesignPatternsGuide = lazy(() => import("./pages/DesignPatternsGuide"));
 const SolidPrinciplesGuide = lazy(() => import("./pages/SolidPrinciplesGuide"));
 const Classified = lazy(() => import("./pages/Classified"));
@@ -55,27 +59,16 @@ const Scriptures = lazy(() => import("./pages/Scriptures"));
 
 const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
 const AdminDashboard = lazy(() => import("@/components/admin/AdminDashboard"));
-const AdminCVDownloads = lazy(() => import("@/components/admin/AdminCVDownloads"));
-const AdminBusinessHub = lazy(() => import("@/components/admin/AdminBusinessHub"));
-const AdminPayments = lazy(() => import("@/components/admin/AdminPayments"));
 const AdminCoursesManager = lazy(() => import("@/components/admin/AdminCoursesManager").then((m) => ({ default: m.AdminCoursesManager })));
-const AdminBlogManager = lazy(() => import("@/components/admin/AdminBlogManager").then((m) => ({ default: m.AdminBlogManager })));
-const AdminCMSStudio = lazy(() => import("@/components/admin/AdminCMSStudio").then((m) => ({ default: m.AdminCMSStudio })));
-const AdminEncryptedDrive = lazy(() => import("@/components/admin/AdminEncryptedDrive").then((m) => ({ default: m.AdminEncryptedDrive })));
 const AdminContactRequests = lazy(() => import("@/components/admin/AdminContactRequests"));
-const AdminProductsManager = lazy(() => import("@/components/admin/AdminProductsManager"));
 const AdminLLMAtlasManager = lazy(() => import("@/components/admin/AdminLLMAtlasManager"));
-const AdminWorkflows = lazy(() => import("@/components/admin/AdminWorkflows").then((m) => ({ default: m.AdminWorkflows })));
 const AdminSocialHub = lazy(() => import("@/components/admin/AdminSocialHub").then((m) => ({ default: m.AdminSocialHub })));
-const AdminScheduledJobs = lazy(() => import("@/components/admin/AdminScheduledJobs").then((m) => ({ default: m.AdminScheduledJobs })));
+const AdminArgusControl = lazy(() => import("@/components/admin/AdminArgusControl"));
 const AdminAnalytics = lazy(() => import("@/components/admin/AdminAnalytics"));
 const AdminSettings = lazy(() => import("@/components/admin/AdminSettings"));
 const AdminSecurity = lazy(() => import("@/components/admin/AdminSecurity").then((m) => ({ default: m.AdminSecurity })));
-const AdminLifeMap = lazy(() => import("@/components/admin/AdminLifeMap"));
 const AdminIntegrations = lazy(() => import("@/components/admin/AdminIntegrations"));
-const AdminNimbusDesk = lazy(() => import("@/components/admin/AdminNimbusDesk"));
 const AdminAuditLogs = lazy(() => import("@/components/admin/AdminAuditLogs"));
-const AdminIPManagement = lazy(() => import("@/components/admin/AdminIPManagement"));
 const AdminMentorshipBookings = lazy(() => import("@/components/admin/AdminMentorshipBookings"));
 const AdminOpsDocs = lazy(() => import("@/components/admin/AdminOpsDocs"));
 const AdminEbooksManager = lazy(() => import("@/components/admin/AdminEbooksManager"));
@@ -99,6 +92,11 @@ const RouteLoader = () => (
     <div className="w-8 h-8 border-2 border-primary/35 border-t-primary rounded-full animate-spin" />
   </div>
 );
+
+const LegacyCheatsheetSeriesRedirect = () => {
+  const { seriesSlug } = useParams();
+  return <Navigate to={seriesSlug ? `/cheatsheets/${seriesSlug}` : "/cheatsheets"} replace />;
+};
 
 const App = () => {
   const [showIntro, setShowIntro] = useState(() => {
@@ -162,8 +160,18 @@ const App = () => {
                 <Route path="/ai-closed_models_2026.html" element={<Navigate to="/llm-galaxy/closed-source-models" replace />} />
                 <Route path="/open-source-models-march-2026.html" element={<Navigate to="/llm-galaxy/open-source-models" replace />} />
                 <Route path="/ai-model-comparison.html" element={<Navigate to="/llm-galaxy/model-comparison" replace />} />
-                <Route path="/blogs" element={<BlogAggregator />} />
-                <Route path="/blogs/:seriesSlug" element={<BlogSeries />} />
+                <Route path="/cheatsheets" element={<BlogAggregator />} />
+                <Route path="/cheatsheets/azure-mastery" element={<AzureMasteryGuide />} />
+                <Route path="/cheatsheets/angular-mastery" element={<AngularMasteryGuide />} />
+                <Route path="/cheatsheets/csharp-mastery" element={<CSharpMastery />} />
+                <Route path="/cheatsheets/efcore-mastery" element={<EFCoreMastery />} />
+                <Route path="/cheatsheets/dotnet-mastery" element={<Navigate to="/cheatsheets/csharp-mastery" replace />} />
+                <Route path="/cheatsheets/dotnet-mastery-toc" element={<Navigate to="/cheatsheets/csharp-mastery" replace />} />
+                <Route path="/cheatsheets/:seriesSlug" element={<BlogSeries />} />
+                <Route path="/blogs" element={<Navigate to="/cheatsheets" replace />} />
+                <Route path="/blogs/azure-mastery" element={<Navigate to="/cheatsheets/azure-mastery" replace />} />
+                <Route path="/blogs/angular-mastery" element={<Navigate to="/cheatsheets/angular-mastery" replace />} />
+                <Route path="/blogs/:seriesSlug" element={<LegacyCheatsheetSeriesRedirect />} />
                 <Route path="/blog/techhub" element={<TechHub />} />
                 <Route path="/articles" element={<Suspense fallback={<RouteLoader />}><ArticlesPage /></Suspense>} />
                 <Route path="/articles/:slug" element={<Suspense fallback={<RouteLoader />}><ArticlesPage /></Suspense>} />
@@ -185,11 +193,16 @@ const App = () => {
                 <Route path="/openowl-blueprint" element={<Navigate to="/openowl-blueprint.html" replace />} />
                 <Route path="/open-owl" element={<Navigate to="/openowl" replace />} />
                 <Route path="/llm-visualizer" element={<LLMVisualizer />} />
-                <Route path="/dotnet-mastery-toc" element={<DotnetMasteryTOC />} />
+                <Route path="/csharp-mastery" element={<Navigate to="/cheatsheets/csharp-mastery" replace />} />
+                <Route path="/efcore-mastery" element={<Navigate to="/cheatsheets/efcore-mastery" replace />} />
+                <Route path="/dotnet-mastery" element={<Navigate to="/cheatsheets/csharp-mastery" replace />} />
+                <Route path="/dotnet-mastery-toc" element={<Navigate to="/cheatsheets/csharp-mastery" replace />} />
                 <Route path="/design-patterns-guide" element={<DesignPatternsGuide />} />
-                <Route path="/blogs/solid-principles" element={<SolidPrinciplesGuide />} />
-                <Route path="/blogs/solid-principle" element={<Navigate to="/blogs/solid-principles" replace />} />
-                <Route path="/solid-principles-guide" element={<Navigate to="/blogs/solid-principles" replace />} />
+                <Route path="/cheatsheets/solid-principles" element={<SolidPrinciplesGuide />} />
+                <Route path="/cheatsheets/solid-principle" element={<Navigate to="/cheatsheets/solid-principles" replace />} />
+                <Route path="/blogs/solid-principles" element={<Navigate to="/cheatsheets/solid-principles" replace />} />
+                <Route path="/blogs/solid-principle" element={<Navigate to="/cheatsheets/solid-principles" replace />} />
+                <Route path="/solid-principles-guide" element={<Navigate to="/cheatsheets/solid-principles" replace />} />
                 <Route path="/classified" element={<Classified />} />
                 <Route path="/classified-preview" element={<Navigate to="/classified" replace />} />
                 <Route path="/login" element={<Login />} />
@@ -203,25 +216,27 @@ const App = () => {
                 {/* Admin Routes - Protected */}
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
-                  <Route path="business" element={<AdminBusinessHub />} />
-                  <Route path="ip-management" element={<AdminIPManagement />} />
-                  <Route path="cv-downloads" element={<AdminCVDownloads />} />
+                  <Route path="business" element={<Navigate to="/admin" replace />} />
+                  <Route path="ip-management" element={<Navigate to="/admin" replace />} />
+                  <Route path="cv-downloads" element={<Navigate to="/admin" replace />} />
                   <Route path="contacts" element={<AdminContactRequests />} />
                   <Route path="mentorship" element={<AdminMentorshipBookings />} />
-                  <Route path="blog" element={<AdminBlogManager />} />
-                  <Route path="cms" element={<AdminCMSStudio />} />
-                  <Route path="nimbus" element={<AdminNimbusDesk />} />
+                  <Route path="blog" element={<Navigate to="/admin" replace />} />
+                  <Route path="cms" element={<Navigate to="/admin" replace />} />
+                  <Route path="nimbus" element={<Navigate to="/admin" replace />} />
                   <Route path="courses" element={<AdminCoursesManager />} />
-                  <Route path="products" element={<AdminProductsManager />} />
+                  <Route path="products" element={<Navigate to="/admin" replace />} />
                   <Route path="ebooks" element={<AdminEbooksManager />} />
                   <Route path="llm-galaxy" element={<AdminLLMAtlasManager />} />
-                  <Route path="workflows" element={<AdminWorkflows />} />
+                  <Route path="workflows" element={<Navigate to="/admin" replace />} />
                   <Route path="social" element={<AdminSocialHub />} />
-                  <Route path="jobs" element={<AdminScheduledJobs />} />
+                  <Route path="jobs" element={<Navigate to="/admin" replace />} />
                   <Route path="analytics" element={<AdminAnalytics />} />
-                  <Route path="payments" element={<AdminPayments />} />
-                  <Route path="drive" element={<AdminEncryptedDrive />} />
-                  <Route path="lifemap" element={<AdminLifeMap />} />
+                  <Route path="argus" element={<AdminArgusControl />} />
+                  <Route path="payments" element={<Navigate to="/admin" replace />} />
+                  <Route path="drive" element={<Navigate to="/admin" replace />} />
+                  <Route path="webvault" element={<AdminWebVault />} />
+                  <Route path="lifemap" element={<Navigate to="/admin" replace />} />
                   <Route path="open-owl" element={<Navigate to="/openowl/admin" replace />} />
                   <Route path="integrations" element={<AdminIntegrations />} />
                   <Route path="ops" element={<AdminOpsDocs />} />

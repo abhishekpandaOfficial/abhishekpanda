@@ -614,8 +614,8 @@ const roadmapSeedCourses: CourseCatalogItem[] = [
     ],
     instructor: COURSE_INSTRUCTOR,
     resourceLink: {
-      label: "Open C# Mastery TOC",
-      href: "/dotnet-mastery-toc",
+      label: "Open C# Mastery",
+      href: "/csharp-mastery",
     },
     oneToOneEnabled: true,
     oneToOnePriceInr: 2499,

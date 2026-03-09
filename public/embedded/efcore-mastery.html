@@ -1,0 +1,3238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EF Core Mastery — Zero to Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070b14;
+  --surface: #0c1120;
+  --card: #111827;
+  --card2: #141e30;
+  --border: #1e2d47;
+  --border2: #253654;
+  --accent: #00e5ff;
+  --accent2: #7c3aed;
+  --accent3: #f59e0b;
+  --accent4: #10b981;
+  --accent5: #ef4444;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --display: 'Orbitron', monospace;
+  --left-w: 260px;
+  --right-w: 520px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══ TOPBAR ═══ */
+.topbar {
+  height: 58px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+}
+
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 14px;
+  color: #000;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+  text-shadow: 0 0 20px rgba(0,229,255,0.4);
+}
+
+.logo-sub {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: var(--mono);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.topbar-sep { flex: 1; }
+
+.topbar-badge {
+  background: linear-gradient(135deg,#7c3aed22,#00e5ff22);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--text2);
+  font-family: var(--mono);
+  letter-spacing: 1px;
+}
+
+.topbar-badge span { color: var(--accent); }
+
+/* ═══ LAYOUT ═══ */
+.layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ═══ LEFT PANEL ═══ */
+.left-panel {
+  width: var(--left-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.left-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.left-header h3 {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.progress-bar-wrap {
+  background: var(--border);
+  border-radius: 4px;
+  height: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 4px;
+  width: 0%;
+  transition: width 0.6s ease;
+  box-shadow: 0 0 8px rgba(0,229,255,0.5);
+}
+
+.progress-label {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: var(--mono);
+  margin-top: 6px;
+}
+
+.left-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.left-nav::-webkit-scrollbar { width: 4px; }
+.left-nav::-webkit-scrollbar-track { background: transparent; }
+.left-nav::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.chapter-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.chapter-item:hover {
+  background: rgba(0,229,255,0.04);
+  border-left-color: var(--border2);
+}
+
+.chapter-item.active {
+  background: rgba(0,229,255,0.08);
+  border-left-color: var(--accent);
+}
+
+.chapter-item.active .ch-title { color: var(--accent); }
+
+.ch-icon {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.chapter-item:hover .ch-icon { transform: scale(1.1); }
+
+.ch-info { flex: 1; min-width: 0; }
+
+.ch-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s;
+}
+
+.ch-count {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: var(--mono);
+}
+
+.ch-badge {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+/* ═══ MIDDLE PANEL ═══ */
+.middle-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  min-width: 0;
+}
+
+.middle-panel::-webkit-scrollbar { width: 6px; }
+.middle-panel::-webkit-scrollbar-track { background: transparent; }
+.middle-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+.chapter-header {
+  margin-bottom: 28px;
+  animation: fadeSlideUp 0.4s ease;
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chapter-eyebrow {
+  font-size: 10px;
+  color: var(--accent);
+  font-family: var(--mono);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.chapter-title {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.chapter-desc {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.7;
+  max-width: 640px;
+}
+
+.chapter-meta {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.meta-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--text2);
+  font-family: var(--mono);
+}
+
+.meta-chip .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+/* TOPIC GRID */
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  animation: fadeSlideUp 0.5s ease 0.1s both;
+}
+
+.topic-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.topic-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(0,229,255,0.03));
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.topic-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,229,255,0.1);
+}
+
+.topic-card:hover::before { opacity: 1; }
+
+.topic-card.active {
+  border-color: var(--accent);
+  background: var(--card2);
+  box-shadow: 0 0 0 1px var(--accent), 0 8px 24px rgba(0,229,255,0.15);
+}
+
+.topic-card-icon {
+  font-size: 22px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.topic-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  font-family: var(--mono);
+}
+
+.topic-card-desc {
+  font-size: 11px;
+  color: var(--text3);
+  line-height: 1.5;
+}
+
+.topic-card-tags {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.tag.basic { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+.tag.intermediate { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+.tag.advanced { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+.tag.perf { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+.tag.new { background: rgba(0,229,255,0.15); color: var(--accent); border: 1px solid rgba(0,229,255,0.3); }
+
+/* ═══ RIGHT PANEL ═══ */
+.right-panel {
+  width: var(--right-w);
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+  transform: translateX(0);
+  transition: width 0.3s ease;
+}
+
+.right-panel.hidden { width: 0; border: none; overflow: hidden; }
+
+.right-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.right-header h3 {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.close-btn {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.close-btn:hover { background: var(--border); color: var(--text); }
+
+.right-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.right-tab {
+  padding: 10px 16px;
+  font-size: 11px;
+  color: var(--text3);
+  font-family: var(--mono);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.right-tab:hover { color: var(--text); }
+.right-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.right-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.right-content::-webkit-scrollbar { width: 4px; }
+.right-content::-webkit-scrollbar-track { background: transparent; }
+.right-content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ═══ CONTENT ELEMENTS ═══ */
+.section-title {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 24px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.section-title:first-child { margin-top: 0; }
+
+p.body {
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--text2);
+  margin-bottom: 12px;
+}
+
+.callout {
+  border-left: 3px solid;
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  margin: 14px 0;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.callout.info { border-color: var(--accent); background: rgba(0,229,255,0.06); color: var(--text2); }
+.callout.warning { border-color: var(--accent3); background: rgba(245,158,11,0.06); color: var(--text2); }
+.callout.tip { border-color: var(--accent4); background: rgba(16,185,129,0.06); color: var(--text2); }
+.callout.danger { border-color: var(--accent5); background: rgba(239,68,68,0.06); color: var(--text2); }
+
+.callout strong { display: block; margin-bottom: 4px; font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+.callout.info strong { color: var(--accent); }
+.callout.warning strong { color: var(--accent3); }
+.callout.tip strong { color: var(--accent4); }
+.callout.danger strong { color: var(--accent5); }
+
+/* CODE BLOCKS */
+.code-block {
+  background: #060a12;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 14px 0;
+  overflow: hidden;
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+
+.code-lang {
+  font-size: 10px;
+  color: var(--accent);
+  font-family: var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.copy-btn {
+  font-size: 10px;
+  color: var(--text3);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-family: var(--mono);
+  transition: all 0.2s;
+}
+
+.copy-btn:hover { color: var(--text); border-color: var(--border2); }
+
+.code-body {
+  padding: 16px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.8;
+  color: #cdd6f4;
+}
+
+.code-body::-webkit-scrollbar { height: 4px; }
+.code-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Syntax highlighting */
+.kw { color: #cba6f7; }
+.str { color: #a6e3a1; }
+.num { color: #fab387; }
+.cm { color: #585b70; font-style: italic; }
+.type { color: #89b4fa; }
+.prop { color: #94e2d5; }
+.attr { color: #f38ba8; }
+.dec { color: #f9e2af; }
+.met { color: #89dceb; }
+.ln { color: #45475a; user-select: none; margin-right: 16px; display: inline-block; width: 24px; text-align: right; }
+
+/* DIAGRAMS */
+.diagram-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 14px 0;
+  overflow: auto;
+}
+
+.diagram-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* LIST STYLES */
+.feature-list {
+  list-style: none;
+  margin: 10px 0;
+}
+
+.feature-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 12.5px;
+  color: var(--text2);
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.feature-list li::before {
+  content: '▸';
+  color: var(--accent);
+  font-size: 10px;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+/* COMPARISON TABLE */
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 14px 0;
+}
+
+.comp-table th {
+  background: var(--card2);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.comp-table td {
+  padding: 9px 12px;
+  color: var(--text2);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: top;
+}
+
+.comp-table tr:hover td { background: rgba(0,229,255,0.03); }
+
+/* Q&A SECTION */
+.qa-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.qa-item:hover { border-color: var(--border2); }
+
+.qa-question {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--card);
+  transition: background 0.2s;
+}
+
+.qa-question:hover { background: var(--card2); }
+
+.qa-q-icon {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--mono);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.qa-q-text {
+  flex: 1;
+  font-size: 12.5px;
+  color: var(--text);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.qa-difficulty {
+  flex-shrink: 0;
+}
+
+.qa-chevron {
+  color: var(--text3);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.qa-item.open .qa-chevron { transform: rotate(180deg); }
+
+.qa-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+  background: #060a12;
+}
+
+.qa-item.open .qa-answer { max-height: 1000px; }
+
+.qa-answer-content {
+  padding: 16px;
+  font-size: 12.5px;
+  color: var(--text2);
+  line-height: 1.75;
+  border-top: 1px solid var(--border);
+}
+
+.qa-answer-content code {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+}
+
+/* Welcome screen */
+.welcome-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 40px;
+  animation: fadeSlideUp 0.6s ease;
+}
+
+.welcome-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(0,229,255,0.3)); }
+  50% { transform: scale(1.05); filter: drop-shadow(0 0 40px rgba(0,229,255,0.6)); }
+}
+
+.welcome-title {
+  font-family: var(--display);
+  font-size: 28px;
+  color: var(--accent);
+  margin-bottom: 12px;
+  text-shadow: 0 0 30px rgba(0,229,255,0.4);
+}
+
+.welcome-sub {
+  font-size: 14px;
+  color: var(--text2);
+  max-width: 480px;
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 24px;
+  text-align: center;
+  min-width: 100px;
+}
+
+.stat-num {
+  font-family: var(--display);
+  font-size: 24px;
+  color: var(--accent);
+  display: block;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Animated SVG nodes */
+@keyframes flowLine {
+  0% { stroke-dashoffset: 100; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes nodeGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(0,229,255,0.4)); }
+  50% { filter: drop-shadow(0 0 12px rgba(0,229,255,0.8)); }
+}
+
+.flow-arrow { animation: nodeGlow 2s ease-in-out infinite; }
+
+/* Right panel enter animation */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.right-content > * { animation: slideInRight 0.3s ease both; }
+
+/* Empty state */
+.empty-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: center;
+  padding: 20px;
+  gap: 12px;
+}
+
+.empty-right svg { opacity: 0.3; }
+
+/* Scrollbar global */
+* { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+
+/* Flow diagram boxes */
+.flow-box {
+  fill: #111827;
+  stroke: #1e2d47;
+  rx: 8;
+}
+
+.flow-box-accent {
+  fill: rgba(0,229,255,0.1);
+  stroke: #00e5ff;
+  rx: 8;
+}
+
+.flow-line {
+  stroke: #1e2d47;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.flow-line-accent {
+  stroke: #00e5ff;
+  stroke-width: 1.5;
+  fill: none;
+  stroke-dasharray: 6 3;
+  animation: dashMove 1.5s linear infinite;
+}
+
+@keyframes dashMove {
+  to { stroke-dashoffset: -18; }
+}
+
+.flow-text {
+  fill: #94a3b8;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+
+.flow-text-accent {
+  fill: #00e5ff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.arrowhead {
+  fill: #1e2d47;
+}
+
+.arrowhead-accent {
+  fill: #00e5ff;
+}
+
+/* interview filter buttons */
+.filter-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.filter-btn {
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  font-family: var(--mono);
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(0,229,255,0.08);
+}
+
+/* Milestone badge */
+.milestone {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg,rgba(124,58,237,0.2),rgba(0,229,255,0.2));
+  border: 1px solid rgba(0,229,255,0.3);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--accent);
+  margin: 6px 0;
+}
+
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-icon">EF</div>
+    <div>
+      <div class="logo-text">EF CORE</div>
+      <div class="logo-sub">Mastery Series</div>
+    </div>
+  </div>
+  <div class="topbar-sep"></div>
+  <div class="topbar-badge">.NET <span>10</span> · EF Core <span>9</span></div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="left-header">
+      <h3>Learning Path</h3>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+      <div class="progress-label" id="progressLabel">0 / 21 chapters</div>
+    </div>
+    <nav class="left-nav" id="leftNav"></nav>
+  </div>
+
+  <!-- MIDDLE PANEL -->
+  <div class="middle-panel" id="middlePanel">
+    <div class="welcome-screen">
+      <div class="welcome-icon">⚡</div>
+      <div class="welcome-title">EF CORE MASTERY</div>
+      <p class="welcome-sub">The most comprehensive Entity Framework Core learning guide — from fundamentals to expert-level internals. Animations, diagrams, code, and 100+ interview questions.</p>
+      <div class="stats-row">
+        <div class="stat-box"><span class="stat-num">21</span><span class="stat-label">Chapters</span></div>
+        <div class="stat-box"><span class="stat-num">120+</span><span class="stat-label">Topics</span></div>
+        <div class="stat-box"><span class="stat-num">150+</span><span class="stat-label">Code Examples</span></div>
+        <div class="stat-box"><span class="stat-num">100+</span><span class="stat-label">Interview Q&A</span></div>
+      </div>
+      <p style="margin-top:24px;font-size:12px;color:var(--text3);font-family:var(--mono);">← Select a chapter to begin</p>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel hidden" id="rightPanel">
+    <div class="right-header">
+      <h3 id="rightTitle">Topic Details</h3>
+      <button class="close-btn" onclick="closeRight()">✕</button>
+    </div>
+    <div class="right-tabs" id="rightTabs"></div>
+    <div class="right-content" id="rightContent">
+      <div class="empty-right">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="8" y="8" width="32" height="32" rx="6" stroke="#1e2d47" stroke-width="2"/><path d="M16 24h16M16 18h10M16 30h12" stroke="#1e2d47" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Select a topic to explore</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA STRUCTURE
+// ═══════════════════════════════════════════════
+
+const CHAPTERS = [
+  {
+    id: 'intro',
+    icon: '🗺️',
+    color: '#00e5ff',
+    bgColor: 'rgba(0,229,255,0.12)',
+    title: 'Introduction to EF Core',
+    subtitle: 'What is EF Core and why use it?',
+    level: 'BEGINNER',
+    levelColor: '#10b981',
+    topicCount: 5,
+    desc: 'Understand what Entity Framework Core is, how it fits into .NET development, and how it differs from classic EF6.',
+    topics: [
+      {
+        id: 'what-is-efcore',
+        icon: '🔍',
+        title: 'What is EF Core?',
+        desc: 'High-level overview of EF Core as a modern ORM',
+        tags: ['basic'],
+        tabs: ['Overview','Architecture','Comparison','Code']
+      },
+      {
+        id: 'orm-fundamentals',
+        icon: '🏗️',
+        title: 'ORM Fundamentals',
+        desc: 'Object-Relational Mapping concepts and patterns',
+        tags: ['basic'],
+        tabs: ['Overview','Diagram','Examples']
+      },
+      {
+        id: 'efcore-vs-ef6',
+        icon: '⚔️',
+        title: 'EF Core vs EF6',
+        desc: 'Key differences, migrations, and feature comparison',
+        tags: ['basic'],
+        tabs: ['Comparison','Migration Guide']
+      },
+      {
+        id: 'efcore-vs-dapper',
+        icon: '🥊',
+        title: 'EF Core vs Dapper',
+        desc: 'When to use each, performance tradeoffs',
+        tags: ['intermediate'],
+        tabs: ['Comparison','Benchmarks','Use Cases']
+      },
+      {
+        id: 'install-setup',
+        icon: '⚙️',
+        title: 'Installation & Setup',
+        desc: 'Get started with EF Core in .NET 10',
+        tags: ['basic','new'],
+        tabs: ['Guide','NuGet Packages','Project Setup']
+      }
+    ]
+  },
+  {
+    id: 'architecture',
+    icon: '🏛️',
+    color: '#7c3aed',
+    bgColor: 'rgba(124,58,237,0.12)',
+    title: 'EF Core Architecture',
+    subtitle: 'Internal components and design',
+    level: 'INTERMEDIATE',
+    levelColor: '#f59e0b',
+    topicCount: 6,
+    desc: 'Deep dive into how EF Core works internally — providers, query pipeline, change tracker, and LINQ translation.',
+    topics: [
+      {
+        id: 'core-components',
+        icon: '🧩',
+        title: 'Core Components',
+        desc: 'DbContext, DbSet, Model Builder, Query Provider',
+        tags: ['intermediate'],
+        tabs: ['Overview','Diagram','Details']
+      },
+      {
+        id: 'linq-to-sql',
+        icon: '🔄',
+        title: 'LINQ → SQL Translation',
+        desc: 'How EF Core converts LINQ to SQL queries',
+        tags: ['advanced'],
+        tabs: ['Pipeline','Expression Trees','Examples']
+      },
+      {
+        id: 'query-pipeline',
+        icon: '⚡',
+        title: 'Query Pipeline',
+        desc: 'The complete journey from C# to database',
+        tags: ['advanced'],
+        tabs: ['Flow Diagram','Stages','Internals']
+      },
+      {
+        id: 'provider-model',
+        icon: '🔌',
+        title: 'Provider Model',
+        desc: 'Database abstraction layer and extensibility',
+        tags: ['intermediate'],
+        tabs: ['Overview','Custom Providers']
+      },
+      {
+        id: 'model-building',
+        icon: '🏗️',
+        title: 'Model Building Process',
+        desc: 'How EF Core builds the model at startup',
+        tags: ['intermediate'],
+        tabs: ['Process','Conventions','Caching']
+      },
+      {
+        id: 'change-tracker-arch',
+        icon: '👁️',
+        title: 'Change Tracker Architecture',
+        desc: 'How entities are tracked and changes detected',
+        tags: ['advanced'],
+        tabs: ['Architecture','Snapshot','Identity Map']
+      }
+    ]
+  },
+  {
+    id: 'dbcontext',
+    icon: '🎛️',
+    color: '#10b981',
+    bgColor: 'rgba(16,185,129,0.12)',
+    title: 'DbContext & Configuration',
+    subtitle: 'The central unit of work',
+    level: 'BEGINNER',
+    levelColor: '#10b981',
+    topicCount: 7,
+    desc: 'Master DbContext — the gateway to your database. Lifecycle, configuration, pooling, and best practices.',
+    topics: [
+      {
+        id: 'dbcontext-basics',
+        icon: '📦',
+        title: 'DbContext Basics',
+        desc: 'Creating and using DbContext',
+        tags: ['basic'],
+        tabs: ['Overview','Code','Lifecycle']
+      },
+      {
+        id: 'dbcontext-config',
+        icon: '⚙️',
+        title: 'Configuration Methods',
+        desc: 'OnConfiguring, AddDbContext, DbContextOptions',
+        tags: ['basic'],
+        tabs: ['Methods','DI Setup','Options']
+      },
+      {
+        id: 'dbcontext-lifetime',
+        icon: '⏳',
+        title: 'Lifetime Management',
+        desc: 'Scoped, Transient, Singleton contexts',
+        tags: ['intermediate'],
+        tabs: ['Lifetimes','DI Patterns','Pitfalls']
+      },
+      {
+        id: 'dbcontext-pooling',
+        icon: '🏊',
+        title: 'DbContext Pooling',
+        desc: 'High-performance context reuse',
+        tags: ['advanced','perf'],
+        tabs: ['Overview','Configuration','Benchmarks']
+      },
+      {
+        id: 'dbset',
+        icon: '🗃️',
+        title: 'DbSet<T>',
+        desc: 'Working with entity collections',
+        tags: ['basic'],
+        tabs: ['Overview','CRUD','Querying']
+      },
+      {
+        id: 'unit-of-work',
+        icon: '🔁',
+        title: 'Unit of Work Pattern',
+        desc: 'DbContext as UoW, when to use repositories',
+        tags: ['intermediate'],
+        tabs: ['Pattern','Implementation','Best Practices']
+      },
+      {
+        id: 'multitenancy',
+        icon: '🏢',
+        title: 'Multi-tenancy',
+        desc: 'Multiple databases, schemas, and contexts',
+        tags: ['advanced'],
+        tabs: ['Strategies','Implementation','Code']
+      }
+    ]
+  },
+  {
+    id: 'modeling',
+    icon: '📐',
+    color: '#f59e0b',
+    bgColor: 'rgba(245,158,11,0.12)',
+    title: 'Entity Modeling',
+    subtitle: 'Designing your domain model',
+    level: 'BEGINNER',
+    levelColor: '#10b981',
+    topicCount: 8,
+    desc: 'How to design entities, configure primary keys, shadow properties, and use conventions, annotations, or Fluent API.',
+    topics: [
+      {
+        id: 'entity-classes',
+        icon: '📋',
+        title: 'Entity Classes',
+        desc: 'POCO entities, requirements, and best practices',
+        tags: ['basic'],
+        tabs: ['Overview','Code','Best Practices']
+      },
+      {
+        id: 'primary-keys',
+        icon: '🔑',
+        title: 'Keys & Identifiers',
+        desc: 'PK, composite keys, alternate keys, sequences',
+        tags: ['basic'],
+        tabs: ['Types','Configuration','Code']
+      },
+      {
+        id: 'conventions',
+        icon: '📏',
+        title: 'Convention-Based Mapping',
+        desc: 'EF Core auto-discovery and naming conventions',
+        tags: ['basic'],
+        tabs: ['Conventions','Customizing','Examples']
+      },
+      {
+        id: 'data-annotations',
+        icon: '🏷️',
+        title: 'Data Annotations',
+        desc: 'Attribute-based configuration',
+        tags: ['basic'],
+        tabs: ['Attributes','Validation','Code']
+      },
+      {
+        id: 'fluent-api',
+        icon: '🎨',
+        title: 'Fluent API',
+        desc: 'Powerful programmatic model configuration',
+        tags: ['intermediate'],
+        tabs: ['API Reference','Examples','vs Annotations']
+      },
+      {
+        id: 'shadow-props',
+        icon: '👻',
+        title: 'Shadow Properties',
+        desc: 'Properties not in entity class but in model',
+        tags: ['intermediate'],
+        tabs: ['Overview','Use Cases','Code']
+      },
+      {
+        id: 'backing-fields',
+        icon: '🔒',
+        title: 'Backing Fields',
+        desc: 'Private fields mapped to columns',
+        tags: ['intermediate'],
+        tabs: ['Overview','Encapsulation','Code']
+      },
+      {
+        id: 'value-objects',
+        icon: '💎',
+        title: 'Value Objects & Owned Types',
+        desc: 'Complex types embedded in entities',
+        tags: ['intermediate'],
+        tabs: ['Owned Types','Value Objects','Code']
+      }
+    ]
+  },
+  {
+    id: 'relationships',
+    icon: '🔗',
+    color: '#06b6d4',
+    bgColor: 'rgba(6,182,212,0.12)',
+    title: 'Relationships',
+    subtitle: 'One-to-one, one-to-many, many-to-many',
+    level: 'INTERMEDIATE',
+    levelColor: '#f59e0b',
+    topicCount: 7,
+    desc: 'Configure all relationship types in EF Core with navigation properties, foreign keys, and cascade delete behavior.',
+    topics: [
+      {
+        id: 'one-to-many',
+        icon: '1️⃣',
+        title: 'One-to-Many',
+        desc: 'The most common relationship type',
+        tags: ['basic'],
+        tabs: ['Overview','Configuration','Code','Diagram']
+      },
+      {
+        id: 'one-to-one',
+        icon: '🤝',
+        title: 'One-to-One',
+        desc: 'Single entity to single entity relationship',
+        tags: ['basic'],
+        tabs: ['Overview','Configuration','Code','Diagram']
+      },
+      {
+        id: 'many-to-many',
+        icon: '🕸️',
+        title: 'Many-to-Many',
+        desc: 'Join tables, explicit and implicit skip navigation',
+        tags: ['intermediate'],
+        tabs: ['Overview','Join Table','Payload','Code']
+      },
+      {
+        id: 'navigation-props',
+        icon: '🧭',
+        title: 'Navigation Properties',
+        desc: 'Reference and collection navigations',
+        tags: ['basic'],
+        tabs: ['Types','Loading','Code']
+      },
+      {
+        id: 'cascade-delete',
+        icon: '💥',
+        title: 'Cascade Delete',
+        desc: 'Delete behaviors and referential integrity',
+        tags: ['intermediate'],
+        tabs: ['Behaviors','Configuration','Code']
+      },
+      {
+        id: 'self-ref',
+        icon: '🔄',
+        title: 'Self-Referencing',
+        desc: 'Hierarchical / tree structures',
+        tags: ['intermediate'],
+        tabs: ['Tree Structures','Code','Use Cases']
+      },
+      {
+        id: 'table-splitting',
+        icon: '✂️',
+        title: 'Table & Entity Splitting',
+        desc: 'Multiple entities per table or vice versa',
+        tags: ['advanced'],
+        tabs: ['Table Splitting','Entity Splitting','Code']
+      }
+    ]
+  },
+  {
+    id: 'migrations',
+    icon: '🚀',
+    color: '#8b5cf6',
+    bgColor: 'rgba(139,92,246,0.12)',
+    title: 'Migrations',
+    subtitle: 'Schema versioning and evolution',
+    level: 'INTERMEDIATE',
+    levelColor: '#f59e0b',
+    topicCount: 6,
+    desc: 'Master EF Core migrations — creating, running, rolling back, and safely applying migrations in production.',
+    topics: [
+      {
+        id: 'migrations-basics',
+        icon: '📝',
+        title: 'Migrations Basics',
+        desc: 'Creating and applying your first migration',
+        tags: ['basic'],
+        tabs: ['Overview','Commands','Code']
+      },
+      {
+        id: 'migration-commands',
+        icon: '💻',
+        title: 'CLI & PMC Commands',
+        desc: 'Full command reference for migrations',
+        tags: ['basic'],
+        tabs: ['Commands','Options','Examples']
+      },
+      {
+        id: 'custom-migrations',
+        icon: '🛠️',
+        title: 'Custom Migration Operations',
+        desc: 'Stored procs, views, seed data in migrations',
+        tags: ['intermediate'],
+        tabs: ['Custom SQL','Seed Data','Code']
+      },
+      {
+        id: 'production-migrations',
+        icon: '🏭',
+        title: 'Production Migrations',
+        desc: 'Safe deployment strategies and patterns',
+        tags: ['advanced'],
+        tabs: ['Strategies','CI/CD','Rollback']
+      },
+      {
+        id: 'migration-bundles',
+        icon: '📦',
+        title: 'Migration Bundles',
+        desc: 'Self-contained executable migrations (.NET 8+)',
+        tags: ['intermediate','new'],
+        tabs: ['Overview','Creating','Deploying']
+      },
+      {
+        id: 'schema-compare',
+        icon: '🔍',
+        title: 'Schema Comparison & Idempotent Scripts',
+        desc: 'Generating SQL scripts for DBA review',
+        tags: ['advanced'],
+        tabs: ['SQL Scripts','Idempotent','Tools']
+      }
+    ]
+  },
+  {
+    id: 'querying',
+    icon: '🔎',
+    color: '#ec4899',
+    bgColor: 'rgba(236,72,153,0.12)',
+    title: 'Querying Data',
+    subtitle: 'LINQ, loading strategies, and filtering',
+    level: 'BEGINNER',
+    levelColor: '#10b981',
+    topicCount: 9,
+    desc: 'Master LINQ queries in EF Core — filtering, projection, joins, aggregates, and the three loading strategies.',
+    topics: [
+      {
+        id: 'linq-basics',
+        icon: '🎯',
+        title: 'LINQ Query Basics',
+        desc: 'Where, Select, OrderBy, GroupBy',
+        tags: ['basic'],
+        tabs: ['Methods','Query Syntax','Code']
+      },
+      {
+        id: 'eager-loading',
+        icon: '⚡',
+        title: 'Eager Loading',
+        desc: 'Include() and ThenInclude() patterns',
+        tags: ['basic'],
+        tabs: ['Overview','Filtered Includes','Code']
+      },
+      {
+        id: 'lazy-loading',
+        icon: '💤',
+        title: 'Lazy Loading',
+        desc: 'Proxy-based on-demand loading',
+        tags: ['intermediate'],
+        tabs: ['Setup','Pitfalls','vs Eager']
+      },
+      {
+        id: 'explicit-loading',
+        icon: '🖱️',
+        title: 'Explicit Loading',
+        desc: 'Load() and Collection() on demand',
+        tags: ['intermediate'],
+        tabs: ['Overview','Code','Use Cases']
+      },
+      {
+        id: 'projections',
+        icon: '📊',
+        title: 'Projections & DTOs',
+        desc: 'Select into anonymous types or DTOs',
+        tags: ['intermediate'],
+        tabs: ['Overview','AutoMapper','Code']
+      },
+      {
+        id: 'filtering-paging',
+        icon: '📃',
+        title: 'Filtering & Pagination',
+        desc: 'Skip, Take, keyset pagination',
+        tags: ['basic'],
+        tabs: ['Pagination','Keyset','Code']
+      },
+      {
+        id: 'aggregates',
+        icon: '∑',
+        title: 'Aggregates & Grouping',
+        desc: 'Count, Sum, Max, GroupBy in SQL',
+        tags: ['basic'],
+        tabs: ['Aggregates','GroupBy','Code']
+      },
+      {
+        id: 'compiled-queries',
+        icon: '⚡',
+        title: 'Compiled Queries',
+        desc: 'Pre-compile queries for maximum performance',
+        tags: ['advanced','perf'],
+        tabs: ['Overview','EF.CompileQuery','Benchmarks']
+      },
+      {
+        id: 'split-queries',
+        icon: '✂️',
+        title: 'Split Queries',
+        desc: 'AsSplitQuery vs single query',
+        tags: ['intermediate','perf'],
+        tabs: ['Overview','When to Use','Code']
+      }
+    ]
+  },
+  {
+    id: 'change-tracking',
+    icon: '👁️',
+    color: '#14b8a6',
+    bgColor: 'rgba(20,184,166,0.12)',
+    title: 'Change Tracking',
+    subtitle: 'Entity states and automatic detection',
+    level: 'INTERMEDIATE',
+    levelColor: '#f59e0b',
+    topicCount: 6,
+    desc: 'Understand how EF Core tracks entity changes — states, snapshots, and when to use AsNoTracking.',
+    topics: [
+      {
+        id: 'entity-states',
+        icon: '🔄',
+        title: 'Entity States',
+        desc: 'Added, Modified, Deleted, Unchanged, Detached',
+        tags: ['basic'],
+        tabs: ['States','State Machine','Code']
+      },
+      {
+        id: 'snapshot-tracking',
+        icon: '📸',
+        title: 'Snapshot Change Detection',
+        desc: 'How EF detects property changes',
+        tags: ['intermediate'],
+        tabs: ['Overview','Process','Performance']
+      },
+      {
+        id: 'no-tracking',
+        icon: '🚫',
+        title: 'AsNoTracking & AsNoTrackingWithIdentityResolution',
+        desc: 'Read-only queries for performance',
+        tags: ['intermediate','perf'],
+        tabs: ['Overview','When to Use','Code']
+      },
+      {
+        id: 'disconnected',
+        icon: '🔌',
+        title: 'Disconnected Entities',
+        desc: 'Working with detached entities in APIs',
+        tags: ['advanced'],
+        tabs: ['Problem','Solutions','Code']
+      },
+      {
+        id: 'identity-map',
+        icon: '🗺️',
+        title: 'Identity Map Pattern',
+        desc: 'One instance per entity per context',
+        tags: ['advanced'],
+        tabs: ['Overview','Behavior','Implications']
+      },
+      {
+        id: 'graphtracker',
+        icon: '📈',
+        title: 'Tracking Graphs',
+        desc: 'Attach and track entire object graphs',
+        tags: ['advanced'],
+        tabs: ['TrackGraph','Update Patterns','Code']
+      }
+    ]
+  },
+  {
+    id: 'saving',
+    icon: '💾',
+    color: '#f97316',
+    bgColor: 'rgba(249,115,22,0.12)',
+    title: 'Saving Data',
+    subtitle: 'Insert, Update, Delete, Batch',
+    level: 'BEGINNER',
+    levelColor: '#10b981',
+    topicCount: 6,
+    desc: 'Persist changes to the database using SaveChanges, bulk operations, and efficient update patterns.',
+    topics: [
+      {
+        id: 'savechanges',
+        icon: '💾',
+        title: 'SaveChanges & SaveChangesAsync',
+        desc: 'The core persistence method',
+        tags: ['basic'],
+        tabs: ['Overview','Async Patterns','Events']
+      },
+      {
+        id: 'insert-update-delete',
+        icon: '✏️',
+        title: 'CRUD Operations',
+        desc: 'Add, Update, Remove, AddRange',
+        tags: ['basic'],
+        tabs: ['Add','Update','Delete','Code']
+      },
+      {
+        id: 'bulk-operations',
+        icon: '⚡',
+        title: 'Bulk Operations (EF Core 7+)',
+        desc: 'ExecuteUpdate, ExecuteDelete — no tracking needed',
+        tags: ['intermediate','new'],
+        tabs: ['Overview','ExecuteUpdate','ExecuteDelete','Benchmarks']
+      },
+      {
+        id: 'interceptors',
+        icon: '🪝',
+        title: 'Interceptors & Events',
+        desc: 'SavingChanges, SavedChanges, audit logging',
+        tags: ['advanced'],
+        tabs: ['Interceptors','Audit Log','Code']
+      },
+      {
+        id: 'soft-delete',
+        icon: '🗑️',
+        title: 'Soft Delete Pattern',
+        desc: 'Global query filters for logical deletes',
+        tags: ['intermediate'],
+        tabs: ['Pattern','Global Filters','Code']
+      },
+      {
+        id: 'seeding',
+        icon: '🌱',
+        title: 'Data Seeding',
+        desc: 'HasData, custom seeding strategies',
+        tags: ['basic'],
+        tabs: ['HasData','Migrations','Custom Seed']
+      }
+    ]
+  },
+  {
+    id: 'performance',
+    icon: '⚡',
+    color: '#eab308',
+    bgColor: 'rgba(234,179,8,0.12)',
+    title: 'Performance Optimization',
+    subtitle: 'N+1, compiled queries, batching',
+    level: 'ADVANCED',
+    levelColor: '#ef4444',
+    topicCount: 8,
+    desc: 'Master EF Core performance — identify and fix N+1 queries, use no-tracking, compiled queries, and batching.',
+    topics: [
+      {
+        id: 'n-plus-1',
+        icon: '🔥',
+        title: 'N+1 Query Problem',
+        desc: 'Identify and eliminate the most common EF perf killer',
+        tags: ['intermediate','perf'],
+        tabs: ['Problem','Detection','Fix','Code']
+      },
+      {
+        id: 'query-logging',
+        icon: '📋',
+        title: 'SQL Logging & Profiling',
+        desc: 'See generated SQL, MiniProfiler, EF diagnostics',
+        tags: ['basic'],
+        tabs: ['Logging Setup','MiniProfiler','Tools']
+      },
+      {
+        id: 'compiled-models',
+        icon: '🏎️',
+        title: 'Compiled Models',
+        desc: 'Pre-compiled model for startup performance',
+        tags: ['advanced','perf'],
+        tabs: ['Overview','Setup','Benchmarks']
+      },
+      {
+        id: 'projection-perf',
+        icon: '📉',
+        title: 'Projection Optimization',
+        desc: 'Select only needed columns',
+        tags: ['intermediate','perf'],
+        tabs: ['Overview','vs Include','Code']
+      },
+      {
+        id: 'connection-pooling',
+        icon: '🔌',
+        title: 'Connection Pooling',
+        desc: 'ADO.NET connection pool configuration',
+        tags: ['advanced','perf'],
+        tabs: ['Overview','Configuration','Monitoring']
+      },
+      {
+        id: 'batching',
+        icon: '📦',
+        title: 'Command Batching',
+        desc: 'EF Core batches SaveChanges operations',
+        tags: ['advanced','perf'],
+        tabs: ['Overview','Configuration','Benchmarks']
+      },
+      {
+        id: 'memory-perf',
+        icon: '🧠',
+        title: 'Memory Optimization',
+        desc: 'Avoid allocations, streaming, chunking',
+        tags: ['advanced','perf'],
+        tabs: ['Overview','Chunking','Code']
+      },
+      {
+        id: 'second-level-cache',
+        icon: '🗄️',
+        title: 'Caching Strategies',
+        desc: 'First-level vs second-level caching',
+        tags: ['advanced','perf'],
+        tabs: ['First Level','Second Level','Code']
+      }
+    ]
+  },
+  {
+    id: 'transactions',
+    icon: '🔐',
+    color: '#64748b',
+    bgColor: 'rgba(100,116,139,0.12)',
+    title: 'Transactions',
+    subtitle: 'ACID guarantees and atomic operations',
+    level: 'INTERMEDIATE',
+    levelColor: '#f59e0b',
+    topicCount: 5,
+    desc: 'Use implicit and explicit transactions to guarantee atomicity. Handle savepoints, distributed transactions, and rollbacks.',
+    topics: [
+      {
+        id: 'implicit-tx',
+        icon: '🔮',
+        title: 'Implicit Transactions',
+        desc: 'SaveChanges wraps all operations in a transaction',
+        tags: ['basic'],
+        tabs: ['Overview','Behavior','Code']
+      },
+      {
+        id: 'explicit-tx',
+        icon: '🎛️',
+        title: 'Explicit Transactions',
+        desc: 'BeginTransaction, Commit, Rollback',
+        tags: ['intermediate'],
+        tabs: ['API','Patterns','Code']
+      },
+      {
+        id: 'savepoints',
+        icon: '📍',
+        title: 'Savepoints',
+        desc: 'Partial rollback within transactions',
+        tags: ['advanced'],
+        tabs: ['Overview','Code','Use Cases']
+      },
+      {
+        id: 'distributed-tx',
+        icon: '🌐',
+        title: 'Distributed Transactions',
+        desc: 'Multiple contexts and databases',
+        tags: ['advanced'],
+        tabs: ['Overview','Outbox Pattern','Code']
+      },
+      {
+        id: 'ambient-tx',
+        icon: '🌫️',
+        title: 'Ambient Transactions',
+        desc: 'System.Transactions and TransactionScope',
+        tabs: ['Overview','Code','Caveats'],
+        tags: ['advanced']
+      }
+    ]
+  },
+  {
+    id: 'concurrency',
+    icon: '🔄',
+    color: '#0ea5e9',
+    bgColor: 'rgba(14,165,233,0.12)',
+    title: 'Concurrency Control',
+    subtitle: 'Optimistic concurrency and conflict handling',
+    level: 'INTERMEDIATE',
+    levelColor: '#f59e0b',
+    topicCount: 4,
+    desc: 'Handle concurrent data access with optimistic concurrency, concurrency tokens, row versions, and conflict resolution.',
+    topics: [
+      {
+        id: 'optimistic-concurrency',
+        icon: '🏆',
+        title: 'Optimistic Concurrency',
+        desc: 'Last-write-wins vs conflict detection',
+        tags: ['intermediate'],
+        tabs: ['Overview','vs Pessimistic','Flow']
+      },
+      {
+        id: 'concurrency-tokens',
+        icon: '🎫',
+        title: 'Concurrency Tokens',
+        desc: '[ConcurrencyCheck] and IsConcurrencyToken()',
+        tags: ['intermediate'],
+        tabs: ['Overview','Configuration','Code']
+      },
+      {
+        id: 'row-version',
+        icon: '🔢',
+        title: 'Row Version / Timestamp',
+        desc: 'Database-generated rowversion for conflict detection',
+        tags: ['intermediate'],
+        tabs: ['Overview','SQL Server','Code']
+      },
+      {
+        id: 'conflict-resolution',
+        icon: '⚖️',
+        title: 'Conflict Resolution',
+        desc: 'Handling DbUpdateConcurrencyException',
+        tags: ['advanced'],
+        tabs: ['Exception','Strategies','Code']
+      }
+    ]
+  },
+  {
+    id: 'rawsql',
+    icon: '📜',
+    color: '#a16207',
+    bgColor: 'rgba(161,98,7,0.12)',
+    title: 'Raw SQL & Stored Procedures',
+    subtitle: 'Escape the ORM when needed',
+    level: 'INTERMEDIATE',
+    levelColor: '#f59e0b',
+    topicCount: 5,
+    desc: 'Execute raw SQL, call stored procedures, and use table-valued functions alongside EF Core entities.',
+    topics: [
+      {
+        id: 'fromsql',
+        icon: '🗃️',
+        title: 'FromSql & FromSqlRaw',
+        desc: 'Execute SQL and map to entities',
+        tags: ['intermediate'],
+        tabs: ['Overview','Parameters','Code']
+      },
+      {
+        id: 'executesql',
+        icon: '▶️',
+        title: 'ExecuteSql & ExecuteSqlRaw',
+        desc: 'Non-query raw SQL execution',
+        tags: ['intermediate'],
+        tabs: ['Overview','Security','Code']
+      },
+      {
+        id: 'stored-procs',
+        icon: '📦',
+        title: 'Stored Procedures',
+        desc: 'CRUD with stored procedures',
+        tags: ['intermediate'],
+        tabs: ['Overview','Mapping','Code']
+      },
+      {
+        id: 'tvf',
+        icon: '📊',
+        title: 'Table-Valued Functions',
+        desc: 'Map TVFs as queryable sources',
+        tags: ['advanced'],
+        tabs: ['Overview','Mapping','Code']
+      },
+      {
+        id: 'sql-injection',
+        icon: '🛡️',
+        title: 'SQL Injection Prevention',
+        desc: 'Parameterization, FormattableString, safe patterns',
+        tags: ['basic'],
+        tabs: ['Risks','Safe Patterns','Code']
+      }
+    ]
+  },
+  {
+    id: 'advanced-mapping',
+    icon: '🗺️',
+    color: '#be185d',
+    bgColor: 'rgba(190,24,93,0.12)',
+    title: 'Advanced Mapping',
+    subtitle: 'Inheritance, value converters, complex types',
+    level: 'ADVANCED',
+    levelColor: '#ef4444',
+    topicCount: 7,
+    desc: 'Advanced mapping patterns including inheritance strategies, value converters, complex types, and entity splitting.',
+    topics: [
+      {
+        id: 'tph',
+        icon: '🏔️',
+        title: 'Table Per Hierarchy (TPH)',
+        desc: 'Discriminator column for inheritance',
+        tags: ['advanced'],
+        tabs: ['Overview','Configuration','Code','Pros/Cons']
+      },
+      {
+        id: 'tpt',
+        icon: '📊',
+        title: 'Table Per Type (TPT)',
+        desc: 'Separate table per derived type',
+        tags: ['advanced'],
+        tabs: ['Overview','Configuration','Code','Pros/Cons']
+      },
+      {
+        id: 'tpc',
+        icon: '🗂️',
+        title: 'Table Per Concrete Type (TPC)',
+        desc: 'Full table per concrete class (EF Core 7+)',
+        tags: ['advanced','new'],
+        tabs: ['Overview','Configuration','Code','vs TPH/TPT']
+      },
+      {
+        id: 'value-converters',
+        icon: '🔄',
+        title: 'Value Converters',
+        desc: 'Transform values between CLR and database',
+        tags: ['intermediate'],
+        tabs: ['Overview','Built-in','Custom','Code']
+      },
+      {
+        id: 'json-columns',
+        icon: '📝',
+        title: 'JSON Columns (EF Core 7+)',
+        desc: 'Map complex types to JSON database columns',
+        tags: ['advanced','new'],
+        tabs: ['Overview','Configuration','Querying','Code']
+      },
+      {
+        id: 'complex-types',
+        icon: '🧱',
+        title: 'Complex Types (EF Core 8+)',
+        desc: 'Value objects without identity',
+        tags: ['advanced','new'],
+        tabs: ['Overview','vs Owned','Code']
+      },
+      {
+        id: 'keyless-entities',
+        icon: '🚫',
+        title: 'Keyless Entity Types',
+        desc: 'Map views, query results without primary keys',
+        tags: ['intermediate'],
+        tabs: ['Overview','Views','Code']
+      }
+    ]
+  },
+  {
+    id: 'testing',
+    icon: '🧪',
+    color: '#0d9488',
+    bgColor: 'rgba(13,148,136,0.12)',
+    title: 'Testing with EF Core',
+    subtitle: 'In-memory, SQLite, and mocking',
+    level: 'INTERMEDIATE',
+    levelColor: '#f59e0b',
+    topicCount: 5,
+    desc: 'Write reliable tests for data access layers using in-memory provider, SQLite, Testcontainers, and repository mocking.',
+    topics: [
+      {
+        id: 'inmemory-provider',
+        icon: '🧠',
+        title: 'In-Memory Provider',
+        desc: 'Fast unit testing (not a real database)',
+        tags: ['intermediate'],
+        tabs: ['Overview','Setup','Limitations','Code']
+      },
+      {
+        id: 'sqlite-testing',
+        icon: '🗄️',
+        title: 'SQLite Testing',
+        desc: 'Real database behavior in tests',
+        tags: ['intermediate'],
+        tabs: ['Setup','Connection Sharing','Code']
+      },
+      {
+        id: 'testcontainers',
+        icon: '🐳',
+        title: 'Testcontainers',
+        desc: 'Docker-based real database testing',
+        tags: ['advanced'],
+        tabs: ['Setup','Integration Tests','Code']
+      },
+      {
+        id: 'repo-pattern',
+        icon: '📚',
+        title: 'Repository Pattern',
+        desc: 'Abstracting data access for testability',
+        tags: ['intermediate'],
+        tabs: ['Pattern','Pros/Cons','Code']
+      },
+      {
+        id: 'ef-test-fixtures',
+        icon: '🏗️',
+        title: 'Test Fixtures & Factories',
+        desc: 'Shared context, isolation patterns',
+        tags: ['advanced'],
+        tabs: ['Fixtures','Factory Pattern','Code']
+      }
+    ]
+  },
+  {
+    id: 'providers',
+    icon: '🔌',
+    color: '#7e22ce',
+    bgColor: 'rgba(126,34,206,0.12)',
+    title: 'Database Providers',
+    subtitle: 'SQL Server, PostgreSQL, MySQL, SQLite',
+    level: 'BEGINNER',
+    levelColor: '#10b981',
+    topicCount: 5,
+    desc: 'Configure EF Core for different database backends and understand provider-specific features and limitations.',
+    topics: [
+      {
+        id: 'sqlserver',
+        icon: '🏢',
+        title: 'SQL Server / Azure SQL',
+        desc: 'The most common EF Core provider',
+        tags: ['basic'],
+        tabs: ['Setup','Features','Temporal Tables']
+      },
+      {
+        id: 'postgresql',
+        icon: '🐘',
+        title: 'PostgreSQL (Npgsql)',
+        desc: 'Open-source powerhouse',
+        tags: ['basic'],
+        tabs: ['Setup','JSONB','Arrays','Code']
+      },
+      {
+        id: 'mysql',
+        icon: '🐬',
+        title: 'MySQL / MariaDB',
+        desc: 'Pomelo provider configuration',
+        tags: ['basic'],
+        tabs: ['Setup','Pomelo','Code']
+      },
+      {
+        id: 'sqlite',
+        icon: '🪶',
+        title: 'SQLite',
+        desc: 'Lightweight embedded database',
+        tags: ['basic'],
+        tabs: ['Setup','Limitations','Code']
+      },
+      {
+        id: 'cosmos',
+        icon: '🌌',
+        title: 'Azure Cosmos DB',
+        desc: 'NoSQL document database provider',
+        tags: ['advanced'],
+        tabs: ['Setup','Differences','Code']
+      }
+    ]
+  },
+  {
+    id: 'extensions',
+    icon: '🧩',
+    color: '#059669',
+    bgColor: 'rgba(5,150,105,0.12)',
+    title: 'EF Core Extensions',
+    subtitle: 'Libraries that supercharge EF Core',
+    level: 'INTERMEDIATE',
+    levelColor: '#f59e0b',
+    topicCount: 6,
+    desc: 'Extend EF Core with popular libraries for bulk operations, auditing, soft deletes, dynamic queries, and pagination.',
+    topics: [
+      {
+        id: 'bulk-extensions',
+        icon: '⚡',
+        title: 'EFCore.BulkExtensions',
+        desc: 'Blazing-fast bulk insert, update, delete',
+        tags: ['intermediate','perf'],
+        tabs: ['Overview','API','Benchmarks','Code']
+      },
+      {
+        id: 'audit-net',
+        icon: '📋',
+        title: 'Audit.NET',
+        desc: 'Complete audit trail for entity changes',
+        tags: ['intermediate'],
+        tabs: ['Overview','Setup','Code']
+      },
+      {
+        id: 'zplus',
+        icon: '➕',
+        title: 'Z.EntityFramework.Plus',
+        desc: 'Batch operations, future queries, caching',
+        tags: ['advanced'],
+        tabs: ['Features','Code']
+      },
+      {
+        id: 'dynamic-linq',
+        icon: '🔍',
+        title: 'Dynamic LINQ',
+        desc: 'System.Linq.Dynamic.Core for runtime queries',
+        tags: ['intermediate'],
+        tabs: ['Overview','Code','Use Cases']
+      },
+      {
+        id: 'pagination-lib',
+        icon: '📄',
+        title: 'Pagination Libraries',
+        desc: 'X.PagedList, Sieve, GridifyQueryable',
+        tags: ['basic'],
+        tabs: ['Libraries','Comparison','Code']
+      },
+      {
+        id: 'migrations-ext',
+        icon: '🔄',
+        title: 'Migration Extensions',
+        desc: 'DbContext.EnsureCreated, FluentMigrator',
+        tags: ['intermediate'],
+        tabs: ['Overview','Code']
+      }
+    ]
+  },
+  {
+    id: 'internals',
+    icon: '🔬',
+    color: '#d97706',
+    bgColor: 'rgba(217,119,6,0.12)',
+    title: 'EF Core Internals',
+    subtitle: 'Expression trees, query caching, DI',
+    level: 'ADVANCED',
+    levelColor: '#ef4444',
+    topicCount: 5,
+    desc: 'Deep dive into EF Core internals — expression trees, query caching, interceptors, and the service provider architecture.',
+    topics: [
+      {
+        id: 'expression-trees',
+        icon: '🌳',
+        title: 'Expression Trees',
+        desc: 'How LINQ expressions become SQL AST',
+        tags: ['advanced'],
+        tabs: ['Overview','AST','Code']
+      },
+      {
+        id: 'query-caching',
+        icon: '🗃️',
+        title: 'Query Plan Cache',
+        desc: 'How EF caches compiled query plans',
+        tags: ['advanced','perf'],
+        tabs: ['Overview','Cache Key','Invalidation']
+      },
+      {
+        id: 'model-cache',
+        icon: '📦',
+        title: 'Model Cache',
+        desc: 'Shared model across context instances',
+        tabs: ['Overview','Customizing'],
+        tags: ['advanced']
+      },
+      {
+        id: 'ef-di',
+        icon: '💉',
+        title: 'EF Core Service Provider',
+        desc: 'Internal DI, replace/customize services',
+        tags: ['advanced'],
+        tabs: ['Architecture','Replace Services','Code']
+      },
+      {
+        id: 'custom-conventions',
+        icon: '📏',
+        title: 'Custom Conventions (EF Core 7+)',
+        desc: 'IModelFinalizing/CreatingConventions',
+        tags: ['advanced','new'],
+        tabs: ['Overview','Implementation','Code']
+      }
+    ]
+  },
+  {
+    id: 'perf-engineering',
+    icon: '🏎️',
+    color: '#dc2626',
+    bgColor: 'rgba(220,38,38,0.12)',
+    title: 'Performance Engineering',
+    subtitle: 'Expert-level optimization techniques',
+    level: 'EXPERT',
+    levelColor: '#dc2626',
+    topicCount: 5,
+    desc: 'Expert-level EF Core performance engineering — query plan analysis, memory allocation reduction, and architectural decisions.',
+    topics: [
+      {
+        id: 'query-plan',
+        icon: '🔍',
+        title: 'Query Plan Analysis',
+        desc: 'EXPLAIN ANALYZE, execution plans',
+        tags: ['advanced','perf'],
+        tabs: ['Overview','SQL Server','PostgreSQL']
+      },
+      {
+        id: 'compiled-models-adv',
+        icon: '🏎️',
+        title: 'Compiled Models Deep Dive',
+        desc: 'Dramatic startup improvement for large models',
+        tags: ['advanced','perf'],
+        tabs: ['Setup','Benchmarks','Limitations']
+      },
+      {
+        id: 'efcore-aot',
+        icon: '🚀',
+        title: 'EF Core & AOT / NativeAOT',
+        desc: '.NET 9/10 ahead-of-time compilation support',
+        tags: ['advanced','new'],
+        tabs: ['Overview','Setup','Limitations']
+      },
+      {
+        id: 'high-perf-writes',
+        icon: '✍️',
+        title: 'High-Performance Write Patterns',
+        desc: 'BatchSize, Dapper hybrid, raw SQL writes',
+        tags: ['advanced','perf'],
+        tabs: ['Strategies','Benchmarks','Code']
+      },
+      {
+        id: 'read-replicas',
+        icon: '🔀',
+        title: 'Read Replicas & CQRS',
+        desc: 'Split read/write contexts for scale',
+        tags: ['advanced'],
+        tabs: ['Overview','CQRS','Code']
+      }
+    ]
+  },
+  {
+    id: 'competitors',
+    icon: '🥊',
+    color: '#475569',
+    bgColor: 'rgba(71,85,105,0.12)',
+    title: 'ORM Alternatives',
+    subtitle: 'Dapper, NHibernate, Marten, RepoDB',
+    level: 'INTERMEDIATE',
+    levelColor: '#f59e0b',
+    topicCount: 5,
+    desc: 'Compare EF Core with alternative ORMs and micro-ORMs. Understand when to choose each and hybrid approaches.',
+    topics: [
+      {
+        id: 'dapper',
+        icon: '⚡',
+        title: 'Dapper',
+        desc: 'The micro-ORM king for raw performance',
+        tags: ['intermediate'],
+        tabs: ['Overview','API','vs EF Core','Code']
+      },
+      {
+        id: 'nhibernate',
+        icon: '🏛️',
+        title: 'NHibernate',
+        desc: 'Full-featured Java Hibernate port',
+        tags: ['intermediate'],
+        tabs: ['Overview','vs EF Core','Use Cases']
+      },
+      {
+        id: 'marten',
+        icon: '🐘',
+        title: 'Marten (PostgreSQL)',
+        desc: 'Document DB + event store on PostgreSQL',
+        tags: ['advanced'],
+        tabs: ['Overview','Document Store','Event Sourcing']
+      },
+      {
+        id: 'repodb',
+        icon: '⚡',
+        title: 'RepoDB',
+        desc: 'Hybrid micro-ORM with caching',
+        tags: ['intermediate'],
+        tabs: ['Overview','vs Dapper','Code']
+      },
+      {
+        id: 'orm-decision',
+        icon: '🎯',
+        title: 'ORM Decision Framework',
+        desc: 'How to choose the right ORM for your project',
+        tags: ['intermediate'],
+        tabs: ['Comparison Matrix','Decision Tree','Recommendations']
+      }
+    ]
+  },
+  {
+    id: 'interview',
+    icon: '🎤',
+    color: '#7c3aed',
+    bgColor: 'rgba(124,58,237,0.12)',
+    title: 'Interview Questions',
+    subtitle: '100+ Q&A across all levels',
+    level: 'ALL LEVELS',
+    levelColor: '#7c3aed',
+    topicCount: 10,
+    desc: 'Comprehensive interview prep — Basic, Intermediate, Advanced, Architectural, Performance, and Scenario-based questions with detailed answers.',
+    topics: [
+      { id: 'iq-basic', icon: '🟢', title: 'Basic Questions', desc: '25+ fundamental EF Core questions', tags: ['basic'] },
+      { id: 'iq-intermediate', icon: '🟡', title: 'Intermediate Questions', desc: '25+ mid-level questions', tags: ['intermediate'] },
+      { id: 'iq-advanced', icon: '🔴', title: 'Advanced Questions', desc: '20+ deep-dive questions', tags: ['advanced'] },
+      { id: 'iq-arch', icon: '🏗️', title: 'Architectural Questions', desc: 'Design patterns, CQRS, DDD', tags: ['advanced'] },
+      { id: 'iq-perf', icon: '⚡', title: 'Performance Questions', desc: 'Optimization scenarios', tags: ['perf'] },
+      { id: 'iq-scenario', icon: '🎭', title: 'Scenario-Based Questions', desc: 'Real-world problem solving', tags: ['advanced'] },
+      { id: 'iq-tricky', icon: '🧩', title: 'Tricky & Logical Questions', desc: 'Gotchas and edge cases', tags: ['advanced'] },
+      { id: 'iq-net10', icon: '🆕', title: '.NET 9/10 Specific', desc: 'Latest EF Core features', tags: ['new'] },
+      { id: 'iq-migration', icon: '🚀', title: 'Migration Questions', desc: 'Schema management scenarios', tags: ['intermediate'] },
+      { id: 'iq-testing', icon: '🧪', title: 'Testing Questions', desc: 'Testing strategies and patterns', tags: ['intermediate'] }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════
+// DETAILED CONTENT FOR EACH TOPIC
+// ═══════════════════════════════════════════════
+
+function getTopicContent(chapterId, topicId, tabName) {
+  const key = `${chapterId}:${topicId}:${tabName}`;
+
+  // ─── WHAT IS EF CORE ─────────────────────────
+  if (key === 'intro:what-is-efcore:Overview') return `
+    <div class="section-title">🔍 What is Entity Framework Core?</div>
+    <p class="body">Entity Framework Core (EF Core) is Microsoft's official <strong>Object-Relational Mapper (ORM)</strong> for .NET. It allows developers to work with relational databases using .NET objects, eliminating most of the boilerplate ADO.NET code required for CRUD operations.</p>
+    <p class="body">EF Core is <strong>open-source</strong>, <strong>cross-platform</strong>, and supports multiple database backends through a provider model. It was rewritten from scratch for .NET Core and is the successor to Entity Framework 6.</p>
+    <div class="callout info"><strong>💡 KEY INSIGHT</strong>With EF Core, you write C# code to query and manipulate data — EF Core translates it to the appropriate SQL for your target database automatically.</div>
+    <div class="section-title">✨ Core Capabilities</div>
+    <ul class="feature-list">
+      <li>LINQ-based querying — write type-safe queries in C#</li>
+      <li>Change tracking — automatically detects entity modifications</li>
+      <li>Migrations — version-control your database schema</li>
+      <li>Database-first and code-first workflows</li>
+      <li>Works with SQL Server, PostgreSQL, MySQL, SQLite, Cosmos DB, and more</li>
+      <li>Supports .NET 8, 9, and 10 — including NativeAOT in EF Core 9+</li>
+      <li>Async/await throughout — built for modern async applications</li>
+    </ul>
+    <div class="callout tip"><strong>✅ .NET 10 NOTE</strong>EF Core in .NET 10 introduces improved AOT support, better performance for compiled models, and enhanced JSON column querying. Always use the latest stable package.</div>
+  `;
+
+  if (key === 'intro:what-is-efcore:Architecture') return `
+    <div class="section-title">🏛️ High-Level Architecture</div>
+    <p class="body">EF Core sits between your application code and the database, translating between the object world and the relational world.</p>
+    <div class="diagram-wrap">
+      <div class="diagram-title">EF CORE ARCHITECTURE OVERVIEW</div>
+      <svg viewBox="0 0 480 320" width="100%" style="max-height:300px;">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" class="arrowhead-accent"/>
+          </marker>
+          <marker id="arr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" class="arrowhead"/>
+          </marker>
+        </defs>
+        <!-- App Layer -->
+        <rect x="160" y="10" width="160" height="44" rx="8" fill="rgba(0,229,255,0.1)" stroke="#00e5ff" stroke-width="1.5"/>
+        <text x="240" y="29" text-anchor="middle" class="flow-text-accent" font-size="12">Your Application</text>
+        <text x="240" y="46" text-anchor="middle" class="flow-text" font-size="10">C# / .NET 10</text>
+        <!-- DbContext -->
+        <rect x="160" y="80" width="160" height="44" rx="8" fill="rgba(124,58,237,0.1)" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="240" y="99" text-anchor="middle" fill="#a78bfa" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="600">DbContext</text>
+        <text x="240" y="116" text-anchor="middle" class="flow-text" font-size="10">Unit of Work</text>
+        <!-- Middle Row -->
+        <rect x="20" y="162" width="120" height="44" rx="8" fill="#111827" stroke="#1e2d47" stroke-width="1.5"/>
+        <text x="80" y="181" text-anchor="middle" class="flow-text" font-size="11">Change</text>
+        <text x="80" y="197" text-anchor="middle" class="flow-text" font-size="11">Tracker</text>
+        <rect x="180" y="162" width="120" height="44" rx="8" fill="#111827" stroke="#1e2d47" stroke-width="1.5"/>
+        <text x="240" y="181" text-anchor="middle" class="flow-text" font-size="11">Query</text>
+        <text x="240" y="197" text-anchor="middle" class="flow-text" font-size="11">Provider</text>
+        <rect x="340" y="162" width="120" height="44" rx="8" fill="#111827" stroke="#1e2d47" stroke-width="1.5"/>
+        <text x="400" y="181" text-anchor="middle" class="flow-text" font-size="11">Model</text>
+        <text x="400" y="197" text-anchor="middle" class="flow-text" font-size="11">Builder</text>
+        <!-- Database Provider -->
+        <rect x="120" y="244" width="240" height="44" rx="8" fill="rgba(245,158,11,0.1)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="240" y="263" text-anchor="middle" fill="#f59e0b" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="600">Database Provider</text>
+        <text x="240" y="280" text-anchor="middle" class="flow-text" font-size="10">SQL Server / PostgreSQL / MySQL / SQLite</text>
+        <!-- Arrows -->
+        <line x1="240" y1="54" x2="240" y2="78" stroke="#00e5ff" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="240" y1="124" x2="240" y2="160" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="180" y1="110" x2="80" y2="160" stroke="#1e2d47" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="300" y1="110" x2="400" y2="160" stroke="#1e2d47" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="240" y1="206" x2="240" y2="242" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arr)" stroke-dasharray="4 2"/>
+        <line x1="80" y1="206" x2="160" y2="242" stroke="#1e2d47" stroke-width="1.5" marker-end="url(#arr2)" stroke-dasharray="4 2"/>
+        <line x1="400" y1="206" x2="320" y2="242" stroke="#1e2d47" stroke-width="1.5" marker-end="url(#arr2)" stroke-dasharray="4 2"/>
+      </svg>
+    </div>
+    <p class="body">Every query in your application flows through the <strong>Query Provider</strong> (which builds the SQL), the <strong>Change Tracker</strong> (which monitors modifications), and a <strong>Database Provider</strong> (which handles the specific database dialect).</p>
+  `;
+
+  if (key === 'intro:what-is-efcore:Code') return `
+    <div class="section-title">💻 Your First EF Core App (.NET 10)</div>
+    <p class="body">Let's see what a complete minimal EF Core setup looks like in .NET 10:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">bash — Install Packages</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body">dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Microsoft.EntityFrameworkCore.Tools</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">C# — Entity + DbContext + Query</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body"><span class="cm">// 1. Define your entity</span>
+<span class="kw">public class</span> <span class="type">Product</span>
+{
+    <span class="kw">public int</span> <span class="prop">Id</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public required string</span> <span class="prop">Name</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public decimal</span> <span class="prop">Price</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public bool</span> <span class="prop">IsActive</span> { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">true</span>;
+}
+
+<span class="cm">// 2. Define your DbContext</span>
+<span class="kw">public class</span> <span class="type">AppDbContext</span> : <span class="type">DbContext</span>
+{
+    <span class="kw">public</span> <span class="type">AppDbContext</span>(<span class="type">DbContextOptions</span>&lt;<span class="type">AppDbContext</span>&gt; options)
+        : <span class="kw">base</span>(options) { }
+
+    <span class="kw">public</span> <span class="type">DbSet</span>&lt;<span class="type">Product</span>&gt; <span class="prop">Products</span> =&gt; <span class="met">Set</span>&lt;<span class="type">Product</span>&gt;();
+}
+
+<span class="cm">// 3. Register in DI (Program.cs)</span>
+builder.<span class="prop">Services</span>.<span class="met">AddDbContext</span>&lt;<span class="type">AppDbContext</span>&gt;(options =&gt;
+    options.<span class="met">UseSqlServer</span>(builder.<span class="prop">Configuration</span>.<span class="met">GetConnectionString</span>(<span class="str">"Default"</span>)));
+
+<span class="cm">// 4. Use in your service</span>
+<span class="kw">public class</span> <span class="type">ProductService</span>(<span class="type">AppDbContext</span> db)
+{
+    <span class="kw">public async</span> <span class="type">Task</span>&lt;<span class="type">List</span>&lt;<span class="type">Product</span>&gt;&gt; <span class="met">GetActiveAsync</span>() =&gt;
+        <span class="kw">await</span> db.<span class="prop">Products</span>
+            .<span class="met">Where</span>(p =&gt; p.<span class="prop">IsActive</span>)
+            .<span class="met">OrderBy</span>(p =&gt; p.<span class="prop">Name</span>)
+            .<span class="met">ToListAsync</span>();
+}</div>
+    </div>
+    <div class="callout tip"><strong>✅ .NET 10 BEST PRACTICE</strong>Use Primary Constructors (C# 12+) for injecting DbContext — cleaner and more concise than traditional constructor injection.</div>
+  `;
+
+  // ─── ORM FUNDAMENTALS ─────────────────────────
+  if (key === 'intro:orm-fundamentals:Overview') return `
+    <div class="section-title">🏗️ What is an ORM?</div>
+    <p class="body">An <strong>Object-Relational Mapper (ORM)</strong> is a programming technique that converts data between incompatible type systems — the object-oriented world of C# and the tabular world of relational databases.</p>
+    <p class="body">Without an ORM, you'd write raw SQL strings, manually map result sets to objects, handle null values, manage connections, and write repetitive CRUD boilerplate. An ORM automates all of this.</p>
+    <div class="callout info"><strong>🎯 THE IMPEDANCE MISMATCH</strong>The fundamental challenge ORMs solve: relational databases store data in tables with rows and columns, while object-oriented languages use objects with properties and inheritance hierarchies. These two models don't map 1:1 — that's called the "object-relational impedance mismatch."</div>
+    <div class="section-title">📊 ORM vs Raw SQL</div>
+    <table class="comp-table">
+      <tr><th>Concern</th><th>Raw ADO.NET / SQL</th><th>EF Core ORM</th></tr>
+      <tr><td>Query writing</td><td>SQL strings</td><td>LINQ expressions</td></tr>
+      <tr><td>Type safety</td><td>❌ Runtime errors</td><td>✅ Compile-time</td></tr>
+      <tr><td>Object mapping</td><td>Manual</td><td>Automatic</td></tr>
+      <tr><td>Schema changes</td><td>Manual SQL scripts</td><td>Migrations</td></tr>
+      <tr><td>Performance</td><td>Maximum control</td><td>Excellent with tuning</td></tr>
+      <tr><td>Boilerplate</td><td>Very high</td><td>Minimal</td></tr>
+      <tr><td>Relationships</td><td>Manual JOINs</td><td>Navigation properties</td></tr>
+      <tr><td>Transactions</td><td>Manual</td><td>Automatic / explicit</td></tr>
+    </table>
+    <div class="section-title">🔄 Entity Lifecycle</div>
+    <ul class="feature-list">
+      <li><strong>New:</strong> Object created in memory, not yet known to EF Core</li>
+      <li><strong>Added:</strong> Tracked by context, INSERT pending on SaveChanges</li>
+      <li><strong>Unchanged:</strong> Loaded from DB, no modifications detected</li>
+      <li><strong>Modified:</strong> One or more properties changed, UPDATE pending</li>
+      <li><strong>Deleted:</strong> Marked for deletion, DELETE pending on SaveChanges</li>
+      <li><strong>Detached:</strong> Not tracked by context at all</li>
+    </ul>
+  `;
+
+  // ─── DBCONTEXT BASICS ─────────────────────────
+  if (key === 'dbcontext:dbcontext-basics:Overview') return `
+    <div class="section-title">📦 DbContext — The Heart of EF Core</div>
+    <p class="body">The <code>DbContext</code> class is the primary class you work with in EF Core. It simultaneously serves as the <strong>Unit of Work</strong> (batching multiple changes into one transaction) and the <strong>Repository</strong> (querying entities from the database).</p>
+    <div class="callout info"><strong>💡 UNIT OF WORK PATTERN</strong>DbContext tracks ALL changes you make during a single "unit of work" (typically a web request), then persists them all atomically when you call SaveChanges(). This ensures consistency.</div>
+    <div class="section-title">🔄 DbContext Lifecycle</div>
+    <div class="diagram-wrap">
+      <div class="diagram-title">DBCONTEXT LIFECYCLE</div>
+      <svg viewBox="0 0 460 200" width="100%">
+        <defs>
+          <marker id="a3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#00e5ff"/>
+          </marker>
+        </defs>
+        <rect x="10" y="80" width="80" height="40" rx="6" fill="rgba(0,229,255,0.1)" stroke="#00e5ff" stroke-width="1.5"/>
+        <text x="50" y="97" text-anchor="middle" fill="#00e5ff" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="600">Create</text>
+        <text x="50" y="111" text-anchor="middle" fill="#94a3b8" font-family="'JetBrains Mono',monospace" font-size="9">new / DI</text>
+
+        <rect x="130" y="80" width="80" height="40" rx="6" fill="#111827" stroke="#1e2d47" stroke-width="1.5"/>
+        <text x="170" y="97" text-anchor="middle" fill="#94a3b8" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="600">Query</text>
+        <text x="170" y="111" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="9">LINQ → SQL</text>
+
+        <rect x="250" y="80" width="80" height="40" rx="6" fill="#111827" stroke="#1e2d47" stroke-width="1.5"/>
+        <text x="290" y="97" text-anchor="middle" fill="#94a3b8" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="600">Modify</text>
+        <text x="290" y="111" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="9">Track Changes</text>
+
+        <rect x="370" y="80" width="80" height="40" rx="6" fill="rgba(16,185,129,0.1)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="410" y="97" text-anchor="middle" fill="#10b981" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="600">Save</text>
+        <text x="410" y="111" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="9">SaveChanges</text>
+
+        <line x1="90" y1="100" x2="128" y2="100" stroke="#00e5ff" stroke-width="1.5" marker-end="url(#a3)"/>
+        <line x1="210" y1="100" x2="248" y2="100" stroke="#00e5ff" stroke-width="1.5" marker-end="url(#a3)"/>
+        <line x1="330" y1="100" x2="368" y2="100" stroke="#00e5ff" stroke-width="1.5" marker-end="url(#a3)"/>
+
+        <rect x="130" y="160" width="200" height="30" rx="6" fill="rgba(239,68,68,0.1)" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="230" y="180" text-anchor="middle" fill="#ef4444" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="600">Dispose (end of scope)</text>
+        <line x1="410" y1="120" x2="410" y2="152" stroke="#1e2d47" stroke-width="1.5" stroke-dasharray="4 2"/>
+        <line x1="410" y1="152" x2="332" y2="174" stroke="#1e2d47" stroke-width="1.5" marker-end="url(#a3)" stroke-dasharray="4 2"/>
+
+        <text x="230" y="20" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="10">Short-lived per request (Scoped DI lifetime)</text>
+        <text x="230" y="38" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="10">Never share between threads ⚠️</text>
+      </svg>
+    </div>
+    <div class="callout warning"><strong>⚠️ CRITICAL WARNING</strong>DbContext is NOT thread-safe. Never share a single instance across multiple threads or concurrent async operations. Always use one DbContext per request (Scoped lifetime in ASP.NET Core).</div>
+  `;
+
+  if (key === 'dbcontext:dbcontext-basics:Code') return `
+    <div class="section-title">💻 Creating a DbContext (.NET 10)</div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">C# — Complete DbContext Example</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body"><span class="kw">using</span> <span class="type">Microsoft.EntityFrameworkCore</span>;
+
+<span class="kw">public class</span> <span class="type">ShopDbContext</span> : <span class="type">DbContext</span>
+{
+    <span class="cm">// Constructor for Dependency Injection</span>
+    <span class="kw">public</span> <span class="type">ShopDbContext</span>(<span class="type">DbContextOptions</span>&lt;<span class="type">ShopDbContext</span>&gt; options)
+        : <span class="kw">base</span>(options) { }
+
+    <span class="cm">// DbSet properties — one per entity</span>
+    <span class="kw">public</span> <span class="type">DbSet</span>&lt;<span class="type">Product</span>&gt; <span class="prop">Products</span> =&gt; <span class="met">Set</span>&lt;<span class="type">Product</span>&gt;();
+    <span class="kw">public</span> <span class="type">DbSet</span>&lt;<span class="type">Category</span>&gt; <span class="prop">Categories</span> =&gt; <span class="met">Set</span>&lt;<span class="type">Category</span>&gt;();
+    <span class="kw">public</span> <span class="type">DbSet</span>&lt;<span class="type">Order</span>&gt; <span class="prop">Orders</span> =&gt; <span class="met">Set</span>&lt;<span class="type">Order</span>&gt;();
+
+    <span class="cm">// Model configuration via Fluent API</span>
+    <span class="kw">protected override void</span> <span class="met">OnModelCreating</span>(<span class="type">ModelBuilder</span> modelBuilder)
+    {
+        <span class="cm">// Apply all IEntityTypeConfiguration classes in this assembly</span>
+        modelBuilder.<span class="met">ApplyConfigurationsFromAssembly</span>(
+            <span class="type">typeof</span>(<span class="type">ShopDbContext</span>).<span class="prop">Assembly</span>);
+
+        <span class="cm">// Global query filter for soft deletes</span>
+        modelBuilder.<span class="met">Entity</span>&lt;<span class="type">Product</span>&gt;()
+            .<span class="met">HasQueryFilter</span>(p =&gt; !p.<span class="prop">IsDeleted</span>);
+    }
+
+    <span class="cm">// Intercept SaveChanges for audit fields</span>
+    <span class="kw">public override</span> <span class="type">Task</span>&lt;<span class="kw">int</span>&gt; <span class="met">SaveChangesAsync</span>(
+        <span class="type">CancellationToken</span> ct = <span class="kw">default</span>)
+    {
+        <span class="kw">foreach</span> (<span class="kw">var</span> entry <span class="kw">in</span> <span class="prop">ChangeTracker</span>.<span class="met">Entries</span>&lt;<span class="type">IAuditableEntity</span>&gt;())
+        {
+            <span class="kw">if</span> (entry.<span class="prop">State</span> == <span class="type">EntityState</span>.<span class="prop">Added</span>)
+                entry.<span class="prop">Entity</span>.<span class="prop">CreatedAt</span> = <span class="type">DateTime</span>.<span class="prop">UtcNow</span>;
+            <span class="kw">if</span> (entry.<span class="prop">State</span> is <span class="type">EntityState</span>.<span class="prop">Added</span> or <span class="type">EntityState</span>.<span class="prop">Modified</span>)
+                entry.<span class="prop">Entity</span>.<span class="prop">UpdatedAt</span> = <span class="type">DateTime</span>.<span class="prop">UtcNow</span>;
+        }
+        <span class="kw">return base</span>.<span class="met">SaveChangesAsync</span>(ct);
+    }
+}</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">C# — Program.cs Registration (.NET 10)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body"><span class="kw">var</span> builder = <span class="type">WebApplication</span>.<span class="met">CreateBuilder</span>(args);
+
+builder.<span class="prop">Services</span>.<span class="met">AddDbContext</span>&lt;<span class="type">ShopDbContext</span>&gt;(options =&gt;
+{
+    options.<span class="met">UseSqlServer</span>(
+        builder.<span class="prop">Configuration</span>.<span class="met">GetConnectionString</span>(<span class="str">"ShopDb"</span>),
+        sql =&gt; sql
+            .<span class="met">EnableRetryOnFailure</span>(maxRetryCount: <span class="num">3</span>)
+            .<span class="met">CommandTimeout</span>(<span class="num">30</span>)
+    );
+
+    <span class="cm">// Development-only: log sensitive data & detailed errors</span>
+    <span class="kw">if</span> (builder.<span class="prop">Environment</span>.<span class="prop">IsDevelopment</span>())
+    {
+        options
+            .<span class="met">EnableSensitiveDataLogging</span>()
+            .<span class="met">EnableDetailedErrors</span>()
+            .<span class="met">LogTo</span>(<span class="type">Console</span>.<span class="prop">WriteLine</span>, <span class="type">LogLevel</span>.<span class="prop">Information</span>);
+    }
+});</div>
+    </div>
+  `;
+
+  // ─── ENTITY STATES ─────────────────────────
+  if (key === 'change-tracking:entity-states:States') return `
+    <div class="section-title">🔄 The 5 Entity States</div>
+    <p class="body">Every entity tracked by EF Core exists in one of five states. Understanding these states is crucial for understanding how EF Core works.</p>
+    <div class="diagram-wrap">
+      <div class="diagram-title">ENTITY STATE MACHINE</div>
+      <svg viewBox="0 0 480 280" width="100%">
+        <defs>
+          <marker id="sm" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+            <polygon points="0 0, 7 2.5, 0 5" fill="#94a3b8"/>
+          </marker>
+          <marker id="sma" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+            <polygon points="0 0, 7 2.5, 0 5" fill="#00e5ff"/>
+          </marker>
+        </defs>
+        <!-- Detached -->
+        <rect x="190" y="10" width="100" height="36" rx="6" fill="#111827" stroke="#64748b" stroke-width="1.5"/>
+        <text x="240" y="33" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="600">Detached</text>
+        <!-- Added -->
+        <rect x="30" y="100" width="100" height="36" rx="6" fill="rgba(16,185,129,0.1)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="80" y="123" text-anchor="middle" fill="#10b981" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="600">Added</text>
+        <!-- Unchanged -->
+        <rect x="190" y="130" width="100" height="36" rx="6" fill="rgba(0,229,255,0.1)" stroke="#00e5ff" stroke-width="1.5"/>
+        <text x="240" y="153" text-anchor="middle" fill="#00e5ff" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="600">Unchanged</text>
+        <!-- Modified -->
+        <rect x="350" y="100" width="100" height="36" rx="6" fill="rgba(245,158,11,0.1)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="400" y="123" text-anchor="middle" fill="#f59e0b" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="600">Modified</text>
+        <!-- Deleted -->
+        <rect x="190" y="220" width="100" height="36" rx="6" fill="rgba(239,68,68,0.1)" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="240" y="243" text-anchor="middle" fill="#ef4444" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="600">Deleted</text>
+
+        <!-- Arrows -->
+        <!-- Detached → Added -->
+        <path d="M205 46 L95 98" stroke="#10b981" stroke-width="1.5" fill="none" marker-end="url(#sma)" stroke-dasharray="4 2"/>
+        <text x="125" y="70" fill="#10b981" font-family="'JetBrains Mono',monospace" font-size="9">Add()</text>
+        <!-- Detached → Unchanged -->
+        <line x1="240" y1="46" x2="240" y2="128" stroke="#00e5ff" stroke-width="1.5" marker-end="url(#sma)" stroke-dasharray="4 2"/>
+        <text x="246" y="90" fill="#00e5ff" font-family="'JetBrains Mono',monospace" font-size="9">Attach()</text>
+        <!-- Added → Unchanged (SaveChanges) -->
+        <path d="M130 115 C160 115 175 135 188 148" stroke="#94a3b8" stroke-width="1.5" fill="none" marker-end="url(#sm)"/>
+        <text x="140" y="108" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="8">SaveChanges</text>
+        <!-- Unchanged → Modified -->
+        <path d="M290 142 C320 142 340 125 348 120" stroke="#f59e0b" stroke-width="1.5" fill="none" marker-end="url(#sma)"/>
+        <text x="298" y="132" fill="#f59e0b" font-family="'JetBrains Mono',monospace" font-size="9">modify</text>
+        <!-- Modified → Unchanged (SaveChanges) -->
+        <path d="M350 125 C330 152 300 158 292 158" stroke="#94a3b8" stroke-width="1.5" fill="none" marker-end="url(#sm)"/>
+        <text x="308" y="173" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="8">SaveChanges</text>
+        <!-- Unchanged → Deleted -->
+        <path d="M240 166 L240 218" stroke="#ef4444" stroke-width="1.5" fill="none" marker-end="url(#sma)" stroke-dasharray="4 2"/>
+        <text x="246" y="197" fill="#ef4444" font-family="'JetBrains Mono',monospace" font-size="9">Remove()</text>
+        <!-- Deleted → Detached (SaveChanges) -->
+        <path d="M290 235 C360 235 380 50 280 30" stroke="#94a3b8" stroke-width="1.5" fill="none" marker-end="url(#sm)" stroke-dasharray="3 2"/>
+        <text x="370" y="155" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="8">SaveChanges</text>
+      </svg>
+    </div>
+    <div class="section-title">📋 State Reference</div>
+    <table class="comp-table">
+      <tr><th>State</th><th>Description</th><th>SaveChanges Action</th></tr>
+      <tr><td><span style="color:#10b981">Added</span></td><td>New entity not yet in DB</td><td>INSERT</td></tr>
+      <tr><td><span style="color:#00e5ff">Unchanged</span></td><td>Loaded from DB, no changes</td><td>Nothing</td></tr>
+      <tr><td><span style="color:#f59e0b">Modified</span></td><td>At least one property changed</td><td>UPDATE</td></tr>
+      <tr><td><span style="color:#ef4444">Deleted</span></td><td>Marked for removal</td><td>DELETE</td></tr>
+      <tr><td><span style="color:#64748b">Detached</span></td><td>Not tracked by context</td><td>Nothing</td></tr>
+    </table>
+  `;
+
+  // ─── MIGRATIONS BASICS ─────────────────────────
+  if (key === 'migrations:migrations-basics:Commands') return `
+    <div class="section-title">💻 Essential Migration Commands</div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">CLI — dotnet ef commands</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body"><span class="cm"># Install EF Core tools globally</span>
+dotnet tool install --global dotnet-ef
+
+<span class="cm"># Add a new migration</span>
+dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api
+
+<span class="cm"># Apply pending migrations to database</span>
+dotnet ef database update
+
+<span class="cm"># Apply a specific migration</span>
+dotnet ef database update AddProductTable
+
+<span class="cm"># Rollback to previous migration</span>
+dotnet ef database update PreviousMigrationName
+
+<span class="cm"># Remove the last migration (if not applied)</span>
+dotnet ef migrations remove
+
+<span class="cm"># List all migrations</span>
+dotnet ef migrations list
+
+<span class="cm"># Generate SQL script (for DBA review)</span>
+dotnet ef migrations script --idempotent --output migrations.sql
+
+<span class="cm"># Create migration bundle (self-contained executable)</span>
+dotnet ef migrations bundle --self-contained -r linux-x64</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">PMC — Package Manager Console (Visual Studio)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body"><span class="cm"># Add migration</span>
+Add-Migration InitialCreate -Project Data -StartupProject Api
+
+<span class="cm"># Apply migrations</span>
+Update-Database
+
+<span class="cm"># Generate SQL script</span>
+Script-Migration -Idempotent</div>
+    </div>
+    <div class="callout warning"><strong>⚠️ PRODUCTION WARNING</strong>Never run <code>database update</code> in production manually. Generate idempotent SQL scripts and apply through your CI/CD pipeline after DBA review.</div>
+  `;
+
+  // ─── N+1 PROBLEM ─────────────────────────
+  if (key === 'performance:n-plus-1:Problem') return `
+    <div class="section-title">🔥 The N+1 Query Problem</div>
+    <p class="body">The N+1 problem is the most common EF Core performance killer. It happens when you load a list of N entities, then for each entity you trigger an additional query — resulting in N+1 total queries instead of just 1 or 2.</p>
+    <div class="callout danger"><strong>💥 DANGER</strong>A page showing 100 orders with their customers could generate 101 SQL queries! This is invisible in development but catastrophic in production.</div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">C# — ❌ N+1 BAD (Lazy Loading Trap)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body"><span class="cm">// This looks innocent but is a disaster with lazy loading enabled!</span>
+<span class="kw">var</span> orders = <span class="kw">await</span> db.<span class="prop">Orders</span>.<span class="met">ToListAsync</span>(); <span class="cm">// Query 1: SELECT * FROM Orders</span>
+
+<span class="kw">foreach</span> (<span class="kw">var</span> order <span class="kw">in</span> orders)
+{
+    <span class="cm">// Each access triggers a new query! Query 2, 3, 4... N+1</span>
+    <span class="type">Console</span>.<span class="met">WriteLine</span>(order.<span class="prop">Customer</span>.<span class="prop">Name</span>); <span class="cm">// 💥 N queries!</span>
+}</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">C# — ✅ FIXED with Eager Loading</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body"><span class="cm">// ✅ One query with JOIN — use Include()</span>
+<span class="kw">var</span> orders = <span class="kw">await</span> db.<span class="prop">Orders</span>
+    .<span class="met">Include</span>(o =&gt; o.<span class="prop">Customer</span>)     <span class="cm">// JOIN to customers</span>
+    .<span class="met">Include</span>(o =&gt; o.<span class="prop">OrderItems</span>)  <span class="cm">// JOIN to items</span>
+        .<span class="met">ThenInclude</span>(i =&gt; i.<span class="prop">Product</span>) <span class="cm">// JOIN to products</span>
+    .<span class="met">ToListAsync</span>();
+
+<span class="cm">// ✅ Or use projection — only load what you need</span>
+<span class="kw">var</span> summary = <span class="kw">await</span> db.<span class="prop">Orders</span>
+    .<span class="met">Select</span>(o =&gt; <span class="kw">new</span> { o.<span class="prop">Id</span>, o.<span class="prop">Customer</span>.<span class="prop">Name</span>, o.<span class="prop">Total</span> })
+    .<span class="met">ToListAsync</span>();
+<span class="cm">// Generated SQL: SELECT o.Id, c.Name, o.Total FROM Orders o JOIN Customers c ON...</span></div>
+    </div>
+    <div class="section-title">🔍 Detection Tools</div>
+    <ul class="feature-list">
+      <li>Enable SQL logging in development — look for repeated similar queries</li>
+      <li>MiniProfiler — shows query count per request</li>
+      <li>EF Core warnings: <code>ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))</code></li>
+      <li>Application Insights / Jaeger tracing — query count per trace</li>
+      <li>Throw on N+1 in tests to prevent regressions</li>
+    </ul>
+  `;
+
+  // ─── BULK OPERATIONS ─────────────────────────
+  if (key === 'saving:bulk-operations:Overview') return `
+    <div class="section-title">⚡ Bulk Operations — EF Core 7+</div>
+    <p class="body">EF Core 7 introduced <code>ExecuteUpdate</code> and <code>ExecuteDelete</code> — the game-changing methods that allow you to update or delete many rows in a single SQL statement without loading entities into memory first.</p>
+    <div class="callout info"><strong>💡 BEFORE EF CORE 7</strong>To update 1000 rows, you'd load them all into memory, modify each one, then call SaveChanges — generating 1000 UPDATE statements. Now you generate one!</div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">C# — ExecuteUpdate (.NET 10 / EF Core 8+)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body"><span class="cm">// ✅ Single SQL UPDATE — no loading into memory</span>
+<span class="kw">int</span> updated = <span class="kw">await</span> db.<span class="prop">Products</span>
+    .<span class="met">Where</span>(p =&gt; p.<span class="prop">CategoryId</span> == categoryId)
+    .<span class="met">ExecuteUpdateAsync</span>(setters =&gt; setters
+        .<span class="met">SetProperty</span>(p =&gt; p.<span class="prop">IsActive</span>, <span class="kw">false</span>)
+        .<span class="met">SetProperty</span>(p =&gt; p.<span class="prop">UpdatedAt</span>, <span class="type">DateTime</span>.<span class="prop">UtcNow</span>));
+<span class="cm">// SQL: UPDATE Products SET IsActive=0, UpdatedAt='...' WHERE CategoryId=@p0</span>
+
+<span class="cm">// ✅ Single SQL DELETE</span>
+<span class="kw">int</span> deleted = <span class="kw">await</span> db.<span class="prop">Orders</span>
+    .<span class="met">Where</span>(o =&gt; o.<span class="prop">Status</span> == <span class="str">"Cancelled"</span> &amp;&amp; o.<span class="prop">CreatedAt</span> &lt; cutoffDate)
+    .<span class="met">ExecuteDeleteAsync</span>();
+<span class="cm">// SQL: DELETE FROM Orders WHERE Status='Cancelled' AND CreatedAt &lt; @cutoff</span>
+
+<span class="cm">// Compare with OLD approach (loads ALL into memory!)</span>
+<span class="cm">// var products = await db.Products.Where(...).ToListAsync(); // 😱 loads all!</span>
+<span class="cm">// products.ForEach(p => p.IsActive = false);</span>
+<span class="cm">// await db.SaveChangesAsync(); // 😱 N UPDATE statements!</span></div>
+    </div>
+    <div class="callout warning"><strong>⚠️ NOTE</strong>ExecuteUpdate/ExecuteDelete bypass the change tracker entirely. They will NOT trigger SaveChanges interceptors or raise domain events. Consider this in your architecture.</div>
+  `;
+
+  // ─── INTERVIEW QUESTIONS ─────────────────────
+  if (chapterId === 'interview') {
+    const questions = getInterviewQuestions(topicId);
+    return renderInterviewQuestions(questions, topicId);
+  }
+
+  // ─── OPTIMISTIC CONCURRENCY ─────────────────────────
+  if (key === 'concurrency:optimistic-concurrency:Overview') return `
+    <div class="section-title">🏆 Optimistic Concurrency</div>
+    <p class="body">Optimistic concurrency assumes that conflicting changes are <em>rare</em>. Instead of locking rows when reading (pessimistic), it detects conflicts at write time and throws an exception so the application can handle it.</p>
+    <div class="callout info"><strong>💡 ANALOGY</strong>Imagine two people editing the same Wikipedia article simultaneously. Wikipedia (optimistic) lets both edit, then checks if the article changed between when you loaded it and when you saved. If it did, you get a "edit conflict" warning. Pessimistic would lock the article so only one person can edit at a time.</div>
+    <div class="diagram-wrap">
+      <div class="diagram-title">OPTIMISTIC CONCURRENCY FLOW</div>
+      <svg viewBox="0 0 460 240" width="100%">
+        <text x="80" y="20" text-anchor="middle" fill="#00e5ff" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="600">User A</text>
+        <text x="380" y="20" text-anchor="middle" fill="#f59e0b" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="600">User B</text>
+        <text x="230" y="20" text-anchor="middle" fill="#94a3b8" font-family="'JetBrains Mono',monospace" font-size="10">Database</text>
+        <line x1="80" y1="26" x2="80" y2="235" stroke="#00e5ff" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
+        <line x1="230" y1="26" x2="230" y2="235" stroke="#1e2d47" stroke-width="1"/>
+        <line x1="380" y1="26" x2="380" y2="235" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
+        <!-- Read A -->
+        <line x1="80" y1="50" x2="228" y2="50" stroke="#00e5ff" stroke-width="1.5" marker-end="url(#sma)"/>
+        <text x="148" y="44" text-anchor="middle" fill="#00e5ff" font-family="'JetBrains Mono',monospace" font-size="9">READ (v=1)</text>
+        <!-- Read B -->
+        <line x1="380" y1="80" x2="232" y2="80" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#sm)"/>
+        <text x="305" y="74" text-anchor="middle" fill="#f59e0b" font-family="'JetBrains Mono',monospace" font-size="9">READ (v=1)</text>
+        <!-- Write A success -->
+        <line x1="80" y1="130" x2="228" y2="130" stroke="#00e5ff" stroke-width="1.5" marker-end="url(#sma)"/>
+        <text x="148" y="124" text-anchor="middle" fill="#00e5ff" font-family="'JetBrains Mono',monospace" font-size="9">WRITE (v=1→2) ✅</text>
+        <!-- Write B conflict -->
+        <line x1="380" y1="170" x2="232" y2="170" stroke="#ef4444" stroke-width="1.5" marker-end="url(#sm)"/>
+        <text x="305" y="164" text-anchor="middle" fill="#ef4444" font-family="'JetBrains Mono',monospace" font-size="9">WRITE (v=1) ❌ CONFLICT</text>
+        <!-- Conflict exception -->
+        <rect x="280" y="185" width="180" height="26" rx="4" fill="rgba(239,68,68,0.1)" stroke="#ef4444" stroke-width="1"/>
+        <text x="370" y="202" text-anchor="middle" fill="#ef4444" font-family="'JetBrains Mono',monospace" font-size="9">DbUpdateConcurrencyException</text>
+      </svg>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">C# — Handling Concurrency Conflicts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body"><span class="kw">public class</span> <span class="type">Product</span>
+{
+    <span class="kw">public int</span> <span class="prop">Id</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public string</span> <span class="prop">Name</span> { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">""</span>;
+    
+    <span class="cm">// SQL Server RowVersion — auto-incremented by DB</span>
+    [<span class="attr">Timestamp</span>]
+    <span class="kw">public byte</span>[] <span class="prop">RowVersion</span> { <span class="kw">get</span>; <span class="kw">set</span>; } = [];
+}
+
+<span class="cm">// Conflict resolution</span>
+<span class="kw">try</span>
+{
+    <span class="kw">await</span> db.<span class="met">SaveChangesAsync</span>();
+}
+<span class="kw">catch</span> (<span class="type">DbUpdateConcurrencyException</span> ex)
+{
+    <span class="kw">foreach</span> (<span class="kw">var</span> entry <span class="kw">in</span> ex.<span class="prop">Entries</span>)
+    {
+        <span class="kw">var</span> dbValues = <span class="kw">await</span> entry.<span class="met">GetDatabaseValuesAsync</span>();
+        <span class="kw">if</span> (dbValues == <span class="kw">null</span>)
+            <span class="kw">throw new</span> <span class="type">InvalidOperationException</span>(<span class="str">"Entity deleted!"</span>);
+
+        <span class="cm">// Option 1: Client wins — overwrite DB values</span>
+        entry.<span class="prop">OriginalValues</span>.<span class="met">SetValues</span>(dbValues);
+        
+        <span class="cm">// Option 2: DB wins — refresh with database values</span>
+        <span class="cm">// entry.CurrentValues.SetValues(dbValues);</span>
+    }
+    <span class="kw">await</span> db.<span class="met">SaveChangesAsync</span>(); <span class="cm">// Retry</span>
+}</div>
+    </div>
+  `;
+
+  // ─── FLUENT API ─────────────────────────
+  if (key === 'modeling:fluent-api:Examples') return `
+    <div class="section-title">🎨 Fluent API — Complete Reference</div>
+    <p class="body">The Fluent API is the most powerful and flexible way to configure your EF Core model. It keeps configuration separate from your entity classes and gives you access to every configuration option.</p>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">C# — IEntityTypeConfiguration Pattern (.NET 10)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body"><span class="cm">// Best practice: separate configuration class per entity</span>
+<span class="kw">public class</span> <span class="type">ProductConfiguration</span> : <span class="type">IEntityTypeConfiguration</span>&lt;<span class="type">Product</span>&gt;
+{
+    <span class="kw">public void</span> <span class="met">Configure</span>(<span class="type">EntityTypeBuilder</span>&lt;<span class="type">Product</span>&gt; builder)
+    {
+        <span class="cm">// Table name and schema</span>
+        builder.<span class="met">ToTable</span>(<span class="str">"Products"</span>, <span class="str">"catalog"</span>);
+
+        <span class="cm">// Primary key</span>
+        builder.<span class="met">HasKey</span>(p =&gt; p.<span class="prop">Id</span>);
+        builder.<span class="prop">Property</span>(p =&gt; p.<span class="prop">Id</span>)
+            .<span class="met">UseHiLo</span>(<span class="str">"product_hilo"</span>); <span class="cm">// HiLo key generation</span>
+
+        <span class="cm">// String property configuration</span>
+        builder.<span class="prop">Property</span>(p =&gt; p.<span class="prop">Name</span>)
+            .<span class="met">IsRequired</span>()
+            .<span class="met">HasMaxLength</span>(<span class="num">200</span>)
+            .<span class="met">HasColumnName</span>(<span class="str">"product_name"</span>);
+
+        <span class="cm">// Decimal precision</span>
+        builder.<span class="prop">Property</span>(p =&gt; p.<span class="prop">Price</span>)
+            .<span class="met">HasColumnType</span>(<span class="str">"decimal(18,2)"</span>)
+            .<span class="met">HasDefaultValue</span>(<span class="num">0</span>);
+
+        <span class="cm">// Indexes</span>
+        builder.<span class="met">HasIndex</span>(p =&gt; p.<span class="prop">Sku</span>)
+            .<span class="met">IsUnique</span>()
+            .<span class="met">HasDatabaseName</span>(<span class="str">"IX_Products_Sku"</span>);
+
+        builder.<span class="met">HasIndex</span>(p =&gt; <span class="kw">new</span> { p.<span class="prop">CategoryId</span>, p.<span class="prop">IsActive</span> })
+            .<span class="met">HasDatabaseName</span>(<span class="str">"IX_Products_Category_Active"</span>);
+
+        <span class="cm">// Relationship</span>
+        builder.<span class="met">HasOne</span>(p =&gt; p.<span class="prop">Category</span>)
+            .<span class="met">WithMany</span>(c =&gt; c.<span class="prop">Products</span>)
+            .<span class="met">HasForeignKey</span>(p =&gt; p.<span class="prop">CategoryId</span>)
+            .<span class="met">OnDelete</span>(<span class="type">DeleteBehavior</span>.<span class="prop">Restrict</span>);
+
+        <span class="cm">// Value converter</span>
+        builder.<span class="prop">Property</span>(p =&gt; p.<span class="prop">Tags</span>)
+            .<span class="met">HasConversion</span>(
+                v =&gt; <span class="type">JsonSerializer</span>.<span class="met">Serialize</span>(v, <span class="kw">default</span>(<span class="type">JsonSerializerOptions</span>)),
+                v =&gt; <span class="type">JsonSerializer</span>.<span class="met">Deserialize</span>&lt;<span class="type">List</span>&lt;<span class="kw">string</span>&gt;&gt;(v, <span class="kw">default</span>) ?? []);
+
+        <span class="cm">// Concurrency token</span>
+        builder.<span class="prop">Property</span>(p =&gt; p.<span class="prop">RowVersion</span>)
+            .<span class="met">IsRowVersion</span>();
+
+        <span class="cm">// Global query filter</span>
+        builder.<span class="met">HasQueryFilter</span>(p =&gt; !p.<span class="prop">IsDeleted</span>);
+    }
+}</div>
+    </div>
+  `;
+
+  // ─── LINQ → SQL TRANSLATION ─────────────────────────
+  if (key === 'architecture:linq-to-sql:Pipeline') return `
+    <div class="section-title">🔄 LINQ → SQL Translation Pipeline</div>
+    <p class="body">When you write a LINQ query against EF Core, it goes through a sophisticated multi-stage pipeline before a SQL query hits your database. Understanding this pipeline helps you write better queries and debug performance issues.</p>
+    <div class="diagram-wrap">
+      <div class="diagram-title">QUERY TRANSLATION PIPELINE</div>
+      <svg viewBox="0 0 400 480" width="100%" style="max-height:460px;">
+        <defs>
+          <marker id="pa" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+            <polygon points="0 0, 7 2.5, 0 5" fill="#00e5ff"/>
+          </marker>
+        </defs>
+        <!-- Steps -->
+        <rect x="80" y="10" width="240" height="48" rx="8" fill="rgba(0,229,255,0.1)" stroke="#00e5ff" stroke-width="1.5"/>
+        <text x="200" y="30" text-anchor="middle" fill="#00e5ff" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="600">1. LINQ Expression Tree</text>
+        <text x="200" y="48" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="9">db.Products.Where(p =&gt; p.IsActive).Select(...)</text>
+
+        <line x1="200" y1="58" x2="200" y2="74" stroke="#00e5ff" stroke-width="1.5" marker-end="url(#pa)"/>
+        <text x="210" y="70" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="8">Parse</text>
+
+        <rect x="80" y="76" width="240" height="44" rx="8" fill="#111827" stroke="#1e2d47" stroke-width="1.5"/>
+        <text x="200" y="95" text-anchor="middle" fill="#94a3b8" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="600">2. Query Compilation</text>
+        <text x="200" y="112" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="9">Build IQueryable expression tree</text>
+
+        <line x1="200" y1="120" x2="200" y2="136" stroke="#1e2d47" stroke-width="1.5" marker-end="url(#pa)"/>
+
+        <rect x="80" y="138" width="240" height="44" rx="8" fill="#111827" stroke="#1e2d47" stroke-width="1.5"/>
+        <text x="200" y="157" text-anchor="middle" fill="#94a3b8" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="600">3. Query Optimizer</text>
+        <text x="200" y="174" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="9">Rewrite &amp; optimize expression</text>
+
+        <line x1="200" y1="182" x2="200" y2="198" stroke="#1e2d47" stroke-width="1.5" marker-end="url(#pa)"/>
+
+        <rect x="80" y="200" width="240" height="44" rx="8" fill="#111827" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="200" y="219" text-anchor="middle" fill="#a78bfa" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="600">4. SQL Generator</text>
+        <text x="200" y="236" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="9">Provider-specific SQL builder</text>
+
+        <line x1="200" y1="244" x2="200" y2="260" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#pa)"/>
+
+        <rect x="80" y="262" width="240" height="44" rx="8" fill="rgba(245,158,11,0.1)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="200" y="281" text-anchor="middle" fill="#f59e0b" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="600">5. SQL Command</text>
+        <text x="200" y="298" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="9">SELECT p.Id, p.Name FROM Products WHERE...</text>
+
+        <line x1="200" y1="306" x2="200" y2="322" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#pa)"/>
+
+        <rect x="80" y="324" width="240" height="44" rx="8" fill="rgba(16,185,129,0.1)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="200" y="343" text-anchor="middle" fill="#10b981" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="600">6. Result Materialization</text>
+        <text x="200" y="360" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="9">Map rows → C# objects + Track</text>
+
+        <line x1="200" y1="368" x2="200" y2="384" stroke="#10b981" stroke-width="1.5" marker-end="url(#pa)"/>
+
+        <rect x="80" y="386" width="240" height="44" rx="8" fill="rgba(0,229,255,0.1)" stroke="#00e5ff" stroke-width="1.5"/>
+        <text x="200" y="405" text-anchor="middle" fill="#00e5ff" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="600">7. Return IEnumerable/List</text>
+        <text x="200" y="422" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono',monospace" font-size="9">C# objects returned to caller ✅</text>
+
+        <!-- Cache indicator -->
+        <rect x="330" y="76" width="60" height="130" rx="6" fill="rgba(124,58,237,0.08)" stroke="#7c3aed" stroke-width="1" stroke-dasharray="3 2"/>
+        <text x="360" y="130" text-anchor="middle" fill="#7c3aed" font-family="'JetBrains Mono',monospace" font-size="9" transform="rotate(-90,360,130)">QUERY CACHE</text>
+        <path d="M330 100 L326 100" stroke="#7c3aed" stroke-width="1" stroke-dasharray="2 2"/>
+        <path d="M330 165 L326 165" stroke="#7c3aed" stroke-width="1" stroke-dasharray="2 2"/>
+      </svg>
+    </div>
+    <div class="callout tip"><strong>💡 PERFORMANCE TIP</strong>Steps 1-5 are cached after the first execution. Subsequent identical queries (with only parameter changes) skip straight to step 5. This is why parameterized queries are crucial for performance.</div>
+  `;
+
+  // Default fallback
+  return `
+    <div class="section-title">📚 ${tabName}</div>
+    <p class="body">This section covers <strong>${tabName}</strong> in depth. The content includes detailed explanations, practical code examples in C# / .NET 10, and real-world scenarios.</p>
+    <div class="callout info"><strong>💡 COMING SOON</strong>Detailed content for this section is being loaded. This covers everything about ${topicId} including patterns, best practices, and .NET 10 specific features.</div>
+    <div class="section-title">Key Points</div>
+    <ul class="feature-list">
+      <li>Always use async methods (<code>ToListAsync</code>, <code>SaveChangesAsync</code>) in web applications</li>
+      <li>Follow the principle of minimal data loading — only query what you need</li>
+      <li>Use <code>AsNoTracking()</code> for read-only queries to boost performance significantly</li>
+      <li>Configure entities using <code>IEntityTypeConfiguration&lt;T&gt;</code> for clean separation</li>
+      <li>Always test with real database behavior, not just in-memory provider</li>
+      <li>Log SQL in development: <code>options.LogTo(Console.WriteLine, LogLevel.Information)</code></li>
+    </ul>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">C# — .NET 10 Pattern</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body"><span class="cm">// .NET 10 with EF Core — Best Practice Example</span>
+<span class="kw">public class</span> <span class="type">ExampleService</span>(<span class="type">AppDbContext</span> db)
+{
+    <span class="kw">public async</span> <span class="type">Task</span>&lt;<span class="type">IReadOnlyList</span>&lt;<span class="type">ProductDto</span>&gt;&gt; <span class="met">GetAsync</span>(
+        <span class="type">CancellationToken</span> ct = <span class="kw">default</span>)
+    {
+        <span class="kw">return await</span> db.<span class="prop">Products</span>
+            .<span class="met">AsNoTracking</span>()           <span class="cm">// Read-only — no tracking overhead</span>
+            .<span class="met">Where</span>(p =&gt; p.<span class="prop">IsActive</span>)   <span class="cm">// Filter in database</span>
+            .<span class="met">Select</span>(p =&gt; <span class="kw">new</span> <span class="type">ProductDto</span>(p.<span class="prop">Id</span>, p.<span class="prop">Name</span>, p.<span class="prop">Price</span>))
+            .<span class="met">ToListAsync</span>(ct);          <span class="cm">// Async always</span>
+    }
+}</span></div>
+    </div>
+  `;
+}
+
+// ─── INTERVIEW QUESTIONS DATA ─────────────────────────
+function getInterviewQuestions(topicId) {
+  const allQA = {
+    'iq-basic': [
+      { q: "What is Entity Framework Core and how does it differ from Entity Framework 6?", diff: "BASIC", a: "EF Core is a lightweight, extensible, open-source, and cross-platform version of Entity Framework. Key differences: EF Core was rewritten from scratch and runs on .NET Core/.NET 5+; it's cross-platform (Windows, Linux, macOS); supports more database providers; has better performance; supports new features like keyless entities, owned entity types, raw SQL for updates (EF Core 7+), JSON columns, and compiled models. EF6 only runs on full .NET Framework and is in maintenance mode." },
+      { q: "What is the purpose of DbContext in EF Core?", diff: "BASIC", a: "DbContext serves three primary roles: (1) Unit of Work — it tracks all changes during a request and persists them atomically via SaveChanges(); (2) Repository — provides DbSet<T> properties for querying entities; (3) Configuration Hub — configures the model via OnModelCreating(). It's the gateway between your domain model and the database." },
+      { q: "What is the difference between DbSet.Add() and DbContext.Attach()?", diff: "BASIC", a: "Add() marks the entity and ALL reachable entities as Added (EntityState.Added), meaning they'll all be INSERTed. Attach() marks the entity as Unchanged (EntityState.Unchanged), meaning EF tracks it but won't generate any SQL unless you modify properties. Use Add() for new entities, Attach() to start tracking an existing entity retrieved outside the current context." },
+      { q: "What are the different entity states in EF Core?", diff: "BASIC", a: "There are 5 states: (1) Detached — not tracked; (2) Unchanged — tracked, no changes, no SQL on SaveChanges; (3) Added — new entity, INSERT on SaveChanges; (4) Modified — tracked, has changes, UPDATE on SaveChanges; (5) Deleted — marked for removal, DELETE on SaveChanges. You can inspect/set state via context.Entry(entity).State." },
+      { q: "What is a migration in EF Core?", diff: "BASIC", a: "A migration is a versioned snapshot of your model changes that EF Core uses to evolve the database schema over time. Each migration has an Up() method (apply changes) and a Down() method (rollback). Migrations are C# classes generated by 'dotnet ef migrations add'. They create a database version history stored in the __EFMigrationsHistory table." },
+      { q: "Explain the difference between eager loading, lazy loading, and explicit loading.", diff: "BASIC", a: "Eager Loading: Load related entities upfront using Include()/ThenInclude() — single query with JOINs. Lazy Loading: Related entities load automatically when you access a navigation property — requires proxy setup, generates N+1 queries if not careful. Explicit Loading: You manually load a navigation with context.Entry(entity).Reference(x => x.Nav).Load() — gives you full control over when/if to load." },
+      { q: "What does AsNoTracking() do and when should you use it?", diff: "BASIC", a: "AsNoTracking() tells EF Core not to add the returned entities to the Change Tracker. This means: (1) No snapshot copy is kept in memory; (2) Entities are read-only — changes won't be detected or saved; (3) Better performance (less memory, no comparison overhead). Use it for all read-only queries (GET endpoints, reports, dashboards) where you don't intend to SaveChanges with those entities." },
+      { q: "What is the difference between SaveChanges() and SaveChangesAsync()?", diff: "BASIC", a: "Both persist all tracked entity changes to the database. SaveChangesAsync() is the async version that should always be preferred in ASP.NET Core applications. It's non-blocking — it frees the thread while waiting for the database I/O, allowing the server to handle other requests. Using SaveChanges() (synchronous) in async web apps can cause thread starvation under load." },
+      { q: "How do you configure a string property with a maximum length and make it required?", diff: "BASIC", a: "Two approaches: Data Annotations: [Required][MaxLength(200)] public string Name { get; set; } — or with .NET 10 required keyword. Fluent API: builder.Property(x => x.Name).IsRequired().HasMaxLength(200). Prefer Fluent API as it doesn't pollute your entity with EF-specific attributes and gives you more options (column name, type, etc.)." },
+      { q: "What is the difference between Code-First and Database-First in EF Core?", diff: "BASIC", a: "Code-First: You write C# entity classes and DbContext, then use migrations to create/update the database. This is the recommended modern approach. Database-First: You start with an existing database and use 'dotnet ef dbcontext scaffold' to generate entity classes and DbContext from the schema. Useful when working with legacy databases. EF Core 6+ supports model-first via scaffolding with customizable templates." }
+    ],
+    'iq-intermediate': [
+      { q: "Explain the N+1 query problem and how to solve it in EF Core.", diff: "INTERMEDIATE", a: "N+1 occurs when you load N entities then access a navigation property on each (triggering N additional queries). Example: Loading 100 orders then accessing order.Customer generates 101 queries. Solutions: (1) Eager loading with Include(); (2) Projections with Select() — select only needed fields including related; (3) Split queries with AsSplitQuery() for collection includes; (4) Disable lazy loading in production; (5) Use tools like MiniProfiler to detect it." },
+      { q: "What is the Unit of Work pattern and how does DbContext implement it?", diff: "INTERMEDIATE", a: "Unit of Work maintains a list of objects affected by a business transaction and coordinates writing out changes and resolving concurrency problems. DbContext is EF Core's built-in UoW: it tracks all entity changes (Add, Modify, Delete) during a unit of work (e.g., a web request), then persists them ALL in a single transaction when SaveChanges() is called. This ensures atomicity — all changes succeed or all fail." },
+      { q: "What is DbContext pooling and when should you use it?", diff: "INTERMEDIATE", a: "DbContext pooling (AddDbContextPool<T>) reuses DbContext instances instead of creating new ones per request. EF Core resets the instance state (tracked entities, changes) between uses. Benefits: Reduced GC pressure, faster request handling. Limitations: Can't have constructor parameters that differ per request; instance fields are shared between reuses. Best for high-throughput APIs. Typical pool size is 128-1024. Benchmark: 15-20% throughput improvement in high-load scenarios." },
+      { q: "Explain the difference between IQueryable<T> and IEnumerable<T> in EF Core queries.", diff: "INTERMEDIATE", a: "IQueryable<T>: Query is built as an expression tree and translated to SQL — filtering, sorting, projection happen IN the database. IEnumerable<T>: Query executes immediately, data loaded into memory, then LINQ operates on the in-memory collection. The critical mistake: var query = db.Products.AsEnumerable().Where(x => x.IsActive) loads ALL products from DB then filters in memory. ALWAYS keep queries as IQueryable until you materialize with ToList/FirstOrDefault/etc." },
+      { q: "What is the purpose of IEntityTypeConfiguration<T> and why use it?", diff: "INTERMEDIATE", a: "IEntityTypeConfiguration<T> is an interface for organizing Fluent API configuration into separate classes per entity. Benefits: (1) Single Responsibility — each file configures one entity; (2) No bloated OnModelCreating(); (3) Easy to find configuration; (4) Testable. Register with modelBuilder.ApplyConfigurationsFromAssembly(typeof(MyContext).Assembly) to auto-discover all configurations in the assembly." },
+      { q: "How does EF Core handle many-to-many relationships in modern versions?", diff: "INTERMEDIATE", a: "EF Core 5+ supports implicit many-to-many without a join entity class. Just add collection navigations on both sides: List<Tag> Tags in Post and List<Post> Posts in Tag. EF auto-creates the join table. For payload (extra columns), use explicit join entity: class PostTag { PostId, TagId, CreatedAt } with HasMany().WithMany().UsingEntity<PostTag>(). EF Core 7 improved many-to-many with shared-type entity types." },
+      { q: "What are global query filters and what are their use cases?", diff: "INTERMEDIATE", a: "Global query filters are LINQ predicates applied to all queries for an entity type via HasQueryFilter(). They're transparent to callers — automatically added to every query. Use cases: (1) Soft delete: HasQueryFilter(e => !e.IsDeleted); (2) Multi-tenancy: HasQueryFilter(e => e.TenantId == tenantService.CurrentTenantId); (3) Published-only content. Disable per-query with .IgnoreQueryFilters()." },
+      { q: "Explain optimistic concurrency in EF Core and how to implement it.", diff: "INTERMEDIATE", a: "Optimistic concurrency detects conflicts at write time instead of locking rows. Implementation: Add a [Timestamp] byte[] RowVersion property (SQL Server) or [ConcurrencyCheck] on specific properties. EF adds WHERE RowVersion = @original to UPDATE/DELETE. If 0 rows affected → DbUpdateConcurrencyException thrown. Handle by getting current DB values (GetDatabaseValuesAsync()) and choosing client-wins or db-wins resolution strategy." },
+      { q: "What is the difference between ThenInclude and multiple Include calls?", diff: "INTERMEDIATE", a: "Multiple Include() on the same DbSet loads different top-level navigation paths. ThenInclude() chains off a previous Include() to load deeper-nested navigations. Example: .Include(o => o.Customer).Include(o => o.Items).ThenInclude(i => i.Product) loads Customer and Items+Product. If you call .Include(o => o.Items).Include(o => o.Items.Product), the second Include is a separate path. ThenInclude is required to traverse beyond the first navigation level." }
+    ],
+    'iq-advanced': [
+      { q: "Explain EF Core's change tracking mechanism in detail. How does snapshot tracking work?", diff: "ADVANCED", a: "When EF Core loads an entity, it stores a snapshot of all property values in the Change Tracker. On SaveChanges(), it compares current values against snapshots (DetectChanges()). If any property differs, the entity is marked Modified and an UPDATE is generated. The identity map (one instance per entity per context) ensures the same database row maps to the same C# object instance. This snapshot approach is efficient but has overhead — hence AsNoTracking() for read-only." },
+      { q: "What are compiled queries in EF Core and when are they beneficial?", diff: "ADVANCED", a: "EF.CompileQuery() pre-compiles a LINQ query into a delegate, bypassing expression tree compilation on every call. Normal queries cache the plan after first execution (per context type + query shape). Compiled queries skip this cache lookup entirely — beneficial for: (1) Extremely hot paths called millions of times/sec; (2) Queries that don't benefit from the regular cache (complex expressions). In benchmarks, compiled queries are 2-10x faster than regular cached queries for simple lookups." },
+      { q: "What is the difference between table-per-hierarchy (TPH), table-per-type (TPT), and table-per-concrete-type (TPC) inheritance?", diff: "ADVANCED", a: "TPH (default): All types in single table with a discriminator column. Best performance (no JOINs). Nullable columns for derived-type properties. TPT: Each type gets its own table, base type columns in base table. Clean schema, but requires JOINs for polymorphic queries — slower. TPC (EF Core 7+): Each concrete type gets its own FULL table with all columns (no shared base table). Best for queries on specific types, worst for polymorphic queries. Choose: TPH for performance (default), TPT for clean schema, TPC for type-specific scenarios." },
+      { q: "How do EF Core interceptors work and what are their use cases?", diff: "ADVANCED", a: "Interceptors allow hooking into EF Core operations at various points. Types: IDbCommandInterceptor (modify SQL before execution), IDbConnectionInterceptor (connection events), ISaveChangesInterceptor (before/after SaveChanges). Use cases: Automatic audit logging, query hints injection, connection retry logic, telemetry, soft delete automation, command timeout adjustment. Register via options.AddInterceptors(new MyInterceptor()). Interceptors can be synchronous or asynchronous and can short-circuit operations." },
+      { q: "Explain the EF Core query pipeline and how expression trees are used.", diff: "ADVANCED", a: "When you call db.Products.Where(p => p.IsActive), the lambda is an Expression<Func<Product, bool>> — not executable code but a tree describing the code. EF's query provider traverses this tree, maps it to its internal model (ShapedQuery), applies optimizations (filter pushdown, JOIN reduction), then passes it to the SQL generator which produces parameterized SQL. The compiled result is cached. Expression trees are the foundation of EF Core's ability to translate arbitrary LINQ to any SQL dialect." },
+      { q: "What is the purpose of compiled models and when should you use them?", diff: "ADVANCED", a: "Compiled models (dotnet ef dbcontext optimize) pre-generate C# code for the EF Core model, eliminating model building at startup. Benefits: (1) Dramatic startup time reduction for large models (100+ entities can take seconds to build normally); (2) Works with NativeAOT (.NET 9+). Drawbacks: Need to regenerate on every model change, slightly more complex deployment. Recommended for production apps with large models or serverless/lambda where cold starts matter." }
+    ],
+    'iq-perf': [
+      { q: "What are the most impactful EF Core performance optimizations for high-traffic APIs?", diff: "PERFORMANCE", a: "1. DbContext Pooling (AddDbContextPool) — reuse context instances. 2. AsNoTracking() on all read endpoints. 3. Projections (Select()) instead of loading full entities. 4. Compiled queries (EF.CompileQuery) for hot paths. 5. ExecuteUpdate/ExecuteDelete instead of load-modify-save for bulk ops. 6. AsSplitQuery() for queries with multiple collection includes. 7. Compiled models (dotnet ef dbcontext optimize) for large models. 8. Proper indexes (always check execution plans). 9. Use streaming with ToAsyncEnumerable() for large result sets." },
+      { q: "How do you detect and fix the N+1 query problem in production?", diff: "PERFORMANCE", a: "Detection: (1) Enable SQL logging; (2) Use MiniProfiler — shows query count per request; (3) Application Insights — track query counts; (4) Add ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning)) to detect at dev time. Fixes: Eager load with Include(), project with Select() to flatten needed data, use batch loading with explicit loading. Prevention: Code review, write integration tests that assert max query count per scenario." },
+      { q: "Explain the performance difference between projections and Include() for loading related data.", diff: "PERFORMANCE", a: "Include() loads full entity objects with all columns, tracked in memory. Select() (projection) generates a SELECT with only the columns you specify, returns anonymous types or DTOs, no tracking overhead. Projection is almost always faster: less data transferred, no materialization of unused columns, no snapshot storage. Rule of thumb: Use Include() when you need to modify the loaded data. Use Select() for all read-only scenarios." },
+      { q: "What is AsSplitQuery() and when should you use it?", diff: "PERFORMANCE", a: "By default, Include() with collections creates a Cartesian product — a single JOIN query that multiplies rows. AsSplitQuery() executes separate queries for each collection Include(). Use when: loading multiple collection navigations (causes data explosion in single query), very large result sets. Don't use when: small data sets (extra round trips), when atomicity is needed. Configure globally: UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)." }
+    ],
+    'iq-scenario': [
+      { q: "Scenario: Your API endpoint is timing out. You suspect EF Core. How do you diagnose and fix it?", diff: "SCENARIO", a: "Step 1: Enable SQL logging (LogTo + LogLevel.Information) to see generated SQL. Step 2: Look for N+1 patterns (many similar queries per request). Step 3: Add MiniProfiler to see query count + duration per request. Step 4: Copy slow SQL to SSMS/pgAdmin, run EXPLAIN ANALYZE. Step 5: Check for missing indexes (table scans). Step 6: Look for Cartesian product explosions (Include on collections). Step 7: Check if entities are fully loaded when projections would suffice. Step 8: Verify AsNoTracking() is used for read-only operations." },
+      { q: "Scenario: You need to update 100,000 rows based on a condition. What's the best approach?", diff: "SCENARIO", a: "Never use: Load all 100k entities → modify → SaveChanges() — generates 100k UPDATE statements. Best approaches: (1) EF Core 7+ ExecuteUpdate: db.Products.Where(pred).ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, 'Inactive')) — single SQL UPDATE. (2) For complex logic: raw SQL via ExecuteSqlRawAsync(). (3) EFCore.BulkExtensions for bulk operations with full entity support. The ExecuteUpdate approach is the cleanest for EF Core 7+ and bypasses the change tracker entirely." },
+      { q: "Scenario: You're building a multi-tenant SaaS. How would you implement data isolation with EF Core?", diff: "SCENARIO", a: "Approach 1 — Global Query Filter (Row-level): Add TenantId to all entities. Use HasQueryFilter(e => e.TenantId == _tenantService.CurrentTenantId) in DbContext. Inject ICurrentTenantService into DbContext. Approach 2 — Schema isolation: Different schema per tenant, use dynamic connection string. Approach 3 — Database isolation: Separate database per tenant with dynamic DbContextOptions. Always combine with validation in SaveChanges to prevent cross-tenant writes." },
+      { q: "Scenario: Implement optimistic concurrency for a collaborative document editor. What would you do if two users edit the same document simultaneously?", diff: "SCENARIO", a: "1. Add [Timestamp] RowVersion property to Document entity. 2. When User A saves: WHERE Id=@id AND RowVersion=@originalVersion. If version matches → success, RowVersion incremented. 3. When User B saves: WHERE Id=@id AND RowVersion=@originalVersion — but version changed → 0 rows affected → DbUpdateConcurrencyException. 4. Catch exception, call GetDatabaseValuesAsync() to get current state. 5. Show conflict UI: show User B's changes vs current DB state, let them merge/overwrite. 6. Update OriginalValues with DB values and retry." }
+    ],
+    'iq-arch': [
+      { q: "When would you choose EF Core over Dapper, and vice versa?", diff: "ARCHITECTURAL", a: "Choose EF Core when: building domain-rich applications (DDD), need migrations, complex object graphs, want productivity and type safety, medium complexity queries. Choose Dapper when: extreme read performance needed (microservices, high-volume reporting), full SQL control required, working with complex legacy schemas that don't map well to ORM, simple CRUD with no relationships. Hybrid: Use EF Core for writes (complex transactions, domain model) and Dapper for complex read queries (CQRS)." },
+      { q: "Should you use the Repository pattern on top of EF Core? Why or why not?", diff: "ARCHITECTURAL", a: "Controversial topic. Arguments against (popular in .NET community): DbContext IS a UoW/repository, adding a layer adds complexity and often just wraps DbContext methods, makes it harder to use EF Core features like Include(). Arguments for: Testability without a real database, hide EF Core dependency from domain layer, swap persistence in future. Pragmatic answer: For small-medium apps, use DbContext directly in services. For large apps with domain isolation requirements (DDD), use thin repository interfaces but don't over-abstract — allow access to IQueryable when needed." },
+      { q: "How would you implement CQRS with EF Core?", diff: "ARCHITECTURAL", a: "Command side (writes): Use EF Core with full change tracking, domain entities, validation, business logic. Query side (reads): Separate DbContext (ReadOnlyDbContext) with AsNoTracking() globally set. Use projections/DTOs, possibly Dapper for complex reports. Infrastructure: Separate read model tables or views optimized for queries. Benefits: Optimized read path, separate scaling, cleaner code. Implementation: MediatR for commands/queries, separate handlers, possibly read replica database for the query context." }
+    ],
+    'iq-tricky': [
+      { q: "What happens if you use await on two queries on the same DbContext simultaneously?", diff: "TRICKY", a: "DbContext is NOT thread-safe. Two concurrent async operations on the same instance will throw: 'A second operation was started on this context before a previous operation completed.' This is a common mistake with parallel LINQ or Parallel.ForEach. Solution: Never share DbContext across threads. For parallel operations, create a new context scope per operation using IDbContextFactory<T> (AddDbContextFactory in DI)." },
+      { q: "Why does EF Core sometimes generate 'wrong' SQL, and how do you fix it?", diff: "TRICKY", a: "Common causes: (1) Client evaluation — LINQ methods EF can't translate fall back to in-memory (check for warnings). (2) Complex C# in predicates — use simple expressions EF understands. (3) AsEnumerable() before Where() — forces client eval. Fixes: Enable strict query translation (UseQueryTrackingBehavior, throw on client evaluation warnings). Use raw SQL for untranslatable queries. Simplify LINQ expressions. Always check generated SQL in development." },
+      { q: "What's the danger of using 'var query = db.Products;' without materialization?", diff: "TRICKY", a: "IQueryable<T> is lazy — the query is not executed until materialized (ToList, FirstOrDefault, etc.). The danger: (1) If you pass it out of scope/method after DbContext is disposed, you'll get 'Cannot access a disposed context' when it eventually executes; (2) Each time you enumerate it, it hits the database again; (3) The execution context (connection, transaction) may no longer be valid. Always materialize queries within the DbContext scope." },
+      { q: "Does calling Add() on a parent entity also add all its children?", diff: "TRICKY", a: "Yes — EF Core tracks the entire object graph. If you call db.Add(order) and Order has a new Customer and new OrderItems, EF marks ALL of them as Added, generating INSERTs for all. This is called 'graph tracking.' If the children already exist in the DB (they have PK values), use Attach() and explicitly set states. This behavior surprises many developers who accidentally insert duplicate related entities." }
+    ],
+    'iq-net10': [
+      { q: "What are the new features in EF Core 8 and 9 that you should know?", diff: ".NET 10", a: "EF Core 8: Complex types (value objects without identity), primitive collection support, FrozenDictionary for immutable models, improved JSON columns querying, HierarchyId support, DateOnly/TimeOnly support, Sentinel values for defaults. EF Core 9: AOT compilation improvements, enhanced query capabilities, NativeAOT support with compiled models, improved LINQ translation, Azure Cosmos DB for NoSQL improvements, ExecuteUpdate/Delete enhancements, improved model building performance." },
+      { q: "How does EF Core support NativeAOT in .NET 9/10?", diff: ".NET 10", a: "NativeAOT compiles to native code ahead of time, eliminating the JIT. EF Core 9+ supports this with: (1) Compiled models (required — no runtime model building); (2) Pre-generated entity materializers; (3) Interceptors and query filters need to be compatible. Limitations: No lazy loading proxies (use eager/explicit loading), some dynamic LINQ operations restricted, requires 'dotnet ef dbcontext optimize' to generate all source. Best for: Azure Functions, serverless, containers where cold start matters." }
+    ],
+    'iq-migration': [
+      { q: "How do you safely run migrations in production?", diff: "MIGRATIONS", a: "Never use Database.MigrateAsync() in production code (it runs on every startup, dangerous). Recommended: (1) Generate idempotent SQL script: 'dotnet ef migrations script --idempotent --output migrations.sql'; (2) Have DBA review the script; (3) Apply during maintenance window or via CI/CD deployment pipeline; (4) Use migration bundles ('dotnet ef migrations bundle') for self-contained executable; (5) Test migration Up AND Down on staging with production data copy first. Track applied migrations — the __EFMigrationsHistory table does this automatically." },
+      { q: "What's the difference between adding a migration and applying it?", diff: "MIGRATIONS", a: "'dotnet ef migrations add' generates the C# migration class describing what changed in the model — it does NOT touch the database. 'dotnet ef database update' executes the pending migrations against the actual database. This separation is intentional: you can review the generated migration code, modify it (add custom SQL, seed data), then apply. Always inspect generated migrations before applying — EF Core sometimes generates unexpected changes (column type changes can cause data loss)." }
+    ],
+    'iq-testing': [
+      { q: "What's the best approach for integration testing EF Core applications?", diff: "TESTING", a: "Gold standard: Use Testcontainers (Docker) to spin up a real database for tests. Each test class gets a fresh database via EnsureCreated() or migrations. Use WebApplicationFactory for full integration tests. Alternative: SQLite in-memory for faster tests that exercise most SQL behavior. Avoid: EF In-Memory provider for integration tests — it doesn't behave like a real database (no transactions, no SQL constraints, no LINQ limitations). Use in-memory only for pure unit tests of logic that happens to use DbContext." },
+      { q: "How do you write a unit test that uses EF Core without hitting a real database?", diff: "TESTING", a: "Option 1 — SQLite in-memory: services.AddDbContext<AppDbContext>(o => o.UseSqlite('Data Source=:memory:')); share connection so database persists. Option 2 — EF In-Memory (for simple cases): UseInMemoryDatabase('TestDb') — not a real SQL database, won't catch SQL-specific issues. Option 3 — Mock repositories: Abstract data access behind IRepository interfaces and mock with Moq/NSubstitute. Option 4 — Abstract DbSet with a List: Effective for unit testing query logic." }
+    ]
+  };
+  return allQA[topicId] || allQA['iq-basic'];
+}
+
+function renderInterviewQuestions(questions, topicId) {
+  const tagColors = {
+    'BASIC': '#10b981',
+    'INTERMEDIATE': '#f59e0b',
+    'ADVANCED': '#ef4444',
+    'PERFORMANCE': '#a78bfa',
+    'SCENARIO': '#06b6d4',
+    'ARCHITECTURAL': '#7c3aed',
+    'TRICKY': '#f97316',
+    '.NET 10': '#00e5ff',
+    'MIGRATIONS': '#8b5cf6',
+    'TESTING': '#0d9488'
+  };
+
+  const qs = questions.map((q, i) => {
+    const color = tagColors[q.diff] || '#64748b';
+    return `
+      <div class="qa-item" id="qa_${topicId}_${i}">
+        <div class="qa-question" onclick="toggleQA('qa_${topicId}_${i}')">
+          <div class="qa-q-icon" style="background:${color}22;color:${color}">Q</div>
+          <div class="qa-q-text">${q.q}</div>
+          <span class="tag" style="background:${color}22;color:${color};border-color:${color}44;flex-shrink:0">${q.diff}</span>
+          <span class="qa-chevron">▼</span>
+        </div>
+        <div class="qa-answer">
+          <div class="qa-answer-content">${q.a}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="section-title">🎤 ${questions.length} Interview Questions</div>
+    ${qs}
+  `;
+}
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let activeChapterId = null;
+let activeTopicId = null;
+let activeTab = null;
+let visitedChapters = new Set();
+
+// ═══════════════════════════════════════════════
+// RENDER LEFT NAV
+// ═══════════════════════════════════════════════
+function renderLeftNav() {
+  const nav = document.getElementById('leftNav');
+  nav.innerHTML = CHAPTERS.map(ch => `
+    <div class="chapter-item ${activeChapterId === ch.id ? 'active' : ''}" onclick="selectChapter('${ch.id}')">
+      <div class="ch-icon" style="background:${ch.bgColor}">${ch.icon}</div>
+      <div class="ch-info">
+        <div class="ch-title">${ch.title}</div>
+        <div class="ch-count">${ch.topics.length} topics</div>
+      </div>
+      <span class="ch-badge" style="background:${ch.levelColor}22;color:${ch.levelColor};border:1px solid ${ch.levelColor}44">${ch.level}</span>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// SELECT CHAPTER
+// ═══════════════════════════════════════════════
+function selectChapter(id) {
+  activeChapterId = id;
+  activeTopicId = null;
+  visitedChapters.add(id);
+  updateProgress();
+  renderLeftNav();
+
+  const chapter = CHAPTERS.find(c => c.id === id);
+  if (!chapter) return;
+
+  const middle = document.getElementById('middlePanel');
+  middle.innerHTML = `
+    <div class="chapter-header">
+      <div class="chapter-eyebrow">Chapter ${CHAPTERS.indexOf(chapter) + 1} of ${CHAPTERS.length}</div>
+      <div class="chapter-title">${chapter.icon} ${chapter.title}</div>
+      <p class="chapter-desc">${chapter.desc}</p>
+      <div class="chapter-meta">
+        <div class="meta-chip"><span class="dot" style="background:${chapter.levelColor}"></span>${chapter.level}</div>
+        <div class="meta-chip">📚 ${chapter.topics.length} Topics</div>
+      </div>
+    </div>
+    <div class="topics-grid">
+      ${chapter.topics.map(topic => `
+        <div class="topic-card ${activeTopicId === topic.id ? 'active' : ''}" onclick="selectTopic('${chapter.id}', '${topic.id}')">
+          <span class="topic-card-icon">${topic.icon}</span>
+          <div class="topic-card-title">${topic.title}</div>
+          <div class="topic-card-desc">${topic.desc}</div>
+          <div class="topic-card-tags">
+            ${topic.tags.map(t => `<span class="tag ${t}">${t}</span>`).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  closeRight();
+}
+
+// ═══════════════════════════════════════════════
+// SELECT TOPIC
+// ═══════════════════════════════════════════════
+function selectTopic(chapterId, topicId) {
+  activeChapterId = chapterId;
+  activeTopicId = topicId;
+
+  // Update topic card active state
+  document.querySelectorAll('.topic-card').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+
+  const chapter = CHAPTERS.find(c => c.id === chapterId);
+  const topic = chapter?.topics.find(t => t.id === topicId);
+  if (!topic) return;
+
+  const panel = document.getElementById('rightPanel');
+  panel.classList.remove('hidden');
+
+  document.getElementById('rightTitle').textContent = topic.title;
+
+  // Render tabs
+  const tabs = topic.tabs || ['Overview'];
+  const tabsHtml = tabs.map(tab => `
+    <div class="right-tab ${tab === tabs[0] ? 'active' : ''}" onclick="selectTab(this, '${chapterId}', '${topicId}', '${tab}')">${tab}</div>
+  `).join('');
+  document.getElementById('rightTabs').innerHTML = tabsHtml;
+
+  // Render first tab
+  activeTab = tabs[0];
+  renderTabContent(chapterId, topicId, tabs[0]);
+}
+
+// ═══════════════════════════════════════════════
+// SELECT TAB
+// ═══════════════════════════════════════════════
+function selectTab(el, chapterId, topicId, tabName) {
+  document.querySelectorAll('.right-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  activeTab = tabName;
+  renderTabContent(chapterId, topicId, tabName);
+}
+
+function renderTabContent(chapterId, topicId, tabName) {
+  const content = document.getElementById('rightContent');
+  const html = getTopicContent(chapterId, topicId, tabName);
+  content.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════
+// CLOSE RIGHT
+// ═══════════════════════════════════════════════
+function closeRight() {
+  document.getElementById('rightPanel').classList.add('hidden');
+  activeTopicId = null;
+  document.querySelectorAll('.topic-card').forEach(el => el.classList.remove('active'));
+}
+
+// ═══════════════════════════════════════════════
+// TOGGLE Q&A
+// ═══════════════════════════════════════════════
+function toggleQA(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════
+// COPY CODE
+// ═══════════════════════════════════════════════
+function copyCode(btn) {
+  const code = btn.closest('.code-block').querySelector('.code-body');
+  const text = code.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.style.color = '#10b981';
+    setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════════
+function updateProgress() {
+  const pct = Math.round((visitedChapters.size / CHAPTERS.length) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${visitedChapters.size} / ${CHAPTERS.length} chapters`;
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+renderLeftNav();
+</script>
+</body>
+</html>

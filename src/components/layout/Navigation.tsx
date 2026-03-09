@@ -17,7 +17,9 @@ import {
   FolderOpen,
   Target,
   BookOpenText,
-  Shield
+  Shield,
+  ScrollText,
+  BriefcaseBusiness
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -66,11 +68,16 @@ export const Navigation = () => {
   const isBlogActive =
     location.pathname.startsWith("/blog") ||
     location.pathname.startsWith("/blogs") ||
+    location.pathname.startsWith("/cheatsheets") ||
     location.pathname.startsWith("/tech") ||
+    location.pathname === "/csharp-mastery" ||
+    location.pathname === "/efcore-mastery" ||
+    location.pathname === "/dotnet-mastery" ||
     location.pathname === "/dotnet-mastery-toc" ||
     location.pathname === "/design-patterns-guide" ||
     location.pathname === "/solid-principles-guide" ||
-    location.pathname === "/blogs/solid-principles";
+    location.pathname === "/blogs/solid-principles" ||
+    location.pathname === "/cheatsheets/solid-principles";
   const isArticlesActive = location.pathname.startsWith("/articles");
   const isScripturesActive = location.pathname.startsWith("/scriptures");
   const isCoursesActive = location.pathname === "/courses" || location.pathname.startsWith("/courses/");
@@ -151,6 +158,23 @@ export const Navigation = () => {
               </Link>
 
               <Link
+                to="/cheatsheets"
+                className={cn(
+                  desktopNavItemClass,
+                  isBlogActive
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                <span className="relative flex items-center gap-2">
+                  <ScrollText className={desktopNavIconClass} />
+                  Cheatsheets
+                </span>
+              </Link>
+
+              <Link
                 to="/articles"
                 className={cn(
                   desktopNavItemClass,
@@ -168,23 +192,6 @@ export const Navigation = () => {
               </Link>
 
               <Link
-                to="/blogs"
-                className={cn(
-                  desktopNavItemClass,
-                  isBlogActive
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                <span className="relative flex items-center gap-2">
-                  <FileText className={desktopNavIconClass} />
-                  Blogs
-                </span>
-              </Link>
-
-              <Link
                 to="/case-studies"
                 className={cn(
                   desktopNavItemClass,
@@ -196,7 +203,7 @@ export const Navigation = () => {
                 <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
                 <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                 <span className="relative flex items-center gap-2">
-                  <FileText className={desktopNavIconClass} />
+                  <BriefcaseBusiness className={desktopNavIconClass} />
                   Case Studies
                 </span>
               </Link>
@@ -424,6 +431,25 @@ export const Navigation = () => {
                 transition={{ delay: 0.12 }}
               >
                 <Link
+                  to="/cheatsheets"
+                  className={cn(
+                    mobileNavItemClass,
+                    isBlogActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <ScrollText className={mobileNavIconClass} />
+                  Cheatsheets
+                </Link>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.135 }}
+              >
+                <Link
                   to="/articles"
                   className={cn(
                     mobileNavItemClass,
@@ -434,25 +460,6 @@ export const Navigation = () => {
                 >
                   <Newspaper className={mobileNavIconClass} />
                   Articles
-                </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.135 }}
-              >
-                <Link
-                  to="/blogs"
-                  className={cn(
-                    mobileNavItemClass,
-                    isBlogActive
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <FileText className={mobileNavIconClass} />
-                  Blogs
                 </Link>
               </motion.div>
 
@@ -489,7 +496,7 @@ export const Navigation = () => {
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  <FileText className={mobileNavIconClass} />
+                  <BriefcaseBusiness className={mobileNavIconClass} />
                   Case Studies
                 </Link>
               </motion.div>
