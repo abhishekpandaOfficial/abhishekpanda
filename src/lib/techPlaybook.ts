@@ -108,7 +108,7 @@ export const TECH_PLAYBOOK_ITEMS: TechPlaybookItem[] = [
       {
         title: ".NET API Performance Playbook",
         summary: "Practical bottleneck detection and optimization path for high-throughput APIs.",
-        href: "/blogs",
+        href: "/cheatsheets",
         tag: "Recent Tech Blogs (Unboxing)",
       },
     ],
@@ -130,7 +130,7 @@ export const TECH_PLAYBOOK_ITEMS: TechPlaybookItem[] = [
       {
         title: "Microservices Architecture 2026: Practical Patterns",
         summary: "Real-world design guidance for reliable distributed systems.",
-        href: "/blogs",
+        href: "/cheatsheets",
         tag: "Microservices Blogs",
       },
       {
@@ -202,7 +202,7 @@ export const TECH_PLAYBOOK_ITEMS: TechPlaybookItem[] = [
       {
         title: "Argo CD GitOps Delivery Blueprint",
         summary: "Practical GitOps patterns for reliable cluster releases.",
-        href: "/blogs",
+        href: "/cheatsheets",
         tag: "DevOps Blogs",
       },
     ],
@@ -224,7 +224,7 @@ export const TECH_PLAYBOOK_ITEMS: TechPlaybookItem[] = [
       {
         title: "Design Patterns for .NET Teams",
         summary: "Hands-on usage guide with practical decision points.",
-        href: "/blogs",
+        href: "/cheatsheets",
         tag: ".NET Blogs",
       },
     ],
@@ -268,7 +268,7 @@ export const TECH_PLAYBOOK_ITEMS: TechPlaybookItem[] = [
       {
         title: "Microservices Architecture Blueprint",
         summary: "A practical architecture map from MVP to enterprise scale.",
-        href: "/blogs",
+        href: "/cheatsheets",
         tag: "Microservices Blogs",
       },
     ],

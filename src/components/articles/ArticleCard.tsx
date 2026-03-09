@@ -24,7 +24,7 @@ const isRecentArticle = (value: string) => {
 export default function ArticleCard({ article, featured = false, variant }: ArticleCardProps) {
   const cardVariant = variant ?? (featured ? "spotlight" : "grid");
   const isSpotlight = cardVariant === "spotlight";
-  const visibleTags = article.tags.slice(0, isSpotlight ? 3 : 2);
+  const visibleTags = article.tags.slice(0, isSpotlight ? 5 : 4);
   const isNew = isRecentArticle(article.publishedAt);
 
   return (

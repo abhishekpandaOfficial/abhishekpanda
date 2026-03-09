@@ -42,18 +42,18 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     },
   },
   {
-    pattern: "/blogs",
+    pattern: "/cheatsheets",
     data: {
-      title: "All Blogs | Abhishek Panda",
+      title: "All Cheatsheets | Abhishek Panda",
       description:
         "Browse all blog series and all website blog cards from Abhishek Panda in one place.",
       keywords: "Abhishek Panda blogs, mastery series, engineering blog hub, blog series cards",
     },
   },
   {
-    pattern: "/blogs/:seriesSlug",
+    pattern: "/cheatsheets/:seriesSlug",
     data: {
-      title: "Blog Series | Abhishek Panda",
+      title: "Cheatsheet Series | Abhishek Panda",
       description:
         "Open a mastery series TOC with modules, chapters, topics, and related website blog posts.",
     },
@@ -502,7 +502,7 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
     });
   }
 
-  if (pathname === "/blog" || pathname === "/blogs") {
+  if (pathname === "/blog" || pathname === "/blogs" || pathname === "/cheatsheets") {
     graph.push({
       "@type": "Blog",
       name: "Abhishek Panda Blog",

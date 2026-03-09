@@ -111,7 +111,7 @@ export default function CaseStudyDetail({ caseStudy }: CaseStudyDetailProps) {
     {
       title: "Blogs",
       description: "Browse chapter-style blog series and topic tracks.",
-      to: "/blogs",
+      to: "/cheatsheets",
       icon: FileText,
     },
   ];

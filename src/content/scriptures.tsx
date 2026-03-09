@@ -313,7 +313,7 @@ export const SCRIPTURE_HOME_LINKS = [
   },
   {
     title: "Blogs",
-    to: "/blogs",
+    to: "/cheatsheets",
     description: "Browse all website blog series.",
   },
 ];

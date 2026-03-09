@@ -49,7 +49,7 @@ export default function Articles() {
 
     return Array.from(counts.entries())
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-      .slice(0, 8)
+      .slice(0, 14)
       .map(([tag, count]) => ({ tag, count }));
   }, []);
 
@@ -141,7 +141,7 @@ export default function Articles() {
                         Clean article cards with tighter alignment.
                       </h1>
                       <p className="editorial-copy mt-4 max-w-3xl text-base text-muted-foreground md:text-lg">
-                        Browse the archive with less clutter, stronger spacing, and cards that stay balanced at every screen size.
+                        Browse the archive with stronger tech-stack tagging, faster filtering, and cards that stay balanced at every screen size.
                       </p>
 
                       <div className="mt-6 flex flex-wrap gap-3">

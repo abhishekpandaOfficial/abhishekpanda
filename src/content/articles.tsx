@@ -62,7 +62,7 @@ export type ArticleRecord = {
   heroImage: string;
 };
 
-const MAX_ARTICLE_TAGS = 4;
+const MAX_ARTICLE_TAGS = 7;
 const MAX_ARTICLE_LOGOS = 3;
 const MAX_CASE_STUDY_LOGOS = 8;
 const MAX_ARTICLE_KEY_POINTS = 3;
@@ -347,7 +347,7 @@ const BLOG_LINKS_BY_TAG: Array<{
       },
       {
         title: "Blog Aggregator",
-        to: "/blogs",
+        to: "/cheatsheets",
         description: "Official writing feed across website-linked publishing channels.",
       },
     ],
@@ -679,6 +679,15 @@ const deriveTags = (html: string, text: string, title: string) => {
     detected.push("Countermeasures");
   }
   if ((solidScore === 0 && dotnetScore === 0) && /\bcloud|azure|aws\b/.test(lower)) detected.push("Cloud");
+  if (/\bazure|aks|azure devops|app service|cosmos db\b/.test(lower)) detected.push("Azure");
+  if (/\baws|amazon web services|lambda|eks|ecs|dynamodb|s3\b/.test(lower)) detected.push("AWS");
+  if (/\bangular|rxjs|ngrx\b/.test(lower)) detected.push("Angular");
+  if (/\breact|next\.?js\b/.test(lower)) detected.push("React");
+  if (/\btypescript|javascript\b/.test(lower)) detected.push("TypeScript");
+  if (/\bdocker|containerization\b/.test(lower)) detected.push("Docker");
+  if (/\bkubernetes|k8s\b/.test(lower)) detected.push("Kubernetes");
+  if (/\bpostgres|postgresql|sql\b/.test(lower)) detected.push("PostgreSQL");
+  if (/\bkafka|event streaming|stream processing\b/.test(lower)) detected.push("Kafka");
   if (microservicesScore >= 1 && /\bdocker|kubernetes|dapr|yarp|cloud-native\b/.test(lower)) detected.push("Cloud Native");
   if ((solidScore === 0 && dotnetScore === 0) && /\bai|ml|llm|agentic\b/.test(lower)) detected.push("AI");
 
@@ -740,7 +749,7 @@ const deriveRelatedBlogs = (tags: string[]) => {
     },
     {
       title: "Blog Aggregator",
-      to: "/blogs",
+      to: "/cheatsheets",
       description: "Website-linked writing and article discovery.",
     },
   ];
@@ -830,7 +839,7 @@ export const ARTICLES_HOME_LINKS: ArticleLink[] = [
   },
   {
     title: "Blog Aggregator",
-    to: "/blogs",
+    to: "/cheatsheets",
     description: "Cross-platform writing surfaced through this website.",
   },
 ];

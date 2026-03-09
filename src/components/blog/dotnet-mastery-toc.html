@@ -47,67 +47,6 @@
     overflow-x: hidden;
   }
 
-  /* ─── HEADER ─────────────────────────────────────── */
-  .site-header {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 56px;
-    background: rgba(10,12,16,0.92);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    z-index: 100;
-  }
-
-  .header-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: var(--text);
-  }
-
-  .logo-dot {
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, var(--accent), var(--blue));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--bg);
-  }
-
-  .logo-text {
-    font-family: var(--font-display);
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-  }
-
-  .logo-text span { color: var(--accent); }
-
-  .header-tag {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text3);
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 3px 10px;
-    border-radius: 20px;
-  }
-
-  .header-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
   .header-badge {
     font-family: var(--font-mono);
     font-size: 10px;
@@ -124,14 +63,14 @@
     display: grid;
     grid-template-columns: var(--sidebar-w) 1fr var(--right-w);
     min-height: 100vh;
-    padding-top: 56px;
+    padding-top: 0;
   }
 
   /* ─── LEFT SIDEBAR ───────────────────────────────── */
   .left-sidebar {
     position: sticky;
-    top: 56px;
-    height: calc(100vh - 56px);
+    top: 0;
+    height: 100vh;
     overflow-y: auto;
     border-right: 1px solid var(--border);
     background: var(--bg2);
@@ -185,6 +124,14 @@
     justify-content: center;
     font-size: 11px;
     flex-shrink: 0;
+  }
+
+  .nav-icon img,
+  .nav-icon svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    object-fit: contain;
   }
 
   .nav-num {
@@ -528,6 +475,16 @@
     border-left-color: var(--border2);
   }
 
+  .chapter-item.is-selected {
+    background: color-mix(in srgb, var(--bg3) 82%, var(--accent) 18%);
+    border-left-color: var(--accent);
+  }
+
+  .chapter-item.is-selected .chapter-title,
+  .chapter-item.is-selected .chapter-num {
+    color: var(--text);
+  }
+
   .chapter-num {
     font-family: var(--font-mono);
     font-size: 10px;
@@ -572,6 +529,11 @@
   .sub-item:hover {
     background: rgba(96,165,250,0.08);
     color: var(--text2);
+  }
+
+  .sub-item.active {
+    background: rgba(0,212,255,0.1);
+    color: var(--text);
   }
 
   .sub-item:hover::before {
@@ -670,7 +632,7 @@
   @media (max-width: 1200px) {
     :root { --sidebar-w: 200px; --right-w: 220px; }
     .main-content { padding: 32px 32px; }
-    .series-cards-grid { grid-template-columns: repeat(2, 1fr); }
+    .series-cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .series-grid-section { padding: 24px; }
   }
 
@@ -687,14 +649,10 @@
     :root { --sidebar-w: 0px; }
     .page-wrapper { grid-template-columns: 1fr; }
     .left-sidebar { display: none; }
-    .mobile-menu-btn { display: flex; }
+    .mobile-menu-btn { display: flex; position: fixed; top: 14px; left: 14px; z-index: 101; }
     .stat-divider { display: none; }
-    .header-tag { display: none; }
-    /* header */
-    .site-header { padding: 0 14px; }
-    .logo-text { font-size: 13px; }
     /* main */
-    .main-content { padding: 20px 16px; }
+    .main-content { padding: 64px 16px 20px; }
     /* hero */
     .series-hero { padding: 22px 18px; }
     .hero-title { font-size: 25px; letter-spacing: -0.5px; }
@@ -704,7 +662,7 @@
     /* series overview cards */
     .series-grid-section { padding: 20px 16px; }
     .section-title { font-size: 16px; }
-    .series-cards-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .series-cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .series-card { padding: 13px; }
     .sc-name { font-size: 12px; }
     .sc-icon { width: 30px; height: 30px; font-size: 15px; }
@@ -741,7 +699,7 @@
 
   /* ── 600px: tighter adjustments ─────────────────── */
   @media (max-width: 600px) {
-    .series-cards-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .series-cards-grid { grid-template-columns: 1fr; gap: 10px; }
     .module-header { gap: 8px; }
     .module-title { font-size: 14px; }
     .hero-title { font-size: 22px; }
@@ -792,9 +750,8 @@
 
   /* ── 360px: very small phones ────────────────────── */
   @media (max-width: 360px) {
-    .site-header { padding: 0 10px; }
-    .logo-text { display: none; }
-    .main-content { padding: 12px 10px; }
+    .mobile-menu-btn { top: 10px; left: 10px; }
+    .main-content { padding: 56px 10px 12px; }
     .series-hero { padding: 14px 12px; }
     .hero-title { font-size: 18px; }
     .hero-sub { font-size: 12px; }
@@ -1109,8 +1066,9 @@
 
   .series-cards-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    align-items: stretch;
   }
 
   .series-card {
@@ -1408,7 +1366,8 @@
   }
   .sc-name {
     font-family: var(--font-display); font-size: 13.5px; font-weight: 700;
-    color: var(--text); line-height: 1.3; margin: 0 0 8px 0;
+    color: var(--text); line-height: 1.35; margin: 0 0 8px 0;
+    white-space: normal; overflow: visible; text-overflow: unset;
   }
   .sc-footer { margin-top: auto; }
   .sc-meta-row { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; }
@@ -1529,24 +1488,9 @@
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="site-header">
-  <a class="header-logo" href="#">
-    <div class="logo-dot">C#</div>
-    <span class="logo-text">abhishek<span>panda</span>.com</span>
-  </a>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <span class="header-tag">Blog · Technical Series</span>
-    <span class="header-tag" style="color:var(--accent);">.NET Mastery</span>
-  </div>
-  <div class="header-meta">
-    <span class="header-badge">Updated March 2026</span>
-    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle navigation">☰</button>
-  </div>
-</header>
-
 <!-- Mobile overlay -->
 <div class="mobile-sidebar-overlay" id="mobileOverlay" onclick="toggleMobileSidebar()"></div>
+<button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle navigation">☰</button>
 
 <!-- PAGE WRAPPER -->
 <div class="page-wrapper">
@@ -1556,73 +1500,71 @@
     <div class="sidebar-section-label">Blog Series</div>
 
     <a class="sidebar-nav-item active" href="#module-1" onclick="scrollToModule('module-1',this)">
-      <span class="nav-icon" style="background:rgba(0,212,255,0.15);">⚙️</span>
+      <span class="nav-icon" style="background:rgba(0,212,255,0.15);">
+        <svg viewBox="0 0 128 128" aria-hidden="true"><path fill="#9B4F96" d="M115.4 30.7L67.1 2.9c-.8-.5-1.9-.7-3.1-.7-1.2 0-2.3.3-3.1.7l-48 27.9c-1.7 1-2.9 3.5-2.9 5.4v55.7c0 1.1.2 2.4 1 3.5l106.8-62c-.6-1.2-1.5-2.1-2.4-2.7z"/><path fill="#68217A" d="M10.7 95.3c.5.8 1.2 1.5 1.9 1.9l48.2 27.9c.8.5 1.9.7 3.1.7 1.2 0 2.3-.3 3.1-.7l48-27.9c1.7-1 2.9-3.5 2.9-5.4V36.1c0-.9-.1-1.9-.6-2.8l-106.6 62z"/><path fill="#fff" d="M85.3 76.1C81.1 83.5 73.1 88.5 64 88.5c-13.5 0-24.5-11-24.5-24.5s11-24.5 24.5-24.5c9.1 0 17.1 5 21.3 12.5l13-7.5c-6.8-11.9-19.6-20-34.3-20-21.8 0-39.5 17.7-39.5 39.5s17.7 39.5 39.5 39.5c14.6 0 27.4-8 34.2-19.8l-12.9-7.6zM97 66.2l.9-4.3h-4.2v-4.7h5.1L100 51h4.9l-1.2 6.1h3.8l1.2-6.1h4.8l-1.2 6.1h2.4v4.7h-3.3l-.9 4.3h4.2v4.7h-5.1l-1.2 6h-4.9l1.2-6h-3.8l-1.2 6h-4.8l1.2-6h-2.4v-4.7H97zm4.8 0h3.8l.9-4.3h-3.8l-.9 4.3z"/></svg>
+      </span>
       <span style="flex:1;font-size:11.5px">C# Mastery</span>
       <span class="nav-num">34ch</span>
     </a>
     <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" style="width:0%;background:var(--accent)"></div></div>
 
     <a class="sidebar-nav-item" href="#module-2" onclick="scrollToModule('module-2',this)">
-      <span class="nav-icon" style="background:rgba(77,159,255,0.15);">🌐</span>
+      <span class="nav-icon" style="background:rgba(77,159,255,0.15);"><img src="https://cdn.simpleicons.org/dotnet/4d9fff" alt=".NET"></span>
       <span style="flex:1;font-size:11.5px">.NET Core API</span>
       <span class="nav-num">10ch</span>
     </a>
     <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" style="width:0%;background:var(--blue)"></div></div>
 
     <a class="sidebar-nav-item" href="#module-3" onclick="scrollToModule('module-3',this)">
-      <span class="nav-icon" style="background:rgba(0,229,160,0.15);">🗄️</span>
+      <span class="nav-icon" style="background:rgba(0,229,160,0.15);"><img src="https://cdn.simpleicons.org/postgresql/00e5a0" alt="PostgreSQL"></span>
       <span style="flex:1;font-size:11.5px">EF Core & PgSQL</span>
       <span class="nav-num">15ch</span>
     </a>
     <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" style="width:0%;background:var(--green)"></div></div>
 
     <a class="sidebar-nav-item" href="#module-4" onclick="scrollToModule('module-4',this)">
-      <span class="nav-icon" style="background:rgba(255,170,68,0.15);">🔌</span>
+      <span class="nav-icon" style="background:rgba(255,170,68,0.15);"><img src="https://cdn.simpleicons.org/graphql/ffaa44" alt="GraphQL"></span>
       <span style="flex:1;font-size:11.5px">API Styles & Contracts</span>
       <span class="nav-num">15ch</span>
     </a>
     <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" style="width:0%;background:var(--orange)"></div></div>
 
     <a class="sidebar-nav-item" href="#module-5" onclick="scrollToModule('module-5',this)">
-      <span class="nav-icon" style="background:rgba(255,107,107,0.15);">🔐</span>
+      <span class="nav-icon" style="background:rgba(255,107,107,0.15);"><img src="https://cdn.simpleicons.org/jsonwebtokens/ff6b6b" alt="JWT"></span>
       <span style="flex:1;font-size:11.5px">API Security & Identity</span>
       <span class="nav-num">5ch</span>
     </a>
     <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" style="width:0%;background:var(--red)"></div></div>
 
     <a class="sidebar-nav-item" href="#module-6" onclick="scrollToModule('module-6',this)">
-      <span class="nav-icon" style="background:rgba(255,170,68,0.15);">🔗</span>
+      <span class="nav-icon" style="background:rgba(255,170,68,0.15);"><img src="https://cdn.simpleicons.org/docker/ffaa44" alt="Docker"></span>
       <span style="flex:1;font-size:11.5px">Microservices</span>
       <span class="nav-num">9ch</span>
     </a>
     <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" style="width:0%;background:var(--orange)"></div></div>
 
     <a class="sidebar-nav-item" href="#module-7" onclick="scrollToModule('module-7',this)">
-      <span class="nav-icon" style="background:rgba(180,127,255,0.15);">🧪</span>
+      <span class="nav-icon" style="background:rgba(180,127,255,0.15);"><img src="https://cdn.simpleicons.org/dotnet/b47fff" alt="Testing"></span>
       <span style="flex:1;font-size:11.5px">Testing & Validation</span>
       <span class="nav-num">7ch</span>
     </a>
     <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" style="width:0%;background:var(--purple)"></div></div>
 
     <a class="sidebar-nav-item" href="#module-8" onclick="scrollToModule('module-8',this)">
-      <span class="nav-icon" style="background:rgba(180,127,255,0.12)">🤖</span>
+      <span class="nav-icon" style="background:rgba(180,127,255,0.12)"><img src="https://cdn.simpleicons.org/python/b47fff" alt="Python"></span>
       <span style="flex:1;font-size:11.5px">AI/ML Engineering</span>
       <span class="nav-num">28ch</span>
     </a>
     <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" style="width:0%;background:var(--yellow)"></div></div>
 
     <a class="sidebar-nav-item" href="#module-9" onclick="scrollToModule('module-9',this)">
-      <span class="nav-icon" style="background:rgba(0,229,160,0.12);">💰</span>
+      <span class="nav-icon" style="background:rgba(0,229,160,0.12);"><img src="https://cdn.simpleicons.org/stripe/00e5a0" alt="Stripe"></span>
       <span style="flex:1;font-size:11.5px">API as a Service</span>
       <span class="nav-num">8ch</span>
     </a>
     <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" style="width:0%;background:var(--green)"></div></div>
 
     <div class="sidebar-section-label" style="margin-top:20px;">Quick Links</div>
-    <a class="sidebar-nav-item" href="#series-overview">
-      <span class="nav-icon" style="background:var(--bg3);">📋</span>
-      <span style="flex:1;font-size:11.5px">Series Overview</span>
-    </a>
     <a class="sidebar-nav-item" href="#blog-articles">
       <span class="nav-icon" style="background:var(--bg3);">📰</span>
       <span style="flex:1;font-size:11.5px">All Articles</span>
@@ -4620,7 +4562,7 @@
       <div class="module-top-strip" style="background:linear-gradient(90deg,#4c1d95,#6d28d9)"></div>
       <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon-wrap mod-ai">
-          <img src="https://cdn.simpleicons.org/openai/b47fff" width="22" height="22" alt="OpenAI" style="object-fit:contain">
+          <img src="https://cdn.simpleicons.org/python/b47fff" width="22" height="22" alt="Python" style="object-fit:contain">
         </div>
         <div class="module-header-info">
           <div class="module-num">Series 08 · AI/ML Engineering</div>
@@ -5592,6 +5534,8 @@
       </div>
     </div>
 
+    <div id="chapterDetailPanel"></div>
+
     <!-- Scroll ring -->
     <div class="scroll-tracker">
       <div class="ring-wrapper">
@@ -5727,14 +5671,19 @@
 
   // ── Toggle chapter sub-items ───────────────────────
   function toggleChapter(row) {
-    // Open chapter reader
     const chNum = row.querySelector('.chapter-num')?.textContent?.trim();
     const chTitle = row.querySelector('.chapter-title')?.textContent?.trim();
     const chLevel = row.querySelector('.chapter-level')?.textContent?.trim();
     const subs = [...row.querySelectorAll('.sub-item')].map(s => s.textContent.trim());
-    // Find which module this belongs to
     const moduleCard = row.closest('.module-card');
     const moduleId = moduleCard?.id || 'module-1';
+    const chId = makeChapterId(moduleId, chNum);
+
+    if (canUseStaticChapterPanel()) {
+      openStaticChapterPanel(chId, 'overview');
+      return;
+    }
+
     openChapterReader(chNum, chTitle, chLevel, subs, moduleId);
   }
 
@@ -5998,6 +5947,78 @@
   scrollbar-width: thin;
   scrollbar-color: var(--border2) transparent;
 }
+
+.cr-part-block {
+  padding: 0 10px 10px;
+}
+
+.cr-part-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  margin-top: 8px;
+}
+
+.cr-part-toggle:hover { background: var(--bg4); border-color: var(--border2); }
+.cr-part-toggle.active {
+  border-color: color-mix(in srgb, var(--border2) 68%, var(--accent) 32%);
+  background: color-mix(in srgb, var(--bg3) 86%, var(--accent) 14%);
+}
+
+.cr-part-icon {
+  font-size: 12px;
+  line-height: 1;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.cr-part-copy { min-width: 0; flex: 1; }
+
+.cr-part-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.cr-part-meta {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+
+.cr-part-chevron {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text3);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.cr-part-toggle.active .cr-part-chevron { transform: rotate(90deg); }
+
+.cr-part-chapters {
+  display: none;
+  margin-top: 8px;
+  margin-left: 12px;
+  padding-left: 8px;
+  border-left: 1px solid color-mix(in srgb, var(--border) 72%, var(--accent) 28%);
+}
+
+.cr-part-block.open .cr-part-chapters { display: block; }
 
 .cr-ch-item {
   display: flex;
@@ -6522,7 +6543,7 @@
 }
 .cr-nav-mini-icon { font-size: 10px; line-height: 1; opacity: 0.85; }
 
-/* ─── RIGHT PANEL: Progress + Timer + Related ── */
+/* ─── RIGHT PANEL: Quick Actions + Progress + Related ── */
 .cr-right {
   width: 280px;
   flex-shrink: 0;
@@ -6537,13 +6558,6 @@
   scrollbar-color: var(--border2) transparent;
 }
 
-/* Timer widget */
-.cr-timer-widget {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-}
 .cr-widget-label {
   font-family: var(--font-mono);
   font-size: 9px;
@@ -6552,42 +6566,6 @@
   color: var(--text3);
   margin-bottom: 12px;
 }
-.cr-timer-display {
-  font-family: var(--font-display);
-  font-size: 36px;
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: -1px;
-  line-height: 1;
-  margin-bottom: 8px;
-  text-align: center;
-}
-.cr-timer-est {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text3);
-  text-align: center;
-  margin-bottom: 12px;
-}
-.cr-timer-controls {
-  display: flex;
-  gap: 6px;
-}
-.cr-timer-btn {
-  flex: 1;
-  background: var(--bg4);
-  border: 1px solid var(--border2);
-  color: var(--text2);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  padding: 6px;
-  border-radius: 7px;
-  cursor: pointer;
-  transition: all 0.15s;
-  text-align: center;
-}
-.cr-timer-btn:hover { background: var(--bg2); color: var(--text); }
-.cr-timer-btn.active { background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.3); color: var(--accent); }
 
 /* Reading progress widget */
 .cr-progress-widget {
@@ -6675,6 +6653,342 @@
 .cr-rel-title { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.3; }
 .cr-rel-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text3); }
 
+.cr-outline-widget {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.cr-outline-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 10px;
+}
+
+.cr-outline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.cr-outline-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--border2);
+  background: var(--bg4);
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text2);
+}
+
+.cr-outline-topics {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.cr-outline-topic {
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text2);
+  line-height: 1.45;
+}
+
+.cr-outline-topic.active {
+  border-color: color-mix(in srgb, var(--border2) 65%, var(--accent) 35%);
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg4) 84%, var(--accent) 16%);
+}
+
+.cr-article-link {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  color: inherit;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  margin-bottom: 8px;
+}
+
+.cr-article-link:hover { background: var(--bg2); border-color: var(--border2); transform: translateY(-1px); }
+.cr-article-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 5px;
+}
+
+.cr-article-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 6px;
+}
+
+  .cr-article-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text3);
+}
+
+.chapter-side-panel {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.chapter-side-kicker {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.chapter-side-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.chapter-side-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.chapter-side-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border2);
+  background: var(--bg4);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text2);
+}
+
+.chapter-side-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.chapter-side-tab {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text3);
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  transition: all 0.16s ease;
+}
+
+.chapter-side-tab.active {
+  background: var(--accent);
+  color: #03131b;
+  border-color: var(--accent);
+  box-shadow: 0 0 16px rgba(0,212,255,0.24);
+  font-weight: 700;
+}
+
+.chapter-side-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chapter-side-copy {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text2);
+}
+
+.chapter-side-topic {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg4);
+}
+
+.chapter-side-topic-num {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--accent);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.chapter-side-topic-text {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text2);
+}
+
+.chapter-side-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.chapter-side-nav button {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text2);
+  border-radius: 10px;
+  padding: 9px 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.16s ease;
+  min-height: 56px;
+}
+
+.chapter-side-nav button:hover {
+  background: var(--bg4);
+  border-color: var(--border2);
+}
+
+.chapter-side-nav button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.chapter-side-nav-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  margin-bottom: 4px;
+}
+
+.chapter-side-nav-title {
+  display: block;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.toc-summary {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg2);
+  overflow: hidden;
+}
+
+.toc-summary-head,
+.toc-series-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(90px, 0.45fr));
+  gap: 12px;
+  align-items: center;
+}
+
+.toc-summary-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg3) 88%, var(--accent) 12%);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: var(--text3);
+}
+
+.toc-series-row {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.toc-series-row:last-child { border-bottom: 0; }
+.toc-series-row:hover { background: var(--bg3); }
+
+.toc-series-main { min-width: 0; }
+
+.toc-series-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.toc-series-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent);
+}
+
+.toc-series-track {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.toc-series-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.toc-series-desc {
+  font-size: 11.5px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+.toc-series-stat {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text2);
+}
+
+@media (max-width: 900px) {
+  .toc-summary-head { display: none; }
+  .toc-series-row { grid-template-columns: 1fr; gap: 8px; padding: 14px; }
+}
+
 /* Notes widget */
 .cr-notes-widget {
   background: var(--bg3);
@@ -6730,6 +7044,7 @@
 // ─── Chapter database (extracted from DOM) ───────────────────────────
 const CHAPTER_DB = {};
 const SERIES_DB = {};
+const collapsedReaderParts = new Set();
 
 function makeChapterId(moduleId, chNum) {
   return `${moduleId}_${String(chNum || '').replace(/\./g, '-').replace(/\s+/g, '').toLowerCase()}`;
@@ -6780,6 +7095,14 @@ function getTopicDisplayParts(topicText, fallbackIndex) {
   return { num: String((fallbackIndex || 0) + 1), text: raw };
 }
 
+function canUseStaticChapterPanel() {
+  return window.innerWidth > 1024;
+}
+
+function getStaticChapterPanelContainer() {
+  return document.getElementById('chapterDetailPanel');
+}
+
 function buildChapterDB() {
   document.querySelectorAll('.module-card').forEach(moduleCard => {
     const moduleId = moduleCard.id;
@@ -6798,6 +7121,10 @@ function buildChapterDB() {
       const partName = chItem.closest('.part-section')?.querySelector('.part-name')?.textContent?.trim() || '';
       const subs = [...chItem.querySelectorAll('.sub-item')].map(s => s.textContent.trim());
       const chId = makeChapterId(moduleId, chNum);
+      chItem.dataset.chapterId = chId;
+      chItem.querySelectorAll('.sub-item').forEach((subItem, index) => {
+        subItem.dataset.topic = subs[index] || '';
+      });
 
       chapters.push({ chNum, chTitle, chLevel, partName, subs, chId, moduleId });
 
@@ -6847,6 +7174,11 @@ function restoreReaderSelectionFromUrl() {
     ? (ch.subs.find(s => s === topicParam) || ch.subs.find(s => normalizeTopicLookup(s) === topicNorm))
     : null;
 
+  if (canUseStaticChapterPanel()) {
+    openStaticChapterPanel(ch.chId, matchedTopic ? 'topics' : 'overview', matchedTopic || '');
+    return;
+  }
+
   if (matchedTopic) {
     openTopicReader(matchedTopic, ch.chNum, ch.chTitle, ch.chLevel, moduleId, ch.partName || '');
   } else {
@@ -6855,7 +7187,11 @@ function restoreReaderSelectionFromUrl() {
 }
 
 // ─── State ────────────────────────────────────────────────────────────
+const PAGE_PARAMS = new URLSearchParams(window.location.search);
+const TOC_ONLY_MODE = PAGE_PARAMS.get('toc_only') === '1';
 let currentChapterId = null;
+let staticSidebarChapterId = null;
+let staticSidebarTab = 'overview';
 let timerInterval = null;
 let timerSeconds = 0;
 let timerRunning = false;
@@ -7013,28 +7349,61 @@ function renderChapterList(moduleId, activeChId) {
     </div>
     <div class="cr-chapter-list" id="crChapterList">`;
 
-  series.chapters.forEach((ch, i) => {
-    const isActive = ch.chId === activeChId;
-    const isDone = completedChapters.has(ch.chId);
-    const lvClass = getLevelClass(ch.chLevel);
-    const showTopics = isActive && Array.isArray(ch.subs) && ch.subs.length > 0;
-    const topicsHtml = showTopics
-      ? `<div class="cr-ch-topics">${ch.subs.map(topic => {
-          const activeTopic = currentTopicText === topic;
-          const safeTopicArg = toInlineJsArg(topic);
-          const safePartArg = toInlineJsArg(ch.partName || '');
-          return `<button type="button" class="cr-ch-topic-item ${activeTopic ? 'active' : ''}" onclick="event.stopPropagation(); switchToTopic(${safeTopicArg}, '${ch.chId}', '${moduleId}', ${safePartArg})" title="Open ${escapeHtml(topic)}"><span class="cr-ch-topic-dot">${activeTopic ? '●' : '•'}</span><span class="cr-ch-topic-text">${escapeHtml(topic)}</span></button>`;
-        }).join('')}</div>`
-      : '';
+  const partGroups = [];
+  series.chapters.forEach((ch, index) => {
+    const partName = ch.partName || "Series outline";
+    const partKey = `${moduleId}::${normalizeLookupKey(partName || `part-${index}`)}`;
+    let group = partGroups.find((entry) => entry.partKey === partKey);
+    if (!group) {
+      group = { partKey, partName, chapters: [] };
+      partGroups.push(group);
+    }
+    group.chapters.push(ch);
+  });
+
+  partGroups.forEach((group) => {
+    const containsActive = group.chapters.some((chapter) => chapter.chId === activeChId);
+    const isOpen = containsActive || !collapsedReaderParts.has(group.partKey);
+
     html += `
-      <div class="cr-ch-item ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}"
-           onclick="navigateToChapter('${ch.chId}', '${moduleId}')">
-        <span class="cr-ch-num">${ch.chNum}</span>
-        <span class="cr-ch-name">${ch.chTitle}</span>
-        <span class="cr-ch-level cr-lv-${lvClass}">${ch.chLevel.substring(0,3)}</span>
-        <span class="cr-ch-dot"></span>
-      </div>
-      ${topicsHtml}`;
+      <div class="cr-part-block ${isOpen ? 'open' : ''}">
+        <button type="button" class="cr-part-toggle ${containsActive ? 'active' : ''}" onclick="toggleReaderPart('${moduleId}', '${group.partKey}')">
+          <span class="cr-part-icon">▸</span>
+          <span class="cr-part-copy">
+            <span class="cr-part-name">${escapeHtml(group.partName)}</span>
+            <span class="cr-part-meta">${group.chapters.length} chapter${group.chapters.length === 1 ? "" : "s"}</span>
+          </span>
+          <span class="cr-part-chevron">›</span>
+        </button>
+        <div class="cr-part-chapters">`;
+
+    group.chapters.forEach((ch) => {
+      const isActive = ch.chId === activeChId;
+      const isDone = completedChapters.has(ch.chId);
+      const lvClass = getLevelClass(ch.chLevel);
+      const showTopics = isActive && Array.isArray(ch.subs) && ch.subs.length > 0;
+      const topicsHtml = showTopics
+        ? `<div class="cr-ch-topics">${ch.subs.map(topic => {
+            const activeTopic = currentTopicText === topic;
+            const safeTopicArg = toInlineJsArg(topic);
+            const safePartArg = toInlineJsArg(ch.partName || '');
+            return `<button type="button" class="cr-ch-topic-item ${activeTopic ? 'active' : ''}" onclick="event.stopPropagation(); switchToTopic(${safeTopicArg}, '${ch.chId}', '${moduleId}', ${safePartArg})" title="Open ${escapeHtml(topic)}"><span class="cr-ch-topic-dot">${activeTopic ? '●' : '•'}</span><span class="cr-ch-topic-text">${escapeHtml(topic)}</span></button>`;
+          }).join("")}</div>`
+        : "";
+      html += `
+        <div class="cr-ch-item ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}"
+             onclick="navigateToChapter('${ch.chId}', '${moduleId}')">
+          <span class="cr-ch-num">${ch.chNum}</span>
+          <span class="cr-ch-name">${ch.chTitle}</span>
+          <span class="cr-ch-level cr-lv-${lvClass}">${ch.chLevel.substring(0,3)}</span>
+          <span class="cr-ch-dot"></span>
+        </div>
+        ${topicsHtml}`;
+    });
+
+    html += `
+        </div>
+      </div>`;
   });
 
   html += `</div>`;
@@ -7045,6 +7414,12 @@ function renderChapterList(moduleId, activeChId) {
     const activeEl = leftEl.querySelector('.cr-ch-item.active');
     if (activeEl) activeEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }, 100);
+}
+
+function toggleReaderPart(moduleId, partKey) {
+  if (collapsedReaderParts.has(partKey)) collapsedReaderParts.delete(partKey);
+  else collapsedReaderParts.add(partKey);
+  renderChapterList(moduleId, currentChapterId);
 }
 
 function getLevelClass(level) {
@@ -7064,41 +7439,59 @@ function renderRightPanel(moduleId, chId) {
   const chapterData = CHAPTER_DB[chId];
   const series = SERIES_DB[moduleId];
   const seriesModuleIds = Object.keys(SERIES_DB);
-  const curIdx = seriesModuleIds.indexOf(moduleId);
-
-  // Related series = adjacent modules
   const relatedSeries = seriesModuleIds
     .filter(id => id !== moduleId)
     .slice(0, 4)
     .map(id => SERIES_DB[id]);
+  const chapterTopics = Array.isArray(chapterData?.subs) ? chapterData.subs : [];
+  const relatedArticles = siteArticles.slice(0, 4);
 
-  // Completed count for this series
   const seriesDoneCount = series ? series.chapters.filter(c => completedChapters.has(c.chId)).length : 0;
   const seriesTotalCount = series ? series.chapters.length : 1;
   const seriePct = Math.round((seriesDoneCount / seriesTotalCount) * 100);
 
-  // Total done
   const totalChapters = Object.keys(CHAPTER_DB).length;
   const totalDone = completedChapters.size;
   const totalPct = Math.round((totalDone / totalChapters) * 100);
 
-  const notes = chapterNotes[chId] || '';
-
   rightEl.innerHTML = `
-    <!-- Timer -->
-    <div class="cr-timer-widget">
-      <div class="cr-widget-label">⏱ Reading Timer</div>
-      <div class="cr-timer-display" id="crTimerDisplay">00:00</div>
-      <div class="cr-timer-est" id="crTimerEst">Est. 15–20 min read</div>
-      <div class="cr-timer-controls">
-        <button class="cr-timer-btn active" id="crTimerToggle" onclick="toggleTimer()">⏸ Pause</button>
-        <button class="cr-timer-btn" onclick="resetTimer()">↺ Reset</button>
+    <div class="cr-outline-widget">
+      <div class="cr-widget-label">Current Chapter</div>
+      <div class="cr-outline-title">${escapeHtml(chapterData?.chNum || "")} ${escapeHtml(chapterData?.chTitle || "")}</div>
+      <div class="cr-outline-meta">
+        <span class="cr-outline-pill">${escapeHtml(series?.seriesName || "Series")}</span>
+        <span class="cr-outline-pill">${escapeHtml(chapterData?.chLevel || "Basic")}</span>
+        <span class="cr-outline-pill">${chapterTopics.length} topic${chapterTopics.length === 1 ? "" : "s"}</span>
+      </div>
+      <div class="cr-outline-topics">
+        ${chapterTopics.slice(0, 6).map((topic) => `<div class="cr-outline-topic ${currentTopicText === topic ? "active" : ""}">${escapeHtml(topic)}</div>`).join("")}
       </div>
     </div>
 
-    <!-- Progress -->
     <div class="cr-progress-widget">
-      <div class="cr-widget-label">📊 Progress</div>
+      <div class="cr-widget-label">Quick Actions</div>
+      <div class="rs-actions-grid">
+        <button class="action-btn btn-print" onclick="printTOC()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print
+        </button>
+        <button class="action-btn btn-pdf" onclick="downloadPDF()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          ↓ PDF
+        </button>
+        <button class="action-btn btn-epub" onclick="downloadEPUB()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="8" y1="3" x2="8" y2="21"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+          ↓ EPUB
+        </button>
+        <button class="action-btn btn-ai" onclick="openAISummary()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          AI Summary
+        </button>
+      </div>
+    </div>
+
+    <div class="cr-progress-widget">
+      <div class="cr-widget-label">Progress</div>
       <div class="cr-chapter-prog">
         <div class="cr-prog-row">
           <span class="cr-prog-label">This Series</span>
@@ -7123,16 +7516,20 @@ function renderRightPanel(moduleId, chId) {
       </div>
     </div>
 
-    <!-- Notes -->
-    <div class="cr-notes-widget">
-      <div class="cr-widget-label">📝 Chapter Notes</div>
-      <textarea class="cr-notes-area" id="crNotesArea" placeholder="Write your notes for this chapter...">${notes}</textarea>
-      <button class="cr-notes-save" onclick="saveNotes('${chId}')">Save Notes</button>
+    <div class="cr-related-widget">
+      <div class="cr-widget-label">Related Articles</div>
+      ${relatedArticles.length
+        ? relatedArticles.map((article) => `
+          <a class="cr-article-link" href="${escapeHtml(article.href || '/articles')}" target="_top" rel="noopener">
+            <div class="cr-article-eyebrow">${escapeHtml(article.eyebrow || 'Article')}</div>
+            <div class="cr-article-title">${escapeHtml(article.title || 'Untitled')}</div>
+            <div class="cr-article-meta">${escapeHtml(article.readMinutes || 8)} min read</div>
+          </a>`).join("")
+        : '<div style="color:var(--text3);font-family:var(--font-mono);font-size:10px;">No related articles available yet.</div>'}
     </div>
 
-    <!-- Related Series -->
     <div class="cr-related-widget">
-      <div class="cr-widget-label">🔗 Related Series</div>
+      <div class="cr-widget-label">Related Series</div>
       ${relatedSeries.map(s => `
         <div class="cr-related-item" onclick="jumpToSeries('${s.moduleId}')">
           <span class="cr-rel-series">${s.seriesNum}</span>
@@ -7267,9 +7664,17 @@ function renderSiteArticles() {
 window.addEventListener('message', (event) => {
   if (event.origin !== window.location.origin) return;
   const data = event.data || {};
-  if (data.type !== 'site-articles' || !Array.isArray(data.articles)) return;
-  siteArticles = data.articles;
-  renderSiteArticles();
+  if (data.type === 'site-articles' && Array.isArray(data.articles)) {
+    siteArticles = data.articles;
+    renderSiteArticles();
+    return;
+  }
+  if (data.type === 'dotnet-mastery-action') {
+    if (data.action === 'print') printTOC();
+    if (data.action === 'download-pdf') downloadPDF();
+    if (data.action === 'download-epub') downloadEPUB();
+    if (data.action === 'ai-summary') openAISummary();
+  }
 });
 
 function buildStaticChapterBody(seriesName, chNum, chTitle, chLevel, subs) {
@@ -7278,6 +7683,139 @@ function buildStaticChapterBody(seriesName, chNum, chTitle, chLevel, subs) {
 
 function buildStaticTopicBody(seriesName, chNum, chTitle, topicText, subs) {
   return ``;
+}
+
+function getChapterSequence(moduleId, chId) {
+  const series = SERIES_DB[moduleId];
+  if (!series) return { index: -1, prev: null, next: null };
+  const index = series.chapters.findIndex((chapter) => chapter.chId === chId);
+  return {
+    index,
+    prev: index > 0 ? series.chapters[index - 1] : null,
+    next: index >= 0 && index < series.chapters.length - 1 ? series.chapters[index + 1] : null
+  };
+}
+
+function setStaticChapterSelection(chId, topicText = '') {
+  document.querySelectorAll('.chapter-item.is-selected').forEach((row) => row.classList.remove('is-selected'));
+  document.querySelectorAll('.sub-item.active').forEach((row) => row.classList.remove('active'));
+
+  const chapter = CHAPTER_DB[chId];
+  if (!chapter) return;
+
+  const moduleCard = document.getElementById(chapter.moduleId);
+  if (moduleCard) moduleCard.classList.add('open');
+
+  const chapterRow = document.querySelector(`.chapter-item[data-chapter-id="${chapter.chId}"]`);
+  if (!chapterRow) return;
+
+  chapterRow.classList.add('is-selected');
+  chapterRow.closest('.part-section')?.classList.add('open');
+
+  if (topicText) {
+    const topicNorm = normalizeTopicLookup(topicText);
+    const matchedTopic = [...chapterRow.querySelectorAll('.sub-item')].find((item) => normalizeTopicLookup(item.dataset.topic || item.textContent || '') === topicNorm);
+    if (matchedTopic) matchedTopic.classList.add('active');
+  }
+}
+
+function buildStaticChapterCopy(chapter, series, activeTopic) {
+  const topicCount = chapter.subs.length;
+  const focusText = activeTopic
+    ? `Focused topic: ${activeTopic}.`
+    : topicCount
+      ? `Covers ${topicCount} core topic${topicCount === 1 ? '' : 's'} for this chapter.`
+      : 'Chapter summary and topic outline are available in the tabs below.';
+  return `${series.seriesName} · ${chapter.partName || 'Series chapter'}. ${focusText}`;
+}
+
+function renderStaticChapterPanel(chId, tab = staticSidebarTab, activeTopic = '') {
+  const panel = getStaticChapterPanelContainer();
+  const chapter = CHAPTER_DB[chId];
+  if (!panel || !chapter) return;
+
+  const series = SERIES_DB[chapter.moduleId];
+  const { index, prev, next } = getChapterSequence(chapter.moduleId, chId);
+  const topicNorm = normalizeTopicLookup(activeTopic || '');
+  const selectedTopic = activeTopic
+    ? (chapter.subs.find((topic) => normalizeTopicLookup(topic) === topicNorm) || activeTopic)
+    : '';
+  const activeTab = tab || 'overview';
+  const topicRows = chapter.subs.length
+    ? chapter.subs.map((topic, topicIndex) => {
+        const parts = getTopicDisplayParts(topic, topicIndex);
+        const isActive = selectedTopic && normalizeTopicLookup(selectedTopic) === normalizeTopicLookup(topic);
+        return `
+          <button type="button" class="chapter-side-topic" onclick="openStaticChapterPanel('${chId}', 'topics', ${toInlineJsArg(topic)})">
+            <span class="chapter-side-topic-num">${escapeHtml(parts.num)}</span>
+            <span class="chapter-side-topic-text"${isActive ? ' style="color:var(--text)"' : ''}>${escapeHtml(parts.text)}</span>
+          </button>`;
+      }).join('')
+    : `<div class="chapter-side-copy">Topics will appear here when this chapter outline is expanded.</div>`;
+
+  let bodyHtml = '';
+  if (activeTab === 'topics') {
+    bodyHtml = `
+      <div class="chapter-side-copy">${selectedTopic ? `Selected topic: <strong>${escapeHtml(selectedTopic)}</strong>.` : 'Use this tab to scan the chapter topics in a Design Patterns-style tab flow.'}</div>
+      ${topicRows}`;
+  } else if (activeTab === 'details') {
+    bodyHtml = `
+      <div class="chapter-side-copy">${escapeHtml(buildStaticChapterCopy(chapter, series, selectedTopic))}</div>
+      <div class="chapter-side-meta">
+        <span class="chapter-side-pill">${escapeHtml(chapter.partName || 'Series')}</span>
+        <span class="chapter-side-pill">Chapter ${index + 1} / ${series.chapters.length}</span>
+        <span class="chapter-side-pill">${chapter.subs.length} topic${chapter.subs.length === 1 ? '' : 's'}</span>
+      </div>`;
+  } else {
+    bodyHtml = `
+      <div class="chapter-side-copy">${escapeHtml(buildStaticChapterCopy(chapter, series, selectedTopic))}</div>
+      <div class="chapter-side-meta">
+        <span class="chapter-side-pill">${escapeHtml(chapter.chLevel)}</span>
+        <span class="chapter-side-pill">${chapter.subs.length} topic${chapter.subs.length === 1 ? '' : 's'}</span>
+      </div>
+      ${chapter.subs.slice(0, 4).map((topic, topicIndex) => {
+        const parts = getTopicDisplayParts(topic, topicIndex);
+        return `<div class="chapter-side-topic"><span class="chapter-side-topic-num">${escapeHtml(parts.num)}</span><span class="chapter-side-topic-text">${escapeHtml(parts.text)}</span></div>`;
+      }).join('')}`;
+  }
+
+  panel.innerHTML = `
+    <div class="chapter-side-panel">
+      <div class="chapter-side-kicker">${escapeHtml(series.seriesNum || 'Series')} · ${escapeHtml(chapter.partName || 'Chapter')}</div>
+      <div class="chapter-side-title">${escapeHtml(chapter.chNum)} ${escapeHtml(chapter.chTitle)}</div>
+      <div class="chapter-side-meta">
+        <span class="chapter-side-pill">${escapeHtml(series.seriesName)}</span>
+        <span class="chapter-side-pill">${escapeHtml(chapter.chLevel)}</span>
+      </div>
+      <div class="chapter-side-tabs">
+        <button type="button" class="chapter-side-tab ${activeTab === 'overview' ? 'active' : ''}" onclick="openStaticChapterPanel('${chId}', 'overview')">Overview</button>
+        <button type="button" class="chapter-side-tab ${activeTab === 'topics' ? 'active' : ''}" onclick="openStaticChapterPanel('${chId}', 'topics', ${toInlineJsArg(selectedTopic)})">Topics</button>
+        <button type="button" class="chapter-side-tab ${activeTab === 'details' ? 'active' : ''}" onclick="openStaticChapterPanel('${chId}', 'details', ${toInlineJsArg(selectedTopic)})">Details</button>
+      </div>
+      <div class="chapter-side-body">${bodyHtml}</div>
+      <div class="chapter-side-nav">
+        <button type="button" onclick="${prev ? `openStaticChapterPanel('${prev.chId}', 'overview')` : 'void(0)'}" ${prev ? '' : 'disabled'}>
+          <span class="chapter-side-nav-label">Previous</span>
+          <span class="chapter-side-nav-title">${prev ? `${escapeHtml(prev.chNum)} ${escapeHtml(prev.chTitle)}` : 'Start of series'}</span>
+        </button>
+        <button type="button" onclick="${next ? `openStaticChapterPanel('${next.chId}', 'overview')` : 'void(0)'}" ${next ? '' : 'disabled'}>
+          <span class="chapter-side-nav-label">Next</span>
+          <span class="chapter-side-nav-title">${next ? `${escapeHtml(next.chNum)} ${escapeHtml(next.chTitle)}` : 'End of series'}</span>
+        </button>
+      </div>
+    </div>`;
+}
+
+function openStaticChapterPanel(chId, tab = 'overview', activeTopic = '') {
+  const chapter = CHAPTER_DB[chId];
+  if (!chapter) return;
+  staticSidebarChapterId = chId;
+  staticSidebarTab = tab || 'overview';
+  currentChapterId = chId;
+  currentTopicText = activeTopic || null;
+  setStaticChapterSelection(chId, activeTopic);
+  renderStaticChapterPanel(chId, staticSidebarTab, activeTopic);
+  syncReaderSelection(chapter.moduleId, chId, activeTopic || null);
 }
 
 function buildTopicBreadcrumb(subs, chId, moduleId, partName = '', activeTopic = '') {
@@ -7958,6 +8496,11 @@ document.addEventListener('click', (e) => {
   const moduleCard = chapterItem.closest('.module-card');
   const moduleId = moduleCard?.id || 'module-1';
 
+  if (canUseStaticChapterPanel()) {
+    openStaticChapterPanel(makeChapterId(moduleId, chNum), 'topics', topicText);
+    return;
+  }
+
   openTopicReader(topicText, chNum, chTitle, chLevel, moduleId, partName);
 }, true); // capture phase — fires before any inline onclick
 
@@ -8117,11 +8660,64 @@ function switchToTopic(topicText, chId, moduleId, partName) {
   loadTopicContent(chId, ch.chTitle, ch.subs, ch.chLevel, moduleId, topicText, partName);
 }
 
+function buildCompactSeriesOverview() {
+  const section = document.getElementById('series-overview');
+  if (!section) return;
+  section.remove();
+}
+
+function simplifyLandingLayout() {
+  document.querySelector('.hero-sub')?.remove();
+  document.querySelector('.level-row')?.remove();
+  document.querySelector('.logo-ticker-wrap')?.remove();
+  document.querySelector('.hero-eyebrow .new-badge')?.remove();
+
+  const heroTitle = document.querySelector('.hero-title');
+  if (heroTitle) heroTitle.innerHTML = 'Dotnet (.NET Mastery)';
+
+  const heroStats = document.querySelector('.hero-stats');
+  if (heroStats) {
+    const statItems = [...heroStats.querySelectorAll('.stat-item')];
+    statItems.forEach((item, index) => {
+      if (index > 2) item.remove();
+    });
+    [...heroStats.querySelectorAll('.stat-divider')].forEach((divider, index) => {
+      if (index > 1) divider.remove();
+    });
+  }
+}
+
+function simplifyStaticRightSidebar() {
+  document.querySelector('.scroll-tracker')?.remove();
+  document.querySelector('.module-progress-list')?.remove();
+  document.querySelector('.right-sidebar > div[style*="Series Stats"]')?.remove();
+  const recLabel = document.querySelector('.rec-label');
+  if (recLabel) recLabel.textContent = 'Related Articles';
+}
+
 // Initialize DB and restore selection from URL on page load
 document.addEventListener('DOMContentLoaded', () => {
+  if (TOC_ONLY_MODE) {
+    document.documentElement.setAttribute('data-toc-only', 'true');
+    document.querySelectorAll('a[href="#blog-articles"]').forEach((element) => element.remove());
+    document.getElementById('sidebarArticlesList')?.remove();
+    document.querySelectorAll('.sidebar-section-label').forEach((label) => {
+      if ((label.textContent || '').toLowerCase().includes('fresh articles')) label.remove();
+    });
+    document.getElementById('blog-articles')?.remove();
+    document.getElementById('featuredArticlesGrid')?.closest('.series-grid-section')?.remove();
+  }
   renderSiteArticles();
   buildChapterDB();
+  buildCompactSeriesOverview();
+  simplifyLandingLayout();
+  simplifyStaticRightSidebar();
   restoreReaderSelectionFromUrl();
+  if (!currentChapterId && canUseStaticChapterPanel()) {
+    const firstSeries = Object.values(SERIES_DB)[0];
+    const firstChapter = firstSeries?.chapters?.[0];
+    if (firstChapter) openStaticChapterPanel(firstChapter.chId, 'overview');
+  }
 });
 </script>
 

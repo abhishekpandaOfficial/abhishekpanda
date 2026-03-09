@@ -297,7 +297,7 @@ export function LocalBlogPostView({ post }: LocalBlogPostViewProps) {
         <section className="container mx-auto max-w-[1360px] px-4">
           <div className="mb-6">
             <Link
-              to="/blogs"
+              to="/cheatsheets"
               className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/30 hover:text-primary"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -310,7 +310,7 @@ export function LocalBlogPostView({ post }: LocalBlogPostViewProps) {
               <House className="h-3.5 w-3.5" />
               <Link to="/" className="hover:text-foreground">Home</Link>
               <ChevronRight className="h-3.5 w-3.5" />
-              <Link to="/blogs" className="hover:text-foreground">Blogs</Link>
+              <Link to="/cheatsheets" className="hover:text-foreground">Cheatsheets</Link>
               <ChevronRight className="h-3.5 w-3.5" />
               <span className="max-w-[18rem] truncate text-foreground">{post.title}</span>
             </div>
@@ -402,7 +402,7 @@ export function LocalBlogPostView({ post }: LocalBlogPostViewProps) {
                 showMobileActions
                 popularTitle="Popular Blog Chapters"
                 popularItems={popularBlogs}
-                popularCta={{ label: "View all blogs", to: "/blogs" }}
+                popularCta={{ label: "View all cheatsheets", to: "/cheatsheets" }}
                 secondaryTitle="Continue Reading"
                 secondaryItems={[
                   ...relatedBlogs.slice(0, 2).map((item) => ({

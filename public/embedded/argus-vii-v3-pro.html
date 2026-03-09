@@ -682,6 +682,9 @@ function initARGUS(){
     if (data.type === 'parent-theme' && (data.theme === 'light' || data.theme === 'dark')) {
       applyArgusTheme(data.theme);
     }
+    if (data.type === 'argus-bridge') {
+      applyArgusBridge(data.bridge || {});
+    }
   });
   // ── MAP VIEW ──────────────────────────────────────────
   const LBLS={dark:'◼ TACTICAL DARK',sat:'🛰 SATELLITE HI-RES',hybrid:'🌐 HYBRID · SAT+ROADS+LABELS',terrain:'▲ TERRAIN+ELEVATION',street:'⬜ STREET (OSM)',night:'🌃 NIGHT · NO LABELS'};
@@ -1292,7 +1295,7 @@ function initARGUS(){
   }
 
   // ── ASSET DATA ──────────────────────────────────────
-  const SHIPS=[
+  let SHIPS=[
     {id:'CVN-71',name:'USS THEODORE ROOSEVELT',type:'Carrier Strike Group',flag:'🇺🇸',lat:36.2,lng:-10.5,hdg:95,spd:18,stat:'PATROL',cls:'SURFACE'},
     {id:'CVN-76',name:'USS RONALD REAGAN',type:'Carrier Strike Group',flag:'🇺🇸',lat:25.1,lng:125.8,hdg:220,spd:22,stat:'TRANSIT',cls:'SURFACE'},
     {id:'DDG-109',name:'USS JASON DUNHAM',type:'Arleigh Burke DDG',flag:'🇺🇸',lat:33.5,lng:32.8,hdg:180,spd:28,stat:'ALERT',cls:'SURFACE'},
@@ -1312,7 +1315,7 @@ function initARGUS(){
     {id:'F-75',name:'DENA (F-75)',type:'IRIN Frigate',flag:'🇮🇷',lat:25.3,lng:58.5,hdg:155,spd:18,stat:'PATROL',cls:'SURFACE'},
     {id:'DDG-RIYADH',name:'HMGS AL RIYADH',type:'Al-Riyadh Class',flag:'🇸🇦',lat:24.1,lng:48.6,hdg:200,spd:20,stat:'PATROL',cls:'SURFACE'},
   ];
-  const DRONES=[
+  let DRONES=[
     {id:'MQ9-001',name:'MQ-9 REAPER',type:'Combat UAV',flag:'🇺🇸',lat:36.2,lng:43.5,hdg:80,alt:15000,stat:'ACTIVE',spd:240},
     {id:'RQ4-002',name:'RQ-4B GLOBAL HAWK',type:'HALE ISR UAV',flag:'🇺🇸',lat:48.5,lng:22.3,hdg:270,alt:60000,stat:'ISR OPS',spd:340},
     {id:'TB2-001',name:'BAYRAKTAR TB2',type:'MALE Combat UAV',flag:'🇺🇦',lat:49.8,lng:36.2,hdg:90,alt:8000,stat:'ACTIVE',spd:120},
@@ -1326,7 +1329,7 @@ function initARGUS(){
     {id:'SHD-001',name:'SHAHED-136',type:'Loitering Munition',flag:'🇮🇷',lat:32.1,lng:51.7,hdg:315,alt:3000,stat:'ACTIVE',spd:185},
     {id:'MQ1-004',name:'MQ-1C GRAY EAGLE',type:'Combat UAV',flag:'🇺🇸',lat:15.2,lng:45.3,hdg:240,alt:25000,stat:'ISR OPS',spd:220},
   ];
-  const MISSILES=[
+  let MISSILES=[
     {id:'ICBM-NK01',name:'HWASONG-17',type:'ICBM (TEST)',flag:'🇰🇵',lat:40.0,lng:126.5,tlat:40.8,tlng:129.2,stat:'TEST',phase:'BOOST'},
     {id:'CRUISE-RU01',name:'KALIBR CRUISE',type:'LACM',flag:'🇷🇺',lat:46.8,lng:32.1,tlat:49.2,tlng:36.4,stat:'IN FLIGHT',phase:'CRUISE'},
     {id:'CRUISE-RU02',name:'KALIBR CRUISE',type:'LACM',flag:'🇷🇺',lat:47.2,lng:33.5,tlat:50.1,tlng:37.8,stat:'IN FLIGHT',phase:'CRUISE'},
@@ -1336,7 +1339,7 @@ function initARGUS(){
     {id:'SRBM-CN01',name:'DF-21D (ASBM)',type:'ASBM',flag:'🇨🇳',lat:26.8,lng:117.3,tlat:24.5,tlng:123.8,stat:'ALERT POSTURE',phase:'READY'},
     {id:'AAM-RU01',name:'S-400 INTERCEPTOR',type:'SAM',flag:'🇷🇺',lat:55.5,lng:37.2,tlat:57.2,tlng:35.8,stat:'ACTIVE DEFENSE',phase:'INTERCEPT'},
   ];
-  const SATS=[
+  let SATS=[
     {id:'USA-315',name:'KH-11 KEYHOLE',type:'Optical IMINT',flag:'🇺🇸',lat:48.2,lng:55.3,alt:'LEO 470km',inc:97.9,stat:'ACTIVE',orbit:'SSO'},
     {id:'USA-316',name:'KH-11 KEYHOLE',type:'Optical IMINT',flag:'🇺🇸',lat:22.4,lng:88.6,alt:'LEO 475km',inc:97.9,stat:'ACTIVE',orbit:'SSO'},
     {id:'USA-202',name:'NROL-44 (SIGINT)',type:'SIGINT',flag:'🇺🇸',lat:35.5,lng:45.2,alt:'GEO 35786km',inc:0.0,stat:'ACTIVE',orbit:'GEO'},
@@ -1352,7 +1355,7 @@ function initARGUS(){
     {id:'HELIOS-2A',name:'HELIOS-2A',type:'Optical IMINT',flag:'🇫🇷',lat:44.5,lng:2.1,alt:'LEO 680km',inc:98.1,stat:'ACTIVE',orbit:'SSO'},
     {id:'PLEIADES-1A',name:'PLEIADES NEO-1',type:'Commercial IMINT',flag:'🇫🇷',lat:28.5,lng:72.3,alt:'LEO 620km',inc:98.2,stat:'ACTIVE',orbit:'SSO'},
   ];
-  const CONFLICTS=[
+  let CONFLICTS=[
     {id:'CZ-UA',name:'UKRAINE CONFLICT ZONE',sev:'critical',stat:'ACTIVE CONFLICT',cas:'HIGH',poly:[[52.4,22.5],[52.6,33.0],[50.5,38.2],[47.8,38.5],[46.2,35.5],[46.0,33.0],[47.5,28.0],[49.2,24.0],[51.0,22.0]]},
     {id:'CZ-ME',name:'MIDDLE EAST THEATER',sev:'critical',stat:'ACTIVE HOSTILITIES',cas:'HIGH',poly:[[33.5,34.5],[34.5,36.8],[33.0,38.2],[31.2,36.5],[29.8,34.0],[30.5,32.0],[31.8,33.5]]},
     {id:'CZ-TW',name:'TAIWAN STRAIT TENSION',sev:'high',stat:'ELEVATED TENSION',cas:'NONE',poly:[[26.4,120.0],[26.4,122.5],[23.8,122.5],[22.0,120.5],[22.0,119.5],[23.5,119.0],[25.0,119.2]]},
@@ -1487,6 +1490,50 @@ function initARGUS(){
       ${dfRow('HDG',Math.round(s[10]||0)+'°','')}${dfRow('ON GND',s[8]?'YES':'NO','')}
       ${dfRow('LAT',s[6]?s[6].toFixed(5)+'°':'—','')}${dfRow('LNG',s[5]?s[5].toFixed(5)+'°':'—','')}
     </div><div class="sfooter">SOURCE: ADS-B LIVE · ICAO24: ${s[0]||'—'} · ${new Date().toUTCString()}</div>`);
+  }
+
+  function applyOperatorOverride(operator){
+    if(!operator) return;
+    const setField=(id,val,cls='')=>{
+      const el=document.getElementById(id); if(!el) return;
+      if(typeof val === 'undefined' || val === null || val === '') return;
+      el.textContent=val; if(cls) el.className='op-val '+cls;
+    };
+    const city=[operator.city, operator.country].filter(Boolean).join(', ');
+    setField('opIP', operator.ip || 'UNKNOWN', 'cyan');
+    setField('opCity', city || 'Unknown location');
+    setField('opISP', operator.isp || 'Unknown ISP');
+    setField('opTZ', operator.timezone ? operator.timezone.split('/').slice(-1)[0] : 'UTC');
+    setField('opStatus', operator.ip ? '● ADMIN LINK' : '● PENDING', operator.ip ? 'green' : 'orange');
+
+    if(operator.latitude !== null && operator.latitude !== undefined && operator.longitude !== null && operator.longitude !== undefined){
+      window._opLat=operator.latitude; window._opLng=operator.longitude;
+      LYR.search.clearLayers();
+      const opMarker=L.divIcon({
+        html:`<div style="position:relative;width:14px;height:14px;">
+          <div style="position:absolute;inset:-6px;border-radius:50%;border:1.5px solid #00ff88;opacity:0.5;animation:blink 2s infinite;"></div>
+          <div style="width:14px;height:14px;border-radius:50%;background:#00ff88;border:2px solid #fff;box-shadow:0 0 14px #00ff88;"></div>
+        </div>`,iconSize:[14,14],iconAnchor:[7,7],className:''
+      });
+      const opMk=L.marker([operator.latitude,operator.longitude],{icon:opMarker}).addTo(LYR.search);
+      opMk.bindTooltip(`📡 OPERATOR: ${operator.ip || 'UNKNOWN'} · ${operator.city || 'Unknown city'}`,{permanent:false});
+    }
+  }
+
+  function applyArgusBridge(bridge){
+    if(!bridge || typeof bridge !== 'object') return;
+    if(bridge.operator){
+      window.__ARGUS_OPERATOR_OVERRIDE__ = bridge.operator;
+      applyOperatorOverride(bridge.operator);
+    }
+    if(bridge.assets){
+      if(Array.isArray(bridge.assets.ships)) SHIPS = bridge.assets.ships;
+      if(Array.isArray(bridge.assets.drones)) DRONES = bridge.assets.drones;
+      if(Array.isArray(bridge.assets.missiles)) MISSILES = bridge.assets.missiles;
+      if(Array.isArray(bridge.assets.sats)) SATS = bridge.assets.sats;
+      if(Array.isArray(bridge.assets.conflicts)) CONFLICTS = bridge.assets.conflicts;
+      renderConflicts(); renderShips(); renderDrones(); renderMissiles(); renderSats();
+    }
   }
 
   // ── GEOLOCATION ────────────────────────────────────
@@ -1685,6 +1732,10 @@ function initARGUS(){
 
   // ── OPERATOR IP / GEOLOCATION (no prompt) ────────
   async function fetchOperatorIP(){
+    if(window.__ARGUS_OPERATOR_OVERRIDE__){
+      applyOperatorOverride(window.__ARGUS_OPERATOR_OVERRIDE__);
+      return;
+    }
     const setField=(id,val,cls='')=>{
       const el=document.getElementById(id); if(!el) return;
       el.textContent=val; if(cls) el.className='op-val '+cls;

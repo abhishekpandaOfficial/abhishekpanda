@@ -3,18 +3,6 @@ import { ActiveSessionIndicator } from "./ActiveSessionIndicator";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard,
-  FileText,
-  GraduationCap,
-  Package,
-  Brain,
-  Workflow,
-  Share2,
-  Clock,
-  BarChart3,
-  Users,
-  CreditCard,
-  HardDrive,
   Settings,
   Shield,
   ChevronLeft,
@@ -23,18 +11,9 @@ import {
   Search,
   Menu,
   X,
-  Download,
-  Zap,
   Sparkles,
   Command,
-  Heart,
-  Link2,
-  BookOpen,
-  Mail,
-  Inbox,
   Loader2,
-  Building2,
-  Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -45,114 +24,42 @@ import { SecurityAlertPanel } from "./SecurityAlertPanel";
 import { useActiveSession } from "@/hooks/useActiveSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-interface SidebarItem {
-  name: string;
-  icon: React.ComponentType<{ className?: string }>;
-  path: string;
-  badge: string | null;
-  color: string;
-}
-
-interface SidebarGroup {
-  title: string;
-  items: SidebarItem[];
-}
+import { adminSidebarGroups } from "./adminNavigation";
 
 const getBadgeClassName = (badge: string) => {
   const key = badge.toLowerCase();
   if (["security", "ip track", "protection"].includes(key)) {
-    return "bg-red-500/15 text-red-300 border border-red-500/30";
+    return "bg-red-500/10 text-red-700 border border-red-500/25 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/30";
   }
   if (["ai", "galaxycore", "automation"].includes(key)) {
-    return "bg-violet-500/20 text-violet-300 border border-violet-500/30";
+    return "bg-violet-500/10 text-violet-700 border border-violet-500/25 dark:bg-violet-500/20 dark:text-violet-300 dark:border-violet-500/30";
   }
   if (["content", "publishing", "courses", "knowledge"].includes(key)) {
-    return "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
+    return "bg-indigo-500/10 text-indigo-700 border border-indigo-500/25 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30";
   }
-  if (["operations", "overview", "insights", "config"].includes(key)) {
-    return "bg-sky-500/20 text-sky-300 border border-sky-500/30";
+  if (["operations", "overview", "insights", "config", "surveillance"].includes(key)) {
+    return "bg-sky-500/10 text-sky-700 border border-sky-500/25 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/30";
   }
   if (["revenue", "leads", "inbox", "calls"].includes(key)) {
-    return "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+    return "bg-emerald-500/10 text-emerald-700 border border-emerald-500/25 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30";
   }
   if (["api", "connectors", "catalog"].includes(key)) {
-    return "bg-amber-500/20 text-amber-300 border border-amber-500/30";
+    return "bg-amber-500/10 text-amber-700 border border-amber-500/25 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30";
   }
   if (["encrypted", "family"].includes(key)) {
-    return "bg-purple-500/20 text-purple-300 border border-purple-500/30";
+    return "bg-purple-500/10 text-purple-700 border border-purple-500/25 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30";
   }
   return "bg-muted/40 text-muted-foreground border border-border/60";
 };
-
-const sidebarGroups: SidebarGroup[] = [
-  {
-    title: "CORE",
-    items: [
-      { name: "Command Center", icon: LayoutDashboard, path: "/admin", badge: "Overview", color: "text-blue-500" },
-      { name: "Business", icon: Building2, path: "/admin/business", badge: "Operations", color: "text-indigo-500" },
-      { name: "OpenOwl", icon: Bot, path: "/openowl/admin", badge: "AI", color: "text-cyan-500" },
-      { name: "IP Access Control", icon: Shield, path: "/admin/ip-management", badge: "Security", color: "text-red-500" },
-      { name: "CV Downloads", icon: Download, path: "/admin/cv-downloads", badge: "Leads", color: "text-slate-400" },
-      { name: "Contact Requests", icon: Inbox, path: "/admin/contacts", badge: "Inbox", color: "text-sky-500" },
-      { name: "Mentorship", icon: Users, path: "/admin/mentorship", badge: "Calls", color: "text-emerald-400" },
-    ],
-  },
-  {
-    title: "CREATOR SUITE",
-    items: [
-      { name: "CMS Studio", icon: FileText, path: "/admin/cms", badge: "Content", color: "text-violet-500" },
-      { name: "Legacy Blog Studio", icon: FileText, path: "/admin/blog", badge: null, color: "text-slate-400" },
-      { name: "Nimbus Desk", icon: BookOpen, path: "/admin/nimbus", badge: "Knowledge", color: "text-indigo-500" },
-      { name: "LMS Studio", icon: GraduationCap, path: "/admin/courses", badge: "Courses", color: "text-amber-500" },
-      { name: "Digital Products", icon: Package, path: "/admin/products", badge: "Catalog", color: "text-cyan-500" },
-      { name: "Ebook Studio", icon: BookOpen, path: "/admin/ebooks", badge: "Publishing", color: "text-emerald-400" },
-    ],
-  },
-  {
-    title: "AI & AUTOMATION",
-    items: [
-      { name: "LLM Galaxy", icon: Brain, path: "/admin/llm-galaxy", badge: "GALAXYCORE", color: "text-violet-500" },
-      { name: "AETHERGRID", icon: Zap, path: "/admin/workflows", badge: "AI", color: "text-indigo-500" },
-      { name: "OmniFlow Social", icon: Share2, path: "/admin/social", badge: null, color: "text-blue-600" },
-      { name: "Chronos Scheduler", icon: Clock, path: "/admin/jobs", badge: null, color: "text-amber-500" },
-    ],
-  },
-  {
-    title: "INTELLIGENCE",
-    items: [
-      { name: "Observatory", icon: BarChart3, path: "/admin/analytics", badge: "Insights", color: "text-emerald-500" },
-    ],
-  },
-  {
-    title: "FINANCE",
-    items: [
-      { name: "FINCORE", icon: CreditCard, path: "/admin/payments", badge: "Revenue", color: "text-teal-500" },
-    ],
-  },
-  {
-    title: "PERSONAL OS",
-    items: [
-      { name: "Astra Vault", icon: HardDrive, path: "/admin/drive", badge: "Encrypted", color: "text-purple-500" },
-      { name: "LifeMap", icon: Heart, path: "/admin/lifemap", badge: "Family", color: "text-pink-500" },
-    ],
-  },
-  {
-    title: "SYSTEM",
-    items: [
-      { name: "Integrations Hub", icon: Link2, path: "/admin/integrations", badge: "Connectors", color: "text-blue-500" },
-      { name: "Ops Docs", icon: Command, path: "/admin/ops", badge: "API", color: "text-slate-300" },
-      { name: "Audit Logs", icon: Shield, path: "/admin/audit-logs", badge: "IP Track", color: "text-red-500" },
-      { name: "Sentinel", icon: Shield, path: "/admin/security", badge: "Protection", color: "text-orange-500" },
-      { name: "System Settings", icon: Settings, path: "/admin/settings", badge: "Config", color: "text-slate-500" },
-    ],
-  },
-];
 
 const isLocalhost = () => {
   const host = window.location.hostname;
   return host === "localhost" || host === "127.0.0.1" || host === "::1";
 };
+
+const COMMAND_CENTER_SESSION_KEY = "admin_command_center_session_seen";
+const ADMIN_ACCESS_CACHE_KEY = "admin_access_verified_until";
+const ADMIN_ACCESS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 export const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -188,73 +95,107 @@ export const AdminLayout = () => {
   // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
+      const failAuth = async (shouldSignOut = false) => {
+        sessionStorage.removeItem(ADMIN_ACCESS_CACHE_KEY);
+        if (shouldSignOut) {
+          await supabase.auth.signOut();
+        }
+        navigate('/admin/login');
+      };
+
+      const validateAccess = async (userId: string, allowRetry: boolean) => {
+        const rolePromise = supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .eq('role', 'admin')
+          .single();
+
+        const readMfaSession = () =>
+          supabase
+            .from('admin_mfa_sessions')
+            .select('fully_verified_at, expires_at')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        const [{ data: roleData, error: roleError }, mfaResult] = await Promise.all([
+          rolePromise,
+          readMfaSession(),
+        ]);
+
+        if (roleError || !roleData) {
+          return { ok: false, shouldSignOut: true };
+        }
+
+        const isMfaValid = (row: { fully_verified_at?: string | null; expires_at?: string | null } | null) => {
+          const expiresAt = row?.expires_at ? new Date(row.expires_at).getTime() : 0;
+          return !!row?.fully_verified_at && expiresAt > Date.now();
+        };
+
+        if (isMfaValid(mfaResult.data ?? null)) {
+          return { ok: true, shouldSignOut: false };
+        }
+
+        if (!allowRetry) {
+          return { ok: false, shouldSignOut: false };
+        }
+
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+          await new Promise((resolve) => setTimeout(resolve, 150));
+          const retryResult = await readMfaSession();
+          if (isMfaValid(retryResult.data ?? null)) {
+            return { ok: true, shouldSignOut: false };
+          }
+        }
+
+        return { ok: false, shouldSignOut: false };
+      };
+
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          navigate('/admin/login');
+          await failAuth(false);
           return;
         }
 
-        // Check if user has admin role
-        const { data: roleData, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .eq('role', 'admin')
-          .single();
+        const hasClientFlag = sessionStorage.getItem('admin_2fa_verified') === 'true';
+        const cachedUntil = Number(sessionStorage.getItem(ADMIN_ACCESS_CACHE_KEY) || "0");
+        const cacheStillValid = cachedUntil > Date.now();
 
-        if (roleError || !roleData) {
-          await supabase.auth.signOut();
-          navigate('/admin/login');
-          return;
-        }
+        if (hasClientFlag && cacheStillValid) {
+          setIsAuthenticated(true);
+          setIsLoading(false);
+          registerSession();
 
-        // Enforce server-verified MFA session (admin_mfa_sessions).
-        const getMfaOk = async () => {
-          const { data: mfaRow, error: mfaErr } = await supabase
-            .from('admin_mfa_sessions')
-            .select('fully_verified_at, expires_at')
-            .eq('user_id', session.user.id)
-            .maybeSingle();
-
-          const expiresAt = mfaRow?.expires_at ? new Date(mfaRow.expires_at).getTime() : 0;
-          const ok = !!mfaRow?.fully_verified_at && expiresAt > Date.now();
-          return { ok, error: mfaErr };
-        };
-
-        let { ok, error: mfaErr } = await getMfaOk();
-        if (!ok) {
-          // Allow brief propagation delay after passkey verification
-          const hasClientFlag = sessionStorage.getItem('admin_2fa_verified') === 'true';
-          if (hasClientFlag) {
-            for (let i = 0; i < 5 && !ok; i += 1) {
-              await new Promise((r) => setTimeout(r, 400));
-              ({ ok, error: mfaErr } = await getMfaOk());
-            }
+          const validation = await validateAccess(session.user.id, false);
+          if (!validation.ok) {
+            await failAuth(validation.shouldSignOut);
           }
+          return;
         }
-        if (mfaErr || !ok) {
-          // Local development bypass: allow access only on localhost when
-          // client-side verification flag is present.
-          const hasClientFlag = sessionStorage.getItem('admin_2fa_verified') === 'true';
+
+        const validation = await validateAccess(session.user.id, hasClientFlag);
+        if (!validation.ok) {
           const allowLocalhostBypass = isLocalhost() && hasClientFlag;
           if (allowLocalhostBypass) {
             setIsAuthenticated(true);
+            sessionStorage.setItem(ADMIN_ACCESS_CACHE_KEY, String(Date.now() + ADMIN_ACCESS_CACHE_TTL_MS));
             registerSession();
             return;
           }
-          navigate('/admin/login');
+          await failAuth(validation.shouldSignOut);
           return;
         }
 
         setIsAuthenticated(true);
+        sessionStorage.setItem(ADMIN_ACCESS_CACHE_KEY, String(Date.now() + ADMIN_ACCESS_CACHE_TTL_MS));
         
         // Register this session for cross-device tracking
         registerSession();
       } catch (error) {
         console.error('Auth check failed:', error);
-        navigate('/admin/login');
+        await failAuth(false);
       } finally {
         setIsLoading(false);
       }
@@ -267,6 +208,8 @@ export const AdminLayout = () => {
       if (event === 'SIGNED_OUT') {
         sessionStorage.removeItem('admin_2fa_verified');
         sessionStorage.removeItem('admin_2fa_timestamp');
+        sessionStorage.removeItem(COMMAND_CENTER_SESSION_KEY);
+        sessionStorage.removeItem(ADMIN_ACCESS_CACHE_KEY);
         navigate('/admin/login');
       }
     });
@@ -277,6 +220,8 @@ export const AdminLayout = () => {
   const handleSignOut = async () => {
     sessionStorage.removeItem('admin_2fa_verified');
     sessionStorage.removeItem('admin_2fa_timestamp');
+    sessionStorage.removeItem(COMMAND_CENTER_SESSION_KEY);
+    sessionStorage.removeItem(ADMIN_ACCESS_CACHE_KEY);
     await supabase.auth.signOut();
     toast.success('Signed out successfully');
     navigate('/admin/login');
@@ -352,10 +297,10 @@ export const AdminLayout = () => {
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
     <>
       {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-border/30">
+      <div className="flex h-14 items-center justify-between border-b border-border/40 px-3.5">
         <Link to="/admin" className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30 overflow-hidden group">
-            <Command className="w-5 h-5 text-white transition-transform group-hover:scale-110" />
+          <div className="admin-logo-surface group relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-sky-500 via-blue-500 to-indigo-600 shadow-lg shadow-blue-500/20">
+            <Command className="h-4.5 w-4.5 text-white transition-transform group-hover:scale-110" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>
           {(!collapsed || isMobile) && (
@@ -364,11 +309,11 @@ export const AdminLayout = () => {
               animate={{ opacity: 1 }}
               className="flex flex-col"
             >
-              <span className="font-bold text-sm text-foreground flex items-center gap-1">
+              <span className="flex items-center gap-1 text-sm font-semibold text-foreground">
                 Command Center
-                <Sparkles className="w-3 h-3 text-violet-400" />
+                <Sparkles className="h-3 w-3 text-sky-600 dark:text-sky-400" />
               </span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">CEO Dashboard</span>
+              <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Admin Console</span>
             </motion.div>
           )}
         </Link>
@@ -394,14 +339,14 @@ export const AdminLayout = () => {
           }
         }}
         onScroll={() => handleSidebarScroll(isMobile)}
-        className="flex-1 py-4 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border/50"
+        className="flex-1 overflow-y-auto py-3 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border/50"
       >
-        <div className="space-y-6 px-3">
-          {sidebarGroups.map((group) => (
+        <div className="space-y-5 px-2.5">
+          {adminSidebarGroups.map((group) => (
             <div key={group.title}>
               {(!collapsed || isMobile) && (
-                <div className="px-3 mb-2">
-                  <span className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                <div className="mb-2 px-2.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
                     {group.title}
                   </span>
                 </div>
@@ -419,10 +364,10 @@ export const AdminLayout = () => {
                         if (isMobile) setMobileMenuOpen(false);
                       }}
                       className={cn(
-                        "relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
+                        "group relative flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200",
                         isActive
-                          ? "bg-gradient-to-r from-violet-500/20 via-purple-500/10 to-transparent text-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                          ? "bg-gradient-to-r from-primary/18 via-primary/8 to-transparent text-foreground"
+                          : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
                       )}
                     >
                       {/* Active indicator glow */}
@@ -432,23 +377,23 @@ export const AdminLayout = () => {
                         />
                       )}
                       <item.icon className={cn(
-                        "w-5 h-5 shrink-0 transition-all duration-200",
-                        isActive ? `${item.color} drop-shadow-[0_0_8px_currentColor]` : item.color,
+                        "h-[18px] w-[18px] shrink-0 transition-all duration-200",
+                        isActive ? `${item.color} drop-shadow-[0_0_6px_currentColor]` : item.color,
                         "group-hover:scale-110"
                       )} />
                       {(!collapsed || isMobile) && (
                         <>
                           <span className={cn(
-                            "text-sm font-medium truncate flex-1",
+                            "flex-1 truncate text-[13px] font-medium",
                             isActive && "text-foreground"
                           )}>
                             {item.name}
                           </span>
                           {item.badge && (
                             <span className={cn(
-                              "px-1.5 py-0.5 text-[9px] font-medium rounded",
-                              getBadgeClassName(item.badge)
-                            )}>
+                            "rounded px-1.5 py-0.5 text-[9px] font-medium tracking-[0.08em]",
+                            getBadgeClassName(item.badge)
+                          )}>
                               {item.badge}
                             </span>
                           )}
@@ -464,19 +409,19 @@ export const AdminLayout = () => {
       </nav>
 
       {/* User Section */}
-      <div className="p-4 border-t border-border/30">
+      <div className="border-t border-border/40 p-3">
         <div className={cn(
           "flex items-center gap-3",
           collapsed && !isMobile && "justify-center"
         )}>
-          <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center overflow-hidden shadow-lg shadow-emerald-500/30">
+          <div className="admin-logo-surface relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/20">
             <span className="text-white font-bold text-sm">AP</span>
             <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 rounded-full border-2 border-card" />
           </div>
           {(!collapsed || isMobile) && (
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-sm truncate text-foreground">Abhishek Panda</div>
-              <div className="text-[10px] text-muted-foreground truncate">CEO & Founder • OriginX Labs</div>
+              <div className="truncate text-sm font-semibold text-foreground">Abhishek Panda</div>
+              <div className="truncate text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Admin Operator</div>
             </div>
           )}
           {(!collapsed || isMobile) && (
@@ -499,22 +444,22 @@ export const AdminLayout = () => {
       <CommandPalette />
       <div
         className={cn(
-          "h-screen overflow-hidden bg-background text-foreground flex w-full relative",
-          collapsed ? "lg:pl-20" : "lg:pl-[280px]"
+          "admin-shell relative flex h-screen w-full overflow-hidden bg-background text-foreground",
+          collapsed ? "lg:pl-[76px]" : "lg:pl-[248px]"
         )}
       >
         {/* Desktop Sidebar - ensure it's always clickable */}
         <aside
           className={cn(
-            "hidden lg:flex flex-col border-r border-border/30 bg-card/60 backdrop-blur-xl h-screen fixed left-0 top-0 shrink-0 transition-[width] duration-300 ease-in-out z-40 pointer-events-auto",
-            collapsed ? "w-20" : "w-[280px]"
+            "pointer-events-auto fixed left-0 top-0 z-40 hidden h-screen shrink-0 flex-col border-r border-border/40 bg-card/75 backdrop-blur-xl transition-[width] duration-300 ease-in-out lg:flex",
+            collapsed ? "w-[76px]" : "w-[248px]"
           )}
         >
           <SidebarContent />
         </aside>
 
         {/* Mobile Header */}
-        <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-xl border-b border-border/30 flex items-center justify-between px-4 z-40">
+        <div className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b border-border/40 bg-card/85 px-4 backdrop-blur-xl lg:hidden">
           <Button
             variant="ghost"
             size="icon"
@@ -524,10 +469,10 @@ export const AdminLayout = () => {
             <Menu className="w-6 h-6" />
           </Button>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <div className="admin-logo-surface flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 via-blue-500 to-indigo-600 shadow-lg shadow-blue-500/20">
               <Command className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-sm text-foreground">Command Center</span>
+            <span className="text-sm font-semibold text-foreground">Command Center</span>
           </div>
           <ThemeToggle />
         </div>
@@ -548,7 +493,7 @@ export const AdminLayout = () => {
                 animate={{ x: 0 }}
                 exit={{ x: -280 }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="lg:hidden fixed left-0 top-0 bottom-0 w-72 bg-card border-r border-border/30 z-50 overflow-y-auto flex flex-col"
+                className="fixed bottom-0 left-0 top-0 z-50 flex w-[290px] flex-col overflow-y-auto border-r border-border/40 bg-card lg:hidden"
               >
                 <div className="absolute top-4 right-4 z-10">
                   <Button
@@ -569,11 +514,11 @@ export const AdminLayout = () => {
         {/* Main Content */}
         <main className="flex-1 min-w-0 flex h-screen flex-col relative z-10">
           {/* Top Bar */}
-          <header className="hidden lg:flex h-16 items-center justify-between px-6 border-b border-border/30 bg-card/30 backdrop-blur-xl z-20">
+          <header className="z-20 hidden h-14 items-center justify-between border-b border-border/40 bg-card/45 px-4 backdrop-blur-xl lg:flex">
             <div className="flex items-center gap-4">
               <Button
                 variant="outline"
-                className="w-80 h-9 justify-start pl-3 bg-muted/30 border-border/30 text-muted-foreground hover:bg-muted/50 hover:border-violet-500/50 rounded-xl"
+                className="h-9 w-[320px] justify-start rounded-xl border-border/40 bg-muted/30 pl-3 text-muted-foreground hover:border-primary/40 hover:bg-muted/50"
                 onClick={() => {
                   const event = new KeyboardEvent('keydown', { key: 'k', metaKey: true });
                   document.dispatchEvent(event);
@@ -586,7 +531,7 @@ export const AdminLayout = () => {
                 </kbd>
               </Button>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <ActiveSessionIndicator
                 activeSessions={activeSessions}
                 onKillSession={killSession}
@@ -604,7 +549,7 @@ export const AdminLayout = () => {
           <div
             ref={contentRef}
             onScroll={handleContentScroll}
-            className="flex-1 overflow-y-auto p-4 md:p-6 pt-20 lg:pt-6"
+            className="flex-1 overflow-y-auto p-3 pt-16 md:p-4 md:pt-16 lg:p-5 lg:pt-5"
           >
             <Outlet />
           </div>

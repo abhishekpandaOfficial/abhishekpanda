@@ -105,9 +105,9 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
       icon: Home,
     },
     {
-      title: "Blogs",
-      description: "Browse chapter-style blog series and topic tracks.",
-      to: "/blogs",
+      title: "Cheatsheets",
+      description: "Browse mastery series, guides, and topic tracks.",
+      to: "/cheatsheets",
       icon: FileText,
     },
     {
@@ -440,7 +440,7 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
           showMobileActions
           popularTitle="Popular Blog Chapters"
           popularItems={popularBlogs}
-          popularCta={{ label: "Open all blogs", to: "/blogs" }}
+          popularCta={{ label: "Open all cheatsheets", to: "/cheatsheets" }}
           secondaryTitle="Continue Reading"
           secondaryItems={[...relatedArticles.slice(0, 3), ...article.relatedBlogs.slice(0, 2)]}
           newsletterTitle="Weekly engineering and article updates"

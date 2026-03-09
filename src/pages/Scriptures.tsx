@@ -55,7 +55,7 @@ export default function Scriptures() {
   const canonical = `${SITE_URL}${isDetail ? `/scriptures/${slug}` : "/scriptures"}`;
   const relatedPages = [
     { title: "Articles", to: "/articles", description: "Knowledge guides and deep dives" },
-    { title: "Blogs", to: "/blogs", description: "Updates and insights" },
+    { title: "Cheatsheets", to: "/cheatsheets", description: "Series and mastery tracks" },
     { title: "About", to: "/about", description: "Author and mission" },
   ];
 

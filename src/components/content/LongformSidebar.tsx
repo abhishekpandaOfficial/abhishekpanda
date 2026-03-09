@@ -46,7 +46,7 @@ export function LongformSidebar({
   activeHeadingId,
   popularTitle = "Popular Articles",
   popularItems,
-  popularCta = { label: "View all articles", to: "/blogs" },
+  popularCta = { label: "View all cheatsheets", to: "/cheatsheets" },
   secondaryTitle,
   secondaryItems = [],
   newsletterTitle = "Stay ahead in engineering",

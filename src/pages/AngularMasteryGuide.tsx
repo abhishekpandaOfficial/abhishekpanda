@@ -2,9 +2,9 @@ import { useMemo, useRef } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { CheatsheetGuideShell } from "@/components/cheatsheets/CheatsheetGuideShell";
 
-const STATIC_GUIDE_VERSION = "2026-03-09-solid-principles-guide-v2";
+const STATIC_GUIDE_VERSION = "2026-03-09-angular-mastery-guide-v2";
 
-const SolidPrinciplesGuide = () => {
+const AngularMasteryGuide = () => {
   const { theme } = useTheme();
   const initialThemeRef = useRef(theme);
 
@@ -15,16 +15,16 @@ const SolidPrinciplesGuide = () => {
       v: STATIC_GUIDE_VERSION,
     });
 
-    return `/embedded/solid-principles-guide.html?${params.toString()}`;
+    return `/embedded/angular-mastery.html?${params.toString()}`;
   }, []);
 
   return (
     <CheatsheetGuideShell
       iframeSrc={iframeSrc}
-      iframeTitle="SOLID Principles Guide"
-      seriesSlug="solid-principles"
+      iframeTitle="Angular Mastery"
+      seriesSlug="angular-mastery"
     />
   );
 };
 
-export default SolidPrinciplesGuide;
+export default AngularMasteryGuide;

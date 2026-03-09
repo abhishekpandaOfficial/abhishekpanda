@@ -82,10 +82,10 @@ export const FeaturedBlog = () => {
         >
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-2 text-sm font-semibold mb-6">
             <Sparkles className="w-4 h-4" />
-            Blog Learning Tracks
+            Cheatsheet Learning Tracks
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-3 tracking-tight">
-            Latest from the <span className="gradient-text">Blog</span>
+            Explore the <span className="gradient-text">Cheatsheets</span>
           </h2>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
             Premium learning tracks and deep dives across architecture, cloud, data, and AI. Follow a structured path from fundamentals to architect-level depth.
@@ -94,8 +94,8 @@ export const FeaturedBlog = () => {
 
         <div className="mb-10">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <h3 className="text-xl md:text-2xl font-black tracking-tight text-foreground">Read from Blog Series</h3>
-            <Link to="/blogs" className="text-sm font-semibold text-primary inline-flex items-center gap-2">
+            <h3 className="text-xl md:text-2xl font-black tracking-tight text-foreground">Read from Cheatsheet Series</h3>
+            <Link to="/cheatsheets" className="text-sm font-semibold text-primary inline-flex items-center gap-2">
               Open all series
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -105,9 +105,9 @@ export const FeaturedBlog = () => {
 
         <div className="mb-12">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <h3 className="text-xl md:text-2xl font-black tracking-tight text-foreground">Latest from Blogs Page</h3>
-            <Link to="/blogs" className="text-sm font-semibold text-primary inline-flex items-center gap-2">
-              View all blog cards
+            <h3 className="text-xl md:text-2xl font-black tracking-tight text-foreground">Latest from Cheatsheets Hub</h3>
+            <Link to="/cheatsheets" className="text-sm font-semibold text-primary inline-flex items-center gap-2">
+              View all cheatsheet cards
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -125,15 +125,15 @@ export const FeaturedBlog = () => {
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-border/60 bg-card/60 p-8 text-center text-muted-foreground">
-              No blog cards found yet. Add files in <code>src/content/blog</code> or publish posts to show them here.
+              No cheatsheet cards found yet. Add files in <code>src/content/blog</code> or publish posts to show them here.
             </div>
           )}
         </div>
 
         <div className="text-center">
           <Button variant="hero-outline" size="lg" asChild>
-            <Link to="/blogs">
-              Explore Blogs
+            <Link to="/cheatsheets">
+              Explore Cheatsheets
               <ArrowRight className="w-4 h-4" />
             </Link>
           </Button>

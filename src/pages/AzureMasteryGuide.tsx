@@ -2,9 +2,9 @@ import { useMemo, useRef } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { CheatsheetGuideShell } from "@/components/cheatsheets/CheatsheetGuideShell";
 
-const STATIC_GUIDE_VERSION = "2026-03-09-solid-principles-guide-v2";
+const STATIC_GUIDE_VERSION = "2026-03-09-azure-mastery-guide-v2";
 
-const SolidPrinciplesGuide = () => {
+const AzureMasteryGuide = () => {
   const { theme } = useTheme();
   const initialThemeRef = useRef(theme);
 
@@ -15,16 +15,16 @@ const SolidPrinciplesGuide = () => {
       v: STATIC_GUIDE_VERSION,
     });
 
-    return `/embedded/solid-principles-guide.html?${params.toString()}`;
+    return `/embedded/azure-dotnet10-mastery-syllabus-enhanced.html?${params.toString()}`;
   }, []);
 
   return (
     <CheatsheetGuideShell
       iframeSrc={iframeSrc}
-      iframeTitle="SOLID Principles Guide"
-      seriesSlug="solid-principles"
+      iframeTitle="Azure + .NET 10 Complete Mastery Syllabus"
+      seriesSlug="azure-mastery"
     />
   );
 };
 
-export default SolidPrinciplesGuide;
+export default AzureMasteryGuide;
