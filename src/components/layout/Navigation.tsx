@@ -10,16 +10,12 @@ import {
   FileText,
   Newspaper,
   Brain,
-  GraduationCap,
   Lock,
   Code2,
   Cpu,
   FolderOpen,
-  Target,
   BookOpenText,
-  Shield,
-  ScrollText,
-  BriefcaseBusiness
+  ScrollText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -66,7 +62,6 @@ export const Navigation = () => {
 
   const isGalaxyActive = location.pathname.startsWith("/llm-galaxy") || location.pathname === "/llm-visualizer";
   const isBlogActive =
-    location.pathname.startsWith("/blog") ||
     location.pathname.startsWith("/blogs") ||
     location.pathname.startsWith("/cheatsheets") ||
     location.pathname.startsWith("/tech") ||
@@ -74,6 +69,8 @@ export const Navigation = () => {
     location.pathname === "/angular-mastery" ||
     location.pathname === "/csharp-mastery" ||
     location.pathname === "/linq-mastery" ||
+    location.pathname === "/microservices-mastery" ||
+    location.pathname === "/kafka-mastery" ||
     location.pathname === "/blazor-mastery" ||
     location.pathname === "/efcore-mastery" ||
     location.pathname === "/dotnet-mastery" ||
@@ -82,13 +79,11 @@ export const Navigation = () => {
     location.pathname === "/solid-principles-guide" ||
     location.pathname === "/blogs/solid-principles" ||
     location.pathname === "/cheatsheets/solid-principles";
+  const isAiMlBlogsActive =
+    location.pathname.startsWith("/ai-ml-blogs");
   const isArticlesActive = location.pathname.startsWith("/articles");
   const isScripturesActive = location.pathname.startsWith("/scriptures");
-  const isCoursesActive = location.pathname === "/courses" || location.pathname.startsWith("/courses/");
-  const isCaseStudiesActive = location.pathname.startsWith("/case-studies");
-  const isInterviewActive = location.pathname.startsWith("/interview");
   const isProjectsActive = location.pathname.startsWith("/projects");
-  const isClassifiedActive = location.pathname.startsWith("/classified");
   const desktopNavItemClass =
     "relative flex items-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all duration-300 group xl:gap-2.5 xl:px-3 xl:py-2.5 xl:text-[13px] 2xl:rounded-xl 2xl:px-3.5 2xl:text-sm";
   const desktopNavIconClass = "h-4 w-4 shrink-0 transition-transform group-hover:scale-110 xl:h-[17px] xl:w-[17px] 2xl:h-[18px] 2xl:w-[18px]";
@@ -139,26 +134,8 @@ export const Navigation = () => {
                 </Link>
               ))}
 
-              {/* Courses */}
               <Link
-                to="/courses"
-                className={cn(
-                  desktopNavItemClass,
-                  isCoursesActive
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                <span className="relative flex items-center gap-2">
-                  <GraduationCap className={desktopNavIconClass} />
-                  Courses
-                </span>
-              </Link>
-
-              <Link
-                to="/cheatsheets"
+                to="/blogs"
                 className={cn(
                   desktopNavItemClass,
                   isBlogActive
@@ -170,7 +147,24 @@ export const Navigation = () => {
                 <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                 <span className="relative flex items-center gap-2">
                   <ScrollText className={desktopNavIconClass} />
-                  Cheatsheets
+                  Blogs
+                </span>
+              </Link>
+
+              <Link
+                to="/ai-ml-blogs"
+                className={cn(
+                  desktopNavItemClass,
+                  isAiMlBlogsActive
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                <span className="relative flex items-center gap-2">
+                  <Brain className={desktopNavIconClass} />
+                  AI/ML Blogs
                 </span>
               </Link>
 
@@ -192,40 +186,6 @@ export const Navigation = () => {
               </Link>
 
               <Link
-                to="/case-studies"
-                className={cn(
-                  desktopNavItemClass,
-                  isCaseStudiesActive
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                <span className="relative flex items-center gap-2">
-                  <BriefcaseBusiness className={desktopNavIconClass} />
-                  Case Studies
-                </span>
-              </Link>
-
-              <Link
-                to="/interview"
-                className={cn(
-                  desktopNavItemClass,
-                  isInterviewActive
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                <span className="relative flex items-center gap-2">
-                  <Target className={desktopNavIconClass} />
-                  Interview
-                </span>
-              </Link>
-
-              <Link
                 to="/projects"
                 className={cn(
                   desktopNavItemClass,
@@ -240,24 +200,6 @@ export const Navigation = () => {
                 <span className="relative flex items-center gap-2">
                   <FolderOpen className={desktopNavIconClass} />
                   Projects
-                </span>
-              </Link>
-
-              <Link
-                to="/classified"
-                className={cn(
-                  desktopNavItemClass,
-                  "hidden min-[1480px]:flex",
-                  isClassifiedActive
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                <span className="relative flex items-center gap-2">
-                  <Shield className={desktopNavIconClass} />
-                  Classified
                 </span>
               </Link>
 
@@ -371,17 +313,6 @@ export const Navigation = () => {
           >
             <div className="absolute inset-0 bg-background/95 backdrop-blur-xl" />
             <nav className="relative container mx-auto px-4 py-8 flex flex-col gap-2 max-h-[calc(100vh-5rem)] overflow-y-auto">
-              <Link
-                to="/classified"
-                className="mb-4 flex items-center justify-between rounded-2xl border border-border/60 bg-card/70 px-4 py-3 backdrop-blur-xl transition hover:border-primary/35 hover:bg-card"
-              >
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Global View</div>
-                  <div className="text-xs text-muted-foreground">Open ARGUS VIII classified preview</div>
-                </div>
-                <HeaderGlobe compact />
-              </Link>
-
               {/* About */}
               {navLinks.slice(0, 1).map((link, index) => (
                 <motion.div
@@ -405,33 +336,13 @@ export const Navigation = () => {
                 </motion.div>
               ))}
 
-              {/* Courses */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <Link
-                  to="/courses"
-                  className={cn(
-                    mobileNavItemClass,
-                    isCoursesActive
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <GraduationCap className={mobileNavIconClass} />
-                  Courses
-                </Link>
-              </motion.div>
-
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.12 }}
               >
                 <Link
-                  to="/cheatsheets"
+                  to="/blogs"
                   className={cn(
                     mobileNavItemClass,
                     isBlogActive
@@ -440,7 +351,26 @@ export const Navigation = () => {
                   )}
                 >
                   <ScrollText className={mobileNavIconClass} />
-                  Cheatsheets
+                  Blogs
+                </Link>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.127 }}
+              >
+                <Link
+                  to="/ai-ml-blogs"
+                  className={cn(
+                    mobileNavItemClass,
+                    isAiMlBlogsActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <Brain className={mobileNavIconClass} />
+                  AI/ML Blogs
                 </Link>
               </motion.div>
 
@@ -479,63 +409,6 @@ export const Navigation = () => {
                 >
                   <BookOpenText className={mobileNavIconClass} />
                   Scriptures
-                </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.14 }}
-              >
-                <Link
-                  to="/case-studies"
-                  className={cn(
-                    mobileNavItemClass,
-                    isCaseStudiesActive
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <BriefcaseBusiness className={mobileNavIconClass} />
-                  Case Studies
-                </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.16 }}
-              >
-                <Link
-                  to="/classified"
-                  className={cn(
-                    mobileNavItemClass,
-                    isClassifiedActive
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <Shield className={mobileNavIconClass} />
-                  Classified
-                </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.15 }}
-              >
-                <Link
-                  to="/interview"
-                  className={cn(
-                    mobileNavItemClass,
-                    isInterviewActive
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <Target className={mobileNavIconClass} />
-                  Interview
                 </Link>
               </motion.div>
 

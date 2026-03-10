@@ -56,7 +56,7 @@ export function MasteryEmbedPage({
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/cheatsheets">Cheatsheets</Link>
+                  <Link to="/blogs">Blogs</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />

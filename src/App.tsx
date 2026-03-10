@@ -34,6 +34,9 @@ const ModelComparisonPage = lazy(() => import("./pages/ModelComparisonPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const BlogAggregator = lazy(() => import("./pages/BlogAggregator"));
 const BlogSeries = lazy(() => import("./pages/BlogSeries"));
+const AiMlBlogsHub = lazy(() => import("./pages/AiMlBlogsHub"));
+const AiMlSeries = lazy(() => import("./pages/AiMlSeries"));
+const MachineLearningCoreMastery = lazy(() => import("./pages/MachineLearningCoreMastery"));
 const ArticlesPage = lazy(() => import("./pages/Articles"));
 const CaseStudies = lazy(() => import("./pages/CaseStudies"));
 const Interview = lazy(() => import("./pages/Interview"));
@@ -165,7 +168,8 @@ const App = () => {
                 <Route path="/ai-closed_models_2026.html" element={<Navigate to="/llm-galaxy/closed-source-models" replace />} />
                 <Route path="/open-source-models-march-2026.html" element={<Navigate to="/llm-galaxy/open-source-models" replace />} />
                 <Route path="/ai-model-comparison.html" element={<Navigate to="/llm-galaxy/model-comparison" replace />} />
-                <Route path="/cheatsheets" element={<BlogAggregator />} />
+                <Route path="/blogs" element={<BlogAggregator />} />
+                <Route path="/cheatsheets" element={<Navigate to="/blogs" replace />} />
                 <Route path="/cheatsheets/azure-mastery" element={<AzureMasteryGuide />} />
                 <Route path="/cheatsheets/angular-mastery" element={<AngularMasteryGuide />} />
                 <Route path="/cheatsheets/csharp-mastery" element={<CSharpMastery />} />
@@ -177,7 +181,9 @@ const App = () => {
                 <Route path="/cheatsheets/efcore-mastery" element={<EFCoreMastery />} />
                 <Route path="/cheatsheets/dotnet-mastery-toc" element={<Navigate to="/cheatsheets/dotnet-mastery" replace />} />
                 <Route path="/cheatsheets/:seriesSlug" element={<BlogSeries />} />
-                <Route path="/blogs" element={<Navigate to="/cheatsheets" replace />} />
+                <Route path="/ai-ml-blogs" element={<AiMlBlogsHub />} />
+                <Route path="/ai-ml-blogs/machine-learning-core-mastery" element={<MachineLearningCoreMastery />} />
+                <Route path="/ai-ml-blogs/:seriesSlug" element={<AiMlSeries />} />
                 <Route path="/blogs/azure-mastery" element={<Navigate to="/cheatsheets/azure-mastery" replace />} />
                 <Route path="/blogs/angular-mastery" element={<Navigate to="/cheatsheets/angular-mastery" replace />} />
                 <Route path="/blogs/linq-mastery" element={<Navigate to="/cheatsheets/linq-mastery" replace />} />

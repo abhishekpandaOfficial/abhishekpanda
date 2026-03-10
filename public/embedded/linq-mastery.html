@@ -165,7 +165,7 @@ strong{color:var(--text)}
 .cb-lang{font-size:9.5px;color:var(--g1);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase}
 .cp-btn{font-size:9.5px;color:var(--text3);background:transparent;border:1px solid var(--border);border-radius:4px;padding:2px 8px;cursor:pointer;font-family:var(--mono);transition:all .2s}
 .cp-btn:hover{color:var(--text);border-color:var(--border2)}
-.cb-body{padding:14px;overflow-x:auto;font-family:var(--mono);font-size:11.5px;line-height:1.85;color:#c5e8d8}
+.cb-body{padding:14px;overflow-x:auto;font-family:var(--mono);font-size:11.5px;line-height:1.85;color:#c5e8d8;white-space:pre}
 .cb-body::-webkit-scrollbar{height:3px}
 .cb-body::-webkit-scrollbar-thumb{background:var(--border2)}
 
@@ -187,7 +187,9 @@ strong{color:var(--text)}
 .fl li::before{content:'▸';color:var(--g1);font-size:10px;margin-top:3px;flex-shrink:0}
 
 /* DIAGRAM */
-.dw{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin:12px 0;overflow:auto}
+.dw{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin:12px 0;overflow:hidden}
+.dw svg{display:block;width:100%;max-width:min(100%,760px);max-height:340px;height:auto;overflow:hidden;margin:0 auto}
+.dw img{display:block;width:100%;max-width:min(100%,760px);max-height:340px;height:auto;object-fit:contain;margin:0 auto}
 .dt{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;text-align:center}
 
 /* PATTERNS */
@@ -254,7 +256,7 @@ strong{color:var(--text)}
     <div class="count-chip"><b>100</b> Q&amp;A</div>
     <div class="count-chip"><b>50</b> Patterns</div>
   </div>
-  <div class="top-pill">.NET <span>10</span> · C# <span>13</span></div>
+  <div class="top-pill">.NET <span>10</span> · C# <span>14</span></div>
 </div>
 
 <div class="layout">
@@ -511,6 +513,1565 @@ const CHAPTERS = [
 ];
 
 // ═══════════════════════════════════════════════════════
+// GENERATED DETAIL HELPERS
+// ═══════════════════════════════════════════════════════
+function findChapter(cid) {
+  return CHAPTERS.find(ch => ch.id === cid);
+}
+
+function findTopic(cid, tid) {
+  const ch = findChapter(cid);
+  return ch?.topics.find(topic => topic.id === tid) || null;
+}
+
+function escHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function splitSvgLines(text, maxChars = 16, maxLines = 2) {
+  const words = String(text ?? '').trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return [''];
+
+  const lines = [];
+  let current = '';
+
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length <= maxChars || !current) {
+      current = candidate;
+      continue;
+    }
+
+    lines.push(current);
+    current = word;
+
+    if (lines.length === maxLines - 1) break;
+  }
+
+  const consumedWords = lines.join(' ').split(/\s+/).filter(Boolean).length;
+  const remainingWords = words.slice(consumedWords);
+  const remainder = current ? [current, ...remainingWords.slice(1)] : remainingWords;
+
+  if (remainder.length) {
+    const finalLine = remainder.join(' ');
+    lines.push(finalLine.length > maxChars * 1.2 ? `${finalLine.slice(0, Math.max(0, maxChars - 1)).trimEnd()}…` : finalLine);
+  }
+
+  return lines.slice(0, maxLines);
+}
+
+function renderSvgTextBlock(text, x, y, className, fontSize, options = {}) {
+  const maxChars = options.maxChars || 16;
+  const maxLines = options.maxLines || 2;
+  const lineHeight = options.lineHeight || fontSize + 2;
+  const lines = splitSvgLines(text, maxChars, maxLines);
+  const startY = y - ((lines.length - 1) * lineHeight) / 2;
+
+  return `<text x="${x}" y="${y}" text-anchor="middle" class="${className}" font-size="${fontSize}">${lines.map((line, index) => `<tspan x="${x}" y="${startY + (index * lineHeight)}">${escHtml(line)}</tspan>`).join('')}</text>`;
+}
+
+function renderList(items) {
+  return `<ul class="fl">${items.map(item => `<li>${item}</li>`).join('')}</ul>`;
+}
+
+function renderCodeBlock(title, code) {
+  return `<div class="cb"><div class="cb-hdr"><span class="cb-lang">${escHtml(title)}</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body">${escHtml(code)}</div></div>`;
+}
+
+function renderTable(headers, rows) {
+  return `<table class="tbl"><tr>${headers.map(h => `<th>${escHtml(h)}</th>`).join('')}</tr>${rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}</table>`;
+}
+
+function renderTopicDiagram(guide, tab) {
+  const accent = guide.accent || '#00ff88';
+  const soft = accent + '22';
+  const title = `${guide.title.toUpperCase()} · ${tab.toUpperCase()} FLOW`;
+  return `<div class="dw">
+<div class="dt">${escHtml(title)}</div>
+<svg viewBox="0 0 420 224" width="100%" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="gd1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <polygon points="0 0,7 2.5,0 5" fill="${accent}"></polygon>
+    </marker>
+  </defs>
+  <rect x="10" y="38" width="84" height="36" rx="8" fill="${soft}" stroke="${accent}" stroke-width="1.4"></rect>
+  ${renderSvgTextBlock('Source', 52, 56, 'ft-g', 10, { maxChars: 10, maxLines: 1 })}
+  ${renderSvgTextBlock(guide.sourceHint, 52, 104, 'ft', 8, { maxChars: 14, maxLines: 2, lineHeight: 9 })}
+
+  <rect x="116" y="38" width="104" height="36" rx="8" fill="#0d1a17" stroke="#1e3530" stroke-width="1.4"></rect>
+  ${renderSvgTextBlock(guide.title, 168, 56, 'ft', 9, { maxChars: 16, maxLines: 2, lineHeight: 10 })}
+  ${renderSvgTextBlock(guide.operatorHint, 168, 104, 'ft', 8, { maxChars: 16, maxLines: 2, lineHeight: 9 })}
+
+  <rect x="242" y="38" width="92" height="36" rx="8" fill="#0d1a17" stroke="#4cc9f0" stroke-width="1.4"></rect>
+  <text x="288" y="56" text-anchor="middle" fill="#4cc9f0" font-family="'Fira Code',monospace" font-size="10">Execution</text>
+  ${renderSvgTextBlock(guide.execution, 288, 104, 'ft', 8, { maxChars: 18, maxLines: 2, lineHeight: 9 })}
+
+  <rect x="356" y="38" width="54" height="36" rx="8" fill="${soft}" stroke="${accent}" stroke-width="1.4"></rect>
+  ${renderSvgTextBlock('Result', 383, 56, 'ft-g', 9, { maxChars: 10, maxLines: 1 })}
+  ${renderSvgTextBlock(guide.resultHint, 383, 104, 'ft', 8, { maxChars: 12, maxLines: 2, lineHeight: 9 })}
+
+  <line x1="94" y1="56" x2="116" y2="56" stroke="${accent}" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#gd1)">
+    <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.15s" repeatCount="indefinite"></animate>
+  </line>
+  <line x1="220" y1="56" x2="242" y2="56" stroke="${accent}" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#gd1)">
+    <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.15s" repeatCount="indefinite"></animate>
+  </line>
+  <line x1="334" y1="56" x2="356" y2="56" stroke="${accent}" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#gd1)">
+    <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.15s" repeatCount="indefinite"></animate>
+  </line>
+
+  <line x1="20" y1="132" x2="400" y2="132" stroke="#162620" stroke-width="1"></line>
+  ${renderSvgTextBlock(guide.diagramNote, 210, 162, 'ft', 8, { maxChars: 52, maxLines: 2, lineHeight: 10 })}
+  ${renderSvgTextBlock(guide.diagramNote2, 210, 190, 'ft', 8, { maxChars: 52, maxLines: 2, lineHeight: 10 })}
+</svg>
+</div>`;
+}
+
+function getChapterPlaybook(cid) {
+  const defaults = {
+    bestFor: 'Writing clear, testable, data-shaped business logic.',
+    sourceHint: 'Input sequence',
+    operatorHint: 'Operator pipeline',
+    execution: 'Deferred until enumeration',
+    resultHint: 'Materialized shape',
+    diagramNote: 'Most LINQ operators build a pipeline first and execute later.',
+    diagramNote2: 'The exact execution location depends on IEnumerable vs IQueryable.',
+    when: [
+      'Use it when you want code that explains intent before implementation mechanics.',
+      'Prefer it when data transformation is a bigger concern than mutation.',
+      'Keep the pipeline readable: filter early, project intentionally, materialize once.'
+    ],
+    tradeoffs: [
+      'Readable pipelines can still hide expensive operators if you do not reason about execution.',
+      'Composability is powerful, but over-chaining can make debugging harder.',
+      'The provider matters: in-memory LINQ and EF Core LINQ do not have the same runtime cost.'
+    ],
+    rules: [
+      'Keep queries lazy until you really need a concrete collection.',
+      'Avoid repeated enumeration when the source is expensive.',
+      'Choose the collection type that matches the downstream access pattern.'
+    ],
+  };
+
+  const playbooks = {
+    fundamentals: {
+      bestFor: 'Building the mental model for how LINQ thinks about data, providers, and execution.',
+      sourceHint: 'Collection / DB / XML',
+      operatorHint: 'Query syntax or methods',
+      execution: 'Provider decides execution model',
+      resultHint: 'Typed query result',
+      when: [
+        'Start here before performance tuning or EF Core work.',
+        'Use these ideas when explaining LINQ to teammates or interviewers.',
+        'Come back to this chapter whenever query behavior feels surprising.'
+      ],
+    },
+    syntax: {
+      bestFor: 'Choosing the syntax style that keeps intent obvious in day-to-day code.',
+      operatorHint: 'from / where / select',
+      resultHint: 'Readable pipeline',
+      when: [
+        'Use query syntax when joins, multiple from clauses, or group clauses read more clearly.',
+        'Use fluent syntax when composition, helper methods, or conditional filters matter more.',
+        'Mix both only when it measurably improves clarity.'
+      ],
+    },
+    filtering: {
+      bestFor: 'Reducing the sequence before expensive projection, grouping, or sorting.',
+      operatorHint: 'Predicate evaluation',
+      resultHint: 'Smaller sequence',
+      diagramNote: 'Filtering should normally happen as early as possible in the pipeline.',
+      when: [
+        'Use filtering first to shrink the work done by later operators.',
+        'Push filters to SQL when working with IQueryable and EF Core.',
+        'Prefer explicit predicate helpers over giant inline lambdas.'
+      ],
+      tradeoffs: [
+        'Complex predicates become hard to read if business rules are not named.',
+        'Moving to AsEnumerable too early can shift filtering into memory.',
+        'Capturing mutable outer state makes queries harder to reason about.'
+      ],
+    },
+    projection: {
+      bestFor: 'Reshaping data into DTOs, reports, view models, and nested results.',
+      operatorHint: 'Transform or flatten',
+      resultHint: 'New object shape',
+      diagramNote: 'Projection changes shape; it does not mutate the original elements.',
+    },
+    sorting: {
+      bestFor: 'Stable ordering before paging, ranking, or presentation.',
+      operatorHint: 'Key selectors',
+      execution: 'Buffers before sorted output',
+      resultHint: 'Ordered sequence',
+      diagramNote: 'Sorting usually buffers the full input before returning the first result.',
+    },
+    partitioning: {
+      bestFor: 'Paging, batching, slicing, and chunk-based processing.',
+      operatorHint: 'Windowing / slicing',
+      resultHint: 'Subset or batches',
+      diagramNote: 'Partitioning can be cheap or expensive depending on source type and order.',
+    },
+    element: {
+      bestFor: 'Reading one element safely while making assumptions explicit.',
+      operatorHint: 'Single element retrieval',
+      resultHint: 'One element or default',
+    },
+    aggregation: {
+      bestFor: 'Turning many records into one answer or one summary object.',
+      operatorHint: 'Accumulate / summarize',
+      execution: 'Consumes sequence to completion',
+      resultHint: 'Scalar or accumulator',
+    },
+    sets: {
+      bestFor: 'Uniqueness, membership, and comparing one sequence with another.',
+      operatorHint: 'Equality semantics',
+      resultHint: 'Set-style output',
+      diagramNote: 'Set operators depend heavily on equality rules and comparer quality.',
+    },
+    joins: {
+      bestFor: 'Combining related sequences without nested loops.',
+      operatorHint: 'Key matching',
+      resultHint: 'Correlated records',
+      execution: 'Often builds lookup on one side',
+      diagramNote: 'Join shape depends on whether you need inner, left, cross, or positional matching.',
+    },
+    grouping: {
+      bestFor: 'Reports, analytics, pivots, rollups, and hierarchical summaries.',
+      operatorHint: 'Key partitioning',
+      resultHint: 'Groups / summaries',
+      execution: 'Usually buffers all matching input',
+    },
+    quantifiers: {
+      bestFor: 'Fast yes/no questions about a sequence.',
+      operatorHint: 'Short-circuit checks',
+      resultHint: 'Boolean answer',
+      execution: 'Often stops early',
+    },
+    conversion: {
+      bestFor: 'Choosing the right concrete collection for later access patterns.',
+      operatorHint: 'Materialization',
+      execution: 'Immediate',
+      resultHint: 'Concrete collection',
+      diagramNote: 'Conversion marks the moment your lazy pipeline becomes real in memory.',
+    },
+    generation: {
+      bestFor: 'Creating test data, ranges, placeholders, and simple sequence sources.',
+      sourceHint: 'Generated values',
+      operatorHint: 'Enumerable factory',
+      resultHint: 'New sequence',
+    },
+    deferred: {
+      bestFor: 'Reasoning about when work happens and why duplicate enumeration hurts.',
+      operatorHint: 'Deferred pipeline',
+      execution: 'Built now, runs later',
+      resultHint: 'Executed on iteration',
+      diagramNote: 'Deferred execution is powerful, but only if you know when enumeration happens.',
+    },
+    performance: {
+      bestFor: 'Hot paths, large datasets, and allocation-sensitive pipelines.',
+      operatorHint: 'Cost-aware query',
+      resultHint: 'Measured result',
+      diagramNote: 'Measure first: algorithm and data-shape choices usually matter more than LINQ syntax alone.',
+    },
+    'expr-trees': {
+      bestFor: 'Dynamic query composition, providers, and translation to SQL or other backends.',
+      operatorHint: 'Expression tree',
+      resultHint: 'Traversable code graph',
+      execution: 'Interpreted or compiled later',
+      diagramNote: 'Expression trees turn code into data so frameworks can inspect and rewrite it.',
+    },
+    'async-linq': {
+      bestFor: 'Streaming results asynchronously without waiting for the whole batch.',
+      operatorHint: 'Async iterator',
+      execution: 'Pull-based async streaming',
+      resultHint: 'IAsyncEnumerable<T>',
+      diagramNote: 'Async streams trade immediate batch completion for steady item-by-item delivery.',
+    },
+    plinq: {
+      bestFor: 'CPU-bound work across large in-memory sequences.',
+      operatorHint: 'Parallel partitioning',
+      execution: 'Multi-core',
+      resultHint: 'Merged parallel result',
+      diagramNote: 'PLINQ helps only when the work per element outweighs partitioning and merge overhead.',
+    },
+    'custom-linq': {
+      bestFor: 'Shared query building rules and reusable domain filters.',
+      operatorHint: 'Composable abstraction',
+      resultHint: 'Reusable query API',
+      diagramNote: 'Custom extensions keep business filtering rules centralized and testable.',
+    },
+    'xml-linq': {
+      bestFor: 'Readable XML querying and transformation without low-level DOM ceremony.',
+      sourceHint: 'XML document',
+      operatorHint: 'Elements / attributes',
+      resultHint: 'Projected XML data',
+    },
+    debugging: {
+      bestFor: 'Making lazy pipelines visible enough to trust in production.',
+      operatorHint: 'Inspect / trace',
+      resultHint: 'Observable behavior',
+    },
+    'linq-ef-integration': {
+      bestFor: 'Real EF Core, API filtering, reporting, and business pipeline design.',
+      sourceHint: 'IQueryable / HTTP input',
+      operatorHint: 'Translated query',
+      execution: 'SQL + app composition',
+      resultHint: 'API / report output',
+    }
+  };
+
+  return { ...defaults, ...(playbooks[cid] || {}) };
+}
+
+function getTopicSignature(tid, title) {
+  const signatures = {
+    'query-syntax': 'from x in source where predicate select projection',
+    'method-syntax': 'source.Where(predicate).Select(selector)',
+    'lambda': 'x => expression',
+    'where': 'Where<TSource>(Func<TSource, bool>)',
+    'oftype': 'OfType<TResult>()',
+    'where-indexed': 'Where<TSource>((item, index) => bool)',
+    'select': 'Select<TSource, TResult>(Func<TSource, TResult>)',
+    'selectmany': 'SelectMany<TSource, TResult>(Func<TSource, IEnumerable<TResult>>)',
+    'select-index': 'Select<TSource, TResult>((item, index) => TResult)',
+    'orderby': 'OrderBy<TSource, TKey>(Func<TSource, TKey>)',
+    'thenby': 'ThenBy<TSource, TKey>(Func<TSource, TKey>)',
+    'reverse': 'Reverse<TSource>()',
+    'skip-take': 'Skip(count).Take(count)',
+    'chunk': 'Chunk(size)',
+    'first-last': 'First / Last / FirstOrDefault / LastOrDefault',
+    'single': 'Single / SingleOrDefault',
+    'elementat': 'ElementAt / ElementAtOrDefault',
+    'count-sum': 'Count / LongCount / Sum',
+    'min-max': 'Min / Max / MinBy / MaxBy',
+    'average': 'Average',
+    'aggregate': 'Aggregate(seed, accumulator, selector)',
+    'distinct': 'Distinct / DistinctBy',
+    'union': 'Union / UnionBy',
+    'intersect': 'Intersect / IntersectBy',
+    'except': 'Except / ExceptBy',
+    'join': 'Join(outerKey, innerKey, resultSelector)',
+    'groupjoin': 'GroupJoin(...).SelectMany(...DefaultIfEmpty())',
+    'zip': 'Zip(second, resultSelector)',
+    'groupby': 'GroupBy(keySelector)',
+    'any-all': 'Any / All',
+    'contains': 'Contains(value, comparer?)',
+    'sequence-equal': 'SequenceEqual(second, comparer?)',
+    'tolist-toarray': 'ToList / ToArray',
+    'todictionary': 'ToDictionary(keySelector, elementSelector?)',
+    'tolookup': 'ToLookup(keySelector, elementSelector?)',
+    'tohashset': 'ToHashSet(comparer?)',
+    'range': 'Enumerable.Range(start, count)',
+    'repeat': 'Enumerable.Repeat(value, count)',
+    'empty': 'Enumerable.Empty<T>()',
+    'concat-append': 'Concat / Append / Prepend',
+    'iasyncenumerable': 'IAsyncEnumerable<T> + await foreach',
+    'plinq-basics': 'AsParallel()',
+    'predicate-builder': 'Expression<Func<T, bool>> composition',
+  };
+  return signatures[tid] || `${title} standard LINQ pattern`;
+}
+
+function getTopicExecution(cid, tid) {
+  if (cid === 'linq-ef-integration' || tid === 'linq-ef') return 'Translated into SQL while the query stays IQueryable.';
+  if (cid === 'expr-trees' || tid === 'custom-provider') return 'Represented as an expression tree and interpreted or compiled later.';
+  if (cid === 'plinq' || tid === 'linq-parallel') return 'Partitioned across worker threads and merged when consumed.';
+  if (cid === 'async-linq') return 'Pulled asynchronously item by item by await foreach.';
+  if (cid === 'conversion') return 'Executes immediately and allocates a concrete collection.';
+  if (cid === 'sorting' || tid === 'orderby' || tid === 'thenby' || tid === 'reverse') return 'Deferred API surface, but sorting buffers before yielding ordered output.';
+  if (cid === 'grouping' || tid === 'groupby' || tid === 'groupby-result') return 'Deferred API surface, but grouping buffers the source to build buckets.';
+  if (cid === 'aggregation') return 'Immediate once the aggregate is invoked; the sequence is consumed to completion.';
+  if (cid === 'deferred') return 'The pipeline is built now and re-executed each time it is enumerated.';
+  return 'Usually deferred: work is performed when the sequence is enumerated.';
+}
+
+function getTopicPitfall(cid, tid, topic) {
+  const pitfalls = {
+    'linq-why': 'Using LINQ for mutation-heavy workflows where a direct loop communicates intent better.',
+    'ienumerable': 'Calling AsEnumerable too early on an EF Core query and accidentally forcing in-memory filtering.',
+    'mixed-syntax': 'Switching styles so often that the query becomes harder, not easier, to read.',
+    'lambda': 'Capturing mutable outer variables and then being surprised by the value at execution time.',
+    'where': 'Writing one giant predicate instead of splitting business rules into named methods.',
+    'oftype': 'Using Cast<T>() when the sequence may contain incompatible runtime types.',
+    'complex-predicates': 'Operator precedence bugs caused by missing parentheses in long AND/OR chains.',
+    'selectmany': 'Forgetting that SelectMany flattens and therefore changes cardinality.',
+    'orderby': 'Sorting before filtering, which increases memory and CPU cost.',
+    'custom-comparer': 'Inconsistent comparison logic that violates ordering expectations.',
+    'keyset-paging': 'Using unstable sort keys, which causes duplicate or skipped rows between pages.',
+    'single': 'Using Single when the data source does not truly guarantee uniqueness.',
+    'todictionary': 'Duplicate keys throwing an exception after a long-running pipeline.',
+    'tolookup': 'Assuming it behaves lazily like GroupBy; it does not.',
+    'chunk': 'Forgetting that the final chunk may contain fewer items than the requested size.',
+    'groupjoin': 'Confusing GroupJoin with SQL LEFT JOIN without applying DefaultIfEmpty when needed.',
+    'sequence-equal': 'Comparing sequences with different ordering assumptions.',
+    'linq-ef': 'Using non-translatable .NET methods and accidentally forcing client-side work or runtime errors.',
+    'linq-api-filter': 'Building dynamic filters from raw strings without a whitelist of allowed fields.',
+    'plinq-pitfalls': 'Parallelizing cheap work and making it slower due to partitioning overhead.',
+    'custom-provider': 'Underestimating how much translation, normalization, and expression rewriting a provider needs.',
+  };
+  return pitfalls[tid] || `The most common mistake with ${topic.title} is treating it as syntax only and not reasoning about execution, allocations, and data shape.`;
+}
+
+function getTopicComparison(tab, cid, tid, topic) {
+  const compareTabs = ['Comparison', 'Differences', 'vs FirstOrDefault', 'vs Offset', 'vs GroupBy', 'Trade-offs', 'Difference', 'Perf Impact', 'vs XmlDocument', 'XPath vs LINQ'];
+  if (!compareTabs.includes(tab) && tid !== 'ienumerable' && tid !== 'tolist-toarray' && tid !== 'tolookup') return null;
+
+  if (tid === 'ienumerable') {
+    return renderTable(
+      ['Aspect', 'IEnumerable<T>', 'IQueryable<T>'],
+      [
+        ['Execution location', 'In-memory on the application server', 'Translated and pushed to the data source'],
+        ['Lambda form', 'Compiled delegates', 'Expression trees'],
+        ['Best use', 'Lists, arrays, XML objects, in-process transformations', 'EF Core, OData, remote query providers'],
+        ['Main danger', 'Multiple enumeration and in-memory heavy work', 'Provider translation limits and accidental client evaluation']
+      ]
+    );
+  }
+
+  if (tid === 'tolist-toarray') {
+    return renderTable(
+      ['Aspect', 'ToList()', 'ToArray()'],
+      [
+        ['Mutability', 'Grow and mutate later', 'Fixed-size snapshot'],
+        ['Memory shape', 'May have extra capacity', 'Exact contiguous size'],
+        ['Best use', 'App logic that will append/remove items', 'Read-only handoff or interop-friendly data'],
+        ['Tradeoff', 'Slightly more overhead', 'Cannot resize without copying']
+      ]
+    );
+  }
+
+  if (tid === 'tolookup') {
+    return renderTable(
+      ['Aspect', 'ToLookup()', 'GroupBy()'],
+      [
+        ['Execution', 'Immediate', 'Deferred surface'],
+        ['Access pattern', 'O(1)-style repeated key lookup', 'Single-pass iteration over groups'],
+        ['Missing key', 'Returns empty group', 'No direct indexer'],
+        ['Best use', 'Reuse groups many times', 'Build groups once and stream results']
+      ]
+    );
+  }
+
+  if (tid === 'keyset-paging' || tab === 'vs Offset') {
+    return renderTable(
+      ['Aspect', 'Offset paging', 'Keyset paging'],
+      [
+        ['SQL cost', 'Gets slower on deep pages', 'Stable cost with indexed sort key'],
+        ['Correctness under writes', 'Can skip/duplicate rows', 'Safer when new rows arrive'],
+        ['UX fit', 'Jump to arbitrary page number', 'Next/previous or cursor navigation'],
+        ['Implementation', 'Simpler', 'Requires stable cursor columns']
+      ]
+    );
+  }
+
+  if (tab === 'vs XmlDocument') {
+    return renderTable(
+      ['Aspect', 'LINQ to XML', 'XmlDocument'],
+      [
+        ['Programming model', 'Composable, query friendly', 'Node-centric DOM API'],
+        ['Readability', 'Higher for projections and filtering', 'Lower for traversal-heavy code'],
+        ['Mutations', 'Clean element construction', 'Verbose imperative mutation'],
+        ['Best use', 'Modern .NET XML transformation', 'Legacy APIs expecting XmlDocument']
+      ]
+    );
+  }
+
+  if (tab === 'XPath vs LINQ') {
+    return renderTable(
+      ['Aspect', 'XPath', 'LINQ to XML'],
+      [
+        ['Style', 'String-based path expressions', 'Typed C# composition'],
+        ['Refactoring safety', 'Low', 'High'],
+        ['Dynamic ad-hoc queries', 'Very concise', 'More explicit'],
+        ['Best fit', 'Existing XPath-heavy environments', 'Mainstream .NET codebases']
+      ]
+    );
+  }
+
+  return renderTable(
+    ['Dimension', topic.title, 'Team guidance'],
+    [
+      ['Primary value', escHtml(topic.desc), `Use when ${escHtml(topic.desc.toLowerCase())}.`],
+      ['Execution model', escHtml(getTopicExecution(cid, tid)), 'Validate cost before applying it to hot paths or large datasets.'],
+      ['Main tradeoff', escHtml(getTopicPitfall(cid, tid, topic)), 'Prefer readability first, then optimize based on measurement.']
+    ]
+  );
+}
+
+function getTopicCode(cid, tid, topic) {
+  const samples = {
+    'linq-why': [
+      'var premiumCustomers = customers',
+      '    .Where(c => c.IsActive && c.Spend >= 1000m)',
+      '    .OrderByDescending(c => c.Spend)',
+      '    .Select(c => new CustomerSummary(c.Id, c.Name, c.Spend))',
+      '    .ToList();',
+      '',
+      '// Same intent as nested loops, but easier to test and refactor.'
+    ],
+    'query-syntax': [
+      'var recentOrders =',
+      '    from order in orders',
+      '    where order.PlacedOn >= cutoff',
+      '    orderby order.Total descending',
+      '    select new',
+      '    {',
+      '        order.Id,',
+      '        order.CustomerName,',
+      '        order.Total',
+      '    };'
+    ],
+    'method-syntax': [
+      'var recentOrders = orders',
+      '    .Where(order => order.PlacedOn >= cutoff)',
+      '    .OrderByDescending(order => order.Total)',
+      '    .Select(order => new',
+      '    {',
+      '        order.Id,',
+      '        order.CustomerName,',
+      '        order.Total',
+      '    });'
+    ],
+    'mixed-syntax': [
+      'var grouped =',
+      '    from order in orders',
+      '    group order by order.Region into regions',
+      '    select new RegionSummary(',
+      '        regions.Key,',
+      '        regions.OrderByDescending(x => x.Total).Take(3).ToList()',
+      '    );'
+    ],
+    'lambda': [
+      'var expensiveNames = products',
+      '    .Where(static p => p.Price >= 100m)',
+      '    .Select(p => p.Name)',
+      '    .ToList();',
+      '',
+      'Func<Product, bool> inMemory = p => p.Price >= 100m;',
+      'Expression<Func<Product, bool>> providerSafe = p => p.Price >= 100m;'
+    ],
+    'let-into': [
+      'var result =',
+      '    from employee in employees',
+      '    let annual = employee.MonthlySalary * 12',
+      '    where annual >= 120000m',
+      '    group annual by employee.Department into grouped',
+      '    select new { grouped.Key, Total = grouped.Sum() };'
+    ],
+    'where': [
+      'var shippable = orders',
+      '    .Where(o => o.Status == OrderStatus.Ready)',
+      '    .Where(o => o.Total > 250m)',
+      '    .ToList();'
+    ],
+    'oftype': [
+      'IEnumerable<object> events = [',
+      '    new UserCreated("a@site.dev"),',
+      '    new PasswordReset("a@site.dev"),',
+      '    "noise"',
+      '];',
+      '',
+      'var resets = events',
+      '    .OfType<PasswordReset>()',
+      '    .Select(e => e.Email)',
+      '    .ToList();'
+    ],
+    'complex-predicates': [
+      'Expression<Func<Product, bool>> isVisible = p => p.IsActive && !p.IsDeleted;',
+      'Expression<Func<Product, bool>> inBudget = p => p.Price >= min && p.Price <= max;',
+      '',
+      'var query = db.Products',
+      '    .Where(isVisible)',
+      '    .Where(inBudget);'
+    ],
+    'where-indexed': [
+      'var highlighted = feed',
+      '    .Where((item, index) => index < 3 || item.IsPinned)',
+      '    .Select((item, index) => new { Rank = index + 1, item.Title })',
+      '    .ToList();'
+    ],
+    'select': [
+      'var cards = orders',
+      '    .Select(o => new OrderCard(',
+      '        o.Id,',
+      '        o.CustomerName,',
+      '        o.Total,',
+      '        o.Items.Count',
+      '    ))',
+      '    .ToList();'
+    ],
+    'selectmany': [
+      'var lines = orders',
+      '    .SelectMany(',
+      '        o => o.Items,',
+      '        (order, item) => new',
+      '        {',
+      '            order.Id,',
+      '            item.Sku,',
+      '            item.Quantity',
+      '        })',
+      '    .ToList();'
+    ],
+    'select-index': [
+      'var ranked = scores',
+      '    .OrderByDescending(s => s.Points)',
+      '    .Select((score, index) => new',
+      '    {',
+      '        Rank = index + 1,',
+      '        score.Player,',
+      '        score.Points',
+      '    })',
+      '    .ToList();'
+    ],
+    'anonymous-types': [
+      'var result = products',
+      '    .Select(p => new',
+      '    {',
+      '        p.Id,',
+      '        DisplayName = p.Name.Trim(),',
+      '        PriceBand = p.Price >= 100m ? "Premium" : "Standard"',
+      '    })',
+      '    .ToList();',
+      '',
+      'var records = products',
+      '    .Select(p => new ProductRow(p.Id, p.Name, p.Price));'
+    ],
+    'orderby': [
+      'var ordered = products',
+      '    .Where(p => p.IsActive)',
+      '    .OrderBy(p => p.Category)',
+      '    .ToList();'
+    ],
+    'thenby': [
+      'var ordered = products',
+      '    .OrderBy(p => p.Category)',
+      '    .ThenByDescending(p => p.Rating)',
+      '    .ThenBy(p => p.Name)',
+      '    .ToList();'
+    ],
+    'reverse': [
+      'var chronological = logs.OrderBy(l => l.CreatedAt).ToList();',
+      'var newestFirst = chronological',
+      '    .AsEnumerable()',
+      '    .Reverse()',
+      '    .ToList();'
+    ],
+    'custom-comparer': [
+      'var ordered = products',
+      '    .OrderBy(p => p, ProductPriorityComparer.Instance)',
+      '    .ToList();',
+      '',
+      'sealed class ProductPriorityComparer : IComparer<Product>',
+      '{',
+      '    public static ProductPriorityComparer Instance { get; } = new();',
+      '    public int Compare(Product? x, Product? y) =>',
+      '        Comparer<(bool IsFeatured, decimal Price)>.Default.Compare(',
+      '            (x?.IsFeatured ?? false, x?.Price ?? 0m),',
+      '            (y?.IsFeatured ?? false, y?.Price ?? 0m));',
+      '}'
+    ],
+    'skip-take': [
+      'var page = products',
+      '    .OrderBy(p => p.Id)',
+      '    .Skip((pageNumber - 1) * pageSize)',
+      '    .Take(pageSize)',
+      '    .ToList();'
+    ],
+    'skipwhile-takewhile': [
+      'var section = logLines',
+      '    .SkipWhile(line => !line.StartsWith("[BEGIN]"))',
+      '    .TakeWhile(line => !line.StartsWith("[END]"))',
+      '    .ToList();'
+    ],
+    'chunk': [
+      'foreach (var batch in orders.Chunk(500))',
+      '{',
+      '    await ProcessBatchAsync(batch, cancellationToken);',
+      '}'
+    ],
+    'keyset-paging': [
+      'var nextPage = await db.Products',
+      '    .Where(p => p.Id > lastSeenId)',
+      '    .OrderBy(p => p.Id)',
+      '    .Take(pageSize)',
+      '    .Select(p => new ProductRow(p.Id, p.Name, p.Price))',
+      '    .ToListAsync(cancellationToken);'
+    ],
+    'first-last': [
+      'var firstOpen = tickets.FirstOrDefault(t => t.Status == TicketStatus.Open);',
+      'var lastAudit = audits.LastOrDefault();'
+    ],
+    'single': [
+      'var admin = users.Single(u => u.Role == Roles.PrimaryAdmin);',
+      '',
+      '// Use only when the business rule guarantees exactly one row.'
+    ],
+    'elementat': [
+      'var third = leaderboard.ElementAtOrDefault(2);',
+      'if (third is not null)',
+      '{',
+      '    Console.WriteLine(third.Player);',
+      '}'
+    ],
+    'default-values': [
+      'var fallback = settings',
+      '    .FirstOrDefault(s => s.Key == "Theme",',
+      '        new AppSetting("Theme", "dark"));'
+    ],
+    'count-sum': [
+      'var activeCount = users.Count(u => u.IsActive);',
+      'var revenue = invoices',
+      '    .Where(i => i.Status == InvoiceStatus.Paid)',
+      '    .Sum(i => i.Amount);'
+    ],
+    'min-max': [
+      'var cheapest = products.MinBy(p => p.Price);',
+      'var mostRecent = deployments.MaxBy(d => d.FinishedAt);'
+    ],
+    'average': [
+      'var averageLeadTime = tickets',
+      '    .Where(t => t.ClosedAt is not null)',
+      '    .Average(t => (t.ClosedAt!.Value - t.CreatedAt).TotalHours);'
+    ],
+    'distinct': [
+      'var distinctRegions = customers',
+      '    .DistinctBy(c => c.Region)',
+      '    .Select(c => c.Region)',
+      '    .ToList();'
+    ],
+    'union': [
+      'var allTags = featuredTags',
+      '    .Union(communityTags, StringComparer.OrdinalIgnoreCase)',
+      '    .OrderBy(tag => tag)',
+      '    .ToList();'
+    ],
+    'intersect': [
+      'var sharedIds = tenantA',
+      '    .IntersectBy(tenantB.Select(x => x.Id), x => x.Id)',
+      '    .ToList();'
+    ],
+    'except': [
+      'var newUsers = currentUsers',
+      '    .ExceptBy(previousUsers.Select(x => x.Id), x => x.Id)',
+      '    .ToList();'
+    ],
+    'join': [
+      'var report = orders.Join(',
+      '    customers,',
+      '    order => order.CustomerId,',
+      '    customer => customer.Id,',
+      '    (order, customer) => new',
+      '    {',
+      '        order.Id,',
+      '        Customer = customer.Name,',
+      '        order.Total',
+      '    });'
+    ],
+    'groupjoin': [
+      'var leftJoin = customers',
+      '    .GroupJoin(',
+      '        orders,',
+      '        customer => customer.Id,',
+      '        order => order.CustomerId,',
+      '        (customer, relatedOrders) => new { customer, relatedOrders }',
+      '    )',
+      '    .SelectMany(',
+      '        row => row.relatedOrders.DefaultIfEmpty(),',
+      '        (row, order) => new',
+      '        {',
+      '            Customer = row.customer.Name,',
+      '            OrderId = order?.Id',
+      '        });'
+    ],
+    'cross-join': [
+      'var matrix = colors',
+      '    .SelectMany(',
+      '        color => sizes,',
+      '        (color, size) => new { color, size })',
+      '    .ToList();'
+    ],
+    'zip': [
+      'var deltas = actual',
+      '    .Zip(forecast, (a, f) => new { Actual = a, Forecast = f, Delta = a - f })',
+      '    .ToList();'
+    ],
+    'groupby-result': [
+      'var summary = orders',
+      '    .GroupBy(o => o.Region,',
+      '        (region, rows) => new RegionReport(',
+      '            region,',
+      '            rows.Count(),',
+      '            rows.Sum(o => o.Total)))',
+      '    .ToList();'
+    ],
+    'groupby-comparer': [
+      'var grouped = people',
+      '    .GroupBy(p => p.Email, StringComparer.OrdinalIgnoreCase)',
+      '    .Select(g => new { g.Key, Count = g.Count() })',
+      '    .ToList();'
+    ],
+    'nested-groups': [
+      'var nested = sales',
+      '    .GroupBy(s => s.Year)',
+      '    .Select(yearGroup => new',
+      '    {',
+      '        yearGroup.Key,',
+      '        Regions = yearGroup',
+      '            .GroupBy(s => s.Region)',
+      '            .Select(regionGroup => new { regionGroup.Key, Total = regionGroup.Sum(x => x.Amount) })',
+      '            .ToList()',
+      '    })',
+      '    .ToList();'
+    ],
+    'any-all': [
+      'var hasFailures = checks.Any(c => c.Status == CheckStatus.Failed);',
+      'var allHealthy = checks.All(c => c.Status == CheckStatus.Healthy);'
+    ],
+    'contains': [
+      'var blocked = blockedUserIds.ToHashSet();',
+      'var allowed = requests',
+      '    .Where(r => !blocked.Contains(r.UserId))',
+      '    .ToList();'
+    ],
+    'sequence-equal': [
+      'var same = expected.SequenceEqual(actual, StringComparer.OrdinalIgnoreCase);'
+    ],
+    'tolist-toarray': [
+      'var rows = query.ToList();',
+      'var immutableSnapshot = rows.ToArray();'
+    ],
+    'todictionary': [
+      'var byId = products.ToDictionary(p => p.Id);',
+      'var view = products.ToDictionary(',
+      '    p => p.Id,',
+      '    p => new ProductCard(p.Id, p.Name, p.Price));'
+    ],
+    'tolookup': [
+      'ILookup<int, Order> byCustomer = orders.ToLookup(o => o.CustomerId);',
+      'var customerOrders = byCustomer[customerId];'
+    ],
+    'tohashset': [
+      'var allowedRegions = regions',
+      '    .Select(r => r.Code)',
+      '    .ToHashSet(StringComparer.OrdinalIgnoreCase);'
+    ],
+    'cast-asenumerable': [
+      'var providerSafe = db.Products.Where(p => p.IsActive);',
+      'var inMemoryOnly = providerSafe',
+      '    .AsEnumerable()',
+      '    .Where(p => Regex.IsMatch(p.Name, pattern))',
+      '    .ToList();'
+    ],
+    'range': [
+      'var pageNumbers = Enumerable.Range(1, totalPages).ToList();'
+    ],
+    'repeat': [
+      'var separators = Enumerable.Repeat("-", 80);',
+      'var banner = string.Concat(separators);'
+    ],
+    'empty': [
+      'IEnumerable<Order> orders = filter.IsEnabled',
+      '    ? dbOrders',
+      '    : Enumerable.Empty<Order>();'
+    ],
+    'concat-append': [
+      'var audit = baseSteps',
+      '    .Append("Persist")',
+      '    .Append("Publish")',
+      '    .Prepend("Validate")',
+      '    .ToList();'
+    ],
+    'immediate-ops': [
+      'var count = query.Count();',
+      'var first = query.FirstOrDefault();',
+      'var rows = query.ToList();',
+      '',
+      '// Each of these triggers execution.'
+    ],
+    'streaming': [
+      'var streaming = source',
+      '    .Where(x => x.IsActive)',
+      '    .Select(x => x.Name);',
+      '',
+      'var buffering = source',
+      '    .OrderBy(x => x.Name)',
+      '    .Take(10);'
+    ],
+    'yield-return': [
+      'public static IEnumerable<DateOnly> BusinessDays(DateOnly start, int count)',
+      '{',
+      '    for (var i = 0; i < count; i++)',
+      '    {',
+      '        var day = start.AddDays(i);',
+      '        if (day.DayOfWeek is not DayOfWeek.Saturday and not DayOfWeek.Sunday)',
+      '            yield return day;',
+      '    }',
+      '}'
+    ],
+    'span-linq': [
+      'Span<int> values = stackalloc[] { 4, 8, 15, 16, 23, 42 };',
+      'var sum = 0;',
+      'foreach (var value in values)',
+      '{',
+      '    if (value > 10) sum += value;',
+      '}',
+      '',
+      '// Prefer direct loops on Span<T> in hot paths.'
+    ],
+    'linq-parallel': [
+      'var hashes = files',
+      '    .AsParallel()',
+      '    .WithDegreeOfParallelism(Environment.ProcessorCount)',
+      '    .Select(ComputeSha256)',
+      '    .ToList();'
+    ],
+    'expr-visit': [
+      'sealed class SoftDeleteVisitor : ExpressionVisitor',
+      '{',
+      '    protected override Expression VisitMethodCall(MethodCallExpression node)',
+      '    {',
+      '        return base.VisitMethodCall(node);',
+      '    }',
+      '}'
+    ],
+    'expr-compile': [
+      'Expression<Func<Order, bool>> expr = o => o.Total >= 100m;',
+      'Func<Order, bool> compiled = expr.Compile();',
+      'var result = orders.Where(compiled).ToList();'
+    ],
+    'expr-build': [
+      'var parameter = Expression.Parameter(typeof(Product), "p");',
+      'var property = Expression.Property(parameter, nameof(Product.Price));',
+      'var constant = Expression.Constant(100m);',
+      'var body = Expression.GreaterThanOrEqual(property, constant);',
+      'var lambda = Expression.Lambda<Func<Product, bool>>(body, parameter);'
+    ],
+    'iasyncenumerable': [
+      'await foreach (var row in StreamRowsAsync(cancellationToken))',
+      '{',
+      '    Console.WriteLine(row.Id);',
+      '}'
+    ],
+    'await-foreach': [
+      'await foreach (var order in service.GetOrdersAsync().WithCancellation(cancellationToken))',
+      '{',
+      '    await projector.WriteAsync(order, cancellationToken);',
+      '}'
+    ],
+    'async-streams': [
+      'public static async IAsyncEnumerable<OrderEvent> StreamAsync(',
+      '    [EnumeratorCancellation] CancellationToken cancellationToken = default)',
+      '{',
+      '    while (!cancellationToken.IsCancellationRequested)',
+      '    {',
+      '        yield return await ReadNextAsync(cancellationToken);',
+      '    }',
+      '}'
+    ],
+    'channels': [
+      'var channel = Channel.CreateBounded<Order>(100);',
+      '',
+      '_ = Task.Run(async () =>',
+      '{',
+      '    await foreach (var order in service.GetOrdersAsync())',
+      '        await channel.Writer.WriteAsync(order);',
+      '});'
+    ],
+    'plinq-basics': [
+      'var scores = transactions',
+      '    .AsParallel()',
+      '    .Select(CalculateRiskScore)',
+      '    .ToArray();'
+    ],
+    'plinq-ordering': [
+      'var ordered = numbers',
+      '    .AsParallel()',
+      '    .AsOrdered()',
+      '    .Select(n => n * n)',
+      '    .ToArray();'
+    ],
+    'plinq-control': [
+      'var result = numbers',
+      '    .AsParallel()',
+      '    .WithDegreeOfParallelism(4)',
+      '    .WithExecutionMode(ParallelExecutionMode.ForceParallelism)',
+      '    .Select(Compute)',
+      '    .ToArray();'
+    ],
+    'plinq-pitfalls': [
+      'var wrong = urls',
+      '    .AsParallel()',
+      '    .Select(url => httpClient.GetStringAsync(url).Result)',
+      '    .ToList();',
+      '',
+      '// Use async I/O instead of PLINQ for network work.'
+    ],
+    'ext-methods': [
+      'public static IQueryable<Product> Active(this IQueryable<Product> query)',
+      '    => query.Where(p => p.IsActive && !p.IsDeleted);'
+    ],
+    'composable-queries': [
+      'public static IQueryable<Order> ForDashboard(this IQueryable<Order> query, DashboardFilter filter)',
+      '{',
+      '    if (filter.Region is not null)',
+      '        query = query.Where(o => o.Region == filter.Region);',
+      '    if (filter.From is not null)',
+      '        query = query.Where(o => o.PlacedOn >= filter.From);',
+      '    return query;',
+      '}'
+    ],
+    'predicate-builder': [
+      'Expression<Func<Product, bool>> predicate = p => true;',
+      'if (filter.ActiveOnly)',
+      '    predicate = predicate.And(p => p.IsActive);',
+      'if (filter.MinPrice is not null)',
+      '    predicate = predicate.And(p => p.Price >= filter.MinPrice);'
+    ],
+    'custom-provider': [
+      'sealed class MiniQueryProvider : IQueryProvider',
+      '{',
+      '    public IQueryable CreateQuery(Expression expression) => throw new NotImplementedException();',
+      '    public IQueryable<TElement> CreateQuery<TElement>(Expression expression) => throw new NotImplementedException();',
+      '    public object? Execute(Expression expression) => throw new NotImplementedException();',
+      '    public TResult Execute<TResult>(Expression expression) => throw new NotImplementedException();',
+      '}'
+    ],
+    'xdoc': [
+      'var doc = XDocument.Load("orders.xml");',
+      'var ids = doc.Root!',
+      '    .Elements("order")',
+      '    .Select(x => (int)x.Attribute("id")!)',
+      '    .ToList();'
+    ],
+    'xml-query': [
+      'var emails = doc',
+      '    .Descendants("customer")',
+      '    .Attributes("email")',
+      '    .Select(a => (string)a)',
+      '    .Where(email => !string.IsNullOrWhiteSpace(email))',
+      '    .ToList();'
+    ],
+    'xml-transform': [
+      'var summary = new XElement("summary",',
+      '    orders.GroupBy(o => o.Region)',
+      '          .Select(g => new XElement("region",',
+      '              new XAttribute("name", g.Key),',
+      '              new XAttribute("count", g.Count()))));'
+    ],
+    'debug-techniques': [
+      'var query = orders',
+      '    .Where(o => o.Total > 100m)',
+      '    .Select(o => new { o.Id, o.Total });',
+      '',
+      'var preview = query.Take(5).ToList(); // inspect in debugger'
+    ],
+    'debug-logging': [
+      'db.Database.LogTo(Console.WriteLine);',
+      'var rows = await db.Products',
+      '    .Where(p => p.IsActive)',
+      '    .ToListAsync(cancellationToken);'
+    ],
+    'linqpad': [
+      'void Main()',
+      '{',
+      '    var top = Customers',
+      '        .Where(c => c.IsActive)',
+      '        .OrderBy(c => c.Name)',
+      '        .Take(10);',
+      '    top.Dump();',
+      '}'
+    ],
+    'linq-ef': [
+      'var cards = await db.Orders',
+      '    .AsNoTracking()',
+      '    .Where(o => o.Status == OrderStatus.Paid)',
+      '    .OrderByDescending(o => o.PaidOn)',
+      '    .Select(o => new OrderCard(o.Id, o.Customer.Name, o.Total))',
+      '    .ToListAsync(cancellationToken);'
+    ],
+    'linq-api-filter': [
+      'IQueryable<Product> query = db.Products.AsNoTracking();',
+      'if (!string.IsNullOrWhiteSpace(request.Search))',
+      '    query = query.Where(p => p.Name.Contains(request.Search));',
+      'if (request.MinPrice is not null)',
+      '    query = query.Where(p => p.Price >= request.MinPrice);'
+    ],
+    'linq-reporting': [
+      'var report = await db.Orders',
+      '    .Where(o => o.PlacedOn >= from && o.PlacedOn < to)',
+      '    .GroupBy(o => o.Region)',
+      '    .Select(g => new RegionReportRow(g.Key, g.Count(), g.Sum(x => x.Total)))',
+      '    .ToListAsync(cancellationToken);'
+    ],
+    'linq-pipeline': [
+      'var dashboard = source',
+      '    .Where(IsVisible)',
+      '    .Select(Enrich)',
+      '    .Where(x => x.Score >= threshold)',
+      '    .GroupBy(x => x.Region)',
+      '    .Select(ToRegionSummary)',
+      '    .ToList();'
+    ]
+  };
+
+  if (samples[tid]) return samples[tid].join('\n');
+
+  return [
+    `// ${topic.title} in C# 14 / .NET 10`,
+    'var result = source',
+    '    .Where(x => x is not null)',
+    '    .Select(x => x)',
+    '    .ToList();',
+    '',
+    `// Replace the placeholder pipeline with the exact ${topic.title} operator(s)`,
+    '// after validating execution location and data volume.'
+  ].join('\n');
+}
+
+function getTopicScenario(cid, tid, topic) {
+  const scenarios = {
+    'linq-why': 'A service needs a readable pipeline that filters active customers, projects to API DTOs, and stays easy to unit test.',
+    'query-syntax': 'A reporting query has multiple joins and groups, so the SQL-like query form is easier for the team to follow.',
+    'mixed-syntax': 'A team groups with query syntax, then uses fluent operators for reusable helper methods afterward.',
+    'where': 'An order-processing API must reduce a 100,000-row candidate set before sorting and paging it.',
+    'selectmany': 'An e-commerce dashboard needs one flat list of line items from a nested order -> items structure.',
+    'custom-comparer': 'Priority rules need to rank featured items first, then newest, then alphabetical.',
+    'chunk': 'A background worker must send 50,000 records to an external API in batches of 500.',
+    'keyset-paging': 'An admin grid pages through millions of rows where deep offset paging has become slow and unstable.',
+    'single': 'Your business domain guarantees one active primary admin per tenant, and you want that invariant enforced loudly.',
+    'todictionary': 'A request pipeline repeatedly looks up products by ID after the initial database query finishes.',
+    'tolookup': 'You need to ask for all orders for the same customer ID many times in one workflow.',
+    'linq-parallel': 'CPU-heavy hashing or scoring work needs to use all cores without shared mutable state.',
+    'predicate-builder': 'A search API exposes optional region, status, category, and price filters that should compose safely.',
+    'linq-ef': 'An ASP.NET Core endpoint must translate user filters into efficient SQL and project directly into DTOs.',
+    'linq-reporting': 'A finance dashboard needs grouped totals, averages, and per-region summaries from transaction tables.',
+    'plinq-pitfalls': 'A team tries AsParallel on HTTP calls and sees worse latency because the real bottleneck is I/O, not CPU.',
+  };
+  return scenarios[tid] || `${topic.title} is most useful when the team wants a pipeline that stays easy to read, reason about, and test under production constraints.`;
+}
+
+function getTopicInterview(tid, topic) {
+  const qa = {
+    q: `How would you explain ${topic.title} to another senior .NET developer?`,
+    a: `${topic.title} matters because it changes either the shape, size, order, or execution model of the sequence. A strong answer explains what it does, when it runs, what it costs, and where it should execute when EF Core is involved.`
+  };
+
+  const overrides = {
+    'ienumerable': {
+      q: 'Why is IEnumerable<T> vs IQueryable<T> one of the most important LINQ interview topics?',
+      a: 'Because it decides whether filtering and projection happen in RAM or in the database. The wrong choice leads to accidental full-table loads, extra allocations, and slow endpoints.'
+    },
+    'single': {
+      q: 'When should you use Single instead of First?',
+      a: 'Use Single only when the business rule demands exactly one match and you want a loud failure if the data breaks that rule. Use First when you only care about the first match.'
+    },
+    'chunk': {
+      q: 'Why is Chunk safer than manual batching code in many codebases?',
+      a: 'It makes the batching rule explicit, removes index math noise, and handles the final partial batch correctly. You still need to reason about source enumeration and downstream backpressure.'
+    },
+    'predicate-builder': {
+      q: 'Why do dynamic predicates often use Expression<Func<T, bool>> instead of Func<T, bool>?',
+      a: 'Expression trees can still be translated by EF Core providers. Plain delegates are opaque runtime code and usually force in-memory evaluation.'
+    },
+    'plinq-basics': {
+      q: 'When does AsParallel actually help?',
+      a: 'When the workload is CPU-bound, large enough to amortize partitioning overhead, and free of shared mutable state. It does not help for network or database I/O.'
+    },
+    'linq-ef': {
+      q: 'What is the biggest EF Core LINQ mistake you watch for in code review?',
+      a: 'Projection and filtering happening too late, especially after AsEnumerable or after full entity loading. The right fix is to keep the query as IQueryable and project only the fields you need.'
+    }
+  };
+
+  return overrides[tid] || qa;
+}
+
+function getTopicGuide(cid, tid) {
+  const chapter = findChapter(cid);
+  const topic = findTopic(cid, tid);
+  if (!chapter || !topic) return null;
+
+  const playbook = getChapterPlaybook(cid);
+  return {
+    chapter,
+    topic,
+    title: topic.title,
+    accent: chapter.lc,
+    description: topic.desc,
+    bestFor: playbook.bestFor,
+    signature: getTopicSignature(tid, topic.title),
+    execution: getTopicExecution(cid, tid),
+    pitfall: getTopicPitfall(cid, tid, topic),
+    when: playbook.when,
+    tradeoffs: playbook.tradeoffs,
+    rules: playbook.rules,
+    sourceHint: playbook.sourceHint,
+    operatorHint: playbook.operatorHint,
+    resultHint: playbook.resultHint,
+    diagramNote: playbook.diagramNote,
+    diagramNote2: playbook.diagramNote2,
+    flow: [
+      playbook.sourceHint,
+      topic.title,
+      chapter.title,
+      playbook.resultHint
+    ],
+    code: getTopicCode(cid, tid, topic),
+    scenario: getTopicScenario(cid, tid, topic),
+    interview: getTopicInterview(tid, topic),
+  };
+}
+
+function renderTabFocus(guide, tab, cid, tid) {
+  const comparison = getTopicComparison(tab, cid, tid, guide.topic);
+  const lower = tab.toLowerCase();
+
+  if (comparison) {
+    return `<div class="callout tip"><strong>TAB FOCUS</strong>This tab highlights the decision points, trade-offs, and side-by-side differences for <code>${escHtml(guide.title)}</code>.</div>`;
+  }
+
+  if (lower.includes('diagram') || lower.includes('architecture') || lower.includes('providers')) {
+    return `<div class="callout info"><strong>TAB FOCUS</strong>This tab explains how <code>${escHtml(guide.title)}</code> flows through the LINQ pipeline and where the work actually executes.</div>`;
+  }
+
+  if (lower.includes('code') || lower.includes('examples') || lower.includes('patterns') || lower.includes('implementation')) {
+    return `<div class="callout tip"><strong>TAB FOCUS</strong>This tab is code-first. Read the example, then validate how execution, buffering, and provider translation behave in your real project.</div>`;
+  }
+
+  if (lower.includes('pitfall') || lower.includes('problem') || lower.includes('gotcha') || lower.includes('fix') || lower.includes('detection') || lower.includes('performance') || lower.includes('cancellation') || lower.includes('null')) {
+    return `<div class="callout danger"><strong>TAB FOCUS</strong>${escHtml(guide.pitfall)}</div>`;
+  }
+
+  return `<div class="callout info"><strong>TAB FOCUS</strong>This tab gives the practical mental model for <code>${escHtml(guide.title)}</code>: what it is, when to use it, what it costs, and how to apply it cleanly in modern .NET.</div>`;
+}
+
+function renderOverviewLesson(guide, tab) {
+  return `
+${renderTabFocus(guide, tab, guide.chapter.id, guide.topic.id)}
+
+<div class="sec">What It Is</div>
+<p class="bd"><strong>${escHtml(guide.title)}</strong> belongs to <strong>${escHtml(guide.chapter.title)}</strong>. It is mainly used for <strong>${escHtml(guide.bestFor.toLowerCase())}</strong></p>
+${renderTable(
+  ['Quick fact', 'Detail'],
+  [
+    ['Operator / pattern', escHtml(guide.signature)],
+    ['Execution model', escHtml(guide.execution)],
+    ['Best fit', escHtml(guide.bestFor)],
+    ['Common pitfall', escHtml(guide.pitfall)]
+  ]
+)}
+
+<div class="sec">When To Use It</div>
+${renderList(guide.when)}
+
+<div class="sec">Trade-offs</div>
+${renderList(guide.tradeoffs)}
+
+${renderTopicDiagram(guide, tab)}
+
+${renderCodeBlock(`C# 14 / .NET 10 — ${guide.title}`, guide.code)}
+
+<div class="sec">Scenario & Use Case</div>
+<p class="bd">${escHtml(guide.scenario)}</p>
+
+<div class="sec">Production Rules</div>
+${renderList(guide.rules)}
+`;
+}
+
+function renderDiagramLesson(guide, tab) {
+  return `
+${renderTabFocus(guide, tab, guide.chapter.id, guide.topic.id)}
+
+<div class="sec">Execution Flow</div>
+<p class="bd">This tab focuses on how <strong>${escHtml(guide.title)}</strong> moves data through the LINQ pipeline, what happens lazily vs eagerly, and where work actually runs.</p>
+${renderTopicDiagram(guide, tab)}
+
+<div class="sec">Architecture Notes</div>
+${renderTable(
+  ['Concern', 'Detail'],
+  [
+    ['Input', escHtml(guide.sourceHint)],
+    ['Operator stage', escHtml(guide.operatorHint)],
+    ['Execution', escHtml(guide.execution)],
+    ['Output', escHtml(guide.resultHint)]
+  ]
+)}
+
+<div class="sec">Why This Matters</div>
+${renderList([
+  `Use this mental model before applying <strong>${escHtml(guide.title)}</strong> to large datasets.`,
+  'The same query shape can behave very differently between IEnumerable and IQueryable.',
+  'Most production LINQ bugs come from misunderstanding where the work runs.'
+])}
+
+<div class="sec">Scenario & Use Case</div>
+<p class="bd">${escHtml(guide.scenario)}</p>
+`;
+}
+
+function renderCodeLesson(guide, tab) {
+  return `
+${renderTabFocus(guide, tab, guide.chapter.id, guide.topic.id)}
+
+<div class="sec">Code Walkthrough</div>
+<p class="bd">This tab is implementation-first. The sample is written for <strong>C# 14 / .NET 10</strong> and is meant to show the cleanest production shape for <strong>${escHtml(guide.title)}</strong>.</p>
+${renderCodeBlock(`C# 14 / .NET 10 — ${guide.title}`, guide.code)}
+
+<div class="sec">What To Notice</div>
+${renderList([
+  `The sample keeps the intent of <strong>${escHtml(guide.title)}</strong> visible instead of hiding it in manual loops.`,
+  'Filtering and projection should stay as close as possible to the data source when EF Core is involved.',
+  'Materialization should happen once at a deliberate boundary.'
+])}
+
+<div class="sec">Production Rules</div>
+${renderList(guide.rules)}
+
+<div class="sec">Scenario & Use Case</div>
+<p class="bd">${escHtml(guide.scenario)}</p>
+`;
+}
+
+function renderComparisonLesson(guide, tab) {
+  const comparison = getTopicComparison(tab, guide.chapter.id, guide.topic.id, guide.topic);
+  return `
+${renderTabFocus(guide, tab, guide.chapter.id, guide.topic.id)}
+
+<div class="sec">Decision Guide</div>
+<p class="bd">This tab is about choosing correctly. With <strong>${escHtml(guide.title)}</strong>, the main job is knowing which option keeps the query readable, correct, and efficient for the data source.</p>
+${comparison || ''}
+
+<div class="sec">Trade-offs</div>
+${renderList(guide.tradeoffs)}
+
+<div class="sec">Team Guidance</div>
+${renderList([
+  'Prefer the option that makes execution location obvious to the next developer.',
+  'Do not optimize for syntax preference before understanding the data-shape and provider behavior.',
+  `Review <strong>${escHtml(guide.title)}</strong> in terms of correctness first, then performance.`
+])}
+`;
+}
+
+function renderPitfallLesson(guide, tab) {
+  return `
+${renderTabFocus(guide, tab, guide.chapter.id, guide.topic.id)}
+
+<div class="sec">The Main Risk</div>
+<p class="bd">${escHtml(guide.pitfall)}</p>
+<div class="callout danger"><strong>ANTI-PATTERN</strong>The usual failure mode is not the syntax itself. It is choosing the right operator and then ignoring when it executes, how often it enumerates, or whether it runs in memory instead of the database.</div>
+
+${renderCodeBlock(`C# 14 / .NET 10 — ${guide.title}`, guide.code)}
+
+<div class="sec">How To Fix It</div>
+${renderList([
+  'Measure or inspect execution instead of assuming.',
+  'Keep queries lazy until a real materialization boundary is needed.',
+  'If the source is expensive, enumerate once and reuse the result deliberately.',
+  'Name predicates and projections so business rules stay obvious.'
+])}
+
+<div class="sec">Scenario & Use Case</div>
+<p class="bd">${escHtml(guide.scenario)}</p>
+`;
+}
+
+function renderUseCaseLesson(guide, tab) {
+  return `
+${renderTabFocus(guide, tab, guide.chapter.id, guide.topic.id)}
+
+<div class="sec">Where It Fits</div>
+<p class="bd"><strong>${escHtml(guide.title)}</strong> is best understood through use. This tab focuses on where it belongs in everyday .NET work and what kind of problem it solves cleanly.</p>
+
+<div class="sec">Best Uses</div>
+${renderList(guide.when)}
+
+<div class="sec">Scenario & Use Case</div>
+<p class="bd">${escHtml(guide.scenario)}</p>
+<div class="callout warn"><strong>WHEN TO REACH FOR THIS</strong>Use <code>${escHtml(guide.title)}</code> when it makes the pipeline more explicit than a manual loop and when the source, data volume, and execution location are well understood.</div>
+
+<div class="sec">Code Shape</div>
+${renderCodeBlock(`C# 14 / .NET 10 — ${guide.title}`, guide.code)}
+`;
+}
+
+function renderReferenceLesson(guide, tab) {
+  return `
+${renderTabFocus(guide, tab, guide.chapter.id, guide.topic.id)}
+
+<div class="sec">${escHtml(tab)} Notes</div>
+<p class="bd">This tab is reference-first. It isolates the core facts, terminology, or API knowledge for <strong>${escHtml(guide.title)}</strong> without repeating the full overview lesson.</p>
+
+${renderTable(
+  ['Reference point', 'Detail'],
+  [
+    ['Topic', escHtml(guide.title)],
+    ['Tab focus', escHtml(tab)],
+    ['Execution model', escHtml(guide.execution)],
+    ['Why it matters', escHtml(guide.bestFor)]
+  ]
+)}
+
+<div class="sec">Key Takeaways</div>
+${renderList([
+  `Use <strong>${escHtml(tab)}</strong> as a focused reference for <strong>${escHtml(guide.title)}</strong>.`,
+  'Keep the query readable before adding advanced refinements.',
+  'Check provider behavior if this topic is used with EF Core or IQueryable.',
+  `Return to the <strong>Overview</strong> tab when you need the broader explanation and scenario context.`
+])}
+
+<div class="sec">Useful Rule</div>
+<p class="bd">${escHtml(guide.pitfall)}</p>
+`;
+}
+
+function renderPerformanceLesson(guide, tab) {
+  return `
+${renderTabFocus(guide, tab, guide.chapter.id, guide.topic.id)}
+
+<div class="sec">Performance Lens</div>
+<p class="bd">This tab is optimization-focused. It separates cost, allocations, execution timing, and scaling concerns from the normal conceptual explanation of <strong>${escHtml(guide.title)}</strong>.</p>
+
+${renderTable(
+  ['Dimension', 'Guidance'],
+  [
+    ['Execution', escHtml(guide.execution)],
+    ['Primary risk', escHtml(guide.pitfall)],
+    ['Optimization rule', 'Measure first, then change data shape, execution location, or materialization points.'],
+    ['Team rule', 'Do not trade away maintainability unless profiling shows a real bottleneck.']
+  ]
+)}
+
+<div class="sec">Optimization Checklist</div>
+${renderList([
+  'Reduce unnecessary enumeration and buffering.',
+  'Keep large-source filtering and projection near the data source.',
+  'Use HashSet, Dictionary, or lookup structures when repeated membership checks dominate cost.',
+  'Switch to loops or Span-based code only for proven hot paths.'
+])}
+
+${renderCodeBlock(`C# 14 / .NET 10 — ${guide.title}`, guide.code)}
+`;
+}
+
+function renderProviderLesson(guide, tab) {
+  return `
+${renderTabFocus(guide, tab, guide.chapter.id, guide.topic.id)}
+
+<div class="sec">Provider View</div>
+<p class="bd">This tab is provider-focused. It explains how <strong>${escHtml(guide.title)}</strong> behaves differently depending on whether the source is in-memory, expression-tree-backed, XML-based, or translated by another execution engine.</p>
+
+${renderTable(
+  ['Provider concern', 'Detail'],
+  [
+    ['Query shape', escHtml(guide.signature)],
+    ['Execution model', escHtml(guide.execution)],
+    ['Provider warning', escHtml(guide.pitfall)],
+    ['Best fit', escHtml(guide.bestFor)]
+  ]
+)}
+
+<div class="sec">Provider Rules</div>
+${renderList([
+  'Keep the pipeline provider-friendly as long as possible.',
+  'Do not move into AsEnumerable unless you intentionally want in-memory behavior.',
+  'Check translation support for custom methods, Regex, and local helpers.',
+  'Separate syntax preference from provider capability; they are different concerns.'
+])}
+`;
+}
+
+function renderInterviewLesson(guide) {
+  return `
+<div class="sec">Interview Q&A</div>
+<div class="qa-item open">
+  <div class="qa-q">
+    <div class="qa-qicon" style="background:${guide.accent}22;color:${guide.accent}">Q</div>
+    <div class="qa-qtext">${escHtml(guide.interview.q)}</div>
+    <span class="tag" style="background:${guide.accent}22;color:${guide.accent};border-color:${guide.accent}44;flex-shrink:0">TOPIC</span>
+  </div>
+  <div class="qa-ans" style="max-height:400px">
+    <div class="qa-ans-body">${escHtml(guide.interview.a)}</div>
+  </div>
+</div>`;
+}
+
+function getTabMode(tab, cid, tid, topic) {
+  const lower = tab.toLowerCase();
+  const hasComparison = !!getTopicComparison(tab, cid, tid, topic);
+
+  const diagramTabs = new Set(['diagram', 'architecture']);
+  const codeTabs = new Set(['code', 'examples', 'implementation']);
+  const comparisonTabs = new Set(['comparison', 'differences', 'difference', 'trade-offs', 'vs firstordefault', 'vs offset', 'vs groupby', 'vs xmldocument', 'xpath vs linq', 'vs func<t>', 'perf impact']);
+  const pitfallTabs = new Set(['pitfalls', 'pitfall', 'problem', 'gotchas', 'fix', 'detection', 'null handling']);
+  const useCaseTabs = new Set(['benefits', 'use cases', 'when to use', 'pagination', 'batching']);
+  const performanceTabs = new Set(['benchmarks', 'performance', 'high cost ops', 'low-alloc', 'amdahl law', 'rules']);
+  const providerTabs = new Set(['providers']);
+  const referenceTabs = new Set([
+    'history', 'keywords', 'chaining', 'closures', 'records', 'anonymous types', 'igrouping', 'seed',
+    'list', 'guide', 'tricks', 'tips', 'techniques', 'best practices', 'api', 'configuration',
+    'partitioners', 'how it works', 'let clause', 'into clause', 'specification', 'predicatebuilder',
+    'custom visitor', 'asparallel', 'iquerer', 'icomparer', 'left join pattern', 'flattening',
+    'indexed where', '.net 6+ triples', 'linqpad', 'vs extension', 'sieve', 'short-circuit',
+    'comparer', 'distinctby', 'minby/maxby', 'iterator block', 'polymorphism', 'iComparer'.toLowerCase()
+  ]);
+
+  if (diagramTabs.has(lower)) return 'diagram';
+  if (providerTabs.has(lower)) return 'provider';
+  if (codeTabs.has(lower) || lower.includes('all 10 patterns') || lower.includes('all questions')) return 'code';
+  if (hasComparison || comparisonTabs.has(lower)) return 'comparison';
+  if (pitfallTabs.has(lower) || lower.includes('cancellation')) return 'pitfall';
+  if (useCaseTabs.has(lower)) return 'usecase';
+  if (performanceTabs.has(lower)) return 'performance';
+  if (referenceTabs.has(lower)) return 'reference';
+  return 'overview';
+}
+
+function shouldRenderInterview(mode) {
+  return mode === 'overview' || mode === 'comparison' || mode === 'pitfall' || mode === 'usecase' || mode === 'performance';
+}
+
+function renderGeneratedTopicContent(cid, tid, tab) {
+  const guide = getTopicGuide(cid, tid);
+  if (!guide) {
+    return `<div class="sec">📚 ${escHtml(tab)}</div><p class="bd">Unable to load topic details.</p>`;
+  }
+
+  const mode = getTabMode(tab, cid, tid, guide.topic);
+  let lesson = '';
+  if (mode === 'diagram') {
+    lesson = renderDiagramLesson(guide, tab);
+  } else if (mode === 'code') {
+    lesson = renderCodeLesson(guide, tab);
+  } else if (mode === 'comparison') {
+    lesson = renderComparisonLesson(guide, tab);
+  } else if (mode === 'pitfall') {
+    lesson = renderPitfallLesson(guide, tab);
+  } else if (mode === 'usecase') {
+    lesson = renderUseCaseLesson(guide, tab);
+  } else if (mode === 'reference') {
+    lesson = renderReferenceLesson(guide, tab);
+  } else if (mode === 'performance') {
+    lesson = renderPerformanceLesson(guide, tab);
+  } else if (mode === 'provider') {
+    lesson = renderProviderLesson(guide, tab);
+  } else {
+    lesson = renderOverviewLesson(guide, tab);
+  }
+
+  return `
+<div class="sec">📚 ${escHtml(guide.title)} · ${escHtml(tab)}</div>
+<p class="bd"><strong>${escHtml(guide.title)}</strong> covers ${escHtml(guide.description.toLowerCase())}. This lesson is written in the same style as the richer mastery pages: definition, execution model, easy examples, C# 14 / .NET 10 code, flow visualization, scenarios, and interview context.</p>
+${lesson}
+${shouldRenderInterview(mode) ? renderInterviewLesson(guide) : ''}`;
+}
+
+// ═══════════════════════════════════════════════════════
 // CONTENT LIBRARY
 // ═══════════════════════════════════════════════════════
 function getContent(cid, tid, tab) {
@@ -582,6 +2143,125 @@ function getContent(cid, tid, tab) {
 <line x1="351" y1="202" x2="351" y2="234" stroke="#1e3530" stroke-width="1.5" marker-end="url(#a2)" stroke-dasharray="4 2"/>
 </svg>
 </div>`;
+
+  if(k==='fundamentals:linq-arch:Architecture') return `
+<div class="sec">🏛️ LINQ Architecture Layers</div>
+<p class="bd">LINQ architecture is easiest to understand as <strong>language syntax on top, standard query operators in the middle, and providers underneath</strong>. The same <code>Where</code>, <code>Select</code>, and <code>GroupBy</code> calls can execute against arrays, EF Core queries, XML documents, or custom providers because the architecture separates <em>query shape</em> from <em>execution engine</em>.</p>
+<div class="callout info"><strong>ARCHITECTURE IDEA</strong>The C# compiler gives you query syntax and lambdas, the LINQ operator layer gives you a uniform API, and the provider decides whether the query runs in memory, in SQL, in XML traversal, or somewhere else.</div>
+${renderTable(
+  ['Layer', 'Responsibility', 'What to remember'],
+  [
+    ['C# language layer', 'Query syntax, lambdas, type inference, extension methods', 'This is where developers write the query.'],
+    ['Standard query operators', 'Where, Select, OrderBy, GroupBy, Join, Aggregate and more', 'These form the common vocabulary of LINQ.'],
+    ['Provider layer', 'Executes delegates or translates expression trees', 'This is where IEnumerable and IQueryable diverge.'],
+    ['Data source layer', 'Lists, arrays, SQL databases, XML, async streams', 'The source controls what is possible and what is expensive.']
+  ]
+)}
+<div class="sec">How The Pieces Fit</div>
+${renderList([
+  'Query syntax is compiled into method calls, usually on <code>Enumerable</code> or <code>Queryable</code>.',
+  'LINQ to Objects consumes delegates and executes directly in memory.',
+  'LINQ providers like EF Core consume expression trees and translate them into another query language.',
+  'Your biggest architectural decision is keeping the query in the right form for the provider as long as possible.'
+])}
+<div class="sec">Production Rule</div>
+<p class="bd">When the source is a database, try to stay in the <code>IQueryable</code> world until projection and filtering are complete. When the source is already in memory, use LINQ for readability and move to loops only when profiling proves you need it.</p>
+<div class="sec">Interview Q&A</div>
+<div class="qa-item open">
+  <div class="qa-q">
+    <div class="qa-qicon" style="background:#00ff8822;color:#00ff88">Q</div>
+    <div class="qa-qtext">What are the main layers in LINQ architecture?</div>
+    <span class="tag basic">BASIC</span>
+  </div>
+  <div class="qa-ans" style="max-height:320px">
+    <div class="qa-ans-body">The main layers are the C# language layer, the standard query operator layer, the provider layer, and the data source. C# shapes the query, the LINQ operators define the API, and the provider decides how that query is actually executed.</div>
+  </div>
+</div>`;
+
+  if(k==='fundamentals:linq-arch:Diagram') return `
+<div class="sec">🗺️ LINQ Architecture Diagram</div>
+<p class="bd">This tab is visual-first. Use it to see how one LINQ query flows from C# syntax into operators, then down into the provider and the real execution target.</p>
+<div class="dw">
+<div class="dt">LINQ QUERY TO EXECUTION FLOW</div>
+<svg viewBox="0 0 420 250" width="100%" preserveAspectRatio="xMidYMid meet">
+<defs>
+  <marker id="la1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0,7 2.5,0 5" fill="#00ff88"></polygon>
+  </marker>
+</defs>
+<rect x="110" y="14" width="200" height="34" rx="8" fill="rgba(0,255,136,.08)" stroke="#00ff88" stroke-width="1.4"></rect>
+<text x="210" y="35" text-anchor="middle" class="ft-g" font-size="11">C# Query / Method Syntax</text>
+
+<rect x="82" y="74" width="256" height="38" rx="8" fill="#0d1a17" stroke="#1e3530" stroke-width="1.4"></rect>
+<text x="210" y="96" text-anchor="middle" class="ft" font-size="10">Standard Query Operators</text>
+
+<rect x="18" y="148" width="118" height="42" rx="8" fill="#0d1a17" stroke="#00ff88" stroke-width="1.4"></rect>
+<text x="77" y="165" text-anchor="middle" class="ft-g" font-size="10">LINQ to Objects</text>
+<text x="77" y="178" text-anchor="middle" class="ft" font-size="8">delegates, in-memory</text>
+
+<rect x="151" y="148" width="118" height="42" rx="8" fill="#0d1a17" stroke="#4cc9f0" stroke-width="1.4"></rect>
+<text x="210" y="165" text-anchor="middle" fill="#4cc9f0" font-family="'Fira Code',monospace" font-size="10">LINQ Provider</text>
+<text x="210" y="178" text-anchor="middle" class="ft" font-size="8">expression translation</text>
+
+<rect x="284" y="148" width="118" height="42" rx="8" fill="#0d1a17" stroke="#ffd166" stroke-width="1.4"></rect>
+<text x="343" y="165" text-anchor="middle" fill="#ffd166" font-family="'Fira Code',monospace" font-size="10">LINQ to XML</text>
+<text x="343" y="178" text-anchor="middle" class="ft" font-size="8">document traversal</text>
+
+<line x1="210" y1="48" x2="210" y2="74" stroke="#00ff88" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#la1)">
+  <animate attributeName="stroke-dashoffset" from="16" to="0" dur="1.1s" repeatCount="indefinite"></animate>
+</line>
+<line x1="210" y1="112" x2="77" y2="148" stroke="#00ff88" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#la1)">
+  <animate attributeName="stroke-dashoffset" from="16" to="0" dur="1.1s" repeatCount="indefinite"></animate>
+</line>
+<line x1="210" y1="112" x2="210" y2="148" stroke="#00ff88" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#la1)">
+  <animate attributeName="stroke-dashoffset" from="16" to="0" dur="1.1s" repeatCount="indefinite"></animate>
+</line>
+<line x1="210" y1="112" x2="343" y2="148" stroke="#00ff88" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#la1)">
+  <animate attributeName="stroke-dashoffset" from="16" to="0" dur="1.1s" repeatCount="indefinite"></animate>
+</line>
+
+<text x="210" y="218" text-anchor="middle" class="ft" font-size="9">Same LINQ API, different execution engines underneath.</text>
+<text x="210" y="234" text-anchor="middle" class="ft" font-size="9">That is why provider awareness matters more than syntax preference.</text>
+</svg>
+</div>
+<div class="callout tip"><strong>READING THE DIAGRAM</strong>The query starts in C#, becomes standard operator calls, and then branches to the provider that understands the source. That provider decides whether the pipeline runs as .NET code, SQL translation, or document traversal.</div>`;
+
+  if(k==='fundamentals:linq-arch:Providers') return `
+<div class="sec">🔌 LINQ Providers</div>
+<p class="bd">Providers are the execution engines behind LINQ. They decide how a query is interpreted and where the work runs. This tab is provider-focused, not syntax-focused.</p>
+${renderTable(
+  ['Provider', 'Typical interface', 'Execution style', 'Best use'],
+  [
+    ['LINQ to Objects', 'IEnumerable<T>', 'Direct delegate execution in process', 'Lists, arrays, in-memory projections and filtering'],
+    ['LINQ to Entities / EF Core', 'IQueryable<T>', 'Expression tree translation to SQL', 'Database-backed queries with server-side filtering'],
+    ['LINQ to XML', 'IEnumerable<T>', 'Traverses XElement / XDocument objects', 'Readable XML query and transformation code'],
+    ['PLINQ', 'ParallelQuery<T>', 'Parallel in-memory execution across CPU cores', 'Large CPU-bound in-memory workloads'],
+    ['Custom providers', 'IQueryable<T>', 'Custom expression parsing / translation', 'Specialized platforms, search layers, or internal DSLs']
+  ]
+)}
+<div class="sec">Provider Rules</div>
+${renderList([
+  'Use <code>IEnumerable</code> when the data is already in memory and you want direct .NET execution.',
+  'Use <code>IQueryable</code> when the provider should translate the query before running it.',
+  'Do not switch to <code>AsEnumerable()</code> early unless you intentionally want in-memory behavior.',
+  'Check provider translation limits before using custom methods, Regex, or complex local helpers in EF Core queries.'
+])}
+<div class="sec">Provider Example</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# 14 / .NET 10 — Provider Boundary</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body">IQueryable&lt;Product&gt; sqlQuery = db.Products
+    .Where(p =&gt; p.Price &gt;= 100m)
+    .OrderBy(p =&gt; p.Name);
+
+// Provider still owns execution here: SQL is generated.
+
+var localOnly = sqlQuery
+    .AsEnumerable()
+    .Where(p =&gt; Regex.IsMatch(p.Name, pattern))
+    .ToList();
+
+// After AsEnumerable(), execution is now in memory.</div></div>
+<div class="sec">When This Tab Matters</div>
+<p class="bd">Use this tab when you want to answer: “Which LINQ provider is actually running my query?” That question is usually more important than whether you used query syntax or fluent syntax.</p>`;
 
   if(k==='fundamentals:ienumerable:Overview') return `
 <div class="sec">🔄 IEnumerable vs IQueryable — The Most Important LINQ Distinction</div>
@@ -998,33 +2678,7 @@ function getContent(cid, tid, tab) {
   if(cid==='interview') return renderInterviewQs(tid);
 
   // ── DEFAULT ─────────────────────────────────────────────
-  return `
-<div class="sec">📚 ${tab}</div>
-<p class="bd">This section provides deep coverage of <strong>${tid.replace(/-/g,' ')}</strong> — including explanations, diagrams, and production-ready .NET 10 code examples.</p>
-<div class="callout info"><strong>💡 SECTION CONTENT</strong>Detailed content for this topic includes operator signatures, behavior explanations, performance characteristics, and real-world usage patterns.</div>
-<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# — .NET 10 Example</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
-<div class="cb-body"><span class="cm">// Best practices for ${tid.replace(/-/g,' ')} in .NET 10</span>
-<span class="kw">var</span> result = source
-    .<span class="mt">Where</span>(x =&gt; x.<span class="pr">IsActive</span>)       <span class="cm">// Filter first</span>
-    .<span class="mt">OrderBy</span>(x =&gt; x.<span class="pr">Name</span>)         <span class="cm">// Then sort</span>
-    .<span class="mt">Select</span>(x =&gt; <span class="kw">new</span> {              <span class="cm">// Project only needed fields</span>
-        x.<span class="pr">Id</span>,
-        x.<span class="pr">Name</span>,
-        x.<span class="pr">Value</span>
-    })
-    .<span class="mt">ToList</span>();                        <span class="cm">// Single materialization</span>
-
-<span class="cm">// Remember: AsNoTracking() when used with EF Core</span>
-<span class="cm">// Remember: ToList() once, not multiple times on same query</span>
-<span class="cm">// Remember: Use Any() instead of Count() > 0</span></div></div>
-<div class="sec">Key Rules</div>
-<ul class="fl">
-<li>Filter (<code>Where</code>) before expensive operations like <code>OrderBy</code> or <code>GroupBy</code></li>
-<li>Use <code>Any()</code> not <code>Count() > 0</code> — short-circuits on first match</li>
-<li>Project with <code>Select()</code> to DTOs early — reduce data flowing through pipeline</li>
-<li>Materialize with <code>ToList()</code> when result will be used multiple times</li>
-<li>Prefer <code>FirstOrDefault()</code> over <code>Where().First()</code> — same result, fewer steps</li>
-</ul>`;
+  return renderGeneratedTopicContent(cid, tid, tab);
 }
 
 // ── PATTERNS RENDERER ─────────────────────────────────────
@@ -1107,7 +2761,7 @@ code:`<span class="kw">public static</span> <span class="ty">T</span>? <span cla
     <span class="ty">Func</span>&lt;<span class="ty">T</span>, <span class="kw">bool</span>&gt; predicate) <span class="kw">where</span> T : <span class="kw">class</span>
     =&gt; source.<span class="mt">FirstOrDefault</span>(predicate);
 
-<span class="cm">// Usage with pattern matching (.NET 10 C# 13)</span>
+<span class="cm">// Usage with pattern matching (.NET 10 C# 14)</span>
 <span class="kw">if</span> (users.<span class="mt">TryFind</span>(u =&gt; u.<span class="pr">Email</span> == email) <span class="kw">is</span> { } user)
     <span class="mt">SendWelcome</span>(user);`},
 {n:8,title:"Pipeline Composition Pattern",desc:"Chain transformation stages into a readable data processing pipeline.",
@@ -1761,5 +3415,6 @@ function updateProgress() {
 
 renderNav();
 </script>
+<script src="/embedded/mastery-resize.js"></script>
 </body>
 </html>

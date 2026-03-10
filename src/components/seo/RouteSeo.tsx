@@ -44,18 +44,44 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
   {
     pattern: "/cheatsheets",
     data: {
-      title: "All Cheatsheets | Abhishek Panda",
+      title: "All Blogs | Abhishek Panda",
       description:
-        "Browse all blog series and all website blog cards from Abhishek Panda in one place.",
+        "Browse all mastery blog series and website blog cards from Abhishek Panda in one place.",
+      keywords: "Abhishek Panda blogs, mastery series, engineering blog hub, blog series cards",
+    },
+  },
+  {
+    pattern: "/blogs",
+    data: {
+      title: "All Blogs | Abhishek Panda",
+      description:
+        "Browse all mastery blog series and website blog cards from Abhishek Panda in one place.",
       keywords: "Abhishek Panda blogs, mastery series, engineering blog hub, blog series cards",
     },
   },
   {
     pattern: "/cheatsheets/:seriesSlug",
     data: {
-      title: "Cheatsheet Series | Abhishek Panda",
+      title: "Blog Series | Abhishek Panda",
       description:
         "Open a mastery series TOC with modules, chapters, topics, and related website blog posts.",
+    },
+  },
+  {
+    pattern: "/ai-ml-blogs",
+    data: {
+      title: "AI / ML Blogs | Abhishek Panda",
+      description:
+        "Browse AI and machine learning mastery tracks across math, statistics, Python, feature engineering, ML core, NLP, and computer vision.",
+      keywords: "AI blogs, machine learning blogs, data science mastery, Abhishek Panda AI ML",
+    },
+  },
+  {
+    pattern: "/ai-ml-blogs/:seriesSlug",
+    data: {
+      title: "AI / ML Series | Abhishek Panda",
+      description:
+        "Open an AI / ML mastery series with starter topics, focus areas, and structured learning blocks.",
     },
   },
   {

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Layers3, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
-import { BLOG_SERIES, getBlogSeriesHref } from "@/lib/blogSeries";
+import { BLOG_SERIES, getBlogSeriesHref, type BlogSeriesTrack } from "@/lib/blogSeries";
 import { getBlogSeriesVisual } from "@/lib/blogVisuals";
 
 const MotionLink = motion.create(Link);
@@ -11,7 +11,7 @@ const MotionLink = motion.create(Link);
 type BlogSeriesGridProps = {
   counts: Map<string, number>;
   selectedSlug?: string | null;
-  seriesList?: typeof BLOG_SERIES;
+  seriesList?: BlogSeriesTrack[];
 };
 
 export function BlogSeriesGrid({ counts, selectedSlug, seriesList = BLOG_SERIES }: BlogSeriesGridProps) {

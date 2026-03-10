@@ -45,12 +45,12 @@ export default function BlogSeries() {
           <div className="mx-auto max-w-2xl rounded-[2rem] border border-border/60 bg-card/80 p-10 text-center">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">Series not found</p>
             <h1 className="mt-3 text-3xl font-black tracking-tight text-foreground">That mastery route does not exist.</h1>
-            <p className="mt-4 text-muted-foreground">Open the blogs hub to browse every available mastery series card.</p>
+            <p className="mt-4 text-muted-foreground">Open the Blogs hub to browse every available mastery series card.</p>
             <Link
-              to="/cheatsheets"
+              to="/blogs"
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
             >
-              Back to Cheatsheets
+              Back to Blogs
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -117,11 +117,11 @@ export default function BlogSeries() {
       <main className="pt-24 pb-20">
         <section className="container mx-auto px-4">
           <Link
-            to="/cheatsheets"
+            to="/blogs"
             className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/30 hover:text-primary"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to All Cheatsheets
+            Back to All Blogs
           </Link>
 
           <div className="mt-6 overflow-hidden rounded-[2rem] border border-border/60 bg-gradient-to-br from-card via-card to-primary/10 p-8 md:p-10">

@@ -1,6 +1,6 @@
 import { MasteryEmbedPage } from "@/components/blog/MasteryEmbedPage";
 
-const STATIC_HTML_VERSION = "2026-03-09-efcore-html-v1";
+const STATIC_HTML_VERSION = "2026-03-10-efcore-html-v4";
 
 const EFCoreMastery = () => {
   return (

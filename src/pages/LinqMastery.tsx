@@ -1,6 +1,6 @@
 import { MasteryEmbedPage } from "@/components/blog/MasteryEmbedPage";
 
-const STATIC_HTML_VERSION = "2026-03-10-linq-html-v1";
+const STATIC_HTML_VERSION = "2026-03-10-linq-html-v10";
 
 const LinqMastery = () => {
   return (

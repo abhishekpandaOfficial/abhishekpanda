@@ -98,6 +98,17 @@ const SERIES_PALETTES: Record<string, VisualPalette> = {
   "gcp-mastery": { from: "#0b1727", via: "#15803d", to: "#0f766e", accent: "#86efac", soft: "#dcfce7", line: "rgba(220,252,231,0.24)" },
   "deep-learning-mastery": { from: "#0c1024", via: "#7c3aed", to: "#1e1b4b", accent: "#c4b5fd", soft: "#ede9fe", line: "rgba(237,233,254,0.24)" },
   "machine-learning-mastery": { from: "#062838", via: "#0891b2", to: "#0f766e", accent: "#67e8f9", soft: "#cffafe", line: "rgba(207,250,254,0.24)" },
+  "mathematics-mastery": { from: "#061a2d", via: "#0369a1", to: "#0f766e", accent: "#7dd3fc", soft: "#e0f2fe", line: "rgba(224,242,254,0.24)" },
+  "statistics-mastery": { from: "#071b19", via: "#0f766e", to: "#14532d", accent: "#6ee7b7", soft: "#d1fae5", line: "rgba(209,250,229,0.24)" },
+  "python-mastery": { from: "#23180a", via: "#ca8a04", to: "#1d4ed8", accent: "#fde047", soft: "#fef9c3", line: "rgba(254,249,195,0.24)" },
+  "numpy-mastery": { from: "#07152b", via: "#1d4ed8", to: "#0f766e", accent: "#93c5fd", soft: "#dbeafe", line: "rgba(219,234,254,0.24)" },
+  "pandas-mastery": { from: "#120d24", via: "#7c3aed", to: "#1e293b", accent: "#c4b5fd", soft: "#ede9fe", line: "rgba(237,233,254,0.24)" },
+  "matplotlib-mastery": { from: "#2b1408", via: "#ea580c", to: "#7c2d12", accent: "#fdba74", soft: "#ffedd5", line: "rgba(255,237,213,0.24)" },
+  "seaborn-mastery": { from: "#1b1028", via: "#db2777", to: "#4f46e5", accent: "#f9a8d4", soft: "#fce7f3", line: "rgba(252,231,243,0.24)" },
+  "feature-engineering-mastery": { from: "#08201a", via: "#16a34a", to: "#0f766e", accent: "#86efac", soft: "#dcfce7", line: "rgba(220,252,231,0.24)" },
+  "machine-learning-core-mastery": { from: "#062838", via: "#0891b2", to: "#0f766e", accent: "#67e8f9", soft: "#cffafe", line: "rgba(207,250,254,0.24)" },
+  "deep-learning-core-mastery": { from: "#0c1024", via: "#7c3aed", to: "#1e1b4b", accent: "#c4b5fd", soft: "#ede9fe", line: "rgba(237,233,254,0.24)" },
+  "nlp-mastery": { from: "#140b25", via: "#9333ea", to: "#0f766e", accent: "#d8b4fe", soft: "#f3e8ff", line: "rgba(243,232,255,0.24)" },
   "blockchain-zero-to-hero": { from: "#2b1408", via: "#d97706", to: "#7c2d12", accent: "#fcd34d", soft: "#fef3c7", line: "rgba(254,243,199,0.24)" },
   "nlp-llm-mastery": { from: "#140b25", via: "#9333ea", to: "#0f766e", accent: "#d8b4fe", soft: "#f3e8ff", line: "rgba(243,232,255,0.24)" },
   "computer-vision-mastery": { from: "#1f1024", via: "#db2777", to: "#4338ca", accent: "#f9a8d4", soft: "#fce7f3", line: "rgba(252,231,243,0.24)" },
@@ -274,6 +285,70 @@ const getSeriesPattern = (series: BlogSeriesTrack, palette: VisualPalette) => {
         <path d="M774 336V148M774 336h218" stroke="${line}" stroke-width="6" stroke-linecap="round"/>
         <circle cx="818" cy="290" r="10" fill="${accent}" /><circle cx="860" cy="248" r="10" fill="${accent}" /><circle cx="918" cy="216" r="10" fill="${accent}" /><circle cx="968" cy="172" r="10" fill="${accent}" />
         <path d="M806 302 980 160" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>`;
+    case "mathematics-mastery":
+      return `<rect x="742" y="104" width="290" height="252" rx="28" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <path d="M774 320 860 176 930 246 998 130" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M772 332h246M792 126c34 24 54 54 62 92" fill="none" stroke="${line}" stroke-width="7" stroke-linecap="round"/>
+        <text x="884" y="412" text-anchor="middle" fill="${soft}" font-family="JetBrains Mono, monospace" font-size="28" font-weight="700">vectors · gradients · matrices</text>`;
+    case "statistics-mastery":
+      return `<rect x="742" y="102" width="292" height="284" rx="28" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <rect x="786" y="248" width="34" height="86" rx="10" fill="${accent}" />
+        <rect x="840" y="204" width="34" height="130" rx="10" fill="rgba(255,255,255,.08)" stroke="${line}" />
+        <rect x="894" y="172" width="34" height="162" rx="10" fill="${accent}" />
+        <rect x="948" y="228" width="34" height="106" rx="10" fill="rgba(255,255,255,.08)" stroke="${line}" />
+        <path d="M774 148c46-26 82-40 112-40 34 0 72 18 118 58" fill="none" stroke="${line}" stroke-width="7" stroke-linecap="round"/>`;
+    case "python-mastery":
+      return `<path d="M790 104h78c34 0 52 20 52 50v54h-96c-26 0-42 14-42 40v44c0 30 20 48 50 48h82c28 0 46-18 46-46v-52h-102c-24 0-38-14-38-36" fill="rgba(255,255,255,.06)" stroke="${line}" stroke-width="6"/>
+        <path d="M982 428h-78c-34 0-52-20-52-50v-54h96c26 0 42-14 42-40v-44c0-30-20-48-50-48h-82c-28 0-46 18-46 46v52h102c24 0 38 14 38 36" fill="rgba(255,255,255,.06)" stroke="${accent}" stroke-width="6"/>
+        <circle cx="844" cy="150" r="8" fill="${accent}" /><circle cx="928" cy="382" r="8" fill="${soft}" />`;
+    case "numpy-mastery":
+      return `<rect x="754" y="108" width="86" height="86" rx="14" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="848" y="184" width="86" height="86" rx="14" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="942" y="260" width="86" height="86" rx="14" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <path d="M840 152h8M934 228h8M1028 304h8M840 194 848 194M934 270 942 270" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>
+        <path d="M754 388c96-30 190-36 284-18" fill="none" stroke="${line}" stroke-width="7" stroke-linecap="round"/>`;
+    case "pandas-mastery":
+      return `<rect x="744" y="112" width="286" height="258" rx="28" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <path d="M744 178h286M744 244h286M840 112v258M936 112v258" stroke="${line}" stroke-width="6"/>
+        <rect x="840" y="178" width="96" height="66" fill="${accent}" opacity=".28" />
+        <rect x="936" y="244" width="94" height="126" fill="${accent}" opacity=".2" />`;
+    case "matplotlib-mastery":
+      return `<rect x="748" y="104" width="280" height="286" rx="28" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <path d="M786 332V150M786 332h206" stroke="${line}" stroke-width="6" stroke-linecap="round"/>
+        <path d="M806 296 854 246 912 260 970 176" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="854" cy="246" r="9" fill="${soft}" /><circle cx="912" cy="260" r="9" fill="${soft}" /><circle cx="970" cy="176" r="9" fill="${soft}" />`;
+    case "seaborn-mastery":
+      return `<rect x="742" y="104" width="292" height="286" rx="28" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <path d="M798 316c12-86 38-132 78-132 34 0 54 28 64 82 10 42 30 62 56 62" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round"/>
+        <path d="M786 352h212" stroke="${line}" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="876" cy="184" r="18" fill="rgba(255,255,255,.08)" stroke="${line}" /><circle cx="956" cy="274" r="16" fill="rgba(255,255,255,.08)" stroke="${line}" />`;
+    case "feature-engineering-mastery":
+      return `<rect x="738" y="108" width="298" height="274" rx="28" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <rect x="776" y="150" width="70" height="56" rx="14" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="776" y="228" width="70" height="56" rx="14" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="922" y="188" width="74" height="96" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <path d="M846 178h42M846 256h42M886 178v78M922 236h-18" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>
+        <text x="886" y="344" text-anchor="middle" fill="${soft}" font-family="JetBrains Mono, monospace" font-size="24" font-weight="700">clean → encode → scale</text>`;
+    case "machine-learning-core-mastery":
+      return `<rect x="730" y="108" width="300" height="278" rx="30" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <rect x="760" y="150" width="74" height="74" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="850" y="150" width="74" height="74" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="940" y="150" width="74" height="74" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <text x="797" y="194" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="800">S</text>
+        <text x="887" y="194" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="800">U</text>
+        <text x="977" y="194" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="800">R</text>
+        <path d="M797 224v62M887 224v62M977 224v62" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>
+        <path d="M797 286h180" stroke="${line}" stroke-width="6" stroke-linecap="round"/>
+        <text x="886" y="350" text-anchor="middle" fill="${soft}" font-family="JetBrains Mono, monospace" font-size="24" font-weight="700">supervised · unsupervised · reinforcement</text>`;
+    case "deep-learning-core-mastery":
+      return `<circle cx="776" cy="126" r="12" fill="${accent}" /><circle cx="776" cy="210" r="12" fill="${accent}" /><circle cx="776" cy="294" r="12" fill="${accent}" />
+        <circle cx="886" cy="168" r="12" fill="${accent}" /><circle cx="886" cy="252" r="12" fill="${accent}" />
+        <circle cx="996" cy="126" r="12" fill="${accent}" /><circle cx="996" cy="210" r="12" fill="${accent}" /><circle cx="996" cy="294" r="12" fill="${accent}" />
+        <path d="M788 126 874 168 788 210 874 252 788 294M898 168 984 126M898 168 984 210M898 252 984 210M898 252 984 294" fill="none" stroke="${line}" stroke-width="5"/>`;
+    case "nlp-mastery":
+      return `<path d="M758 136h216c28 0 50 22 50 50v52c0 28-22 50-50 50H858l-58 52v-52h-42c-28 0-50-22-50-50v-52c0-28 22-50 50-50Z" fill="rgba(255,255,255,.06)" stroke="${line}" />
+        <circle cx="810" cy="212" r="10" fill="${accent}" /><circle cx="886" cy="212" r="10" fill="${accent}" /><circle cx="962" cy="212" r="10" fill="${accent}" />
+        <path d="M748 392c88-20 180-16 272 12" fill="none" stroke="${line}" stroke-width="7" stroke-linecap="round"/>`;
     case "blockchain-zero-to-hero":
       return `<rect x="760" y="98" width="252" height="88" rx="22" fill="rgba(255,255,255,.06)" stroke="${line}" />
         <rect x="788" y="224" width="196" height="68" rx="20" fill="rgba(255,255,255,.06)" stroke="${line}" />

@@ -566,10 +566,13 @@ p.body {
 .code-body {
   padding: 16px;
   overflow-x: auto;
+  display: block;
   font-family: var(--mono);
   font-size: 12px;
   line-height: 1.8;
   color: #cdd6f4;
+  white-space: pre-wrap;
+  tab-size: 4;
 }
 
 .code-body::-webkit-scrollbar { height: 4px; }
@@ -2293,6 +2296,1262 @@ const CHAPTERS = [
 // DETAILED CONTENT FOR EACH TOPIC
 // ═══════════════════════════════════════════════
 
+function efEscapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function efList(items) {
+  return `<ul class="feature-list">${items.map(item => `<li>${item}</li>`).join('')}</ul>`;
+}
+
+function efCallout(type, title, body) {
+  return `<div class="callout ${type}"><strong>${title}</strong>${body}</div>`;
+}
+
+function efEnsureCommentedCode(code, label) {
+  if (/(^|\n)\s*(\/\/|#)/.test(code)) return code;
+
+  if (/^\s*dotnet\b/m.test(code)) {
+    return `# ${label}\n# Review the generated artifact before applying it outside local development.\n${code}`;
+  }
+
+  return `// ${label}\n// Keep the EF Core boundary explicit and prefer async APIs for I/O.\n${code}`;
+}
+
+function efHighlightCode(code) {
+  const placeholders = [];
+  const stash = html => `@@EFTOK${placeholders.push(html) - 1}@@`;
+  let text = efEscapeHtml(code);
+
+  text = text.replace(/("""[\s\S]*?"""|"([^"\\]|\\.)*"|'([^'\\]|\\.)*')/g, match => stash(`<span class="str">${match}</span>`));
+  text = text.replace(/\/\/[^\n]*/g, match => stash(`<span class="cm">${match}</span>`));
+  text = text.replace(/(^|\n)(#.*)/g, (_, prefix, comment) => `${prefix}${stash(`<span class="cm">${comment}</span>`)}`);
+  text = text.replace(/\.([A-Za-z_][A-Za-z0-9_]*)(\s*\()/g, (_, name, paren) => `.${stash(`<span class="met">${name}</span>`)}${paren}`);
+  text = text.replace(/\.([A-Za-z_][A-Za-z0-9_]*)\b/g, (_, name) => `.${stash(`<span class="prop">${name}</span>`)}`);
+
+  text = text.replace(/\b(class|record|struct|interface|enum)\s+([A-Za-z_][A-Za-z0-9_]*)/g, (_, keyword, name) =>
+    `${stash(`<span class="kw">${keyword}</span>`)} ${stash(`<span class="type">${name}</span>`)}`
+  );
+
+  text = text.replace(/\b(Task|ValueTask|CancellationToken|DbContext|DbContextOptions|DbContextOptionsBuilder|DbSet|ModelBuilder|EntityTypeBuilder|EntityState|SaveChangesInterceptor|InterceptionResult|DateTime|Guid|List|IReadOnlyList|ICollection|IEnumerable|IAsyncEnumerable|SqliteConnection|MsSqlBuilder|QuerySplittingBehavior|DeleteBehavior|Product|Order|Customer|OrderItem|AppDbContext|WriteDbContext|ReadDbContext|ProductListItem|OrderSummaryDto|Document|OrderStatus|PaymentMethod|CardPayment|BankTransferPayment|WalletPayment|InvoicePayment|CustomerSnapshot|ProductDto|EF)\b/g,
+    match => stash(`<span class="type">${match}</span>`)
+  );
+
+  text = text.replace(/\b(public|private|protected|internal|static|readonly|sealed|abstract|partial|async|await|return|new|void|int|string|bool|decimal|double|float|byte|char|object|var|this|base|default|using|namespace|if|else|switch|case|foreach|for|while|do|try|catch|finally|throw|break|continue|null|true|false|in|is|not|or|and|when|where)\b/g,
+    match => stash(`<span class="kw">${match}</span>`)
+  );
+
+  text = text.replace(/\b(\d+(?:_\d+)*(?:\.\d+)?)\b/g, match => stash(`<span class="num">${match}</span>`));
+  text = text.replace(/@@EFTOK(\d+)@@/g, (_, index) => placeholders[Number(index)]);
+
+  return text;
+}
+
+function efCodeBlock(label, code) {
+  const commentedCode = efEnsureCommentedCode(code, label);
+  return `
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">${efEscapeHtml(label)}</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <div class="code-body">${efHighlightCode(commentedCode)}</div>
+    </div>
+  `;
+}
+
+function efTable(rows) {
+  return `
+    <table class="comp-table">
+      <tr><th>Lens</th><th>Topic insight</th></tr>
+      ${rows.map(([left, right]) => `<tr><td>${efEscapeHtml(left)}</td><td>${right}</td></tr>`).join('')}
+    </table>
+  `;
+}
+
+function efWrapSvgText(text, x, y, fill, maxChars, lineHeight, maxLines, size, weight) {
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = '';
+
+  for (const word of words) {
+    const next = line ? `${line} ${word}` : word;
+    if (next.length <= maxChars) {
+      line = next;
+      continue;
+    }
+
+    if (line) {
+      lines.push(line);
+      line = word;
+    } else {
+      lines.push(word.slice(0, maxChars));
+      line = word.slice(maxChars);
+    }
+
+    if (lines.length === maxLines) break;
+  }
+
+  if (line && lines.length < maxLines) lines.push(line);
+  if (!lines.length) lines.push('');
+
+  return `<text x="${x}" y="${y}" text-anchor="middle" fill="${fill}" font-family="'JetBrains Mono',monospace" font-size="${size}" font-weight="${weight}">${lines.map((part, index) => `<tspan x="${x}" dy="${index === 0 ? 0 : lineHeight}">${efEscapeHtml(part)}</tspan>`).join('')}</text>`;
+}
+
+function efFindTopic(chapterId, topicId) {
+  const chapter = CHAPTERS.find(item => item.id === chapterId);
+  const topic = chapter?.topics.find(item => item.id === topicId);
+  return { chapter, topic };
+}
+
+function efChapterPlaybook(chapter) {
+  const map = {
+    intro: {
+      stage: 'Learn the mental model before touching production data',
+      bestFor: 'understanding why EF Core exists and what problems it solves',
+      when: [
+        'Use this when onboarding developers who know SQL or ADO.NET but not EF Core.',
+        'Use it when a team needs the vocabulary for DbContext, entities, tracking, and providers.',
+        'Use it before deciding where EF Core should sit in your application architecture.'
+      ],
+      tradeoffs: [
+        'You move faster, but you still need SQL awareness to debug performance.',
+        'The abstraction improves maintainability, but it can hide expensive queries if you stop inspecting SQL.',
+        'A strong model pays off later; a weak model creates migration and query pain.'
+      ],
+      rules: [
+        'Teach DbContext lifetime and query translation early.',
+        'Keep entity design explicit instead of letting conventions surprise the team.',
+        'Always inspect generated SQL on non-trivial queries.'
+      ],
+      source: 'Domain model',
+      flow: ['Entity classes', 'DbContext + model', 'Provider translation', 'Database result'],
+      output: 'typed entities or DTOs'
+    },
+    architecture: {
+      stage: 'Translate LINQ to provider-specific SQL and materialize results',
+      bestFor: 'understanding pipeline boundaries, providers, and internal services',
+      when: [
+        'Use this when debugging translation failures or query-shape issues.',
+        'Use it when comparing database providers or tuning execution plans.',
+        'Use it when you need a clean picture of model building, translation, and materialization.'
+      ],
+      tradeoffs: [
+        'EF Core removes a lot of plumbing, but provider capabilities are not identical.',
+        'Internal caching improves repeat query performance, but only if the query shape stays stable.',
+        'Deep architecture knowledge helps with diagnosis, but it is overkill for simple CRUD screens.'
+      ],
+      rules: [
+        'Know what runs in SQL and what runs in memory.',
+        'Keep query shapes stable to benefit from cache reuse.',
+        'Treat provider-specific features as deliberate dependencies.'
+      ],
+      source: 'LINQ / metadata',
+      flow: ['Expression tree', 'Compiler / optimizer', 'Provider SQL', 'Materializer'],
+      output: 'executed command + object graph'
+    },
+    dbcontext: {
+      stage: 'Coordinate a unit of work, tracking, and persistence boundary',
+      bestFor: 'scoped request lifetimes, repositories, and application services',
+      when: [
+        'Use this for one business transaction or one HTTP request.',
+        'Use it when you want change tracking and SaveChanges orchestration.',
+        'Use factories or pooling when you need controlled creation at scale.'
+      ],
+      tradeoffs: [
+        'A short-lived context is simple and safe; a long-lived context creates stale state and memory growth.',
+        'Tracking helps updates, but it costs memory and CPU for read-only endpoints.',
+        'Pooling reduces allocations, but your context must reset cleanly between uses.'
+      ],
+      rules: [
+        'Keep DbContext scoped and short lived.',
+        'Never share one context across concurrent operations.',
+        'Favor async APIs in web and worker services.'
+      ],
+      source: 'Application service',
+      flow: ['Resolve context', 'Query or track', 'SaveChanges', 'Dispose'],
+      output: 'committed unit of work'
+    },
+    modeling: {
+      stage: 'Define how CLR types become relational shape',
+      bestFor: 'clean domain models, explicit constraints, and future-safe schema evolution',
+      when: [
+        'Use this when designing entities, keys, owned types, and value conversions.',
+        'Use it when a schema must match domain language, precision, and invariants.',
+        'Use it before generating migrations for shared environments.'
+      ],
+      tradeoffs: [
+        'Conventions are quick, but Fluent API gives stronger control.',
+        'Rich models improve correctness, but advanced mapping increases complexity.',
+        'Provider-specific types can unlock features, but reduce portability.'
+      ],
+      rules: [
+        'Put important constraints in the model, not just in comments.',
+        'Keep persistence concerns out of business logic where possible.',
+        'Review generated migrations after every model change.'
+      ],
+      source: 'CLR model',
+      flow: ['Entities', 'Mapping rules', 'Model snapshot', 'Database schema'],
+      output: 'predictable schema'
+    },
+    relationships: {
+      stage: 'Map navigations, keys, and delete behavior between aggregates',
+      bestFor: 'loading related data and preserving referential integrity',
+      when: [
+        'Use this when building object graphs across parent, child, and join entities.',
+        'Use it when deciding between skip navigations, payload joins, or explicit foreign keys.',
+        'Use it when delete behavior and loading strategy affect correctness.'
+      ],
+      tradeoffs: [
+        'Rich navigation graphs are convenient, but they can create accidental over-fetching.',
+        'Cascade delete simplifies cleanup, but it can surprise operations teams on large graphs.',
+        'Many-to-many convenience is good, but explicit join entities are better when the relationship has behavior.'
+      ],
+      rules: [
+        'Make delete behavior explicit.',
+        'Prefer projections for read APIs over deep Include chains.',
+        'Model relationship payloads with dedicated join entities.'
+      ],
+      source: 'Aggregate boundaries',
+      flow: ['Principal entity', 'Dependent entity', 'Foreign key', 'Navigation graph'],
+      output: 'coherent relational links'
+    },
+    migrations: {
+      stage: 'Turn model deltas into reviewed schema change scripts',
+      bestFor: 'schema evolution across dev, test, and production',
+      when: [
+        'Use this when your model changes and the database must evolve safely.',
+        'Use it when DBAs or pipelines need auditable SQL artifacts.',
+        'Use it when deployments need rollback, idempotency, and repeatability.'
+      ],
+      tradeoffs: [
+        'Migrations are repeatable and versioned, but bad generated changes can still damage data.',
+        'Automatic execution is convenient in development, but risky in production.',
+        'Hand-edited migrations add power, but require discipline and review.'
+      ],
+      rules: [
+        'Review migration code before applying it.',
+        'Prefer idempotent scripts or bundles for production.',
+        'Test both upgrade and rollback paths on realistic data.'
+      ],
+      source: 'Model diff',
+      flow: ['Detect changes', 'Generate migration', 'Review SQL', 'Apply safely'],
+      output: 'versioned schema'
+    },
+    querying: {
+      stage: 'Shape data in SQL first, then materialize only what the endpoint needs',
+      bestFor: 'read paths, dashboards, APIs, and search flows',
+      when: [
+        'Use this when you need filtering, sorting, projection, aggregation, or pagination.',
+        'Use it when read throughput matters and you want to avoid over-fetching.',
+        'Use it when loading strategy directly impacts latency and memory.'
+      ],
+      tradeoffs: [
+        'LINQ is expressive, but some expressions do not translate cleanly.',
+        'Includes are convenient, but DTO projections are usually cheaper.',
+        'Split queries prevent cartesian explosions, but add more round trips.'
+      ],
+      rules: [
+        'Project early for read APIs.',
+        'Keep filtering, ordering, and aggregation in SQL.',
+        'Measure lazy loading cost before allowing it in production.'
+      ],
+      source: 'IQueryable',
+      flow: ['Compose LINQ', 'Translate SQL', 'Execute query', 'Map results'],
+      output: 'DTOs or tracked entities'
+    },
+    'change-tracking': {
+      stage: 'Compare current entity values against tracked state',
+      bestFor: 'update workflows and disconnected API merges',
+      when: [
+        'Use tracking when you intend to modify loaded entities.',
+        'Use no-tracking when the response is read-only.',
+        'Use graph APIs when detached entities re-enter the system.'
+      ],
+      tradeoffs: [
+        'Tracking enables simple updates, but costs memory and CPU.',
+        'Disconnected graphs are flexible, but easy to mark incorrectly.',
+        'Identity resolution prevents duplicates, but makes context lifetime matter.'
+      ],
+      rules: [
+        'Use AsNoTracking on pure reads.',
+        'Keep one context per unit of work.',
+        'Be explicit about entity state when attaching detached graphs.'
+      ],
+      source: 'Tracked entity',
+      flow: ['Materialize', 'Snapshot', 'Detect changes', 'Generate commands'],
+      output: 'state transitions'
+    },
+    saving: {
+      stage: 'Generate insert, update, delete, and batch commands',
+      bestFor: 'transactional writes and persistence orchestration',
+      when: [
+        'Use SaveChanges when tracked entities represent a true unit of work.',
+        'Use ExecuteUpdate and ExecuteDelete for set-based bulk changes.',
+        'Use interceptors when writes need auditing or policy hooks.'
+      ],
+      tradeoffs: [
+        'Tracked saves are expressive, but slower for large bulk updates.',
+        'Set-based writes are fast, but they bypass change tracker hooks.',
+        'Soft delete is safe for recovery, but it complicates filtering and indexing.'
+      ],
+      rules: [
+        'Prefer SaveChangesAsync in server code.',
+        'Use set-based APIs for large updates.',
+        'Be explicit about side effects when bypassing tracking.'
+      ],
+      source: 'Tracked graph',
+      flow: ['Detect changes', 'Build commands', 'Open transaction', 'Commit'],
+      output: 'durable state'
+    },
+    performance: {
+      stage: 'Reduce query count, payload size, allocations, and startup overhead',
+      bestFor: 'high-traffic APIs and performance-sensitive workloads',
+      when: [
+        'Use this when request latency or memory usage is rising.',
+        'Use it when query count, result size, or startup time becomes visible in telemetry.',
+        'Use it when you need a repeatable performance review checklist.'
+      ],
+      tradeoffs: [
+        'Aggressive tuning improves throughput, but can hurt readability.',
+        'Caching helps hot paths, but requires careful invalidation.',
+        'Hybrid EF Core + raw SQL or Dapper improves hot spots, but increases cognitive load.'
+      ],
+      rules: [
+        'Measure before and after every optimization.',
+        'Prioritize N+1, over-fetching, and missing indexes first.',
+        'Keep generated SQL and execution plans in the review loop.'
+      ],
+      source: 'Hot path',
+      flow: ['Observe', 'Profile', 'Change query/model', 'Benchmark'],
+      output: 'lower latency'
+    },
+    transactions: {
+      stage: 'Guarantee atomicity across one or more commands',
+      bestFor: 'multi-step writes and consistency boundaries',
+      when: [
+        'Use implicit transactions for ordinary SaveChanges batches.',
+        'Use explicit transactions when several save operations must succeed together.',
+        'Use savepoints or outbox patterns when partial rollback and distributed consistency matter.'
+      ],
+      tradeoffs: [
+        'Transactions protect consistency, but hold locks and resources longer.',
+        'TransactionScope can simplify coordination, but increases operational risk.',
+        'Distributed consistency patterns are safer than two-phase commit in most cloud systems.'
+      ],
+      rules: [
+        'Keep transactions short.',
+        'Avoid network calls while a transaction is open.',
+        'Prefer outbox or saga patterns over distributed transactions in microservices.'
+      ],
+      source: 'Write pipeline',
+      flow: ['Begin', 'Execute commands', 'Optional savepoint', 'Commit / rollback'],
+      output: 'atomic persistence'
+    },
+    concurrency: {
+      stage: 'Detect conflicting writes without pessimistic row locks',
+      bestFor: 'collaborative edits and last-write conflict handling',
+      when: [
+        'Use optimistic concurrency when conflicts are possible but rare.',
+        'Use rowversion or tokens when users may edit the same record concurrently.',
+        'Use conflict resolution logic when data integrity matters more than blind overwrite.'
+      ],
+      tradeoffs: [
+        'Optimistic concurrency scales well, but the application must handle retries or merges.',
+        'Tokens are easy to adopt, but they complicate disconnected APIs if originals are missing.',
+        'Pessimistic locking can prevent conflicts, but usually reduces concurrency.'
+      ],
+      rules: [
+        'Always surface a clear merge or retry strategy.',
+        'Include the original concurrency token in update requests.',
+        'Test conflict paths, not just happy paths.'
+      ],
+      source: 'Original values',
+      flow: ['Load token', 'User edits', 'Compare token', 'Commit or reject'],
+      output: 'safe conflict handling'
+    },
+    rawsql: {
+      stage: 'Drop below LINQ when the database shape or feature demands it',
+      bestFor: 'stored procedures, TVFs, vendor-specific SQL, and bulk operations',
+      when: [
+        'Use raw SQL when EF translation is insufficient or too indirect.',
+        'Use it when a DBA-owned query must remain authoritative.',
+        'Use it when database features such as TVFs or hints are central to the solution.'
+      ],
+      tradeoffs: [
+        'Raw SQL gives exact control, but sacrifices some portability and composability.',
+        'Parameterization keeps it safe, but string concatenation reintroduces injection risk.',
+        'Mixing LINQ and raw SQL is powerful, but harder to standardize across teams.'
+      ],
+      rules: [
+        'Always parameterize.',
+        'Keep SQL in one place with tests around the shape.',
+        'Use EF for orchestration and mapping even when the query is hand-written.'
+      ],
+      source: 'SQL command',
+      flow: ['Build safe SQL', 'Bind parameters', 'Execute provider', 'Map result'],
+      output: 'database-native behavior'
+    },
+    'advanced-mapping': {
+      stage: 'Align rich domain shapes with efficient database storage',
+      bestFor: 'inheritance, conversions, JSON, and special mapping cases',
+      when: [
+        'Use this when simple table-per-entity mapping no longer fits the domain.',
+        'Use it when provider features such as JSON columns or keyless views matter.',
+        'Use it when the shape of the object model and schema intentionally diverge.'
+      ],
+      tradeoffs: [
+        'Advanced mapping increases expressiveness, but can hurt query simplicity.',
+        'Inheritance strategies change storage cost and query cost in different ways.',
+        'Provider-specific mappings unlock features, but tie you more closely to one platform.'
+      ],
+      rules: [
+        'Benchmark inheritance strategies before locking in.',
+        'Keep value conversions explicit and reversible.',
+        'Validate provider support before using advanced mapping in shared libraries.'
+      ],
+      source: 'Specialized model',
+      flow: ['Choose strategy', 'Configure mapping', 'Generate schema', 'Query efficiently'],
+      output: 'domain-friendly persistence'
+    },
+    testing: {
+      stage: 'Verify data access behavior against realistic provider semantics',
+      bestFor: 'integration tests, query verification, and migration confidence',
+      when: [
+        'Use SQLite or Testcontainers when you care about real SQL behavior.',
+        'Use fixtures and factories when test isolation and speed both matter.',
+        'Use repository abstraction carefully when it genuinely improves test focus.'
+      ],
+      tradeoffs: [
+        'Real databases increase confidence, but they are slower than pure unit tests.',
+        'In-memory provider is fast, but it can hide translation and constraint issues.',
+        'Mocking repositories is easy, but it proves less about real query behavior.'
+      ],
+      rules: [
+        'Choose the test type based on the risk.',
+        'Do not trust the in-memory provider for relational correctness.',
+        'Keep migration and schema tests in CI.'
+      ],
+      source: 'Test fixture',
+      flow: ['Create database', 'Seed data', 'Run query/write', 'Assert behavior'],
+      output: 'reliable tests'
+    },
+    providers: {
+      stage: 'Adapt EF Core behavior to the selected database engine',
+      bestFor: 'provider selection, features, and deployment alignment',
+      when: [
+        'Use this when choosing SQL Server, PostgreSQL, MySQL, SQLite, or Cosmos DB.',
+        'Use it when portability matters or provider-specific features are attractive.',
+        'Use it when deployment environment and database capability must align.'
+      ],
+      tradeoffs: [
+        'Provider-specific features can be excellent, but reduce portability.',
+        'Cross-provider code is safer for libraries, but often leaves performance on the table.',
+        'Local-dev simplicity may conflict with production database behavior.'
+      ],
+      rules: [
+        'Develop against the production-like provider whenever possible.',
+        'Document provider-specific assumptions in code and architecture notes.',
+        'Re-test translations when switching providers.'
+      ],
+      source: 'Provider package',
+      flow: ['Configure provider', 'Translate query', 'Use provider features', 'Execute'],
+      output: 'database-specific behavior'
+    },
+    extensions: {
+      stage: 'Use focused libraries where EF Core intentionally stays minimal',
+      bestFor: 'bulk ops, auditing, dynamic queries, and operational helpers',
+      when: [
+        'Use extensions when the built-in API is correct but not efficient enough.',
+        'Use them when audit, dynamic filtering, or pagination would otherwise require repetitive infrastructure.',
+        'Use them when the operational cost of home-grown solutions exceeds the library risk.'
+      ],
+      tradeoffs: [
+        'Extensions accelerate delivery, but add dependency and upgrade risk.',
+        'Third-party abstractions can save time, but they need provider and license review.',
+        'Convenience APIs are useful, but the team still needs to understand the SQL they generate.'
+      ],
+      rules: [
+        'Adopt only libraries with active maintenance and clear provider support.',
+        'Benchmark bulk libraries on realistic data shapes.',
+        'Keep extension use behind clear application boundaries.'
+      ],
+      source: 'Extension package',
+      flow: ['Install library', 'Configure integration', 'Run optimized operation', 'Monitor behavior'],
+      output: 'faster delivery or higher throughput'
+    },
+    internals: {
+      stage: 'Explain what EF Core does under the hood before SQL reaches the driver',
+      bestFor: 'deep diagnostics, customization, and advanced performance work',
+      when: [
+        'Use this when translation, caching, or internal service replacement becomes relevant.',
+        'Use it when diagnosing unusual query behavior or startup cost.',
+        'Use it when building conventions or custom providers around EF Core.'
+      ],
+      tradeoffs: [
+        'Internal knowledge enables sharp diagnosis, but increases framework coupling.',
+        'Customizing internal services is powerful, but harder to maintain across upgrades.',
+        'Query caching is efficient, but only if expression shape stays consistent.'
+      ],
+      rules: [
+        'Prefer public extension points first.',
+        'Treat internal service replacement as a deliberate architectural choice.',
+        'Capture benchmarks before and after internal changes.'
+      ],
+      source: 'Expression tree / metadata',
+      flow: ['Parse expression', 'Compile pipeline', 'Cache plan', 'Run materializer'],
+      output: 'predictable internals'
+    },
+    'perf-engineering': {
+      stage: 'Engineer for repeatable throughput, predictable latency, and deploy-time constraints',
+      bestFor: 'high-scale APIs, serverless cold starts, and large models',
+      when: [
+        'Use this when normal EF tuning is no longer enough.',
+        'Use it when startup time, plan quality, or large-scale writes dominate cost.',
+        'Use it when you need measurable architecture-level decisions around reads and writes.'
+      ],
+      tradeoffs: [
+        'Expert tuning can dramatically improve numbers, but usually adds complexity.',
+        'AOT and compiled models improve startup, but reduce dynamic flexibility.',
+        'Read/write separation improves scalability, but introduces consistency design decisions.'
+      ],
+      rules: [
+        'Optimize the dominant bottleneck, not every layer at once.',
+        'Use representative benchmarks and production-like plans.',
+        'Document why a high-performance pattern exists so it survives team turnover.'
+      ],
+      source: 'Telemetry + benchmarks',
+      flow: ['Find bottleneck', 'Choose tactic', 'Benchmark change', 'Ship guardrails'],
+      output: 'engineered performance'
+    },
+    competitors: {
+      stage: 'Compare EF Core against adjacent data access strategies',
+      bestFor: 'tool selection and hybrid architecture decisions',
+      when: [
+        'Use this when deciding between EF Core, Dapper, Marten, NHibernate, or hybrid approaches.',
+        'Use it when a team needs a decision framework rather than ideology.',
+        'Use it when hot paths need exact SQL but most of the app benefits from EF Core.'
+      ],
+      tradeoffs: [
+        'EF Core accelerates most application development, but micro-ORMs can win hot-path simplicity.',
+        'Hybrid architectures can be effective, but they raise maintenance cost.',
+        'The best choice depends on team skill, schema volatility, and performance needs.'
+      ],
+      rules: [
+        'Choose the simplest tool that satisfies the risk profile.',
+        'Avoid mixing ORMs unless the performance or domain case is real.',
+        'Keep ownership boundaries clear when using hybrids.'
+      ],
+      source: 'Architecture decision',
+      flow: ['Define requirements', 'Compare trade-offs', 'Pick tool', 'Validate with benchmarks'],
+      output: 'defensible choice'
+    }
+  };
+
+  return map[chapter.id] || {
+    stage: 'Move from topic overview to production-ready application',
+    bestFor: 'learning the concept and applying it safely in a .NET 10 application',
+    when: [
+      'Use this when the topic is part of your application design or data-access workflow.',
+      'Use it when the team needs a practical mental model and a code-first example.',
+      'Use it when you want a short path from concept to implementation.'
+    ],
+    tradeoffs: [
+      'Every abstraction reduces boilerplate, but also hides part of the execution cost.',
+      'The topic becomes valuable when paired with generated SQL inspection and realistic tests.',
+      'Simple defaults are productive, but advanced workloads often need explicit configuration.'
+    ],
+    rules: [
+      'Keep the model, query, and persistence boundaries explicit.',
+      'Inspect SQL and benchmark hot paths.',
+      'Prefer simple patterns until a measurable problem appears.'
+    ],
+    source: 'EF Core surface',
+    flow: ['Model intent', 'Compose query or write', 'Provider work', 'Result / commit'],
+    output: 'reliable application behavior'
+  };
+}
+
+function efTopicOverrides(topicId) {
+  const map = {
+    'eager-loading': {
+      stage: 'Load the graph up front with one deliberate query shape',
+      code: String.raw`public async Task<IReadOnlyList<OrderSummaryDto>> GetRecentOrdersAsync(CancellationToken ct)
+{
+    return await db.Orders
+        .AsNoTracking()
+        .Where(o => o.CreatedAt >= DateTime.UtcNow.AddDays(-7))
+        .Include(o => o.Customer)
+        .Include(o => o.Items.Where(i => !i.IsCancelled))
+            .ThenInclude(i => i.Product)
+        .AsSplitQuery()
+        .Select(o => new OrderSummaryDto(
+            o.Id,
+            o.Customer.Name,
+            o.Items.Count,
+            o.Items.Sum(i => i.Quantity * i.UnitPrice)))
+        .ToListAsync(ct);
+}`,
+      scenario: 'Use eager loading when the endpoint always needs a known related graph, such as an order details screen with customer and item summaries.'
+    },
+    'lazy-loading': {
+      stage: 'Defer related data until navigation access triggers another query',
+      code: String.raw`builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString)
+           .UseLazyLoadingProxies());
+
+public class Order
+{
+    public int Id { get; set; }
+    public virtual Customer Customer { get; set; } = default!;
+    public virtual ICollection<OrderItem> Items { get; set; } = [];
+}`,
+      scenario: 'Lazy loading is acceptable for admin tools or low-traffic workflows where developer convenience matters more than strict query count control.'
+    },
+    'explicit-loading': {
+      stage: 'Load related data only when the application proves it is needed',
+      code: String.raw`var order = await db.Orders.SingleAsync(o => o.Id == request.OrderId, ct);
+
+await db.Entry(order)
+    .Collection(o => o.Items)
+    .Query()
+    .Where(i => !i.IsCancelled)
+    .LoadAsync(ct);
+
+await db.Entry(order)
+    .Reference(o => o.Customer)
+    .LoadAsync(ct);`,
+      scenario: 'Use explicit loading when the first query should stay small and only certain branches of the request need related data.'
+    },
+    'compiled-queries': {
+      stage: 'Precompile hot query shapes and skip repeated translation work',
+      code: String.raw`private static readonly Func<AppDbContext, Guid, CancellationToken, Task<CustomerSnapshot?>> CustomerById =
+    EF.CompileAsyncQuery((AppDbContext db, Guid customerId, CancellationToken ct) =>
+        db.Customers
+            .AsNoTracking()
+            .Where(c => c.Id == customerId)
+            .Select(c => new CustomerSnapshot(c.Id, c.Name, c.Tier))
+            .SingleOrDefault());
+
+public Task<CustomerSnapshot?> GetCustomerAsync(Guid id, CancellationToken ct)
+    => CustomerById(db, id, ct);`,
+      scenario: 'Use compiled queries on hot paths such as API lookups or background processors that execute the same query shape many times per second.'
+    },
+    'migrations-basics': {
+      stage: 'Capture model changes as versioned schema artifacts',
+      code: String.raw`dotnet ef migrations add InitialCreate
+dotnet ef database update
+
+dotnet ef migrations script --idempotent --output artifacts/sql/efcore.sql
+dotnet ef migrations bundle --self-contained -r linux-x64`,
+      scenario: 'Use this when the domain model evolves and you need a consistent, reviewable schema history across environments.'
+    },
+    'custom-migrations': {
+      stage: 'Blend generated schema changes with deliberate SQL',
+      code: String.raw`protected override void Up(MigrationBuilder migrationBuilder)
+{
+    migrationBuilder.Sql("""
+        UPDATE Products
+        SET Slug = LOWER(REPLACE(Name, ' ', '-'))
+        WHERE Slug IS NULL;
+    """);
+
+    migrationBuilder.CreateIndex(
+        name: "IX_Products_Slug",
+        table: "Products",
+        column: "Slug",
+        unique: true);
+}`,
+      scenario: 'Use custom migration operations when deployment needs data backfills, view creation, or zero-downtime helper objects.'
+    },
+    'bulk-operations': {
+      stage: 'Send one set-based command instead of loading and saving every row',
+      code: String.raw`await db.Orders
+    .Where(o => o.Status == OrderStatus.Pending && o.CreatedAt < cutoffUtc)
+    .ExecuteUpdateAsync(setters => setters
+        .SetProperty(o => o.Status, OrderStatus.Expired)
+        .SetProperty(o => o.UpdatedAt, DateTime.UtcNow), ct);
+
+await db.Orders
+    .Where(o => o.Status == OrderStatus.Cancelled && o.CreatedAt < archiveCutoffUtc)
+    .ExecuteDeleteAsync(ct);`,
+      scenario: 'Use set-based bulk operations for nightly cleanups, reclassification jobs, or large back-office updates.'
+    },
+    'interceptors': {
+      stage: 'Hook into command or save pipelines without polluting application services',
+      code: String.raw`public sealed class AuditSaveChangesInterceptor(ICurrentUser currentUser)
+    : SaveChangesInterceptor
+{
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+        DbContextEventData eventData,
+        InterceptionResult<int> result,
+        CancellationToken cancellationToken = default)
+    {
+        var context = eventData.Context;
+        if (context is null) return base.SavingChangesAsync(eventData, result, cancellationToken);
+
+        foreach (var entry in context.ChangeTracker.Entries<IAuditable>())
+        {
+            entry.Entity.ModifiedBy = currentUser.UserId;
+            entry.Entity.ModifiedAt = DateTime.UtcNow;
+        }
+
+        return base.SavingChangesAsync(eventData, result, cancellationToken);
+    }
+}`,
+      scenario: 'Use interceptors when auditing, query tags, retry logging, or policy checks should happen consistently across the data layer.'
+    },
+    'soft-delete': {
+      stage: 'Hide deleted rows logically while keeping recovery and audit history intact',
+      code: String.raw`modelBuilder.Entity<Product>(builder =>
+{
+    builder.Property(p => p.IsDeleted).HasDefaultValue(false);
+    builder.HasQueryFilter(p => !p.IsDeleted);
+});
+
+public override Task<int> SaveChangesAsync(CancellationToken ct = default)
+{
+    foreach (var entry in ChangeTracker.Entries<ISoftDeletable>()
+                 .Where(e => e.State == EntityState.Deleted))
+    {
+        entry.State = EntityState.Modified;
+        entry.Entity.IsDeleted = true;
+        entry.Entity.DeletedAt = DateTime.UtcNow;
+    }
+
+    return base.SaveChangesAsync(ct);
+}`,
+      scenario: 'Use soft delete in business domains where restore, audit, or legal hold is more important than physical row removal.'
+    },
+    'n-plus-1': {
+      stage: 'Spot accidental repeated round trips caused by navigation access patterns',
+      code: String.raw`builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString)
+           .LogTo(Console.WriteLine, LogLevel.Information));
+
+var orders = await db.Orders
+    .AsNoTracking()
+    .Include(o => o.Customer)
+    .Select(o => new { o.Id, Customer = o.Customer.Name })
+    .ToListAsync(ct);`,
+      scenario: 'Use this lens when a page seems fine locally but becomes slow in production because one request triggers dozens or hundreds of small queries.'
+    },
+    'query-logging': {
+      stage: 'Make SQL, timings, and provider behavior visible during development and diagnostics',
+      code: String.raw`builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString)
+           .EnableSensitiveDataLogging()
+           .EnableDetailedErrors()
+           .LogTo(message => logger.LogInformation("{Message}", message), LogLevel.Information));`,
+      scenario: 'Use SQL logging and profiling first whenever query shape, parameterization, or command count is unclear.'
+    },
+    'optimistic-concurrency': {
+      stage: 'Compare concurrency tokens on save and reject stale writes cleanly',
+      code: String.raw`public sealed class Document
+{
+    public Guid Id { get; set; }
+    public required string Title { get; set; }
+
+    [Timestamp]
+    public byte[] RowVersion { get; set; } = [];
+}
+
+try
+{
+    await db.SaveChangesAsync(ct);
+}
+catch (DbUpdateConcurrencyException ex)
+{
+    foreach (var entry in ex.Entries)
+    {
+        var databaseValues = await entry.GetDatabaseValuesAsync(ct);
+        entry.OriginalValues.SetValues(databaseValues!);
+    }
+
+    throw;
+}`,
+      scenario: 'Use optimistic concurrency on collaborative entities such as orders, documents, or inventory adjustments where silent overwrite is dangerous.'
+    },
+    'fromsql': {
+      stage: 'Start from SQL but keep EF Core materialization and tracking decisions',
+      code: String.raw`var summaries = await db.OrderSummaries
+    .FromSqlInterpolated($"""
+        SELECT o.Id, c.Name AS CustomerName, o.Total
+        FROM Orders o
+        INNER JOIN Customers c ON c.Id = o.CustomerId
+        WHERE o.CreatedAt >= {fromUtc}
+    """)
+    .AsNoTracking()
+    .ToListAsync(ct);`,
+      scenario: 'Use FromSql when the database query is already well known, owned by DBAs, or uses constructs that are awkward in LINQ.'
+    },
+    'executesql': {
+      stage: 'Run non-query SQL commands without hydrating entities',
+      code: String.raw`var affectedRows = await db.Database.ExecuteSqlInterpolatedAsync($"""
+    UPDATE Orders
+    SET Status = {"Archived"}
+    WHERE Status = {"Completed"} AND UpdatedAt < {cutoffUtc}
+""", ct);`,
+      scenario: 'Use ExecuteSql for maintenance commands, special-purpose updates, or database-native operations outside the tracked entity flow.'
+    },
+    'sql-injection': {
+      stage: 'Use parameterization to keep SQL flexible without opening injection holes',
+      code: String.raw`// Safe
+var rows = await db.Products
+    .FromSqlInterpolated($"""
+        SELECT * FROM Products WHERE CategoryId = {categoryId}
+    """)
+    .ToListAsync(ct);
+
+// Unsafe - never do this
+var sql = $"SELECT * FROM Products WHERE Name = '{userInput}'";`,
+      scenario: 'Use safe interpolation or parameters any time raw SQL receives external input.'
+    },
+    'tph': {
+      stage: 'Store a hierarchy in one table with a discriminator column',
+      code: String.raw`modelBuilder.Entity<PaymentMethod>()
+    .HasDiscriminator<string>("payment_type")
+    .HasValue<CardPayment>("card")
+    .HasValue<BankTransferPayment>("bank");`,
+      scenario: 'Use TPH when inheritance is real but polymorphic query performance matters more than a perfectly normalized schema.'
+    },
+    'tpt': {
+      stage: 'Separate base and derived types into different tables',
+      code: String.raw`modelBuilder.Entity<User>().ToTable("Users");
+modelBuilder.Entity<AdminUser>().ToTable("AdminUsers");
+modelBuilder.Entity<CustomerUser>().ToTable("CustomerUsers");`,
+      scenario: 'Use TPT when the schema must reflect the inheritance tree clearly and query volume is not dominated by polymorphic reads.'
+    },
+    'tpc': {
+      stage: 'Give each concrete type a full table and avoid joins to a base table',
+      code: String.raw`modelBuilder.Entity<InvoicePayment>().UseTpcMappingStrategy();
+modelBuilder.Entity<CardPayment>().ToTable("CardPayments");
+modelBuilder.Entity<WalletPayment>().ToTable("WalletPayments");`,
+      scenario: 'Use TPC when most queries target concrete leaf types and duplicated base columns are acceptable.'
+    },
+    'value-converters': {
+      stage: 'Translate between CLR-friendly values and storage-friendly columns',
+      code: String.raw`builder.Property(o => o.Status)
+    .HasConversion(
+        status => status.ToString(),
+        value => Enum.Parse<OrderStatus>(value));
+
+builder.Property(o => o.Tags)
+    .HasConversion(
+        tags => JsonSerializer.Serialize(tags, JsonSerializerOptions.Default),
+        json => JsonSerializer.Deserialize<List<string>>(json, JsonSerializerOptions.Default) ?? []);`,
+      scenario: 'Use converters when domain types such as enums, value objects, or collections should remain expressive in code.'
+    },
+    'json-columns': {
+      stage: 'Persist complex document-like values inside a relational row',
+      code: String.raw`modelBuilder.Entity<Customer>()
+    .OwnsOne(c => c.Profile, profile =>
+    {
+        profile.ToJson();
+        profile.OwnsOne(p => p.Preferences);
+    });`,
+      scenario: 'Use JSON columns when a sub-document changes together with the root entity and separate tables would add noise.'
+    },
+    'inmemory-provider': {
+      stage: 'Run fast tests with a fake provider that skips real relational behavior',
+      code: String.raw`services.AddDbContext<AppDbContext>(options =>
+    options.UseInMemoryDatabase("tests"));`,
+      scenario: 'Use the in-memory provider only for simple logic tests where SQL translation and relational constraints are irrelevant.'
+    },
+    'sqlite-testing': {
+      stage: 'Get lightweight relational behavior in tests without a full server',
+      code: String.raw`await using var connection = new SqliteConnection("Data Source=:memory:");
+await connection.OpenAsync(ct);
+
+var options = new DbContextOptionsBuilder<AppDbContext>()
+    .UseSqlite(connection)
+    .Options;
+
+await using var db = new AppDbContext(options);
+await db.Database.EnsureCreatedAsync(ct);`,
+      scenario: 'Use SQLite testing when you need relational semantics and a small feedback loop for integration tests.'
+    },
+    'testcontainers': {
+      stage: 'Spin up the real database engine inside automated tests',
+      code: String.raw`var sql = new MsSqlBuilder()
+    .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+    .Build();
+
+await sql.StartAsync(ct);
+
+var options = new DbContextOptionsBuilder<AppDbContext>()
+    .UseSqlServer(sql.GetConnectionString())
+    .Options;`,
+      scenario: 'Use Testcontainers for high-confidence integration tests where provider-specific SQL, transactions, and constraints matter.'
+    },
+    'sqlserver': {
+      stage: 'Use the most common provider surface for enterprise .NET applications',
+      code: String.raw`builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("SqlServer"),
+        sql => sql.EnableRetryOnFailure()));`,
+      scenario: 'Use SQL Server or Azure SQL when you need mature tooling, rowversion concurrency, temporal tables, and strong .NET ecosystem alignment.'
+    },
+    'postgresql': {
+      stage: 'Exploit PostgreSQL features such as JSONB, arrays, and powerful indexing',
+      code: String.raw`builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("Postgres"),
+        npgsql => npgsql.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));`,
+      scenario: 'Use PostgreSQL when advanced JSON querying, arrays, and open-source platform flexibility are core requirements.'
+    },
+    'cosmos': {
+      stage: 'Map aggregates to a document database through the EF Core provider',
+      code: String.raw`builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseCosmos(
+        accountEndpoint,
+        accountKey,
+        databaseName));`,
+      scenario: 'Use Cosmos DB provider when the aggregate is naturally document-shaped and the operational model aligns with partitioned NoSQL.'
+    },
+    'expression-trees': {
+      stage: 'Capture C# query intent as a traversable tree before translation',
+      code: String.raw`Expression<Func<Order, bool>> predicate =
+    order => order.Status == OrderStatus.Paid && order.Total >= minimumTotal;
+
+var query = db.Orders.Where(predicate);`,
+      scenario: 'Use expression tree knowledge when building reusable specifications, custom query builders, or translation diagnostics.'
+    },
+    'query-caching': {
+      stage: 'Reuse compiled query plans when the expression shape stays stable',
+      code: String.raw`var query = db.Orders
+    .Where(o => o.CustomerId == customerId)
+    .OrderByDescending(o => o.CreatedAt)
+    .Take(size);
+
+// Good: parameter changes keep the same shape and reuse the cache.`,
+      scenario: 'Use query cache awareness when hot paths repeat the same query pattern with different parameter values.'
+    },
+    'query-plan': {
+      stage: 'Look at the database execution plan, not just the LINQ expression',
+      code: String.raw`var sql = db.Orders
+    .Where(o => o.Status == OrderStatus.Paid)
+    .OrderByDescending(o => o.CreatedAt)
+    .ToQueryString();`,
+      scenario: 'Use query plan analysis when indexes, join order, scans, or sorts dominate runtime more than EF itself.'
+    },
+    'efcore-aot': {
+      stage: 'Trim reflection-heavy startup work for NativeAOT-focused deployments',
+      code: String.raw`dotnet ef dbcontext optimize --output-dir CompiledModels --namespace MyApp.CompiledModels
+
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
+    options.UseSqlServer(connectionString)
+           .UseModel(AppDbContextModel.Instance));`,
+      scenario: 'Use AOT-oriented EF Core patterns for functions, small containers, and environments where cold start dominates.'
+    },
+    'high-perf-writes': {
+      stage: 'Choose the write strategy that matches data volume and consistency needs',
+      code: String.raw`await using var tx = await db.Database.BeginTransactionAsync(ct);
+
+await db.Database.ExecuteSqlInterpolatedAsync($"""
+    UPDATE Inventory
+    SET Quantity = Quantity - {qty}
+    WHERE ProductId = {productId}
+""", ct);
+
+await tx.CommitAsync(ct);`,
+      scenario: 'Use high-performance write patterns when classic tracked entity updates produce too many round trips or allocations.'
+    },
+    'read-replicas': {
+      stage: 'Split read and write paths so each database connection serves a clear responsibility',
+      code: String.raw`builder.Services.AddDbContext<WriteDbContext>(options =>
+    options.UseSqlServer(primaryConnection));
+
+builder.Services.AddDbContext<ReadDbContext>(options =>
+    options.UseSqlServer(readReplicaConnection));`,
+      scenario: 'Use read replicas and CQRS when read scale requirements exceed what a single write database should serve.'
+    },
+    'dapper': {
+      stage: 'Use a micro-ORM when exact SQL and minimal abstraction win the trade-off',
+      code: String.raw`const string sql = """
+    SELECT Id, Name, Tier
+    FROM Customers
+    WHERE Id = @Id
+""";
+
+var customer = await connection.QuerySingleAsync<CustomerRow>(sql, new { Id = customerId });`,
+      scenario: 'Use Dapper for hot paths with stable SQL where full change tracking and model metadata are unnecessary.'
+    },
+    'orm-decision': {
+      stage: 'Select the data access tool that matches the team, domain, and performance profile',
+      code: String.raw`// Common hybrid rule:
+// EF Core for transactional domain workflows
+// Dapper or raw SQL for narrow, benchmarked hot paths`,
+      scenario: 'Use an ORM decision framework during architecture review so tool choice is based on risk and workload, not preference.'
+    }
+  };
+
+  return map[topicId] || {};
+}
+
+function efBuildTopicCode(chapter, topic, tabName, play) {
+  const override = efTopicOverrides(topic.id);
+  if (override.code) return override.code;
+
+  if (chapter.id === 'migrations') {
+    return String.raw`dotnet ef migrations add ${topic.title.replace(/[^A-Za-z0-9]+/g, '')}
+dotnet ef database update
+dotnet ef migrations script --idempotent --output artifacts/sql/${topic.id}.sql`;
+  }
+
+  if (chapter.id === 'querying' || chapter.id === 'performance') {
+    return String.raw`public async Task<IReadOnlyList<ProductListItem>> GetAsync(AppDbContext db, CancellationToken ct)
+{
+    return await db.Products
+        .AsNoTracking()
+        .Where(p => p.IsActive)
+        .OrderBy(p => p.Name)
+        .Select(p => new ProductListItem(p.Id, p.Name, p.Price))
+        .ToListAsync(ct);
+}`;
+  }
+
+  if (chapter.id === 'relationships') {
+    return String.raw`modelBuilder.Entity<Order>(builder =>
+{
+    builder.HasMany(o => o.Items)
+        .WithOne(i => i.Order)
+        .HasForeignKey(i => i.OrderId)
+        .OnDelete(DeleteBehavior.Cascade);
+});`;
+  }
+
+  if (chapter.id === 'change-tracking' || chapter.id === 'saving') {
+    return String.raw`var order = await db.Orders.SingleAsync(o => o.Id == request.OrderId, ct);
+order.Status = OrderStatus.Paid;
+order.UpdatedAt = DateTime.UtcNow;
+
+await db.SaveChangesAsync(ct);`;
+  }
+
+  if (chapter.id === 'providers') {
+    return String.raw`builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));`;
+  }
+
+  if (chapter.id === 'testing') {
+    return String.raw`await using var db = factory.CreateDbContext();
+await db.Database.EnsureCreatedAsync(ct);
+
+db.Products.Add(new Product { Name = "Keyboard", Price = 90m });
+await db.SaveChangesAsync(ct);`;
+  }
+
+  return String.raw`public sealed class ${topic.title.replace(/[^A-Za-z0-9]+/g, '')}Service(AppDbContext db)
+{
+    public async Task ExecuteAsync(CancellationToken ct = default)
+    {
+        var result = await db.Set<Product>()
+            .AsNoTracking()
+            .Take(25)
+            .ToListAsync(ct);
+
+        Console.WriteLine($"Loaded {result.Count} rows for ${topic.title}.");
+    }
+}`;
+}
+
+function efScenario(chapter, topic, tabName, play) {
+  const override = efTopicOverrides(topic.id);
+  if (override.scenario) return override.scenario;
+
+  const tab = tabName.toLowerCase();
+  if (tab.includes('diagram') || tab.includes('flow') || tab.includes('architecture') || tab.includes('state')) {
+    return `A team is debugging ${topic.title} in production. The quickest way to align developers, DBAs, and reviewers is to walk the data flow step by step and show where EF Core, the provider, and the database each do their work.`;
+  }
+
+  if (tab.includes('code') || tab.includes('setup') || tab.includes('configuration') || tab.includes('implementation') || tab.includes('commands')) {
+    return `A developer has to implement ${topic.title} in a .NET 10 service this sprint. They need a starting pattern that is easy to paste into a service, review in a PR, and evolve without losing the correct EF Core boundaries.`;
+  }
+
+  if (tab.includes('vs') || tab.includes('pros') || tab.includes('comparison') || tab.includes('recommendations')) {
+    return `An architecture review needs a decision, not just definitions. ${topic.title} becomes useful when the team must explain why one EF Core pattern, provider, or mapping strategy fits the workload better than another.`;
+  }
+
+  if (tab.includes('pitfalls') || tab.includes('problem') || tab.includes('limitations') || tab.includes('caveats') || tab.includes('risks')) {
+    return `The application already uses ${topic.title}, but the current implementation is fragile. The team needs to understand the failure mode, the symptoms in telemetry, and the safer pattern before scaling it further.`;
+  }
+
+  return `${topic.title} matters when the team needs to move from a conceptual explanation to a production-ready EF Core implementation without guessing where SQL, change tracking, or provider behavior comes in.`;
+}
+
+function efInterview(topic, play) {
+  const override = efTopicOverrides(topic.id);
+  if (override.interview) return override.interview;
+
+  return {
+    q: `How would you explain ${topic.title} to another .NET engineer in an interview?`,
+    a: `${topic.title} is valuable because it sits at the ${play.stage.toLowerCase()} stage of EF Core. A strong answer explains what problem it solves, what SQL or tracking behavior it affects, and which trade-off appears first in real production code.`
+  };
+}
+
+function efTabFocus(tabName) {
+  const tab = tabName.toLowerCase();
+
+  if (tab.includes('diagram') || tab.includes('flow') || tab.includes('architecture') || tab.includes('state') || tab.includes('ast')) {
+    return {
+      label: 'Visual flow',
+      sectionTitle: `🧭 ${tabName} Walkthrough`,
+      note: 'Use the flow first to explain where EF Core makes decisions and where the provider or database takes over.'
+    };
+  }
+
+  if (tab.includes('code') || tab.includes('setup') || tab.includes('configuration') || tab.includes('implementation') || tab.includes('commands') || tab.includes('api')) {
+    return {
+      label: 'Implementation',
+      sectionTitle: `💻 ${tabName} in .NET 10 / C# 14`,
+      note: 'Treat this tab as the copy-ready implementation slice: configuration, lifetime, translation boundary, and safe defaults.'
+    };
+  }
+
+  if (tab.includes('vs') || tab.includes('comparison') || tab.includes('pros') || tab.includes('recommendations')) {
+    return {
+      label: 'Decision lens',
+      sectionTitle: `⚖️ ${tabName} Decision Guide`,
+      note: 'Focus on why one approach fits the workload better than another instead of repeating the same definition.'
+    };
+  }
+
+  if (tab.includes('pitfalls') || tab.includes('problem') || tab.includes('limitations') || tab.includes('caveats') || tab.includes('risks')) {
+    return {
+      label: 'Failure mode',
+      sectionTitle: `🚨 ${tabName} and Operational Risk`,
+      note: 'Explain the mistake pattern, how it appears in logs or metrics, and what the safer approach looks like.'
+    };
+  }
+
+  return {
+    label: 'Topic guide',
+    sectionTitle: `📚 ${tabName}`,
+    note: 'Start with the mental model, then show the production pattern and the trade-offs.'
+  };
+}
+
+function renderGeneratedEfDiagram(chapter, topic, tabName, play) {
+  const stages = play.flow.slice(0, 4);
+  const positions = [58, 170, 282, 394];
+  const tabFocus = efTabFocus(tabName);
+
+  return `
+    <div class="diagram-wrap">
+      <div class="diagram-title">${efEscapeHtml(`${topic.title} · ${tabFocus.label}`)}</div>
+      <svg viewBox="0 0 452 240" width="100%" style="display:block;max-height:240px;">
+        <defs>
+          <marker id="efg_${chapter.id}_${topic.id}" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="${chapter.color}"></polygon>
+          </marker>
+        </defs>
+        ${stages.map((stage, index) => `
+          <rect x="${positions[index] - 46}" y="56" width="92" height="52" rx="10" fill="${index % 2 === 0 ? chapter.bgColor : 'rgba(15,23,42,0.96)'}" stroke="${index === 0 || index === stages.length - 1 ? chapter.color : '#1e2d47'}" stroke-width="1.4"></rect>
+          ${efWrapSvgText(stage, positions[index], 80, index === 0 || index === stages.length - 1 ? chapter.color : '#d7e0ea', 14, 13, 3, 9, 600)}
+        `).join('')}
+        ${positions.slice(0, stages.length - 1).map((x, index) => `
+          <line x1="${x + 46}" y1="82" x2="${positions[index + 1] - 46}" y2="82" stroke="${chapter.color}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#efg_${chapter.id}_${topic.id})">
+            <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.1s" repeatCount="indefinite"></animate>
+          </line>
+        `).join('')}
+        ${efWrapSvgText(tabFocus.note, 226, 142, '#93a4b8', 60, 12, 3, 9, 400)}
+        ${efWrapSvgText(`Best fit: ${play.bestFor}`, 226, 196, '#56d364', 56, 12, 2, 9, 500)}
+      </svg>
+    </div>
+  `;
+}
+
+function renderGeneratedEfCoreContent(chapterId, topicId, tabName) {
+  const { chapter, topic } = efFindTopic(chapterId, topicId);
+  if (!chapter || !topic) return '';
+
+  const chapterPlay = efChapterPlaybook(chapter);
+  const override = efTopicOverrides(topic.id);
+  const play = {
+    ...chapterPlay,
+    ...override,
+    tradeoffs: override.tradeoffs || chapterPlay.tradeoffs,
+    when: override.when || chapterPlay.when,
+    rules: override.rules || chapterPlay.rules,
+    flow: override.flow || chapterPlay.flow,
+    output: override.output || chapterPlay.output,
+    source: override.source || chapterPlay.source,
+    bestFor: override.bestFor || chapterPlay.bestFor,
+    stage: override.stage || chapterPlay.stage
+  };
+  const focus = efTabFocus(tabName);
+  const interview = efInterview(topic, play);
+  const code = efBuildTopicCode(chapter, topic, tabName, play);
+  const scenario = efScenario(chapter, topic, tabName, play);
+  const compareRows = [
+    ['Topic', `<strong>${efEscapeHtml(topic.title)}</strong>`],
+    ['Tab intent', efEscapeHtml(focus.label)],
+    ['Best fit', efEscapeHtml(play.bestFor)],
+    ['Execution lens', efEscapeHtml(play.stage)],
+    ['Output', efEscapeHtml(play.output)]
+  ];
+
+  const tab = tabName.toLowerCase();
+  const showCode = !(tab.includes('diagram') || tab.includes('flow') || tab.includes('architecture') || tab.includes('ast')) || tab.includes('code') || tab.includes('setup') || tab.includes('configuration') || tab.includes('implementation') || tab.includes('commands');
+  const showTable = tab.includes('vs') || tab.includes('comparison') || tab.includes('pros') || tab.includes('recommendations') || tab.includes('decision');
+  const showRisk = tab.includes('pitfalls') || tab.includes('problem') || tab.includes('limitations') || tab.includes('caveats') || tab.includes('risks');
+
+  return `
+    <div class="section-title">${focus.sectionTitle}</div>
+    <p class="body"><strong>${efEscapeHtml(topic.title)}</strong> belongs to <strong>${efEscapeHtml(chapter.title)}</strong>. This tab is written to show what the topic means, when to use it, what trade-offs appear first, and how the .NET 10 / C# 14 implementation should look in a real application.</p>
+    <p class="body">${efEscapeHtml(topic.desc)} The goal is clarity: what EF Core is doing, what the provider or database is doing, and how those boundaries affect your design.</p>
+
+    ${efCallout('info', '💡 WHAT THIS TAB SHOULD TEACH', `${efEscapeHtml(focus.note)} ${efEscapeHtml(`For ${topic.title}, the core mental model is: ${play.stage}.`)}`)}
+
+    <div class="section-title">🧠 Definition & Use</div>
+    <p class="body"><strong>${efEscapeHtml(topic.title)}</strong> is mainly useful for <strong>${efEscapeHtml(play.bestFor)}</strong>. In practice, this topic becomes important when the team needs a safe EF Core pattern that still keeps SQL, tracking, and provider behavior visible.</p>
+    ${efList(play.when.map(item => efEscapeHtml(item)))}
+
+    ${showTable ? `
+      <div class="section-title">📊 Decision Table</div>
+      ${efTable(compareRows)}
+    ` : ''}
+
+    <div class="section-title">🔄 Diagram / Data Flow</div>
+    ${renderGeneratedEfDiagram(chapter, topic, tabName, play)}
+
+    ${showCode ? `
+      <div class="section-title">💻 .NET 10 / C# 14 Example</div>
+      <p class="body">This sample is intentionally small and review-friendly. It shows the correct boundary for <strong>${efEscapeHtml(topic.title)}</strong> without hiding the important EF Core behavior.</p>
+      ${efCodeBlock(`${topic.title} — .NET 10 / C# 14`, code)}
+    ` : ''}
+
+    <div class="section-title">⚖️ Trade-offs</div>
+    ${efList(play.tradeoffs.map(item => efEscapeHtml(item)))}
+
+    ${showRisk ? efCallout('warning', '⚠️ COMMON FAILURE MODE', `Teams usually struggle with ${efEscapeHtml(topic.title)} when the abstraction is used without checking query count, translation boundaries, or context lifetime. Treat the SQL and telemetry as part of the feature, not as debugging afterthoughts.`) : ''}
+
+    <div class="section-title">🎯 Scenario / Use Case</div>
+    <p class="body">${efEscapeHtml(scenario)}</p>
+
+    <div class="section-title">✅ Production Rules</div>
+    ${efList(play.rules.map(item => efEscapeHtml(item)))}
+
+    ${efCallout('tip', '✅ PRACTICAL RULE', `Use ${efEscapeHtml(topic.title)} only after deciding whether this path should return tracked entities, DTO projections, or raw SQL results. That one decision usually determines the correct EF Core implementation style.`)}
+
+    <div class="section-title">🎤 Interview Question</div>
+    <div class="qa-item open" id="qa_generated_${chapter.id}_${topic.id}_${tabName.replace(/[^a-z0-9]+/gi, '_')}">
+      <div class="qa-question" onclick="toggleQA('qa_generated_${chapter.id}_${topic.id}_${tabName.replace(/[^a-z0-9]+/gi, '_')}')">
+        <div class="qa-q-icon" style="background:${chapter.color}22;color:${chapter.color}">Q</div>
+        <div class="qa-q-text">${efEscapeHtml(interview.q)}</div>
+        <span class="tag" style="background:${chapter.color}22;color:${chapter.color};border-color:${chapter.color}44;flex-shrink:0">${efEscapeHtml(chapter.level)}</span>
+        <span class="qa-chevron">▼</span>
+      </div>
+      <div class="qa-answer">
+        <div class="qa-answer-content">${efEscapeHtml(interview.a)}</div>
+      </div>
+    </div>
+  `;
+}
+
 function getTopicContent(chapterId, topicId, tabName) {
   const key = `${chapterId}:${topicId}:${tabName}`;
 
@@ -2934,36 +4193,7 @@ Script-Migration -Idempotent</div>
   `;
 
   // Default fallback
-  return `
-    <div class="section-title">📚 ${tabName}</div>
-    <p class="body">This section covers <strong>${tabName}</strong> in depth. The content includes detailed explanations, practical code examples in C# / .NET 10, and real-world scenarios.</p>
-    <div class="callout info"><strong>💡 COMING SOON</strong>Detailed content for this section is being loaded. This covers everything about ${topicId} including patterns, best practices, and .NET 10 specific features.</div>
-    <div class="section-title">Key Points</div>
-    <ul class="feature-list">
-      <li>Always use async methods (<code>ToListAsync</code>, <code>SaveChangesAsync</code>) in web applications</li>
-      <li>Follow the principle of minimal data loading — only query what you need</li>
-      <li>Use <code>AsNoTracking()</code> for read-only queries to boost performance significantly</li>
-      <li>Configure entities using <code>IEntityTypeConfiguration&lt;T&gt;</code> for clean separation</li>
-      <li>Always test with real database behavior, not just in-memory provider</li>
-      <li>Log SQL in development: <code>options.LogTo(Console.WriteLine, LogLevel.Information)</code></li>
-    </ul>
-    <div class="code-block">
-      <div class="code-header"><span class="code-lang">C# — .NET 10 Pattern</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <div class="code-body"><span class="cm">// .NET 10 with EF Core — Best Practice Example</span>
-<span class="kw">public class</span> <span class="type">ExampleService</span>(<span class="type">AppDbContext</span> db)
-{
-    <span class="kw">public async</span> <span class="type">Task</span>&lt;<span class="type">IReadOnlyList</span>&lt;<span class="type">ProductDto</span>&gt;&gt; <span class="met">GetAsync</span>(
-        <span class="type">CancellationToken</span> ct = <span class="kw">default</span>)
-    {
-        <span class="kw">return await</span> db.<span class="prop">Products</span>
-            .<span class="met">AsNoTracking</span>()           <span class="cm">// Read-only — no tracking overhead</span>
-            .<span class="met">Where</span>(p =&gt; p.<span class="prop">IsActive</span>)   <span class="cm">// Filter in database</span>
-            .<span class="met">Select</span>(p =&gt; <span class="kw">new</span> <span class="type">ProductDto</span>(p.<span class="prop">Id</span>, p.<span class="prop">Name</span>, p.<span class="prop">Price</span>))
-            .<span class="met">ToListAsync</span>(ct);          <span class="cm">// Async always</span>
-    }
-}</span></div>
-    </div>
-  `;
+  return renderGeneratedEfCoreContent(chapterId, topicId, tabName);
 }
 
 // ─── INTERVIEW QUESTIONS DATA ─────────────────────────
@@ -3234,5 +4464,6 @@ function updateProgress() {
 // ═══════════════════════════════════════════════
 renderLeftNav();
 </script>
+<script src="/embedded/mastery-resize.js"></script>
 </body>
 </html>
