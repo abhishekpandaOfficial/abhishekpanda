@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>.NET Mastery — Core Engineering</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Familjen+Grotesk:wght@400;500;600;700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg0:#060b0f;--bg1:#0a1018;--bg2:#0f1923;--bg3:#152030;
+  --border:#1b2d40;--border2:#243d55;
+  --g1:#00ffa3;--g2:#00c8ff;--g3:#7b61ff;--g4:#ff6b35;--g5:#ffd700;
+  --text1:#dde6f0;--text2:#8a9db5;--text3:#3d5068;
+  --code:#050e16;--codeborder:#1a3045;
+  --lw:272px;--rw:570px;--hh:54px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--text1);font-family:'Lato',sans-serif}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--g2)}
+
+/* ── HEADER ── */
+.hdr{
+  position:fixed;top:0;left:0;right:0;height:var(--hh);z-index:200;
+  background:rgba(6,11,15,0.97);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 18px;gap:14px;
+  backdrop-filter:blur(16px);
+}
+.hdr-logo{
+  font-family:'Familjen Grotesk',sans-serif;font-size:18px;font-weight:800;
+  background:linear-gradient(120deg,var(--g1),var(--g2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;
+}
+.hdr-sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
+.hdr-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.5px}
+.hdr-r{margin-left:auto;display:flex;gap:8px;align-items:center}
+.pill{
+  font-family:'DM Mono',monospace;font-size:10px;padding:3px 10px;border-radius:20px;
+  border:1px solid;cursor:default;
+}
+.pill-g{color:var(--g1);border-color:rgba(0,255,163,.25);background:rgba(0,255,163,.06)}
+.pill-b{color:var(--g2);border-color:rgba(0,200,255,.25);background:rgba(0,200,255,.06)}
+.pill-btn{cursor:pointer;transition:all .2s}
+.pill-btn:hover{background:rgba(0,200,255,.15)}
+.prog-wrap{display:flex;align-items:center;gap:7px}
+.prog-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)}
+.prog-bar{width:70px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--g1),var(--g2));border-radius:2px;transition:width .5s}
+
+/* ── LAYOUT ── */
+.lay{display:flex;height:100vh;padding-top:var(--hh)}
+
+/* ── LEFT ── */
+.lp{
+  width:var(--lw);min-width:var(--lw);background:var(--bg1);
+  border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;
+}
+.lp-search{padding:10px;border-bottom:1px solid var(--border)}
+.lp-search input{
+  width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:5px;
+  padding:6px 11px;color:var(--text1);font-size:11.5px;font-family:'Lato',sans-serif;outline:none;
+}
+.lp-search input:focus{border-color:var(--g2)}
+.lp-search input::placeholder{color:var(--text3)}
+
+.ci{border-bottom:1px solid rgba(27,45,64,.6)}
+.ch{
+  display:flex;align-items:center;gap:9px;padding:10px 12px;
+  cursor:pointer;transition:background .15s;user-select:none;
+}
+.ch:hover{background:var(--bg2)}
+.ch.act{background:linear-gradient(90deg,rgba(0,200,255,.07),transparent);border-left:2px solid var(--g2)}
+.cnum{
+  width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:9px;font-weight:500;flex-shrink:0;
+}
+.ctitle{font-size:11.5px;font-weight:500;color:var(--text2);flex:1;line-height:1.3}
+.ch.act .ctitle{color:var(--text1)}
+.carr{font-size:8px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.ci.open .carr{transform:rotate(90deg)}
+.tl{display:none;padding:3px 0 7px}
+.ci.open .tl{display:block}
+.ti{
+  padding:5px 12px 5px 41px;font-size:11px;color:var(--text3);
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:7px;
+}
+.ti:hover{color:var(--text2);background:rgba(255,255,255,.02)}
+.ti.act{color:var(--g2);background:rgba(0,200,255,.05)}
+
+/* ── MIDDLE ── */
+.mp{
+  flex:1;background:var(--bg0);border-right:1px solid var(--border);
+  overflow-y:auto;padding:22px 18px;
+}
+
+/* WELCOME */
+.welcome{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:calc(100vh - 54px);text-align:center;gap:18px;padding:40px 20px;
+}
+.w-logo{
+  font-family:'Familjen Grotesk',sans-serif;font-size:64px;font-weight:800;
+  background:linear-gradient(135deg,var(--g1),var(--g2),var(--g3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  line-height:1;
+}
+@keyframes logoGlow{0%,100%{filter:drop-shadow(0 0 20px rgba(0,255,163,.3))}50%{filter:drop-shadow(0 0 40px rgba(0,200,255,.5))}}
+.w-logo{animation:logoGlow 4s ease-in-out infinite}
+.w-title{font-family:'Familjen Grotesk',sans-serif;font-size:26px;font-weight:700;color:var(--text1)}
+.w-sub{font-size:13px;color:var(--text2);max-width:440px;line-height:1.7}
+.w-stats{display:flex;gap:28px;margin-top:6px}
+.ws{text-align:center}
+.ws-n{font-family:'Familjen Grotesk',sans-serif;font-size:30px;font-weight:800;color:var(--g1)}
+.ws-l{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
+.start-btn{
+  background:linear-gradient(135deg,var(--g1),var(--g2));border:none;color:#060b0f;
+  font-family:'Familjen Grotesk',sans-serif;font-size:14px;font-weight:700;
+  padding:11px 28px;border-radius:7px;cursor:pointer;transition:all .3s;
+}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,255,163,.3)}
+
+/* CHAPTER HERO */
+.ch-hero{
+  background:linear-gradient(135deg,var(--bg2),var(--bg1));
+  border:1px solid var(--border);border-radius:10px;padding:22px;margin-bottom:18px;
+  position:relative;overflow:hidden;
+}
+.ch-hero::after{
+  content:'';position:absolute;top:-20px;right:-20px;
+  width:100px;height:100px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,200,255,.08),transparent);
+}
+.ch-hero-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.ch-hero-title{font-family:'Familjen Grotesk',sans-serif;font-size:22px;font-weight:800;margin-bottom:7px;line-height:1.2}
+.ch-hero-desc{font-size:12.5px;color:var(--text2);line-height:1.6;max-width:480px}
+.ch-hero-pills{display:flex;gap:5px;margin-top:12px;flex-wrap:wrap}
+.chp{font-family:'DM Mono',monospace;font-size:9.5px;padding:2px 8px;border-radius:3px;border:1px solid}
+
+/* TOPIC CARDS */
+.tgrid{display:flex;flex-direction:column;gap:7px}
+.tc{
+  background:var(--bg2);border:1px solid var(--border);border-radius:7px;
+  padding:13px 15px;cursor:pointer;transition:all .18s;display:flex;align-items:flex-start;gap:11px;
+}
+.tc:hover{border-color:var(--border2);transform:translateX(2px);background:var(--bg3)}
+.tc.act{border-color:var(--g2);background:rgba(0,200,255,.04)}
+.tc-icon{font-size:19px;flex-shrink:0;margin-top:1px}
+.tc-body{flex:1}
+.tc-title{font-size:12.5px;font-weight:700;color:var(--text1);margin-bottom:3px}
+.tc-desc{font-size:11px;color:var(--text3);line-height:1.5}
+.tc-tags{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.tct{font-family:'DM Mono',monospace;font-size:9.5px;padding:2px 6px;border-radius:3px;border:1px solid}
+
+/* ── RIGHT ── */
+.rp{width:var(--rw);min-width:var(--rw);background:var(--bg1);overflow-y:auto}
+
+.re{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:14px;color:var(--text3);text-align:center;padding:40px;
+}
+.re-icon{font-size:44px;opacity:.25}
+.re h3{font-family:'Familjen Grotesk',sans-serif;font-size:16px;color:var(--text2)}
+.re p{font-size:12px;line-height:1.6}
+
+/* DETAIL */
+.dc{padding:22px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.dc{animation:fadeUp .25s ease}
+
+.d-bread{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+.d-title{font-family:'Familjen Grotesk',sans-serif;font-size:21px;font-weight:800;margin-bottom:5px;line-height:1.2}
+.d-sub{font-size:12.5px;color:var(--text2);line-height:1.55;margin-bottom:10px}
+.d-pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.dp{font-family:'DM Mono',monospace;font-size:9.5px;padding:2px 8px;border-radius:3px;border:1px solid}
+
+/* SECTION */
+.sec{margin-bottom:22px}
+.sec-t{
+  font-family:'Familjen Grotesk',sans-serif;font-size:13px;font-weight:700;
+  color:var(--text1);margin-bottom:10px;display:flex;align-items:center;gap:7px;
+}
+.sec-t::before{content:'';display:block;width:3px;height:13px;background:var(--g2);border-radius:2px;flex-shrink:0}
+
+/* PROSE */
+.prose{font-size:12.5px;color:var(--text2);line-height:1.75}
+.prose p{margin-bottom:9px}
+.prose strong{color:var(--text1)}
+.prose ul{padding-left:16px;margin-bottom:9px}
+.prose li{margin-bottom:4px}
+.prose ol{padding-left:16px;margin-bottom:9px}
+.prose code{background:var(--code);border:1px solid var(--codeborder);border-radius:3px;padding:1px 5px;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--g2)}
+
+/* CODE BLOCK */
+.cb{background:var(--code);border:1px solid var(--codeborder);border-radius:9px;overflow:hidden;margin-bottom:14px}
+.cb-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 14px;border-bottom:1px solid var(--codeborder);background:rgba(0,0,0,.3);
+}
+.cb-lang{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--g1);text-transform:uppercase;letter-spacing:1px}
+.cb-name{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
+.cb-copy{background:none;border:1px solid var(--border);color:var(--text3);border-radius:3px;padding:2px 8px;font-size:9.5px;cursor:pointer;transition:all .2s;font-family:'DM Mono',monospace}
+.cb-copy:hover{border-color:var(--g2);color:var(--g2)}
+.cb-body{padding:14px;overflow-x:auto}
+.cb-body pre{font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;color:#c9d1d9}
+
+/* Syntax tokens */
+.kw{color:#79c0ff}.tp{color:#56d364}.st{color:#a5d6ff}.nu{color:#ffa657}
+.cm{color:#484f58;font-style:italic}.fn{color:#d2a8ff}.pr{color:#ff7b72}
+.at{color:#e3b341}.it{color:#39d353}
+
+/* DIAGRAM */
+.dg{background:var(--code);border:1px solid var(--codeborder);border-radius:9px;overflow:hidden;margin-bottom:14px}
+.dg-hdr{padding:9px 14px;border-bottom:1px solid var(--codeborder);background:rgba(0,0,0,.3);font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
+.dg-body{padding:14px;display:flex;justify-content:center;overflow-x:auto}
+
+/* CALLOUT */
+.co{border-radius:7px;padding:11px 13px;margin-bottom:13px;display:flex;gap:9px;font-size:12px;line-height:1.6}
+.co-info{background:rgba(0,200,255,.05);border:1px solid rgba(0,200,255,.2);color:var(--text2)}
+.co-warn{background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.2);color:var(--text2)}
+.co-ok{background:rgba(0,255,163,.05);border:1px solid rgba(0,255,163,.2);color:var(--text2)}
+.co-err{background:rgba(255,107,53,.05);border:1px solid rgba(255,107,53,.2);color:var(--text2)}
+.co-ic{flex-shrink:0;font-size:14px}
+
+/* COMPARE TABLE */
+.ctbl{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:14px}
+.ctbl th{background:var(--bg2);padding:8px 11px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);border:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px}
+.ctbl td{padding:8px 11px;border:1px solid var(--border);color:var(--text2);vertical-align:top;line-height:1.5}
+.ctbl tr:hover td{background:rgba(255,255,255,.015)}
+.good{color:var(--g1)}.bad{color:var(--pr,#ff7b72)}.mid{color:var(--g5)}
+
+/* STEP LIST */
+.steps{counter-reset:step;margin-bottom:14px}
+.step{
+  display:flex;gap:12px;align-items:flex-start;padding:10px 0;
+  border-bottom:1px solid rgba(27,45,64,.5);font-size:12px;color:var(--text2);line-height:1.6;
+}
+.step:last-child{border-bottom:none}
+.step::before{
+  counter-increment:step;content:counter(step);
+  min-width:22px;height:22px;border-radius:50%;background:rgba(0,200,255,.12);
+  border:1px solid rgba(0,200,255,.3);color:var(--g2);font-family:'DM Mono',monospace;
+  font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.step strong{color:var(--text1)}
+
+/* Q&A */
+.qa{background:var(--bg2);border:1px solid var(--border);border-radius:7px;margin-bottom:9px;overflow:hidden}
+.qa-q{padding:11px 13px;cursor:pointer;display:flex;align-items:flex-start;gap:9px;transition:background .15s}
+.qa-q:hover{background:var(--bg3)}
+.qa-qi{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--g2);flex-shrink:0;margin-top:1px}
+.qa-qt{font-size:12px;font-weight:600;color:var(--text1);flex:1;line-height:1.5}
+.qa-lv{font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;border:1px solid;flex-shrink:0;margin-top:2px}
+.qa-ar{color:var(--text3);font-size:9px;transition:transform .2s;margin-top:3px;flex-shrink:0}
+.qa.open .qa-ar{transform:rotate(90deg)}
+.qa-a{display:none;padding:11px 13px;border-top:1px solid var(--border);background:rgba(0,0,0,.2)}
+.qa.open .qa-a{display:block}
+.qa-at{font-size:11.5px;color:var(--text2);line-height:1.75}
+
+/* Level colors */
+.lv-b{color:#56d364;border-color:rgba(86,211,100,.3);background:rgba(86,211,100,.07)}
+.lv-i{color:var(--g5);border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.07)}
+.lv-a{color:#ff7b72;border-color:rgba(255,123,114,.3);background:rgba(255,123,114,.07)}
+.lv-e{color:var(--g3);border-color:rgba(123,97,255,.3);background:rgba(123,97,255,.07)}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-logo">.NET</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-sub">Core Engineering Mastery · .NET 10</div>
+  <div class="hdr-r">
+    <button class="pill pill-btn pill-b" onclick="showAllQA()">🎯 Interview Q&amp;A</button>
+    <div class="prog-wrap">
+      <span class="prog-num" id="pct">0%</span>
+      <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+    </div>
+    <div class="pill pill-g">.NET 10</div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="lay">
+
+  <!-- LEFT -->
+  <div class="lp">
+    <div class="lp-search">
+      <input id="search" type="text" placeholder="🔍  Search topics…" oninput="filterNav(this.value)">
+    </div>
+    <div id="nav"></div>
+  </div>
+
+  <!-- MIDDLE -->
+  <div class="mp" id="mp">
+    <div class="welcome" id="welcome">
+      <div class="w-logo">.NET</div>
+      <div class="w-title">Core Engineering Mastery</div>
+      <div class="w-sub">Deep dive into .NET internals — CLR, JIT, GC, async, DI, performance, and everything that runs under the hood of every .NET application.</div>
+      <div class="w-stats">
+        <div class="ws"><div class="ws-n">20</div><div class="ws-l">Chapters</div></div>
+        <div class="ws"><div class="ws-n">100+</div><div class="ws-l">Topics</div></div>
+        <div class="ws"><div class="ws-n">200+</div><div class="ws-l">Q&amp;A</div></div>
+        <div class="ws"><div class="ws-n">120+</div><div class="ws-l">Diagrams</div></div>
+      </div>
+      <button class="start-btn" onclick="selectCh(0)">⚙️ Start Learning</button>
+    </div>
+    <div id="mcon" style="display:none"></div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="rp" id="rp">
+    <div class="re" id="re">
+      <div class="re-icon">⚙️</div>
+      <h3>Select a Topic</h3>
+      <p>Click any topic card to see in-depth explanations, architecture diagrams, code examples, and interview questions.</p>
+    </div>
+    <div id="rcon" style="display:none"></div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CHAPTER DATA
+// ═══════════════════════════════════════════════════════════
+const CHS = [
+{n:"01",title:".NET Fundamentals",icon:"🌐",c:"#00ffa3",bg:"rgba(0,255,163,0.1)",
+ desc:"What .NET is, its evolution from .NET Framework to .NET 10, managed vs unmanaged code, and cross-platform architecture.",
+ tags:["Beginner","Foundation","CLR"],
+ topics:[
+  {id:"f1",icon:"📖",title:"What is .NET?",desc:"Platform overview, runtime, BCL, SDK, CLI",tags:["Beginner","Core"]},
+  {id:"f2",icon:"📅",title:"Evolution: Framework → Core → .NET 5-10",desc:"Version history, unification, breaking changes",tags:["Beginner","History"]},
+  {id:"f3",icon:"🆚",title:".NET vs .NET Framework",desc:"Side-by-side comparison, migration paths",tags:["Beginner","Core"]},
+  {id:"f4",icon:"🌍",title:"Cross-Platform Architecture",desc:"RID, platform abstractions, runtime identifiers",tags:["Intermediate","Core"]},
+  {id:"f5",icon:"🔐",title:"Managed vs Unmanaged Code",desc:"CLR benefits, interop boundaries, P/Invoke",tags:["Intermediate","CLR"]},
+ ]},
+{n:"02",title:".NET Architecture",icon:"🏗️",c:"#00c8ff",bg:"rgba(0,200,255,0.1)",
+ desc:"Layered architecture of .NET: language, runtime, base libraries, SDK and how they interconnect.",
+ tags:["Core","Architecture","Design"],
+ topics:[
+  {id:"a1",icon:"🏛️",title:"Architecture Layers",desc:"Language → Runtime → BCL → App model",tags:["Core","Architecture"]},
+  {id:"a2",icon:"⚡",title:"CLR — Common Language Runtime",desc:"Execution engine, memory, security, threads",tags:["Core","CLR"]},
+  {id:"a3",icon:"📚",title:"Base Class Library (BCL)",desc:"System.* namespaces, what's in the box",tags:["Core","BCL"]},
+  {id:"a4",icon:"🔧",title:".NET SDK & CLI",desc:"SDK layout, global tools, workloads",tags:["Beginner","Tooling"]},
+  {id:"a5",icon:"📦",title:"Runtime vs Framework vs SDK",desc:"What each layer contains and who uses what",tags:["Intermediate","Core"]},
+ ]},
+{n:"03",title:"CLR Runtime Internals",icon:"⚙️",c:"#7b61ff",bg:"rgba(123,97,255,0.1)",
+ desc:"Inside the Common Language Runtime — execution engine, AppDomain, AssemblyLoadContext, type loading.",
+ tags:["Advanced","CLR","Expert"],
+ topics:[
+  {id:"r1",icon:"🔄",title:"CLR Architecture Overview",desc:"EE, loader, GC, JIT, security — full map",tags:["Advanced","CLR"]},
+  {id:"r2",icon:"📦",title:"AppDomain & AssemblyLoadContext",desc:"Isolation, plugin loading, hot reload",tags:["Advanced","CLR"]},
+  {id:"r3",icon:"🔃",title:"Type Loading Pipeline",desc:"From IL to runtime type, vtable, method tables",tags:["Expert","CLR"]},
+  {id:"r4",icon:"🧵",title:"Thread Management in CLR",desc:"OS threads, fiber mode, thread injection",tags:["Advanced","Threading"]},
+  {id:"r5",icon:"✅",title:"Verification & Security",desc:"Type safety, code access security, CAS",tags:["Advanced","Security"]},
+ ]},
+{n:"04",title:"Compilation Pipeline",icon:"⚗️",c:"#ffd700",bg:"rgba(255,215,0,0.1)",
+ desc:"End-to-end journey from C# source code to native CPU instructions via Roslyn, IL, and JIT.",
+ tags:["Core","Compiler","CLR"],
+ topics:[
+  {id:"c1",icon:"✏️",title:"Roslyn Compiler Architecture",desc:"Compilation phases, syntax trees, semantic model",tags:["Advanced","Roslyn"]},
+  {id:"c2",icon:"📜",title:"Common Intermediate Language (CIL)",desc:"IL opcodes, stack-based VM, reading IL",tags:["Expert","IL"]},
+  {id:"c3",icon:"🔄",title:"Full Compilation Pipeline",desc:"Source → Tokens → AST → IL → Native",tags:["Core","Compiler"]},
+  {id:"c4",icon:"🔬",title:"Reading IL with ILDasm",desc:"Disassembly, understanding output, SharpLab",tags:["Expert","IL"]},
+  {id:"c5",icon:"📋",title:"Metadata & Manifests",desc:"Assembly metadata, type tables, tokens",tags:["Advanced","Metadata"]},
+ ]},
+{n:"05",title:"JIT Compilation",icon:"⚡",c:"#ff6b35",bg:"rgba(255,107,53,0.1)",
+ desc:"Just-in-time compilation internals — tiered JIT, PGO, method inlining, and SIMD intrinsics.",
+ tags:["Expert","JIT","Performance"],
+ topics:[
+  {id:"j1",icon:"⚡",title:"JIT Pipeline & Phases",desc:"Frontend, optimizer, backend, codegen phases",tags:["Expert","JIT"]},
+  {id:"j2",icon:"📈",title:"Tiered Compilation",desc:"Tier-0, Tier-1, R2R, re-JIT thresholds",tags:["Advanced","JIT"]},
+  {id:"j3",icon:"🎯",title:"Profile-Guided Optimization (PGO)",desc:"Dynamic PGO, instrumented runs, hot/cold splitting",tags:["Expert","JIT"]},
+  {id:"j4",icon:"🔗",title:"Method Inlining",desc:"Inlining heuristics, [MethodImpl], AggressiveInlining",tags:["Advanced","Performance"]},
+  {id:"j5",icon:"🚀",title:"SIMD & Hardware Intrinsics",desc:"Vector<T>, AVX2, ARM NEON, platform-specific",tags:["Expert","Performance"]},
+  {id:"j6",icon:"🏭",title:"Native AOT",desc:"Ahead-of-time compilation, trimming, startup perf",tags:["Advanced","AOT"]},
+ ]},
+{n:"06",title:"Assemblies & Metadata",icon:"📦",c:"#56d364",bg:"rgba(86,211,100,0.1)",
+ desc:"Assembly structure, versioning, strong naming, reflection metadata tables.",
+ tags:["Core","Assembly","Deployment"],
+ topics:[
+  {id:"as1",icon:"📦",title:"Assembly Structure",desc:"PE format, sections, manifest, resources",tags:["Intermediate","Assembly"]},
+  {id:"as2",icon:"🏷️",title:"Assembly Versioning",desc:"SemVer, AssemblyVersion, binding redirects",tags:["Intermediate","Deployment"]},
+  {id:"as3",icon:"🔑",title:"Strong Naming",desc:"Key pairs, GAC, delayed signing",tags:["Advanced","Security"]},
+  {id:"as4",icon:"🔍",title:"Reflection & Metadata Tables",desc:"TypeDef, MethodDef, tokens, MemberInfo",tags:["Advanced","Reflection"]},
+  {id:"as5",icon:"🔌",title:"Dynamic Assemblies",desc:"AssemblyBuilder, Emit, expression trees",tags:["Expert","Dynamic"]},
+ ]},
+{n:"07",title:"Memory Management & GC",icon:"🗑️",c:"#00ffa3",bg:"rgba(0,255,163,0.1)",
+ desc:"Garbage collector internals — generational GC, LOH, GC modes, pinning, and IDisposable patterns.",
+ tags:["Core","GC","Performance"],
+ topics:[
+  {id:"m1",icon:"📊",title:"Heap Layout & Generations",desc:"Gen0/1/2, LOH, POH, segment sizes",tags:["Core","GC"]},
+  {id:"m2",icon:"🔄",title:"GC Algorithm: Mark-Compact",desc:"Mark phase, relocation, compaction, roots",tags:["Advanced","GC"]},
+  {id:"m3",icon:"⚙️",title:"GC Modes & Configuration",desc:"Workstation, Server, Concurrent, Background",tags:["Advanced","GC"]},
+  {id:"m4",icon:"📌",title:"Pinning & GC Handles",desc:"GCHandle, pinned objects, unsafe interop",tags:["Expert","GC"]},
+  {id:"m5",icon:"♻️",title:"IDisposable & Finalizers",desc:"Dispose pattern, using, IAsyncDisposable",tags:["Core","Patterns"]},
+  {id:"m6",icon:"🏊",title:"Object Pooling",desc:"ArrayPool, MemoryPool, ObjectPool<T>",tags:["Advanced","Performance"]},
+  {id:"m7",icon:"📉",title:"GC Tuning & DATAS",desc:"GCSettings, DOTNET_GCConserveMemory, metrics",tags:["Expert","Tuning"]},
+ ]},
+{n:"08",title:"Threading & Concurrency",icon:"🧵",c:"#00c8ff",bg:"rgba(0,200,255,0.1)",
+ desc:"Thread lifecycle, ThreadPool, synchronization primitives, lock-free programming.",
+ tags:["Core","Threading","Concurrency"],
+ topics:[
+  {id:"th1",icon:"🧵",title:"Thread Lifecycle",desc:"States, priority, foreground/background, abort",tags:["Core","Threading"]},
+  {id:"th2",icon:"🏊",title:"ThreadPool Internals",desc:"Work stealing, hill-climbing, injection",tags:["Advanced","ThreadPool"]},
+  {id:"th3",icon:"🔒",title:"Synchronization Primitives",desc:"lock, Monitor, Mutex, SemaphoreSlim, RWLock",tags:["Core","Sync"]},
+  {id:"th4",icon:"⚡",title:"Volatile & Interlocked",desc:"Memory barriers, Interlocked ops, compare-exchange",tags:["Advanced","LockFree"]},
+  {id:"th5",icon:"📊",title:"Concurrent Collections",desc:"ConcurrentDictionary, ConcurrentQueue, Channel<T>",tags:["Core","Collections"]},
+  {id:"th6",icon:"🔄",title:"Lock-Free Programming",desc:"CAS, ABA problem, SpinLock, memory models",tags:["Expert","LockFree"]},
+ ]},
+{n:"09",title:"Task & Async Infrastructure",icon:"⏳",c:"#7b61ff",bg:"rgba(123,97,255,0.1)",
+ desc:"TPL internals, Task state machine, async/await implementation, async streams, cancellation.",
+ tags:["Core","Async","TPL"],
+ topics:[
+  {id:"tp1",icon:"⏳",title:"Task & Task<T> Internals",desc:"Task state machine, continuations, scheduler",tags:["Core","TPL"]},
+  {id:"tp2",icon:"⚡",title:"async/await State Machine",desc:"Compiler transformation, IAsyncStateMachine",tags:["Advanced","Async"]},
+  {id:"tp3",icon:"🌊",title:"Async Streams & Channels",desc:"IAsyncEnumerable, await foreach, Channel<T>",tags:["Advanced","Async"]},
+  {id:"tp4",icon:"❌",title:"CancellationToken Internals",desc:"CTS, linked tokens, cooperative cancellation",tags:["Core","Async"]},
+  {id:"tp5",icon:"📋",title:"TaskScheduler & SyncContext",desc:"Custom schedulers, ConfigureAwait, deadlocks",tags:["Advanced","Async"]},
+  {id:"tp6",icon:"🏎️",title:"ValueTask & IValueTaskSource",desc:"Allocation-free async, pooled completion sources",tags:["Expert","Performance"]},
+ ]},
+{n:"10",title:"Dependency Injection",icon:"💉",c:"#ff6b35",bg:"rgba(255,107,53,0.1)",
+ desc:"Built-in DI container internals, service lifetimes, scopes, keyed services, and advanced patterns.",
+ tags:["Core","DI","Architecture"],
+ topics:[
+  {id:"di1",icon:"💉",title:"DI Container Internals",desc:"ServiceCollection, ServiceProvider, descriptors",tags:["Core","DI"]},
+  {id:"di2",icon:"⏱️",title:"Service Lifetimes",desc:"Transient/Scoped/Singleton — internals & gotchas",tags:["Core","DI"]},
+  {id:"di3",icon:"🗂️",title:"Scoped Services & IServiceScope",desc:"Scope factory, async scopes, captive deps",tags:["Advanced","DI"]},
+  {id:"di4",icon:"🔑",title:"Keyed Services (.NET 8+)",desc:"IKeyedServiceProvider, [FromKeyedServices]",tags:["Modern","DI"]},
+  {id:"di5",icon:"🔧",title:"Generic Host & IHostedService",desc:"Host builder, hosted services, startup",tags:["Core","Hosting"]},
+ ]},
+{n:"11",title:"Configuration System",icon:"⚙️",c:"#ffd700",bg:"rgba(255,215,0,0.1)",
+ desc:"Layered configuration providers, options pattern, reload on change, secrets management.",
+ tags:["Core","Configuration"],
+ topics:[
+  {id:"cf1",icon:"📄",title:"Configuration Providers",desc:"JSON, ENV, args, Azure KV — layering order",tags:["Core","Config"]},
+  {id:"cf2",icon:"🎯",title:"Options Pattern",desc:"IOptions, IOptionsSnapshot, IOptionsMonitor",tags:["Core","Options"]},
+  {id:"cf3",icon:"✅",title:"Options Validation",desc:"DataAnnotations, ValidateOnStart, IValidateOptions",tags:["Intermediate","Options"]},
+  {id:"cf4",icon:"🔄",title:"Reload-on-Change",desc:"IChangeToken, ChangeToken.OnChange, hot reload",tags:["Advanced","Config"]},
+  {id:"cf5",icon:"🔒",title:"Secrets Management",desc:"User secrets, Key Vault, environment overrides",tags:["Intermediate","Security"]},
+ ]},
+{n:"12",title:"Logging Infrastructure",icon:"📋",c:"#56d364",bg:"rgba(86,211,100,0.1)",
+ desc:"ILogger internals, structured logging, log scopes, high-performance logging with source generators.",
+ tags:["Core","Logging"],
+ topics:[
+  {id:"lg1",icon:"📋",title:"ILogger Internals",desc:"LoggerFactory, LoggerProvider, filter rules",tags:["Core","Logging"]},
+  {id:"lg2",icon:"📊",title:"Structured Logging",desc:"Message templates, {Name:format}, semantic logging",tags:["Core","Logging"]},
+  {id:"lg3",icon:"🏷️",title:"Log Scopes & Enrichment",desc:"BeginScope, correlation IDs, contextual props",tags:["Intermediate","Logging"]},
+  {id:"lg4",icon:"⚡",title:"High-Performance Logging",desc:"LoggerMessage source gen, compiled delegates",tags:["Advanced","Performance"]},
+  {id:"lg5",icon:"🔌",title:"Serilog & OpenTelemetry",desc:"Sink ecosystem, OTEL integration, traces",tags:["Intermediate","Observability"]},
+ ]},
+{n:"13",title:"File & IO System",icon:"💾",c:"#00ffa3",bg:"rgba(0,255,163,0.1)",
+ desc:"Stream hierarchy, async I/O, memory-mapped files, FileSystemWatcher, Pipelines API.",
+ tags:["Core","IO","Performance"],
+ topics:[
+  {id:"io1",icon:"🌊",title:"Stream Architecture",desc:"Stream base, buffering, composing streams",tags:["Core","IO"]},
+  {id:"io2",icon:"⚡",title:"Async IO & RandomAccess",desc:"FileStream, RandomAccess, overlapped IO",tags:["Advanced","IO"]},
+  {id:"io3",icon:"🗺️",title:"Memory-Mapped Files",desc:"MemoryMappedFile, views, IPC via mmf",tags:["Advanced","IO"]},
+  {id:"io4",icon:"🔭",title:"FileSystemWatcher",desc:"Events, filters, platform behavior differences",tags:["Intermediate","IO"]},
+  {id:"io5",icon:"🚿",title:"System.IO.Pipelines",desc:"PipeReader, PipeWriter, zero-copy networking",tags:["Expert","Performance"]},
+ ]},
+{n:"14",title:"Networking Stack",icon:"🌐",c:"#00c8ff",bg:"rgba(0,200,255,0.1)",
+ desc:"HttpClient internals, connection pooling, Sockets API, QUIC, WebSockets.",
+ tags:["Core","Networking"],
+ topics:[
+  {id:"net1",icon:"🌐",title:"HttpClient Internals",desc:"SocketsHttpHandler, connection pooling, DNS TTL",tags:["Core","HTTP"]},
+  {id:"net2",icon:"🔄",title:"HttpMessageHandler Pipeline",desc:"DelegatingHandler, IHttpClientFactory, resiliency",tags:["Core","HTTP"]},
+  {id:"net3",icon:"🔌",title:"Sockets & TCP/UDP",desc:"Socket, TcpClient, SocketAsyncEventArgs",tags:["Advanced","Sockets"]},
+  {id:"net4",icon:"🚀",title:"QUIC & HTTP/3",desc:"System.Net.Quic, multiplexing, 0-RTT",tags:["Advanced","Networking"]},
+  {id:"net5",icon:"🔗",title:"gRPC & WebSockets",desc:"Grpc.Net.Client, System.Net.WebSockets",tags:["Intermediate","Protocols"]},
+ ]},
+{n:"15",title:"Diagnostics & Debugging",icon:"🔬",c:"#7b61ff",bg:"rgba(123,97,255,0.1)",
+ desc:"dotnet-trace, EventSource, activity tracing, memory dumps, performance counters.",
+ tags:["Advanced","Diagnostics","Tooling"],
+ topics:[
+  {id:"dg1",icon:"📡",title:"EventSource & ETW",desc:"Events, keywords, channels, EventCounter",tags:["Advanced","Diagnostics"]},
+  {id:"dg2",icon:"🔭",title:"dotnet-trace & dotnet-counters",desc:"Collection, analysis, perfview, speedscope",tags:["Advanced","Tooling"]},
+  {id:"dg3",icon:"💥",title:"Memory Dump Analysis",desc:"createdump, WinDbg/sos, dotnet-dump analyze",tags:["Expert","Debugging"]},
+  {id:"dg4",icon:"📊",title:"Activity & Distributed Tracing",desc:"Activity, ActivitySource, W3C TraceContext",tags:["Intermediate","Observability"]},
+  {id:"dg5",icon:"⚡",title:"DiagnosticsObserver API",desc:"DiagnosticListener, IObservable<KeyValuePair>",tags:["Expert","Diagnostics"]},
+ ]},
+{n:"16",title:"Performance Optimization",icon:"🚀",c:"#ff6b35",bg:"rgba(255,107,53,0.1)",
+ desc:"Allocation profiling, Span<T>, pooling, unsafe code, BenchmarkDotNet, zero-alloc patterns.",
+ tags:["Advanced","Performance","Expert"],
+ topics:[
+  {id:"p1",icon:"🎯",title:"Allocation Profiling",desc:"dotMemory, PerfView, allocation sources",tags:["Advanced","Profiling"]},
+  {id:"p2",icon:"⚡",title:"Span<T> & Memory<T>",desc:"Zero-copy slicing, stackalloc, buffer patterns",tags:["Advanced","Performance"]},
+  {id:"p3",icon:"♻️",title:"Pooling Patterns",desc:"ArrayPool, MemoryPool, ObjectPool, RecyclableMemoryStream",tags:["Advanced","Performance"]},
+  {id:"p4",icon:"📏",title:"BenchmarkDotNet",desc:"Microbenchmarking, harness, diagnosers",tags:["Intermediate","Tooling"]},
+  {id:"p5",icon:"🔢",title:"LINQ Performance",desc:"Deferred vs immediate, LINQ vs for-loop, EnumerableX",tags:["Intermediate","Performance"]},
+  {id:"p6",icon:"🔬",title:"Unsafe & Fixed",desc:"unsafe context, pointer arithmetic, MemoryMarshal",tags:["Expert","Unsafe"]},
+ ]},
+{n:"17",title:"Security",icon:"🔒",c:"#ffd700",bg:"rgba(255,215,0,0.1)",
+ desc:"Cryptography APIs, secure coding, certificate handling, data protection, and threat modeling.",
+ tags:["Core","Security"],
+ topics:[
+  {id:"sec1",icon:"🔐",title:"Cryptography APIs",desc:"AES, RSA, ECDSA, SHA, X.509, CNG",tags:["Intermediate","Crypto"]},
+  {id:"sec2",icon:"🛡️",title:"Data Protection API",desc:"IDataProtector, key rotation, persistence",tags:["Intermediate","Security"]},
+  {id:"sec3",icon:"📜",title:"Certificates & TLS",desc:"X509Certificate2, SslStream, cert pinning",tags:["Advanced","TLS"]},
+  {id:"sec4",icon:"🔑",title:"Secret Storage",desc:"DPAPI, Azure Key Vault, environment secrets",tags:["Intermediate","Security"]},
+ ]},
+{n:"18",title:"Native Interop",icon:"🔌",c:"#56d364",bg:"rgba(86,211,100,0.1)",
+ desc:"P/Invoke, marshaling, COM interop, LibraryImport source generator, unsafe code.",
+ tags:["Advanced","Interop","Native"],
+ topics:[
+  {id:"ni1",icon:"🔌",title:"P/Invoke & DllImport",desc:"Calling native libs, calling conventions",tags:["Advanced","Interop"]},
+  {id:"ni2",icon:"📦",title:"LibraryImport Source Gen",desc:"Compile-time marshaling, [LibraryImport]",tags:["Advanced","Modern"]},
+  {id:"ni3",icon:"🔄",title:"Marshaling Rules",desc:"Blittable types, structs, strings, arrays",tags:["Advanced","Interop"]},
+  {id:"ni4",icon:"🏭",title:"COM Interop",desc:"RCW/CCW, IUnknown, CoClass, NoPIA",tags:["Expert","COM"]},
+  {id:"ni5",icon:"🧠",title:"Unsafe Code & NativeMemory",desc:"NativeMemory, Marshal, fixed, stackalloc",tags:["Expert","Unsafe"]},
+ ]},
+{n:"19",title:"Package & Project System",icon:"📦",c:"#00ffa3",bg:"rgba(0,255,163,0.1)",
+ desc:"NuGet internals, SDK-style projects, MSBuild pipeline, Central Package Management.",
+ tags:["Core","Tooling","Build"],
+ topics:[
+  {id:"pkg1",icon:"📦",title:"NuGet Internals",desc:"Package resolution, dependency graph, restore",tags:["Core","NuGet"]},
+  {id:"pkg2",icon:"📄",title:"SDK-Style Projects",desc:".csproj schema, implicit items, glob patterns",tags:["Core","MSBuild"]},
+  {id:"pkg3",icon:"🏗️",title:"MSBuild Pipeline",desc:"Targets, tasks, props, evaluation order",tags:["Advanced","MSBuild"]},
+  {id:"pkg4",icon:"📋",title:"Central Package Management",desc:"Directory.Packages.props, version pinning",tags:["Intermediate","NuGet"]},
+  {id:"pkg5",icon:"🔧",title:"Custom Build Tasks",desc:"Task authoring, ITask, TargetFramework",tags:["Advanced","MSBuild"]},
+ ]},
+{n:"20",title:"Advanced Runtime Topics",icon:"🧬",c:"#7b61ff",bg:"rgba(123,97,255,0.1)",
+ desc:"Runtime hosting, IL emit, dynamic proxies, expression trees, Roslyn analyzers.",
+ tags:["Expert","Runtime","Advanced"],
+ topics:[
+  {id:"rt1",icon:"🏠",title:"Runtime Hosting",desc:"Custom hosts, ICLRRuntimeHost, hybrid hosting",tags:["Expert","Runtime"]},
+  {id:"rt2",icon:"📜",title:"IL Emit & DynamicMethod",desc:"ILGenerator, opcodes, lightweight codegen",tags:["Expert","CodeGen"]},
+  {id:"rt3",icon:"🌳",title:"Expression Trees (Revisited)",desc:"Compile, DebugView, visitor pattern",tags:["Advanced","LINQ"]},
+  {id:"rt4",icon:"🔍",title:"Roslyn Analyzers",desc:"DiagnosticAnalyzer, CodeFix, IOperation",tags:["Advanced","Roslyn"]},
+  {id:"rt5",icon:"🔮",title:"Source Generators",desc:"IIncrementalGenerator, SyntaxProvider, output",tags:["Advanced","Roslyn"]},
+ ]},
+];
+
+// ═══════════════════════════════════════════════════════════
+// TOPIC DETAIL DATA
+// ═══════════════════════════════════════════════════════════
+const DETAILS = {
+
+"a2": {
+  title:"CLR — Common Language Runtime",
+  bread:"Chapter 2 · .NET Architecture",
+  sub:"The heart of .NET — the execution engine that manages memory, security, type safety, and threading for all managed code.",
+  pills:[{t:"Core",c:"#00c8ff"},{t:"CLR",c:"#7b61ff"},{t:"Foundation",c:"#56d364"}],
+  secs:[
+    {ty:"prose",title:"What the CLR Does",html:`
+<p>The CLR is the virtual machine that executes .NET assemblies. It provides services that would otherwise require custom per-application implementation:</p>
+<ul>
+<li><strong>Memory management</strong> — automatic garbage collection, no manual malloc/free</li>
+<li><strong>Type safety</strong> — verifies IL is type-safe before execution</li>
+<li><strong>Exception handling</strong> — structured SEH-based exception propagation</li>
+<li><strong>Thread management</strong> — thread pool, synchronization primitives</li>
+<li><strong>JIT compilation</strong> — translates IL to native machine code on first call</li>
+<li><strong>Security</strong> — Code Access Security (legacy) + runtime type verification</li>
+<li><strong>Interop</strong> — marshaling between managed and native code</li>
+</ul>
+`},
+    {ty:"diagram",title:"CLR Internal Architecture",svg:`
+<svg width="500" height="280" viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="clrbg" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#0a1a2a"/>
+  <stop offset="1" stop-color="#060b0f"/>
+</linearGradient>
+<style>
+.b{fill:#0f2035;stroke:#1b3550;stroke-width:1.2;rx:6}
+.ht{font-family:'DM Mono',monospace;font-size:9px;fill:#8a9db5;text-anchor:middle}
+.bt{font-family:'DM Mono',monospace;font-size:9.5px;fill:#dde6f0;text-anchor:middle;font-weight:500}
+.gb{fill:#0d2a1a;stroke:#00ffa3;stroke-width:1.2}
+.bb{fill:#0d1a2a;stroke:#00c8ff;stroke-width:1.2}
+.pb{fill:#1a0d2a;stroke:#7b61ff;stroke-width:1.2}
+.ob{fill:#2a1a0d;stroke:#ff6b35;stroke-width:1.2}
+@keyframes cpulse{0%,100%{opacity:.8}50%{opacity:1;filter:drop-shadow(0 0 4px rgba(0,200,255,.5))}}
+.anim{animation:cpulse 3s ease-in-out infinite}
+</style>
+</defs>
+<rect fill="url(#clrbg)" x="5" y="5" width="490" height="270" rx="10" stroke="#1b3550" stroke-width="1"/>
+<text font-family="'Familjen Grotesk',sans-serif" font-size="12" font-weight="700" fill="#00c8ff" text-anchor="middle" x="250" y="26">CLR ARCHITECTURE</text>
+
+<!-- Row 1: Entry points -->
+<rect class="bb" x="20" y="36" width="100" height="32" rx="5"/>
+<text class="bt" x="70" y="53">C# Code</text>
+<rect class="bb" x="140" y="36" width="100" height="32" rx="5"/>
+<text class="bt" x="190" y="53">VB.NET</text>
+<rect class="bb" x="260" y="36" width="100" height="32" rx="5"/>
+<text class="bt" x="310" y="53">F#</text>
+<rect class="bb" x="380" y="36" width="100" height="32" rx="5"/>
+<text class="bt" x="430" y="53">Any .NET lang</text>
+
+<!-- Arrow down to IL -->
+<line x1="250" y1="68" x2="250" y2="85" stroke="#1b3550" stroke-width="1.5" marker-end="url(#a1)"/>
+<defs><marker id="a1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3z" fill="#1b3550"/></marker></defs>
+
+<!-- IL Layer -->
+<rect fill="#1a1a0d" stroke="#ffd700" stroke-width="1.2" x="80" y="86" width="340" height="32" rx="5" class="anim"/>
+<text class="bt" fill="#ffd700" x="250" y="107">CIL — Common Intermediate Language</text>
+
+<!-- Arrow down -->
+<line x1="250" y1="118" x2="250" y2="135" stroke="#1b3550" stroke-width="1.5" marker-end="url(#a1)"/>
+
+<!-- Row 2: CLR Components -->
+<rect class="ob" x="20" y="136" width="105" height="46" rx="5"/>
+<text class="bt" fill="#ff6b35" x="72" y="153">JIT</text>
+<text class="ht" x="72" y="169">Compiler</text>
+
+<rect class="gb" x="140" y="136" width="105" height="46" rx="5"/>
+<text class="bt" fill="#00ffa3" x="192" y="153">GC</text>
+<text class="ht" x="192" y="169">Garbage Coll.</text>
+
+<rect class="pb" x="260" y="136" width="105" height="46" rx="5"/>
+<text class="bt" fill="#7b61ff" x="312" y="153">Thread</text>
+<text class="ht" x="312" y="169">Pool</text>
+
+<rect class="bb" x="380" y="136" width="100" height="46" rx="5"/>
+<text class="bt" fill="#00c8ff" x="430" y="153">Type</text>
+<text class="ht" x="430" y="169">Loader</text>
+
+<!-- Row 3: OS Layer -->
+<rect fill="#0d1a0d" stroke="#56d364" stroke-width="1" x="20" y="208" width="460" height="50" rx="5"/>
+<text class="bt" fill="#56d364" x="250" y="230">OS (Windows / Linux / macOS / WASM)</text>
+<text class="ht" x="250" y="248">Threads · Memory · File I/O · Network · Signals</text>
+
+<!-- Arrows row2 to OS -->
+<line x1="250" y1="182" x2="250" y2="205" stroke="#1b3550" stroke-width="1.5" marker-end="url(#a1)"/>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"Observing CLR Behavior",code:`<span class="cm">// GC information at runtime</span>
+<span class="kw">var</span> gcInfo = <span class="tp">GC</span>.GetGCMemoryInfo();
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Gen0 size: {gcInfo.GenerationInfo[0].SizeAfterBytes:N0}"</span>);
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Heap size: {gcInfo.HeapSizeBytes:N0}"</span>);
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Fragmented: {gcInfo.FragmentedBytes:N0}"</span>);
+
+<span class="cm">// CLR version</span>
+<span class="tp">Console</span>.WriteLine(<span class="tp">Environment</span>.Version);
+<span class="tp">Console</span>.WriteLine(<span class="tp">RuntimeInformation</span>.FrameworkDescription);
+
+<span class="cm">// AppDomain info (one per app in .NET Core+)</span>
+<span class="kw">var</span> domain = <span class="tp">AppDomain</span>.CurrentDomain;
+<span class="tp">Console</span>.WriteLine(domain.FriendlyName);
+
+<span class="cm">// AssemblyLoadContext — one per isolation boundary</span>
+<span class="kw">var</span> ctx = <span class="tp">AssemblyLoadContext</span>.Default;
+<span class="kw">foreach</span> (<span class="kw">var</span> asm <span class="kw">in</span> ctx.Assemblies)
+    <span class="tp">Console</span>.WriteLine(asm.GetName().Name);</span>`},
+  ]},
+
+"c2": {
+  title:"Common Intermediate Language (CIL)",
+  bread:"Chapter 4 · Compilation Pipeline",
+  sub:"The bytecode format that all .NET languages compile to — a stack-based virtual instruction set that enables cross-language interoperability.",
+  pills:[{t:"Expert",c:"#7b61ff"},{t:"IL",c:"#ffd700"},{t:"CLR",c:"#00c8ff"}],
+  secs:[
+    {ty:"prose",title:"What is CIL?",html:`
+<p>CIL (also called MSIL or IL) is a CPU-independent bytecode format. Every .NET language (C#, F#, VB.NET) compiles to the same IL. The CLR's JIT then translates IL to native code for the target CPU at runtime.</p>
+<p><strong>Key properties of IL:</strong></p>
+<ul>
+<li><strong>Stack-based</strong> — operations pop/push a virtual evaluation stack</li>
+<li><strong>Strongly typed</strong> — all operations are type-checked</li>
+<li><strong>Object-oriented</strong> — native support for objects, virtual dispatch, inheritance</li>
+<li><strong>Verifiable</strong> — CLR can verify type safety before running</li>
+</ul>
+`},
+    {ty:"diagram",title:"IL Stack Machine — How ldarg/add/ret Work",svg:`
+<svg width="500" height="200" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+<defs><style>
+.st{fill:#0d1a2a;stroke:#00c8ff;stroke-width:1.2;rx:5}
+.stt{font-family:'DM Mono',monospace;font-size:9px;fill:#dde6f0;text-anchor:middle}
+.sub{font-family:'DM Mono',monospace;font-size:8px;fill:#8a9db5;text-anchor:middle}
+.op{fill:#0d2a1a;stroke:#00ffa3;stroke-width:1.2}
+@keyframes sp{0%{opacity:.4}50%{opacity:1}100%{opacity:.4}}
+.s1{animation:sp 1s ease-in-out infinite}.s2{animation:sp 1s .33s ease-in-out infinite}.s3{animation:sp 1s .66s ease-in-out infinite}
+</style></defs>
+
+<text font-family="'DM Mono',monospace" font-size="10" fill="#8a9db5" x="10" y="18">IL: int Add(int a, int b)</text>
+
+<!-- IL Instructions column -->
+<rect fill="#0a1018" stroke="#1b2d40" stroke-width="1" x="10" y="26" width="160" height="160" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="8.5" fill="#ffd700" x="20" y="44">IL_0000: ldarg.0</text>
+<text font-family="'DM Mono',monospace" font-size="8.5" fill="#ffd700" x="20" y="62">IL_0001: ldarg.1</text>
+<text font-family="'DM Mono',monospace" font-size="8.5" fill="#ffd700" x="20" y="80">IL_0002: add</text>
+<text font-family="'DM Mono',monospace" font-size="8.5" fill="#ffd700" x="20" y="98">IL_0003: ret</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" x="20" y="116">; push arg 0 (a)</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" x="20" y="130">; push arg 1 (b)</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" x="20" y="144">; pop a,b push a+b</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" x="20" y="158">; return top of stack</text>
+
+<!-- Stack visualization -->
+<text font-family="'DM Mono',monospace" font-size="9" fill="#8a9db5" text-anchor="middle" x="310" y="18">Eval Stack</text>
+<rect fill="#060b0f" stroke="#1b2d40" stroke-width="1" x="245" y="24" width="130" height="160" rx="5"/>
+
+<!-- Stack slots animated -->
+<rect class="st s3" x="260" y="35" width="100" height="28" rx="4"/>
+<text class="stt" x="310" y="54">42 (b)</text>
+<rect class="st s2" x="260" y="70" width="100" height="28" rx="4"/>
+<text class="stt" x="310" y="89">17 (a)</text>
+<rect class="op s1" x="260" y="130" width="100" height="28" rx="4"/>
+<text class="stt" fill="#00ffa3" x="310" y="149">59 (result)</text>
+
+<!-- Arrow pointing down -->
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" text-anchor="middle" x="310" y="113">↓ after add ↓</text>
+
+<!-- JIT output -->
+<rect fill="#0d2a1a" stroke="#00ffa3" stroke-width="1" x="405" y="24" width="85" height="80" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#00ffa3" x="410" y="40">Native:</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#56d364" x="410" y="56">lea eax,</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#56d364" x="410" y="68">[ecx+edx]</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#56d364" x="410" y="80">ret</text>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"Inspecting IL with Reflection.Emit",code:`<span class="cm">// Reading IL via MethodBody</span>
+<span class="kw">var</span> method = <span class="kw">typeof</span>(<span class="tp">Math</span>).GetMethod(<span class="st">"Max"</span>, <span class="kw">new</span>[] { <span class="kw">typeof</span>(<span class="tp">int</span>), <span class="kw">typeof</span>(<span class="tp">int</span>) });
+<span class="kw">var</span> body = method!.GetMethodBody();
+<span class="kw">byte</span>[] il = body!.GetILAsByteArray()!;
+<span class="tp">Console</span>.WriteLine(<span class="st">$"IL bytes: {BitConverter.ToString(il)}"</span>);
+
+<span class="cm">// Emitting IL dynamically — DynamicMethod</span>
+<span class="kw">var</span> dyn = <span class="kw">new</span> <span class="tp">DynamicMethod</span>(<span class="st">"Add"</span>, <span class="kw">typeof</span>(<span class="tp">int</span>),
+    <span class="kw">new</span>[] { <span class="kw">typeof</span>(<span class="tp">int</span>), <span class="kw">typeof</span>(<span class="tp">int</span>) });
+
+<span class="tp">ILGenerator</span> il2 = dyn.GetILGenerator();
+il2.Emit(<span class="tp">OpCodes</span>.Ldarg_0);   <span class="cm">// push arg0</span>
+il2.Emit(<span class="tp">OpCodes</span>.Ldarg_1);   <span class="cm">// push arg1</span>
+il2.Emit(<span class="tp">OpCodes</span>.Add);       <span class="cm">// pop 2, push sum</span>
+il2.Emit(<span class="tp">OpCodes</span>.Ret);       <span class="cm">// return</span>
+
+<span class="kw">var</span> addFn = (<span class="tp">Func</span>&lt;<span class="tp">int</span>,<span class="tp">int</span>,<span class="tp">int</span>&gt;)dyn.CreateDelegate(<span class="kw">typeof</span>(<span class="tp">Func</span>&lt;<span class="tp">int</span>,<span class="tp">int</span>,<span class="tp">int</span>&gt;));
+<span class="tp">Console</span>.WriteLine(addFn(<span class="nu">3</span>, <span class="nu">4</span>)); <span class="cm">// 7</span>
+
+<span class="cm">// Use SharpLab.io — paste C# and see IL + JIT ASM instantly</span></span>`},
+    {ty:"co",kind:"info",ic:"💡",txt:"Use <strong>SharpLab.io</strong> (free, browser-based) to see real-time IL and native ASM output for any C# code. Essential tool for .NET internals exploration."},
+  ]},
+
+"j2": {
+  title:"Tiered Compilation",
+  bread:"Chapter 5 · JIT Compilation",
+  sub:"How .NET achieves fast startup AND peak throughput — methods start with quick Tier-0 code and are re-JIT'd with full optimizations when they become hot.",
+  pills:[{t:"Advanced",c:"#ff6b35"},{t:"JIT",c:"#ffd700"},{t:"Performance",c:"#00ffa3"}],
+  secs:[
+    {ty:"prose",title:"The Problem Tiered JIT Solves",html:`
+<p>Traditional JIT faced a tradeoff: <strong>fast startup</strong> (quick but unoptimized compilation) vs <strong>peak performance</strong> (full optimization but slow startup). You had to pick one.</p>
+<p>Tiered compilation solves this by compiling methods twice:</p>
+<ul>
+<li><strong>Tier-0</strong> — Called on first invocation. Quick, minimal optimization. Code runs immediately.</li>
+<li><strong>Call counting</strong> — The runtime counts how many times each method is called.</li>
+<li><strong>Tier-1</strong> — After ~30 calls (configurable), method is re-JIT'd with full optimizations on a background thread.</li>
+</ul>
+`},
+    {ty:"diagram",title:"Tiered Compilation Flow",svg:`
+<svg width="500" height="220" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="ja" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto">
+  <path d="M0,0 L0,6 L7,3z" fill="#ff6b35"/>
+</marker>
+<style>
+.jbx{fill:#1a100d;stroke:#ff6b35;stroke-width:1.2}
+.jt{font-family:'DM Mono',monospace;font-size:9px;fill:#dde6f0;text-anchor:middle}
+.js{font-family:'DM Mono',monospace;font-size:8px;fill:#8a9db5;text-anchor:middle}
+.jg{fill:#0d1a0d;stroke:#00ffa3;stroke-width:1.2}
+.jb2{fill:#0d0d2a;stroke:#7b61ff;stroke-width:1.2}
+@keyframes jp{0%{stroke-dashoffset:60}100%{stroke-dashoffset:0}}
+.janim{stroke-dasharray:8 4;animation:jp 1.5s linear infinite}
+</style></defs>
+
+<!-- IL Box -->
+<rect fill="#1a1a0d" stroke="#ffd700" stroke-width="1.2" x="10" y="80" width="90" height="50" rx="5"/>
+<text class="jt" fill="#ffd700" x="55" y="100">IL</text>
+<text class="js" x="55" y="117">Assembly</text>
+
+<!-- Tier 0 -->
+<rect class="jbx" x="140" y="60" width="110" height="90" rx="5"/>
+<text class="jt" fill="#ff6b35" x="195" y="80">Tier-0</text>
+<text class="js" x="195" y="96">Quick JIT</text>
+<text class="js" x="195" y="110">No opt</text>
+<text class="js" fill="#56d364" x="195" y="127">Fast startup!</text>
+
+<!-- Call counter -->
+<rect fill="#0d1a1a" stroke="#00c8ff" stroke-width="1.2" x="140" y="168" width="110" height="36" rx="5"/>
+<text class="jt" fill="#00c8ff" x="195" y="183">Call Counter</text>
+<text class="js" x="195" y="197">n >= 30?</text>
+
+<!-- Tier 1 -->
+<rect class="jg" x="310" y="40" width="120" height="110" rx="5"/>
+<text class="jt" fill="#00ffa3" x="370" y="62">Tier-1</text>
+<text class="js" x="370" y="78">Full Optimize</text>
+<text class="js" x="370" y="93">Inlining</text>
+<text class="js" x="370" y="107">Loop unroll</text>
+<text class="js" x="370" y="121">SIMD</text>
+<text class="js" fill="#56d364" x="370" y="135">Max perf!</text>
+
+<!-- Background thread -->
+<rect class="jb2" x="310" y="165" width="120" height="36" rx="5"/>
+<text class="jt" fill="#7b61ff" x="370" y="180">Background</text>
+<text class="js" x="370" y="195">Thread Re-JIT</text>
+
+<!-- Arrows -->
+<line stroke="#ffd700" stroke-width="1.5" marker-end="url(#ja)" x1="100" y1="105" x2="137" y2="105"/>
+<line stroke="#ff6b35" stroke-width="1.5" class="janim" marker-end="url(#ja)" x1="250" y1="105" x2="307" y2="95"/>
+<line stroke="#00c8ff" stroke-width="1.5" x1="195" y1="150" x2="195" y2="165"/>
+<line stroke="#00c8ff" stroke-width="1.5" class="janim" marker-end="url(#ja)" x1="250" y1="185" x2="307" y2="185"/>
+
+<text class="js" fill="#3d5068" x="270" y="122">hot path</text>
+<text class="js" fill="#3d5068" x="258" y="176">re-jit trigger</text>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"Controlling JIT Compilation Behavior",code:`<span class="kw">using</span> System.Runtime.CompilerServices;
+
+<span class="cm">// Opt OUT of tiering — always use Tier-1 (slower startup, faster execution)</span>
+[<span class="at">MethodImpl(MethodImplOptions.AggressiveOptimization)</span>]
+<span class="kw">public static double</span> <span class="fn">ComputeHeavy</span>(<span class="tp">Span</span>&lt;<span class="tp">double</span>&gt; data)
+{
+    <span class="kw">double</span> sum = <span class="nu">0</span>;
+    <span class="kw">foreach</span> (<span class="kw">var</span> v <span class="kw">in</span> data) sum += v;
+    <span class="kw">return</span> sum;
+}
+
+<span class="cm">// Hint JIT to INLINE aggressively</span>
+[<span class="at">MethodImpl(MethodImplOptions.AggressiveInlining)</span>]
+<span class="kw">public static int</span> <span class="fn">FastAdd</span>(<span class="tp">int</span> a, <span class="tp">int</span> b) => a + b;
+
+<span class="cm">// Prevent inlining — e.g., for accurate stack traces</span>
+[<span class="at">MethodImpl(MethodImplOptions.NoInlining)</span>]
+<span class="kw">public static void</span> <span class="fn">ThrowHelper</span>(<span class="tp">string</span> msg)
+    => <span class="kw">throw new</span> <span class="tp">InvalidOperationException</span>(msg);
+
+<span class="cm">// Environment variable controls (set before app start):</span>
+<span class="cm">// DOTNET_TieredCompilation=0        — disable tiering</span>
+<span class="cm">// DOTNET_TieredPGO=1                — enable dynamic PGO</span>
+<span class="cm">// DOTNET_TC_QuickJitForLoops=1      — Tier-0 for loops too</span>
+<span class="cm">// DOTNET_TC_CallCountingDelayMs=100 — delay before Tier-1</span>
+
+<span class="cm">// ReadyToRun (R2R) — pre-JIT'd assemblies for fast startup</span>
+<span class="cm">// dotnet publish -r win-x64 --self-contained -p:PublishReadyToRun=true</span></span>`},
+    {ty:"co",kind:"warn",ic:"⚠️",txt:"<strong>Don't blindly add AggressiveInlining everywhere.</strong> Large inlined methods increase I-cache pressure. Profile first with BenchmarkDotNet before adding JIT hints."},
+  ]},
+
+"m2": {
+  title:"GC Algorithm: Mark-Compact",
+  bread:"Chapter 7 · Memory Management & GC",
+  sub:"How .NET's garbage collector finds live objects, moves them, and reclaims dead memory — generational collection and concurrent phases.",
+  pills:[{t:"Advanced",c:"#00ffa3"},{t:"GC",c:"#56d364"},{t:"CLR",c:"#7b61ff"}],
+  secs:[
+    {ty:"prose",title:"The Three-Phase GC Algorithm",html:`
+<p>The .NET GC uses a <strong>generational, mark-sweep-compact</strong> algorithm. Understanding it is critical for writing low-latency, high-throughput applications.</p>
+<ol>
+<li><strong>Mark phase</strong> — Starting from GC roots (stack variables, statics, GC handles), the GC traverses the object graph and marks all reachable (live) objects.</li>
+<li><strong>Sweep phase</strong> — Unmarked objects are considered dead. Their memory is available for reuse.</li>
+<li><strong>Compact phase</strong> — Live objects are moved together to eliminate fragmentation. References in all live objects are updated.</li>
+</ol>
+`},
+    {ty:"diagram",title:"Generational Heap Layout",svg:`
+<svg width="500" height="240" viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<style>
+.gl{font-family:'DM Mono',monospace;font-size:9px;fill:#8a9db5}
+.gv{font-family:'DM Mono',monospace;font-size:9px;fill:#dde6f0;font-weight:600}
+@keyframes gmark{0%{opacity:.3}50%{opacity:1}100%{opacity:.3}}
+.live{animation:gmark 2s ease-in-out infinite}
+.dead{fill:#1a0d0d;stroke:#ff7b72;stroke-width:1}
+.liveobj{fill:#0d2a1a;stroke:#00ffa3;stroke-width:1.2}
+.prom{fill:#1a1a0d;stroke:#ffd700;stroke-width:1.2}
+</style>
+</defs>
+
+<!-- Gen 0 -->
+<rect fill="#0a1018" stroke="#1b2d40" stroke-width="1" x="10" y="20" width="480" height="55" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="10" fill="#00ffa3" x="18" y="38">Gen 0  (small, ~256KB, collected frequently)</text>
+<!-- Objects in gen0 -->
+<rect class="liveobj live" x="20" y="42" width="28" height="22" rx="3"/>
+<rect class="dead" x="52" y="42" width="18" height="22" rx="3"/>
+<rect class="liveobj live" x="74" y="42" width="35" height="22" rx="3"/>
+<rect class="dead" x="113" y="42" width="22" height="22" rx="3"/>
+<rect class="liveobj live" x="139" y="42" width="28" height="22" rx="3"/>
+<rect class="dead" x="171" y="42" width="40" height="22" rx="3"/>
+<rect class="liveobj live" x="215" y="42" width="25" height="22" rx="3"/>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#56d364" x="255" y="57">live</text>
+<rect fill="#2a1a0d" stroke="#ff6b35" stroke-width="1" x="275" y="42" width="20" height="22" rx="3"/>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#ff7b72" x="300" y="57">dead → reclaim</text>
+
+<!-- Gen 1 -->
+<rect fill="#0a1018" stroke="#1b2d40" stroke-width="1" x="10" y="90" width="480" height="55" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="10" fill="#ffd700" x="18" y="108">Gen 1  (medium, ~2MB, buffer between Gen0/Gen2)</text>
+<rect class="prom" x="20" y="112" width="45" height="22" rx="3"/>
+<rect class="prom" x="70" y="112" width="30" height="22" rx="3"/>
+<rect class="dead" x="104" y="112" width="22" height="22" rx="3"/>
+<rect class="prom" x="130" y="112" width="60" height="22" rx="3"/>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#ffd700" x="198" y="127">promoted from Gen0</text>
+
+<!-- Gen 2 + LOH -->
+<rect fill="#0a1018" stroke="#1b2d40" stroke-width="1" x="10" y="160" width="310" height="55" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="10" fill="#00c8ff" x="18" y="178">Gen 2  (large, long-lived objects, rare GC)</text>
+<rect fill="#0d1a2a" stroke="#00c8ff" stroke-width="1" x="20" y="182" width="80" height="22" rx="3"/>
+<rect fill="#0d1a2a" stroke="#00c8ff" stroke-width="1" x="108" y="182" width="60" height="22" rx="3"/>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#8a9db5" x="178" y="197">static data, caches, singletons…</text>
+
+<!-- LOH -->
+<rect fill="#0a1018" stroke="#7b61ff" stroke-width="1" x="330" y="160" width="160" height="55" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="10" fill="#7b61ff" x="338" y="178">LOH  (&gt;85KB)</text>
+<rect fill="#1a0d2a" stroke="#7b61ff" stroke-width="1" x="338" y="182" width="145" height="22" rx="3"/>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#7b61ff" x="350" y="197">byte[100_000], large arrays</text>
+
+<!-- POH label -->
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" x="10" y="230">POH = Pinned Object Heap (.NET 5+) — for pinned buffers, avoids LOH fragmentation</text>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"GC Control & Monitoring",code:`<span class="cm">// Force GC (use in tests/benchmarks only, never production!)</span>
+<span class="tp">GC</span>.Collect(<span class="nu">2</span>, <span class="tp">GCCollectionMode</span>.Aggressive, <span class="kw">true</span>, <span class="kw">true</span>);
+
+<span class="cm">// Suppress GC for latency-sensitive sections</span>
+<span class="kw">try</span>
+{
+    <span class="tp">GC</span>.TryStartNoGCRegion(<span class="nu">64</span> * <span class="nu">1024</span> * <span class="nu">1024</span>); <span class="cm">// 64MB budget</span>
+    <span class="cm">// … latency-critical code here …</span>
+}
+<span class="kw">finally</span>
+{
+    <span class="tp">GC</span>.EndNoGCRegion();
+}
+
+<span class="cm">// Monitor GC via EventSource (production-safe)</span>
+<span class="kw">var</span> info = <span class="tp">GC</span>.GetGCMemoryInfo();
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Gen0 collections: {GC.CollectionCount(0)}"</span>);
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Gen2 collections: {GC.CollectionCount(2)}"</span>);
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Total memory:     {GC.GetTotalMemory(false):N0}"</span>);
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Total alloc:      {GC.GetTotalAllocatedBytes():N0}"</span>); <span class="cm">// .NET 5+</span>
+
+<span class="cm">// Server GC — for throughput (multi-core, per-core heaps)</span>
+<span class="cm">// In runtimeconfig.json:</span>
+<span class="cm">// { "configProperties": { "System.GC.Server": true,</span>
+<span class="cm">//    "System.GC.HeapHardLimit": 536870912 } }</span>
+
+<span class="cm">// Weak reference — doesn't prevent GC</span>
+<span class="kw">var</span> weak = <span class="kw">new</span> <span class="tp">WeakReference</span>&lt;<span class="tp">byte</span>[]&gt;(<span class="kw">new</span> <span class="kw">byte</span>[<span class="nu">1024</span>]);
+<span class="kw">if</span> (weak.TryGetTarget(<span class="kw">out var</span> buf)) <span class="cm">// null if GC'd</span>
+    <span class="tp">Console</span>.WriteLine(<span class="st">$"Still alive: {buf.Length}"</span>);</span>`},
+    {ty:"co",kind:"err",ic:"🔥",txt:"<strong>LOH fragmentation</strong> is a common production issue. Never allocate large temporary arrays in loops — use <code>ArrayPool&lt;byte&gt;.Shared.Rent()</code> instead. LOH is only GC'd with Gen2, which can be expensive."},
+  ]},
+
+"tp2": {
+  title:"async/await State Machine",
+  bread:"Chapter 9 · Task & Async Infrastructure",
+  sub:"What the C# compiler generates behind every async method — the IAsyncStateMachine struct that makes await non-blocking.",
+  pills:[{t:"Advanced",c:"#7b61ff"},{t:"Async",c:"#00c8ff"},{t:"Compiler",c:"#ffd700"}],
+  secs:[
+    {ty:"prose",title:"What the Compiler Generates",html:`
+<p>When you write <code>async Task&lt;T&gt; FooAsync()</code>, the C# compiler transforms it into a <strong>state machine struct</strong> that implements <code>IAsyncStateMachine</code>. This is why async methods have almost zero overhead when they complete synchronously.</p>
+<p><strong>Key generated members:</strong></p>
+<ul>
+<li><code>&lt;state&gt;</code> — int tracking which await we're at (-1 = not started, -2 = completed)</li>
+<li><code>&lt;builder&gt;</code> — AsyncTaskMethodBuilder managing the Task and continuations</li>
+<li><code>MoveNext()</code> — called on each resume; the actual method body as a switch</li>
+<li>All local variables become fields (to survive across await points)</li>
+</ul>
+`},
+    {ty:"diagram",title:"async/await State Machine Flow",svg:`
+<svg width="500" height="250" viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="aa" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto">
+  <path d="M0,0 L0,6 L7,3z" fill="#7b61ff"/>
+</marker>
+<style>
+.ab{fill:#1a0d2a;stroke:#7b61ff;stroke-width:1.2}
+.at{font-family:'DM Mono',monospace;font-size:9px;fill:#dde6f0;text-anchor:middle}
+.as2{font-family:'DM Mono',monospace;font-size:8px;fill:#8a9db5;text-anchor:middle}
+.aarr{stroke:#7b61ff;stroke-width:1.5;fill:none;marker-end:url(#aa)}
+.freed{fill:#0d2a0d;stroke:#00ffa3;stroke-width:1.2}
+@keyframes pulse{0%,100%{opacity:1;fill:#1a0d2a}50%{opacity:.7;fill:#2a1a3a}}
+.apulse{animation:pulse 2.5s ease-in-out infinite}
+</style></defs>
+
+<!-- State machine struct -->
+<rect fill="#0a0d1a" stroke="#1b2d40" stroke-width="1" x="5" y="5" width="170" height="235" rx="6"/>
+<text font-family="'DM Mono',monospace" font-size="9" fill="#7b61ff" text-anchor="middle" x="90" y="24">IAsyncStateMachine</text>
+<rect class="ab apulse" x="15" y="30" width="150" height="24" rx="4"/>
+<text class="as2" x="90" y="46">state = -1 (initial)</text>
+<rect class="ab" x="15" y="58" width="150" height="24" rx="4"/>
+<text class="as2" x="90" y="74">builder (Task)</text>
+<rect class="ab" x="15" y="86" width="150" height="24" rx="4"/>
+<text class="as2" x="90" y="102">locals (as fields)</text>
+<rect class="ab" x="15" y="114" width="150" height="100" rx="4"/>
+<text class="at" fill="#7b61ff" x="90" y="134">MoveNext()</text>
+<text class="as2" x="90" y="152">switch (state) {</text>
+<text class="as2" x="90" y="167">  case 0: // start</text>
+<text class="as2" x="90" y="182">  case 1: // after await 1</text>
+<text class="as2" x="90" y="197">  case 2: // after await 2</text>
+<text class="as2" x="90" y="212">}</text>
+
+<!-- Thread box -->
+<rect fill="#0d1a0d" stroke="#56d364" stroke-width="1.2" x="200" y="20" width="120" height="50" rx="5"/>
+<text class="at" fill="#56d364" x="260" y="40">Thread</text>
+<text class="as2" x="260" y="56">calls MoveNext()</text>
+
+<!-- Await point -->
+<rect fill="#1a1a0d" stroke="#ffd700" stroke-width="1.2" x="200" y="90" width="120" height="50" rx="5"/>
+<text class="at" fill="#ffd700" x="260" y="110">await point</text>
+<text class="as2" x="260" y="126">register continuation</text>
+
+<!-- FREED -->
+<rect class="freed" x="200" y="160" width="120" height="50" rx="5"/>
+<text class="at" fill="#00ffa3" x="260" y="180">Thread FREED</text>
+<text class="as2" x="260" y="196">returns to pool</text>
+
+<!-- IO Complete -->
+<rect fill="#0d1a2a" stroke="#00c8ff" stroke-width="1.2" x="360" y="90" width="130" height="50" rx="5"/>
+<text class="at" fill="#00c8ff" x="425" y="110">I/O Complete</text>
+<text class="as2" x="425" y="126">post continuation</text>
+
+<!-- Resume -->
+<rect fill="#1a0d2a" stroke="#7b61ff" stroke-width="1.2" x="360" y="160" width="130" height="50" rx="5"/>
+<text class="at" fill="#7b61ff" x="425" y="180">Resume</text>
+<text class="as2" x="425" y="196">state = next, MoveNext()</text>
+
+<!-- Arrows -->
+<line class="aarr" x1="175" y1="45" x2="197" y2="45"/>
+<line class="aarr" x1="260" y1="70" x2="260" y2="87"/>
+<line class="aarr" x1="260" y1="140" x2="260" y2="157"/>
+<line class="aarr" x1="320" y1="115" x2="357" y2="115"/>
+<line class="aarr" x1="425" y1="140" x2="425" y2="157"/>
+<line class="aarr" x1="360" y1="185" x2="185" y2="130"/>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"What the Compiler Generates (Simplified)",code:`<span class="cm">// YOUR CODE:</span>
+<span class="kw">async</span> <span class="tp">Task</span>&lt;<span class="tp">string</span>&gt; <span class="fn">FetchAsync</span>(<span class="tp">string</span> url)
+{
+    <span class="kw">var</span> client = <span class="kw">new</span> <span class="tp">HttpClient</span>();
+    <span class="kw">string</span> result = <span class="kw">await</span> client.<span class="fn">GetStringAsync</span>(url);
+    <span class="kw">return</span> result.ToUpper();
+}
+
+<span class="cm">// COMPILER GENERATES (conceptually):</span>
+[<span class="at">CompilerGenerated</span>]
+<span class="kw">private struct</span> <span class="tp">FetchAsyncStateMachine</span> : <span class="tp">IAsyncStateMachine</span>
+{
+    <span class="kw">public int</span> &lt;state&gt;;            <span class="cm">// -1 = not started, &gt;=0 = awaiting</span>
+    <span class="kw">public</span> <span class="tp">AsyncTaskMethodBuilder</span>&lt;<span class="tp">string</span>&gt; &lt;builder&gt;;
+    <span class="kw">public string</span> url;             <span class="cm">// captured parameter</span>
+    <span class="kw">private</span> <span class="tp">HttpClient</span> &lt;client&gt;;   <span class="cm">// local variable → field</span>
+    <span class="kw">private string</span> &lt;result&gt;;
+    <span class="kw">private</span> <span class="tp">TaskAwaiter</span>&lt;<span class="tp">string</span>&gt; &lt;awaiter&gt;;
+
+    <span class="kw">void</span> <span class="fn">MoveNext</span>()
+    {
+        <span class="kw">switch</span> (&lt;state&gt;)
+        {
+            <span class="kw">case</span> -<span class="nu">1</span>: <span class="cm">// first call</span>
+                &lt;client&gt; = <span class="kw">new</span> <span class="tp">HttpClient</span>();
+                &lt;awaiter&gt; = &lt;client&gt;.<span class="fn">GetStringAsync</span>(url).GetAwaiter();
+                <span class="kw">if</span> (!&lt;awaiter&gt;.IsCompleted)
+                {
+                    &lt;state&gt; = <span class="nu">0</span>;
+                    &lt;builder&gt;.AwaitUnsafeOnCompleted(<span class="kw">ref</span> &lt;awaiter&gt;, <span class="kw">ref this</span>);
+                    <span class="kw">return</span>; <span class="cm">// ← THREAD RELEASED HERE</span>
+                }
+                <span class="kw">goto case</span> <span class="nu">0</span>;
+            <span class="kw">case</span> <span class="nu">0</span>: <span class="cm">// resumed after await</span>
+                &lt;result&gt; = &lt;awaiter&gt;.GetResult();
+                &lt;builder&gt;.SetResult(&lt;result&gt;.ToUpper());
+                <span class="kw">break</span>;
+        }
+    }
+}</span>`},
+    {ty:"co",kind:"warn",ic:"⚠️",txt:"Every <code>await</code> captures local variables as fields on the state machine struct. <strong>Avoid awaiting inside tight loops</strong> with large locals — it can cause excessive heap allocations per iteration. Use <code>ValueTask</code> for hot paths."},
+  ]},
+
+"di2": {
+  title:"Service Lifetimes Deep Dive",
+  bread:"Chapter 10 · Dependency Injection",
+  sub:"Transient, Scoped, and Singleton — understanding exactly when objects are created, shared, and disposed in .NET's DI container.",
+  pills:[{t:"Core",c:"#ff6b35"},{t:"DI",c:"#00c8ff"},{t:"Architecture",c:"#7b61ff"}],
+  secs:[
+    {ty:"prose",title:"The Three Lifetimes",html:`
+<p>Every service registered in .NET DI has a <strong>lifetime</strong> that controls when instances are created and how they're shared. Choosing the wrong lifetime is one of the most common .NET bugs.</p>
+<ul>
+<li><strong>Transient</strong> — new instance on every <code>GetService&lt;T&gt;()</code> call. No sharing. Disposed when scope ends.</li>
+<li><strong>Scoped</strong> — one instance per scope (HTTP request in ASP.NET Core). Shared within a scope, different across scopes.</li>
+<li><strong>Singleton</strong> — one instance for the entire application lifetime. Created once, never re-created.</li>
+</ul>
+`},
+    {ty:"diagram",title:"Lifetime Comparison Across Requests",svg:`
+<svg width="500" height="220" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<style>
+.lb{font-family:'DM Mono',monospace;font-size:9px;fill:#8a9db5}
+.lv{font-family:'DM Mono',monospace;font-size:9px;fill:#dde6f0;font-weight:600}
+.tr1{fill:#2a1a0d;stroke:#ff6b35;stroke-width:1.2}
+.sc1{fill:#0d1a2a;stroke:#00c8ff;stroke-width:1.2}
+.sg1{fill:#0d2a0d;stroke:#00ffa3;stroke-width:1.2}
+</style></defs>
+
+<!-- Headers -->
+<text class="lb" x="5" y="18">Lifetime</text>
+<text class="lb" x="120" y="18">Request 1</text>
+<text class="lb" x="280" y="18">Request 2</text>
+
+<!-- TRANSIENT ROW -->
+<text class="lv" fill="#ff6b35" x="5" y="55">Transient</text>
+<text class="lb" x="5" y="70">new each call</text>
+<!-- Req1: 2 different objects -->
+<rect class="tr1" x="120" y="28" width="55" height="28" rx="4"/>
+<text class="lb" x="136" y="44">#1 new</text>
+<rect class="tr1" x="185" y="28" width="55" height="28" rx="4"/>
+<text class="lb" x="201" y="44">#2 new</text>
+<!-- Req2: 2 different objects -->
+<rect class="tr1" x="280" y="28" width="55" height="28" rx="4"/>
+<text class="lb" x="296" y="44">#3 new</text>
+<rect class="tr1" x="345" y="28" width="55" height="28" rx="4"/>
+<text class="lb" x="361" y="44">#4 new</text>
+<text class="lb" x="415" y="44">all different!</text>
+
+<!-- SCOPED ROW -->
+<text class="lv" fill="#00c8ff" x="5" y="115">Scoped</text>
+<text class="lb" x="5" y="130">1 per request</text>
+<rect class="sc1" x="120" y="88" width="120" height="28" rx="4"/>
+<text class="lb" x="160" y="104">shared in req1</text>
+<rect class="sc1" x="280" y="88" width="120" height="28" rx="4"/>
+<text class="lb" x="320" y="104">shared in req2</text>
+<text class="lb" x="415" y="104">diff instances</text>
+
+<!-- SINGLETON ROW -->
+<text class="lv" fill="#00ffa3" x="5" y="175">Singleton</text>
+<text class="lb" x="5" y="190">1 forever</text>
+<rect class="sg1" x="120" y="148" width="290" height="28" rx="4"/>
+<text class="lb" text-anchor="middle" x="265" y="164">same instance across ALL requests, ALL scopes</text>
+<text class="lb" x="415" y="164">1 instance</text>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"Service Registration & Captive Dependency Detection",code:`<span class="cm">// Registration</span>
+<span class="kw">var</span> services = <span class="kw">new</span> <span class="tp">ServiceCollection</span>();
+
+services.AddTransient&lt;<span class="tp">IEmailSender</span>, <span class="tp">SmtpEmailSender</span>&gt;();  <span class="cm">// new each time</span>
+services.AddScoped&lt;<span class="tp">IOrderService</span>, <span class="tp">OrderService</span>&gt;();      <span class="cm">// per-request</span>
+services.AddSingleton&lt;<span class="tp">ICache</span>, <span class="tp">MemoryCache</span>&gt;();          <span class="cm">// app lifetime</span>
+
+<span class="cm">// KEYED SERVICES (.NET 8+)</span>
+services.AddKeyedSingleton&lt;<span class="tp">ICache</span>, <span class="tp">RedisCache</span>&gt;(<span class="st">"redis"</span>);
+services.AddKeyedSingleton&lt;<span class="tp">ICache</span>, <span class="tp">MemoryCache</span>&gt;(<span class="st">"memory"</span>);
+
+<span class="kw">class</span> <span class="tp">MyService</span>(
+    [<span class="at">FromKeyedServices("redis")</span>] <span class="tp">ICache</span> redis,
+    [<span class="at">FromKeyedServices("memory")</span>] <span class="tp">ICache</span> mem) { }
+
+<span class="cm">// CAPTIVE DEPENDENCY — common bug!</span>
+<span class="cm">// Singleton capturing Scoped = Scoped lives forever → WRONG!</span>
+<span class="kw">class</span> <span class="tp">BadSingleton</span>(<span class="tp">IOrderService</span> orders) { } <span class="cm">// orders is Scoped!</span>
+<span class="cm">// Fix: inject IServiceScopeFactory and create scope manually:</span>
+<span class="kw">class</span> <span class="tp">GoodSingleton</span>(<span class="tp">IServiceScopeFactory</span> factory)
+{
+    <span class="kw">public async</span> <span class="tp">Task</span> <span class="fn">DoWorkAsync</span>()
+    {
+        <span class="kw">await using var</span> scope = factory.CreateAsyncScope();
+        <span class="kw">var</span> svc = scope.ServiceProvider.GetRequiredService&lt;<span class="tp">IOrderService</span>&gt;();
+        <span class="kw">await</span> svc.<span class="fn">ProcessAsync</span>();
+    }
+}
+
+<span class="cm">// VALIDATE on startup (.NET 6+) — catches captive deps at build time</span>
+services.BuildServiceProvider(
+    <span class="kw">new</span> <span class="tp">ServiceProviderOptions</span> { ValidateScopes = <span class="kw">true</span>, ValidateOnBuild = <span class="kw">true</span> });</span>`},
+    {ty:"co",kind:"err",ic:"🚨",txt:"<strong>Captive dependency</strong> (injecting a Scoped service into a Singleton) is one of the most common .NET bugs. It causes stale, shared state across requests. Always enable <code>ValidateScopes = true</code> in development."},
+  ]},
+
+"p2": {
+  title:"Span&lt;T&gt; & Memory&lt;T&gt;",
+  bread:"Chapter 16 · Performance Optimization",
+  sub:"The zero-allocation workhorse of modern .NET — slice into any contiguous memory without copying a single byte.",
+  pills:[{t:"Advanced",c:"#ff6b35"},{t:"Performance",c:"#00ffa3"},{t:".NET 5+",c:"#7b61ff"}],
+  secs:[
+    {ty:"prose",title:"Why Span Matters",html:`
+<p>Before <code>Span&lt;T&gt;</code>, every <code>string.Substring()</code> allocated a new string. Every array slice copied data. Every buffer operation potentially moved memory. <code>Span&lt;T&gt;</code> changes all of this by representing a <strong>view into existing memory</strong> with zero allocation.</p>
+<ul>
+<li>Works over arrays, stack memory (stackalloc), string slices, unmanaged memory</li>
+<li><code>ReadOnlySpan&lt;T&gt;</code> — immutable view, can represent string content</li>
+<li><code>Memory&lt;T&gt;</code> — heap-safe span (can be stored in fields, used across async)</li>
+<li><code>Span&lt;T&gt;</code> is a <strong>ref struct</strong> — cannot escape to heap, cannot be used in async methods</li>
+</ul>
+`},
+    {ty:"code",lang:"csharp",name:"Span<T> — Zero-Allocation Patterns",code:`<span class="cm">// 1. Parsing without allocating substrings</span>
+<span class="tp">ReadOnlySpan</span>&lt;<span class="tp">char</span>&gt; date = <span class="st">"2024-03-15"</span>.AsSpan();
+<span class="tp">ReadOnlySpan</span>&lt;<span class="tp">char</span>&gt; year  = date[..<span class="nu">4</span>];      <span class="cm">// no alloc!</span>
+<span class="tp">ReadOnlySpan</span>&lt;<span class="tp">char</span>&gt; month = date[<span class="nu">5</span>..<span class="nu">7</span>];    <span class="cm">// no alloc!</span>
+<span class="kw">int</span> y = <span class="kw">int</span>.Parse(year);                   <span class="cm">// Parse from span directly</span>
+
+<span class="cm">// 2. Stack-allocated buffers — zero heap pressure</span>
+<span class="tp">Span</span>&lt;<span class="tp">byte</span>&gt; buf = <span class="kw">stackalloc byte</span>[<span class="nu">128</span>];
+<span class="kw">int</span> written = <span class="tp">Encoding</span>.UTF8.GetBytes(<span class="st">"Hello"</span>, buf);
+<span class="tp">Span</span>&lt;<span class="tp">byte</span>&gt; used = buf[..written];
+
+<span class="cm">// 3. Modifying array slices in-place</span>
+<span class="kw">int</span>[] data = [<span class="nu">1</span>,<span class="nu">2</span>,<span class="nu">3</span>,<span class="nu">4</span>,<span class="nu">5</span>];
+<span class="tp">Span</span>&lt;<span class="kw">int</span>&gt; middle = data.AsSpan(<span class="nu">1</span>, <span class="nu">3</span>);   <span class="cm">// [2,3,4], no copy</span>
+middle.Fill(<span class="nu">0</span>);                           <span class="cm">// data = [1,0,0,0,5]</span>
+middle.Reverse();                           <span class="cm">// in-place</span>
+
+<span class="cm">// 4. Memory&lt;T&gt; — for async methods (Span can't cross await)</span>
+<span class="kw">async</span> <span class="tp">Task</span> <span class="fn">ProcessAsync</span>(<span class="tp">Memory</span>&lt;<span class="tp">byte</span>&gt; buffer)
+{
+    <span class="kw">await</span> <span class="tp">Task</span>.Delay(<span class="nu">1</span>); <span class="cm">// await is fine with Memory&lt;T&gt;</span>
+    <span class="tp">Span</span>&lt;<span class="tp">byte</span>&gt; span = buffer.Span; <span class="cm">// get span when needed</span>
+}
+
+<span class="cm">// 5. High-perf string split — NO allocations at all</span>
+<span class="kw">static void</span> <span class="fn">ParseCsvLine</span>(<span class="tp">ReadOnlySpan</span>&lt;<span class="tp">char</span>&gt; line)
+{
+    <span class="kw">foreach</span> (<span class="kw">var</span> range <span class="kw">in</span> line.Split(<span class="st">','</span>))  <span class="cm">// C# 13: Span.Split</span>
+    {
+        <span class="tp">ReadOnlySpan</span>&lt;<span class="tp">char</span>&gt; field = line[range];
+        <span class="tp">Console</span>.WriteLine(field.ToString()); <span class="cm">// only alloc if needed</span>
+    }
+}</span>`},
+    {ty:"co",kind:"ok",ic:"⚡",txt:"<strong>Rule of thumb:</strong> In hot paths, replace <code>string.Substring()</code> with <code>AsSpan()[..]</code>, replace large array parameters with <code>Span&lt;T&gt;</code> parameters, and use <code>stackalloc</code> for small temporary buffers under 1KB."},
+  ]},
+
+"dg2": {
+  title:"dotnet-trace & dotnet-counters",
+  bread:"Chapter 15 · Diagnostics & Debugging",
+  sub:"Production-safe tracing tools for capturing CPU profiles, GC events, thread contention, and custom metrics from running .NET apps.",
+  pills:[{t:"Advanced",c:"#7b61ff"},{t:"Tooling",c:"#00ffa3"},{t:"Observability",c:"#00c8ff"}],
+  secs:[
+    {ty:"prose",title:"The .NET Diagnostics Toolchain",html:`
+<p>The .NET SDK ships a suite of CLI diagnostics tools installable as global tools. They connect to running processes via the <strong>diagnostics port</strong> (Unix socket / named pipe) without requiring debugger attachment.</p>
+<ul>
+<li><strong>dotnet-trace</strong> — CPU sampling, GC events, threadpool events, custom EventSource</li>
+<li><strong>dotnet-counters</strong> — Live metric monitoring (GC, threadpool, HTTP, custom)</li>
+<li><strong>dotnet-dump</strong> — Capture and analyze memory dumps</li>
+<li><strong>dotnet-gcdump</strong> — Lightweight heap snapshot (GC roots only, not full dump)</li>
+<li><strong>dotnet-stack</strong> — Print managed stack traces of all threads</li>
+</ul>
+`},
+    {ty:"code",lang:"bash",name:"Using Diagnostics Tools",code:`<span class="cm"># Install global tools</span>
+dotnet tool install -g dotnet-trace
+dotnet tool install -g dotnet-counters
+dotnet tool install -g dotnet-dump
+dotnet tool install -g dotnet-gcdump
+
+<span class="cm"># dotnet-counters — live dashboard</span>
+dotnet-counters monitor --process-id 12345 <span class="st">\
+  System.Runtime \</span>
+  <span class="st">Microsoft.AspNetCore.Hosting \</span>
+  <span class="st">MyApp.CustomMetrics</span>
+
+<span class="cm"># Output:</span>
+<span class="cm"># [System.Runtime]</span>
+<span class="cm">#   GC Heap Size (MB)                          42</span>
+<span class="cm">#   Gen 0 GC Count (/sec)                      3.2</span>
+<span class="cm">#   ThreadPool Queue Length                     0</span>
+<span class="cm">#   Active Timers Count                         5</span>
+
+<span class="cm"># dotnet-trace — CPU + GC profile</span>
+dotnet-trace collect --process-id 12345 <span class="st">\
+  --profile gc-collect \</span>  <span class="cm"># preset: GC events</span>
+  <span class="st">--profile cpu-sampling</span>  <span class="cm"># preset: CPU samples</span>
+  <span class="cm"># Output: trace.nettrace → open in PerfView / SpeedScope</span>
+
+<span class="cm"># dotnet-dump — analyze live or file</span>
+dotnet-dump collect --process-id 12345
+dotnet-dump analyze core_20240315.dump
+<span class="cm"># Inside analyzer:</span>
+<span class="cm"># > dumpheap -stat       — heap summary by type</span>
+<span class="cm"># > gcroot &lt;addr&gt;        — find what's keeping object alive</span>
+<span class="cm"># > clrthreads           — all managed threads + stacks</span>
+<span class="cm"># > threadpool           — threadpool queue/worker state</span></span>`},
+    {ty:"code",lang:"csharp",name:"Custom EventCounters & Metrics",code:`<span class="cm">// Custom metrics visible to dotnet-counters</span>
+<span class="kw">using</span> System.Diagnostics.Tracing;
+
+[<span class="at">EventSource(Name = "MyApp.Metrics")</span>]
+<span class="kw">sealed class</span> <span class="tp">AppMetrics</span> : <span class="tp">EventSource</span>
+{
+    <span class="kw">public static readonly</span> <span class="tp">AppMetrics</span> Instance = <span class="kw">new</span>();
+
+    <span class="kw">private readonly</span> <span class="tp">IncrementingPollingCounter</span> _reqCounter;
+    <span class="kw">private readonly</span> <span class="tp">PollingCounter</span> _queueDepth;
+    <span class="kw">private int</span> _queue;
+
+    <span class="kw">private</span> <span class="tp">AppMetrics</span>()
+    {
+        _reqCounter = <span class="kw">new</span> <span class="tp">IncrementingPollingCounter</span>(
+            <span class="st">"requests-per-second"</span>, <span class="kw">this</span>,
+            () => <span class="tp">Interlocked</span>.Read(<span class="kw">ref</span> _requestCount))
+            { DisplayRateTimeScale = <span class="tp">TimeSpan</span>.FromSeconds(<span class="nu">1</span>) };
+
+        _queueDepth = <span class="kw">new</span> <span class="tp">PollingCounter</span>(
+            <span class="st">"queue-depth"</span>, <span class="kw">this</span>,
+            () => <span class="tp">Volatile</span>.Read(<span class="kw">ref</span> _queue));
+    }
+    <span class="kw">private long</span> _requestCount;
+    <span class="kw">public void</span> <span class="fn">RequestReceived</span>() => <span class="tp">Interlocked</span>.Increment(<span class="kw">ref</span> _requestCount);
+}</span>`},
+  ]},
+
+"net1": {
+  title:"HttpClient Internals",
+  bread:"Chapter 14 · Networking Stack",
+  sub:"What happens inside HttpClient — SocketsHttpHandler, connection pools, DNS refresh, and how IHttpClientFactory keeps it healthy.",
+  pills:[{t:"Core",c:"#00c8ff"},{t:"HTTP",c:"#00ffa3"},{t:"Architecture",c:"#7b61ff"}],
+  secs:[
+    {ty:"prose",title:"HttpClient Architecture",html:`
+<p>Since .NET Core 2.1, <code>HttpClient</code> delegates to <code>SocketsHttpHandler</code> — a pure managed HTTP implementation built on <code>Socket</code>. It handles:</p>
+<ul>
+<li><strong>Connection pooling</strong> — reuses TCP connections per <code>(host, port, scheme)</code> tuple</li>
+<li><strong>HTTP/1.1, 2, and 3</strong> — protocol negotiation via ALPN</li>
+<li><strong>DNS TTL</strong> — by default, connections live forever (DNS change blindness). Use <code>PooledConnectionLifetime</code>.</li>
+<li><strong>SSL/TLS</strong> — certificate validation, client certs, SNI</li>
+</ul>
+`},
+    {ty:"diagram",title:"IHttpClientFactory Pipeline",svg:`
+<svg width="500" height="200" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="ha" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto">
+  <path d="M0,0 L0,6 L7,3z" fill="#00c8ff"/>
+</marker>
+<style>
+.hb{fill:#0d1a2a;stroke:#00c8ff;stroke-width:1.2}
+.ht2{font-family:'DM Mono',monospace;font-size:9px;fill:#dde6f0;text-anchor:middle}
+.hs{font-family:'DM Mono',monospace;font-size:8px;fill:#8a9db5;text-anchor:middle}
+.harr{stroke:#00c8ff;stroke-width:1.5;fill:none;marker-end:url(#ha)}
+@keyframes hflow{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}
+.hanim{stroke-dasharray:6 3;animation:hflow 1.5s linear infinite}
+</style></defs>
+
+<text font-family="'DM Mono',monospace" font-size="10" fill="#8a9db5" x="10" y="18">IHttpClientFactory Pipeline</text>
+
+<!-- Boxes left to right -->
+<rect class="hb" x="10" y="30" width="80" height="50" rx="5"/>
+<text class="ht2" x="50" y="52">Request</text>
+<text class="hs" x="50" y="68">GetClient()</text>
+
+<rect fill="#1a1a0d" stroke="#ffd700" stroke-width="1.2" x="115" y="30" width="80" height="50" rx="5"/>
+<text class="ht2" fill="#ffd700" x="155" y="52">Logging</text>
+<text class="hs" x="155" y="68">Handler</text>
+
+<rect fill="#2a1a0d" stroke="#ff6b35" stroke-width="1.2" x="225" y="30" width="80" height="50" rx="5"/>
+<text class="ht2" fill="#ff6b35" x="265" y="52">Retry</text>
+<text class="hs" x="265" y="68">Handler</text>
+
+<rect fill="#0d1a0d" stroke="#00ffa3" stroke-width="1.2" x="335" y="30" width="80" height="50" rx="5"/>
+<text class="ht2" fill="#00ffa3" x="375" y="52">Circuit</text>
+<text class="hs" x="375" y="68">Breaker</text>
+
+<rect fill="#1a0d2a" stroke="#7b61ff" stroke-width="1.2" x="435" y="30" width="55" height="50" rx="5"/>
+<text class="ht2" fill="#7b61ff" x="462" y="52">HTTP</text>
+<text class="hs" x="462" y="68">Socket</text>
+
+<!-- Arrows -->
+<line class="harr hanim" x1="90" y1="55" x2="112" y2="55"/>
+<line class="harr hanim" x1="195" y1="55" x2="222" y2="55"/>
+<line class="harr hanim" x1="305" y1="55" x2="332" y2="55"/>
+<line class="harr hanim" x1="415" y1="55" x2="432" y2="55"/>
+
+<!-- Connection Pool -->
+<rect fill="#0a1018" stroke="#1b2d40" stroke-width="1" x="10" y="110" width="480" height="60" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="9.5" fill="#00c8ff" x="18" y="130">SocketsHttpHandler  —  Connection Pool</text>
+<rect class="hb" x="18" y="138" width="80" height="24" rx="4"/>
+<text class="hs" x="58" y="153">api.stripe.com:443</text>
+<rect class="hb" x="108" y="138" width="80" height="24" rx="4"/>
+<text class="hs" x="148" y="153">api.github.com:443</text>
+<rect class="hb" x="198" y="138" width="80" height="24" rx="4"/>
+<text class="hs" x="238" y="153">db.prod:5432</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" x="295" y="153">PooledConnectionLifetime = 2min (recommended)</text>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"HttpClient Best Practices (.NET 10)",code:`<span class="cm">// ✅ CORRECT: use IHttpClientFactory — registered in DI</span>
+services.AddHttpClient&lt;<span class="tp">IGitHubService</span>, <span class="tp">GitHubService</span>&gt;(client =>
+{
+    client.BaseAddress = <span class="kw">new</span> <span class="tp">Uri</span>(<span class="st">"https://api.github.com"</span>);
+    client.DefaultRequestHeaders.Add(<span class="st">"User-Agent"</span>, <span class="st">"MyApp/1.0"</span>);
+    client.Timeout = <span class="tp">TimeSpan</span>.FromSeconds(<span class="nu">30</span>);
+})
+.AddStandardResilienceHandler()   <span class="cm">// Polly v8: retry + circuit breaker</span>
+.ConfigurePrimaryHttpMessageHandler(() => <span class="kw">new</span> <span class="tp">SocketsHttpHandler</span>
+{
+    <span class="cm">// KEY: rotate connections to pick up DNS changes</span>
+    PooledConnectionLifetime = <span class="tp">TimeSpan</span>.FromMinutes(<span class="nu">2</span>),
+    PooledConnectionIdleTimeout = <span class="tp">TimeSpan</span>.FromMinutes(<span class="nu">1</span>),
+    MaxConnectionsPerServer = <span class="nu">20</span>,
+    EnableMultipleHttp2Connections = <span class="kw">true</span>,
+});
+
+<span class="cm">// ❌ WRONG: creating HttpClient per request — socket exhaustion!</span>
+<span class="cm">// using var client = new HttpClient(); // DO NOT DO THIS</span>
+
+<span class="cm">// Resilience pipeline (.NET 8+ Microsoft.Extensions.Http.Resilience)</span>
+services.AddHttpClient(<span class="st">"api"</span>)
+    .AddResilienceHandler(<span class="st">"pipeline"</span>, b => b
+        .AddRetry(<span class="kw">new</span> <span class="tp">HttpRetryStrategyOptions</span> { MaxRetryAttempts = <span class="nu">3</span> })
+        .AddCircuitBreaker(<span class="kw">new</span> <span class="tp">HttpCircuitBreakerStrategyOptions</span>())
+        .AddTimeout(<span class="tp">TimeSpan</span>.FromSeconds(<span class="nu">10</span>)));</span>`},
+    {ty:"co",kind:"err",ic:"🚨",txt:"<strong>Socket exhaustion</strong> from <code>new HttpClient()</code> per request is one of the most common .NET production outages. Always use <code>IHttpClientFactory</code> or a static/singleton <code>HttpClient</code> with <code>PooledConnectionLifetime</code> set."},
+  ]},
+
+"io5": {
+  title:"System.IO.Pipelines",
+  bread:"Chapter 13 · File & IO System",
+  sub:"The highest-performance I/O API in .NET — zero-copy, backpressure-aware byte processing for network and stream workloads.",
+  pills:[{t:"Expert",c:"#7b61ff"},{t:"Performance",c:"#00ffa3"},{t:".NET Core 2.1+",c:"#00c8ff"}],
+  secs:[
+    {ty:"prose",title:"Why Pipelines?",html:`
+<p>Traditional stream processing requires manual buffer management, awkward partial-read handling, and usually allocates. <code>System.IO.Pipelines</code> solves these problems with a high-level, backpressure-aware API:</p>
+<ul>
+<li><strong>PipeWriter</strong> — producer requests memory buffers from the pipe, writes to them, advances</li>
+<li><strong>PipeReader</strong> — consumer reads available data, processes, advances past consumed bytes</li>
+<li><strong>Backpressure</strong> — if consumer is slow, writer pauses automatically</li>
+<li><strong>Buffer reuse</strong> — memory is rented from <code>MemoryPool</code>, not allocated per read</li>
+</ul>
+`},
+    {ty:"code",lang:"csharp",name:"System.IO.Pipelines — Line Reader",code:`<span class="kw">using</span> System.IO.Pipelines;
+
+<span class="cm">// Read a stream line-by-line with ZERO allocation per line</span>
+<span class="kw">async</span> <span class="tp">Task</span> <span class="fn">ReadLinesAsync</span>(<span class="tp">Stream</span> stream)
+{
+    <span class="kw">var</span> reader = <span class="tp">PipeReader</span>.Create(stream);
+
+    <span class="kw">while</span> (<span class="kw">true</span>)
+    {
+        <span class="tp">ReadResult</span> result = <span class="kw">await</span> reader.<span class="fn">ReadAsync</span>();
+        <span class="tp">ReadOnlySequence</span>&lt;<span class="tp">byte</span>&gt; buffer = result.Buffer;
+
+        <span class="kw">while</span> (<span class="fn">TryReadLine</span>(<span class="kw">ref</span> buffer, <span class="kw">out</span> <span class="tp">ReadOnlySequence</span>&lt;<span class="tp">byte</span>&gt; line))
+        {
+            <span class="fn">ProcessLine</span>(line); <span class="cm">// handle line — no allocation!</span>
+        }
+
+        reader.AdvanceTo(buffer.Start, buffer.End);
+
+        <span class="kw">if</span> (result.IsCompleted) <span class="kw">break</span>;
+    }
+    <span class="kw">await</span> reader.<span class="fn">CompleteAsync</span>();
+}
+
+<span class="kw">static bool</span> <span class="fn">TryReadLine</span>(
+    <span class="kw">ref</span> <span class="tp">ReadOnlySequence</span>&lt;<span class="tp">byte</span>&gt; buf,
+    <span class="kw">out</span> <span class="tp">ReadOnlySequence</span>&lt;<span class="tp">byte</span>&gt; line)
+{
+    <span class="tp">SequencePosition</span>? pos = buf.PositionOf((<span class="tp">byte</span>)<span class="st">'\n'</span>);
+    <span class="kw">if</span> (pos == <span class="kw">null</span>) { line = <span class="kw">default</span>; <span class="kw">return false</span>; }
+    line = buf.Slice(<span class="nu">0</span>, pos.Value);
+    buf = buf.Slice(buf.GetPosition(<span class="nu">1</span>, pos.Value));
+    <span class="kw">return true</span>;
+}
+
+<span class="cm">// Custom pipe with backpressure control</span>
+<span class="kw">var</span> pipe = <span class="kw">new</span> <span class="tp">Pipe</span>(<span class="kw">new</span> <span class="tp">PipeOptions</span>(
+    pauseWriterThreshold: <span class="nu">1024</span> * <span class="nu">1024</span>,   <span class="cm">// pause writer at 1MB</span>
+    resumeWriterThreshold: <span class="nu">512</span> * <span class="nu">1024</span>,  <span class="cm">// resume at 512KB</span>
+    minimumSegmentSize: <span class="nu">4096</span>));           <span class="cm">// segment size</span></span>`},
+  ]},
+
+};
+
+// ═══════════════════════════════════════════════════════════
+// INTERVIEW QUESTIONS
+// ═══════════════════════════════════════════════════════════
+const QA = [
+{q:"What is the CLR and what services does it provide?",a:"The <strong>CLR (Common Language Runtime)</strong> is the virtual machine that executes .NET assemblies. It provides: (1) Memory management via generational GC, (2) Type safety — verifies IL is type-safe before execution, (3) JIT compilation — translates IL to native code on first call, (4) Exception handling — structured exception propagation, (5) Thread management — thread pool, synchronization, (6) Security — code access security, assembly verification, (7) Interop — marshaling between managed and native code. In .NET Core, the CLR is called CoreCLR and is cross-platform.",level:"b",tag:"CLR"},
+{q:"Explain .NET's generational garbage collector and why it's generational.",a:"Generational GC is based on the <strong>generational hypothesis</strong>: most objects die young. The heap is split into Gen0 (new, small ~256KB), Gen1 (medium ~2MB), Gen2 (long-lived). New objects go to Gen0. When Gen0 fills, a GC is triggered — surviving objects are promoted to Gen1. Gen1 survivors promote to Gen2. The LOH (>85KB objects) is collected only with Gen2. Why generational? Gen0 collections are cheap and frequent — they only scan a tiny portion of the heap. Gen2 is expensive but rare. This matches real allocation patterns: HTTP request objects should die in Gen0, not pollute Gen2.",level:"i",tag:"GC"},
+{q:"What is the difference between Tier-0 and Tier-1 JIT compilation?",a:"<strong>Tier-0</strong>: when a method is first called, the JIT compiles it quickly with minimal optimization. Code runs immediately — startup is fast. <strong>Tier-1</strong>: after ~30 invocations (threshold configurable), a background thread re-JITs the method with full optimization (inlining, loop unrolling, SIMD). The running code is patched to point to the new native code. This achieves fast startup AND peak performance. You can control this with: <code>[MethodImpl(AggressiveOptimization)]</code> to skip Tier-0, or set <code>DOTNET_TieredCompilation=0</code> to disable tiering entirely.",level:"a",tag:"JIT"},
+{q:"How does async/await work internally?",a:"The C# compiler transforms every <code>async</code> method into a <strong>state machine struct</strong> implementing <code>IAsyncStateMachine</code>. The struct stores: (1) a state integer (which await we're at), (2) an <code>AsyncTaskMethodBuilder</code>, (3) all local variables as fields (so they survive the await). The <code>MoveNext()</code> method contains the actual method body as a switch on state. At each await point, if the awaitable isn't complete, the method registers a continuation and <strong>returns the thread to the pool</strong>. When the awaited operation completes, the continuation schedules MoveNext() again from the saved state.",level:"a",tag:"Async"},
+{q:"What causes a deadlock with async/await and how do you prevent it?",a:"Classic deadlock: code with a SynchronizationContext (ASP.NET classic, WinForms, WPF) calls <code>.Result</code> or <code>.Wait()</code> on a Task. The context has one thread. The Task's continuation needs to resume on that same thread — but the thread is blocked by <code>.Wait()</code>. Deadlock. <strong>Prevention:</strong> (1) Never call <code>.Result/.Wait()</code> — use await all the way, (2) Use <code>ConfigureAwait(false)</code> in library code to avoid capturing the context, (3) ASP.NET Core has no SyncContext — deadlocks are harder to trigger but still possible, (4) If you must call async from sync, use a dedicated thread with <code>Task.Run(...).GetAwaiter().GetResult()</code>.",level:"a",tag:"Async"},
+{q:"What is the difference between Transient, Scoped, and Singleton DI lifetimes?",a:"<strong>Transient</strong> — new instance every call to GetService. Stateless services, formatters. <strong>Scoped</strong> — one instance per scope (one HTTP request in ASP.NET Core). DbContext, unit-of-work. <strong>Singleton</strong> — one instance for app lifetime. Config, caches, stateless infrastructure. Key gotcha: <strong>captive dependency</strong> — a Singleton capturing a Scoped service gets that service for its entire lifetime (stale per-request state). Fix: inject IServiceScopeFactory and create scopes manually. Always enable <code>ValidateScopes = true</code> in development to catch this at startup.",level:"i",tag:"DI"},
+{q:"What is socket exhaustion and how does IHttpClientFactory prevent it?",a:"<strong>Socket exhaustion</strong> happens when code creates <code>new HttpClient()</code> per request and disposes it. Disposing HttpClient closes TCP connections, but OS sockets linger in TIME_WAIT for 2-4 minutes. Under load, you exhaust the OS socket limit and get connection failures. <code>IHttpClientFactory</code> fixes this by: (1) Managing named HttpClient instances with configurable lifetimes, (2) Rotating <code>SocketsHttpHandler</code> instances (which hold the connection pool) on a configurable interval, (3) Keeping TCP connections alive and reusing them. Set <code>PooledConnectionLifetime</code> to pick up DNS changes without socket exhaustion.",level:"i",tag:"Networking"},
+{q:"Explain what Span<T> is and its key limitations.",a:"<code>Span&lt;T&gt;</code> is a <strong>ref struct</strong> that represents a contiguous region of arbitrary memory (array, stack, unmanaged) without owning or copying it. Zero-allocation slicing. Key limitations: (1) It's a ref struct — cannot be stored as a class field, cannot be boxed, cannot be used as a generic type argument, (2) Cannot cross async boundaries (cannot exist on heap, which await would require), (3) Cannot be used in lambdas or iterators. Solutions: use <code>Memory&lt;T&gt;</code> when you need to store the slice, use <code>MemoryMarshal</code> for advanced cases. <code>ReadOnlySpan&lt;T&gt;</code> can represent string content without string allocation.",level:"a",tag:"Performance"},
+{q:"What is the Large Object Heap (LOH) and why does it cause problems?",a:"Objects larger than 85KB go to the <strong>LOH</strong> instead of Gen0. The LOH is problematic because: (1) It's only collected with Gen2 GC, which is expensive, (2) The LOH is NOT compacted by default — dead space creates fragmentation, (3) Fragmentation means OutOfMemoryException despite available memory. Common LOH allocators: <code>byte[100_000]</code>, large strings, <code>List&lt;T&gt;</code> backing arrays at certain sizes. Solutions: (1) Use <code>ArrayPool&lt;byte&gt;.Shared</code> to rent/return arrays, (2) Set <code>GCSettings.LargeObjectHeapCompactionMode = CompactOnce</code> for one-time compaction, (3) Use <code>MemoryPool&lt;T&gt;</code> for long-lived buffers.",level:"a",tag:"GC"},
+{q:"How does the .NET ThreadPool work?",a:"The .NET ThreadPool manages a pool of worker threads for executing <code>Task</code> items, async continuations, and threadpool work items. Key mechanisms: (1) <strong>Hill-climbing algorithm</strong> — measures throughput and adjusts thread count. If throughput improves with more threads, add one; if it drops, remove one, (2) <strong>Work-stealing queues</strong> — each thread has a local deque. Threads process their own items first; idle threads steal from others' tails, (3) <strong>Injection delay</strong> — new threads are added slowly (one per 500ms) to prevent explosive thread counts during I/O burst. Use <code>ThreadPool.SetMinThreads</code> to pre-warm threads for low-latency scenarios.",level:"a",tag:"Threading"},
+{q:"What is CIL (Common Intermediate Language)?",a:"CIL (also MSIL or IL) is the bytecode format all .NET languages compile to. It's a <strong>stack-based virtual instruction set</strong>: operations push/pop a virtual evaluation stack. Key properties: (1) CPU-independent — same IL runs on x64, ARM, WASM, (2) Strongly typed — all ops are type-checked, (3) Object-oriented — native support for virtual dispatch, inheritance, interfaces, (4) Verifiable — CLR can verify type safety before JIT. You can read IL with <code>ildasm.exe</code>, <code>dotnet ildasm</code>, or SharpLab.io. IL can be emitted dynamically via <code>ILGenerator</code> for runtime code generation.",level:"a",tag:"CLR"},
+{q:"What is the difference between AppDomain and AssemblyLoadContext?",a:"In .NET Framework, <strong>AppDomain</strong> was the isolation boundary — multiple AppDomains per process for isolation and hot-reload. In .NET Core/5+, AppDomain is emulated (only one per process). <strong>AssemblyLoadContext (ALC)</strong> is the modern equivalent — it's a boundary around a set of loaded assemblies. Each ALC has its own type identity: the same type from two different ALCs are different types. Uses: (1) Plugin architectures — load plugins in separate ALCs, unload by releasing the ALC, (2) Hot reload — load new version in new ALC, (3) Isolation — prevent assembly conflicts. The default ALC (<code>AssemblyLoadContext.Default</code>) holds the main app assemblies.",level:"a",tag:"CLR"},
+{q:"What is Profile-Guided Optimization (PGO) in .NET?",a:"PGO gathers runtime profiling data (which branches were taken, which types appeared at virtual call sites) and uses it to generate better-optimized Tier-1 code. <strong>Dynamic PGO</strong> (.NET 6+): the JIT instruments Tier-0 code to collect type and branch statistics, then uses this data when promoting to Tier-1 — no separate profiling run needed. Benefits: (1) Devirtualization of interface calls based on observed types, (2) Cold/hot code splitting — moves rare paths out of hot sections, (3) Better inlining decisions. Enable with: <code>DOTNET_TieredPGO=1</code>. PGO can give 10-30% throughput improvements on real workloads.",level:"e",tag:"JIT"},
+{q:"Explain the IDisposable pattern and when to add a finalizer.",a:"Implement <code>IDisposable</code> when your class holds <strong>unmanaged resources</strong> (file handles, sockets, native memory) or references to other IDisposable objects. Full pattern: (1) <code>public void Dispose()</code> calls <code>Dispose(true)</code> then <code>GC.SuppressFinalize(this)</code>, (2) <code>protected virtual void Dispose(bool disposing)</code> — if disposing, release managed resources; always release unmanaged, (3) Finalizer (<code>~MyClass()</code>) calls <code>Dispose(false)</code> as a safety net. Add a finalizer ONLY if you hold raw unmanaged resources (IntPtr to native memory). If you only hold IDisposable objects, no finalizer needed — they have their own. Modern: prefer <code>IAsyncDisposable</code> + <code>await using</code>.",level:"i",tag:"GC"},
+{q:"What is AssemblyLoadContext and how do you build a plugin system with it?",a:"An <code>AssemblyLoadContext</code> is an isolated assembly loading scope. Types loaded in different ALCs are separate types — even if from the same .dll. For plugin systems: (1) Create a <code>PluginLoadContext : AssemblyLoadContext</code> with <code>isCollectible: true</code>, (2) Override <code>Load(AssemblyName)</code> — return null for shared types (interfaces, contracts) to let them resolve from Default ALC, return your plugin assembly for plugin-specific types, (3) Unload by releasing all references to the ALC and calling <code>alc.Unload()</code> — GC eventually collects it. Gotcha: any live references (event handlers, statics) will prevent unloading — use <code>WeakReference</code> to ALC to detect completion.",level:"e",tag:"CLR"},
+{q:"How does the .NET Configuration system layer providers?",a:"Configuration is built from providers layered in priority order (last wins). Default order in ASP.NET Core: (1) appsettings.json, (2) appsettings.{Environment}.json, (3) User Secrets (dev only), (4) Environment variables, (5) Command-line args. Each provider is an <code>IConfigurationProvider</code> implementing a key-value store. The <code>ConfigurationRoot</code> iterates providers in reverse order, returning the first non-null value. The Options pattern binds configuration sections to POCOs: <code>IOptions&lt;T&gt;</code> (singleton, snapshot at startup), <code>IOptionsSnapshot&lt;T&gt;</code> (scoped, re-reads per request), <code>IOptionsMonitor&lt;T&gt;</code> (singleton + change notification).",level:"i",tag:"Config"},
+{q:"What is System.IO.Pipelines and when would you use it over Stream?",a:"<code>System.IO.Pipelines</code> provides a high-performance I/O abstraction with built-in backpressure, buffer management, and zero-copy semantics. <code>PipeWriter</code> requests memory from the pipe, writes, advances. <code>PipeReader</code> reads available data, processes, advances past consumed bytes. The pipe manages memory from <code>MemoryPool</code> — no per-read allocation. Use Pipelines when: (1) Processing high-throughput network streams (Kestrel uses Pipelines internally), (2) Frame-delimited protocols (length-prefix, newline), (3) You need backpressure (consumer controls writer pace). Use Stream when: (1) Simple file I/O, (2) Third-party APIs expect Stream, (3) Complexity isn't justified.",level:"e",tag:"IO"},
+{q:"What is the difference between EventSource and ILogger?",a:"<strong>ILogger</strong> is the high-level structured logging API — writes to sinks (console, files, Seq, etc.) via providers. Designed for application developers. Has log levels, scopes, message templates. Has overhead even when disabled (string formatting, object allocation). <strong>EventSource</strong> is a low-level, high-performance event tracing API — writes to ETW (Windows), LTTng (Linux), or EventPipe. Near-zero overhead when no listener is attached (payload formatting is deferred). Used for performance-critical infrastructure metrics. In .NET 6+, they're complementary: use ILogger for app logging, EventSource/EventCounter for metrics and diagnostics, and OpenTelemetry for distributed traces. <code>LoggerMessage.Define</code> source gen gives ILogger performance close to EventSource.",level:"i",tag:"Diagnostics"},
+{q:"What are Source Generators and how do they differ from Reflection?",a:"<strong>Reflection</strong> is runtime type inspection — reads metadata from loaded assemblies at runtime. Flexible but slow: no JIT optimization, lots of allocation, no compile-time errors. <strong>Source Generators</strong> (C# 9+) run at <em>compile time</em> as part of the Roslyn compilation pipeline. They analyze your source code and emit additional C# files that are compiled alongside yours. Zero runtime overhead — it's just generated code. Real-world uses: System.Text.Json serializers, LoggerMessage.Define, EF Core, DI registration. Implement via <code>IIncrementalGenerator</code> — use <code>SyntaxProvider</code> to filter relevant nodes, emit code only when input changes. Works with Native AOT (reflection doesn't).",level:"a",tag:"Roslyn"},
+{q:"How do you diagnose high memory usage in a .NET application?",a:"<strong>Step 1:</strong> Use <code>dotnet-counters monitor</code> to confirm heap growth vs. managed vs. unmanaged. <strong>Step 2:</strong> Capture a GC heap dump with <code>dotnet-gcdump</code> — lightweight, shows live object graph. Analyze with Visual Studio or PerfView. <strong>Step 3:</strong> For full heap analysis, <code>dotnet-dump collect</code> then <code>dotnet-dump analyze</code> → <code>dumpheap -stat</code> to find top allocating types, <code>gcroot &lt;address&gt;</code> to find what's keeping objects alive. <strong>Common causes:</strong> event handler leaks (+=, no -=), static collections growing forever, cache without eviction, LOH fragmentation, finalizer queue backup. <strong>Prevention:</strong> always unsubscribe events, use WeakReference for caches, set cache size limits.",level:"a",tag:"Diagnostics"},
+];
+
+// ═══════════════════════════════════════════════════════════
+// RENDER ENGINE
+// ═══════════════════════════════════════════════════════════
+let curCh=-1, curTopic=null, visited=new Set();
+
+function buildNav(){
+  const nav=document.getElementById('nav');
+  CHS.forEach((ch,i)=>{
+    const el=document.createElement('div');
+    el.className='ci';el.id=`ci${i}`;
+    el.innerHTML=`
+      <div class="ch" onclick="selectCh(${i})">
+        <div class="cnum" style="background:${ch.bg};color:${ch.c}">${ch.n}</div>
+        <div class="ctitle">${ch.title}</div>
+        <div class="carr">▶</div>
+      </div>
+      <div class="tl">
+        ${ch.topics.map(t=>`
+          <div class="ti" id="n${t.id}" onclick="selectTopic('${t.id}',${i})">${t.icon} ${t.title}</div>
+        `).join('')}
+      </div>`;
+    nav.appendChild(el);
+  });
+}
+
+function selectCh(i){
+  curCh=i;
+  document.querySelectorAll('.ci').forEach((el,j)=>{
+    el.classList.toggle('open',j===i);
+    el.querySelector('.ch').classList.toggle('act',j===i);
+  });
+  document.getElementById('welcome').style.display='none';
+  document.getElementById('mcon').style.display='block';
+
+  const ch=CHS[i];
+  const pills=ch.tags.map(t=>`<span class="chp" style="color:${ch.c};border-color:${ch.c}44;background:${ch.bg}">${t}</span>`).join('');
+  const cards=ch.topics.map(t=>{
+    const tags=t.tags.map(tg=>{
+      const c=tg.includes('Expert')?'#7b61ff':tg.includes('Adv')?'#ff6b35':tg.includes('Core')?'#00c8ff':'#8a9db5';
+      return `<span class="tct" style="color:${c};border-color:${c}33">${tg}</span>`;
+    }).join('');
+    return `<div class="tc" id="c${t.id}" onclick="selectTopic('${t.id}',${i})">
+      <div class="tc-icon">${t.icon}</div>
+      <div class="tc-body">
+        <div class="tc-title">${t.title}</div>
+        <div class="tc-desc">${t.desc}</div>
+        <div class="tc-tags">${tags}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('mcon').innerHTML=`
+    <div class="ch-hero">
+      <div class="ch-hero-tag" style="color:${ch.c}">Chapter ${ch.n} — ${ch.topics.length} Topics</div>
+      <div class="ch-hero-title" style="color:${ch.c}">${ch.icon} ${ch.title}</div>
+      <div class="ch-hero-desc">${ch.desc}</div>
+      <div class="ch-hero-pills">${pills}</div>
+    </div>
+    <div class="tgrid">${cards}</div>`;
+}
+
+function selectTopic(id,chi){
+  if(chi!==curCh)selectCh(chi);
+  curTopic=id;
+  visited.add(id);
+  updateProg();
+
+  document.querySelectorAll('.tc').forEach(el=>el.classList.remove('act'));
+  document.querySelectorAll('.ti').forEach(el=>el.classList.remove('act'));
+  const c=document.getElementById('c'+id);if(c)c.classList.add('act');
+  const n=document.getElementById('n'+id);if(n)n.classList.add('act');
+
+  const d=DETAILS[id];
+  if(!d){renderGeneric(id,chi);return;}
+  renderDetail(d);
+}
+
+function renderDetail(d){
+  document.getElementById('re').style.display='none';
+  document.getElementById('rcon').style.display='block';
+
+  const pills=d.pills.map(p=>`<span class="dp" style="color:${p.c};border-color:${p.c}44;background:${p.c}11">${p.t}</span>`).join('');
+  const secs=d.secs.map(renderSec).join('');
+  const qa=renderQASection(d.title);
+
+  document.getElementById('rcon').innerHTML=`
+    <div class="dc">
+      <div class="d-bread">${d.bread}</div>
+      <div class="d-title">${d.title}</div>
+      <div class="d-sub">${d.sub}</div>
+      <div class="d-pills">${pills}</div>
+      ${secs}
+      ${qa}
+    </div>`;
+}
+
+function renderSec(s){
+  if(s.ty==='prose') return `<div class="sec"><div class="sec-t">${s.title}</div><div class="prose">${s.html}</div></div>`;
+  if(s.ty==='code') return `
+    <div class="sec">
+      <div class="cb">
+        <div class="cb-hdr">
+          <span class="cb-lang">${s.lang}</span>
+          <span class="cb-name">${s.name}</span>
+          <button class="cb-copy" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="cb-body"><pre>${s.code}</pre></div>
+      </div>
+    </div>`;
+  if(s.ty==='diagram') return `
+    <div class="sec">
+      <div class="dg">
+        <div class="dg-hdr">${s.title}</div>
+        <div class="dg-body">${s.svg}</div>
+      </div>
+    </div>`;
+  if(s.ty==='co'){
+    const cls=s.kind==='info'?'co-info':s.kind==='warn'?'co-warn':s.kind==='ok'?'co-ok':'co-err';
+    return `<div class="co ${cls}"><span class="co-ic">${s.ic}</span><span>${s.txt}</span></div>`;
+  }
+  return '';
+}
+
+function renderQASection(title){
+  const words=title.toLowerCase().replace(/<[^>]*>/g,'').split(/\s+/);
+  const rel=QA.filter(q=>{
+    const text=(q.q+q.a+q.tag).toLowerCase();
+    return words.some(w=>w.length>3&&text.includes(w));
+  }).slice(0,4);
+  if(!rel.length)return '';
+  const lcMap={b:'lv-b',i:'lv-i',a:'lv-a',e:'lv-e'};
+  const lbMap={b:'Basic',i:'Intermediate',a:'Advanced',e:'Expert'};
+  return `
+    <div class="sec">
+      <div class="sec-t">🎯 Interview Questions</div>
+      ${rel.map((q,i)=>`
+        <div class="qa" id="qa${i}${Date.now()}">
+          <div class="qa-q" onclick="toggleQA(this)">
+            <span class="qa-qi">Q</span>
+            <span class="qa-qt">${q.q}</span>
+            <span class="qa-lv ${lcMap[q.level]}">${lbMap[q.level]}</span>
+            <span class="qa-ar">▶</span>
+          </div>
+          <div class="qa-a"><div class="qa-at">${q.a}</div></div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderGeneric(id,chi){
+  document.getElementById('re').style.display='none';
+  document.getElementById('rcon').style.display='block';
+  const ch=CHS[chi];
+  const t=ch.topics.find(x=>x.id===id);
+  if(!t)return;
+  document.getElementById('rcon').innerHTML=`
+    <div class="dc">
+      <div class="d-bread">${ch.title}</div>
+      <div class="d-title">${t.icon} ${t.title}</div>
+      <div class="d-sub">${t.desc}</div>
+      <div class="co co-info"><span class="co-ic">📚</span>
+        <span>This topic is part of <strong>${ch.title}</strong>. Explore the ${ch.topics.length} topics in this chapter using the topic cards.</span>
+      </div>
+      ${renderQASection(t.title)}
+    </div>`;
+}
+
+function toggleQA(el){el.parentElement.classList.toggle('open')}
+
+function copyCode(btn){
+  const txt=btn.closest('.cb').querySelector('pre').innerText;
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent='✓ Copied!';
+    setTimeout(()=>btn.textContent='Copy',2000);
+  });
+}
+
+function updateProg(){
+  const total=CHS.reduce((s,c)=>s+c.topics.length,0);
+  const p=Math.round(visited.size/total*100);
+  document.getElementById('pct').textContent=p+'%';
+  document.getElementById('pfill').style.width=p+'%';
+}
+
+function filterNav(q){
+  q=q.toLowerCase();
+  CHS.forEach((ch,i)=>{
+    let any=false;
+    ch.topics.forEach(t=>{
+      const el=document.getElementById('n'+t.id);
+      if(!el)return;
+      const match=!q||t.title.toLowerCase().includes(q)||t.desc.toLowerCase().includes(q);
+      el.style.display=match?'':'none';
+      if(match)any=true;
+    });
+    if(q&&any)document.getElementById(`ci${i}`).classList.add('open');
+  });
+}
+
+function showAllQA(){
+  document.getElementById('re').style.display='none';
+  document.getElementById('rcon').style.display='block';
+  const lcMap={b:'lv-b',i:'lv-i',a:'lv-a',e:'lv-e'};
+  const lbMap={b:'Basic',i:'Intermediate',a:'Advanced',e:'Expert'};
+  const tags=[...new Set(QA.map(q=>q.tag))];
+  const filters=tags.map(t=>
+    `<button onclick="fQA('${t}',this)" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace">${t}</button>`
+  ).join('');
+  const items=QA.map((q,i)=>`
+    <div class="qa" data-tag="${q.tag}">
+      <div class="qa-q" onclick="toggleQA(this)">
+        <span class="qa-qi">Q</span>
+        <span class="qa-qt">${q.q}</span>
+        <span style="font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(0,200,255,.08);color:var(--g2);border:1px solid rgba(0,200,255,.2);font-family:'DM Mono',monospace;flex-shrink:0">${q.tag}</span>
+        <span class="qa-lv ${lcMap[q.level]}">${lbMap[q.level]}</span>
+        <span class="qa-ar">▶</span>
+      </div>
+      <div class="qa-a"><div class="qa-at">${q.a}</div></div>
+    </div>`).join('');
+  document.getElementById('rcon').innerHTML=`
+    <div class="dc">
+      <div class="d-bread">.NET Mastery — Interview Prep</div>
+      <div class="d-title">🎯 Interview Questions</div>
+      <div class="d-sub">${QA.length} questions · CLR, GC, JIT, Async, DI, Performance, Networking and more.</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px">
+        <button onclick="fQA(null,this)" style="background:var(--g2)22;border:1px solid var(--g2)44;color:var(--g2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace">All</button>
+        ${filters}
+      </div>
+      <div id="qaList">${items}</div>
+    </div>`;
+}
+
+function fQA(tag,btn){
+  document.querySelectorAll('#qaList .qa').forEach(el=>{
+    el.style.display=(!tag||el.dataset.tag===tag)?'':'none';
+  });
+}
+
+// ── INIT ──
+buildNav();
+</script>
+</body>
+</html>

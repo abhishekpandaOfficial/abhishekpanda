@@ -1,6 +1,8 @@
 import type { BlogIndexRow } from "@/hooks/usePublishedPersonalBlogs";
 import type { BlogSeriesTrack } from "@/lib/blogSeries";
 
+type VisualTheme = "dark" | "light";
+
 const svgDataUrl = (svg: string) => `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 
 const escapeXml = (value: string) =>
@@ -20,6 +22,86 @@ const splitTitle = (value: string, parts = 2) => {
     lines.push(words.slice(index, index + chunk).join(" "));
   }
   return lines.slice(0, parts);
+};
+
+type VisualPalette = {
+  from: string;
+  via: string;
+  to: string;
+  accent: string;
+  soft: string;
+  line: string;
+};
+
+const hexToRgb = (hex: string) => {
+  const normalized = hex.replace("#", "");
+  const value = normalized.length === 3
+    ? normalized.split("").map((part) => part + part).join("")
+    : normalized;
+
+  const int = Number.parseInt(value, 16);
+  return {
+    r: (int >> 16) & 255,
+    g: (int >> 8) & 255,
+    b: int & 255,
+  };
+};
+
+const rgbToHex = ({ r, g, b }: { r: number; g: number; b: number }) =>
+  `#${[r, g, b]
+    .map((part) => Math.max(0, Math.min(255, Math.round(part))).toString(16).padStart(2, "0"))
+    .join("")}`;
+
+const mixHex = (hexA: string, hexB: string, weight: number) => {
+  const a = hexToRgb(hexA);
+  const b = hexToRgb(hexB);
+  const ratio = Math.max(0, Math.min(1, weight));
+  return rgbToHex({
+    r: a.r + (b.r - a.r) * ratio,
+    g: a.g + (b.g - a.g) * ratio,
+    b: a.b + (b.b - a.b) * ratio,
+  });
+};
+
+const getThemedPalette = (base: VisualPalette, theme: VisualTheme): VisualPalette => {
+  if (theme === "dark") return base;
+
+  return {
+    from: mixHex(base.from, "#ffffff", 0.82),
+    via: mixHex(base.via, "#ffffff", 0.72),
+    to: mixHex(base.to, "#ffffff", 0.8),
+    accent: mixHex(base.accent, "#0f172a", 0.18),
+    soft: "#0f172a",
+    line: "rgba(15,23,42,0.12)",
+  };
+};
+
+const SERIES_PALETTES: Record<string, VisualPalette> = {
+  "csharp-mastery": { from: "#0f1021", via: "#5b21b6", to: "#1d4ed8", accent: "#a78bfa", soft: "#ede9fe", line: "rgba(237,233,254,0.24)" },
+  "linq-mastery": { from: "#071a16", via: "#0f766e", to: "#14532d", accent: "#34d399", soft: "#d1fae5", line: "rgba(209,250,229,0.24)" },
+  "dotnet-mastery": { from: "#081120", via: "#0f4c81", to: "#164e63", accent: "#38bdf8", soft: "#dbeafe", line: "rgba(219,234,254,0.24)" },
+  "efcore-mastery": { from: "#0b1623", via: "#14532d", to: "#0f766e", accent: "#2dd4bf", soft: "#ccfbf1", line: "rgba(204,251,241,0.24)" },
+  "solid-principles": { from: "#111827", via: "#4f46e5", to: "#0f172a", accent: "#93c5fd", soft: "#dbeafe", line: "rgba(219,234,254,0.24)" },
+  "design-patterns": { from: "#23110a", via: "#c2410c", to: "#7c2d12", accent: "#fdba74", soft: "#ffedd5", line: "rgba(255,237,213,0.24)" },
+  "microservices-mastery": { from: "#081a20", via: "#0369a1", to: "#0f766e", accent: "#67e8f9", soft: "#cffafe", line: "rgba(207,250,254,0.24)" },
+  "kafka-mastery": { from: "#181127", via: "#6d28d9", to: "#111827", accent: "#c084fc", soft: "#f3e8ff", line: "rgba(243,232,255,0.24)" },
+  "blazor-mastery": { from: "#120d24", via: "#7c3aed", to: "#1d4ed8", accent: "#c4b5fd", soft: "#ede9fe", line: "rgba(237,233,254,0.24)" },
+  "devops-mastery": { from: "#0c1726", via: "#1d4ed8", to: "#155e75", accent: "#7dd3fc", soft: "#e0f2fe", line: "rgba(224,242,254,0.24)" },
+  "ai-ml-mastery": { from: "#0b1120", via: "#6d28d9", to: "#0f766e", accent: "#c084fc", soft: "#ddd6fe", line: "rgba(221,214,254,0.24)" },
+  "databases-mastery": { from: "#082f49", via: "#0f766e", to: "#164e63", accent: "#22d3ee", soft: "#a5f3fc", line: "rgba(165,243,252,0.24)" },
+  "agile-mastery": { from: "#271904", via: "#ca8a04", to: "#854d0e", accent: "#fde047", soft: "#fef9c3", line: "rgba(254,249,195,0.24)" },
+  "angular-mastery": { from: "#170b11", via: "#be123c", to: "#1d4ed8", accent: "#fb7185", soft: "#ffe4e6", line: "rgba(255,228,230,0.24)" },
+  "next-js-mastery": { from: "#09090b", via: "#334155", to: "#1f2937", accent: "#e2e8f0", soft: "#f8fafc", line: "rgba(248,250,252,0.24)" },
+  "blockchain-mastery": { from: "#1f2937", via: "#f59e0b", to: "#7c2d12", accent: "#fbbf24", soft: "#fde68a", line: "rgba(253,230,138,0.24)" },
+  "azure-mastery": { from: "#071a2f", via: "#005fb8", to: "#0f766e", accent: "#38bdf8", soft: "#e0f2fe", line: "rgba(224,242,254,0.24)" },
+  "aws-mastery": { from: "#24150a", via: "#f97316", to: "#7c2d12", accent: "#fdba74", soft: "#ffedd5", line: "rgba(255,237,213,0.24)" },
+  "gcp-mastery": { from: "#0b1727", via: "#15803d", to: "#0f766e", accent: "#86efac", soft: "#dcfce7", line: "rgba(220,252,231,0.24)" },
+  "deep-learning-mastery": { from: "#0c1024", via: "#7c3aed", to: "#1e1b4b", accent: "#c4b5fd", soft: "#ede9fe", line: "rgba(237,233,254,0.24)" },
+  "machine-learning-mastery": { from: "#062838", via: "#0891b2", to: "#0f766e", accent: "#67e8f9", soft: "#cffafe", line: "rgba(207,250,254,0.24)" },
+  "blockchain-zero-to-hero": { from: "#2b1408", via: "#d97706", to: "#7c2d12", accent: "#fcd34d", soft: "#fef3c7", line: "rgba(254,243,199,0.24)" },
+  "nlp-llm-mastery": { from: "#140b25", via: "#9333ea", to: "#0f766e", accent: "#d8b4fe", soft: "#f3e8ff", line: "rgba(243,232,255,0.24)" },
+  "computer-vision-mastery": { from: "#1f1024", via: "#db2777", to: "#4338ca", accent: "#f9a8d4", soft: "#fce7f3", line: "rgba(252,231,243,0.24)" },
+  "web3-series": { from: "#0d1728", via: "#2563eb", to: "#7c3aed", accent: "#93c5fd", soft: "#dbeafe", line: "rgba(219,234,254,0.24)" },
 };
 
 const pickPalette = (source: string) => {
@@ -43,7 +125,7 @@ const pickPalette = (source: string) => {
   return { from: "#14082e", via: "#7c3aed", to: "#1f2937", accent: "#c084fc", soft: "#e9d5ff", line: "rgba(233,213,255,0.24)" };
 };
 
-const getSeriesPattern = (source: string, accent: string, line: string) => {
+const getFallbackSeriesPattern = (source: string, accent: string, line: string) => {
   const lower = source.toLowerCase();
   if (/\bai|llm|nlp|deep learning|machine learning|computer vision|model\b/.test(lower)) {
     return `<circle cx="884" cy="170" r="96" fill="rgba(255,255,255,.06)" stroke="${line}" /><circle cx="884" cy="170" r="28" fill="${accent}" /><path d="M884 56v-42M884 326v-42M770 170h-42M998 170h-42M806 92l-32-32M962 248l32 32M962 92l32-32M806 248l-32 32" stroke="${accent}" stroke-width="8" stroke-linecap="round"/><path d="M730 418c98-66 198-87 310-66" fill="none" stroke="${line}" stroke-width="6" stroke-linecap="round"/>`;
@@ -63,6 +145,162 @@ const getSeriesPattern = (source: string, accent: string, line: string) => {
   return `<path d="M772 420 884 122l112 298" fill="none" stroke="${accent}" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><path d="M820 280h126" fill="none" stroke="${line}" stroke-width="10" stroke-linecap="round"/><circle cx="772" cy="420" r="18" fill="${accent}" /><circle cx="884" cy="122" r="18" fill="${accent}" /><circle cx="996" cy="420" r="18" fill="${accent}" />`;
 };
 
+const getSeriesPattern = (series: BlogSeriesTrack, palette: VisualPalette) => {
+  const { accent, line, soft } = palette;
+
+  switch (series.slug) {
+    case "csharp-mastery":
+      return `<rect x="736" y="92" width="300" height="210" rx="28" fill="rgba(255,255,255,.06)" stroke="${line}" />
+        <text x="886" y="174" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="116" font-weight="800">C#</text>
+        <path d="M760 356h256M760 396h202M760 436h232" stroke="${line}" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="778" cy="132" r="8" fill="${accent}"/><circle cx="808" cy="132" r="8" fill="${accent}"/><circle cx="838" cy="132" r="8" fill="${accent}"/>`;
+    case "linq-mastery":
+      return `<rect x="728" y="100" width="108" height="72" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="872" y="100" width="108" height="72" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="800" y="236" width="108" height="72" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <path d="M836 136h32M916 136h28M854 172l28 52M926 172l-28 52" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>
+        <text x="854" y="286" text-anchor="middle" fill="${soft}" font-family="JetBrains Mono, monospace" font-size="34" font-weight="700">where</text>
+        <path d="M744 392c96 14 186 18 274 12" fill="none" stroke="${line}" stroke-width="7" stroke-linecap="round"/>`;
+    case "dotnet-mastery":
+      return `<circle cx="886" cy="172" r="118" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <circle cx="886" cy="172" r="74" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <rect x="790" y="286" width="192" height="126" rx="24" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <text x="886" y="188" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="54" font-weight="800">.NET</text>
+        <text x="886" y="350" text-anchor="middle" fill="${accent}" font-family="JetBrains Mono, monospace" font-size="24" font-weight="700">CLR · JIT · GC</text>`;
+    case "efcore-mastery":
+      return `<ellipse cx="886" cy="122" rx="126" ry="38" fill="rgba(255,255,255,.08)" stroke="${line}" />
+        <path d="M760 122v170c0 21 56 38 126 38s126-17 126-38V122" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <path d="M760 176c0 21 56 38 126 38s126-17 126-38M760 230c0 21 56 38 126 38s126-17 126-38" fill="none" stroke="${line}" />
+        <rect x="764" y="374" width="110" height="60" rx="16" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="896" y="374" width="110" height="60" rx="16" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <path d="M874 404h22" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>`;
+    case "solid-principles":
+      return `<rect x="732" y="92" width="62" height="132" rx="20" fill="rgba(56,189,248,.22)" stroke="${line}" />
+        <rect x="808" y="92" width="62" height="132" rx="20" fill="rgba(251,146,60,.22)" stroke="${line}" />
+        <rect x="884" y="92" width="62" height="132" rx="20" fill="rgba(74,222,128,.22)" stroke="${line}" />
+        <rect x="960" y="92" width="62" height="132" rx="20" fill="rgba(244,114,182,.22)" stroke="${line}" />
+        <rect x="846" y="246" width="62" height="132" rx="20" fill="rgba(250,204,21,.22)" stroke="${line}" />
+        <text x="763" y="170" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800">S</text>
+        <text x="839" y="170" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800">O</text>
+        <text x="915" y="170" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800">L</text>
+        <text x="991" y="170" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800">I</text>
+        <text x="877" y="324" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800">D</text>`;
+    case "design-patterns":
+      return `<circle cx="886" cy="164" r="46" fill="rgba(255,255,255,.08)" stroke="${line}" />
+        <circle cx="774" cy="110" r="26" fill="rgba(255,255,255,.06)" stroke="${line}" />
+        <circle cx="998" cy="110" r="26" fill="rgba(255,255,255,.06)" stroke="${line}" />
+        <circle cx="774" cy="246" r="26" fill="rgba(255,255,255,.06)" stroke="${line}" />
+        <circle cx="998" cy="246" r="26" fill="rgba(255,255,255,.06)" stroke="${line}" />
+        <path d="M798 120 850 148M974 120 922 148M798 236 850 180M974 236 922 180" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>
+        <text x="886" y="174" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="800">Patterns</text>`;
+    case "microservices-mastery":
+      return `<rect x="730" y="104" width="92" height="62" rx="16" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="844" y="104" width="92" height="62" rx="16" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="958" y="104" width="92" height="62" rx="16" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="786" y="238" width="92" height="62" rx="16" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="900" y="238" width="92" height="62" rx="16" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="840" y="370" width="98" height="62" rx="16" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <path d="M822 135h18M936 135h18M833 166l18 58M947 166l-18 58M886 300v66" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>`;
+    case "kafka-mastery":
+      return `<rect x="730" y="102" width="300" height="270" rx="30" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <path d="M766 146h230M766 206h230M766 266h230M766 326h230" stroke="${line}" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="804" cy="146" r="12" fill="${accent}" /><circle cx="876" cy="206" r="12" fill="${accent}" /><circle cx="948" cy="266" r="12" fill="${accent}" /><circle cx="1020" cy="326" r="12" fill="${accent}" />
+        <text x="886" y="426" text-anchor="middle" fill="${soft}" font-family="JetBrains Mono, monospace" font-size="28" font-weight="700">partitions · streams · offsets</text>`;
+    case "blazor-mastery":
+      return `<rect x="748" y="100" width="276" height="232" rx="30" fill="rgba(255,255,255,.06)" stroke="${line}" />
+        <path d="M804 152h164M804 196h164M804 240h104" stroke="${line}" stroke-width="7" stroke-linecap="round"/>
+        <circle cx="790" cy="154" r="14" fill="${accent}" />
+        <circle cx="790" cy="198" r="14" fill="${accent}" />
+        <circle cx="790" cy="242" r="14" fill="${accent}" />
+        <path d="M756 392c56-42 118-64 186-64s130 22 186 64" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round"/>
+        <text x="886" y="454" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="800">Blazor</text>`;
+    case "devops-mastery":
+      return `<path d="M754 182c0-44 34-80 78-80 28 0 52 12 68 32 16-20 40-32 68-32 44 0 78 36 78 80s-34 80-78 80c-28 0-52-12-68-32-16 20-40 32-68 32-44 0-78-36-78-80Z" fill="none" stroke="${accent}" stroke-width="14"/>
+        <rect x="748" y="352" width="84" height="46" rx="14" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="844" y="352" width="84" height="46" rx="14" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="940" y="352" width="84" height="46" rx="14" fill="rgba(255,255,255,.07)" stroke="${line}" />`;
+    case "ai-ml-mastery":
+      return `<circle cx="886" cy="174" r="94" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <circle cx="832" cy="146" r="12" fill="${accent}" /><circle cx="886" cy="120" r="12" fill="${accent}" /><circle cx="940" cy="146" r="12" fill="${accent}" />
+        <circle cx="832" cy="202" r="12" fill="${accent}" /><circle cx="886" cy="228" r="12" fill="${accent}" /><circle cx="940" cy="202" r="12" fill="${accent}" />
+        <path d="M832 146 886 120 940 146 940 202 886 228 832 202 832 146" fill="none" stroke="${line}" stroke-width="5"/>`;
+    case "databases-mastery":
+      return `<ellipse cx="886" cy="118" rx="124" ry="36" fill="rgba(255,255,255,.08)" stroke="${line}" />
+        <path d="M762 118v176c0 20 56 36 124 36s124-16 124-36V118" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <path d="M762 174c0 20 56 36 124 36s124-16 124-36M762 230c0 20 56 36 124 36s124-16 124-36" fill="none" stroke="${line}" />
+        <path d="M748 388c90-42 184-42 276 0" fill="none" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>`;
+    case "agile-mastery":
+      return `<rect x="736" y="102" width="86" height="252" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="844" y="102" width="86" height="252" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="952" y="102" width="86" height="252" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="754" y="142" width="50" height="36" rx="10" fill="${accent}" />
+        <rect x="862" y="194" width="50" height="36" rx="10" fill="${accent}" />
+        <rect x="970" y="246" width="50" height="36" rx="10" fill="${accent}" />`;
+    case "angular-mastery":
+      return `<path d="M886 84 1004 130 982 286 886 340 790 286 768 130Z" fill="rgba(255,255,255,.07)" stroke="${line}" stroke-width="6" />
+        <path d="M886 130 952 274h-38l-16-38h-24l-16 38h-38L886 130Z" fill="none" stroke="${accent}" stroke-width="12" stroke-linejoin="round"/>
+        <path d="M874 206h24" stroke="${accent}" stroke-width="10" stroke-linecap="round"/>`;
+    case "next-js-mastery":
+      return `<circle cx="886" cy="186" r="116" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <text x="886" y="210" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="118" font-weight="800">N</text>
+        <path d="M776 358c62-34 128-46 220-42" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round"/>`;
+    case "blockchain-mastery":
+      return `<rect x="754" y="126" width="88" height="88" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="844" y="214" width="88" height="88" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="934" y="126" width="88" height="88" rx="18" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <path d="M842 170h92M886 214v-40M932 170h4" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>`;
+    case "azure-mastery":
+      return `<path d="M784 276c0-52 40-94 92-94 12-42 50-72 96-72 56 0 102 46 102 102 36 6 64 38 64 76 0 42-34 76-76 76H814c-44 0-80-36-80-80 0-36 24-66 58-74Z" fill="rgba(255,255,255,.07)" stroke="${line}" stroke-width="6"/>
+        <rect x="780" y="392" width="92" height="54" rx="16" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="886" y="392" width="92" height="54" rx="16" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <rect x="992" y="392" width="92" height="54" rx="16" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <path d="M872 420h14M978 420h14" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>`;
+    case "aws-mastery":
+      return `<path d="M774 274c0-54 42-98 96-98 10-44 48-76 96-76 58 0 104 46 104 104 34 8 60 38 60 74 0 42-34 76-76 76H808c-46 0-84-38-84-84 0-36 22-66 50-78Z" fill="rgba(255,255,255,.06)" stroke="${line}" stroke-width="6"/>
+        <path d="M804 402c56 22 144 20 204-8" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round"/>
+        <path d="M988 392l28 10-28 12" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`;
+    case "gcp-mastery":
+      return `<circle cx="834" cy="202" r="74" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <circle cx="938" cy="202" r="74" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <circle cx="886" cy="138" r="74" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <path d="M834 202c0-30 24-54 52-54M938 202c0 30-24 54-52 54M886 138c28 0 50 22 50 50" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round"/>`;
+    case "deep-learning-mastery":
+      return `<circle cx="776" cy="126" r="12" fill="${accent}" /><circle cx="776" cy="210" r="12" fill="${accent}" /><circle cx="776" cy="294" r="12" fill="${accent}" />
+        <circle cx="886" cy="168" r="12" fill="${accent}" /><circle cx="886" cy="252" r="12" fill="${accent}" />
+        <circle cx="996" cy="126" r="12" fill="${accent}" /><circle cx="996" cy="210" r="12" fill="${accent}" /><circle cx="996" cy="294" r="12" fill="${accent}" />
+        <path d="M788 126 874 168 788 210 874 252 788 294M898 168 984 126M898 168 984 210M898 252 984 210M898 252 984 294" fill="none" stroke="${line}" stroke-width="5"/>`;
+    case "machine-learning-mastery":
+      return `<rect x="738" y="100" width="296" height="286" rx="28" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <path d="M774 336V148M774 336h218" stroke="${line}" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="818" cy="290" r="10" fill="${accent}" /><circle cx="860" cy="248" r="10" fill="${accent}" /><circle cx="918" cy="216" r="10" fill="${accent}" /><circle cx="968" cy="172" r="10" fill="${accent}" />
+        <path d="M806 302 980 160" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>`;
+    case "blockchain-zero-to-hero":
+      return `<rect x="760" y="98" width="252" height="88" rx="22" fill="rgba(255,255,255,.06)" stroke="${line}" />
+        <rect x="788" y="224" width="196" height="68" rx="20" fill="rgba(255,255,255,.06)" stroke="${line}" />
+        <rect x="824" y="330" width="124" height="88" rx="22" fill="rgba(255,255,255,.06)" stroke="${line}" />
+        <path d="M886 186v38M886 292v38" stroke="${accent}" stroke-width="10" stroke-linecap="round"/>`;
+    case "nlp-llm-mastery":
+      return `<path d="M758 136h216c28 0 50 22 50 50v52c0 28-22 50-50 50H858l-58 52v-52h-42c-28 0-50-22-50-50v-52c0-28 22-50 50-50Z" fill="rgba(255,255,255,.06)" stroke="${line}" />
+        <circle cx="810" cy="212" r="10" fill="${accent}" /><circle cx="886" cy="212" r="10" fill="${accent}" /><circle cx="962" cy="212" r="10" fill="${accent}" />
+        <path d="M748 392c88-20 180-16 272 12" fill="none" stroke="${line}" stroke-width="7" stroke-linecap="round"/>`;
+    case "computer-vision-mastery":
+      return `<rect x="746" y="104" width="280" height="220" rx="30" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <rect x="792" y="148" width="188" height="132" rx="20" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <circle cx="886" cy="214" r="44" fill="none" stroke="${accent}" stroke-width="10" />
+        <circle cx="886" cy="214" r="10" fill="${accent}" />
+        <path d="M782 392c74-34 154-44 228-28" fill="none" stroke="${line}" stroke-width="7" stroke-linecap="round"/>`;
+    case "web3-series":
+      return `<circle cx="776" cy="180" r="28" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <circle cx="886" cy="118" r="28" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <circle cx="996" cy="180" r="28" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <circle cx="830" cy="302" r="28" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <circle cx="942" cy="302" r="28" fill="rgba(255,255,255,.07)" stroke="${line}" />
+        <path d="M798 166 864 132 974 166M798 194 842 284M974 194 930 284M858 302h56" fill="none" stroke="${accent}" stroke-width="8" stroke-linecap="round"/>`;
+    default:
+      return getFallbackSeriesPattern(`${series.title} ${series.subtitle} ${series.tags.join(" ")} ${series.keywords.join(" ")}`, accent, line);
+  }
+};
+
 const getPostPattern = (source: string, accent: string, line: string) => {
   const lower = source.toLowerCase();
   if (/\bsecurity|privacy|tracking|surveillance\b/.test(lower)) {
@@ -74,15 +312,22 @@ const getPostPattern = (source: string, accent: string, line: string) => {
   return `<path d="M700 386c98-80 204-108 324-84" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round"/><path d="M674 450c122-54 238-70 356-46" fill="none" stroke="${line}" stroke-width="6" stroke-linecap="round"/><circle cx="760" cy="182" r="18" fill="${accent}" /><circle cx="864" cy="130" r="14" fill="${accent}" /><circle cx="964" cy="206" r="18" fill="${accent}" /><path d="M760 182 864 130 964 206" fill="none" stroke="${line}" stroke-width="5" stroke-linecap="round"/>`;
 };
 
-export const getBlogSeriesVisual = (series: BlogSeriesTrack) => {
+export const getBlogSeriesVisual = (series: BlogSeriesTrack, theme: VisualTheme = "light") => {
   const source = `${series.title} ${series.subtitle} ${series.tags.join(" ")} ${series.keywords.join(" ")}`;
-  const palette = pickPalette(source);
+  const palette = getThemedPalette(SERIES_PALETTES[series.slug] || pickPalette(source), theme);
   const lines = splitTitle(series.title, 2).map(escapeXml);
   const label = escapeXml(series.tags.slice(0, 2).join(" • ") || "Series");
-  const pattern = getSeriesPattern(source, palette.accent, palette.line);
+  const pattern = getSeriesPattern(series, palette);
+  const gridStroke = theme === "dark" ? "#ffffff" : "#0f172a";
+  const gridOpacity = theme === "dark" ? ".12" : ".08";
+  const panelFill = theme === "dark" ? "rgba(9,12,22,.3)" : "rgba(255,255,255,.72)";
+  const panelStroke = theme === "dark" ? "rgba(255,255,255,.14)" : "rgba(15,23,42,.12)";
+  const chipFill = theme === "dark" ? "rgba(255,255,255,.1)" : "rgba(255,255,255,.9)";
+  const titleColor = theme === "dark" ? "#ffffff" : "#0f172a";
+  const subtitleColor = theme === "dark" ? "rgba(255,255,255,.82)" : "rgba(15,23,42,.72)";
 
   return svgDataUrl(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="${escapeXml(series.title)}"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${palette.from}" /><stop offset="48%" stop-color="${palette.via}" /><stop offset="100%" stop-color="${palette.to}" /></linearGradient></defs><rect width="1200" height="720" fill="url(#bg)" /><g opacity=".12" stroke="#fff"><path d="M0 108h1200M0 216h1200M0 324h1200M0 432h1200M0 540h1200M0 648h1200"/><path d="M120 0v720M280 0v720M440 0v720M600 0v720M760 0v720M920 0v720M1080 0v720"/></g><rect x="70" y="72" width="562" height="576" rx="36" fill="rgba(9,12,22,.3)" stroke="rgba(255,255,255,.14)" /><rect x="104" y="106" width="260" height="52" rx="26" fill="rgba(255,255,255,.1)" /><text x="132" y="140" fill="${palette.soft}" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700">${label}</text><text x="104" y="236" fill="#fff" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="800">${lines[0] || ""}</text>${lines[1] ? `<text x="104" y="308" fill="#fff" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="800">${lines[1]}</text>` : ""}<text x="104" y="${lines[1] ? 384 : 330}" fill="rgba(255,255,255,.82)" font-family="Inter, Arial, sans-serif" font-size="25">${escapeXml(series.subtitle).slice(0, 78)}</text><text x="104" y="${lines[1] ? 418 : 364}" fill="rgba(255,255,255,.82)" font-family="Inter, Arial, sans-serif" font-size="25">${escapeXml(series.subtitle).slice(78, 154)}</text>${pattern}</svg>`
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="${escapeXml(series.title)}"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${palette.from}" /><stop offset="48%" stop-color="${palette.via}" /><stop offset="100%" stop-color="${palette.to}" /></linearGradient></defs><rect width="1200" height="720" fill="url(#bg)" /><g opacity="${gridOpacity}" stroke="${gridStroke}"><path d="M0 108h1200M0 216h1200M0 324h1200M0 432h1200M0 540h1200M0 648h1200"/><path d="M120 0v720M280 0v720M440 0v720M600 0v720M760 0v720M920 0v720M1080 0v720"/></g><rect x="70" y="72" width="562" height="576" rx="36" fill="${panelFill}" stroke="${panelStroke}" /><rect x="104" y="106" width="260" height="52" rx="26" fill="${chipFill}" /><text x="132" y="140" fill="${palette.soft}" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700">${label}</text><text x="104" y="236" fill="${titleColor}" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="800">${lines[0] || ""}</text>${lines[1] ? `<text x="104" y="308" fill="${titleColor}" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="800">${lines[1]}</text>` : ""}<text x="104" y="${lines[1] ? 384 : 330}" fill="${subtitleColor}" font-family="Inter, Arial, sans-serif" font-size="25">${escapeXml(series.subtitle).slice(0, 78)}</text><text x="104" y="${lines[1] ? 418 : 364}" fill="${subtitleColor}" font-family="Inter, Arial, sans-serif" font-size="25">${escapeXml(series.subtitle).slice(78, 154)}</text>${pattern}</svg>`
   );
 };
 

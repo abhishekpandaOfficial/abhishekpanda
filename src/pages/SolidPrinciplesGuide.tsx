@@ -1,28 +1,14 @@
-import { useMemo, useRef } from "react";
-import { useTheme } from "@/components/ThemeProvider";
-import { CheatsheetGuideShell } from "@/components/cheatsheets/CheatsheetGuideShell";
+import { MasteryEmbedPage } from "@/components/blog/MasteryEmbedPage";
 
-const STATIC_GUIDE_VERSION = "2026-03-09-solid-principles-guide-v2";
+const STATIC_HTML_VERSION = "2026-03-10-solid-principles-html-v3";
 
 const SolidPrinciplesGuide = () => {
-  const { theme } = useTheme();
-  const initialThemeRef = useRef(theme);
-
-  const iframeSrc = useMemo(() => {
-    const params = new URLSearchParams({
-      embedded: "1",
-      theme: initialThemeRef.current,
-      v: STATIC_GUIDE_VERSION,
-    });
-
-    return `/embedded/solid-principles-guide.html?${params.toString()}`;
-  }, []);
-
   return (
-    <CheatsheetGuideShell
-      iframeSrc={iframeSrc}
-      iframeTitle="SOLID Principles Guide"
-      seriesSlug="solid-principles"
+    <MasteryEmbedPage
+      title="SOLID Principles"
+      embedPath="/embedded/solid-principles-guide.html"
+      version={STATIC_HTML_VERSION}
+      backgroundClassName="bg-[#0a0e1a]"
     />
   );
 };

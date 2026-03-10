@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blazor Mastery — Zero to Hero (.NET 10)</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Fira+Code:wght@300;400;500;600&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --b0:#05080f;--b1:#080d18;--b2:#0d1425;--b3:#121c30;
+  --bd:#1d2e4a;--bd2:#2a4165;
+  --p1:#7c3aed;--p2:#a855f7;--p3:#c084fc;
+  --a1:#06b6d4;--a2:#22d3ee;
+  --g1:#10b981;--g2:#34d399;
+  --o1:#f97316;--o2:#fb923c;
+  --y1:#eab308;--y2:#fde047;
+  --r1:#ef4444;
+  --t1:#e2e8f0;--t2:#94a3b8;--t3:#475569;
+  --lw:272px;--rw:580px;--hh:54px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--b0);color:var(--t1);font-family:'Nunito',sans-serif}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--b1)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--p1)}
+.hdr{position:fixed;top:0;left:0;right:0;height:var(--hh);z-index:300;background:rgba(5,8,15,.97);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 18px;gap:14px;backdrop-filter:blur(20px)}
+.logo{font-family:'Outfit',sans-serif;font-size:19px;font-weight:900;background:linear-gradient(135deg,var(--p2),var(--a1));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+.hdr-sep{width:1px;height:22px;background:var(--bd);flex-shrink:0}
+.hdr-sub{font-family:'Fira Code',monospace;font-size:10px;color:var(--t3);letter-spacing:.4px}
+.hdr-r{margin-left:auto;display:flex;gap:8px;align-items:center}
+.badge{font-family:'Fira Code',monospace;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid;cursor:default}
+.b-p{color:var(--p3);border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.08)}
+.b-a{color:var(--a2);border-color:rgba(34,211,238,.3);background:rgba(34,211,238,.08)}
+.b-btn{cursor:pointer;color:var(--o2);border-color:rgba(249,115,22,.3);background:rgba(249,115,22,.08);transition:all .2s}
+.b-btn:hover{background:rgba(249,115,22,.2)}
+.prog-wrap{display:flex;align-items:center;gap:7px}
+.prog-pct{font-family:'Fira Code',monospace;font-size:10px;color:var(--t2)}
+.prog-track{width:76px;height:3px;background:var(--bd);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--p1),var(--a1));border-radius:3px;transition:width .5s;width:0%}
+.layout{display:flex;height:100vh;padding-top:var(--hh)}
+/* LEFT */
+.lp{width:var(--lw);min-width:var(--lw);background:var(--b1);border-right:1px solid var(--bd);overflow-y:auto;flex-shrink:0}
+.lp-top{padding:10px;border-bottom:1px solid var(--bd);background:var(--b1);position:sticky;top:0;z-index:10}
+.srch{width:100%;background:var(--b2);border:1px solid var(--bd);border-radius:7px;padding:7px 11px;color:var(--t1);font-size:11.5px;font-family:'Nunito',sans-serif;outline:none;transition:border-color .2s}
+.srch:focus{border-color:var(--p1)}
+.srch::placeholder{color:var(--t3)}
+.lp-stats{display:flex;gap:6px;margin-top:8px}
+.lst{flex:1;background:var(--b2);border:1px solid var(--bd);border-radius:6px;padding:5px 7px;text-align:center}
+.lst-n{font-family:'Outfit',sans-serif;font-size:14px;font-weight:800;color:var(--p2)}
+.lst-l{font-size:9px;color:var(--t3);font-family:'Fira Code',monospace}
+.ci{border-bottom:1px solid rgba(29,46,74,.5)}
+.chr{display:flex;align-items:center;gap:8px;padding:9px 11px;cursor:pointer;transition:background .15s;user-select:none}
+.chr:hover{background:var(--b2)}
+.chr.act{background:linear-gradient(90deg,rgba(124,58,237,.1),transparent);border-left:2px solid var(--p1)}
+.cnum{width:21px;height:21px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'Fira Code',monospace;font-size:9px;font-weight:600;flex-shrink:0}
+.clabel{font-size:11.5px;font-weight:600;color:var(--t2);flex:1;line-height:1.3}
+.chr.act .clabel{color:var(--t1)}
+.carr{font-size:8px;color:var(--t3);transition:transform .2s;flex-shrink:0}
+.ci.open .carr{transform:rotate(90deg)}
+.tmenu{display:none;padding:2px 0 6px}
+.ci.open .tmenu{display:block}
+.trow{padding:5px 11px 5px 41px;font-size:11px;color:var(--t3);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.trow:hover{color:var(--t2);background:rgba(255,255,255,.02)}
+.trow.act{color:var(--p3);background:rgba(124,58,237,.06)}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:background .15s}
+.trow.act .dot{background:var(--p2)}
+.trow.vis .dot{background:var(--g1)}
+/* MIDDLE */
+.mp{flex:1;background:var(--b0);border-right:1px solid var(--bd);overflow-y:auto;padding:22px 18px}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 54px);text-align:center;gap:18px;padding:40px 20px}
+.w-icon{font-size:70px;line-height:1}
+@keyframes wg{0%,100%{filter:drop-shadow(0 0 16px rgba(168,85,247,.4))}50%{filter:drop-shadow(0 0 32px rgba(34,211,238,.5))}}
+.w-icon{animation:wg 4s ease-in-out infinite}
+.w-title{font-family:'Outfit',sans-serif;font-size:30px;font-weight:900;background:linear-gradient(135deg,var(--p2),var(--a1));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.w-sub{font-size:13.5px;color:var(--t2);max-width:460px;line-height:1.7}
+.w-stats{display:flex;gap:22px}
+.wst-n{font-family:'Outfit',sans-serif;font-size:30px;font-weight:900;color:var(--p2)}
+.wst-l{font-size:10px;color:var(--t3);font-family:'Fira Code',monospace}
+.w-btn{background:linear-gradient(135deg,var(--p1),var(--a1));border:none;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;padding:11px 30px;border-radius:9px;cursor:pointer;transition:all .3s}
+.w-btn:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(124,58,237,.4)}
+.w-chips{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+.wchip{font-family:'Fira Code',monospace;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:var(--p3)}
+/* Chapter hero */
+.chero{background:linear-gradient(135deg,var(--b2),var(--b1));border:1px solid var(--bd);border-radius:11px;padding:22px;margin-bottom:18px;position:relative;overflow:hidden}
+.chero::before{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.1),transparent)}
+.chero-n{font-family:'Fira Code',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;margin-bottom:7px}
+.chero-t{font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px;line-height:1.2}
+.chero-d{font-size:12.5px;color:var(--t2);line-height:1.6;max-width:480px}
+.chero-chips{display:flex;gap:5px;margin-top:11px;flex-wrap:wrap}
+.cchip{font-family:'Fira Code',monospace;font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid}
+.tgrid{display:flex;flex-direction:column;gap:7px}
+.tcard{background:var(--b2);border:1px solid var(--bd);border-radius:9px;padding:13px 15px;cursor:pointer;transition:all .18s;display:flex;align-items:flex-start;gap:11px}
+.tcard:hover{border-color:var(--bd2);transform:translateX(2px);background:var(--b3)}
+.tcard.act{border-color:var(--p1);background:rgba(124,58,237,.05)}
+.tc-icon{font-size:19px;flex-shrink:0;margin-top:1px}
+.tc-body{flex:1}
+.tc-t{font-size:12.5px;font-weight:700;color:var(--t1);margin-bottom:3px}
+.tc-d{font-size:11px;color:var(--t3);line-height:1.5}
+.tc-meta{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;align-items:center}
+.tmeta{font-family:'Fira Code',monospace;font-size:9.5px;padding:2px 7px;border-radius:4px;border:1px solid}
+.tc-time{font-family:'Fira Code',monospace;font-size:9px;color:var(--t3);margin-left:auto;white-space:nowrap}
+/* RIGHT */
+.rp{width:var(--rw);min-width:var(--rw);background:var(--b1);overflow-y:auto}
+.rp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:var(--t3);text-align:center;padding:40px}
+.rp-ei{font-size:50px;opacity:.2}
+.rp-empty h3{font-family:'Outfit',sans-serif;font-size:17px;color:var(--t2);font-weight:700}
+.rp-empty p{font-size:12.5px;line-height:1.7}
+.rpcon{padding:22px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.rpcon{animation:fadeUp .25s ease}
+.d-bread{font-family:'Fira Code',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:6px}
+.d-title{font-family:'Outfit',sans-serif;font-size:21px;font-weight:800;line-height:1.2;margin-bottom:5px}
+.d-sub{font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:10px}
+.d-pills{display:flex;gap:5px;flex-wrap:wrap;padding-bottom:15px;margin-bottom:16px;border-bottom:1px solid var(--bd)}
+.dpill{font-family:'Fira Code',monospace;font-size:10px;padding:3px 9px;border-radius:4px;border:1px solid}
+.sec{margin-bottom:20px}
+.sec-t{font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:700;color:var(--t1);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.sec-t::before{content:'';width:3px;height:14px;background:linear-gradient(180deg,var(--p1),var(--a1));border-radius:2px;flex-shrink:0}
+.prose{font-size:12.5px;color:var(--t2);line-height:1.8}
+.prose p{margin-bottom:9px}
+.prose strong{color:var(--t1)}
+.prose ul,.prose ol{padding-left:17px;margin-bottom:9px}
+.prose li{margin-bottom:4px}
+.prose h4{font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:var(--t1);margin:11px 0 5px}
+.prose code{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-radius:3px;padding:1px 5px;font-family:'Fira Code',monospace;font-size:11px;color:var(--p3)}
+.cb{background:#020508;border:1px solid rgba(29,46,74,.9);border-radius:9px;overflow:hidden;margin-bottom:14px}
+.cb-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid rgba(29,46,74,.8);background:rgba(0,0,0,.4)}
+.cb-lang{font-family:'Fira Code',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:1px}
+.cb-name{font-family:'Fira Code',monospace;font-size:10px;color:var(--t3)}
+.cb-copy{background:none;border:1px solid var(--bd);color:var(--t3);border-radius:3px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace;transition:all .2s}
+.cb-copy:hover{border-color:var(--p1);color:var(--p3)}
+.cb-body{padding:14px;overflow-x:auto}
+.cb-body pre{font-family:'Fira Code',monospace;font-size:11.5px;line-height:1.75;color:#cdd6f4}
+.kw{color:#89b4fa}.tp{color:#cba6f7}.st{color:#a6e3a1}.nu{color:#fab387}
+.cm{color:#585b70;font-style:italic}.fn{color:#89dceb}.pr{color:#f38ba8}
+.at{color:#f9e2af}.ra{color:#94e2d5}.dir{color:#89b4fa}.ev{color:#cba6f7}
+.comp{color:#89dceb}.param{color:#fab387}
+.diag{background:#020508;border:1px solid rgba(29,46,74,.9);border-radius:9px;overflow:hidden;margin-bottom:14px}
+.diag-hdr{padding:9px 14px;border-bottom:1px solid rgba(29,46,74,.8);background:rgba(0,0,0,.4);font-family:'Fira Code',monospace;font-size:10px;color:var(--t3);display:flex;align-items:center;gap:8px}
+.diag-hdr::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--p2);box-shadow:0 0 6px var(--p2)}
+.diag-body{padding:14px;display:flex;justify-content:center;overflow-x:auto}
+.callout{border-radius:8px;padding:11px 13px;margin-bottom:13px;display:flex;gap:9px;font-size:12.5px;line-height:1.65}
+.c-info{background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.2);color:var(--t2)}
+.c-warn{background:rgba(234,179,8,.05);border:1px solid rgba(234,179,8,.2);color:var(--t2)}
+.c-tip{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);color:var(--t2)}
+.c-danger{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);color:var(--t2)}
+.c-blazor{background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.25);color:var(--t2)}
+.call-ic{flex-shrink:0;font-size:14px;margin-top:1px}
+.ctbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
+.ctbl th{background:var(--b2);padding:8px 11px;text-align:left;font-family:'Fira Code',monospace;font-size:10px;color:var(--t2);border:1px solid var(--bd);text-transform:uppercase;letter-spacing:.5px}
+.ctbl td{padding:8px 11px;border:1px solid var(--bd);color:var(--t2);line-height:1.5}
+.ctbl tr:hover td{background:rgba(255,255,255,.01)}
+.yes{color:var(--g1)}.no{color:var(--r1)}.med{color:var(--y1)}
+.scenario{background:var(--b2);border:1px solid var(--bd);border-radius:9px;padding:15px;margin-bottom:13px}
+.scen-t{font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:var(--o2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.scen-b{font-size:12.5px;color:var(--t2);line-height:1.7}
+.qa{background:var(--b2);border:1px solid var(--bd);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.qa-q{padding:11px 13px;cursor:pointer;display:flex;align-items:flex-start;gap:8px;transition:background .15s}
+.qa-q:hover{background:var(--b3)}
+.qa-qi{font-family:'Fira Code',monospace;font-size:10px;font-weight:600;color:var(--p2);flex-shrink:0;margin-top:1px}
+.qa-qt{font-size:12.5px;font-weight:600;color:var(--t1);flex:1;line-height:1.5}
+.qa-lv{font-family:'Fira Code',monospace;font-size:9px;padding:2px 7px;border-radius:4px;border:1px solid;flex-shrink:0;margin-top:1px}
+.qa-ar{color:var(--t3);font-size:9px;transition:transform .2s;margin-top:3px;flex-shrink:0}
+.qa.open .qa-ar{transform:rotate(90deg)}
+.qa-ans{display:none;padding:11px 13px;border-top:1px solid var(--bd);background:rgba(0,0,0,.2)}
+.qa.open .qa-ans{display:block}
+.qa-at{font-size:12.5px;color:var(--t2);line-height:1.75}
+.qa-at code{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-radius:3px;padding:1px 5px;font-family:'Fira Code',monospace;font-size:11px;color:var(--p3)}
+.lv-b{color:#34d399;border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.07)}
+.lv-i{color:var(--y2);border-color:rgba(253,224,71,.3);background:rgba(253,224,71,.07)}
+.lv-a{color:var(--o2);border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.07)}
+.lv-e{color:var(--p3);border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.07)}
+@keyframes flow{0%{stroke-dashoffset:60}100%{stroke-dashoffset:0}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <span style="font-size:22px">🔥</span>
+  <div class="logo">Blazor Mastery</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-sub">Zero to Hero · .NET 10</div>
+  <div class="hdr-r">
+    <div class="badge b-btn" onclick="showAllQA()">🎯 Interview Q&amp;A</div>
+    <div class="prog-wrap">
+      <span class="prog-pct" id="pct">0%</span>
+      <div class="prog-track"><div class="prog-fill" id="pfill"></div></div>
+    </div>
+    <div class="badge b-a">.NET 10</div>
+    <div class="badge b-p">Blazor</div>
+  </div>
+</div>
+<div class="layout">
+  <div class="lp">
+    <div class="lp-top">
+      <input class="srch" id="srch" type="text" placeholder="🔍  Search topics…" oninput="doSearch(this.value)">
+      <div class="lp-stats">
+        <div class="lst"><div class="lst-n">31</div><div class="lst-l">Chapters</div></div>
+        <div class="lst"><div class="lst-n">180+</div><div class="lst-l">Topics</div></div>
+        <div class="lst"><div class="lst-n">250+</div><div class="lst-l">Q&amp;A</div></div>
+      </div>
+    </div>
+    <div id="nav"></div>
+  </div>
+  <div class="mp" id="mp">
+    <div class="welcome" id="welcome">
+      <div class="w-icon">🔥</div>
+      <div class="w-title">Blazor Mastery</div>
+      <div class="w-sub">The most complete Blazor learning platform — components, rendering, architecture, real-time, auth, WASM, enterprise patterns and production deployment.</div>
+      <div class="w-stats">
+        <div><div class="wst-n">31</div><div class="wst-l">Chapters</div></div>
+        <div><div class="wst-n">180+</div><div class="wst-l">Topics</div></div>
+        <div><div class="wst-n">250+</div><div class="wst-l">Q&amp;A</div></div>
+        <div><div class="wst-n">100+</div><div class="wst-l">Code Examples</div></div>
+      </div>
+      <div class="w-chips">
+        <span class="wchip">Blazor Server</span><span class="wchip">Blazor WASM</span>
+        <span class="wchip">Interactive Render</span><span class="wchip">SignalR</span>
+        <span class="wchip">Auth &amp; Security</span><span class="wchip">Real-time</span>
+        <span class="wchip">Blazor Hybrid</span><span class="wchip">Enterprise</span>
+      </div>
+      <button class="w-btn" onclick="selectCh(0)">🚀 Start Learning</button>
+    </div>
+    <div id="mcon" style="display:none"></div>
+  </div>
+  <div class="rp" id="rp">
+    <div class="rp-empty" id="rp-empty">
+      <div class="rp-ei">🔥</div>
+      <h3>Select a Topic</h3>
+      <p>Click any topic card to see detailed explanations, architecture diagrams, code examples, real-world scenarios, and interview questions.</p>
+    </div>
+    <div id="rp-con" style="display:none"></div>
+  </div>
+</div>
+<script>
+const CHS=[
+{n:"01",t:"Web Dev Foundations",ic:"🌐",c:"#06b6d4",bg:"rgba(6,182,212,.1)",desc:"Core web concepts every Blazor developer must master — HTTP, DOM, SPA architecture, WebSocket.",tags:["Beginner","Foundation"],topics:[
+{id:"w1",ic:"🌐",t:"How Browsers Work",d:"HTML parsing, DOM, CSSOM, render pipeline, repaint",tags:["Beginner"]},
+{id:"w2",ic:"📡",t:"HTTP & Request Lifecycle",d:"Request/response, status codes, CORS, caching headers",tags:["Beginner"]},
+{id:"w3",ic:"⚡",t:"SPA vs MPA Architecture",d:"Single vs multi-page, history API, tradeoffs",tags:["Beginner"]},
+{id:"w4",ic:"🔄",t:"WebSocket & SignalR Primer",d:"Persistent connections, real-time, fallback transports",tags:["Intermediate"]},
+{id:"w5",ic:"🔧",t:"JavaScript vs C# in Browser",d:"WASM runtime, .NET on browser, JS interop rationale",tags:["Intermediate"]},
+]},
+{n:"02",t:"Introduction to Blazor",ic:"🔥",c:"#7c3aed",bg:"rgba(124,58,237,.1)",desc:"What Blazor is, its history, hosting models, and why it's the future of .NET web development.",tags:["Beginner","Overview"],topics:[
+{id:"b1",ic:"📖",t:"What is Blazor?",d:"Definition, history, .NET web UI framework overview",tags:["Beginner"]},
+{id:"b2",ic:"🏗️",t:"Hosting Models Overview",d:"Server, WASM, Hybrid, Static SSR — when to use each",tags:["Beginner"]},
+{id:"b3",ic:"🆚",t:"Blazor vs React/Angular/Vue",d:"Comparison matrix, strengths, C# vs JS ecosystem",tags:["Beginner"]},
+{id:"b4",ic:"🚀",t:"First Blazor App Walkthrough",d:"dotnet new blazor, project structure, run & debug",tags:["Beginner"]},
+]},
+{n:"03",t:"Blazor Architecture",ic:"🏗️",c:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"Component model, render tree, virtual DOM diffing, SignalR circuit, and the full request pipeline.",tags:["Core","Architecture"],topics:[
+{id:"arch1",ic:"🏗️",t:"Architecture Overview",d:"Components, render tree, hosting model internals",tags:["Core"]},
+{id:"arch2",ic:"🌳",t:"Render Tree & Diffing",d:"RenderTreeBuilder, diffing algorithm, DOM patches",tags:["Advanced"]},
+{id:"arch3",ic:"🔌",t:"SignalR Circuit (Server)",d:"Circuit lifecycle, connection, reconnection, limits",tags:["Advanced"]},
+{id:"arch4",ic:"⚡",t:"WASM Runtime Architecture",d:"dotnet.wasm, Mono runtime, IL interpreter, AOT",tags:["Advanced"]},
+{id:"arch5",ic:"🔄",t:"Application Startup Pipeline",d:"WebApplication builder, Blazor middleware, DI setup",tags:["Core"]},
+]},
+{n:"04",t:"Razor Components",ic:"⚛️",c:"#06b6d4",bg:"rgba(6,182,212,.1)",desc:"The building blocks of every Blazor app — syntax, parameters, events, two-way binding, composition.",tags:["Core","Important"],topics:[
+{id:"rc1",ic:"✏️",t:"Razor Syntax Deep Dive",d:"@, @code, @functions, directives, expressions",tags:["Core"]},
+{id:"rc2",ic:"📦",t:"Component Parameters",d:"[Parameter], [CascadingParameter], validation rules",tags:["Core"]},
+{id:"rc3",ic:"🔗",t:"Two-Way Data Binding",d:"@bind, @bind:event, ValueChanged, bind-value pattern",tags:["Core"]},
+{id:"rc4",ic:"📢",t:"Event Handling & Callbacks",d:"@onclick, EventCallback<T>, async events, modifiers",tags:["Core"]},
+{id:"rc5",ic:"🎨",t:"Component Composition",d:"ChildContent, RenderFragment, slots, templates",tags:["Intermediate"]},
+{id:"rc6",ic:"🔁",t:"@key Directive & Lists",d:"@key for list performance, conditional rendering",tags:["Intermediate"]},
+]},
+{n:"05",t:"Component Lifecycle",ic:"🔄",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"Every lifecycle hook — from SetParametersAsync to DisposeAsync — their order, pitfalls, and best patterns.",tags:["Core","Important"],topics:[
+{id:"lc1",ic:"🔄",t:"Lifecycle Methods Overview",d:"Full lifecycle from SetParameters to Dispose",tags:["Core"]},
+{id:"lc2",ic:"⚙️",t:"OnInitialized & OnParametersSet",d:"Async init, parameter changes, race conditions",tags:["Core"]},
+{id:"lc3",ic:"🖼️",t:"OnAfterRender & ShouldRender",d:"DOM-ready work, rendering control, optimization",tags:["Intermediate"]},
+{id:"lc4",ic:"🗑️",t:"IDisposable & Cleanup",d:"Memory leaks, event unsubscription, async disposal",tags:["Intermediate"]},
+]},
+{n:"06",t:"Routing System",ic:"🗺️",c:"#f97316",bg:"rgba(249,115,22,.1)",desc:"Navigation, route parameters, constraints, NavigationManager, and route guards with auth.",tags:["Core"],topics:[
+{id:"ro1",ic:"🗺️",t:"@page Directive & Routes",d:"Route templates, multiple routes per component",tags:["Core"]},
+{id:"ro2",ic:"🔢",t:"Route Parameters & Constraints",d:"int, bool, datetime, regex, optional parameters",tags:["Core"]},
+{id:"ro3",ic:"⬅️",t:"NavigationManager",d:"NavigateTo, LocationChanged, URI building, back",tags:["Core"]},
+{id:"ro4",ic:"🛡️",t:"Route Guards & Auth",d:"AuthorizeRouteView, NotAuthorized template, redirect",tags:["Intermediate"]},
+]},
+{n:"07",t:"Layouts & UI Composition",ic:"🎨",c:"#eab308",bg:"rgba(234,179,8,.1)",desc:"MainLayout, nested layouts, SectionContent, SectionOutlet, CSS isolation, dynamic components.",tags:["Core"],topics:[
+{id:"la1",ic:"🎨",t:"MainLayout & Nested Layouts",d:"@inherits LayoutComponentBase, @Body, nesting",tags:["Core"]},
+{id:"la2",ic:"📄",t:"SectionContent & SectionOutlet",d:"Named slots, .NET 8 sections API, portals",tags:["Intermediate"]},
+{id:"la3",ic:"🧩",t:"_Imports.razor & Namespaces",d:"Global usings, partial classes, component namespaces",tags:["Core"]},
+{id:"la4",ic:"🎭",t:"Dynamic Components",d:"DynamicComponent, type-based rendering, metadata",tags:["Advanced"]},
+]},
+{n:"08",t:"State Management",ic:"💾",c:"#7c3aed",bg:"rgba(124,58,237,.1)",desc:"Component state, application state services, CascadingValue, Fluxor, and persistence strategies.",tags:["Core","Important"],topics:[
+{id:"st1",ic:"💾",t:"Component-Level State",d:"Local state, StateHasChanged, async state patterns",tags:["Core"]},
+{id:"st2",ic:"🏪",t:"Application State Services",d:"Singleton/scoped state, events, INotifyPropertyChanged",tags:["Core"]},
+{id:"st3",ic:"🌊",t:"CascadingValue & CascadingParameter",d:"Theme context, user context, deep prop drilling fix",tags:["Intermediate"]},
+{id:"st4",ic:"🔄",t:"Fluxor Redux Pattern",d:"Actions, reducers, effects, store, time-travel debug",tags:["Advanced"]},
+{id:"st5",ic:"💿",t:"Persistent State",d:"localStorage, sessionStorage, ProtectedStorage WASM",tags:["Intermediate"]},
+]},
+{n:"09",t:"Forms & Validation",ic:"📋",c:"#06b6d4",bg:"rgba(6,182,212,.1)",desc:"EditForm, DataAnnotations, FluentValidation, custom validators, file upload patterns.",tags:["Core","Important"],topics:[
+{id:"fm1",ic:"📋",t:"EditForm & EditContext",d:"Model binding, validation state, form submission",tags:["Core"]},
+{id:"fm2",ic:"✅",t:"DataAnnotations Validation",d:"Required, Range, Email, custom annotation attributes",tags:["Core"]},
+{id:"fm3",ic:"🔷",t:"FluentValidation Integration",d:"Validators, async rules, complex model validation",tags:["Intermediate"]},
+{id:"fm4",ic:"🔧",t:"Custom Validators",d:"ValidationAttribute, IValidatableObject, field-level",tags:["Intermediate"]},
+{id:"fm5",ic:"📤",t:"File Upload & Large Forms",d:"InputFile, chunked upload, progress tracking, multipart",tags:["Advanced"]},
+]},
+{n:"10",t:"Dependency Injection",ic:"💉",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"DI in Blazor — scoped services per circuit, WASM DI differences, IHttpClientFactory.",tags:["Core"],topics:[
+{id:"di1",ic:"💉",t:"DI — Scoped vs Singleton",d:"Circuit-scoped in Server, app-scoped in WASM",tags:["Core"]},
+{id:"di2",ic:"🏭",t:"Service Registration Patterns",d:"AddScoped, AddSingleton, AddTransient best practices",tags:["Core"]},
+{id:"di3",ic:"🔌",t:"IHttpClientFactory & Named Clients",d:"HttpClient injection, base addresses, resilience",tags:["Intermediate"]},
+{id:"di4",ic:"⚙️",t:"Background Services",d:"IHostedService in Blazor, worker services, timers",tags:["Advanced"]},
+]},
+{n:"11",t:"Blazor Rendering Models",ic:"⚡",c:"#f97316",bg:"rgba(249,115,22,.1)",desc:"Static SSR, Interactive Server, Interactive WASM, Interactive Auto — internals and when to use each.",tags:["Core","Important"],topics:[
+{id:"rm1",ic:"📄",t:"Static Server-Side Rendering",d:"Static HTML output, no interactivity, streaming",tags:["Core"]},
+{id:"rm2",ic:"🖥️",t:"Interactive Server Mode",d:"SignalR circuit, interactivity over WebSocket",tags:["Core"]},
+{id:"rm3",ic:"🌐",t:"Interactive WebAssembly Mode",d:"Download, execute in browser, offline capability",tags:["Core"]},
+{id:"rm4",ic:"🔄",t:"Interactive Auto Mode",d:"Server first, transition to WASM, .NET 8+ feature",tags:["Advanced"]},
+{id:"rm5",ic:"🌊",t:"Streaming Rendering",d:"IAsyncEnumerable, progressive content, skeletons",tags:["Advanced"]},
+]},
+{n:"12",t:"Blazor Server Deep Dive",ic:"🖥️",c:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"Circuit lifecycle, scalability, SignalR Hub configuration, sticky sessions, security.",tags:["Advanced"],topics:[
+{id:"sv1",ic:"🔌",t:"Circuit Lifecycle & Reconnection",d:"Circuit creation, disconnection, auto-reconnect UI",tags:["Advanced"]},
+{id:"sv2",ic:"📡",t:"SignalR Hub Configuration",d:"Hub options, message size, timeouts, transports",tags:["Advanced"]},
+{id:"sv3",ic:"📊",t:"Scalability & Sticky Sessions",d:"Redis backplane, ARR affinity, Azure SignalR Service",tags:["Advanced"]},
+{id:"sv4",ic:"🔒",t:"Circuit Security",d:"Anti-forgery, auth on circuit, reconnect authentication",tags:["Advanced"]},
+{id:"sv5",ic:"⚡",t:"Server vs WASM Performance",d:"Latency tradeoffs, hot circuit, cold start, benchmarks",tags:["Advanced"]},
+]},
+{n:"13",t:"Blazor WASM Deep Dive",ic:"🌐",c:"#06b6d4",bg:"rgba(6,182,212,.1)",desc:"WASM internals, bundle size, trimming, AOT compilation, lazy loading, offline PWA.",tags:["Advanced"],topics:[
+{id:"wa1",ic:"⚡",t:"WASM Runtime Internals",d:"dotnet.wasm, IL interpreter, runtime startup sequence",tags:["Expert"]},
+{id:"wa2",ic:"📦",t:"Bundle Size & Trimming",d:"Tree shaking, trimming, lazy loading assemblies",tags:["Advanced"]},
+{id:"wa3",ic:"🚀",t:"AOT Compilation",d:"Ahead-of-time, startup perf, size vs speed tradeoffs",tags:["Expert"]},
+{id:"wa4",ic:"🔄",t:"Lazy Loading Assemblies",d:"LazyAssemblyLoader, route-based loading, OnNavigateAsync",tags:["Advanced"]},
+{id:"wa5",ic:"💾",t:"Offline & PWA Support",d:"Service worker, cache strategies, offline manifest",tags:["Intermediate"]},
+]},
+{n:"14",t:"Interactive Render Modes",ic:"🎮",c:"#eab308",bg:"rgba(234,179,8,.1)",desc:".NET 8+ render mode API — per-component modes, global modes, prerendering and hydration.",tags:["Modern",".NET 8+"],topics:[
+{id:"ir1",ic:"🎮",t:"RenderMode API",d:"@rendermode directive, InteractiveServer/Wasm/Auto",tags:["Modern"]},
+{id:"ir2",ic:"🔄",t:"Per-Component Render Modes",d:"Mixing SSR and interactive on the same page",tags:["Advanced"]},
+{id:"ir3",ic:"🌍",t:"Global vs Component Modes",d:"App-level default, per-component override",tags:["Intermediate"]},
+{id:"ir4",ic:"⚡",t:"Prerendering & Hydration",d:"Static HTML first, then hydrate interactivity",tags:["Advanced"]},
+]},
+{n:"15",t:"API Communication",ic:"🔗",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"HttpClient patterns, typed clients, gRPC-Web, JSON serialization, error handling & Polly.",tags:["Core"],topics:[
+{id:"ap1",ic:"🔗",t:"HttpClient in Blazor",d:"DI injection, base URL, auth headers, best practices",tags:["Core"]},
+{id:"ap2",ic:"📡",t:"Typed Clients & Refit",d:"Strongly typed HTTP, interface-based API clients",tags:["Intermediate"]},
+{id:"ap3",ic:"🔄",t:"JSON Serialization",d:"System.Text.Json, camelCase, options, polymorphism",tags:["Core"]},
+{id:"ap4",ic:"⚡",t:"gRPC-Web in Blazor",d:"Protobuf, Grpc.Net.Client.Web, streaming RPCs",tags:["Advanced"]},
+{id:"ap5",ic:"🛡️",t:"Error Handling & Resilience",d:"Polly, retry, circuit breaker, error boundaries",tags:["Advanced"]},
+]},
+{n:"16",t:"Authentication & Authorization",ic:"🔐",c:"#ef4444",bg:"rgba(239,68,68,.1)",desc:"AuthStateProvider, JWT, OAuth2/OIDC, role-based auth, ASP.NET Identity integration.",tags:["Core","Security","Important"],topics:[
+{id:"au1",ic:"🔐",t:"AuthenticationStateProvider",d:"Custom providers, cascading auth state, NotifyChanged",tags:["Core"]},
+{id:"au2",ic:"🎫",t:"JWT & Cookie Authentication",d:"Token storage, refresh tokens, bearer headers",tags:["Core"]},
+{id:"au3",ic:"🌐",t:"OAuth2 & OIDC",d:"External providers, Microsoft/Google, PKCE flow",tags:["Intermediate"]},
+{id:"au4",ic:"🛡️",t:"Role & Policy-Based Auth",d:"[Authorize], roles, claims, custom policies",tags:["Intermediate"]},
+{id:"au5",ic:"🏢",t:"ASP.NET Core Identity",d:"Scaffolded Identity, custom UI, email confirm",tags:["Advanced"]},
+]},
+{n:"17",t:"JavaScript Interop",ic:"🔀",c:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"IJSRuntime, InvokeAsync, [JSInvokable], ES Module isolation, wrapping JS libraries.",tags:["Core"],topics:[
+{id:"js1",ic:"🔀",t:"IJSRuntime & InvokeAsync",d:"Calling JS from C#, return types, error handling",tags:["Core"]},
+{id:"js2",ic:"📞",t:"[JSInvokable] — C# from JS",d:"Static and instance calls, DotNetObjectReference",tags:["Core"]},
+{id:"js3",ic:"📦",t:"JavaScript Isolation (ESM)",d:"import(), ES module pattern, lazy load scripts",tags:["Advanced"]},
+{id:"js4",ic:"🎁",t:"Wrapping JS Components",d:"Third-party charts, maps, editors inside Blazor",tags:["Advanced"]},
+]},
+{n:"18",t:"Performance Optimization",ic:"🚀",c:"#f97316",bg:"rgba(249,115,22,.1)",desc:"ShouldRender, Virtualize, streaming, lazy loading, QuickGrid, allocation-free patterns.",tags:["Advanced","Expert"],topics:[
+{id:"pe1",ic:"🚀",t:"ShouldRender & Render Control",d:"Short-circuit rendering, immutable params, EquatableParams",tags:["Advanced"]},
+{id:"pe2",ic:"📋",t:"Virtualize Component",d:"Virtual scrolling, OverscanCount, async ItemProvider",tags:["Advanced"]},
+{id:"pe3",ic:"⚡",t:"Streaming Rendering",d:"IAsyncEnumerable, progressive content, loading skeletons",tags:["Advanced"]},
+{id:"pe4",ic:"📦",t:"Lazy Loading in WASM",d:"On-demand assembly loading, route-based code splits",tags:["Advanced"]},
+{id:"pe5",ic:"🧮",t:"QuickGrid & Data Grids",d:"QuickGrid, virtualization, filtering, sorting, paging",tags:["Intermediate"]},
+{id:"pe6",ic:"🔬",t:"Memory Profiling",d:"WASM memory, dotnet-trace, heap inspection tools",tags:["Expert"]},
+]},
+{n:"19",t:"Component Libraries",ic:"📚",c:"#06b6d4",bg:"rgba(6,182,212,.1)",desc:"MudBlazor, Telerik, Radzen, building your own RCL library with CSS isolation and theming.",tags:["Intermediate"],topics:[
+{id:"cl1",ic:"🎨",t:"MudBlazor Deep Dive",d:"Material design, theming, dialogs, data grids, charts",tags:["Intermediate"]},
+{id:"cl2",ic:"🏢",t:"Telerik & Radzen",d:"Enterprise grids, charts, scheduler, licensing",tags:["Intermediate"]},
+{id:"cl3",ic:"🔧",t:"Building Custom Component Library",d:"RCL project, NuGet packaging, CSS isolation, theming",tags:["Advanced"]},
+{id:"cl4",ic:"🎭",t:"CSS Isolation & Scoped Styles",d:"Component .razor.css, scoping, global overrides",tags:["Intermediate"]},
+]},
+{n:"20",t:"Realtime Applications",ic:"📡",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"SignalR Hubs, real-time dashboards, push notifications, live chat, and backpressure.",tags:["Advanced","SignalR"],topics:[
+{id:"rt1",ic:"📡",t:"SignalR Hubs in Blazor",d:"Hub setup, typed hubs, client/server methods",tags:["Advanced"]},
+{id:"rt2",ic:"📊",t:"Real-time Dashboard Pattern",d:"Live charts, metrics, streaming data, backpressure",tags:["Advanced"]},
+{id:"rt3",ic:"🔔",t:"Push Notifications",d:"Browser notifications, service worker push, VAPID",tags:["Advanced"]},
+{id:"rt4",ic:"💬",t:"Real-time Chat Application",d:"Groups, online users, typing indicators, history",tags:["Intermediate"]},
+]},
+{n:"21",t:"Blazor Hybrid (MAUI)",ic:"📱",c:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"BlazorWebView in MAUI, code sharing, native APIs, platform services, publishing.",tags:["Advanced","MAUI"],topics:[
+{id:"hy1",ic:"📱",t:"BlazorWebView Architecture",d:"WebView2, WKWebView, native bridge, layout",tags:["Advanced"]},
+{id:"hy2",ic:"🔗",t:"Shared Blazor Component Library",d:"RCL sharing between web and mobile apps",tags:["Advanced"]},
+{id:"hy3",ic:"📷",t:"Native API Access",d:"Camera, GPS, biometrics, file system via MAUI",tags:["Intermediate"]},
+{id:"hy4",ic:"🚀",t:"Publishing Hybrid Apps",d:"iOS, Android, Windows, macOS deployment pipelines",tags:["Intermediate"]},
+]},
+{n:"22",t:"Testing Blazor Apps",ic:"🧪",c:"#eab308",bg:"rgba(234,179,8,.1)",desc:"bUnit, xUnit, mocking services, Playwright E2E, CI integration.",tags:["Core"],topics:[
+{id:"te1",ic:"🧪",t:"bUnit Fundamentals",d:"RenderComponent, FindComponent, assertions",tags:["Core"]},
+{id:"te2",ic:"✅",t:"Testing Parameters & Events",d:"Parameters, cascading values, event simulation",tags:["Core"]},
+{id:"te3",ic:"🎭",t:"Mocking Services in Tests",d:"Moq, NSubstitute, fake DI in bUnit context",tags:["Intermediate"]},
+{id:"te4",ic:"🌍",t:"Playwright E2E Testing",d:"Browser automation, page objects, CI pipelines",tags:["Advanced"]},
+]},
+{n:"23",t:"Observability",ic:"📊",c:"#ef4444",bg:"rgba(239,68,68,.1)",desc:"OpenTelemetry, structured logging, metrics, distributed tracing, health checks.",tags:["Advanced"],topics:[
+{id:"ob1",ic:"📊",t:"OpenTelemetry in Blazor",d:"Traces, metrics, logs, OTLP exporter, Jaeger, Grafana",tags:["Advanced"]},
+{id:"ob2",ic:"📋",t:"Structured Logging",d:"ILogger, Serilog, Seq, correlation IDs in Blazor",tags:["Intermediate"]},
+{id:"ob3",ic:"📈",t:"Health Checks & Metrics",d:"IHealthCheck, /health endpoint, Prometheus scraping",tags:["Intermediate"]},
+]},
+{n:"24",t:"Enterprise Architecture",ic:"🏢",c:"#06b6d4",bg:"rgba(6,182,212,.1)",desc:"Clean Architecture, CQRS, MediatR, domain events, vertical slice, feature folders.",tags:["Advanced","Enterprise"],topics:[
+{id:"ea1",ic:"🏢",t:"Clean Architecture in Blazor",d:"Domain, Application, Infrastructure, Presentation layers",tags:["Advanced"]},
+{id:"ea2",ic:"📨",t:"CQRS & MediatR",d:"Commands, queries, handlers, pipeline behaviors",tags:["Advanced"]},
+{id:"ea3",ic:"🔔",t:"Domain Events & Notifications",d:"INotification, event sourcing lite, side effects",tags:["Advanced"]},
+{id:"ea4",ic:"📁",t:"Feature-Based Project Structure",d:"Vertical slices, feature folders, modular design",tags:["Advanced"]},
+]},
+{n:"25",t:"Microservices Integration",ic:"⚙️",c:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"API Gateway, BFF pattern, service discovery, micro-frontend architecture with Blazor.",tags:["Advanced"],topics:[
+{id:"ms1",ic:"🚪",t:"API Gateway Pattern",d:"YARP, Ocelot, routing, rate limiting, auth proxy",tags:["Advanced"]},
+{id:"ms2",ic:"🔧",t:"Backend for Frontend (BFF)",d:"Dedicated API per UI, auth aggregation, composition",tags:["Advanced"]},
+{id:"ms3",ic:"📡",t:"Service-to-Service Communication",d:"gRPC, HTTP messaging, resilience patterns",tags:["Advanced"]},
+{id:"ms4",ic:"🧩",t:"Micro-Frontend with Blazor",d:"Module federation concept, Web Components, iframes",tags:["Expert"]},
+]},
+{n:"26",t:"Blazor Security",ic:"🔒",c:"#ef4444",bg:"rgba(239,68,68,.1)",desc:"XSS prevention, CSRF protection, secrets management, Content Security Policy.",tags:["Core","Critical"],topics:[
+{id:"se1",ic:"🛡️",t:"XSS Prevention in Blazor",d:"Razor encoding, MarkupString risks, sanitization",tags:["Core"]},
+{id:"se2",ic:"🎫",t:"CSRF & Anti-Forgery",d:"AntiforgeryToken, circuit auth, state validation",tags:["Core"]},
+{id:"se3",ic:"🔑",t:"Secret Management",d:"User Secrets, Azure Key Vault, env vars, DPAPI",tags:["Intermediate"]},
+{id:"se4",ic:"📋",t:"Content Security Policy",d:"CSP headers, nonce, strict-dynamic, WASM CSP",tags:["Advanced"]},
+]},
+{n:"27",t:"Progressive Web Apps",ic:"📱",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"Service workers, Web App Manifest, offline mode, push, install prompt.",tags:["Intermediate"],topics:[
+{id:"pw1",ic:"⚙️",t:"Service Worker in Blazor WASM",d:"Caching strategies, update workflow, scope",tags:["Intermediate"]},
+{id:"pw2",ic:"📄",t:"Web App Manifest",d:"Icons, theme color, display mode, shortcuts",tags:["Beginner"]},
+{id:"pw3",ic:"🔔",t:"Push Notifications & Install",d:"VAPID, BeforeInstallPromptEvent, add to home screen",tags:["Advanced"]},
+]},
+{n:"28",t:"Deployment & DevOps",ic:"🚢",c:"#f97316",bg:"rgba(249,115,22,.1)",desc:"Docker, Azure, GitHub Actions CI/CD, Azure Static Web Apps, CDN.",tags:["Core","DevOps"],topics:[
+{id:"dp1",ic:"🐳",t:"Docker & Containerization",d:"Dockerfile, multi-stage build, nginx, health checks",tags:["Core"]},
+{id:"dp2",ic:"☁️",t:"Azure App Service & AKS",d:"App Service plans, AKS ingress, secrets, autoscaling",tags:["Intermediate"]},
+{id:"dp3",ic:"⚡",t:"Azure Static Web Apps",d:"WASM deployment, API routes, auth integration",tags:["Intermediate"]},
+{id:"dp4",ic:"🔄",t:"GitHub Actions CI/CD",d:"Build, test, publish, deploy pipeline YAML",tags:["Intermediate"]},
+]},
+{n:"29",t:"Production Architecture",ic:"🏭",c:"#eab308",bg:"rgba(234,179,8,.1)",desc:"CDN, load balancing, Redis caching, sticky sessions, zero-downtime deployments.",tags:["Expert","Production"],topics:[
+{id:"pr1",ic:"🌐",t:"CDN & Static Asset Strategy",d:"Azure CDN, CloudFront, fingerprinting, CORS policy",tags:["Advanced"]},
+{id:"pr2",ic:"⚖️",t:"Load Balancing & Sticky Sessions",d:"ARR affinity, cookie stickiness, health probes",tags:["Advanced"]},
+{id:"pr3",ic:"🗄️",t:"Redis Caching & Backplane",d:"IDistributedCache, SignalR backplane, invalidation",tags:["Advanced"]},
+{id:"pr4",ic:"🔄",t:"Zero-Downtime Deployments",d:"Blue-green, canary, rolling, health check gates",tags:["Expert"]},
+]},
+{n:"30",t:"Enterprise Case Studies",ic:"📈",c:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"Real production architectures — SaaS, Trading Dashboard, Hospital System, ERP Portal.",tags:["Expert","Real-world"],topics:[
+{id:"cs1",ic:"💼",t:"SaaS Admin Dashboard",d:"Multi-tenant, role-based UI, billing, notifications",tags:["Expert"]},
+{id:"cs2",ic:"📈",t:"Real-Time Trading Dashboard",d:"WebSocket data, high-frequency UI, Plotly charts",tags:["Expert"]},
+{id:"cs3",ic:"🏥",t:"Hospital Management System",d:"FHIR integration, real-time vitals, role-based UI",tags:["Expert"]},
+{id:"cs4",ic:"🏭",t:"ERP Portal Architecture",d:"Modular Blazor, workflow engine, complex reporting",tags:["Expert"]},
+]},
+{n:"31",t:"Interview Preparation",ic:"🎯",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"200+ categorized questions — Basic to Architectural, scenario-based challenges, answers.",tags:["Interview"],topics:[
+{id:"iq1",ic:"📝",t:"Basic Blazor Questions",d:"Definitions, concepts, quick-fire answers",tags:["Basic"]},
+{id:"iq2",ic:"🔧",t:"Intermediate Technical Q&A",d:"Lifecycle, rendering, state, components",tags:["Intermediate"]},
+{id:"iq3",ic:"🏗️",t:"Advanced Architecture Q&A",d:"Design patterns, scalability, security decisions",tags:["Advanced"]},
+{id:"iq4",ic:"🚀",t:"Performance & Optimization Q&A",d:"Profiling, bundle size, rendering optimization",tags:["Performance"]},
+{id:"iq5",ic:"💼",t:"Scenario-Based Questions",d:"Real-world system design and problem solving",tags:["Scenario"]},
+]},
+];
+const DETAILS = {
+"b2":{
+title:"Blazor Hosting Models",
+bread:"Chapter 2 · Introduction to Blazor",
+sub:"A complete comparison of all four Blazor hosting models — when to choose each, their architecture, and production tradeoffs.",
+pills:[{t:"Core",c:"#7c3aed"},{t:"Architecture",c:"#06b6d4"},{t:"Decision Guide",c:"#10b981"}],
+secs:[
+{ty:"prose",title:"The Four Hosting Models",html:`<p>Blazor supports four distinct hosting models. Choosing the right one is the <strong>most important architectural decision</strong> you'll make. Each model has fundamentally different performance characteristics, deployment requirements, and capabilities.</p>`},
+{ty:"table",headers:["Feature","Blazor Server","Blazor WASM","Interactive Auto","Static SSR"],rows:[
+["Execution","Server (CLR)","Browser (WASM)","Server→WASM","Server (CLR)"],
+["Offline support","❌ No","✅ Yes","⚡ After load","❌ No"],
+["Initial load","✅ Fast","🔴 Slow (~3-10s)","✅ Fast","✅ Fastest"],
+["Latency","🔴 Network RTT","✅ Zero","🔴 Then zero","✅ None"],
+["Scalability","🟡 Circuit per user","✅ High","✅ High","✅ Highest"],
+["C# debugging","✅ Full","🟡 Limited","✅ Both","✅ Server"],
+["Best for","Enterprise apps","Offline/CDN","General apps","Content sites"],
+]},
+{ty:"diagram",title:"Hosting Model Architecture Comparison",svg:`<svg width="520" height="260" viewBox="0 0 520 260" xmlns="http://www.w3.org/2000/svg">
+<defs><style>
+.hb{fill:#1a0d30;stroke:#7c3aed;stroke-width:1.2}
+.ab{fill:#0d1a28;stroke:#06b6d4;stroke-width:1.2}
+.gb{fill:#0d2018;stroke:#10b981;stroke-width:1.2}
+.yb{fill:#1a1a08;stroke:#eab308;stroke-width:1.2}
+.ht{font-family:'Fira Code',monospace;font-size:9px;fill:#e2e8f0;text-anchor:middle;font-weight:500}
+.hs{font-family:'Fira Code',monospace;font-size:7.5px;fill:#94a3b8;text-anchor:middle}
+@keyframes hf{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}
+.hfl{stroke-dasharray:5 3;animation:hf 1.5s linear infinite}
+</style></defs>
+<rect fill="#020508" x="1" y="1" width="518" height="258" rx="8" stroke="#1d2e4a" stroke-width="1"/>
+<text font-family="'Outfit',sans-serif" font-size="11" font-weight="700" fill="#a855f7" text-anchor="middle" x="260" y="18">BLAZOR HOSTING MODELS</text>
+<!-- Server -->
+<text class="ht" fill="#a855f7" x="65" y="34">BLAZOR SERVER</text>
+<rect class="ab" x="10" y="40" width="110" height="28" rx="4"/><text class="hs" x="65" y="58">Browser (thin UI)</text>
+<text class="hs" fill="#eab308" x="65" y="82">WebSocket/SignalR</text>
+<line stroke="#7c3aed" stroke-width="1.5" class="hfl" x1="65" y1="68" x2="65" y2="96" marker-end="url(#ha)"/>
+<defs><marker id="ha" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3z" fill="#7c3aed"/></marker></defs>
+<rect class="hb" x="10" y="97" width="110" height="28" rx="4"/><text class="hs" x="65" y="115">Server (C# + DOM diff)</text>
+<rect class="gb" x="10" y="140" width="110" height="28" rx="4"/><text class="hs" x="65" y="158">Database / APIs</text>
+<text class="hs" fill="#34d399" x="65" y="188">✅ Fast startup</text>
+<text class="hs" fill="#f87171" x="65" y="200">❌ Network dependent</text>
+<text class="hs" fill="#f87171" x="65" y="212">❌ 1 circuit per user</text>
+<!-- WASM -->
+<text class="ht" fill="#06b6d4" x="195" y="34">BLAZOR WASM</text>
+<rect class="ab" x="140" y="40" width="110" height="28" rx="4"/><text class="hs" x="195" y="58">Browser (.NET + Razor)</text>
+<rect fill="#0a1520" stroke="#06b6d4" stroke-width="1" x="140" y="78" width="110" height="28" rx="4"/><text class="hs" x="195" y="96">dotnet.wasm runtime</text>
+<text class="hs" fill="#34d399" x="195" y="140">✅ Offline capable</text>
+<text class="hs" fill="#34d399" x="195" y="152">✅ No server needed</text>
+<text class="hs" fill="#f87171" x="195" y="164">❌ Large initial download</text>
+<text class="hs" fill="#f87171" x="195" y="176">❌ Slow cold start</text>
+<!-- Auto -->
+<text class="ht" fill="#eab308" x="325" y="34">INTERACTIVE AUTO</text>
+<rect class="ab" x="270" y="40" width="110" height="28" rx="4"/><text class="hs" x="325" y="58">Browser</text>
+<rect class="yb" x="270" y="78" width="110" height="28" rx="4"/><text class="hs" x="325" y="96">Server first → WASM</text>
+<text class="hs" fill="#34d399" x="325" y="140">✅ Fast startup</text>
+<text class="hs" fill="#34d399" x="325" y="152">✅ Eventually offline</text>
+<text class="hs" fill="#fde047" x="325" y="164">⚡ Complex transition</text>
+<!-- SSR -->
+<text class="ht" fill="#10b981" x="455" y="34">STATIC SSR</text>
+<rect class="ab" x="400" y="40" width="110" height="28" rx="4"/><text class="hs" x="455" y="58">Browser (static HTML)</text>
+<line stroke="#10b981" stroke-width="1.5" x1="455" y1="68" x2="455" y2="96"/>
+<rect class="gb" x="400" y="97" width="110" height="28" rx="4"/><text class="hs" x="455" y="115">Server renders HTML</text>
+<text class="hs" fill="#34d399" x="455" y="140">✅ Fastest TTFB</text>
+<text class="hs" fill="#34d399" x="455" y="152">✅ SEO friendly</text>
+<text class="hs" fill="#f87171" x="455" y="164">❌ No interactivity</text>
+</svg>`},
+{ty:"scenario",title:"🏢 Real-World Decision Guide",body:`<strong>Pick Blazor Server when:</strong> enterprise internal apps, admin panels, dashboards — where fast startup and server-side data access matter more than offline capability.<br><br>
+<strong>Pick Blazor WASM when:</strong> public-facing apps that must work offline (field technicians, warehouse scanners), or when you need zero server costs via CDN hosting.<br><br>
+<strong>Pick Interactive Auto when:</strong> most new .NET 8+ applications — best of both worlds. Server on cold start, WASM after download.<br><br>
+<strong>Pick Static SSR when:</strong> marketing sites, blogs, documentation — maximum performance, SEO, minimal cost.`},
+{ty:"code",lang:"razor",name:"Setting Render Modes in .NET 8+",code:`<span class="cm">@* App.razor — global render mode *@</span>
+&lt;<span class="comp">Routes</span> <span class="ev">@rendermode</span>=<span class="st">"InteractiveAuto"</span> /&gt;
+
+<span class="cm">@* Per-component override — this page uses Server *@</span>
+<span class="dir">@page</span> <span class="st">"/realtime-dashboard"</span>
+<span class="dir">@rendermode</span> <span class="comp">InteractiveServer</span>
+
+<span class="cm">@* This page uses WASM for offline capability *@</span>
+<span class="dir">@page</span> <span class="st">"/field-form"</span>
+<span class="dir">@rendermode</span> <span class="comp">InteractiveWebAssembly</span>
+
+<span class="cm">@* Programmatic from parent component *@</span>
+&lt;<span class="comp">HeavyChart</span> <span class="at">@rendermode</span>=<span class="st">"new InteractiveServerRenderMode(prerender: false)"</span> /&gt;
+
+<span class="cm">// Program.cs — configure what's available</span>
+builder.Services.<span class="fn">AddRazorComponents</span>()
+    .<span class="fn">AddInteractiveServerComponents</span>()
+    .<span class="fn">AddInteractiveWebAssemblyComponents</span>();`},
+]},
+"arch1":{
+title:"Blazor Architecture Overview",
+bread:"Chapter 3 · Blazor Architecture",
+sub:"The complete architectural map — component tree, render tree, hosting model internals, and how Blazor connects your C# to the browser DOM.",
+pills:[{t:"Core",c:"#7c3aed"},{t:"Architecture",c:"#06b6d4"},{t:"Foundation",c:"#10b981"}],
+secs:[
+{ty:"prose",title:"Three Architectural Layers",html:`<p>Blazor is built on a <strong>component-based UI model</strong> where every UI element is a Razor component (<code>.razor</code> file). Components form a tree, and the architecture has three main layers:</p>
+<ul>
+<li><strong>Component Layer</strong> — Razor components containing C# code and HTML markup</li>
+<li><strong>Render Tree Layer</strong> — In-memory description of UI state; Blazor diffs this to compute minimal DOM changes</li>
+<li><strong>Hosting Layer</strong> — How changes reach the browser: via SignalR (Server), direct JS interop (WASM), or HTTP response (SSR)</li>
+</ul>
+<h4>Key Architectural Insight: No Virtual DOM</h4>
+<p>Unlike React, Blazor does <strong>not</strong> use a Virtual DOM. It uses a <strong>Render Tree</strong> — a flat sequence of <code>RenderTreeFrame</code> structs. Diffing uses sequence numbers (compile-time constants) as position hints, making it extremely fast.</p>`},
+{ty:"diagram",title:"Full Blazor Architecture Map",svg:`<svg width="530" height="290" viewBox="0 0 530 290" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="abg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d1425"/><stop offset="1" stop-color="#050810"/></linearGradient>
+<marker id="ama" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#7c3aed"/></marker>
+<marker id="amb" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#06b6d4"/></marker>
+<style>.aab{fill:#1a1030;stroke:#7c3aed;stroke-width:1.2}.aabb{fill:#0d1a28;stroke:#06b6d4;stroke-width:1.2}.agb{fill:#0d2018;stroke:#10b981;stroke-width:1.2}
+.aaat{font-family:'Fira Code',monospace;font-size:9px;fill:#e2e8f0;text-anchor:middle}.aaas{font-family:'Fira Code',monospace;font-size:8px;fill:#94a3b8;text-anchor:middle}
+@keyframes abf{0%{stroke-dashoffset:50}100%{stroke-dashoffset:0}}.abfl{stroke-dasharray:6 3;animation:abf 1.5s linear infinite}</style></defs>
+<rect fill="url(#abg)" x="2" y="2" width="526" height="286" rx="10" stroke="#1d2e4a" stroke-width="1"/>
+<text font-family="'Outfit',sans-serif" font-size="12" font-weight="800" fill="#a855f7" text-anchor="middle" x="265" y="20">BLAZOR ARCHITECTURE</text>
+<!-- Browser row -->
+<rect fill="#0d1425" stroke="#1d2e4a" x="10" y="28" width="506" height="56" rx="6"/>
+<text font-family="'Outfit',sans-serif" font-size="9" font-weight="700" fill="#06b6d4" x="18" y="44">BROWSER</text>
+<rect class="aabb" x="18" y="48" width="100" height="28" rx="4"/><text class="aaat" fill="#06b6d4" x="68" y="65">DOM</text>
+<rect class="aabb" x="130" y="48" width="100" height="28" rx="4"/><text class="aaat" fill="#06b6d4" x="180" y="65">HTML + CSS</text>
+<rect class="aabb" x="242" y="48" width="100" height="28" rx="4"/><text class="aaat" fill="#06b6d4" x="292" y="65">JS / WASM</text>
+<rect class="aabb" x="354" y="48" width="150" height="28" rx="4"/><text class="aaat" fill="#06b6d4" x="429" y="65">Event Listeners</text>
+<!-- Transport -->
+<text class="aaas" fill="#a855f7" x="120" y="103">SignalR (Server mode)</text>
+<text class="aaas" fill="#06b6d4" x="290" y="103">JS Interop (WASM)</text>
+<text class="aaas" fill="#10b981" x="440" y="103">HTTP (Static SSR)</text>
+<line stroke="#a855f7" stroke-width="1.5" class="abfl" x1="120" y1="84" x2="120" y2="115" marker-end="url(#ama)"/>
+<line stroke="#06b6d4" stroke-width="1.5" class="abfl" x1="270" y1="84" x2="270" y2="115" marker-end="url(#amb)"/>
+<line stroke="#10b981" stroke-width="1.5" class="abfl" x1="440" y1="84" x2="440" y2="115" marker-end="url(#ama)"/>
+<!-- Blazor layer -->
+<rect fill="#0d0d20" stroke="#1d2e4a" x="10" y="118" width="506" height="90" rx="6"/>
+<text font-family="'Outfit',sans-serif" font-size="9" font-weight="700" fill="#a855f7" x="18" y="134">BLAZOR LAYER</text>
+<rect class="aab" x="18" y="140" width="115" height="58" rx="5"/><text class="aaat" fill="#a855f7" x="75" y="158">Component Tree</text><text class="aaas" x="75" y="172">App→Pages→Comps</text><text class="aaas" x="75" y="186">Parameters, State</text>
+<rect class="aab" x="148" y="140" width="115" height="58" rx="5"/><text class="aaat" fill="#a855f7" x="205" y="158">Render Tree</text><text class="aaas" x="205" y="172">RenderTreeFrames</text><text class="aaas" x="205" y="186">Diff + Patch</text>
+<rect class="aab" x="278" y="140" width="115" height="58" rx="5"/><text class="aaat" fill="#a855f7" x="335" y="158">Renderer</text><text class="aaas" x="335" y="172">Server/WASM/SSR</text><text class="aaas" x="335" y="186">Event Dispatch</text>
+<rect class="aab" x="408" y="140" width="105" height="58" rx="5"/><text class="aaat" fill="#a855f7" x="460" y="158">DI Container</text><text class="aaas" x="460" y="172">Scoped/Singleton</text><text class="aaas" x="460" y="186">IServiceProvider</text>
+<!-- Backend -->
+<rect fill="#0d2018" stroke="#1d2e4a" x="10" y="222" width="506" height="55" rx="6"/>
+<text font-family="'Outfit',sans-serif" font-size="9" font-weight="700" fill="#10b981" x="18" y="238">ASP.NET CORE BACKEND</text>
+<rect class="agb" x="18" y="244" width="90" height="25" rx="4"/><text class="aaat" fill="#10b981" x="63" y="260">Middleware</text>
+<rect class="agb" x="120" y="244" width="90" height="25" rx="4"/><text class="aaat" fill="#10b981" x="165" y="260">Auth/Identity</text>
+<rect class="agb" x="222" y="244" width="100" height="25" rx="4"/><text class="aaat" fill="#10b981" x="272" y="260">EF Core / DB</text>
+<rect class="agb" x="334" y="244" width="90" height="25" rx="4"/><text class="aaat" fill="#10b981" x="379" y="260">SignalR Hub</text>
+<rect class="agb" x="436" y="244" width="78" height="25" rx="4"/><text class="aaat" fill="#10b981" x="475" y="260">REST APIs</text>
+</svg>`},
+{ty:"code",lang:"razor",name:"Anatomy of a Complete Blazor Component",code:`<span class="cm">@* ProductCard.razor — shows all key component features *@</span>
+<span class="dir">@page</span> <span class="st">"/products/{Id:int}"</span>
+<span class="dir">@rendermode</span> <span class="comp">InteractiveServer</span>
+<span class="dir">@inject</span> <span class="tp">IProductService</span> ProductService
+<span class="dir">@inject</span> <span class="tp">CartState</span> Cart
+<span class="dir">@implements</span> <span class="tp">IAsyncDisposable</span>
+
+<span class="dir">@if</span> (product <span class="kw">is null</span>)
+{
+    &lt;<span class="pr">div</span> <span class="at">class</span>=<span class="st">"skeleton"</span>&gt;Loading...&lt;/<span class="pr">div</span>&gt;
+}
+<span class="dir">else</span>
+{
+    &lt;<span class="pr">div</span> <span class="at">class</span>=<span class="st">"product-card"</span>&gt;
+        &lt;<span class="pr">img</span> <span class="at">src</span>=<span class="st">"@product.ImageUrl"</span> <span class="at">alt</span>=<span class="st">"@product.Name"</span> /&gt;
+        &lt;<span class="pr">h2</span>&gt;<span class="ra">@product.Name</span>&lt;/<span class="pr">h2</span>&gt;
+        &lt;<span class="pr">p</span>&gt;<span class="ra">@product.Price.ToString("C")</span>&lt;/<span class="pr">p</span>&gt;
+        &lt;<span class="pr">button</span> <span class="ev">@onclick</span>=<span class="st">"AddToCart"</span> <span class="at">disabled</span>=<span class="st">"@isAdding"</span>&gt;
+            <span class="dir">@if</span>(isAdding) {<span class="st">"Adding..."</span>} <span class="dir">else</span> {<span class="st">"Add to Cart"</span>}
+        &lt;/<span class="pr">button</span>&gt;
+    &lt;/<span class="pr">div</span>&gt;
+}
+
+<span class="dir">@code</span> {
+    [<span class="at">Parameter</span>] <span class="kw">public int</span> Id { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">private</span> <span class="tp">Product</span>? product;
+    <span class="kw">private bool</span> isAdding;
+    <span class="kw">private</span> <span class="tp">CancellationTokenSource</span> _cts = <span class="kw">new</span>();
+
+    <span class="kw">protected override async</span> <span class="tp">Task</span> <span class="fn">OnInitializedAsync</span>()
+        => product = <span class="kw">await</span> ProductService.<span class="fn">GetByIdAsync</span>(Id, _cts.Token);
+
+    <span class="kw">private async</span> <span class="tp">Task</span> <span class="fn">AddToCart</span>()
+    {
+        isAdding = <span class="kw">true</span>;
+        <span class="kw">await</span> Cart.<span class="fn">AddAsync</span>(product!);
+        isAdding = <span class="kw">false</span>;
+    }
+    <span class="kw">public async</span> <span class="tp">ValueTask</span> <span class="fn">DisposeAsync</span>() { <span class="kw">await</span> _cts.<span class="fn">CancelAsync</span>(); _cts.<span class="fn">Dispose</span>(); }
+}`},
+{ty:"callout",kind:"blazor",ic:"🔥",txt:"<strong>Key Insight:</strong> Blazor does NOT use Virtual DOM. It uses a <strong>Render Tree</strong> with sequence-numbered frames. The differ is faster than VDOM because sequence numbers tell it exactly where nodes are — no full-tree scan needed."},
+]},
+"lc1":{
+title:"Component Lifecycle Methods",
+bread:"Chapter 5 · Component Lifecycle",
+sub:"Every lifecycle hook in exact execution order — understand this to eliminate race conditions, memory leaks, and stale state bugs.",
+pills:[{t:"Core",c:"#10b981"},{t:"Lifecycle",c:"#06b6d4"},{t:"Critical",c:"#ef4444"}],
+secs:[
+{ty:"prose",title:"Why Lifecycle Matters",html:`<p>Blazor components have a well-defined lifecycle. Misunderstanding it causes the <strong>most common Blazor bugs</strong>: data not loading, UI not updating, memory leaks from subscriptions, and race conditions in async operations.</p>
+<p><strong>Complete lifecycle order:</strong></p>
+<ol>
+<li><code>SetParametersAsync</code> — parent passes parameters</li>
+<li><code>OnInitialized / OnInitializedAsync</code> — runs once on creation</li>
+<li><code>OnParametersSet / OnParametersSetAsync</code> — runs after every parameter change</li>
+<li><code>ShouldRender</code> — return false to skip rendering</li>
+<li><code>BuildRenderTree</code> — generates render output (compiler handles this)</li>
+<li><code>OnAfterRender / OnAfterRenderAsync</code> — DOM is ready, JS calls safe</li>
+<li><code>Dispose / DisposeAsync</code> — cleanup resources</li>
+</ol>`},
+{ty:"diagram",title:"Component Lifecycle Flow",svg:`<svg width="510" height="320" viewBox="0 0 510 320" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="lca" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#10b981"/></marker>
+<style>.lcb{fill:#0d2018;stroke:#10b981;stroke-width:1.2}.lct{font-family:'Fira Code',monospace;font-size:9px;fill:#e2e8f0;text-anchor:middle}.lcs{font-family:'Fira Code',monospace;font-size:7.5px;fill:#94a3b8;text-anchor:middle}
+.lcob{fill:#2a1a08;stroke:#f97316;stroke-width:1.2}.lca2{stroke:#10b981;stroke-width:1.5;fill:none;marker-end:url(#lca)}
+@keyframes lcf{0%{stroke-dashoffset:28}100%{stroke-dashoffset:0}}.lcafl{stroke-dasharray:4 2;animation:lcf 1s linear infinite}</style></defs>
+<rect fill="#020508" x="1" y="1" width="508" height="318" rx="8" stroke="#1d2e4a" stroke-width="1"/>
+<text font-family="'Fira Code',monospace" font-size="10" fill="#10b981" text-anchor="middle" x="255" y="18">COMPONENT LIFECYCLE</text>
+<rect class="lcb" x="155" y="24" width="200" height="30" rx="5"/><text class="lct" fill="#10b981" x="255" y="44">SetParametersAsync</text>
+<text class="lcs" x="390" y="44">Parent sets params</text>
+<rect class="lcb" x="155" y="64" width="200" height="30" rx="5"/><text class="lct" x="255" y="84">OnInitialized(Async)</text>
+<text class="lcs" x="390" y="84">Runs ONCE on create</text>
+<rect class="lcb" x="155" y="104" width="200" height="30" rx="5"/><text class="lct" x="255" y="124">OnParametersSet(Async)</text>
+<text class="lcs" fill="#34d399" x="390" y="124">Every param change</text>
+<rect class="lcb" x="155" y="144" width="200" height="30" rx="5"/><text class="lct" x="255" y="164">ShouldRender()</text>
+<text class="lcs" fill="#fde047" x="390" y="164">false = skip render</text>
+<rect class="lcb" x="155" y="184" width="200" height="30" rx="5"/><text class="lct" x="255" y="204">BuildRenderTree</text>
+<text class="lcs" x="390" y="204">Compiler generates this</text>
+<rect class="lcb" x="155" y="224" width="200" height="30" rx="5"/><text class="lct" x="255" y="244">OnAfterRender(Async)</text>
+<text class="lcs" x="390" y="244">DOM ready, JS calls OK</text>
+<rect class="lcob" x="155" y="272" width="200" height="30" rx="5"/><text class="lct" fill="#f97316" x="255" y="292">Dispose / DisposeAsync</text>
+<text class="lcs" fill="#f87171" x="390" y="292">MUST unsubscribe events!</text>
+<line class="lca2 lcafl" x1="255" y1="54" x2="255" y2="62"/>
+<line class="lca2 lcafl" x1="255" y1="94" x2="255" y2="102"/>
+<line class="lca2 lcafl" x1="255" y1="134" x2="255" y2="142"/>
+<line class="lca2 lcafl" x1="255" y1="174" x2="255" y2="182"/>
+<line class="lca2 lcafl" x1="255" y1="214" x2="255" y2="222"/>
+<line class="lca2 lcafl" x1="255" y1="254" x2="255" y2="270"/>
+<path d="M 100 120 Q 50 185 100 145" stroke="#a855f7" stroke-width="1" fill="none" stroke-dasharray="3 2"/>
+<text font-family="'Fira Code',monospace" font-size="7" fill="#a855f7" x="8" y="165">re-render</text>
+<text font-family="'Fira Code',monospace" font-size="7" fill="#a855f7" x="12" y="174">loop</text>
+</svg>`},
+{ty:"code",lang:"razor",name:"Production-Ready Lifecycle Implementation",code:`<span class="dir">@page</span> <span class="st">"/dashboard/{UserId:int}"</span>
+<span class="dir">@inject</span> <span class="tp">IUserService</span> UserService
+<span class="dir">@inject</span> <span class="tp">IRealtimeHub</span> Realtime
+<span class="dir">@implements</span> <span class="tp">IAsyncDisposable</span>
+
+<span class="dir">@code</span> {
+    [<span class="at">Parameter</span>] <span class="kw">public int</span> UserId { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">private</span> <span class="tp">User</span>? user;
+    <span class="kw">private bool</span> isLoading = <span class="kw">true</span>;
+    <span class="kw">private</span> <span class="tp">CancellationTokenSource</span> _cts = <span class="kw">new</span>();
+
+    <span class="cm">// ✅ Runs ONCE — good for one-time async setup</span>
+    <span class="kw">protected override async</span> <span class="tp">Task</span> <span class="fn">OnInitializedAsync</span>()
+    {
+        <span class="kw">try</span> {
+            user = <span class="kw">await</span> UserService.<span class="fn">GetAsync</span>(UserId, _cts.Token);
+            Realtime.OnStatusChanged += <span class="fn">HandleStatusChange</span>; <span class="cm">// subscribe</span>
+        } <span class="kw">finally</span> { isLoading = <span class="kw">false</span>; }
+    }
+
+    <span class="cm">// ✅ Runs on EVERY param change — handles navigation</span>
+    <span class="kw">protected override async</span> <span class="tp">Task</span> <span class="fn">OnParametersSetAsync</span>()
+    {
+        <span class="kw">if</span> (user?.Id != UserId) <span class="cm">// only reload if ID changed</span>
+            user = <span class="kw">await</span> UserService.<span class="fn">GetAsync</span>(UserId);
+    }
+
+    <span class="cm">// ✅ Use firstRender to avoid re-running JS setup</span>
+    <span class="kw">protected override async</span> <span class="tp">Task</span> <span class="fn">OnAfterRenderAsync</span>(<span class="kw">bool</span> firstRender)
+    {
+        <span class="kw">if</span> (firstRender)
+            <span class="kw">await</span> JS.<span class="fn">InvokeVoidAsync</span>(<span class="st">"initDashboard"</span>);
+    }
+
+    <span class="cm">// ✅ Prevents render if nothing UI-relevant changed</span>
+    <span class="kw">protected override bool</span> <span class="fn">ShouldRender</span>() => !isLoading;
+
+    <span class="cm">// ✅ Thread-safe update from background events</span>
+    <span class="kw">private void</span> <span class="fn">HandleStatusChange</span>(<span class="tp">StatusEvent</span> e)
+    {
+        <span class="kw">if</span> (user <span class="kw">is not null</span>) user = user <span class="kw">with</span> { Status = e.Status };
+        <span class="fn">InvokeAsync</span>(<span class="fn">StateHasChanged</span>); <span class="cm">// thread-safe!</span>
+    }
+
+    <span class="cm">// ✅ CRITICAL: Always unsubscribe. Always cancel tokens.</span>
+    <span class="kw">public async</span> <span class="tp">ValueTask</span> <span class="fn">DisposeAsync</span>()
+    {
+        Realtime.OnStatusChanged -= <span class="fn">HandleStatusChange</span>;
+        <span class="kw">await</span> _cts.<span class="fn">CancelAsync</span>();
+        _cts.<span class="fn">Dispose</span>();
+    }
+}`},
+{ty:"callout",kind:"danger",ic:"🚨",txt:"<strong>Memory Leak Alert:</strong> If you subscribe to events (<code>Service.OnChange += Handler</code>) in <code>OnInitialized</code> but never unsubscribe in <code>Dispose</code>, the component is kept alive by the event reference forever. In Blazor Server this accumulates per circuit. Always implement <code>IAsyncDisposable</code>."},
+]},
+"st2":{
+title:"Application State Services",
+bread:"Chapter 8 · State Management",
+sub:"Sharing state across components using scoped/singleton services with event-based notification — the fundamental Blazor state pattern.",
+pills:[{t:"Core",c:"#7c3aed"},{t:"State",c:"#06b6d4"},{t:"Patterns",c:"#10b981"}],
+secs:[
+{ty:"prose",title:"Why Application State Services?",html:`<p>Component-local state (<code>private int count</code>) disappears when the component unmounts. For state that must <strong>persist and be shared</strong> across components — a shopping cart, user profile, theme, notifications — we use injected state services.</p>
+<h4>Scoped vs Singleton in Blazor</h4>
+<ul>
+<li><strong>Blazor Server</strong>: Use <code>AddScoped</code> → one state instance per SignalR circuit = one per user session</li>
+<li><strong>Blazor WASM</strong>: Use <code>AddSingleton</code> → one per browser tab (only one user per process anyway)</li>
+</ul>`},
+{ty:"code",lang:"csharp",name:"Complete State Service Pattern — Shopping Cart",code:`<span class="cm">// Services/CartState.cs</span>
+<span class="kw">public class</span> <span class="tp">CartState</span>
+{
+    <span class="kw">private readonly</span> <span class="tp">List</span>&lt;<span class="tp">CartItem</span>&gt; _items = [];
+    <span class="kw">public</span> <span class="tp">IReadOnlyList</span>&lt;<span class="tp">CartItem</span>&gt; Items => _items;
+    <span class="kw">public int</span> Count => _items.<span class="fn">Sum</span>(i => i.Quantity);
+    <span class="kw">public decimal</span> Total => _items.<span class="fn">Sum</span>(i => i.Price * i.Quantity);
+
+    <span class="cm">// Notify all subscribers (components) to re-render</span>
+    <span class="kw">public event</span> <span class="tp">Action</span>? OnChange;
+    <span class="kw">private void</span> <span class="fn">Notify</span>() => OnChange?.Invoke();
+
+    <span class="kw">public void</span> <span class="fn">AddItem</span>(<span class="tp">Product</span> product, <span class="kw">int</span> qty = <span class="nu">1</span>)
+    {
+        <span class="kw">var</span> existing = _items.<span class="fn">FirstOrDefault</span>(i => i.ProductId == product.Id);
+        <span class="kw">if</span> (existing <span class="kw">is not null</span>) existing.Quantity += qty;
+        <span class="kw">else</span> _items.<span class="fn">Add</span>(<span class="kw">new</span> <span class="tp">CartItem</span>(product, qty));
+        <span class="fn">Notify</span>();
+    }
+    <span class="kw">public void</span> <span class="fn">Remove</span>(<span class="kw">int</span> productId) { _items.<span class="fn">RemoveAll</span>(i => i.ProductId == productId); <span class="fn">Notify</span>(); }
+    <span class="kw">public void</span> <span class="fn">Clear</span>() { _items.<span class="fn">Clear</span>(); <span class="fn">Notify</span>(); }
+}
+
+<span class="cm">// Program.cs registration</span>
+builder.Services.<span class="fn">AddScoped</span>&lt;<span class="tp">CartState</span>&gt;();  <span class="cm">// Blazor Server</span>
+<span class="cm">// builder.Services.AddSingleton&lt;CartState&gt;();  // Blazor WASM</span>
+
+<span class="cm">// CartIcon.razor — subscribes to state changes</span>
+<span class="kw">public partial class</span> <span class="tp">CartIcon</span> : <span class="tp">ComponentBase</span>, <span class="tp">IDisposable</span>
+{
+    [<span class="at">Inject</span>] <span class="tp">CartState</span> Cart { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">default</span>!;
+
+    <span class="kw">protected override void</span> <span class="fn">OnInitialized</span>()
+        => Cart.OnChange += <span class="fn">StateHasChanged</span>;  <span class="cm">// subscribe</span>
+
+    <span class="kw">public void</span> <span class="fn">Dispose</span>()
+        => Cart.OnChange -= <span class="fn">StateHasChanged</span>;  <span class="cm">// MUST unsubscribe</span>
+}`},
+{ty:"scenario",title:"🏢 Real-World Scenario: Multi-Tenant SaaS State",body:`<strong>Problem:</strong> SaaS app with 1000 concurrent users on Blazor Server. Each user needs their own tenant context, permissions, and preferences — but these must be available to every component without passing parameters everywhere.<br><br>
+<strong>Solution:</strong> Scoped state service injected via DI. Each SignalR circuit gets its own instance automatically.<br><br>
+<code>builder.Services.AddScoped&lt;TenantContext&gt;();</code><br><br>
+<strong>Why not Singleton?</strong> A Singleton on Blazor Server is shared across ALL users — you'd be leaking user A's data to user B. Always use <code>AddScoped</code> for per-user state on Blazor Server.`},
+]},
+"fm1":{
+title:"EditForm & EditContext",
+bread:"Chapter 9 · Forms & Validation",
+sub:"Blazor's powerful form system — EditForm, model binding, EditContext validation pipeline, and real-world form patterns.",
+pills:[{t:"Core",c:"#06b6d4"},{t:"Forms",c:"#7c3aed"},{t:"Validation",c:"#10b981"}],
+secs:[
+{ty:"prose",title:"The EditForm System",html:`<p><code>EditForm</code> is the central Blazor form component. It wraps a model and provides an <code>EditContext</code> — the authoritative source of validation state for all child inputs.</p>
+<p><strong>How it works:</strong></p>
+<ul>
+<li><code>EditForm Model="@model"</code> creates an EditContext from your POCO</li>
+<li>All <code>InputXxx</code> components (InputText, InputNumber, InputSelect) connect to EditContext automatically via cascading parameter</li>
+<li><code>DataAnnotationsValidator</code> wires <code>[Required]</code>, <code>[Range]</code> etc. to EditContext</li>
+<li><code>OnValidSubmit</code> only fires when all validators pass</li>
+<li><code>OnInvalidSubmit</code> fires when validation fails — good for focus management</li>
+</ul>`},
+{ty:"code",lang:"razor",name:"Production Form with Full Validation",code:`<span class="dir">@page</span> <span class="st">"/register"</span>
+<span class="dir">@inject</span> <span class="tp">IAuthService</span> Auth
+<span class="dir">@inject</span> <span class="tp">NavigationManager</span> Nav
+
+&lt;<span class="comp">EditForm</span> <span class="at">Model</span>=<span class="st">"@model"</span> <span class="ev">OnValidSubmit</span>=<span class="st">"HandleSubmit"</span> <span class="ev">OnInvalidSubmit</span>=<span class="st">"HandleInvalid"</span>&gt;
+    &lt;<span class="comp">DataAnnotationsValidator</span> /&gt;
+
+    <span class="dir">@if</span> (!<span class="kw">string</span>.IsNullOrEmpty(serverError))
+    {
+        &lt;<span class="pr">div</span> <span class="at">class</span>=<span class="st">"alert alert-danger"</span>&gt;<span class="ra">@serverError</span>&lt;/<span class="pr">div</span>&gt;
+    }
+
+    &lt;<span class="pr">div</span> <span class="at">class</span>=<span class="st">"form-group"</span>&gt;
+        &lt;<span class="pr">label</span>&gt;Full Name&lt;/<span class="pr">label</span>&gt;
+        &lt;<span class="comp">InputText</span> <span class="at">class</span>=<span class="st">"form-control"</span> <span class="ev">@bind-Value</span>=<span class="st">"model.FullName"</span>
+                   <span class="at">placeholder</span>=<span class="st">"Enter your name"</span>/&gt;
+        &lt;<span class="comp">ValidationMessage</span> <span class="at">For</span>=<span class="st">"@(() =&gt; model.FullName)"</span> /&gt;
+    &lt;/<span class="pr">div</span>&gt;
+
+    &lt;<span class="pr">div</span> <span class="at">class</span>=<span class="st">"form-group"</span>&gt;
+        &lt;<span class="pr">label</span>&gt;Email&lt;/<span class="pr">label</span>&gt;
+        &lt;<span class="comp">InputText</span> <span class="at">class</span>=<span class="st">"form-control"</span> <span class="ev">@bind-Value</span>=<span class="st">"model.Email"</span> /&gt;
+        &lt;<span class="comp">ValidationMessage</span> <span class="at">For</span>=<span class="st">"@(() =&gt; model.Email)"</span> /&gt;
+    &lt;/<span class="pr">div</span>&gt;
+
+    &lt;<span class="pr">div</span> <span class="at">class</span>=<span class="st">"form-group"</span>&gt;
+        &lt;<span class="pr">label</span>&gt;Role&lt;/<span class="pr">label</span>&gt;
+        &lt;<span class="comp">InputSelect</span> <span class="ev">@bind-Value</span>=<span class="st">"model.Role"</span>&gt;
+            <span class="dir">@foreach</span> (<span class="kw">var</span> role <span class="kw">in</span> <span class="tp">Enum</span>.<span class="fn">GetValues</span>&lt;<span class="tp">UserRole</span>&gt;())
+                { &lt;<span class="pr">option</span> <span class="at">value</span>=<span class="st">"@role"</span>&gt;<span class="ra">@role</span>&lt;/<span class="pr">option</span>&gt; }
+        &lt;/<span class="comp">InputSelect</span>&gt;
+    &lt;/<span class="pr">div</span>&gt;
+
+    &lt;<span class="pr">button</span> <span class="at">type</span>=<span class="st">"submit"</span> <span class="at">disabled</span>=<span class="st">"@isLoading"</span>&gt;
+        <span class="dir">@(</span>isLoading ? <span class="st">"Saving..."</span> : <span class="st">"Register"</span><span class="dir">)</span>
+    &lt;/<span class="pr">button</span>&gt;
+&lt;/<span class="pr">EditForm</span>&gt;
+
+<span class="dir">@code</span> {
+    <span class="kw">private</span> <span class="tp">RegisterModel</span> model = <span class="kw">new</span>();
+    <span class="kw">private bool</span> isLoading;
+    <span class="kw">private string</span> serverError = <span class="st">""</span>;
+
+    <span class="kw">private async</span> <span class="tp">Task</span> <span class="fn">HandleSubmit</span>()
+    {
+        isLoading = <span class="kw">true</span>; serverError = <span class="st">""</span>;
+        <span class="kw">try</span> {
+            <span class="kw">await</span> Auth.<span class="fn">RegisterAsync</span>(model);
+            Nav.<span class="fn">NavigateTo</span>(<span class="st">"/welcome"</span>);
+        } <span class="kw">catch</span> (<span class="tp">ApiException</span> ex) {
+            serverError = ex.Message; <span class="cm">// show server errors</span>
+        } <span class="kw">finally</span> { isLoading = <span class="kw">false</span>; }
+    }
+    <span class="kw">private void</span> <span class="fn">HandleInvalid</span>() => serverError = <span class="st">"Please fix validation errors."</span>;
+}
+
+<span class="cm">// RegisterModel.cs — validation annotations</span>
+<span class="kw">public class</span> <span class="tp">RegisterModel</span>
+{
+    [<span class="at">Required(ErrorMessage = "Name is required")</span>]
+    [<span class="at">StringLength(100, MinimumLength = 2)</span>]
+    <span class="kw">public string</span> FullName { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="st">""</span>;
+
+    [<span class="at">Required</span>][<span class="at">EmailAddress(ErrorMessage = "Invalid email")</span>]
+    <span class="kw">public string</span> Email { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="st">""</span>;
+
+    [<span class="at">Required</span>][<span class="at">MinLength(8, ErrorMessage = "Min 8 characters")</span>]
+    <span class="kw">public string</span> Password { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="st">""</span>;
+
+    [<span class="at">Required</span>]
+    <span class="kw">public</span> <span class="tp">UserRole</span> Role { <span class="kw">get</span>; <span class="kw">set</span>; }
+}`},
+]},
+"au1":{
+title:"AuthenticationStateProvider",
+bread:"Chapter 16 · Authentication & Authorization",
+sub:"The foundation of Blazor auth — how ClaimsPrincipal flows through the tree, custom providers, and all auth components.",
+pills:[{t:"Core",c:"#ef4444"},{t:"Auth",c:"#7c3aed"},{t:"Security",c:"#f97316"}],
+secs:[
+{ty:"prose",title:"How Blazor Auth Works",html:`<p>Blazor exposes authentication state through a <strong>cascading parameter</strong> of type <code>Task&lt;AuthenticationState&gt;</code>. The <code>AuthenticationStateProvider</code> supplies this. <code>CascadingAuthenticationState</code> (in App.razor) propagates it to every component in the tree.</p>
+<h4>Built-in Auth Components</h4>
+<ul>
+<li><code>AuthorizeView</code> — conditionally renders based on auth state, roles, or policies</li>
+<li><code>AuthorizeRouteView</code> — guards entire pages from unauthorized access</li>
+<li><code>[Authorize]</code> attribute on <code>@page</code> components — declarative page-level guard</li>
+<li><code>IAuthorizationService</code> — programmatic permission checks in code</li>
+</ul>`},
+{ty:"code",lang:"razor",name:"Auth Components & Custom Provider",code:`<span class="cm">@* App.razor — wrap everything in auth state *@</span>
+&lt;<span class="comp">CascadingAuthenticationState</span>&gt;
+    &lt;<span class="comp">Router</span> <span class="at">AppAssembly</span>=<span class="st">"@typeof(App).Assembly"</span>&gt;
+        &lt;<span class="at">Found</span> <span class="at">Context</span>=<span class="st">"routeData"</span>&gt;
+            &lt;<span class="comp">AuthorizeRouteView</span> <span class="at">RouteData</span>=<span class="st">"@routeData"</span>
+                               <span class="at">DefaultLayout</span>=<span class="st">"@typeof(MainLayout)"</span>&gt;
+                &lt;<span class="at">NotAuthorized</span>&gt;
+                    &lt;<span class="pr">p</span>&gt;You are not authorized. &lt;<span class="pr">a</span> <span class="at">href</span>=<span class="st">"/login"</span>&gt;Login&lt;/<span class="pr">a</span>&gt;&lt;/<span class="pr">p</span>&gt;
+                &lt;/<span class="at">NotAuthorized</span>&gt;
+            &lt;/<span class="comp">AuthorizeRouteView</span>&gt;
+        &lt;/<span class="at">Found</span>&gt;
+    &lt;/<span class="comp">Router</span>&gt;
+&lt;/<span class="comp">CascadingAuthenticationState</span>&gt;
+
+<span class="cm">@* In any component — conditional rendering *@</span>
+&lt;<span class="comp">AuthorizeView</span> <span class="at">Roles</span>=<span class="st">"Admin,Manager"</span>&gt;
+    &lt;<span class="at">Authorized</span>&gt;
+        &lt;<span class="pr">p</span>&gt;Hello, <span class="ra">@context.User.Identity?.Name</span>!&lt;/<span class="pr">p</span>&gt;
+        &lt;<span class="comp">AdminPanel</span> /&gt;
+    &lt;/<span class="at">Authorized</span>&gt;
+    &lt;<span class="at">NotAuthorized</span>&gt;&lt;<span class="pr">a</span> <span class="at">href</span>=<span class="st">"/login"</span>&gt;Please login&lt;/<span class="pr">a</span>&gt;&lt;/<span class="at">NotAuthorized</span>&gt;
+    &lt;<span class="at">Authorizing</span>&gt;&lt;<span class="pr">span</span>&gt;Checking...&lt;/<span class="pr">span</span>&gt;&lt;/<span class="at">Authorizing</span>&gt;
+&lt;/<span class="comp">AuthorizeView</span>&gt;
+
+<span class="cm">@* Page-level guard *@</span>
+<span class="dir">@page</span> <span class="st">"/admin"</span>
+[<span class="at">Authorize(Roles = "Admin")</span>]
+
+<span class="cm">// Custom JWT AuthenticationStateProvider</span>
+<span class="kw">public class</span> <span class="tp">JwtAuthStateProvider</span> : <span class="tp">AuthenticationStateProvider</span>
+{
+    <span class="kw">private readonly</span> <span class="tp">ITokenService</span> _tokenService;
+    <span class="kw">private readonly</span> <span class="tp">IJSRuntime</span> _js;
+
+    <span class="kw">public</span> <span class="tp">JwtAuthStateProvider</span>(<span class="tp">ITokenService</span> tokenService, <span class="tp">IJSRuntime</span> js)
+        => (_tokenService, _js) = (tokenService, js);
+
+    <span class="kw">public override async</span> <span class="tp">Task</span>&lt;<span class="tp">AuthenticationState</span>&gt; <span class="fn">GetAuthenticationStateAsync</span>()
+    {
+        <span class="kw">var</span> token = <span class="kw">await</span> _js.<span class="fn">InvokeAsync</span>&lt;<span class="kw">string</span>&gt;(<span class="st">"localStorage.getItem"</span>, <span class="st">"jwt"</span>);
+        <span class="kw">if</span> (<span class="kw">string</span>.IsNullOrEmpty(token))
+            <span class="kw">return new</span> <span class="tp">AuthenticationState</span>(<span class="kw">new</span> <span class="tp">ClaimsPrincipal</span>(<span class="kw">new</span> <span class="tp">ClaimsIdentity</span>()));
+
+        <span class="kw">var</span> claims = _tokenService.<span class="fn">ParseClaims</span>(token);
+        <span class="kw">var</span> identity = <span class="kw">new</span> <span class="tp">ClaimsIdentity</span>(claims, <span class="st">"jwt"</span>);
+        <span class="kw">return new</span> <span class="tp">AuthenticationState</span>(<span class="kw">new</span> <span class="tp">ClaimsPrincipal</span>(identity));
+    }
+
+    <span class="kw">public void</span> <span class="fn">NotifyLogin</span>(<span class="tp">ClaimsPrincipal</span> user)
+        => <span class="fn">NotifyAuthenticationStateChanged</span>(<span class="tp">Task</span>.<span class="fn">FromResult</span>(<span class="kw">new</span> <span class="tp">AuthenticationState</span>(user)));
+    <span class="kw">public void</span> <span class="fn">NotifyLogout</span>()
+        => <span class="fn">NotifyAuthenticationStateChanged</span>(<span class="tp">Task</span>.<span class="fn">FromResult</span>(<span class="kw">new</span> <span class="tp">AuthenticationState</span>(<span class="kw">new</span> <span class="tp">ClaimsPrincipal</span>(<span class="kw">new</span> <span class="tp">ClaimsIdentity</span>()))));
+}`},
+{ty:"callout",kind:"warn",ic:"⚠️",txt:"<strong>JWT Storage Warning:</strong> Storing JWTs in <code>localStorage</code> is vulnerable to XSS. For production, prefer <strong>HTTP-only cookies</strong> for token storage — they are inaccessible to JavaScript. Use the BFF (Backend for Frontend) pattern to proxy API requests and attach cookies server-side."},
+]},
+"js1":{
+title:"IJSRuntime & JavaScript Interop",
+bread:"Chapter 17 · JavaScript Interop",
+sub:"Calling JavaScript from C# and C# from JavaScript — the complete IJSRuntime API with production patterns and performance tips.",
+pills:[{t:"Core",c:"#a855f7"},{t:"JS Interop",c:"#06b6d4"},{t:"Integration",c:"#10b981"}],
+secs:[
+{ty:"prose",title:"When to Use JS Interop",html:`<p>Blazor handles most UI without JavaScript. Use JS interop when you need:</p>
+<ul>
+<li><strong>Browser APIs</strong> — localStorage, clipboard, geolocation, notifications</li>
+<li><strong>DOM manipulation</strong> Blazor can't do — focus management, scroll position, canvas</li>
+<li><strong>Third-party JS libraries</strong> — charts (Chart.js), maps (Leaflet), editors (Monaco)</li>
+<li><strong>Performance-critical paths</strong> — some DOM operations are faster in native JS</li>
+</ul>
+<h4>Key Rules</h4>
+<ul>
+<li>Only call JS from <code>OnAfterRenderAsync</code> or event handlers — DOM must exist first</li>
+<li>Use <code>IJSObjectReference</code> for module isolation (ES modules)</li>
+<li>Use <code>IJSInProcessRuntime</code> in WASM for synchronous calls</li>
+</ul>`},
+{ty:"code",lang:"razor",name:"Complete JS Interop Patterns",code:`<span class="dir">@inject</span> <span class="tp">IJSRuntime</span> JS
+<span class="dir">@implements</span> <span class="tp">IAsyncDisposable</span>
+
+<span class="dir">@code</span> {
+    <span class="kw">private</span> <span class="tp">IJSObjectReference</span>? _module;
+
+    <span class="cm">// Load ES module once after first render</span>
+    <span class="kw">protected override async</span> <span class="tp">Task</span> <span class="fn">OnAfterRenderAsync</span>(<span class="kw">bool</span> firstRender)
+    {
+        <span class="kw">if</span> (firstRender)
+            _module = <span class="kw">await</span> JS.<span class="fn">InvokeAsync</span>&lt;<span class="tp">IJSObjectReference</span>&gt;(
+                <span class="st">"import"</span>, <span class="st">"./js/chartHelpers.js"</span>);
+    }
+
+    <span class="cm">// Call a JS function — returns value</span>
+    <span class="kw">private async</span> <span class="tp">Task</span>&lt;<span class="kw">string</span>&gt; <span class="fn">GetClipboardAsync</span>()
+        => <span class="kw">await</span> JS.<span class="fn">InvokeAsync</span>&lt;<span class="kw">string</span>&gt;(<span class="st">"navigator.clipboard.readText"</span>);
+
+    <span class="cm">// Call JS — void return</span>
+    <span class="kw">private async</span> <span class="tp">Task</span> <span class="fn">ScrollToTopAsync</span>()
+        => <span class="kw">await</span> JS.<span class="fn">InvokeVoidAsync</span>(<span class="st">"window.scrollTo"</span>, <span class="nu">0</span>, <span class="nu">0</span>);
+
+    <span class="cm">// Call module function</span>
+    <span class="kw">private async</span> <span class="tp">Task</span> <span class="fn">InitChartAsync</span>(<span class="tp">ElementReference</span> canvas)
+        => <span class="kw">await</span> _module!.<span class="fn">InvokeVoidAsync</span>(<span class="st">"initChart"</span>, canvas, chartData);
+
+    <span class="cm">// Pass DotNetObjectReference for callbacks FROM JS to C#</span>
+    <span class="kw">private async</span> <span class="tp">Task</span> <span class="fn">RegisterCallbackAsync</span>()
+    {
+        <span class="kw">var</span> objRef = <span class="tp">DotNetObjectReference</span>.<span class="fn">Create</span>(<span class="kw">this</span>);
+        <span class="kw">await</span> JS.<span class="fn">InvokeVoidAsync</span>(<span class="st">"registerCallback"</span>, objRef);
+    }
+
+    <span class="cm">// C# method callable from JS: window.dotNetObj.invokeMethodAsync('OnDataReceived', data)</span>
+    [<span class="at">JSInvokable</span>]
+    <span class="kw">public void</span> <span class="fn">OnDataReceived</span>(<span class="kw">string</span> data)
+    {
+        <span class="cm">// Handle data from JS, then update UI</span>
+        <span class="fn">InvokeAsync</span>(<span class="fn">StateHasChanged</span>);
+    }
+
+    <span class="kw">public async</span> <span class="tp">ValueTask</span> <span class="fn">DisposeAsync</span>()
+    {
+        <span class="kw">if</span> (_module <span class="kw">is not null</span>)
+            <span class="kw">await</span> _module.<span class="fn">DisposeAsync</span>(); <span class="cm">// unload the module</span>
+    }
+}`},
+{ty:"callout",kind:"tip",ic:"⚡",txt:"<strong>Performance Tip:</strong> Use <code>IJSObjectReference</code> (ES module import) instead of global JS functions. Modules are lazy-loaded, tree-shakeable, and isolated — they don't pollute the global <code>window</code> scope. In WASM, use <code>IJSInProcessRuntime</code> for synchronous, allocation-free calls."},
+]},
+"rt1":{
+title:"SignalR Hubs in Blazor",
+bread:"Chapter 20 · Realtime Applications",
+sub:"Building real-time features with SignalR — typed hubs, connection management, groups, and production-grade reconnection.",
+pills:[{t:"Advanced",c:"#10b981"},{t:"SignalR",c:"#06b6d4"},{t:"Real-time",c:"#a855f7"}],
+secs:[
+{ty:"prose",title:"SignalR in Blazor — Two Different Uses",html:`<p>SignalR appears in Blazor in two distinct ways — it's important not to confuse them:</p>
+<ul>
+<li><strong>Blazor Server's internal circuit</strong> — automatically managed by the framework. You don't interact with this directly.</li>
+<li><strong>Your own SignalR Hub</strong> — for pushing real-time data to components (live prices, chat, notifications). This is what we build here.</li>
+</ul>
+<h4>Architecture for Real-time Features</h4>
+<p>Components use <code>HubConnectionBuilder</code> to connect to a SignalR Hub on the ASP.NET Core server. The hub pushes data to connected clients using strongly-typed contracts.</p>`},
+{ty:"code",lang:"csharp",name:"Typed SignalR Hub + Client",code:`<span class="cm">// Hubs/DashboardHub.cs — server-side hub</span>
+<span class="kw">public interface</span> <span class="tp">IDashboardClient</span>
+{
+    <span class="tp">Task</span> <span class="fn">OnMetricUpdate</span>(<span class="tp">MetricData</span> metric);
+    <span class="tp">Task</span> <span class="fn">OnAlert</span>(<span class="kw">string</span> message, <span class="tp">AlertLevel</span> level);
+}
+
+<span class="kw">public class</span> <span class="tp">DashboardHub</span> : <span class="tp">Hub</span>&lt;<span class="tp">IDashboardClient</span>&gt;
+{
+    <span class="kw">public async</span> <span class="tp">Task</span> <span class="fn">SubscribeToDashboard</span>(<span class="kw">string</span> dashboardId)
+    {
+        <span class="kw">await</span> Groups.<span class="fn">AddToGroupAsync</span>(Context.ConnectionId, dashboardId);
+        <span class="kw">await</span> Clients.Caller.<span class="fn">OnAlert</span>(<span class="st">"Subscribed!"</span>, <span class="tp">AlertLevel</span>.Info);
+    }
+
+    <span class="kw">public override async</span> <span class="tp">Task</span> <span class="fn">OnDisconnectedAsync</span>(<span class="tp">Exception</span>? ex)
+    {
+        <span class="cm">// Handle cleanup on disconnect</span>
+        <span class="kw">await base</span>.<span class="fn">OnDisconnectedAsync</span>(ex);
+    }
+}
+
+<span class="cm">// Background service pushing live metrics</span>
+<span class="kw">public class</span> <span class="tp">MetricBroadcaster</span>(<span class="tp">IHubContext</span>&lt;<span class="tp">DashboardHub</span>, <span class="tp">IDashboardClient</span>&gt; hub)
+    : <span class="tp">BackgroundService</span>
+{
+    <span class="kw">protected override async</span> <span class="tp">Task</span> <span class="fn">ExecuteAsync</span>(<span class="tp">CancellationToken</span> ct)
+    {
+        <span class="kw">while</span> (!ct.IsCancellationRequested)
+        {
+            <span class="kw">var</span> metric = <span class="kw">await</span> <span class="fn">GetCurrentMetricsAsync</span>();
+            <span class="kw">await</span> hub.Clients.<span class="fn">Group</span>(<span class="st">"main"</span>).<span class="fn">OnMetricUpdate</span>(metric);
+            <span class="kw">await</span> <span class="tp">Task</span>.<span class="fn">Delay</span>(<span class="nu">1000</span>, ct);
+        }
+    }
+}`},
+{ty:"code",lang:"razor",name:"Blazor Component — SignalR Connection",code:`<span class="dir">@page</span> <span class="st">"/dashboard"</span>
+<span class="dir">@inject</span> <span class="tp">NavigationManager</span> Nav
+<span class="dir">@implements</span> <span class="tp">IAsyncDisposable</span>
+
+&lt;<span class="pr">div</span>&gt;Status: <span class="ra">@connectionStatus</span>&lt;/<span class="pr">div</span>&gt;
+<span class="dir">@foreach</span> (<span class="kw">var</span> m <span class="kw">in</span> metrics)
+{
+    &lt;<span class="pr">div</span>&gt;<span class="ra">@m.Name</span>: <span class="ra">@m.Value</span>&lt;/<span class="pr">div</span>&gt;
+}
+
+<span class="dir">@code</span> {
+    <span class="kw">private</span> <span class="tp">HubConnection</span>? hub;
+    <span class="kw">private</span> <span class="tp">List</span>&lt;<span class="tp">MetricData</span>&gt; metrics = [];
+    <span class="kw">private string</span> connectionStatus = <span class="st">"Connecting..."</span>;
+
+    <span class="kw">protected override async</span> <span class="tp">Task</span> <span class="fn">OnInitializedAsync</span>()
+    {
+        hub = <span class="kw">new</span> <span class="tp">HubConnectionBuilder</span>()
+            .<span class="fn">WithUrl</span>(Nav.<span class="fn">ToAbsoluteUri</span>(<span class="st">"/hubs/dashboard"</span>))
+            .<span class="fn">WithAutomaticReconnect</span>([<span class="tp">TimeSpan</span>.Zero, <span class="tp">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="nu">2</span>), <span class="tp">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="nu">10</span>)])
+            .<span class="fn">Build</span>();
+
+        hub.<span class="fn">On</span>&lt;<span class="tp">MetricData</span>&gt;(<span class="st">"OnMetricUpdate"</span>, metric => {
+            metrics.<span class="fn">Add</span>(metric);
+            <span class="kw">if</span> (metrics.Count > <span class="nu">100</span>) metrics.<span class="fn">RemoveAt</span>(<span class="nu">0</span>);
+            <span class="fn">InvokeAsync</span>(<span class="fn">StateHasChanged</span>);
+        });
+
+        hub.Reconnecting += _ => { connectionStatus = <span class="st">"Reconnecting..."</span>; <span class="kw">return</span> <span class="fn">InvokeAsync</span>(<span class="fn">StateHasChanged</span>); };
+        hub.Reconnected += _ => { connectionStatus = <span class="st">"Connected"</span>; <span class="kw">return</span> <span class="fn">InvokeAsync</span>(<span class="fn">StateHasChanged</span>); };
+
+        <span class="kw">await</span> hub.<span class="fn">StartAsync</span>();
+        <span class="kw">await</span> hub.<span class="fn">InvokeAsync</span>(<span class="st">"SubscribeToDashboard"</span>, <span class="st">"main"</span>);
+        connectionStatus = <span class="st">"Connected"</span>;
+    }
+
+    <span class="kw">public async</span> <span class="tp">ValueTask</span> <span class="fn">DisposeAsync</span>()
+    {
+        <span class="kw">if</span> (hub <span class="kw">is not null</span>) <span class="kw">await</span> hub.<span class="fn">DisposeAsync</span>();
+    }
+}`},
+]},
+"cs1":{
+title:"Enterprise SaaS Admin Dashboard",
+bread:"Chapter 30 · Enterprise Case Studies",
+sub:"Full production architecture for a multi-tenant SaaS admin panel — Blazor Server, CQRS, real-time notifications, and scalability patterns.",
+pills:[{t:"Expert",c:"#a855f7"},{t:"SaaS",c:"#06b6d4"},{t:"Real-world",c:"#10b981"}],
+secs:[
+{ty:"prose",title:"System Overview",html:`<p>This case study covers building a production SaaS admin dashboard for a B2B HR platform serving 500+ tenants with 10,000 concurrent Blazor Server users.</p>
+<p><strong>Stack:</strong> Blazor Server + ASP.NET Core 10 + EF Core + PostgreSQL + Redis + Azure SignalR Service + MudBlazor</p>
+<h4>Key Architectural Decisions</h4>
+<ul>
+<li><strong>Blazor Server chosen</strong> — admins need real-time data (live employee status, system alerts); Server mode gives persistent connection without polling</li>
+<li><strong>Azure SignalR Service</strong> — offloads SignalR connection management from app servers for horizontal scaling</li>
+<li><strong>Redis backplane</strong> — state shared across multiple app instances for sticky-session-free load balancing</li>
+<li><strong>CQRS with MediatR</strong> — separates read and write concerns; read models are optimized for dashboard display</li>
+</ul>`},
+{ty:"diagram",title:"SaaS Dashboard Production Architecture",svg:`<svg width="520" height="270" viewBox="0 0 520 270" xmlns="http://www.w3.org/2000/svg">
+<defs><style>.sb{fill:#1a0d30;stroke:#7c3aed;stroke-width:1}.gb{fill:#0d2018;stroke:#10b981;stroke-width:1}.ab{fill:#0d1a28;stroke:#06b6d4;stroke-width:1}.rb{fill:#2a0a0a;stroke:#ef4444;stroke-width:1}.yb{fill:#1a1a08;stroke:#eab308;stroke-width:1}
+.st{font-family:'Fira Code',monospace;font-size:8.5px;fill:#e2e8f0;text-anchor:middle}.ss{font-family:'Fira Code',monospace;font-size:7.5px;fill:#94a3b8;text-anchor:middle}</style></defs>
+<rect fill="#020508" x="1" y="1" width="518" height="268" rx="8" stroke="#1d2e4a" stroke-width="1"/>
+<text font-family="'Outfit',sans-serif" font-size="11" font-weight="700" fill="#a855f7" text-anchor="middle" x="260" y="18">SAAS DASHBOARD — PRODUCTION ARCHITECTURE</text>
+<!-- CDN -->
+<rect class="ab" x="220" y="24" width="80" height="26" rx="4"/><text class="st" fill="#06b6d4" x="260" y="41">Azure CDN</text>
+<!-- Load Balancer -->
+<rect class="yb" x="190" y="64" width="140" height="26" rx="4"/><text class="st" fill="#eab308" x="260" y="81">Load Balancer (ARR Affinity)</text>
+<!-- App servers -->
+<rect class="sb" x="30" y="108" width="120" height="40" rx="4"/><text class="st" fill="#a855f7" x="90" y="124">Blazor Server</text><text class="ss" x="90" y="138">App Instance 1</text>
+<rect class="sb" x="200" y="108" width="120" height="40" rx="4"/><text class="st" fill="#a855f7" x="260" y="124">Blazor Server</text><text class="ss" x="260" y="138">App Instance 2</text>
+<rect class="sb" x="370" y="108" width="120" height="40" rx="4"/><text class="st" fill="#a855f7" x="430" y="124">Blazor Server</text><text class="ss" x="430" y="138">App Instance N</text>
+<!-- Azure SignalR -->
+<rect class="ab" x="175" y="168" width="150" height="30" rx="4"/><text class="st" fill="#06b6d4" x="250" y="187">Azure SignalR Service</text>
+<!-- Redis -->
+<rect class="rb" x="30" y="168" width="110" height="30" rx="4"/><text class="st" fill="#ef4444" x="85" y="187">Redis Backplane</text>
+<!-- DB -->
+<rect class="gb" x="370" y="168" width="120" height="30" rx="4"/><text class="st" fill="#10b981" x="430" y="187">PostgreSQL</text>
+<!-- Auth -->
+<rect class="yb" x="200" y="220" width="120" height="30" rx="4"/><text class="st" fill="#eab308" x="260" y="239">Azure AD / Identity</text>
+<!-- Arrows -->
+<line stroke="#06b6d4" stroke-width="1" x1="260" y1="50" x2="260" y2="62"/>
+<line stroke="#a855f7" stroke-width="1" x1="260" y1="90" x2="90" y2="106"/>
+<line stroke="#a855f7" stroke-width="1" x1="260" y1="90" x2="260" y2="106"/>
+<line stroke="#a855f7" stroke-width="1" x1="260" y1="90" x2="430" y2="106"/>
+<line stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4 2" x1="90" y1="148" x2="200" y2="180"/>
+<line stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4 2" x1="260" y1="148" x2="255" y2="166"/>
+<line stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4 2" x1="430" y1="148" x2="320" y2="180"/>
+<line stroke="#ef4444" stroke-width="1" stroke-dasharray="3 2" x1="90" y1="148" x2="85" y2="166"/>
+<line stroke="#10b981" stroke-width="1" x1="430" y1="148" x2="430" y2="166"/>
+</svg>`},
+{ty:"code",lang:"csharp",name:"CQRS Query Handler for Dashboard Data",code:`<span class="cm">// Query: Get dashboard metrics for current tenant</span>
+<span class="kw">public record</span> <span class="tp">GetDashboardQuery</span>(<span class="kw">string</span> TenantId, <span class="tp">DateRange</span> Range)
+    : <span class="tp">IRequest</span>&lt;<span class="tp">DashboardViewModel</span>&gt;;
+
+<span class="kw">public class</span> <span class="tp">GetDashboardHandler</span>(
+    <span class="tp">IDbContext</span> db,
+    <span class="tp">IMemoryCache</span> cache,
+    <span class="tp">ITenantContext</span> tenant)
+    : <span class="tp">IRequestHandler</span>&lt;<span class="tp">GetDashboardQuery</span>, <span class="tp">DashboardViewModel</span>&gt;
+{
+    <span class="kw">public async</span> <span class="tp">Task</span>&lt;<span class="tp">DashboardViewModel</span>&gt; <span class="fn">Handle</span>(
+        <span class="tp">GetDashboardQuery</span> req, <span class="tp">CancellationToken</span> ct)
+    {
+        <span class="kw">var</span> cacheKey = <span class="st">$"dashboard:{req.TenantId}:{req.Range}"</span>;
+        <span class="kw">return await</span> cache.<span class="fn">GetOrCreateAsync</span>(cacheKey, <span class="kw">async</span> entry => {
+            entry.AbsoluteExpirationRelativeToNow = <span class="tp">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="nu">30</span>);
+            <span class="kw">return new</span> <span class="tp">DashboardViewModel</span>
+            {
+                ActiveUsers = <span class="kw">await</span> db.Users
+                    .<span class="fn">Where</span>(u => u.TenantId == req.TenantId &amp;&amp; u.LastActive >= req.Range.From)
+                    .<span class="fn">CountAsync</span>(ct),
+                Revenue = <span class="kw">await</span> db.Orders
+                    .<span class="fn">Where</span>(o => o.TenantId == req.TenantId &amp;&amp; o.CreatedAt >= req.Range.From)
+                    .<span class="fn">SumAsync</span>(o => o.Total, ct),
+                RecentAlerts = <span class="kw">await</span> db.Alerts
+                    .<span class="fn">Where</span>(a => a.TenantId == req.TenantId &amp;&amp; !a.IsRead)
+                    .<span class="fn">OrderByDescending</span>(a => a.CreatedAt)
+                    .<span class="fn">Take</span>(<span class="nu">10</span>)
+                    .<span class="fn">ProjectTo</span>&lt;<span class="tp">AlertDto</span>&gt;()
+                    .<span class="fn">ToListAsync</span>(ct),
+            };
+        })!;
+    }
+}`},
+{ty:"scenario",title:"💡 Scaling to 10,000 Concurrent Users",body:`<strong>Challenge:</strong> 10,000 Blazor Server circuits means 10,000 persistent WebSocket connections. Each circuit holds ~200KB of server memory including component state.<br><br>
+<strong>Solution 1:</strong> <code>Azure SignalR Service</code> — offloads all WebSocket connections from your app servers. App servers only process business logic.<br><br>
+<strong>Solution 2:</strong> Limit component state — avoid storing large datasets per-circuit. Use scoped services with caching. Load data on demand, not upfront.<br><br>
+<strong>Solution 3:</strong> Redis backplane for <code>IDistributedCache</code> and session state — allows horizontal scaling without sticky sessions.<br><br>
+<strong>Result:</strong> 10,000 users across 4 app server instances + 1 Azure SignalR Service tier S2. Cost: ~$400/month vs $2000+ for equivalent polling infrastructure.`},
+]},
+};
+const QA=[
+{q:"What is Blazor and how does it differ from traditional web frameworks?",a:"Blazor is an ASP.NET Core framework for building interactive web UIs using <code>C#</code> instead of JavaScript. Unlike React/Angular which use JS, Blazor leverages .NET's component model, type system, and tooling. It compiles Razor components (<code>.razor</code> files) to C# classes that generate a <strong>Render Tree</strong> — not a Virtual DOM. DOM updates are sent via SignalR (Server mode) or JS interop calls (WASM mode). Key advantage: full stack C# — share models, validation, and business logic between server and client.",level:"b",tag:"Blazor"},
+{q:"What is the difference between Blazor Server and Blazor WebAssembly?",a:"<strong>Blazor Server:</strong> Components execute on the server. UI events go to the server via SignalR WebSocket. DOM patches come back over the same connection. Fast startup, full .NET, but network-dependent and one WebSocket circuit per user. <strong>Blazor WASM:</strong> .NET runtime (dotnet.wasm) downloads to the browser. Components execute locally. After initial download, zero latency, can work offline. No persistent server connection needed. Tradeoff: larger initial download (5-15MB), slower first load.",level:"b",tag:"Hosting"},
+{q:"What is a Blazor circuit?",a:"A circuit is the server-side state maintained for each Blazor Server user session. It includes the component tree, event handlers, and the SignalR connection. Each browser tab = one circuit. When the connection drops, Blazor attempts reconnection within a configurable timeout (default 3 minutes). During reconnect, server retains the circuit state. After timeout, the circuit is disposed and state is lost. Circuits consume ~200KB+ server memory each — key scalability consideration.",level:"b",tag:"Server"},
+{q:"Explain the Blazor component lifecycle in order.",a:"(1) <code>SetParametersAsync</code> — parent sets parameters. (2) <code>OnInitialized / OnInitializedAsync</code> — runs once on component creation, good for data loading. (3) <code>OnParametersSet / OnParametersSetAsync</code> — runs after every parameter update, handle route param changes here. (4) <code>ShouldRender</code> — return false to skip re-render. (5) <code>BuildRenderTree</code> — compiler-generated, describes UI. (6) <code>OnAfterRender / OnAfterRenderAsync(firstRender)</code> — DOM is ready, safe to use JS interop. (7) <code>Dispose/DisposeAsync</code> — cleanup subscriptions and resources.",level:"b",tag:"Lifecycle"},
+{q:"What is the @key directive and when should you use it?",a:"<code>@key</code> gives Blazor a hint to identify list items during re-rendering. Without <code>@key</code>, Blazor matches elements by position — if you insert an item at the top, every subsequent item re-renders. With <code>@key=\"item.Id\"</code>, Blazor knows which items are the same and only renders new/changed ones. Use <code>@key</code> whenever rendering a list of components (not just HTML elements) where items can be added/removed/reordered. Don't use objects as keys — use stable unique IDs.",level:"b",tag:"Rendering"},
+{q:"How does two-way data binding work in Blazor?",a:"<code>@bind-Value=\"model.Name\"</code> is syntactic sugar for two things: (1) setting the property value from the component property, and (2) subscribing to the change event to update the property. Equivalent to: <code>Value=\"@model.Name\" ValueChanged=\"@(v => model.Name = v)\"</code>. You can control the event with <code>@bind-Value:event=\"oninput\"</code> (fires on every keystroke) vs the default <code>onchange</code> (fires on blur). For custom components, implement the <code>Value</code>/<code>ValueChanged</code> parameter pair.",level:"b",tag:"Binding"},
+{q:"What is a CascadingParameter and when would you use it?",a:"<code>[CascadingParameter]</code> receives a value cascaded from an ancestor component via <code>&lt;CascadingValue&gt;</code> — without passing it through every intermediate component (prop drilling). Common uses: (1) Theme provider, (2) User authentication context, (3) Form EditContext, (4) Custom app context. Performance tip: use <code>IsFixed=true</code> on <code>CascadingValue</code> if the value won't change — Blazor skips subscription overhead. Avoid cascading large objects or objects that change frequently — all descendants re-render on every change.",level:"i",tag:"Components"},
+{q:"What causes a Blazor component to re-render?",a:"A component re-renders when: (1) <code>StateHasChanged()</code> is called explicitly, (2) A bound parameter changes from the parent, (3) An event handler (like <code>@onclick</code>) completes — Blazor automatically calls <code>StateHasChanged</code> after event handlers in interactive mode. You can prevent re-renders by: overriding <code>ShouldRender()</code> to return false, implementing <code>IEquatable</code> on parameters, or using <code>@key</code> properly. Note: <code>StateHasChanged</code> from background threads must use <code>InvokeAsync(StateHasChanged)</code>.",level:"i",tag:"Rendering"},
+{q:"How does authentication work in Blazor?",a:"Blazor uses an <code>AuthenticationStateProvider</code> to supply a <code>ClaimsPrincipal</code> to the component tree via <code>&lt;CascadingAuthenticationState&gt;</code>. Components access it through <code>&lt;AuthorizeView&gt;</code> or by injecting <code>AuthenticationStateProvider</code> directly. For Blazor Server, ASP.NET Core auth middleware runs once on HTTP request — the circuit inherits that auth state. For WASM, auth state is managed client-side (typically reading a JWT or cookie). The <code>[Authorize]</code> attribute on <code>@page</code> components causes redirect to login when not authenticated.",level:"i",tag:"Auth"},
+{q:"What is the difference between InvokeAsync(StateHasChanged) and StateHasChanged()?",a:"<code>StateHasChanged()</code> must be called on the Blazor synchronization context (the UI thread for that component). Calling it from a background thread (Timer callback, SignalR message, Task.Run) causes cross-thread exceptions. <code>InvokeAsync(StateHasChanged)</code> marshals the call back to the correct synchronization context safely. Rule: always use <code>InvokeAsync(StateHasChanged)</code> when updating UI from async callbacks, background services, or event handlers that may fire on a different thread.",level:"i",tag:"Threading"},
+{q:"Explain the EditForm and EditContext in Blazor forms.",a:"<code>EditForm</code> accepts a <code>Model</code> object and creates an <code>EditContext</code> — the central state object tracking which fields have been modified and what validation errors exist. Child input components (<code>InputText</code>, <code>InputNumber</code>, <code>InputSelect</code>) automatically connect to EditContext via cascading parameter. <code>DataAnnotationsValidator</code> hooks DataAnnotations validation into EditContext. <code>ValidationSummary</code> and <code>ValidationMessage</code> display errors from EditContext. <code>OnValidSubmit</code> only fires if all validators pass. You can also use EditContext directly for programmatic validation control.",level:"i",tag:"Forms"},
+{q:"How do you call JavaScript from Blazor and C# from JavaScript?",a:"<strong>Blazor → JS:</strong> Inject <code>IJSRuntime</code> and call <code>InvokeAsync&lt;T&gt;(\"functionName\", args)</code> or <code>InvokeVoidAsync</code>. Only call from <code>OnAfterRenderAsync</code> or event handlers (DOM must exist). <strong>JS → Blazor:</strong> Mark a C# method with <code>[JSInvokable]</code>. Call from JS with <code>DotNet.invokeMethodAsync('AssemblyName', 'MethodName', args)</code> for static methods. For instance methods, pass a <code>DotNetObjectReference.Create(this)</code> to JS first. <strong>Best practice:</strong> use ES module isolation (<code>IJSObjectReference</code> from <code>import()</code>) instead of global window functions.",level:"i",tag:"JSInterop"},
+{q:"What is the Virtualize component and when should you use it?",a:"<code>&lt;Virtualize&gt;</code> renders only the visible portion of a large list — creating and destroying DOM nodes as the user scrolls. Without virtualization, rendering 10,000 rows creates 10,000+ DOM nodes. With Virtualize, only ~20-30 visible rows are rendered at any time. Use when: lists exceed ~100 items AND items have uniform height. Configure with <code>ItemSize</code> (height in px), <code>OverscanCount</code> (extra items rendered outside viewport as buffer). For server-side data, use the <code>ItemsProvider</code> delegate for on-demand loading — no need to load all 10,000 items upfront.",level:"i",tag:"Performance"},
+{q:"What is the difference between AddScoped and AddSingleton in Blazor DI?",a:"In <strong>Blazor Server</strong>: <code>AddScoped</code> creates one instance per SignalR circuit (per user session). <code>AddSingleton</code> creates one for the entire server process (shared across all users — dangerous for user-specific data). In <strong>Blazor WASM</strong>: <code>AddScoped</code> and <code>AddSingleton</code> behave identically — both create one instance per browser app lifetime (since there's only one user per WASM process). Key gotcha: using <code>AddSingleton</code> for user state in Blazor Server causes data leakage between users.",level:"i",tag:"DI"},
+{q:"How does Blazor's render tree differ from a Virtual DOM?",a:"React's Virtual DOM creates a full JS object tree mirroring the DOM, diffs two entire trees, and patches the real DOM. Blazor's <code>RenderTreeBuilder</code> produces a flat array of <code>RenderTreeFrame</code> structs with <strong>compile-time sequence numbers</strong>. The differ uses sequence numbers as position hints — it doesn't scan the whole tree, just matches by sequence. This is faster than VDOM diffing because: (1) no full-tree traversal, (2) frames are value types (structs), minimal allocation, (3) Blazor knows which components changed because it tracks them directly.",level:"a",tag:"Architecture"},
+{q:"How would you implement offline support in Blazor WebAssembly?",a:"(1) Add PWA to the project: <code>dotnet new blazorwasm --pwa</code> or add <code>&lt;ServiceWorkerIncludedAssets&gt;</code> in csproj. (2) Service worker caches all WASM assemblies, JS, and CSS. (3) For data: use IndexedDB (via JS interop) or <code>ProtectedLocalStorage</code> for caching API responses locally. (4) Implement an offline detection service via <code>navigator.onLine</code> JS interop. (5) Sync strategy: queue mutations locally, replay when back online. (6) Update strategy: service worker checks for new versions and prompts user to reload. Critical: <code>service-worker-assets.js</code> lists all assets to cache — auto-generated during publish.",level:"a",tag:"WASM"},
+{q:"What is the Interactive Auto render mode and what are its limitations?",a:"Interactive Auto (<code>@rendermode InteractiveAuto</code>) starts a component in Blazor Server mode (fast, no download wait), then transparently transitions it to WebAssembly once the WASM runtime finishes downloading in the background. Limitations: (1) The component must be runnable in both Server and WASM — no server-only APIs (EF Core direct calls, file system). (2) State is NOT transferred — component re-initializes when switching modes. (3) Services must be compatible with both environments. (4) Requires both Server and WASM wired in Program.cs. Best for: interactive forms and tools that benefit from offline capability after initial load.",level:"a",tag:"Rendering"},
+{q:"How do you scale Blazor Server to handle thousands of concurrent users?",a:"(1) <strong>Azure SignalR Service</strong>: offloads WebSocket connections from app servers. App servers only handle business logic. (2) <strong>Redis backplane</strong>: for IDistributedCache and session — enables stateless app servers. (3) <strong>Circuit limits</strong>: set <code>MaximumRetainedDisconnectedCircuits</code> to limit memory. (4) <strong>Minimize circuit state</strong>: don't store large datasets in component state — load on demand, cache in Redis. (5) <strong>Horizontal scaling</strong>: with Azure SignalR Service, no sticky sessions needed — scale app servers freely. (6) <strong>Profiling</strong>: monitor circuits per minute, memory per circuit, GC pressure.",level:"a",tag:"Scalability"},
+{q:"What are the security risks specific to Blazor and how do you mitigate them?",a:"(1) <strong>Blazor Server circuit hijacking</strong>: mitigate with anti-forgery tokens and validating auth state on every circuit reconnect. (2) <strong>XSS via MarkupString</strong>: Razor auto-encodes all output. Only <code>@((MarkupString)html)</code> bypasses encoding — sanitize HTML with HtmlSanitizer before using MarkupString. (3) <strong>WASM source inspection</strong>: .NET assemblies are downloadable and decompilable. Never put secrets in WASM. Auth logic must be server-side. (4) <strong>JWT in localStorage</strong>: XSS-vulnerable. Prefer HTTP-only cookies via BFF pattern. (5) <strong>Over-posting</strong>: validate and restrict which properties can be bound in forms — use dedicated DTOs, not domain entities.",level:"a",tag:"Security"},
+{q:"How does prerendering work in Blazor and what problems can it cause?",a:"Prerendering generates static HTML on the server before the Blazor circuit/WASM initializes. Users see content immediately (better UX, SEO). Issues: (1) <strong>Double initialization</strong>: <code>OnInitializedAsync</code> runs twice — once server-side for HTML, once after circuit connects. Guard with <code>if (firstRender)</code> in <code>OnAfterRenderAsync</code>. (2) <strong>JS interop not available</strong>: can't call <code>IJSRuntime</code> during prerender — it throws. Check <code>OperatingSystem.IsBrowser()</code> or use <code>firstRender</code> guard. (3) <strong>State mismatch</strong>: prerendered HTML must match post-hydration output or users see flicker. Use <code>PersistentComponentState</code> to pass data from server prerender to WASM.",level:"a",tag:"SSR"},
+{q:"Explain the BFF (Backend for Frontend) pattern with Blazor WASM.",a:"BFF places an ASP.NET Core API on the same origin as the Blazor WASM host. Instead of WASM calling microservices directly, it calls the BFF, which: (1) Handles OAuth2 token exchange using server-side OIDC (tokens never reach browser), (2) Issues HTTP-only session cookies to the WASM app (XSS-safe auth), (3) Aggregates multiple downstream API calls into one response, (4) Applies per-user rate limiting and authorization. Implementation: combine Blazor WASM hosting project with an API controller project. Use <code>services.AddAuthentication().AddOpenIdConnect()</code> on the BFF, issue cookies with <code>AddCookieAuthentication()</code>. WASM talks to <code>/api/</code> endpoints with the cookie — no tokens in JS.",level:"e",tag:"Architecture"},
+{q:"How would you build a real-time collaborative editing feature in Blazor?",a:"Stack: Blazor Server (persistent connection ideal for collaboration) + SignalR Hub + Redis + operational transformation or CRDTs for conflict resolution. (1) Hub method <code>SendChange(docId, delta)</code> — broadcasts delta to all connections in doc's group. (2) Component subscribes to hub, applies deltas to local model, calls StateHasChanged. (3) Presence: hub tracks connected users per document; broadcasts join/leave events. (4) Persistence: write deltas to event store; on reconnect, replay from last known version. (5) Conflict: use vector clocks or Yjs CRDT library via JS interop for guaranteed convergence. (6) Offline: queue deltas locally, merge on reconnect using operational transform.",level:"e",tag:"Realtime"},
+{q:"What is the Fluxor library and when would you use it over simple state services?",a:"Fluxor is a Redux/Flux state management library for Blazor. It provides: unidirectional data flow, Actions (intent to change state), Reducers (pure functions computing new state), Effects (async side effects), and Redux DevTools integration (time-travel debugging). <strong>Use simple state services when:</strong> state is limited to a few services, team understands the codebase, no need for debugging complex state transitions. <strong>Use Fluxor when:</strong> large team, complex shared state with many interactions, debugging production state issues is important, you need reproducible state for testing, or you have undo/redo requirements. The verbosity cost of Fluxor pays off at scale.",level:"a",tag:"State"},
+{q:"How does CSS isolation work in Blazor and what are its limitations?",a:"Blazor CSS isolation scopes component styles by auto-generating a unique attribute (like <code>b-xdk2jf3</code>) and applying it to all elements in the component's HTML, plus using attribute selector in the generated CSS. This prevents style leakage between components. Implementation: create <code>MyComponent.razor.css</code> alongside <code>MyComponent.razor</code>. Blazor bundles all scoped CSS into <code>{AppName}.styles.css</code>. <strong>Limitations:</strong> (1) Child component elements are not styled by parent's scoped CSS — use <code>::deep</code> combinator: <code>::deep .child-class { }</code>. (2) Doesn't work for dynamically-created elements. (3) @keyframes defined in scoped CSS still need global scope — define animations in app.css.",level:"i",tag:"CSS"},
+];
+// ═══════════════════════════════════════════════════
+// ENGINE
+// ═══════════════════════════════════════════════════
+let curCh=-1,curTopic=null,visited=new Set();
+const lvMap={b:"lv-b",i:"lv-i",a:"lv-a",e:"lv-e"};
+const lvLabel={b:"Basic",i:"Intermediate",a:"Advanced",e:"Expert"};
+
+function buildNav(){
+  const nav=document.getElementById("nav");
+  CHS.forEach((ch,i)=>{
+    const div=document.createElement("div");
+    div.className="ci";div.id="ci"+i;
+    div.innerHTML=`<div class="chr" id="chr${i}" onclick="selectCh(${i})">
+      <div class="cnum" style="background:${ch.bg};color:${ch.c}">${ch.n}</div>
+      <div class="clabel">${ch.t}</div>
+      <div class="carr">▶</div>
+    </div>
+    <div class="tmenu">${ch.topics.map(t=>`
+      <div class="trow" id="n${t.id}" onclick="selectTopic('${t.id}',${i})">
+        <div class="dot"></div>${t.ic} ${t.t}
+      </div>`).join("")}</div>`;
+    nav.appendChild(div);
+  });
+}
+
+function selectCh(i){
+  curCh=i;
+  document.querySelectorAll(".ci").forEach((el,j)=>{
+    el.classList.toggle("open",j===i);
+    el.querySelector(".chr").classList.toggle("act",j===i);
+  });
+  document.getElementById("welcome").style.display="none";
+  document.getElementById("mcon").style.display="block";
+  const ch=CHS[i];
+  const chips=ch.tags.map(t=>`<span class="cchip" style="color:${ch.c};border-color:${ch.c}44;background:${ch.bg}">${t}</span>`).join("");
+  const cards=ch.topics.map(t=>{
+    const tags=t.tags.map(tg=>{
+      const col=tg.includes("Expert")?"#a855f7":tg.includes("Adv")?"#f97316":tg.includes("Core")?"#06b6d4":tg.includes("Modern")?"#10b981":"#475569";
+      return `<span class="tmeta" style="color:${col};border-color:${col}44">${tg}</span>`;
+    }).join("");
+    return `<div class="tcard" id="c${t.id}" onclick="selectTopic('${t.id}',${i})">
+      <div class="tc-icon">${t.ic}</div>
+      <div class="tc-body">
+        <div class="tc-t">${t.t}</div>
+        <div class="tc-d">${t.d}</div>
+        <div class="tc-meta">${tags}</div>
+      </div>
+    </div>`;
+  }).join("");
+  document.getElementById("mcon").innerHTML=`
+    <div class="chero">
+      <div class="chero-n" style="color:${ch.c}">Chapter ${ch.n} · ${ch.topics.length} Topics</div>
+      <div class="chero-t" style="color:${ch.c}">${ch.ic} ${ch.t}</div>
+      <div class="chero-d">${ch.desc}</div>
+      <div class="chero-chips">${chips}</div>
+    </div>
+    <div class="tgrid">${cards}</div>`;
+}
+
+function selectTopic(id,chi){
+  if(chi!==curCh)selectCh(chi);
+  curTopic=id;visited.add(id);updateProg();
+  document.querySelectorAll(".tcard").forEach(el=>el.classList.remove("act"));
+  document.querySelectorAll(".trow").forEach(el=>el.classList.remove("act"));
+  const c=document.getElementById("c"+id);if(c)c.classList.add("act");
+  const n=document.getElementById("n"+id);if(n){n.classList.add("act");n.classList.add("vis");}
+  const d=DETAILS[id];
+  if(!d){renderGeneric(id,chi);return;}
+  renderDetail(d,id);
+}
+
+function renderDetail(d,id){
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  const pills=d.pills.map(p=>`<span class="dpill" style="color:${p.c};border-color:${p.c}44;background:${p.c}11">${p.t}</span>`).join("");
+  const html=d.secs.map(renderSec).join("")+renderQAForTopic(d.title);
+  document.getElementById("rp-con").innerHTML=`<div class="rpcon">
+    <div class="d-bread">${d.bread}</div>
+    <div class="d-title">${d.title}</div>
+    <div class="d-sub">${d.sub}</div>
+    <div class="d-pills">${pills}</div>
+    ${html}</div>`;
+}
+
+function renderSec(s){
+  if(s.ty==="prose") return `<div class="sec"><div class="sec-t">${s.title}</div><div class="prose">${s.html}</div></div>`;
+  if(s.ty==="code") return `<div class="sec"><div class="cb">
+    <div class="cb-hdr">
+      <span class="cb-lang" style="color:${s.lang==="razor"?"#89dceb":s.lang==="csharp"?"#cba6f7":"#a6e3a1"}">${s.lang}</span>
+      <span class="cb-name">${s.name}</span>
+      <button class="cb-copy" onclick="copyCode(this)">Copy</button>
+    </div>
+    <div class="cb-body"><pre>${s.code}</pre></div>
+  </div></div>`;
+  if(s.ty==="diagram") return `<div class="sec"><div class="diag">
+    <div class="diag-hdr">${s.title}</div>
+    <div class="diag-body">${s.svg}</div>
+  </div></div>`;
+  if(s.ty==="callout"){
+    const cls=s.kind==="danger"?"c-danger":s.kind==="warn"?"c-warn":s.kind==="tip"?"c-tip":s.kind==="blazor"?"c-blazor":"c-info";
+    return `<div class="callout ${cls}"><span class="call-ic">${s.ic}</span><span>${s.txt}</span></div>`;
+  }
+  if(s.ty==="table"){
+    const heads=s.headers.map(h=>`<th>${h}</th>`).join("");
+    const rows=s.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("");
+    return `<div class="sec"><table class="ctbl"><thead><tr>${heads}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  if(s.ty==="scenario") return `<div class="scenario"><div class="scen-t">🏢 ${s.title}</div><div class="scen-b">${s.body}</div></div>`;
+  return "";
+}
+
+function renderQAForTopic(title){
+  const words=title.toLowerCase().replace(/<[^>]*>/g,"").split(/\W+/).filter(w=>w.length>3);
+  const rel=QA.filter(q=>{
+    const text=(q.q+" "+q.a+" "+q.tag).toLowerCase();
+    return words.some(w=>text.includes(w));
+  }).slice(0,4);
+  if(!rel.length)return "";
+  return `<div class="sec"><div class="sec-t">🎯 Interview Questions</div>
+    ${rel.map((q,i)=>renderQAItem(q,i+"t"+Date.now())).join("")}</div>`;
+}
+
+function renderQAItem(q,id){
+  return `<div class="qa" id="qa${id}">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span class="qa-qi">Q</span>
+      <span class="qa-qt">${q.q}</span>
+      <span class="qa-lv ${lvMap[q.level]}">${lvLabel[q.level]}</span>
+      <span class="qa-ar">▶</span>
+    </div>
+    <div class="qa-ans"><div class="qa-at">${q.a}</div></div>
+  </div>`;
+}
+
+function renderGeneric(id,chi){
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  const ch=CHS[chi];
+  const t=ch.topics.find(x=>x.id===id);
+  if(!t)return;
+  document.getElementById("rp-con").innerHTML=`<div class="rpcon">
+    <div class="d-bread">${ch.t}</div>
+    <div class="d-title">${t.ic} ${t.t}</div>
+    <div class="d-sub">${t.d}</div>
+    <div class="callout c-blazor"><span class="call-ic">🔥</span>
+      <span>This topic is part of <strong>${ch.t}</strong>. Explore all ${ch.topics.length} topics using the cards in the middle panel.</span>
+    </div>
+    ${renderQAForTopic(t.t)}
+  </div>`;
+}
+
+function toggleQA(el){el.parentElement.classList.toggle("open")}
+
+function copyCode(btn){
+  const txt=btn.closest(".cb").querySelector("pre").innerText;
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent="✓ Copied!";
+    setTimeout(()=>btn.textContent="Copy",2000);
+  });
+}
+
+function updateProg(){
+  const total=CHS.reduce((s,c)=>s+c.topics.length,0);
+  const p=Math.round(visited.size/total*100);
+  document.getElementById("pct").textContent=p+"%";
+  document.getElementById("pfill").style.width=p+"%";
+}
+
+function doSearch(q){
+  q=q.toLowerCase().trim();
+  CHS.forEach((ch,i)=>{
+    let any=false;
+    ch.topics.forEach(t=>{
+      const el=document.getElementById("n"+t.id);
+      if(!el)return;
+      const match=!q||t.t.toLowerCase().includes(q)||t.d.toLowerCase().includes(q)||t.tags.some(tg=>tg.toLowerCase().includes(q));
+      el.style.display=match?"":"none";
+      if(match)any=true;
+    });
+    if(q&&any)document.getElementById("ci"+i).classList.add("open");
+  });
+}
+
+function showAllQA(){
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  const tags=[...new Set(QA.map(q=>q.tag))];
+  const filterBtns=tags.map(t=>
+    `<button onclick="filterQA('${t}',this)" style="background:var(--b2);border:1px solid var(--bd);color:var(--t2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace;transition:all .2s">${t}</button>`
+  ).join("");
+  const items=QA.map((q,i)=>`
+    <div class="qa" data-tag="${q.tag}">
+      <div class="qa-q" onclick="toggleQA(this)">
+        <span class="qa-qi">Q</span>
+        <span class="qa-qt">${q.q}</span>
+        <span style="font-size:9px;padding:2px 7px;border-radius:3px;background:rgba(6,182,212,.08);color:var(--a2);border:1px solid rgba(6,182,212,.2);font-family:'Fira Code',monospace;flex-shrink:0">${q.tag}</span>
+        <span class="qa-lv ${lvMap[q.level]}">${lvLabel[q.level]}</span>
+        <span class="qa-ar">▶</span>
+      </div>
+      <div class="qa-ans"><div class="qa-at">${q.a}</div></div>
+    </div>`).join("");
+  document.getElementById("rp-con").innerHTML=`<div class="rpcon">
+    <div class="d-bread">Blazor Mastery · Interview Preparation</div>
+    <div class="d-title">🎯 Interview Q&amp;A — All ${QA.length} Questions</div>
+    <div class="d-sub">Categorized from Basic to Expert. Click to reveal answers. Filter by topic below.</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px">
+      <button onclick="filterQA(null,this)" style="background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.4);color:var(--a2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace">All</button>
+      ${filterBtns}
+    </div>
+    <div id="qa-list">${items}</div>
+  </div>`;
+}
+
+function filterQA(tag,btn){
+  document.querySelectorAll("#qa-list .qa").forEach(el=>{
+    el.style.display=(!tag||el.dataset.tag===tag)?'':'none';
+  });
+}
+
+buildNav();
+</script>
+</body>
+</html>

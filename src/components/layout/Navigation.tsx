@@ -70,7 +70,11 @@ export const Navigation = () => {
     location.pathname.startsWith("/blogs") ||
     location.pathname.startsWith("/cheatsheets") ||
     location.pathname.startsWith("/tech") ||
+    location.pathname === "/azure-mastery" ||
+    location.pathname === "/angular-mastery" ||
     location.pathname === "/csharp-mastery" ||
+    location.pathname === "/linq-mastery" ||
+    location.pathname === "/blazor-mastery" ||
     location.pathname === "/efcore-mastery" ||
     location.pathname === "/dotnet-mastery" ||
     location.pathname === "/dotnet-mastery-toc" ||
@@ -104,20 +108,16 @@ export const Navigation = () => {
         )}
       >
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16 md:h-[4.5rem] 2xl:h-20">
+          <div className="grid h-16 grid-cols-[auto_1fr_auto] items-center gap-4 md:h-[4.5rem] 2xl:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
+            <Link to="/" className="flex items-center gap-2 group justify-self-start">
               <div className="group-hover:scale-110 transition-transform duration-300">
                 <AbhishekAnimatedLogo size="md" animate />
               </div>
-              <span className="font-bold text-lg hidden sm:block">
-                <span className="text-foreground">abhishek</span>
-                <span className="gradient-text">panda</span>
-              </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden xl:flex items-center gap-0 flex-nowrap 2xl:gap-0.5">
+            <nav className="hidden xl:flex items-center justify-center gap-0 flex-nowrap 2xl:gap-0.5">
               {/* About */}
               {navLinks.slice(0, 1).map((link) => (
                 <Link
@@ -344,7 +344,7 @@ export const Navigation = () => {
               </Link>
             </nav>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-self-end gap-2">
               <HeaderGlobe className="hidden sm:flex" compact />
               <ThemeToggle />
               <Button

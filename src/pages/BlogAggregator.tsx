@@ -84,29 +84,27 @@ export default function BlogAggregator() {
         </section>
 
         <section className="container mx-auto px-4">
-          <div className="rounded-[2rem] border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="editorial-kicker text-primary">Series Library</p>
-                <h2 className="editorial-title mt-2 text-3xl font-black text-foreground md:text-4xl">Explore Cheatsheet Series</h2>
-                <p className="editorial-copy mt-3 max-w-3xl text-sm text-muted-foreground">
-                  Open any numbered mastery series to jump straight into its TOC, guide, modules, chapters, and topics.
-                </p>
-              </div>
-              <div className="rounded-full border border-border/60 bg-background/80 px-4 py-2 text-sm font-semibold text-muted-foreground">
-                {filteredSeries.length} of {BLOG_SERIES.length} series
-              </div>
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="editorial-kicker text-primary">Series Library</p>
+              <h2 className="editorial-title mt-2 text-3xl font-black text-foreground md:text-4xl">Explore Cheatsheet Series</h2>
+              <p className="editorial-copy mt-3 max-w-3xl text-sm text-muted-foreground">
+                Open any mastery track directly from its own responsive card with the right hero visual, logo stack, and tags.
+              </p>
             </div>
+            <div className="rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm font-semibold text-muted-foreground">
+              {filteredSeries.length} of {BLOG_SERIES.length} series
+            </div>
+          </div>
 
-            <div className="mt-6">
-              {filteredSeries.length ? (
-                <BlogSeriesGrid counts={visibleSeriesCounts} seriesList={filteredSeries} />
-              ) : (
-                <div className="rounded-[1.75rem] border border-dashed border-border/70 bg-background/70 p-8 text-center text-muted-foreground">
-                  No series cards match that search.
-                </div>
-              )}
-            </div>
+          <div className="mt-8">
+            {filteredSeries.length ? (
+              <BlogSeriesGrid counts={visibleSeriesCounts} seriesList={filteredSeries} />
+            ) : (
+              <div className="rounded-[1.75rem] border border-dashed border-border/70 bg-card/70 p-8 text-center text-muted-foreground">
+                No series cards match that search.
+              </div>
+            )}
           </div>
         </section>
       </main>
