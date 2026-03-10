@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microservices Mastery — .NET 10 & C# 14</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050a12;
+  --surface: #080f1a;
+  --card: #0c1524;
+  --card2: #101c2e;
+  --border: #131f30;
+  --border2: #1a2d45;
+  --g1: #38bdf8;
+  --g2: #0ea5e9;
+  --g3: #7dd3fc;
+  --acc2: #f97316;
+  --acc3: #fbbf24;
+  --acc4: #4ade80;
+  --acc5: #f472b6;
+  --text: #e2f0ff;
+  --text2: #7ba8c8;
+  --text3: #3a5f7a;
+  --mono: 'Fira Code', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --display: 'Bebas Neue', sans-serif;
+  --lw: 262px;
+  --rw: 540px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:14px;flex-shrink:0;z-index:100}
+.logo-wrap{display:flex;align-items:center;gap:10px}
+.logo-badge{width:38px;height:38px;background:linear-gradient(135deg,var(--g1),var(--g3));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;color:#050a12;flex-shrink:0;box-shadow:0 0 16px rgba(56,189,248,0.3)}
+.logo-text{font-family:var(--display);font-size:22px;letter-spacing:3px;color:var(--g1);text-shadow:0 0 24px rgba(56,189,248,0.35);line-height:1}
+.logo-sub{font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:3px;text-transform:uppercase;margin-top:2px}
+.top-sep{flex:1}
+.top-pill{background:rgba(56,189,248,0.06);border:1px solid var(--border2);border-radius:20px;padding:4px 14px;font-size:11px;color:var(--text2);font-family:var(--mono);display:flex;gap:8px}
+.top-pill span{color:var(--g1)}
+.top-counts{display:flex;gap:10px}
+.count-chip{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:10px;font-family:var(--mono);color:var(--text3)}
+.count-chip b{color:var(--g1)}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* LEFT PANEL */
+.left-panel{width:var(--lw);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.left-hdr{padding:14px 14px 10px;border-bottom:1px solid var(--border)}
+.left-hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.left-hdr-top h3{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase}
+.prog-outer{background:var(--border);border-radius:3px;height:3px;overflow:hidden}
+.prog-inner{height:100%;background:linear-gradient(90deg,var(--g1),var(--g3));border-radius:3px;width:0%;transition:width .5s ease;box-shadow:0 0 6px rgba(56,189,248,.6)}
+.prog-text{font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:5px}
+.left-nav{flex:1;overflow-y:auto;padding:6px 0}
+.left-nav::-webkit-scrollbar{width:3px}
+.left-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.ch-item{display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;border-left:2px solid transparent;transition:all .2s}
+.ch-item:hover{background:rgba(56,189,248,.04);border-left-color:var(--border2)}
+.ch-item.active{background:rgba(56,189,248,.07);border-left-color:var(--g1)}
+.ch-item.active .ch-name{color:var(--g1)}
+.ch-icon-wrap{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:transform .2s}
+.ch-item:hover .ch-icon-wrap{transform:scale(1.1)}
+.ch-info{flex:1;min-width:0}
+.ch-name{font-size:11.5px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .2s}
+.ch-meta{font-size:9.5px;color:var(--text3);font-family:var(--mono)}
+.lv-badge{font-size:8.5px;padding:2px 6px;border-radius:8px;font-family:var(--mono);font-weight:700;flex-shrink:0}
+
+/* MIDDLE */
+.middle{flex:1;overflow-y:auto;padding:22px;min-width:0}
+.middle::-webkit-scrollbar{width:5px}
+.middle::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* WELCOME */
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:62vh;text-align:center;padding:40px;animation:fadeUp .5s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.welcome-glyph{font-size:64px;margin-bottom:20px;animation:glow 3s ease-in-out infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 16px rgba(56,189,248,.3))}50%{filter:drop-shadow(0 0 40px rgba(56,189,248,.7))}}
+.welcome-title{font-family:var(--display);font-size:44px;letter-spacing:4px;color:var(--g1);text-shadow:0 0 40px rgba(56,189,248,.4);margin-bottom:8px}
+.welcome-sub{font-size:14px;color:var(--text2);max-width:540px;line-height:1.7;margin-bottom:28px}
+.stat-grid{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 22px;text-align:center;min-width:90px;transition:border-color .2s}
+.stat-card:hover{border-color:var(--g2)}
+.stat-num{font-family:var(--display);font-size:28px;letter-spacing:2px;color:var(--g1);display:block;line-height:1}
+.stat-lbl{font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-top:5px;display:block}
+.welcome-hint{font-size:11px;color:var(--text3);font-family:var(--mono);letter-spacing:1px;margin-top:22px}
+
+/* CHAPTER HEADER */
+.ch-header{margin-bottom:24px;animation:fadeUp .35s ease}
+.ch-eyebrow{font-size:9px;color:var(--g1);font-family:var(--mono);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px}
+.ch-big-title{font-family:var(--display);font-size:30px;letter-spacing:2px;color:var(--text);line-height:1.1;margin-bottom:10px}
+.ch-desc{font-size:13px;color:var(--text2);line-height:1.7;max-width:640px}
+.ch-chips{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--text2);font-family:var(--mono)}
+.chip-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* TOPIC GRID */
+.topics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:11px;animation:fadeUp .4s ease .1s both}
+.t-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:15px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden}
+.t-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--g1),var(--g3));transform:scaleX(0);transition:transform .22s;transform-origin:left}
+.t-card:hover{border-color:var(--g2);transform:translateY(-2px);box-shadow:0 8px 20px rgba(56,189,248,.08)}
+.t-card:hover::after{transform:scaleX(1)}
+.t-card.active{border-color:var(--g1);background:var(--card2);box-shadow:0 0 0 1px var(--g1),0 8px 24px rgba(56,189,248,.12)}
+.t-card.active::after{transform:scaleX(1)}
+.t-icon{font-size:22px;margin-bottom:9px;display:block}
+.t-title{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:5px;font-family:var(--mono)}
+.t-desc{font-size:11px;color:var(--text3);line-height:1.5}
+.t-tags{display:flex;gap:4px;margin-top:9px;flex-wrap:wrap}
+.tag{font-size:8.5px;padding:2px 6px;border-radius:4px;font-family:var(--mono);font-weight:600;letter-spacing:.5px}
+.tag.beginner{background:rgba(56,189,248,.12);color:var(--g1);border:1px solid rgba(56,189,248,.25)}
+.tag.intermediate{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
+.tag.advanced{background:rgba(244,114,182,.12);color:#f472b6;border:1px solid rgba(244,114,182,.25)}
+.tag.expert{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.25)}
+.tag.dotnet{background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.25)}
+.tag.security{background:rgba(249,115,22,.12);color:#f97316;border:1px solid rgba(249,115,22,.25)}
+.tag.perf{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
+.tag.interview{background:rgba(244,114,182,.12);color:#f472b6;border:1px solid rgba(244,114,182,.25)}
+
+/* RIGHT PANEL */
+.right-panel{width:var(--rw);background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:width .3s ease}
+.right-panel.hidden{width:0;border:none;overflow:hidden}
+.right-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.right-hdr h3{flex:1;font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.close-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;flex-shrink:0}
+.close-btn:hover{background:var(--border);color:var(--text)}
+.right-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.right-tabs::-webkit-scrollbar{height:0}
+.r-tab{padding:9px 15px;font-size:10.5px;color:var(--text3);font-family:var(--mono);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;letter-spacing:.5px}
+.r-tab:hover{color:var(--text)}
+.r-tab.active{color:var(--g1);border-bottom-color:var(--g1)}
+.right-body{flex:1;overflow-y:auto;padding:18px}
+.right-body::-webkit-scrollbar{width:3px}
+.right-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* CONTENT */
+@keyframes slideRight{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
+.right-body>*{animation:slideRight .28s ease both}
+
+.sec{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec:first-child{margin-top:0}
+p.bd{font-size:12.5px;line-height:1.75;color:var(--text2);margin-bottom:11px}
+strong{color:var(--text)}
+
+.callout{border-left:3px solid;padding:11px 14px;border-radius:0 7px 7px 0;margin:12px 0;font-size:12px;line-height:1.65}
+.callout.info{border-color:var(--g1);background:rgba(56,189,248,.05);color:var(--text2)}
+.callout.warn{border-color:var(--acc3);background:rgba(251,191,36,.05);color:var(--text2)}
+.callout.tip{border-color:var(--acc4);background:rgba(74,222,128,.05);color:var(--text2)}
+.callout.danger{border-color:var(--acc5);background:rgba(244,114,182,.05);color:var(--text2)}
+.callout.perf{border-color:#a78bfa;background:rgba(167,139,250,.05);color:var(--text2)}
+.callout strong{display:block;margin-bottom:4px;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase}
+.callout.info strong{color:var(--g1)}
+.callout.warn strong{color:var(--acc3)}
+.callout.tip strong{color:var(--acc4)}
+.callout.danger strong{color:var(--acc5)}
+.callout.perf strong{color:#a78bfa}
+
+/* CODE */
+.cb{background:#030a14;border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden}
+.cb-hdr{display:flex;align-items:center;justify-content:space-between;padding:7px 13px;background:var(--card);border-bottom:1px solid var(--border)}
+.cb-lang{font-size:9.5px;color:var(--g1);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase}
+.cp-btn{font-size:9.5px;color:var(--text3);background:transparent;border:1px solid var(--border);border-radius:4px;padding:2px 8px;cursor:pointer;font-family:var(--mono);transition:all .2s}
+.cp-btn:hover{color:var(--text);border-color:var(--border2)}
+.cb-body{padding:14px;overflow-x:auto;font-family:var(--mono);font-size:11.5px;line-height:1.85;color:#a8cce0;white-space:pre}
+.cb-body::-webkit-scrollbar{height:3px}
+.cb-body::-webkit-scrollbar-thumb{background:var(--border2)}
+
+/* Syntax */
+.kw{color:#c084fc} .str{color:#86efac} .num{color:#fbbf24}
+.cm{color:#2d4a5e;font-style:italic} .ty{color:#7dd3fc}
+.pr{color:#67e8f9} .at{color:#fb923c} .mt{color:#a5f3fc}
+.dc{color:#fde68a} .ln{color:#1e3a4a;user-select:none;margin-right:14px;display:inline-block;width:22px;text-align:right}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:11.5px;margin:12px 0}
+.tbl th{background:var(--card2);color:var(--g1);font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;padding:9px 11px;text-align:left;border-bottom:1px solid var(--border)}
+.tbl td{padding:8px 11px;color:var(--text2);border-bottom:1px solid rgba(255,255,255,.03);vertical-align:top;line-height:1.5}
+.tbl tr:hover td{background:rgba(56,189,248,.02)}
+
+/* FEATURE LIST */
+.fl{list-style:none;margin:8px 0}
+.fl li{display:flex;align-items:flex-start;gap:9px;padding:5px 0;font-size:12px;color:var(--text2);line-height:1.5;border-bottom:1px solid rgba(255,255,255,.025)}
+.fl li::before{content:'▸';color:var(--g1);font-size:10px;margin-top:3px;flex-shrink:0}
+
+/* DIAGRAM */
+.dw{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin:12px 0;overflow:auto}
+.dt{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;text-align:center}
+
+/* PATTERN CARDS */
+.pattern-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;transition:border-color .2s}
+.pattern-card:hover{border-color:var(--g2)}
+.pattern-num{font-family:var(--display);font-size:28px;color:rgba(56,189,248,.15);float:right;line-height:1;margin-left:8px}
+.pattern-title{font-size:12.5px;font-weight:600;color:var(--text);font-family:var(--mono);margin-bottom:5px}
+.pattern-desc{font-size:11.5px;color:var(--text2);line-height:1.6;margin-bottom:8px}
+
+/* Q&A */
+.qa-item{border:1px solid var(--border);border-radius:8px;margin-bottom:9px;overflow:hidden;transition:border-color .2s}
+.qa-item:hover{border-color:var(--border2)}
+.qa-q{padding:11px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:9px;background:var(--card);transition:background .2s}
+.qa-q:hover{background:var(--card2)}
+.qa-qicon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:var(--mono);flex-shrink:0;margin-top:1px}
+.qa-qtext{flex:1;font-size:12px;color:var(--text);font-weight:500;line-height:1.5}
+.qa-diff{flex-shrink:0}
+.qa-chev{color:var(--text3);transition:transform .3s ease;flex-shrink:0;font-size:11px;margin-top:3px}
+.qa-item.open .qa-chev{transform:rotate(180deg)}
+.qa-ans{max-height:0;overflow:hidden;transition:max-height .4s ease;background:#030a14}
+.qa-item.open .qa-ans{max-height:1200px}
+.qa-ans-body{padding:14px;font-size:12px;color:var(--text2);line-height:1.8;border-top:1px solid var(--border)}
+.qa-ans-body code{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:var(--mono);font-size:10.5px;color:var(--g1)}
+
+/* FLOW / W3 */
+.w3-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 14px}
+.w3-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px}
+.w3-icon{font-size:16px;margin-bottom:5px}
+.w3-label{font-size:9px;font-family:var(--mono);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+.w3-text{font-size:11px;color:var(--text2);line-height:1.55}
+
+/* ARCH DIAGRAM helpers */
+.arr-g{fill:#38bdf8} .arr-d{fill:#131f30}
+.ft{fill:#7ba8c8;font-family:'Fira Code',monospace;font-size:11px}
+.ft-g{fill:#38bdf8;font-family:'Fira Code',monospace;font-size:11px;font-weight:600}
+.fl-g{stroke:#38bdf8;stroke-width:1.5;fill:none;stroke-dasharray:5 3;animation:dash 1.2s linear infinite}
+.fl-d{stroke:#131f30;stroke-width:1.5;fill:none}
+@keyframes dash{to{stroke-dashoffset:-16}}
+
+/* empty right */
+.empty-r{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);font-family:var(--mono);font-size:11px;text-align:center;padding:20px;gap:10px;opacity:.5}
+
+/* search */
+.left-search{padding:8px 14px;border-bottom:1px solid var(--border)}
+.search-inp{width:100%;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:11.5px;font-family:var(--mono);outline:none;transition:border-color .2s}
+.search-inp:focus{border-color:rgba(56,189,248,.4)}
+.search-inp::placeholder{color:var(--text3)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo-wrap">
+    <div class="logo-badge">⚡</div>
+    <div>
+      <div class="logo-text">MICROSERVICES MASTERY</div>
+      <div class="logo-sub">Production-Grade Architecture</div>
+    </div>
+  </div>
+  <div class="top-sep"></div>
+  <div class="top-counts">
+    <div class="count-chip"><b>17</b> Chapters</div>
+    <div class="count-chip"><b>80+</b> Topics</div>
+    <div class="count-chip"><b>50+</b> Q&amp;A</div>
+    <div class="count-chip"><b>60+</b> Patterns</div>
+  </div>
+  <div class="top-pill">.NET <span>10</span> · C# <span>14</span></div>
+</div>
+
+<div class="layout">
+  <!-- LEFT -->
+  <div class="left-panel">
+    <div class="left-hdr">
+      <div class="left-hdr-top"><h3>Learning Path</h3></div>
+      <div class="prog-outer"><div class="prog-inner" id="progBar"></div></div>
+      <div class="prog-text" id="progTxt">0 / 17 chapters visited</div>
+    </div>
+    <div class="left-search">
+      <input class="search-inp" id="searchInp" placeholder="🔍 Search chapters…" oninput="filterNav(this.value)">
+    </div>
+    <nav class="left-nav" id="leftNav"></nav>
+  </div>
+
+  <!-- MIDDLE -->
+  <div class="middle" id="middle">
+    <div class="welcome">
+      <div class="welcome-glyph">⚡</div>
+      <div class="welcome-title">MICROSERVICES MASTERY</div>
+      <p class="welcome-sub">The most comprehensive microservices learning guide for .NET developers — from architectural fundamentals to production-grade patterns, .NET 10 code, and senior-level interview prep.</p>
+      <div class="stat-grid">
+        <div class="stat-card"><span class="stat-num">17</span><span class="stat-lbl">Chapters</span></div>
+        <div class="stat-card"><span class="stat-num">80+</span><span class="stat-lbl">Topics</span></div>
+        <div class="stat-card"><span class="stat-num">60+</span><span class="stat-lbl">Patterns</span></div>
+        <div class="stat-card"><span class="stat-num">50+</span><span class="stat-lbl">Interview Q&amp;A</span></div>
+        <div class="stat-card"><span class="stat-num">100+</span><span class="stat-lbl">Code Examples</span></div>
+      </div>
+      <div class="welcome-hint">← Select a chapter to begin</div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-panel hidden" id="rightPanel">
+    <div class="right-hdr">
+      <h3 id="rightTitle">Topic Details</h3>
+      <button class="close-btn" onclick="closeRight()">✕</button>
+    </div>
+    <div class="right-tabs" id="rightTabs"></div>
+    <div class="right-body" id="rightBody">
+      <div class="empty-r"><span style="font-size:32px">⚡</span><span>Select a topic</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CHAPTER & TOPIC DATA
+// ═══════════════════════════════════════════════════════
+const CHAPTERS = [
+{id:'foundations',icon:'🏗️',color:'#38bdf8',bg:'rgba(56,189,248,.1)',title:'Monolith vs Microservices',sub:'Foundations & Decision Framework',level:'BEGINNER',lc:'#38bdf8',
+ desc:'Understand the architectural decision that changes everything. Compare monolith, modular monolith, and microservices architectures with real-world case studies.',
+ topics:[
+  {id:'monolith',icon:'🏢',title:'What Is a Monolith?',desc:'Single deployable unit — pros, cons, when it wins',tags:['beginner'],tabs:['Overview','Diagram','Code','When to Use']},
+  {id:'microservices',icon:'⚡',title:'What Are Microservices?',desc:'Autonomous services with independent data stores',tags:['beginner'],tabs:['Overview','Diagram','Code','Principles']},
+  {id:'modular-monolith',icon:'🧩',title:'Modular Monolith',desc:'The sweet spot — bounded modules, single deploy',tags:['beginner','dotnet'],tabs:['Overview','Code','Migration Path']},
+  {id:'decision',icon:'🎯',title:'Decision Framework',desc:'When to choose which architecture',tags:['beginner'],tabs:['Framework','Anti-patterns','Real Cases']},
+  {id:'distributed-monolith',icon:'⚠️',title:'Distributed Monolith Anti-Pattern',desc:'The worst of both worlds — how to detect and fix',tags:['advanced'],tabs:['Overview','Signs','Fix']},
+]},
+{id:'decomposition',icon:'✂️',color:'#4ade80',bg:'rgba(74,222,128,.1)',title:'Decomposition Patterns',sub:'DDD, Bounded Context, Strangler Fig, Aggregator',level:'INTERMEDIATE',lc:'#4ade80',
+ desc:'Master the patterns for breaking systems apart correctly. Domain-Driven Design, bounded contexts, and migration strategies.',
+ topics:[
+  {id:'ddd',icon:'🗺️',title:'Domain-Driven Design (DDD)',desc:'Align software with business domains',tags:['intermediate'],tabs:['Overview','Diagram','Building Blocks','Code']},
+  {id:'bounded-context',icon:'🔲',title:'Bounded Context',desc:'Explicit boundaries — same word, different meaning',tags:['intermediate'],tabs:['Overview','Diagram','ACL Pattern','Code']},
+  {id:'strangler-fig',icon:'🌿',title:'Strangler Fig Pattern',desc:'Safe incremental migration from monolith',tags:['intermediate'],tabs:['Overview','Diagram','Code','Steps']},
+  {id:'aggregator',icon:'🔀',title:'Aggregator Pattern',desc:'Compose results from multiple services',tags:['intermediate','dotnet'],tabs:['Overview','Parallel Aggregation','Code']},
+  {id:'bff',icon:'📱',title:'Backend for Frontend (BFF)',desc:'Tailored backends per client type',tabs:['Overview','Mobile vs Web','Code'],tags:['intermediate']},
+]},
+{id:'integration',icon:'🔌',color:'#a78bfa',bg:'rgba(167,139,250,.1)',title:'Integration Patterns',sub:'API Gateway, Service Mesh, YARP, Service Discovery',level:'INTERMEDIATE',lc:'#a78bfa',
+ desc:'Connect services reliably. API Gateways, service meshes, choreography vs orchestration, and service discovery patterns.',
+ topics:[
+  {id:'api-gateway',icon:'🚪',title:'API Gateway with YARP',desc:'Single entry point — routing, auth, rate limiting',tags:['intermediate','dotnet'],tabs:['Overview','Diagram','Code','Config']},
+  {id:'service-mesh',icon:'🕸️',title:'Service Mesh (Istio/Envoy)',desc:'Infrastructure-level resilience and mTLS',tags:['advanced'],tabs:['Overview','Diagram','Istio Config','When to Use']},
+  {id:'choreography',icon:'🎷',title:'Choreography',desc:'Event-driven — each service reacts independently',tags:['intermediate'],tabs:['Overview','Diagram','Code','vs Orchestration']},
+  {id:'orchestration',icon:'🎻',title:'Orchestration (Saga)',desc:'Central coordinator — SAGA state machine',tags:['intermediate','dotnet'],tabs:['Overview','Diagram','Code','MassTransit']},
+  {id:'service-discovery',icon:'🔍',title:'Service Discovery',desc:'Dynamic endpoint resolution in .NET Aspire',tags:['intermediate','dotnet'],tabs:['Overview','Code','Aspire']},
+]},
+{id:'database-patterns',icon:'🗄️',color:'#fb923c',bg:'rgba(249,115,22,.1)',title:'Database Patterns',sub:'DB-per-Service, CQRS, Event Sourcing, SAGA',level:'INTERMEDIATE',lc:'#fb923c',
+ desc:'True autonomy starts with data ownership. Master database-per-service, CQRS read/write separation, event sourcing, and distributed transactions.',
+ topics:[
+  {id:'db-per-service',icon:'🗃️',title:'Database per Service',desc:'True autonomy — own your data completely',tags:['intermediate'],tabs:['Overview','Diagram','Code','Anti-patterns']},
+  {id:'cqrs',icon:'↔️',title:'CQRS Pattern',desc:'Separate write and read models for performance',tags:['intermediate','dotnet'],tabs:['Overview','Diagram','Code','EF Core + Dapper']},
+  {id:'event-sourcing',icon:'📜',title:'Event Sourcing',desc:'Store state changes as immutable events',tags:['advanced'],tabs:['Overview','Diagram','Code','Snapshots']},
+  {id:'saga',icon:'🔄',title:'SAGA Pattern',desc:'Distributed transactions without 2-phase commit',tags:['advanced','dotnet'],tabs:['Overview','Diagram','Choreography','Orchestration']},
+  {id:'polyglot',icon:'🌐',title:'Polyglot Persistence',desc:'Right database for each service',tags:['intermediate'],tabs:['Overview','Options','Decision Matrix']},
+]},
+{id:'consistency',icon:'📤',color:'#f472b6',bg:'rgba(244,114,182,.1)',title:'Data Consistency & Reliability',sub:'Outbox, Inbox, Idempotency, Transactional Messaging',level:'ADVANCED',lc:'#f472b6',
+ desc:'Prevent data loss and duplicate processing. The Outbox pattern, idempotency keys, inbox deduplication, and dead letter queues.',
+ topics:[
+  {id:'dual-write',icon:'⚠️',title:'The Dual-Write Problem',desc:'Why you cannot atomically write to two systems',tags:['advanced'],tabs:['Overview','Diagram','Why It Fails']},
+  {id:'outbox',icon:'📬',title:'Outbox Pattern',desc:'Atomic DB save + event — guaranteed delivery',tags:['advanced','dotnet'],tabs:['Overview','Diagram','Code','Publisher Worker']},
+  {id:'idempotency',icon:'🔁',title:'Idempotency Pattern',desc:'Safe retry — same operation, same result',tags:['advanced','dotnet'],tabs:['Overview','Code','Idempotency Keys']},
+  {id:'inbox',icon:'📥',title:'Inbox Pattern',desc:'Consumer-side deduplication',tags:['advanced','dotnet'],tabs:['Overview','Code','vs Idempotency']},
+  {id:'dlq',icon:'💀',title:'Dead Letter Queue (DLQ)',desc:'Handle poison messages without blocking',tags:['advanced'],tabs:['Overview','Code','Retry Strategy']},
+]},
+{id:'resiliency',icon:'🛡️',color:'#fbbf24',bg:'rgba(251,191,36,.1)',title:'Resiliency Patterns',sub:'Circuit Breaker, Retry, Bulkhead, Timeout, Fallback',level:'INTERMEDIATE',lc:'#fbbf24',
+ desc:'Build systems that fail gracefully. Circuit breakers, retry with jitter, bulkheads, timeouts, and fallbacks with .NET Polly v8.',
+ topics:[
+  {id:'retry',icon:'⟳',title:'Retry + Exponential Backoff',desc:'Transient fault handling with jitter',tags:['intermediate','dotnet'],tabs:['Overview','Code','Jitter Explained']},
+  {id:'circuit-breaker',icon:'⚡',title:'Circuit Breaker',desc:'Three states — CLOSED, OPEN, HALF-OPEN',tags:['intermediate','dotnet'],tabs:['Overview','States Diagram','Code','.NET 10 Pipeline']},
+  {id:'bulkhead',icon:'🚧',title:'Bulkhead Pattern',desc:'Isolate resources per dependency',tags:['intermediate'],tabs:['Overview','Code','Thread Pool Isolation']},
+  {id:'timeout',icon:'⏱️',title:'Timeout Pattern',desc:'Always set deadlines — fail fast',tags:['beginner'],tabs:['Overview','Code','Per-Attempt vs Total']},
+  {id:'fallback',icon:'🪂',title:'Fallback Pattern',desc:'Graceful degradation with cached/default values',tags:['intermediate','dotnet'],tabs:['Overview','Code','Cache Strategy']},
+]},
+{id:'security',icon:'🔐',color:'#f87171',bg:'rgba(248,113,113,.1)',title:'Security Patterns',sub:'JWT/OAuth2, mTLS, RBAC, Encryption, Rate Limiting',level:'INTERMEDIATE',lc:'#f87171',
+ desc:'Secure every layer of your microservices. Zero-trust networking, JWT authentication, RBAC authorization, mTLS, and rate limiting.',
+ topics:[
+  {id:'jwt-oauth',icon:'🎫',title:'JWT & OAuth2 Auth',desc:'Stateless authentication — tokens, scopes, claims',tags:['intermediate','security'],tabs:['Overview','Flow Diagram','Code','Service-to-Service']},
+  {id:'mtls',icon:'🔒',title:'mTLS Service-to-Service',desc:'Mutual certificate authentication — zero trust',tags:['advanced','security'],tabs:['Overview','Code','Service Mesh vs .NET']},
+  {id:'rbac',icon:'👥',title:'RBAC Authorization',desc:'Role and policy-based access control',tags:['intermediate','security','dotnet'],tabs:['Overview','Code','Policy Builder']},
+  {id:'rate-limiting',icon:'🚦',title:'Rate Limiting & Throttling',desc:'Protect from overload and abuse',tags:['intermediate','security','dotnet'],tabs:['Overview','Algorithms','Code']},
+  {id:'encryption',icon:'🔑',title:'Encryption at Rest & Transit',desc:'Secrets management and data protection',tags:['advanced','security'],tabs:['Overview','Key Vault','Code']},
+]},
+{id:'observability',icon:'🔭',color:'#67e8f9',bg:'rgba(103,232,249,.1)',title:'Observability Patterns',sub:'Distributed Tracing, Logs, Metrics, Health Checks, Chaos',level:'INTERMEDIATE',lc:'#67e8f9',
+ desc:'If you cannot observe it, you cannot operate it. OpenTelemetry, distributed tracing, structured logging, Prometheus metrics, and health checks.',
+ topics:[
+  {id:'three-pillars',icon:'🏛️',title:'Three Pillars of Observability',desc:'Logs, traces, metrics — the complete picture',tags:['intermediate'],tabs:['Overview','Diagram','OpenTelemetry','Code']},
+  {id:'distributed-tracing',icon:'🔗',title:'Distributed Tracing',desc:'Follow a request across 10 services',tags:['intermediate','dotnet'],tabs:['Overview','TraceId/SpanId','Code','Custom Spans']},
+  {id:'structured-logging',icon:'📝',title:'Structured Logging',desc:'JSON logs with correlation IDs — Serilog',tags:['beginner','dotnet'],tabs:['Overview','Code','Log Levels']},
+  {id:'health-checks',icon:'💊',title:'Health Checks',desc:'Liveness vs readiness — K8s probes',tags:['intermediate','dotnet'],tabs:['Overview','Code','K8s Config']},
+  {id:'chaos-engineering',icon:'🌪️',title:'Chaos Engineering',desc:'Break things deliberately before production does',tags:['advanced'],tabs:['Overview','Principles','Code','Chaos Monkey']},
+]},
+{id:'deployment',icon:'🚀',color:'#86efac',bg:'rgba(134,239,172,.1)',title:'Deployment Patterns',sub:'Blue-Green, Canary, Feature Toggles, Sidecar, K8s',level:'INTERMEDIATE',lc:'#86efac',
+ desc:'Deploy with confidence. Blue-green, canary, rolling updates, feature toggles, sidecar pattern, Docker optimization, and Kubernetes manifests.',
+ topics:[
+  {id:'dockerfile',icon:'🐳',title:'Optimized Dockerfile (.NET 10)',desc:'120MB images — multi-stage, Alpine, non-root',tags:['beginner','dotnet'],tabs:['Overview','Dockerfile','Best Practices']},
+  {id:'k8s',icon:'☸️',title:'Kubernetes Deployment',desc:'Deployment, HPA, PDB — zero-downtime',tags:['intermediate'],tabs:['Overview','Manifests','HPA Config','PDB']},
+  {id:'blue-green',icon:'🟦',title:'Blue-Green Deployment',desc:'Instant cutover — zero downtime, instant rollback',tags:['intermediate'],tabs:['Overview','Diagram','K8s Config']},
+  {id:'canary',icon:'🐤',title:'Canary Deployment',desc:'Gradual traffic shift — 1% → 100%',tags:['intermediate'],tabs:['Overview','Istio Config','Monitoring']},
+  {id:'feature-toggles',icon:'🚦',title:'Feature Toggles',desc:'Decouple deploy from release — dark launches',tags:['intermediate','dotnet'],tabs:['Overview','Code','Microsoft.FeatureManagement']},
+]},
+{id:'testing',icon:'🧪',color:'#c084fc',bg:'rgba(192,132,252,.1)',title:'Testing Patterns',sub:'Contract Testing, Pact, Testcontainers, Fault Injection',level:'INTERMEDIATE',lc:'#c084fc',
+ desc:'Test microservices correctly. Consumer-driven contract testing with Pact, real infrastructure with Testcontainers, and fault injection.',
+ topics:[
+  {id:'test-pyramid',icon:'📐',title:'Testing Pyramid for Microservices',desc:'Unit, integration, contract, E2E — right balance',tags:['intermediate'],tabs:['Overview','Strategy','Anti-patterns']},
+  {id:'pact',icon:'📋',title:'Consumer-Driven Contract (Pact)',desc:'Catch breaking API changes before deployment',tags:['advanced'],tabs:['Overview','Code','Pact Broker']},
+  {id:'testcontainers',icon:'🐋',title:'Testcontainers',desc:'Real PostgreSQL/Kafka in integration tests',tags:['intermediate','dotnet'],tabs:['Overview','Code','CI/CD Setup']},
+  {id:'fault-injection',icon:'💥',title:'Fault Injection Testing',desc:'Verify circuit breakers and resilience',tags:['advanced','dotnet'],tabs:['Overview','Code','Scenarios']},
+  {id:'synthetic-tx',icon:'🤖',title:'Synthetic Transactions',desc:'Continuous production health verification',tags:['advanced'],tabs:['Overview','Code','Alerting']},
+]},
+{id:'communication',icon:'📡',color:'#7dd3fc',bg:'rgba(125,211,252,.1)',title:'Sync & Async Communication',sub:'HTTP REST, gRPC, Kafka, RabbitMQ, Pub/Sub',level:'INTERMEDIATE',lc:'#7dd3fc',
+ desc:'Master all communication styles. When to use HTTP REST, gRPC for performance, Kafka for streaming, and RabbitMQ for messaging.',
+ topics:[
+  {id:'http-rest',icon:'🌐',title:'HTTP REST with Resilience',desc:'Typed HttpClient + resilience pipeline',tags:['beginner','dotnet'],tabs:['Overview','Code','Client Best Practices']},
+  {id:'grpc',icon:'⚡',title:'gRPC Internal Services',desc:'7x faster binary protocol — proto definitions',tags:['intermediate','dotnet'],tabs:['Overview','Proto Definition','Code','Streaming']},
+  {id:'kafka',icon:'🌊',title:'Kafka Event Streaming',desc:'High-throughput, durable, replayable events',tags:['intermediate','dotnet'],tabs:['Overview','Diagram','Code','MassTransit']},
+  {id:'rabbitmq',icon:'🐇',title:'RabbitMQ Messaging',desc:'Exchanges, queues, routing patterns',tags:['intermediate','dotnet'],tabs:['Overview','Topology','Code']},
+  {id:'sync-chains',icon:'⛓️',title:'Sync Chain Anti-Pattern',desc:'Cascading failures from deep sync calls',tags:['advanced'],tabs:['Problem','Diagram','Solution']},
+]},
+{id:'configuration',icon:'⚙️',color:'#fde68a',bg:'rgba(253,230,138,.1)',title:'Configuration Patterns',sub:'External, Centralized, Distributed, Secrets',level:'BEGINNER',lc:'#fde68a',
+ desc:'12-factor app configuration, secrets management with Azure Key Vault, feature flags, and dynamic config refresh without restarts.',
+ topics:[
+  {id:'12factor',icon:'📋',title:'12-Factor App Configuration',desc:'Externalize all config — env vars, no secrets in code',tags:['beginner'],tabs:['Overview','Code','Layers']},
+  {id:'azure-app-config',icon:'☁️',title:'Azure App Configuration',desc:'Centralized config with dynamic refresh',tags:['intermediate','dotnet'],tabs:['Overview','Code','Feature Flags']},
+  {id:'secrets-mgmt',icon:'🔑',title:'Secrets Management',desc:'Azure Key Vault, K8s Secrets, User Secrets',tags:['intermediate','security'],tabs:['Overview','Code','Local Dev vs Prod']},
+]},
+{id:'versioning',icon:'🔖',color:'#fca5a5',bg:'rgba(252,165,165,.1)',title:'Versioning Patterns',sub:'Semantic Versioning, API Versioning, Schema Evolution',level:'INTERMEDIATE',lc:'#fca5a5',
+ desc:'APIs and events change over time. Version APIs cleanly, evolve event schemas safely, and maintain backward compatibility.',
+ topics:[
+  {id:'api-versioning',icon:'📌',title:'API Versioning Strategies',desc:'URL, header, query string versioning in .NET',tags:['intermediate','dotnet'],tabs:['Overview','Code','Deprecation']},
+  {id:'schema-evolution',icon:'🧬',title:'Schema Evolution in Events',desc:'Safe changes vs breaking changes in Kafka events',tags:['advanced'],tabs:['Overview','Safe Changes','Schema Registry']},
+  {id:'backward-compat',icon:'🔄',title:'Backward Compatibility',desc:'Never break consumers — rules and patterns',tags:['intermediate'],tabs:['Overview','Rules','Consumer Testing']},
+]},
+{id:'multitenancy',icon:'🏢',color:'#d8b4fe',bg:'rgba(216,180,254,.1)',title:'Multi-Tenancy & SaaS',sub:'Shared DB, Separate Schema, DB-per-Tenant',level:'ADVANCED',lc:'#d8b4fe',
+ desc:'Build SaaS products on microservices. Three isolation models, tenant-aware routing, row-level security, and data isolation strategies.',
+ topics:[
+  {id:'tenancy-models',icon:'🗃️',title:'Three Tenancy Models',desc:'Shared schema, separate schema, silo — trade-offs',tags:['advanced'],tabs:['Overview','Comparison Table','When to Use']},
+  {id:'tenant-efcore',icon:'🔒',title:'Tenant-Aware EF Core',desc:'Global query filters + automatic tenant stamping',tags:['advanced','dotnet'],tabs:['Overview','Code','RLS in PostgreSQL']},
+  {id:'tenant-routing',icon:'🔀',title:'Tenant-Aware Routing',desc:'Route requests to correct tenant resources',tags:['advanced','dotnet'],tabs:['Overview','Code','Middleware']},
+]},
+{id:'finops',icon:'💰',color:'#86efac',bg:'rgba(134,239,172,.1)',title:'Cost & FinOps Patterns',sub:'Right-sizing, Autoscaling, Cost Attribution',level:'INTERMEDIATE',lc:'#86efac',
+ desc:'Control cloud costs. Right-size resources, scale on business metrics not CPU, eliminate Kafka cost traps, and attribute costs per service.',
+ topics:[
+  {id:'right-sizing',icon:'📏',title:'Right-Sizing Services',desc:'VPA recommendations and resource tuning',tags:['intermediate'],tabs:['Overview','K8s Resources','VPA Config']},
+  {id:'hpa-business',icon:'📊',title:'HPA on Business Metrics',desc:'Scale on queue depth, not CPU',tags:['intermediate'],tabs:['Overview','Code','KEDA']},
+  {id:'cost-attribution',icon:'🏷️',title:'Cost Attribution per Service',desc:'Kubecost, labels, and chargeback',tags:['intermediate'],tabs:['Overview','Labels Strategy','Kubecost']},
+  {id:'kafka-costs',icon:'💸',title:'Kafka Cost Traps',desc:'Retention, replication, and consumer group costs',tags:['advanced'],tabs:['Overview','Cost Drivers','Optimization']},
+]},
+{id:'organizational',icon:'🏛️',color:'#c084fc',bg:'rgba(192,132,252,.1)',title:'Organizational Patterns',sub:'Team Topologies, YBIYRI, Service Ownership, Runbooks',level:'INTERMEDIATE',lc:'#c084fc',
+ desc:"Conway's Law in practice. Align team structure with microservices, you-build-it-you-run-it culture, on-call rotations, and runbooks.",
+ topics:[
+  {id:'team-topologies',icon:'👥',title:'Team Topologies',desc:'Stream-aligned, platform, enabling, complex-subsystem',tags:['intermediate'],tabs:['Overview','Four Types','Conway\'s Law']},
+  {id:'ybiyri',icon:'🔧',title:'You Build It, You Run It',desc:"Amazon's ownership model — better code through accountability",tags:['intermediate'],tabs:['Overview','On-Call Rotation','Culture Shift']},
+  {id:'runbooks',icon:'📖',title:'Runbooks as Code',desc:'Alert definitions with embedded response steps',tags:['intermediate'],tabs:['Overview','Code','Prometheus Alerts']},
+  {id:'service-catalog',icon:'🗂️',title:'Service Catalog',desc:'Discover, document, and govern all services',tags:['intermediate'],tabs:['Overview','Backstage','Metadata Schema']},
+]},
+{id:'interview',icon:'🎯',color:'#f472b6',bg:'rgba(244,114,182,.1)',title:'Interview Mastery Guide',sub:'Junior to Architect — Real Q&A from FAANG',level:'ALL',lc:'#f472b6',
+ desc:'50 microservices interview questions with expert answers — from junior fundamentals to architect-level system design and pattern trade-offs.',
+ topics:[
+  {id:'iq-junior',icon:'🟢',title:'Junior Questions (Q1–12)',desc:'Fundamentals every developer must know',tags:['beginner','interview'],tabs:['All Questions']},
+  {id:'iq-mid',icon:'🟡',title:'Mid-Level Questions (Q13–30)',desc:'Patterns, consistency, and distributed systems',tags:['intermediate','interview'],tabs:['All Questions']},
+  {id:'iq-senior',icon:'🔴',title:'Senior Questions (Q31–42)',desc:'Deep-dive resilience, saga, outbox, schema evolution',tags:['advanced','interview'],tabs:['All Questions']},
+  {id:'iq-architect',icon:'🏆',title:'Architect Questions (Q43–50)',desc:'System design and trade-off decisions',tags:['expert','interview'],tabs:['All Questions','System Design']},
+]},
+];
+
+// ═══════════════════════════════════════════════════════
+// GENERIC CONTENT HELPERS
+// ═══════════════════════════════════════════════════════
+function escHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getTopicContext(cid, tid) {
+  const chapter = CHAPTERS.find((item) => item.id === cid);
+  const topic = chapter?.topics.find((item) => item.id === tid);
+  if (!chapter || !topic) return null;
+  return { chapter, topic };
+}
+
+function renderList(items) {
+  return `<ul class="fl">${items.map((item) => `<li>${item}</li>`).join('')}</ul>`;
+}
+
+function renderTable(headers, rows) {
+  return `<table class="tbl"><tr>${headers.map((item) => `<th>${escHtml(item)}</th>`).join('')}</tr>${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('')}</tr>`).join('')}</table>`;
+}
+
+function renderCodeBlock(label, code) {
+  return `<div class="cb"><div class="cb-hdr"><span class="cb-lang">${escHtml(label)}</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body">${escHtml(code)}</div></div>`;
+}
+
+function classifyTab(tab) {
+  const lower = tab.toLowerCase();
+  if (/(diagram|flow|states|topology|layers|building blocks|schema|traceid|spans|resources|labels)/.test(lower)) return 'architecture';
+  if (/(vs |comparison|matrix|cases|drivers|when to use|mobile vs web|local dev vs prod|four types)/.test(lower)) return 'comparison';
+  if (/(config|dockerfile|definition|broker|registry|backstage|featuremanagement|opentelemetry|aspire|masstransit|key vault|keda|kubecost|middleware|builder|pdb|hpa|vpa)/.test(lower)) return 'implementation';
+  if (/(principles|strategy|steps|rules|best practices|monitoring|alerting|rotation|safe changes|deprecation|consumer testing|optimization|algorithms)/.test(lower)) return 'playbook';
+  if (/(problem|anti-patterns|signs|fix|why it fails)/.test(lower)) return 'diagnostics';
+  return 'deep-dive';
+}
+
+function inferLibraries(topic, tab) {
+  const lower = `${topic.title} ${tab}`.toLowerCase();
+  const picks = [];
+  if (topic.tags.includes('dotnet')) picks.push('ASP.NET Core');
+  if (/yarp|gateway/.test(lower)) picks.push('YARP');
+  if (/mass.?transit|saga|orchestration|kafka|rabbitmq/.test(lower)) picks.push('MassTransit');
+  if (/aspire|service discovery/.test(lower)) picks.push('.NET Aspire');
+  if (/cqrs|ef core|dapper/.test(lower)) picks.push('EF Core + Dapper');
+  if (/opentelemetry|tracing|observability/.test(lower)) picks.push('OpenTelemetry');
+  if (/logging/.test(lower)) picks.push('Serilog');
+  if (/pact/.test(lower)) picks.push('PactNet');
+  if (/testcontainers/.test(lower)) picks.push('Testcontainers .NET');
+  if (/docker/.test(lower)) picks.push('Docker BuildKit');
+  if (/kubernetes|hpa|pdb|keda|vpa/.test(lower)) picks.push('Kubernetes');
+  if (/istio|mesh|mtls/.test(lower)) picks.push('Istio / Envoy');
+  if (/schema registry|protobuf|grpc/.test(lower)) picks.push('Protobuf / Schema Registry');
+  if (/feature/.test(lower)) picks.push('Microsoft.FeatureManagement');
+  if (/backstage/.test(lower)) picks.push('Backstage');
+  if (/key vault/.test(lower)) picks.push('Azure Key Vault');
+  if (/kubecost/.test(lower)) picks.push('Kubecost');
+  return [...new Set(picks)].slice(0, 4);
+}
+
+function buildDiagramNodes(ctx, tab, kind) {
+  const topicLabel = ctx.topic.title.replace(/\s+/g, ' ').split(' ').slice(0, 2).join(' ');
+  if (kind === 'diagnostics') {
+    return [
+      ['Signal', 'Symptoms appear'],
+      ['Trace', 'Find root cause'],
+      ['Guardrail', 'Add limit or rule'],
+      ['Outcome', 'Safer production'],
+    ];
+  }
+  if (kind === 'comparison') {
+    return [
+      ['Option A', ctx.topic.title.split(' ')[0]],
+      ['Tradeoff', tab],
+      ['Decision', ctx.chapter.title.split(' ')[0]],
+      ['Outcome', 'Operate safely'],
+    ];
+  }
+  if (kind === 'implementation') {
+    return [
+      ['Client', 'Request or event'],
+      ['Policy', tab],
+      ['Service', topicLabel],
+      ['Ops', 'Logs + metrics'],
+    ];
+  }
+  if (kind === 'playbook') {
+    return [
+      ['Intent', tab],
+      ['Rule', 'Protect reliability'],
+      ['Execution', topicLabel],
+      ['Review', 'Measure result'],
+    ];
+  }
+  return [
+    ['Entry', ctx.chapter.title.split(' ')[0]],
+    ['Core', topicLabel],
+    ['Data', 'State + events'],
+    ['Outcome', 'Scale and clarity'],
+  ];
+}
+
+function renderGeneratedDiagram(ctx, tab, kind) {
+  const nodes = buildDiagramNodes(ctx, tab, kind);
+  const colors = [ctx.chapter.color, '#fbbf24', '#4ade80', '#a78bfa'];
+  const xPos = [12, 114, 216, 318];
+  const lines = nodes.map((node, index) => {
+    const stroke = colors[index] || '#38bdf8';
+    return `
+      <rect x="${xPos[index]}" y="68" width="88" height="54" rx="8" fill="${stroke}11" stroke="${stroke}" stroke-width="1.4"></rect>
+      <text x="${xPos[index] + 44}" y="88" text-anchor="middle" fill="${stroke}" font-family="'Fira Code',monospace" font-size="9.5" font-weight="700">${escHtml(node[0])}</text>
+      <text x="${xPos[index] + 44}" y="106" text-anchor="middle" class="ft" font-size="8.5">${escHtml(node[1])}</text>
+    `;
+  }).join('');
+  const arrows = xPos.slice(0, 3).map((x, index) => `
+    <line x1="${x + 88}" y1="95" x2="${xPos[index + 1]}" y2="95" stroke="${colors[index] || '#38bdf8'}" stroke-width="1.5" marker-end="url(#gfd${kind})"></line>
+  `).join('');
+
+  return `
+    <div class="dw">
+      <div class="dt">${escHtml(ctx.topic.title.toUpperCase())} · ${escHtml(tab.toUpperCase())}</div>
+      <svg viewBox="0 0 420 170" width="100%" style="max-height:220px">
+        <defs>
+          <marker id="gfd${kind}" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+            <polygon points="0 0,7 2.5,0 5" fill="${ctx.chapter.color}"></polygon>
+          </marker>
+        </defs>
+        <text x="210" y="28" text-anchor="middle" fill="${ctx.chapter.color}" font-family="'Fira Code',monospace" font-size="10" font-weight="700">${escHtml(ctx.chapter.title)}</text>
+        <text x="210" y="44" text-anchor="middle" class="ft" font-size="9">${escHtml(ctx.topic.desc)}</text>
+        ${lines}
+        ${arrows}
+      </svg>
+    </div>`;
+}
+
+function buildGeneratedCode(ctx, tab, kind) {
+  const serviceName = ctx.topic.title.replace(/[^A-Za-z0-9]+/g, '');
+  const lower = `${ctx.topic.id} ${tab}`.toLowerCase();
+
+  if (/masstransit/.test(lower)) {
+    return [
+      'builder.Services.AddMassTransit(x =>',
+      '{',
+      `    x.AddConsumer<${serviceName}Consumer>();`,
+      '    x.UsingRabbitMq((context, cfg) =>',
+      '    {',
+      '        cfg.ConfigureEndpoints(context);',
+      '        cfg.UseMessageRetry(r => r.Exponential(5, TimeSpan.FromMilliseconds(200), TimeSpan.FromSeconds(15), TimeSpan.FromMilliseconds(100)));',
+      '    });',
+      '});',
+    ].join('\n');
+  }
+
+  if (/aspire/.test(lower)) {
+    return [
+      'var builder = DistributedApplication.CreateBuilder(args);',
+      'var redis = builder.AddRedis("cache");',
+      'var orders = builder.AddProject<Projects.OrderService>("orders")',
+      '    .WithReference(redis);',
+      'builder.AddProject<Projects.ApiGateway>("gateway")',
+      '    .WithReference(orders);',
+      'builder.Build().Run();',
+    ].join('\n');
+  }
+
+  if (/ef core \+ dapper/.test(lower)) {
+    return [
+      'builder.Services.AddDbContext<WriteDbContext>(o => o.UseNpgsql(conn));',
+      'builder.Services.AddScoped<IWriteUnitOfWork, EfWriteUnitOfWork>();',
+      'builder.Services.AddScoped<IReadConnection>(_ => new NpgsqlConnection(readReplica));',
+      '',
+      'public sealed class OrderReadService(IReadConnection db)',
+      '{',
+      '    public Task<IEnumerable<OrderRow>> GetOpenOrdersAsync(Guid customerId) =>',
+      '        db.QueryAsync<OrderRow>("select * from orders.order_summary where customer_id = @customerId and status = \'Open\'", new { customerId });',
+      '}',
+    ].join('\n');
+  }
+
+  if (/opentelemetry/.test(lower)) {
+    return [
+      'builder.Services.AddOpenTelemetry()',
+      '    .WithTracing(t => t',
+      '        .AddAspNetCoreInstrumentation()',
+      '        .AddHttpClientInstrumentation()',
+      '        .AddOtlpExporter())',
+      '    .WithMetrics(m => m',
+      '        .AddRuntimeInstrumentation()',
+      '        .AddPrometheusExporter());',
+    ].join('\n');
+  }
+
+  if (/dockerfile/.test(lower)) {
+    return [
+      'FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build',
+      'WORKDIR /src',
+      'COPY . .',
+      'RUN dotnet publish src/Service/Service.csproj -c Release -o /app/publish',
+      '',
+      'FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine',
+      'RUN addgroup -S appgroup && adduser -S appuser -G appgroup',
+      'USER appuser',
+      'WORKDIR /app',
+      'COPY --from=build /app/publish .',
+      'ENTRYPOINT ["dotnet", "Service.dll"]',
+    ].join('\n');
+  }
+
+  if (/istio config/.test(lower)) {
+    return [
+      'apiVersion: networking.istio.io/v1beta1',
+      'kind: VirtualService',
+      'metadata:',
+      '  name: service-route',
+      'spec:',
+      '  hosts: ["api.internal"]',
+      '  http:',
+      '    - route:',
+      '        - destination: { host: order-service, subset: stable, weight: 90 }',
+      '        - destination: { host: order-service, subset: canary, weight: 10 }',
+    ].join('\n');
+  }
+
+  if (/pact broker/.test(lower)) {
+    return [
+      'var pact = Pact.V4("catalog-consumer", "catalog-provider", new PactConfig());',
+      'await pact',
+      '  .UponReceiving("GET /api/catalog/{id}")',
+      '  .WithRequest(HttpMethod.Get, "/api/catalog/42")',
+      '  .WillRespond()',
+      '  .WithStatus(HttpStatusCode.OK)',
+      '  .WithJsonBody(new { id = 42, name = "Premium Catalog Item" })',
+      '  .VerifyAsync(async ctx => await providerClient.GetFromJsonAsync<CatalogItem>(ctx.MockServerUri + "/api/catalog/42"));',
+    ].join('\n');
+  }
+
+  if (/schema registry/.test(lower)) {
+    return [
+      'var config = new ProducerConfig { BootstrapServers = "kafka:9092" };',
+      'var schemaConfig = new SchemaRegistryConfig { Url = "http://schema-registry:8081" };',
+      'using var schema = new CachedSchemaRegistryClient(schemaConfig);',
+      'using var producer = new ProducerBuilder<string, OrderCreated>(config)',
+      '  .SetValueSerializer(new ProtobufSerializer<OrderCreated>(schema))',
+      '  .Build();',
+      'await producer.ProduceAsync("orders.created.v1", new Message<string, OrderCreated> { Key = orderId, Value = evt });',
+    ].join('\n');
+  }
+
+  if (/backstage/.test(lower)) {
+    return [
+      'apiVersion: backstage.io/v1alpha1',
+      'kind: Component',
+      'metadata:',
+      `  name: ${ctx.topic.id}`,
+      `  description: ${ctx.topic.title}`,
+      '  annotations:',
+      '    backstage.io/kubernetes-id: order-service',
+      'spec:',
+      '  type: service',
+      '  lifecycle: production',
+      `  owner: team-${ctx.chapter.id}`,
+    ].join('\n');
+  }
+
+  if (/key vault/.test(lower)) {
+    return [
+      'builder.Configuration.AddAzureKeyVault(',
+      '    new Uri("https://platform-secrets.vault.azure.net/"),',
+      '    new DefaultAzureCredential());',
+      '',
+      'builder.Services.Configure<JwtOptions>(',
+      '    builder.Configuration.GetSection("Security:Jwt"));',
+    ].join('\n');
+  }
+
+  if (/keda/.test(lower)) {
+    return [
+      'apiVersion: keda.sh/v1alpha1',
+      'kind: ScaledObject',
+      'metadata: { name: order-processor-scale }',
+      'spec:',
+      '  scaleTargetRef: { name: order-processor }',
+      '  minReplicaCount: 2',
+      '  maxReplicaCount: 20',
+      '  triggers:',
+      '    - type: kafka',
+      '      metadata: { topic: orders.created, lagThreshold: "500" }',
+    ].join('\n');
+  }
+
+  if (/kubecost/.test(lower)) {
+    return [
+      'metadata:',
+      '  labels:',
+      `    platform.domain: ${ctx.chapter.id}`,
+      `    platform.capability: ${ctx.topic.id}`,
+      '    finance.cost-center: commerce',
+      '    finance.owner: stream-team-orders',
+    ].join('\n');
+  }
+
+  if (/prometheus alerts/.test(lower)) {
+    return [
+      'groups:',
+      '- name: order-service',
+      '  rules:',
+      '  - alert: HighP95Latency',
+      '    expr: histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{service="order-service"}[5m])) by (le)) > 0.8',
+      '    for: 10m',
+      '    labels: { severity: warning }',
+    ].join('\n');
+  }
+
+  return [
+    `// ${ctx.topic.title} - ${tab}`,
+    'var builder = WebApplication.CreateBuilder(args);',
+    'builder.Services.AddProblemDetails();',
+    'builder.Services.AddOpenApi();',
+    topic.tags.includes('dotnet') ? 'builder.Services.AddHealthChecks();' : 'builder.Services.AddHostedService<BackgroundProjectionWorker>();',
+    '',
+    'var app = builder.Build();',
+    `app.MapGet("/${ctx.topic.id}", () => Results.Ok(new`,
+    '{',
+    `    topic = "${ctx.topic.title}",`,
+    `    tab = "${tab}",`,
+    `    chapter = "${ctx.chapter.title}"`,
+    '}));',
+    'app.Run();',
+  ].filter(Boolean).join('\n');
+}
+
+function buildGeneratedRows(ctx, tab, kind) {
+  const libraries = inferLibraries(ctx.topic, tab);
+  const leadLibrary = libraries[0] || 'Core platform';
+  return [
+    ['Primary focus', escHtml(tab)],
+    ['Topic anchor', escHtml(ctx.topic.title)],
+    ['Operational goal', escHtml(`Keep ${ctx.topic.title.toLowerCase()} reliable under real traffic and team scale`)],
+    ['Suggested stack', escHtml(libraries.join(', ') || 'ASP.NET Core, PostgreSQL, Kafka, OpenTelemetry')],
+    ['Review lens', escHtml(kind === 'comparison' ? 'Compare tradeoffs before standardizing' : 'Validate behavior, failure mode, and rollback path')],
+    ['Production note', escHtml(`${leadLibrary} should be wired with tracing, health checks, and clear ownership boundaries`)],
+  ];
+}
+
+function buildGeneratedBullets(ctx, tab, kind) {
+  const libraries = inferLibraries(ctx.topic, tab);
+  if (kind === 'comparison') {
+    return [
+      `<strong>Choose by pressure:</strong> select the option that reduces coupling, protects deployment speed, and fits the team maturity around ${escHtml(ctx.topic.title.toLowerCase())}.`,
+      `<strong>Evaluate tradeoffs explicitly:</strong> latency, reliability, developer ergonomics, observability, and rollback difficulty should all be written down before adopting ${escHtml(tab)}.`,
+      `<strong>Standardize around one path:</strong> once chosen, document the default library set such as ${escHtml(libraries.join(', ') || 'ASP.NET Core + PostgreSQL + Kafka')}.`,
+    ];
+  }
+  if (kind === 'diagnostics') {
+    return [
+      `<strong>Watch the signals:</strong> errors, queue lag, saturation, and noisy retries are the first hints that ${escHtml(ctx.topic.title)} is drifting into an anti-pattern.`,
+      `<strong>Trace the blast radius:</strong> inspect upstream callers, downstream dependencies, and ownership boundaries before changing implementation details.`,
+      `<strong>Fix with guardrails:</strong> add budgets, retries, limits, or contracts so the problem does not return in the next release.`,
+    ];
+  }
+  return [
+    `<strong>Start from intent:</strong> ${escHtml(tab)} should explain why ${escHtml(ctx.topic.title.toLowerCase())} exists before jumping into tools.`,
+    `<strong>Wire the supporting stack:</strong> use ${escHtml(libraries.join(', ') || 'ASP.NET Core, PostgreSQL, messaging, and telemetry')} where it improves autonomy and observability.`,
+    `<strong>Close the loop:</strong> every implementation should include failure handling, metrics, and a rollback or degradation plan.`,
+  ];
+}
+
+function buildGeneratedGuardrails(ctx, tab, kind) {
+  return [
+    `<strong>Autonomy first:</strong> avoid shared databases or hidden runtime dependencies while implementing ${escHtml(ctx.topic.title)}.`,
+    `<strong>Trace every critical hop:</strong> ${escHtml(tab)} should expose correlation IDs, metrics, and logs so operators can explain behavior under load.`,
+    `<strong>Rollback path:</strong> every change should have a safe reversal plan, especially when ${escHtml(ctx.chapter.title.toLowerCase())} affects live traffic or data consistency.`,
+  ];
+}
+
+function buildGeneratedScenario(ctx, tab, kind) {
+  if (kind === 'comparison') {
+    return `A platform team is reviewing ${ctx.topic.title.toLowerCase()} for a growing commerce system. The right answer is not the most fashionable option, but the one that reduces coordination cost, fits team maturity, and leaves a safe migration path.`;
+  }
+  if (kind === 'diagnostics') {
+    return `An incident review shows that ${ctx.topic.title.toLowerCase()} is failing under partial outages. This tab should help the team identify the signal, isolate the dependency chain, and add the smallest guardrail that prevents repeat failure.`;
+  }
+  return `A product team is scaling ${ctx.topic.title.toLowerCase()} in a real .NET platform. ${tab} becomes valuable when the team must explain tradeoffs clearly, implement the pattern safely, and keep the resulting service observable in production.`;
+}
+
+function renderStructuredFallback(cid, tid, tab) {
+  const ctx = getTopicContext(cid, tid);
+  if (!ctx) return '';
+
+  const kind = classifyTab(tab);
+  const rows = buildGeneratedRows(ctx, tab, kind);
+  const bullets = buildGeneratedBullets(ctx, tab, kind);
+  const guardrails = buildGeneratedGuardrails(ctx, tab, kind);
+  const scenario = buildGeneratedScenario(ctx, tab, kind);
+  const code = buildGeneratedCode(ctx, tab, kind);
+  const icon = kind === 'comparison' ? '⚖️' : kind === 'diagnostics' ? '🧭' : kind === 'implementation' ? '🛠️' : kind === 'playbook' ? '📋' : '🧠';
+
+  return `
+    <div class="sec">${icon} ${escHtml(ctx.topic.title)} · ${escHtml(tab)}</div>
+    <p class="bd"><strong>${escHtml(tab)}</strong> for <strong>${escHtml(ctx.topic.title)}</strong> should be read as a production decision surface, not a definition dump. The goal is to connect architecture intent, implementation detail, operational behavior, and failure handling in one place.</p>
+    <div class="callout info"><strong>STRUCTURED APPROACH</strong>Start with the decision and boundary. Then show the flow, the concrete .NET implementation shape, the libraries involved, and the production guardrails that stop the pattern from becoming accidental complexity.</div>
+    ${renderTable(['Lens', 'Guidance'], rows)}
+    ${renderGeneratedDiagram(ctx, tab, kind)}
+    <div class="sec">Implementation Focus</div>
+    ${renderList(bullets)}
+    ${renderCodeBlock(`.NET 10 / C# 14 — ${ctx.topic.title} · ${tab}`, code)}
+    <div class="sec">Production Guardrails</div>
+    ${renderList(guardrails)}
+    <div class="callout tip"><strong>REAL-WORLD SCENARIO</strong>${escHtml(scenario)}</div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════
+// CONTENT LIBRARY
+// ═══════════════════════════════════════════════════════
+function getContent(cid, tid, tab) {
+  const k = `${cid}:${tid}:${tab}`;
+
+  // ── FOUNDATIONS ──────────────────────────────────────
+  if(k==='foundations:monolith:Overview') return `
+<div class="sec">🏢 What Is a Monolith?</div>
+<p class="bd"><strong>A monolith</strong> is a single deployable unit where all business logic, UI, data access, and domain operations are tightly bundled together. When you deploy, you deploy everything at once — and when one part fails, the whole system is at risk.</p>
+<div class="callout info"><strong>📖 REAL WORLD</strong>StackOverflow ran as a single ASP.NET monolith serving millions of developers. It worked brilliantly — until team size crossed ~50 engineers and every deployment became a coordination nightmare.</div>
+<ul class="fl">
+<li><strong>✅ Simple development</strong> — one codebase, one repo, one deploy</li>
+<li><strong>✅ Easy debugging</strong> — single process, shared memory, no network</li>
+<li><strong>✅ Simple transactions</strong> — one database, full ACID guarantees</li>
+<li><strong>❌ Scale everything or nothing</strong> — can't scale one feature independently</li>
+<li><strong>❌ One bug = full outage</strong> — a NullReferenceException in email can crash payments</li>
+<li><strong>❌ Team coordination</strong> — 20 devs in one repo = constant merge conflicts</li>
+<li><strong>❌ Technology lock-in</strong> — must use same framework everywhere</li>
+</ul>`;
+
+  if(k==='foundations:monolith:Diagram') return `
+<div class="sec">🏗️ Monolith Architecture Diagram</div>
+<div class="dw"><div class="dt">MONOLITH — SINGLE DEPLOYABLE UNIT</div>
+<svg viewBox="0 0 420 280" width="100%" style="max-height:280px">
+<defs><marker id="ma1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#38bdf8"/></marker></defs>
+<rect x="130" y="10" width="160" height="34" rx="6" fill="rgba(56,189,248,.1)" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="210" y="25" text-anchor="middle" class="ft-g" font-size="11">👤 All Traffic → App</text>
+<text x="210" y="39" text-anchor="middle" class="ft" font-size="9">Single entry point</text>
+<line x1="210" y1="44" x2="210" y2="62" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#ma1)"/>
+<rect x="60" y="64" width="300" height="170" rx="8" fill="rgba(248,113,113,.05)" stroke="#f87171" stroke-width="2" stroke-dasharray="6 3"/>
+<text x="210" y="82" text-anchor="middle" fill="#f87171" font-family="'Fira Code',monospace" font-size="11" font-weight="700">MyApp.exe — One Deployable</text>
+<rect x="80" y="90" width="260" height="28" rx="5" fill="rgba(248,113,113,.1)" stroke="rgba(248,113,113,.3)" stroke-width="1"/>
+<text x="210" y="109" text-anchor="middle" class="ft" font-size="10">🖥️ UI Layer</text>
+<rect x="80" y="123" width="260" height="28" rx="5" fill="rgba(248,113,113,.1)" stroke="rgba(248,113,113,.3)" stroke-width="1"/>
+<text x="210" y="142" text-anchor="middle" class="ft" font-size="10">⚙️ Business Logic (Orders, Catalog, Payments, Users)</text>
+<rect x="80" y="156" width="260" height="28" rx="5" fill="rgba(248,113,113,.1)" stroke="rgba(248,113,113,.3)" stroke-width="1"/>
+<text x="210" y="175" text-anchor="middle" class="ft" font-size="10">📧 Email · 🔔 Notifications · 🔧 Auth · 📊 Reports</text>
+<rect x="80" y="189" width="260" height="28" rx="5" fill="rgba(248,113,113,.08)" stroke="rgba(248,113,113,.2)" stroke-width="1"/>
+<text x="210" y="208" text-anchor="middle" class="ft" font-size="10">📊 Data Access Layer</text>
+<line x1="210" y1="234" x2="210" y2="252" stroke="#475569" stroke-width="1.5" marker-end="url(#ma1)"/>
+<rect x="130" y="254" width="160" height="22" rx="5" fill="#0c1524" stroke="#1a2d45"/>
+<text x="210" y="268" text-anchor="middle" class="ft" font-size="10">💾 Single Shared Database</text>
+</svg></div>
+<div class="callout danger"><strong>⚠️ RISK</strong>In a monolith, a memory leak in the reporting module can crash the payment processor. All modules share the same process and memory space.</div>`;
+
+  if(k==='foundations:monolith:Code') return `
+<div class="sec">💻 Monolith — Tightly Coupled Code</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — Monolith Order Controller</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body"><span class="cm">// ❌ Monolith: All concerns in ONE project, ONE deploy</span>
+[<span class="at">ApiController</span>]
+[<span class="at">Route</span>(<span class="str">"api/orders"</span>)]
+<span class="kw">public class</span> <span class="ty">OrderController</span> : <span class="ty">ControllerBase</span>
+{
+    <span class="kw">private readonly</span> <span class="ty">ApplicationDbContext</span> _db;   <span class="cm">// shared DB!</span>
+    <span class="kw">private readonly</span> <span class="ty">EmailService</span> _email;         <span class="cm">// tightly coupled</span>
+    <span class="kw">private readonly</span> <span class="ty">InventoryService</span> _inv;        <span class="cm">// tightly coupled</span>
+    <span class="kw">private readonly</span> <span class="ty">PaymentService</span> _pay;          <span class="cm">// tightly coupled</span>
+
+    [<span class="at">HttpPost</span>]
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">IActionResult</span>&gt; <span class="mt">CreateOrder</span>(<span class="ty">OrderDto</span> dto)
+    {
+        <span class="cm">// Everything in one transaction — all or nothing</span>
+        <span class="kw">var</span> stock = <span class="kw">await</span> _inv.<span class="mt">CheckStockAsync</span>(dto.ProductId);
+        <span class="kw">if</span> (stock &lt; dto.Quantity) <span class="kw">return</span> <span class="mt">BadRequest</span>(<span class="str">"Out of stock"</span>);
+
+        <span class="kw">var</span> order = <span class="kw">new</span> <span class="ty">Order</span> { <span class="cm">/* ... */</span> };
+        _db.Orders.<span class="mt">Add</span>(order);
+        <span class="kw">await</span> _db.<span class="mt">SaveChangesAsync</span>();            <span class="cm">// one shared DB</span>
+        <span class="kw">await</span> _pay.<span class="mt">ChargeAsync</span>(dto.CustomerId);   <span class="cm">// in-process call</span>
+        <span class="kw">await</span> _email.<span class="mt">SendConfirmationAsync</span>(order); <span class="cm">// blocks response!</span>
+        <span class="kw">return</span> <span class="mt">Ok</span>(order);
+    }
+}</div></div>`;
+
+  if(k==='foundations:monolith:When to Use') return `
+<div class="sec">🎯 When Monolith Is the Right Choice</div>
+<div class="w3-grid">
+<div class="w3-card"><div class="w3-icon">✅</div><div class="w3-label" style="color:#4ade80">USE MONOLITH WHEN</div><div class="w3-text">Team &lt; 15 engineers. Domain boundaries unclear. Early-stage startup. Limited DevOps maturity. Need fast iteration.</div></div>
+<div class="w3-card"><div class="w3-icon">❌</div><div class="w3-label" style="color:#f87171">AVOID WHEN</div><div class="w3-text">5+ teams deploying independently. Different scaling needs per domain. Multiple tech stacks required. Team &gt; 50 engineers.</div></div>
+<div class="w3-card"><div class="w3-icon">🔄</div><div class="w3-label" style="color:#38bdf8">MIGRATION SIGNAL</div><div class="w3-text">Checkout performance bottleneck. Team coordination overhead. One module's failure causes full outage repeatedly.</div></div>
+</div>
+<div class="callout tip"><strong>💡 SHOPIFY'S APPROACH</strong>Shopify ran as a Rails monolith until 2016. They extracted only the checkout flow when it became a bottleneck — not everything at once. "Modular monolith first, microservice when justified."</div>`;
+
+  if(k==='foundations:microservices:Overview') return `
+<div class="sec">⚡ What Are Microservices?</div>
+<p class="bd"><strong>Microservices</strong> decompose a system into small, independently deployable services — each owning a single business capability with its own data store. Teams can deploy the Order Service without touching the Payment Service.</p>
+<div class="callout warn"><strong>⚠️ KEY INSIGHT</strong>Microservices are NOT about making services small. They're about making them AUTONOMOUS. A service that can't be deployed without coordinating with 5 other teams isn't a microservice — it's a distributed monolith.</div>
+<table class="tbl">
+<tr><th>Property</th><th>Microservice</th><th>Monolith</th></tr>
+<tr><td>Deployment</td><td>Independent per service</td><td>All or nothing</td></tr>
+<tr><td>Database</td><td>Own database (polyglot)</td><td>Shared database</td></tr>
+<tr><td>Team ownership</td><td>One team per service</td><td>Multiple teams, one repo</td></tr>
+<tr><td>Scaling</td><td>Per-service (Order × 10, Catalog × 3)</td><td>Scale everything</td></tr>
+<tr><td>Tech stack</td><td>Different per service (Go, .NET, Node)</td><td>One stack</td></tr>
+<tr><td>Failure isolation</td><td>Circuit breakers contain blast radius</td><td>One crash = full outage</td></tr>
+</table>`;
+
+  if(k==='foundations:microservices:Code') return `
+<div class="sec">💻 Autonomous Microservice — .NET 10 Minimal API</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — Order Microservice (Minimal API)</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body"><span class="cm">// ✅ Microservice: Owns ONLY the order domain</span>
+<span class="kw">var</span> builder = <span class="ty">WebApplication</span>.<span class="mt">CreateBuilder</span>(args);
+
+<span class="cm">// Its OWN database — never shared</span>
+builder.Services.<span class="mt">AddDbContext</span>&lt;<span class="ty">OrderDbContext</span>&gt;(opt =&gt;
+    opt.<span class="mt">UseNpgsql</span>(builder.Configuration
+        .<span class="mt">GetConnectionString</span>(<span class="str">"OrderDb"</span>)));
+
+builder.Services.<span class="mt">AddScoped</span>&lt;<span class="ty">IOrderRepository</span>, <span class="ty">OrderRepository</span>&gt;();
+builder.Services.<span class="mt">AddScoped</span>&lt;<span class="ty">IEventPublisher</span>, <span class="ty">KafkaEventPublisher</span>&gt;();
+
+<span class="kw">var</span> app = builder.<span class="mt">Build</span>();
+
+app.<span class="mt">MapPost</span>(<span class="str">"/orders"</span>, <span class="kw">async</span> (
+    <span class="ty">CreateOrderCommand</span> cmd,
+    <span class="ty">IOrderRepository</span> repo,
+    <span class="ty">IEventPublisher</span> publisher) =&gt;
+{
+    <span class="kw">var</span> order = <span class="ty">Order</span>.<span class="mt">Create</span>(cmd);        <span class="cm">// domain logic</span>
+    <span class="kw">await</span> repo.<span class="mt">SaveAsync</span>(order);          <span class="cm">// own DB</span>
+    <span class="kw">await</span> publisher.<span class="mt">PublishAsync</span>(         <span class="cm">// async event — no coupling!</span>
+        <span class="kw">new</span> <span class="ty">OrderCreatedEvent</span>(order.Id, order.CustomerId));
+    <span class="kw">return</span> <span class="ty">Results</span>.<span class="mt">Accepted</span>(<span class="str">$"/orders/{order.Id}"</span>, order);
+});
+
+app.<span class="mt">Run</span>();</div></div>
+<div class="callout info"><strong>✅ AUTONOMY CHECK</strong>Can this service be deployed without touching any other service? Does it own its database schema? Can it operate independently when other services are down? If yes to all — it's a real microservice.</div>`;
+
+  if(k==='foundations:modular-monolith:Code') return `
+<div class="sec">🧩 Modular Monolith — Explicit Module Boundaries</div>
+<p class="bd">Modules live in separate assemblies with explicit contracts. Deployed as one unit — extract to microservice only when justified.</p>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — Modular Monolith Registration</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body"><span class="cm">// Each module is a separate C# project (assembly)</span>
+<span class="kw">public static class</span> <span class="ty">OrderModule</span>
+{
+    <span class="kw">public static</span> <span class="ty">IServiceCollection</span> <span class="mt">AddOrderModule</span>(
+        <span class="kw">this</span> <span class="ty">IServiceCollection</span> services, <span class="ty">IConfiguration</span> config)
+    {
+        services.<span class="mt">AddDbContext</span>&lt;<span class="ty">OrderDbContext</span>&gt;(opt =&gt;
+            opt.<span class="mt">UseNpgsql</span>(config.<span class="mt">GetConnectionString</span>(<span class="str">"Orders"</span>)));
+        services.<span class="mt">AddScoped</span>&lt;<span class="ty">IOrderService</span>, <span class="ty">OrderService</span>&gt;();
+
+        <span class="cm">// Expose ONLY this facade — no direct DbContext leakage</span>
+        services.<span class="mt">AddScoped</span>&lt;<span class="ty">IOrderQueryFacade</span>, <span class="ty">OrderQueryFacade</span>&gt;();
+        <span class="kw">return</span> services;
+    }
+}
+
+<span class="cm">// Program.cs — clean module composition</span>
+builder.Services.<span class="mt">AddOrderModule</span>(builder.Configuration);
+builder.Services.<span class="mt">AddCatalogModule</span>(builder.Configuration);
+builder.Services.<span class="mt">AddPaymentModule</span>(builder.Configuration);
+
+<span class="cm">// When Order needs Customer data — use the facade, never DbContext</span>
+<span class="kw">public sealed class</span> <span class="ty">OrderService</span>(
+    <span class="ty">IOrderRepository</span> orders,
+    <span class="ty">ICustomerQueryFacade</span> customers) <span class="cm">// ← explicit contract</span>
+{
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">Order</span>&gt; <span class="mt">CreateAsync</span>(<span class="ty">CreateOrderCommand</span> cmd)
+    {
+        <span class="kw">var</span> customer = <span class="kw">await</span> customers
+            .<span class="mt">GetByIdAsync</span>(cmd.CustomerId); <span class="cm">// in-process, but via interface</span>
+        <span class="cm">// ...</span>
+    }
+}</div></div>`;
+
+  // ── DECOMPOSITION ────────────────────────────────────
+  if(k==='decomposition:ddd:Overview') return `
+<div class="sec">🗺️ Domain-Driven Design (DDD)</div>
+<p class="bd">DDD is the most powerful framework for identifying microservice boundaries. The core idea: align software design with the business domain. Each <strong>Bounded Context</strong> maps to a potential microservice.</p>
+<div class="callout info"><strong>💡 THE CORE IDEA</strong>Don't split by technical layer (UI/Service/Repository). Split by BUSINESS CAPABILITY. Each service represents one thing the business does — placing orders, processing payments, managing inventory.</div>
+<table class="tbl">
+<tr><th>Building Block</th><th>Purpose</th><th>Example</th></tr>
+<tr><td>Aggregate Root</td><td>Transaction boundary — owns consistency</td><td>Order (contains OrderItems)</td></tr>
+<tr><td>Entity</td><td>Has identity (ID), mutable</td><td>OrderItem with its own ID</td></tr>
+<tr><td>Value Object</td><td>No identity, immutable, compared by value</td><td>Money(100, USD), Address</td></tr>
+<tr><td>Domain Event</td><td>Something that happened in the domain</td><td>OrderCreated, PaymentFailed</td></tr>
+<tr><td>Repository</td><td>Data access abstraction for aggregates</td><td>IOrderRepository</td></tr>
+<tr><td>Domain Service</td><td>Business logic that doesn't belong to one aggregate</td><td>PricingService, TaxCalculator</td></tr>
+</table>`;
+
+  if(k==='decomposition:ddd:Code') return `
+<div class="sec">💻 DDD Aggregate Root — C# 14</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# 14 .NET 10 — Order Aggregate Root</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body"><span class="kw">public sealed class</span> <span class="ty">Order</span> : <span class="ty">AggregateRoot</span>&lt;<span class="ty">OrderId</span>&gt;
+{
+    <span class="kw">private readonly</span> <span class="ty">List</span>&lt;<span class="ty">OrderItem</span>&gt; _items = [];
+    <span class="kw">public</span> <span class="ty">IReadOnlyList</span>&lt;<span class="ty">OrderItem</span>&gt; Items =&gt; _items.AsReadOnly();
+
+    <span class="kw">public</span> <span class="ty">CustomerId</span> CustomerId { <span class="kw">get</span>; <span class="kw">private set</span>; }
+    <span class="kw">public</span> <span class="ty">OrderStatus</span> Status { <span class="kw">get</span>; <span class="kw">private set</span>; }
+    <span class="kw">public</span> <span class="ty">Money</span> TotalAmount { <span class="kw">get</span>; <span class="kw">private set</span>; }
+
+    <span class="cm">// Factory method — only way to create Order</span>
+    <span class="kw">public static</span> <span class="ty">Order</span> <span class="mt">Create</span>(<span class="ty">CustomerId</span> customerId,
+        <span class="ty">IEnumerable</span>&lt;<span class="ty">OrderItem</span>&gt; items)
+    {
+        <span class="kw">var</span> itemList = items.ToList();
+        <span class="ty">ArgumentOutOfRangeException</span>.<span class="mt">ThrowIfZero</span>(itemList.Count);
+
+        <span class="kw">var</span> order = <span class="kw">new</span> <span class="ty">Order</span>
+        {
+            Id = <span class="ty">OrderId</span>.<span class="mt">New</span>(),
+            CustomerId = customerId,
+            Status = <span class="ty">OrderStatus</span>.Pending
+        };
+        order._items.<span class="mt">AddRange</span>(itemList);
+        order.TotalAmount = order.<span class="mt">CalculateTotal</span>();
+
+        <span class="cm">// Raise domain event — decoupled side effects</span>
+        order.<span class="mt">RaiseDomainEvent</span>(
+            <span class="kw">new</span> <span class="ty">OrderCreatedDomainEvent</span>(order.Id, customerId));
+        <span class="kw">return</span> order;
+    }
+
+    <span class="kw">public void</span> <span class="mt">Confirm</span>()
+    {
+        <span class="kw">if</span> (Status != <span class="ty">OrderStatus</span>.Pending)
+            <span class="kw">throw new</span> <span class="ty">DomainException</span>(
+                <span class="str">$"Cannot confirm order in {Status} state"</span>);
+        Status = <span class="ty">OrderStatus</span>.Confirmed;
+        <span class="mt">RaiseDomainEvent</span>(<span class="kw">new</span> <span class="ty">OrderConfirmedDomainEvent</span>(Id));
+    }
+}
+
+<span class="cm">// Strongly-typed ID (C# 14)</span>
+<span class="kw">public readonly record struct</span> <span class="ty">OrderId</span>(<span class="ty">Guid</span> Value)
+{
+    <span class="kw">public static</span> <span class="ty">OrderId</span> <span class="mt">New</span>() =&gt; <span class="kw">new</span>(<span class="ty">Guid</span>.<span class="mt">NewGuid</span>());
+}</div></div>`;
+
+  // ── INTEGRATION ──────────────────────────────────────
+  if(k==='integration:api-gateway:Code') return `
+<div class="sec">💻 YARP API Gateway — Auth + Rate Limiting + Tracing</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — YARP Gateway Program.cs</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body"><span class="kw">var</span> builder = <span class="ty">WebApplication</span>.<span class="mt">CreateBuilder</span>(args);
+
+builder.Services
+    .<span class="mt">AddReverseProxy</span>()
+    .<span class="mt">LoadFromConfig</span>(builder.Configuration
+        .<span class="mt">GetSection</span>(<span class="str">"ReverseProxy"</span>));
+
+builder.Services
+    .<span class="mt">AddAuthentication</span>(<span class="ty">JwtBearerDefaults</span>.AuthenticationScheme)
+    .<span class="mt">AddJwtBearer</span>(opt =&gt; {
+        opt.Authority = <span class="str">"https://identity.yourdomain.com"</span>;
+        opt.Audience = <span class="str">"api-gateway"</span>;
+    });
+
+builder.Services.<span class="mt">AddRateLimiter</span>(opt =&gt;
+{
+    opt.<span class="mt">AddSlidingWindowLimiter</span>(<span class="str">"per-user"</span>, o =&gt;
+    {
+        o.Window = <span class="ty">TimeSpan</span>.<span class="mt">FromMinutes</span>(<span class="num">1</span>);
+        o.PermitLimit = <span class="num">100</span>;
+        o.SegmentsPerWindow = <span class="num">6</span>;
+    });
+});
+
+<span class="kw">var</span> app = builder.<span class="mt">Build</span>();
+app.<span class="mt">UseRateLimiter</span>();
+app.<span class="mt">UseAuthentication</span>();
+app.<span class="mt">UseAuthorization</span>();
+app.<span class="mt">MapReverseProxy</span>(pipeline =&gt;
+{
+    <span class="cm">// Inject correlation ID for distributed tracing</span>
+    pipeline.<span class="mt">Use</span>(<span class="kw">async</span> (context, next) =&gt;
+    {
+        <span class="kw">if</span> (!context.Request.Headers
+            .<span class="mt">ContainsKey</span>(<span class="str">"X-Correlation-Id"</span>))
+            context.Request.Headers[<span class="str">"X-Correlation-Id"</span>] =
+                <span class="ty">Guid</span>.<span class="mt">NewGuid</span>().<span class="mt">ToString</span>();
+        <span class="kw">await</span> <span class="mt">next</span>();
+    });
+});
+app.<span class="mt">Run</span>();</div></div>`;
+
+  if(k==='integration:api-gateway:Config') return `
+<div class="sec">⚙️ YARP appsettings.json — Routes & Clusters</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">JSON — YARP Routing Configuration</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body">{
+  <span class="str">"ReverseProxy"</span>: {
+    <span class="str">"Routes"</span>: {
+      <span class="str">"orders-route"</span>: {
+        <span class="str">"ClusterId"</span>: <span class="str">"orders"</span>,
+        <span class="str">"AuthorizationPolicy"</span>: <span class="str">"authenticated"</span>,
+        <span class="str">"Match"</span>: { <span class="str">"Path"</span>: <span class="str">"/api/orders/{**catch-all}"</span> },
+        <span class="str">"RateLimiterPolicy"</span>: <span class="str">"per-user"</span>
+      },
+      <span class="str">"catalog-route"</span>: {
+        <span class="str">"ClusterId"</span>: <span class="str">"catalog"</span>,
+        <span class="str">"Match"</span>: { <span class="str">"Path"</span>: <span class="str">"/api/catalog/{**catch-all}"</span> }
+      }
+    },
+    <span class="str">"Clusters"</span>: {
+      <span class="str">"orders"</span>: {
+        <span class="str">"LoadBalancingPolicy"</span>: <span class="str">"RoundRobin"</span>,
+        <span class="str">"Destinations"</span>: {
+          <span class="str">"orders-1"</span>: { <span class="str">"Address"</span>: <span class="str">"http://order-service:8080/"</span> },
+          <span class="str">"orders-2"</span>: { <span class="str">"Address"</span>: <span class="str">"http://order-service-2:8080/"</span> }
+        },
+        <span class="str">"HealthCheck"</span>: {
+          <span class="str">"Active"</span>: { <span class="str">"Enabled"</span>: <span class="kw">true</span>, <span class="str">"Path"</span>: <span class="str">"/health"</span> }
+        }
+      }
+    }
+  }
+}</div></div>`;
+
+  if(k==='integration:orchestration:Code') return `
+<div class="sec">💻 Orchestration SAGA — MassTransit State Machine</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — MassTransit Saga Orchestrator</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body"><span class="kw">public sealed class</span> <span class="ty">OrderFulfillmentSaga</span> :
+    <span class="ty">MassTransitStateMachine</span>&lt;<span class="ty">OrderFulfillmentState</span>&gt;
+{
+    <span class="kw">public</span> <span class="ty">State</span> InventoryReserved { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="kw">null</span>!;
+    <span class="kw">public</span> <span class="ty">State</span> PaymentProcessed { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="kw">null</span>!;
+    <span class="kw">public</span> <span class="ty">State</span> Completed { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="kw">null</span>!;
+    <span class="kw">public</span> <span class="ty">State</span> Failed { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="kw">null</span>!;
+
+    <span class="kw">public</span> <span class="ty">OrderFulfillmentSaga</span>()
+    {
+        <span class="mt">InstanceState</span>(x =&gt; x.CurrentState);
+
+        <span class="cm">// Step 1: OrderCreated → reserve inventory</span>
+        <span class="mt">Initially</span>(
+            <span class="mt">When</span>(OrderCreated)
+                .<span class="mt">Then</span>(ctx =&gt; ctx.Saga.OrderId = ctx.Message.OrderId)
+                .<span class="mt">PublishAsync</span>(ctx =&gt; ctx.<span class="mt">Init</span>&lt;<span class="ty">ReserveInventoryCommand</span>&gt;(
+                    <span class="kw">new</span> { ctx.Message.OrderId, ctx.Message.Items }))
+                .<span class="mt">TransitionTo</span>(InventoryReserved));
+
+        <span class="cm">// Step 2a: Inventory OK → charge payment</span>
+        <span class="mt">During</span>(InventoryReserved,
+            <span class="mt">When</span>(InventoryOk)
+                .<span class="mt">PublishAsync</span>(ctx =&gt; ctx.<span class="mt">Init</span>&lt;<span class="ty">ChargePaymentCommand</span>&gt;(
+                    <span class="kw">new</span> { ctx.Saga.OrderId }))
+                .<span class="mt">TransitionTo</span>(PaymentProcessed),
+            <span class="cm">// Step 2b: Inventory FAIL → compensate (cancel order)</span>
+            <span class="mt">When</span>(InventoryFail)
+                .<span class="mt">PublishAsync</span>(ctx =&gt; ctx.<span class="mt">Init</span>&lt;<span class="ty">CancelOrderCommand</span>&gt;(
+                    <span class="kw">new</span> { ctx.Saga.OrderId }))
+                .<span class="mt">TransitionTo</span>(Failed));
+
+        <span class="cm">// Step 3a: Payment OK → complete</span>
+        <span class="mt">During</span>(PaymentProcessed,
+            <span class="mt">When</span>(PaymentOk)
+                .<span class="mt">TransitionTo</span>(Completed),
+            <span class="cm">// Step 3b: Payment FAIL → release inventory + cancel</span>
+            <span class="mt">When</span>(PaymentFail)
+                .<span class="mt">PublishAsync</span>(ctx =&gt; ctx.<span class="mt">Init</span>&lt;<span class="ty">ReleaseInventoryCommand</span>&gt;(
+                    <span class="kw">new</span> { ctx.Saga.OrderId }))
+                .<span class="mt">PublishAsync</span>(ctx =&gt; ctx.<span class="mt">Init</span>&lt;<span class="ty">CancelOrderCommand</span>&gt;(
+                    <span class="kw">new</span> { ctx.Saga.OrderId }))
+                .<span class="mt">TransitionTo</span>(Failed));
+    }
+}</div></div>`;
+
+  // ── DATABASE ─────────────────────────────────────────
+  if(k==='database-patterns:cqrs:Code') return `
+<div class="sec">💻 CQRS with MediatR — .NET 10</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — CQRS Command + Query Handlers</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body"><span class="cm">// COMMAND side — domain logic + events</span>
+<span class="kw">public sealed record</span> <span class="ty">CreateOrderCommand</span>(
+    <span class="ty">Guid</span> CustomerId,
+    <span class="ty">List</span>&lt;<span class="ty">OrderItemDto</span>&gt; Items) : <span class="ty">ICommand</span>&lt;<span class="ty">Guid</span>&gt;;
+
+<span class="kw">public sealed class</span> <span class="ty">CreateOrderHandler</span>(
+    <span class="ty">IOrderRepository</span> repository,
+    <span class="ty">IOutboxRepository</span> outbox,
+    <span class="ty">IUnitOfWork</span> uow) : <span class="ty">ICommandHandler</span>&lt;<span class="ty">CreateOrderCommand</span>, <span class="ty">Guid</span>&gt;
+{
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">Guid</span>&gt; <span class="mt">Handle</span>(
+        <span class="ty">CreateOrderCommand</span> cmd, <span class="ty">CancellationToken</span> ct)
+    {
+        <span class="kw">var</span> order = <span class="ty">Order</span>.<span class="mt">Create</span>(
+            <span class="ty">CustomerId</span>.<span class="mt">From</span>(cmd.CustomerId), cmd.Items);
+
+        <span class="kw">await</span> repository.<span class="mt">AddAsync</span>(order, ct);
+        <span class="kw">foreach</span> (<span class="kw">var</span> evt <span class="kw">in</span> order.DomainEvents)
+            <span class="kw">await</span> outbox.<span class="mt">AddAsync</span>(<span class="ty">OutboxMessage</span>.<span class="mt">From</span>(evt), ct);
+
+        <span class="kw">await</span> uow.<span class="mt">CommitAsync</span>(ct); <span class="cm">// atomic!</span>
+        <span class="kw">return</span> order.Id.Value;
+    }
+}
+
+<span class="cm">// QUERY side — no domain model, just fast reads (Dapper)</span>
+<span class="kw">public sealed record</span> <span class="ty">GetOrdersByCustomerQuery</span>(<span class="ty">Guid</span> CustomerId, <span class="kw">int</span> Page)
+    : <span class="ty">IQuery</span>&lt;<span class="ty">PagedResult</span>&lt;<span class="ty">OrderSummaryDto</span>&gt;&gt;;
+
+<span class="kw">public sealed class</span> <span class="ty">GetOrdersByCustomerHandler</span>(
+    <span class="ty">IReadDbConnection</span> db)
+    : <span class="ty">IQueryHandler</span>&lt;<span class="ty">GetOrdersByCustomerQuery</span>, <span class="ty">PagedResult</span>&lt;<span class="ty">OrderSummaryDto</span>&gt;&gt;
+{
+    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">PagedResult</span>&lt;<span class="ty">OrderSummaryDto</span>&gt;&gt; <span class="mt">Handle</span>(
+        <span class="ty">GetOrdersByCustomerQuery</span> q, <span class="ty">CancellationToken</span> ct)
+    {
+        <span class="kw">var</span> sql = <span class="str">"""
+            SELECT o.id, o.status, o.total_amount, COUNT(oi.id) as item_count
+            FROM orders.order_summary_view o
+            JOIN orders.order_items oi ON oi.order_id = o.id
+            WHERE o.customer_id = @CustomerId
+            GROUP BY o.id, o.status, o.total_amount
+            ORDER BY o.created_at DESC
+            OFFSET @Offset ROWS FETCH NEXT 20 ROWS ONLY
+            """</span>;
+
+        <span class="kw">var</span> items = <span class="kw">await</span> db.<span class="mt">QueryAsync</span>&lt;<span class="ty">OrderSummaryDto</span>&gt;(sql,
+            <span class="kw">new</span> { q.CustomerId, Offset = (q.Page - <span class="num">1</span>) * <span class="num">20</span> });
+        <span class="kw">return</span> <span class="ty">PagedResult</span>.<span class="mt">From</span>(items, q.Page);
+    }
+}</div></div>`;
+
+  // ── CONSISTENCY ──────────────────────────────────────
+  if(k==='consistency:outbox:Code') return `
+<div class="sec">💻 Outbox Pattern — Atomic DB + Event</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — Outbox: Atomic Save</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body"><span class="cm">// 1. OutboxMessage entity lives in SAME database</span>
+<span class="kw">public sealed class</span> <span class="ty">OutboxMessage</span>
+{
+    <span class="kw">public</span> <span class="ty">Guid</span> Id { <span class="kw">get</span>; <span class="kw">init</span>; } = <span class="ty">Guid</span>.<span class="mt">NewGuid</span>();
+    <span class="kw">public string</span> EventType { <span class="kw">get</span>; <span class="kw">init</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public string</span> Payload { <span class="kw">get</span>; <span class="kw">init</span>; } = <span class="kw">default</span>!;
+    <span class="kw">public</span> <span class="ty">DateTime</span> OccurredOnUtc { <span class="kw">get</span>; <span class="kw">init</span>; }
+    <span class="kw">public</span> <span class="ty">DateTime</span>? ProcessedOnUtc { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public string</span>? Error { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span> RetryCount { <span class="kw">get</span>; <span class="kw">set</span>; }
+}
+
+<span class="cm">// 2. Command handler — atomic write (business data + event)</span>
+<span class="kw">await using var</span> tx = <span class="kw">await</span> db.Database
+    .<span class="mt">BeginTransactionAsync</span>(<span class="ty">IsolationLevel</span>.ReadCommitted, ct);
+<span class="kw">try</span>
+{
+    <span class="kw">var</span> order = <span class="ty">Order</span>.<span class="mt">Create</span>(cmd.CustomerId, cmd.Items);
+    db.Orders.<span class="mt">Add</span>(order);
+
+    <span class="cm">// Write to SAME DB, SAME transaction — atomic!</span>
+    db.OutboxMessages.<span class="mt">Add</span>(<span class="kw">new</span> <span class="ty">OutboxMessage</span>
+    {
+        EventType = <span class="kw">nameof</span>(<span class="ty">OrderCreatedEvent</span>),
+        Payload = <span class="ty">JsonSerializer</span>.<span class="mt">Serialize</span>(<span class="kw">new</span> <span class="ty">OrderCreatedEvent</span>(
+            order.Id, order.CustomerId, order.TotalAmount)),
+        OccurredOnUtc = <span class="ty">DateTime</span>.UtcNow
+    });
+
+    <span class="kw">await</span> db.<span class="mt">SaveChangesAsync</span>(ct);
+    <span class="kw">await</span> tx.<span class="mt">CommitAsync</span>(ct); <span class="cm">// all-or-nothing ✅</span>
+}
+<span class="kw">catch</span> { <span class="kw">await</span> tx.<span class="mt">RollbackAsync</span>(ct); <span class="kw">throw</span>; }</div></div>`;
+
+  if(k==='consistency:outbox:Publisher Worker') return `
+<div class="sec">💻 Outbox Publisher — Background Service</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — Outbox Publisher Worker</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body"><span class="kw">public sealed class</span> <span class="ty">OutboxPublisherWorker</span>(
+    <span class="ty">IServiceScopeFactory</span> scopeFactory,
+    <span class="ty">ILogger</span>&lt;<span class="ty">OutboxPublisherWorker</span>&gt; logger) : <span class="ty">BackgroundService</span>
+{
+    <span class="kw">protected override async</span> <span class="ty">Task</span> <span class="mt">ExecuteAsync</span>(<span class="ty">CancellationToken</span> ct)
+    {
+        <span class="kw">while</span> (!ct.IsCancellationRequested)
+        {
+            <span class="kw">await</span> <span class="mt">ProcessBatchAsync</span>(ct);
+            <span class="kw">await</span> <span class="ty">Task</span>.<span class="mt">Delay</span>(<span class="ty">TimeSpan</span>.<span class="mt">FromSeconds</span>(<span class="num">5</span>), ct);
+        }
+    }
+
+    <span class="kw">private async</span> <span class="ty">Task</span> <span class="mt">ProcessBatchAsync</span>(<span class="ty">CancellationToken</span> ct)
+    {
+        <span class="kw">await using var</span> scope = scopeFactory.<span class="mt">CreateAsyncScope</span>();
+        <span class="kw">var</span> db = scope.ServiceProvider
+            .<span class="mt">GetRequiredService</span>&lt;<span class="ty">OrderDbContext</span>&gt;();
+        <span class="kw">var</span> publisher = scope.ServiceProvider
+            .<span class="mt">GetRequiredService</span>&lt;<span class="ty">IEventPublisher</span>&gt;();
+
+        <span class="kw">var</span> pending = <span class="kw">await</span> db.OutboxMessages
+            .<span class="mt">Where</span>(m =&gt; m.ProcessedOnUtc == <span class="kw">null</span>
+                     &amp;&amp; m.RetryCount &lt; <span class="num">5</span>)
+            .<span class="mt">OrderBy</span>(m =&gt; m.OccurredOnUtc)
+            .<span class="mt">Take</span>(<span class="num">50</span>)
+            .<span class="mt">ToListAsync</span>(ct);
+
+        <span class="kw">foreach</span> (<span class="kw">var</span> msg <span class="kw">in</span> pending)
+        {
+            <span class="kw">try</span>
+            {
+                <span class="kw">await</span> publisher.<span class="mt">PublishAsync</span>(
+                    msg.EventType, msg.Payload, ct);
+                msg.ProcessedOnUtc = <span class="ty">DateTime</span>.UtcNow;
+            }
+            <span class="kw">catch</span> (<span class="ty">Exception</span> ex)
+            {
+                msg.RetryCount++;
+                msg.Error = ex.Message;
+                logger.<span class="mt">LogError</span>(ex,
+                    <span class="str">"Failed to publish outbox msg {Id}"</span>, msg.Id);
+            }
+        }
+        <span class="kw">await</span> db.<span class="mt">SaveChangesAsync</span>(ct);
+    }
+}</div></div>`;
+
+  if(k==='consistency:idempotency:Code') return `
+<div class="sec">💻 Idempotency Pattern — Safe Retry Endpoint</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — Idempotency Key Deduplication</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body">app.<span class="mt">MapPost</span>(<span class="str">"/payments/charge"</span>, <span class="kw">async</span> (
+    <span class="ty">ChargePaymentRequest</span> request,
+    <span class="ty">HttpRequest</span> httpRequest,
+    <span class="ty">PaymentDbContext</span> db,
+    <span class="ty">IPaymentGateway</span> gateway) =&gt;
+{
+    <span class="kw">var</span> key = httpRequest.Headers[<span class="str">"Idempotency-Key"</span>]
+        .FirstOrDefault();
+
+    <span class="kw">if</span> (<span class="ty">string</span>.<span class="mt">IsNullOrWhiteSpace</span>(key))
+        <span class="kw">return</span> <span class="ty">Results</span>.<span class="mt">BadRequest</span>(
+            <span class="kw">new</span> { Error = <span class="str">"Idempotency-Key header required"</span> });
+
+    <span class="cm">// Already processed? Return same result</span>
+    <span class="kw">var</span> existing = <span class="kw">await</span> db.IdempotencyRecords
+        .<span class="mt">FirstOrDefaultAsync</span>(r =&gt; r.Key == key);
+
+    <span class="kw">if</span> (existing <span class="kw">is not null</span>)
+    {
+        <span class="kw">var</span> cached = <span class="ty">JsonSerializer</span>.<span class="mt">Deserialize</span>&lt;<span class="ty">PaymentResponse</span>&gt;(
+            existing.ResponsePayload!);
+        <span class="kw">return</span> <span class="ty">Results</span>.<span class="mt">Ok</span>(cached); <span class="cm">// idempotent! ✅</span>
+    }
+
+    <span class="kw">var</span> result = <span class="kw">await</span> gateway.<span class="mt">ChargeAsync</span>(
+        request.CustomerId, request.Amount, request.Currency);
+
+    <span class="kw">var</span> response = <span class="kw">new</span> <span class="ty">PaymentResponse</span>(result.PaymentId, result.Status);
+
+    db.IdempotencyRecords.<span class="mt">Add</span>(<span class="kw">new</span> <span class="ty">IdempotencyRecord</span>
+    {
+        Key = key,
+        ResponsePayload = <span class="ty">JsonSerializer</span>.<span class="mt">Serialize</span>(response),
+        CreatedAt = <span class="ty">DateTime</span>.UtcNow,
+        ExpiresAt = <span class="ty">DateTime</span>.UtcNow.<span class="mt">AddHours</span>(<span class="num">24</span>)
+    });
+    <span class="kw">await</span> db.<span class="mt">SaveChangesAsync</span>();
+    <span class="kw">return</span> <span class="ty">Results</span>.<span class="mt">Ok</span>(response);
+});</div></div>`;
+
+  // ── RESILIENCY ───────────────────────────────────────
+  if(k==='resiliency:circuit-breaker:Code') return `
+<div class="sec">💻 Circuit Breaker — .NET 10 Resilience Pipeline</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — Microsoft.Extensions.Http.Resilience</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body">builder.Services
+    .<span class="mt">AddHttpClient</span>&lt;<span class="ty">ICatalogServiceClient</span>, <span class="ty">CatalogServiceClient</span>&gt;(
+        client =&gt; client.BaseAddress = <span class="kw">new</span> <span class="ty">Uri</span>(<span class="str">"http://catalog-service"</span>))
+    .<span class="mt">AddStandardResilienceHandler</span>(options =&gt;
+    {
+        <span class="cm">// Retry: 3 attempts, exponential backoff + jitter</span>
+        options.Retry.MaxRetryAttempts = <span class="num">3</span>;
+        options.Retry.Delay = <span class="ty">TimeSpan</span>.<span class="mt">FromMilliseconds</span>(<span class="num">200</span>);
+        options.Retry.BackoffType = <span class="ty">DelayBackoffType</span>.Exponential;
+        options.Retry.UseJitter = <span class="kw">true</span>; <span class="cm">// prevents thundering herd!</span>
+
+        <span class="cm">// Per-attempt timeout</span>
+        options.AttemptTimeout.Timeout = <span class="ty">TimeSpan</span>.<span class="mt">FromSeconds</span>(<span class="num">3</span>);
+
+        <span class="cm">// Circuit breaker: open after 50% failures in 10s</span>
+        options.CircuitBreaker.FailureRatio = <span class="num">0.5</span>;
+        options.CircuitBreaker.SamplingDuration =
+            <span class="ty">TimeSpan</span>.<span class="mt">FromSeconds</span>(<span class="num">10</span>);
+        options.CircuitBreaker.MinimumThroughput = <span class="num">10</span>;
+        options.CircuitBreaker.BreakDuration =
+            <span class="ty">TimeSpan</span>.<span class="mt">FromSeconds</span>(<span class="num">30</span>);
+
+        <span class="cm">// Total timeout across all retries</span>
+        options.TotalRequestTimeout.Timeout =
+            <span class="ty">TimeSpan</span>.<span class="mt">FromSeconds</span>(<span class="num">15</span>);
+    });</div></div>`;
+
+  if(k==='resiliency:circuit-breaker:States Diagram') return `
+<div class="sec">⚡ Circuit Breaker — Three States</div>
+<div class="dw"><div class="dt">CIRCUIT BREAKER STATE MACHINE</div>
+<svg viewBox="0 0 420 200" width="100%" style="max-height:200px">
+<defs>
+<marker id="cb1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#4ade80"/></marker>
+<marker id="cb2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#f87171"/></marker>
+<marker id="cb3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#fbbf24"/></marker>
+</defs>
+<rect x="10" y="80" width="110" height="50" rx="8" fill="rgba(74,222,128,.1)" stroke="#4ade80" stroke-width="2"/>
+<text x="65" y="102" text-anchor="middle" fill="#4ade80" font-family="'Fira Code',monospace" font-size="11" font-weight="700">✅ CLOSED</text>
+<text x="65" y="118" text-anchor="middle" class="ft" font-size="9">Requests flow</text>
+<rect x="155" y="80" width="110" height="50" rx="8" fill="rgba(248,113,113,.1)" stroke="#f87171" stroke-width="2"/>
+<text x="210" y="102" text-anchor="middle" fill="#f87171" font-family="'Fira Code',monospace" font-size="11" font-weight="700">🔴 OPEN</text>
+<text x="210" y="118" text-anchor="middle" class="ft" font-size="9">Fail fast (30s)</text>
+<rect x="300" y="80" width="110" height="50" rx="8" fill="rgba(251,191,36,.1)" stroke="#fbbf24" stroke-width="2"/>
+<text x="355" y="102" text-anchor="middle" fill="#fbbf24" font-family="'Fira Code',monospace" font-size="11" font-weight="700">🟡 HALF-OPEN</text>
+<text x="355" y="118" text-anchor="middle" class="ft" font-size="9">Probe recovery</text>
+<line x1="120" y1="95" x2="153" y2="95" stroke="#f87171" stroke-width="1.5" marker-end="url(#cb2)"/>
+<text x="136" y="90" text-anchor="middle" class="ft" font-size="8">failures &gt; 50%</text>
+<line x1="265" y1="105" x2="232" y2="105" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#cb3)"/>
+<text x="248" y="120" text-anchor="middle" class="ft" font-size="8">timer expires</text>
+<line x1="355" y1="80" x2="120" y2="80" stroke="#4ade80" stroke-width="1.5" marker-end="url(#cb1)"/>
+<text x="237" y="74" text-anchor="middle" class="ft" font-size="8" fill="#4ade80">probe succeeds → CLOSED</text>
+<text x="355" y="145" text-anchor="middle" class="ft" font-size="8" fill="#f87171">probe fails → OPEN</text>
+</svg></div>
+<table class="tbl">
+<tr><th>State</th><th>Behavior</th><th>Transition</th></tr>
+<tr><td style="color:#4ade80">CLOSED</td><td>Normal — all requests pass through</td><td>→ OPEN when failure% &gt; threshold</td></tr>
+<tr><td style="color:#f87171">OPEN</td><td>Fail fast — all requests immediately rejected</td><td>→ HALF-OPEN after break duration</td></tr>
+<tr><td style="color:#fbbf24">HALF-OPEN</td><td>Test probes — limited requests allowed</td><td>→ CLOSED on success, OPEN on failure</td></tr>
+</table>`;
+
+  // ── OBSERVABILITY ────────────────────────────────────
+  if(k==='observability:three-pillars:Code') return `
+<div class="sec">💻 OpenTelemetry — Full Stack .NET 10</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — OpenTelemetry Logs + Traces + Metrics</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body">builder.Services.<span class="mt">AddOpenTelemetry</span>()
+    .<span class="mt">ConfigureResource</span>(resource =&gt;
+        resource.<span class="mt">AddService</span>(
+            serviceName: <span class="str">"order-service"</span>,
+            serviceVersion: <span class="str">"2.1.0"</span>,
+            serviceInstanceId: <span class="ty">Environment</span>.MachineName))
+    .<span class="mt">WithTracing</span>(tracing =&gt;
+        tracing
+            .<span class="mt">AddAspNetCoreInstrumentation</span>(o =&gt; o.RecordException = <span class="kw">true</span>)
+            .<span class="mt">AddHttpClientInstrumentation</span>()
+            .<span class="mt">AddEntityFrameworkCoreInstrumentation</span>()
+            .<span class="mt">AddSource</span>(<span class="str">"OrderService.*"</span>)
+            .<span class="mt">AddOtlpExporter</span>(o =&gt;
+                o.Endpoint = <span class="kw">new</span> <span class="ty">Uri</span>(<span class="str">"http://otel-collector:4317"</span>)))
+    .<span class="mt">WithMetrics</span>(metrics =&gt;
+        metrics
+            .<span class="mt">AddAspNetCoreInstrumentation</span>()
+            .<span class="mt">AddHttpClientInstrumentation</span>()
+            .<span class="mt">AddRuntimeInstrumentation</span>()
+            .<span class="mt">AddMeter</span>(<span class="str">"OrderService.Orders"</span>)
+            .<span class="mt">AddPrometheusExporter</span>())
+    .<span class="mt">WithLogging</span>(logging =&gt;
+        logging.<span class="mt">AddOtlpExporter</span>());
+
+<span class="cm">// Structured logging with correlation</span>
+builder.Host.<span class="mt">UseSerilog</span>((ctx, cfg) =&gt;
+    cfg.<span class="mt">ReadFrom</span>.<span class="mt">Configuration</span>(ctx.Configuration)
+       .<span class="mt">Enrich</span>.<span class="mt">FromLogContext</span>()
+       .<span class="mt">Enrich</span>.<span class="mt">WithProperty</span>(<span class="str">"ServiceName"</span>, <span class="str">"order-service"</span>)
+       .<span class="mt">WriteTo</span>.<span class="mt">OpenTelemetry</span>());</div></div>`;
+
+  if(k==='observability:health-checks:Code') return `
+<div class="sec">💻 Health Checks — Liveness vs Readiness</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — Health Checks Setup</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body">builder.Services.<span class="mt">AddHealthChecks</span>()
+    .<span class="mt">AddNpgsql</span>(
+        builder.Configuration.<span class="mt">GetConnectionString</span>(<span class="str">"OrderDb"</span>)!,
+        name: <span class="str">"database"</span>,
+        failureStatus: <span class="ty">HealthStatus</span>.Unhealthy,
+        tags: [<span class="str">"db"</span>, <span class="str">"ready"</span>])
+    .<span class="mt">AddRedis</span>(
+        builder.Configuration.<span class="mt">GetConnectionString</span>(<span class="str">"Redis"</span>)!,
+        name: <span class="str">"cache"</span>,
+        failureStatus: <span class="ty">HealthStatus</span>.Degraded,
+        tags: [<span class="str">"cache"</span>, <span class="str">"ready"</span>])
+    .<span class="mt">AddCheck</span>&lt;<span class="ty">OrderProcessingHealthCheck</span>&gt;(
+        <span class="str">"order-processing"</span>, tags: [<span class="str">"custom"</span>, <span class="str">"ready"</span>]);
+
+<span class="cm">// Liveness: is process alive? (K8s livenessProbe)</span>
+app.<span class="mt">MapHealthChecks</span>(<span class="str">"/health/live"</span>, <span class="kw">new</span> <span class="ty">HealthCheckOptions</span>
+{
+    Predicate = _ =&gt; <span class="kw">false</span>, <span class="cm">// no checks — just confirm alive</span>
+    ResponseWriter = <span class="ty">UIResponseWriter</span>.WriteHealthCheckUIResponse
+});
+
+<span class="cm">// Readiness: ready for traffic? (K8s readinessProbe)</span>
+app.<span class="mt">MapHealthChecks</span>(<span class="str">"/health/ready"</span>, <span class="kw">new</span> <span class="ty">HealthCheckOptions</span>
+{
+    Predicate = check =&gt; check.Tags.<span class="mt">Contains</span>(<span class="str">"ready"</span>),
+    ResponseWriter = <span class="ty">UIResponseWriter</span>.WriteHealthCheckUIResponse
+});</div></div>
+<div class="callout warn"><strong>⚠️ ALWAYS SEPARATE</strong>A service might be alive (liveness OK) but not yet ready (waiting for DB connection, cache warmup). Kubernetes will not route traffic to pods that fail readiness, but won't restart them unless liveness fails.</div>`;
+
+  // ── DEPLOYMENT ───────────────────────────────────────
+  if(k==='deployment:dockerfile:Dockerfile') return `
+<div class="sec">🐳 Production Dockerfile — Multi-Stage .NET 10</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">Dockerfile — .NET 10 Alpine Multi-Stage</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body"><span class="cm"># Final image: ~120MB vs ~1.2GB with SDK image</span>
+
+<span class="cm"># Stage 1: Restore (cached when only .csproj changes)</span>
+<span class="kw">FROM</span> mcr.microsoft.com/dotnet/sdk:<span class="num">10.0</span>-alpine <span class="kw">AS</span> restore
+<span class="kw">WORKDIR</span> /src
+<span class="kw">COPY</span> [<span class="str">"src/OrderService/OrderService.csproj"</span>,
+      <span class="str">"src/OrderService/"</span>]
+<span class="kw">RUN</span> dotnet restore <span class="str">"src/OrderService/OrderService.csproj"</span> \
+    --runtime linux-musl-x64
+
+<span class="cm"># Stage 2: Build & publish</span>
+<span class="kw">FROM</span> restore <span class="kw">AS</span> publish
+<span class="kw">COPY</span> src/ .
+<span class="kw">RUN</span> dotnet publish <span class="str">"src/OrderService/OrderService.csproj"</span> \
+    -c Release -r linux-musl-x64 --self-contained <span class="kw">false</span> \
+    -o /app/publish /p:UseAppHost=<span class="kw">false</span>
+
+<span class="cm"># Stage 3: Minimal runtime only</span>
+<span class="kw">FROM</span> mcr.microsoft.com/dotnet/aspnet:<span class="num">10.0</span>-alpine <span class="kw">AS</span> final
+
+<span class="cm"># Security: Never run as root!</span>
+<span class="kw">RUN</span> addgroup -S appgroup &amp;&amp; adduser -S appuser -G appgroup
+<span class="kw">USER</span> appuser
+
+<span class="kw">WORKDIR</span> /app
+<span class="kw">EXPOSE</span> <span class="num">8080</span>
+
+<span class="kw">HEALTHCHECK</span> --interval=<span class="num">10</span>s --timeout=<span class="num">5</span>s --start-period=<span class="num">30</span>s \
+    <span class="kw">CMD</span> wget -qO- http://localhost:<span class="num">8080</span>/health/live || exit <span class="num">1</span>
+
+<span class="kw">COPY</span> --from=publish /app/publish .
+<span class="kw">ENTRYPOINT</span> [<span class="str">"dotnet"</span>, <span class="str">"OrderService.dll"</span>]</div></div>`;
+
+  if(k==='deployment:k8s:Manifests') return `
+<div class="sec">☸️ Kubernetes — Full Production Manifest</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">YAML — Deployment + HPA + PDB</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: production
+spec:
+  replicas: <span class="num">3</span>
+  selector:
+    matchLabels: { app: order-service }
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: <span class="num">1</span>
+      maxUnavailable: <span class="num">0</span>  <span class="cm"># zero-downtime!</span>
+  template:
+    spec:
+      containers:
+        - name: order-service
+          image: registry.example.com/order-service:v2.1.0
+          resources:
+            requests: { cpu: <span class="str">"100m"</span>, memory: <span class="str">"128Mi"</span> }
+            limits:   { cpu: <span class="str">"500m"</span>, memory: <span class="str">"512Mi"</span> }
+          readinessProbe:
+            httpGet: { path: /health/ready, port: <span class="num">8080</span> }
+            initialDelaySeconds: <span class="num">10</span>
+          livenessProbe:
+            httpGet: { path: /health/live, port: <span class="num">8080</span> }
+            initialDelaySeconds: <span class="num">30</span>
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: order-service-hpa }
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: order-service
+  minReplicas: <span class="num">3</span>
+  maxReplicas: <span class="num">20</span>
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: { type: Utilization, averageUtilization: <span class="num">70</span> }
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: order-service-pdb }
+spec:
+  minAvailable: <span class="num">2</span>
+  selector:
+    matchLabels: { app: order-service }</div></div>`;
+
+  if(k==='deployment:feature-toggles:Code') return `
+<div class="sec">💻 Feature Toggles — Microsoft.FeatureManagement</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — Feature Flags Setup & Usage</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
+<div class="cb-body">builder.Services.<span class="mt">AddFeatureManagement</span>()
+    .<span class="mt">AddFeatureFilter</span>&lt;<span class="ty">PercentageFilter</span>&gt;()   <span class="cm">// % of users</span>
+    .<span class="mt">AddFeatureFilter</span>&lt;<span class="ty">TargetingFilter</span>&gt;()     <span class="cm">// specific users/groups</span>
+    .<span class="mt">AddFeatureFilter</span>&lt;<span class="ty">TimeWindowFilter</span>&gt;();   <span class="cm">// time-based</span>
+
+<span class="cm">// appsettings.json — 10% canary rollout</span>
+<span class="cm">// {</span>
+<span class="cm">//   "FeatureManagement": {</span>
+<span class="cm">//     "NewCheckoutFlow": {</span>
+<span class="cm">//       "EnabledFor": [{ "Name": "Percentage",</span>
+<span class="cm">//         "Parameters": { "Value": 10 } }]</span>
+<span class="cm">//     }</span>
+<span class="cm">//   }</span>
+<span class="cm">// }</span>
+
+app.<span class="mt">MapPost</span>(<span class="str">"/checkout"</span>, <span class="kw">async</span> (
+    <span class="ty">CheckoutRequest</span> req,
+    <span class="ty">IFeatureManager</span> features) =&gt;
+{
+    <span class="kw">if</span> (<span class="kw">await</span> features.<span class="mt">IsEnabledAsync</span>(<span class="str">"NewCheckoutFlow"</span>))
+        <span class="kw">return await</span> checkoutV2.<span class="mt">ProcessAsync</span>(req); <span class="cm">// 10%</span>
+    <span class="kw">return await</span> checkoutV1.<span class="mt">ProcessAsync</span>(req);    <span class="cm">// 90%</span>
+});
+
+<span class="cm">// Attribute-based flag gate on controller action</span>
+[<span class="at">FeatureGate</span>(<span class="str">"NewRecommendations"</span>)]
+[<span class="at">HttpGet</span>(<span class="str">"recommendations"</span>)]
+<span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">IActionResult</span>&gt; <span class="mt">GetRecommendations</span>()
+{
+    <span class="cm">// Returns 404 automatically if flag is OFF</span>
+    <span class="kw">return</span> <span class="mt">Ok</span>(<span class="kw">await</span> _svc.<span class="mt">GetAsync</span>());
+}</div></div>`;
+
+  // ── INTERVIEW ────────────────────────────────────────
+  if(k==='interview:iq-junior:All Questions') return renderIQs('junior');
+  if(k==='interview:iq-mid:All Questions') return renderIQs('mid');
+  if(k==='interview:iq-senior:All Questions') return renderIQs('senior');
+  if(k==='interview:iq-architect:All Questions') return renderIQs('architect');
+  if(k==='interview:iq-architect:System Design') return `
+<div class="sec">🏗️ System Design: E-Commerce Platform</div>
+<p class="bd">Classic microservices system design question. Here's the expert approach that impresses interviewers.</p>
+<div class="callout info"><strong>💡 START HERE — Clarify Requirements</strong>DAU, peak orders/sec, read/write ratio, SLAs. Example: 1M DAU, 10K orders/peak, 100:1 read:write ratio, 99.9% uptime. Never jump to solution before understanding scale.</div>
+<div class="dw"><div class="dt">E-COMMERCE MICROSERVICES ARCHITECTURE</div>
+<svg viewBox="0 0 420 300" width="100%" style="max-height:300px">
+<defs><marker id="sd1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#38bdf8"/></marker></defs>
+<rect x="155" y="5" width="110" height="28" rx="5" fill="rgba(56,189,248,.1)" stroke="#38bdf8" stroke-width="1.5"/>
+<text x="210" y="23" text-anchor="middle" class="ft-g" font-size="10">Web + Mobile Clients</text>
+<line x1="210" y1="33" x2="210" y2="48" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#sd1)"/>
+<rect x="130" y="50" width="160" height="28" rx="5" fill="rgba(251,191,36,.12)" stroke="#fbbf24" stroke-width="1.5"/>
+<text x="210" y="68" text-anchor="middle" fill="#fbbf24" font-family="'Fira Code',monospace" font-size="10" font-weight="700">CDN + WAF + DDoS</text>
+<line x1="210" y1="78" x2="210" y2="93" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#sd1)"/>
+<rect x="110" y="95" width="200" height="28" rx="5" fill="rgba(249,115,22,.12)" stroke="#fb923c" stroke-width="1.5"/>
+<text x="210" y="113" text-anchor="middle" fill="#fb923c" font-family="'Fira Code',monospace" font-size="10" font-weight="700">API Gateway (YARP)</text>
+<line x1="210" y1="123" x2="210" y2="138" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#sd1)"/>
+<rect x="20" y="140" width="72" height="36" rx="5" fill="rgba(56,189,248,.1)" stroke="#38bdf8" stroke-width="1.2"/>
+<text x="56" y="156" text-anchor="middle" class="ft-g" font-size="9">📦 Order</text>
+<text x="56" y="169" text-anchor="middle" class="ft" font-size="8">PostgreSQL</text>
+<rect x="100" y="140" width="72" height="36" rx="5" fill="rgba(74,222,128,.1)" stroke="#4ade80" stroke-width="1.2"/>
+<text x="136" y="156" text-anchor="middle" fill="#4ade80" font-family="'Fira Code',monospace" font-size="9">🛍️ Catalog</text>
+<text x="136" y="169" text-anchor="middle" class="ft" font-size="8">CDN+Mongo</text>
+<rect x="180" y="140" width="72" height="36" rx="5" fill="rgba(249,115,22,.1)" stroke="#f97316" stroke-width="1.2"/>
+<text x="216" y="156" text-anchor="middle" fill="#f97316" font-family="'Fira Code',monospace" font-size="9">💳 Payment</text>
+<text x="216" y="169" text-anchor="middle" class="ft" font-size="8">PG+Stripe</text>
+<rect x="260" y="140" width="72" height="36" rx="5" fill="rgba(192,132,252,.1)" stroke="#c084fc" stroke-width="1.2"/>
+<text x="296" y="156" text-anchor="middle" fill="#c084fc" font-family="'Fira Code',monospace" font-size="9">📦 Inventory</text>
+<text x="296" y="169" text-anchor="middle" class="ft" font-size="8">Redis atomic</text>
+<rect x="340" y="140" width="65" height="36" rx="5" fill="rgba(244,114,182,.1)" stroke="#f472b6" stroke-width="1.2"/>
+<text x="372" y="156" text-anchor="middle" fill="#f472b6" font-family="'Fira Code',monospace" font-size="9">👤 Users</text>
+<text x="372" y="169" text-anchor="middle" class="ft" font-size="8">JWT+Pg</text>
+<line x1="56" y1="176" x2="160" y2="206" stroke="#475569" stroke-width="1" stroke-dasharray="3 2"/>
+<line x1="136" y1="176" x2="175" y2="206" stroke="#475569" stroke-width="1" stroke-dasharray="3 2"/>
+<line x1="216" y1="176" x2="210" y2="206" stroke="#475569" stroke-width="1" stroke-dasharray="3 2"/>
+<line x1="296" y1="176" x2="245" y2="206" stroke="#475569" stroke-width="1" stroke-dasharray="3 2"/>
+<rect x="90" y="208" width="240" height="28" rx="5" fill="rgba(129,140,248,.1)" stroke="#818cf8" stroke-width="1.5"/>
+<text x="210" y="226" text-anchor="middle" fill="#818cf8" font-family="'Fira Code',monospace" font-size="10" font-weight="700">Apache Kafka (Event Bus)</text>
+<line x1="210" y1="236" x2="210" y2="251" stroke="#475569" stroke-width="1.5" marker-end="url(#sd1)"/>
+<rect x="20" y="253" width="80" height="24" rx="4" fill="rgba(129,140,248,.06)" stroke="rgba(129,140,248,.2)"/>
+<text x="60" y="268" text-anchor="middle" class="ft" font-size="9">📧 Notifications</text>
+<rect x="110" y="253" width="80" height="24" rx="4" fill="rgba(129,140,248,.06)" stroke="rgba(129,140,248,.2)"/>
+<text x="150" y="268" text-anchor="middle" class="ft" font-size="9">📊 Analytics</text>
+<rect x="200" y="253" width="80" height="24" rx="4" fill="rgba(129,140,248,.06)" stroke="rgba(129,140,248,.2)"/>
+<text x="240" y="268" text-anchor="middle" class="ft" font-size="9">🔍 Search Index</text>
+<rect x="290" y="253" width="110" height="24" rx="4" fill="rgba(129,140,248,.06)" stroke="rgba(129,140,248,.2)"/>
+<text x="345" y="268" text-anchor="middle" class="ft" font-size="9">🏷️ Recommendations</text>
+</svg></div>
+<div class="callout tip"><strong>🏆 AMAZON PRIME DAY</strong>Prime Day processes ~37.5 orders/sec at peak. Catalog served via CDN + read replicas. Inventory used Redis Lua scripts for atomic decrements. Orders via Kafka async processing.</div>`;
+
+  const structuredFallback = renderStructuredFallback(cid, tid, tab);
+  if (structuredFallback) return structuredFallback;
+
+  return `<div class="empty-r"><span style="font-size:28px">⚡</span><span>Unable to render "${escHtml(tab)}"</span></div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// INTERVIEW Q&A DATA
+// ═══════════════════════════════════════════════════════
+const IQ_DATA = {
+junior:[
+{q:"What is a microservice and how does it differ from a monolith?",diff:"JUNIOR",a:"A microservice is an independently deployable service that owns a single business capability and its own data store. A monolith deploys all capabilities together. Key differences: microservices can be deployed, scaled, and owned independently. The tradeoff is operational complexity — you trade simplicity for autonomy and scale."},
+{q:"What is REST and when would you use gRPC instead?",diff:"JUNIOR",a:"REST is HTTP-based with JSON, language-agnostic, ideal for public APIs. gRPC is binary (Protocol Buffers), ~7x faster, with strongly-typed contracts — ideal for internal service communication where you control both sides and need performance. Use REST for public APIs, gRPC for internal high-throughput calls."},
+{q:"What is the difference between synchronous and asynchronous communication?",diff:"JUNIOR",a:"Synchronous: Service A calls B and waits. Direct, simple, but creates temporal coupling — both services must be available simultaneously. Asynchronous: Service A publishes an event and continues. Service B processes when ready. Decoupled in time and space — better for resilience and scalability."},
+{q:"What is an API Gateway and why do you need one?",diff:"JUNIOR",a:"An API Gateway is the single entry point for all external traffic. It handles cross-cutting concerns: authentication, rate limiting, request routing, SSL termination, and logging. Without it, clients need to know all service addresses, and every service must implement auth independently. YARP is the .NET implementation."},
+{q:"What is service discovery?",diff:"JUNIOR",a:"Service discovery allows services to find each other without hardcoded addresses. In Kubernetes, this is built-in via DNS — order-service resolves to the correct pod IP automatically. Important because container IPs change constantly with auto-scaling. .NET Aspire has built-in service discovery."},
+{q:"What is eventual consistency?",diff:"JUNIOR",a:"Eventual consistency means a system will converge to a consistent state given enough time, but reads may return stale data temporarily. Acceptable for notifications, analytics, recommendations. NOT acceptable for financial transactions, inventory reservation, or access control changes."},
+{q:"What is Docker and why is it used in microservices?",diff:"JUNIOR",a:"Docker packages an application and its dependencies into a container — a portable, isolated unit. In microservices, it means each service can have different dependencies, run consistently across dev/staging/production, and scale independently. Multi-stage Dockerfiles keep production images small (~120MB vs 1.2GB)."},
+{q:"What is Kubernetes?",diff:"JUNIOR",a:"Kubernetes (K8s) orchestrates containers at scale. It handles: scheduling containers across nodes, auto-scaling (HPA), self-healing (restart failed pods), rolling updates (zero-downtime deployments), and service discovery via DNS. Essential for production microservices."},
+{q:"What is CQRS?",diff:"JUNIOR",a:"CQRS (Command Query Responsibility Segregation) separates the write model (commands) from the read model (queries). Write path uses rich domain model with validation. Read path uses optimized queries (Dapper on read replicas, denormalized views). Enables independent scaling and optimization of reads vs writes."},
+],
+mid:[
+{q:"What is the Outbox Pattern and why do you need it?",diff:"MID",a:"The Outbox Pattern solves the dual-write problem: you cannot atomically write to a database AND publish a message to a broker. Solution: write the event to the same database as your business data in the same transaction. A background worker then publishes from the outbox table to the broker. This guarantees at-least-once delivery with zero message loss."},
+{q:"What is idempotency and why is it critical in microservices?",diff:"MID",a:"An idempotent operation produces the same result regardless of how many times it's executed. Critical because: at-least-once delivery means the same event may be processed multiple times; network retries can duplicate requests. Payment charged twice is a disaster. Solution: idempotency keys (UUID per operation) checked before processing."},
+{q:"Explain the Circuit Breaker pattern and its three states.",diff:"MID",a:"Circuit Breaker prevents cascading failures. CLOSED: normal, requests flow through. OPEN: too many failures, all requests immediately rejected (fail fast), gives downstream service recovery time. HALF-OPEN: after break duration, test probes allowed — success → CLOSED, failure → OPEN. .NET implementation: Microsoft.Extensions.Http.Resilience."},
+{q:"What is the SAGA pattern? What are its two implementations?",diff:"MID",a:"SAGA manages distributed transactions across multiple services (no 2-phase commit). Two implementations: Choreography — each service reacts to events and publishes its own events (loose coupling, harder to debug). Orchestration — central saga coordinator explicitly commands each step (easier to visualize, single point of control). Use MassTransit state machines for orchestration in .NET."},
+{q:"What is the difference between orchestration and choreography?",diff:"MID",a:"Choreography: services react to events independently — no central coordinator. Like a jazz ensemble. Loose coupling, but distributed logic is harder to understand. Choreography: central saga explicitly coordinates all steps. Like a conductor. Easier to debug and visualize but creates central coupling. Choreography for simple 2-3 step flows, orchestration for complex 5+ step business processes."},
+{q:"What is exponential backoff with jitter?",diff:"MID",a:"Exponential backoff doubles wait time between retries (200ms, 400ms, 800ms) to avoid overloading a recovering service. Jitter adds randomness (200ms±40ms) to prevent 10,000 clients all retrying at exactly the same millisecond — the thundering herd problem. Without jitter, all retries storm the service simultaneously and prevent recovery."},
+{q:"What is the difference between the Inbox and Outbox patterns?",diff:"MID",a:"Outbox (producer-side): write events to same DB as business data atomically; background worker publishes to broker. Prevents message loss on crash. Inbox (consumer-side): before processing, check if message ID was already processed; store message ID atomically with business operation. Prevents duplicate processing on redelivery. Both patterns work together for exactly-once semantics."},
+{q:"How does health check liveness differ from readiness in Kubernetes?",diff:"MID",a:"Liveness: 'Is the process alive?' If this fails, K8s RESTARTS the pod. Only checks the process itself — no external dependencies. Readiness: 'Is the service ready to receive traffic?' If this fails, K8s REMOVES the pod from load balancer rotation (no restart). Checks DB connectivity, cache, dependencies. A service can be alive but not ready (warming up). Always implement both separately."},
+],
+senior:[
+{q:"How would you design a system to prevent overselling limited inventory?",diff:"SENIOR",a:"Redis with Lua scripts for atomic check-and-decrement. Lua runs atomically on Redis — no race conditions possible: EVAL 'local qty = redis.call(GET, key); if qty >= count then return redis.call(DECRBY, key, count) else return -1 end'. If -1 returned, reject. Use Redis Cluster for scale. Fallback: pessimistic locking in PostgreSQL with SELECT FOR UPDATE NOWAIT."},
+{q:"How do you prevent duplicate order creation when the client retries?",diff:"SENIOR",a:"Idempotency keys. Client generates a UUID for each order intent and sends it in the Idempotency-Key header. Server checks if this key was processed before — if yes, returns the cached response. The key must be stored atomically with the order in the same DB transaction to prevent race conditions on simultaneous retries. Keys expire after 24–48 hours."},
+{q:"How would you handle schema evolution in a Kafka event-driven system?",diff:"SENIOR",a:"Use Schema Registry (Confluent) with Avro or Protobuf. Rules: never remove/rename required fields, never change field types — only add new optional fields with defaults. For breaking changes: create new topic version (OrderCreatedV2), run old and new consumers in parallel during migration, deprecate old version after all consumers migrated. Consumer-Driven Contract Testing (Pact) catches breaking changes before deployment."},
+{q:"Explain the Strangler Fig pattern for monolith migration.",diff:"SENIOR",a:"Named after the fig tree that grows around another tree and eventually replaces it. Never do a big-bang rewrite. Steps: (1) Add a facade/gateway in front of the monolith; (2) Extract one capability at a time as a microservice; (3) Route traffic for that capability to the new service via the gateway; (4) Remove from monolith when stable. YARP makes this easy — swap routes from monolith to new service without downtime."},
+],
+architect:[
+{q:"When would you choose a modular monolith over microservices?",diff:"ARCHITECT",a:"When domain boundaries are unclear (expensive to change later), team is < 20 engineers, limited DevOps maturity, or pre-product-market-fit (need velocity over architecture). A well-structured modular monolith with explicit module contracts can always be extracted into services when a specific module's scaling or team autonomy needs justify it. The cost: microservices solve people and organizational problems as much as technical ones."},
+{q:"How would you design a multi-tenant SaaS platform on microservices?",diff:"ARCHITECT",a:"Three isolation models: (1) Shared DB, Shared Schema — tenant_id on every row + global EF Core query filters + PostgreSQL RLS. Cheapest, least isolation. (2) Shared DB, Separate Schema — per-tenant schema, runtime schema switching. Middle ground. (3) Database-per-Tenant (silo) — complete isolation, most expensive. Choice depends on compliance requirements (healthcare/finance → silo), cost constraints, and tenant count. Build tenant-aware middleware to extract tenant from JWT claim or subdomain, then set DbContext schema dynamically."},
+{q:"Design a system handling 1 million events per second.",diff:"ARCHITECT",a:"Kafka with partitioned topics — scale consumers by adding partitions. Separate hot path (write to Kafka immediately, ~1ms) from processing path (consumers process asynchronously). Use CQRS — writes go to Kafka, reads from pre-built materialized views (Redis/Elasticsearch). Avoid sync calls in the critical path. Batch processing in consumers. Use Avro/Protobuf not JSON (5x smaller). Consumer groups for competing consumers. Monitor consumer lag — add partitions and consumers when lag grows."},
+{q:"How do you decide service boundaries when starting from scratch?",diff:"ARCHITECT",a:"Use Event Storming — workshop with domain experts, identify domain events, group into bounded contexts. Each context is a candidate service. Ask: Can this domain change independently? Does it have its own data lifecycle? Will a separate team own it? Avoid premature decomposition — start with a modular monolith, extract services when specific pain points emerge (scaling, team autonomy, technology needs). Wrong service boundaries are very expensive to change."},
+]
+};
+
+function renderIQs(level) {
+  const qs = IQ_DATA[level] || [];
+  const colors = {JUNIOR:'#4ade80',MID:'#38bdf8',SENIOR:'#fbbf24',ARCHITECT:'#f472b6'};
+  return qs.map((q,i) => {
+    const c = colors[q.diff] || '#64748b';
+    return `<div class="qa-item" id="qi_${level}_${i}">
+<div class="qa-q" onclick="toggleQA(this.parentElement)">
+  <div class="qa-qicon" style="background:${c}22;color:${c}">Q</div>
+  <div class="qa-qtext">${q.q}</div>
+  <span class="tag" style="background:${c}22;color:${c};border-color:${c}44;flex-shrink:0">${q.diff}</span>
+  <span class="qa-chev">▼</span>
+</div>
+<div class="qa-ans"><div class="qa-ans-body">${q.a}</div></div>
+</div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// STATE & RENDERING
+// ═══════════════════════════════════════════════════════
+let activeCh=null, activeTopic=null, visited=new Set();
+
+function renderNav(filter='') {
+  const q = filter.toLowerCase();
+  document.getElementById('leftNav').innerHTML = CHAPTERS
+    .filter(ch => !q || ch.title.toLowerCase().includes(q)
+      || ch.sub.toLowerCase().includes(q)
+      || ch.topics.some(t => t.title.toLowerCase().includes(q)))
+    .map(ch=>`
+<div class="ch-item ${activeCh===ch.id?'active':''}" onclick="selChapter('${ch.id}')">
+  <div class="ch-icon-wrap" style="background:${ch.bg}">${ch.icon}</div>
+  <div class="ch-info">
+    <div class="ch-name">${ch.title}</div>
+    <div class="ch-meta">${ch.topics.length} topics</div>
+  </div>
+  <span class="lv-badge" style="background:${ch.lc}22;color:${ch.lc};border:1px solid ${ch.lc}44">${ch.level}</span>
+</div>`).join('');
+}
+
+function filterNav(val) { renderNav(val); }
+
+function selChapter(id) {
+  activeCh=id; activeTopic=null; visited.add(id); updateProgress();
+  renderNav(document.getElementById('searchInp').value);
+  const ch=CHAPTERS.find(c=>c.id===id);
+  document.getElementById('middle').innerHTML=`
+<div class="ch-header">
+  <div class="ch-eyebrow">Chapter ${CHAPTERS.indexOf(ch)+1} of ${CHAPTERS.length}</div>
+  <div class="ch-big-title">${ch.icon} ${ch.title}</div>
+  <p class="ch-desc">${ch.desc}</p>
+  <div class="ch-chips">
+    <div class="chip"><span class="chip-dot" style="background:${ch.lc}"></span>${ch.level}</div>
+    <div class="chip">📚 ${ch.topics.length} Topics</div>
+    <div class="chip">🏷️ ${ch.sub}</div>
+  </div>
+</div>
+<div class="topics-grid">${ch.topics.map(t=>`
+<div class="t-card ${activeTopic===t.id?'active':''}" onclick="selTopic('${ch.id}','${t.id}')">
+  <span class="t-icon">${t.icon}</span>
+  <div class="t-title">${t.title}</div>
+  <div class="t-desc">${t.desc}</div>
+  <div class="t-tags">${t.tags.map(tag=>`<span class="tag ${tag}">${tag}</span>`).join('')}</div>
+</div>`).join('')}
+</div>`;
+  closeRight();
+}
+
+function selTopic(cid, tid) {
+  activeTopic=tid;
+  document.querySelectorAll('.t-card').forEach(c=>c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  const ch=CHAPTERS.find(c=>c.id===cid);
+  const topic=ch?.topics.find(t=>t.id===tid);
+  if(!topic) return;
+  const rp=document.getElementById('rightPanel');
+  rp.classList.remove('hidden');
+  document.getElementById('rightTitle').textContent=topic.title;
+  const tabs=topic.tabs||['Overview'];
+  document.getElementById('rightTabs').innerHTML=tabs.map((tab,i)=>`
+<div class="r-tab ${i===0?'active':''}" onclick="selTab(this,'${cid}','${tid}','${tab.replace(/'/g,"\\'")}')">${tab}</div>`).join('');
+  renderTab(cid,tid,tabs[0]);
+}
+
+function selTab(el,cid,tid,tab) {
+  document.querySelectorAll('.r-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTab(cid,tid,tab);
+}
+
+function renderTab(cid,tid,tab) {
+  document.getElementById('rightBody').innerHTML=getContent(cid,tid,tab);
+}
+
+function closeRight() {
+  document.getElementById('rightPanel').classList.add('hidden');
+  activeTopic=null;
+  document.querySelectorAll('.t-card').forEach(c=>c.classList.remove('active'));
+}
+
+function toggleQA(el) { el.classList.toggle('open'); }
+
+function cp(btn) {
+  const text=btn.closest('.cb').querySelector('.cb-body').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!'; btn.style.color='#38bdf8';
+    setTimeout(()=>{btn.textContent='Copy';btn.style.color='';},2000);
+  });
+}
+
+function updateProgress() {
+  const pct=Math.round(visited.size/CHAPTERS.length*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`${visited.size} / ${CHAPTERS.length} chapters visited`;
+}
+
+renderNav();
+</script>
+<script src="/embedded/mastery-resize.js"></script>
+</body>
+</html>

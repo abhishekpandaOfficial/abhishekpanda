@@ -316,14 +316,53 @@ html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--t
 .welcome-stat{text-align:center}
 .welcome-stat-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent)}
 .welcome-stat-label{font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
-.start-btn{
-  background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;
-  border-radius:8px;padding:12px 28px;color:#fff;font-size:14px;font-weight:600;
-  cursor:pointer;transition:all 0.3s;font-family:'Syne',sans-serif;
+.welcome-actions{
+  position:relative;isolation:isolate;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  width:min(100%,560px);padding:14px;border-radius:28px;overflow:visible;
+  background:linear-gradient(135deg,rgba(17,24,39,.82),rgba(13,20,32,.74));
+  border:1px solid rgba(42,63,95,.9);
+  box-shadow:0 24px 60px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(18px);
 }
-.start-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,212,255,0.3)}
+.welcome-actions::before{
+  content:'';position:absolute;inset:1px;border-radius:27px;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at top left,rgba(0,212,255,.18),transparent 42%),
+    radial-gradient(circle at bottom right,rgba(124,58,237,.16),transparent 40%);
+}
+.start-btn{
+  position:relative;z-index:1;flex:1 1 220px;justify-content:space-between;
+  display:inline-flex;align-items:center;gap:12px;white-space:nowrap;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,0)) padding-box,
+    linear-gradient(135deg,var(--accent),var(--accent2) 52%,var(--accent3)) border-box;
+  border:1px solid transparent;border-radius:999px;padding:8px 10px 8px 18px;color:#fff;font-size:13px;font-weight:700;
+  cursor:pointer;transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;font-family:'Syne',sans-serif;
+  box-shadow:0 16px 34px rgba(0,212,255,.22), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 20px 38px rgba(0,212,255,.28), inset 0 1px 0 rgba(255,255,255,.22);filter:saturate(1.06)}
+.start-btn-text{display:inline-flex;align-items:center}
+.start-btn-icon{
+  width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:rgba(8,12,20,.24);border:1px solid rgba(255,255,255,.18);font-size:13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.02)) padding-box,
+    linear-gradient(135deg,var(--accent2),var(--accent-red)) border-box;
+  box-shadow:0 16px 34px rgba(124,58,237,.18), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary:hover{box-shadow:0 20px 38px rgba(124,58,237,.24), inset 0 1px 0 rgba(255,255,255,.18)}
+.start-btn-secondary .start-btn-icon{
+  background:rgba(124,58,237,.16);border-color:rgba(255,255,255,.18);color:#efe7ff;
+}
 
 .dotnet-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--badge-soft);font-family:'JetBrains Mono',monospace}
+@media (max-width:640px){
+  .welcome-actions{width:min(100%,420px);padding:10px}
+  .start-btn{flex-basis:100%;width:100%}
+}
 </style>
 </head>
 <body>
@@ -365,7 +404,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--t
         <div class="welcome-stat"><div class="welcome-stat-num">200+</div><div class="welcome-stat-label">Q&amp;A</div></div>
         <div class="welcome-stat"><div class="welcome-stat-num">150+</div><div class="welcome-stat-label">Examples</div></div>
       </div>
-      <button class="start-btn" onclick="selectChapter(0)">🚀 Start Learning</button>
+      <div class="welcome-actions">
+        <button class="start-btn" onclick="selectChapter(0)">
+          <span class="start-btn-text">Start C# Mastery</span>
+          <span class="start-btn-icon" aria-hidden="true">→</span>
+        </button>
+        <button class="start-btn start-btn-secondary" onclick="showAllInterviewQuestions()">
+          <span class="start-btn-text">Interview Q&amp;A</span>
+          <span class="start-btn-icon" aria-hidden="true">🎯</span>
+        </button>
+      </div>
     </div>
     <div id="chapterContent" style="display:none"></div>
   </div>
@@ -1541,6 +1589,1417 @@ middle[<span class="num">0</span>] = <span class="num">99</span>;  <span class="
 }`}
 ]},
 
+"t5_1": {
+title: "Classes & Objects",
+breadcrumb: "Chapter 5 · Object-Oriented Programming",
+subtitle: "The core building block of object-oriented C# — how state, behavior, identity, constructors, and object lifecycle fit together in real code.",
+badges: [{text:"Core",color:"#00d4ff"},{text:"Beginner",color:"#10b981"},{text:"OOP",color:"#ef4444"}],
+sections: [
+{type:"prose", title:"What Is a Class?", content:`
+<p>A <strong>class</strong> is a blueprint for creating objects. It groups together:</p>
+<ul>
+<li><strong>State</strong> — fields and properties that hold data</li>
+<li><strong>Behavior</strong> — methods that define what the object can do</li>
+<li><strong>Identity</strong> — each object instance is a separate reference in memory</li>
+</ul>
+<p>An <strong>object</strong> is a runtime instance of a class. Two objects can have the same values but still be different instances in memory unless you explicitly model value equality with records or custom equality logic.</p>
+<h4>Why this matters</h4>
+<p>Classes are where most business logic lives in typical C# applications. Good class design keeps data valid, exposes clear behavior, and prevents invalid states from leaking across the codebase.</p>
+`},
+{type:"diagram", title:"Class → Object → Method Call Flow", svg:`
+<svg width="520" height="240" viewBox="0 0 520 240" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="coa" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+  <path d="M0,0 L0,6 L8,3 z" fill="#ef4444"/>
+</marker>
+<style>
+.cb{fill:#1a2438;stroke:#ef4444;stroke-width:1.4}
+.ct{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#e2e8f0;text-anchor:middle}
+.cs{font-family:'JetBrains Mono',monospace;font-size:8px;fill:#94a3b8;text-anchor:middle}
+.ca{stroke:#ef4444;stroke-width:1.5;fill:none;marker-end:url(#coa);stroke-dasharray:6 3;animation:flow 2s linear infinite}
+</style></defs>
+<rect x="1" y="1" width="518" height="238" rx="10" fill="#0b1120" stroke="#1f2937"/>
+<text x="260" y="22" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#ef4444">CLASS TO OBJECT LIFECYCLE</text>
+<rect class="cb" x="24" y="62" width="130" height="74" rx="8"/>
+<text class="ct" x="89" y="84">OrderService</text>
+<text class="cs" x="89" y="102">Fields + Properties</text>
+<text class="cs" x="89" y="116">Methods + Rules</text>
+<rect class="cb" x="196" y="62" width="130" height="74" rx="8"/>
+<text class="ct" x="261" y="84">new OrderService()</text>
+<text class="cs" x="261" y="102">Constructor runs</text>
+<text class="cs" x="261" y="116">Object allocated</text>
+<rect class="cb" x="368" y="62" width="128" height="74" rx="8"/>
+<text class="ct" x="432" y="84">service.Process()</text>
+<text class="cs" x="432" y="102">Behavior executes</text>
+<text class="cs" x="432" y="116">State changes safely</text>
+<path class="ca" d="M154 99 H193"/>
+<path class="ca" d="M326 99 H365"/>
+<rect x="24" y="160" width="472" height="56" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)"/>
+<text x="36" y="180" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">Class design questions</text>
+<text x="36" y="198" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">What data belongs here? Which invariants must always hold? Which behavior should stay inside the class instead of outside utility methods?</text>
+</svg>`},
+{type:"code", title:"Class Design in Real C#", lang:"csharp", code:`<span class="kw">public sealed class</span> <span class="type">BankAccount</span>
+{
+    <span class="kw">private decimal</span> _balance;
+
+    <span class="kw">public Guid</span> Id { <span class="kw">get</span>; } = Guid.NewGuid();
+    <span class="kw">public string</span> OwnerName { <span class="kw">get</span>; }
+    <span class="kw">public decimal</span> Balance => _balance;
+
+    <span class="kw">public</span> <span class="type">BankAccount</span>(<span class="kw">string</span> ownerName, <span class="kw">decimal</span> openingBalance)
+    {
+        <span class="kw">if</span> (string.IsNullOrWhiteSpace(ownerName))
+            <span class="kw">throw new</span> <span class="type">ArgumentException</span>(<span class="str">"Owner name is required."</span>);
+        <span class="kw">if</span> (openingBalance < <span class="num">0</span>)
+            <span class="kw">throw new</span> <span class="type">ArgumentOutOfRangeException</span>(nameof(openingBalance));
+
+        OwnerName = ownerName;
+        _balance = openingBalance;
+    }
+
+    <span class="kw">public void</span> <span class="fn">Deposit</span>(<span class="kw">decimal</span> amount)
+    {
+        <span class="kw">if</span> (amount <= <span class="num">0</span>)
+            <span class="kw">throw new</span> <span class="type">ArgumentOutOfRangeException</span>(nameof(amount));
+
+        _balance += amount;
+    }
+
+    <span class="kw">public void</span> <span class="fn">Withdraw</span>(<span class="kw">decimal</span> amount)
+    {
+        <span class="kw">if</span> (amount <= <span class="num">0</span>)
+            <span class="kw">throw new</span> <span class="type">ArgumentOutOfRangeException</span>(nameof(amount));
+        <span class="kw">if</span> (amount > _balance)
+            <span class="kw">throw new</span> <span class="type">InvalidOperationException</span>(<span class="str">"Insufficient funds."</span>);
+
+        _balance -= amount;
+    }
+}`},
+{type:"table", title:"Class Design Cheatsheet", headers:["Concept","Why it matters"], rows:[
+["Constructor", "The constructor establishes a valid starting state. If your object can be invalid right after construction, the design is weak."],
+["Field vs Property", "Use private fields for raw storage and public properties for controlled exposure."],
+["Behavior inside class", "If a rule depends on the object's own data, the method usually belongs on the class."],
+["Sealed class", "Seal classes when you do not intend inheritance. This reduces accidental extension points."]
+]},
+{type:"scenario", title:"Scenario · Modeling a business object", content:`
+<p>Imagine building a payroll system. If <code>Employee</code> is just a bag of public properties, any caller can put the object into an invalid state. If the class owns its invariants and exposes clear methods like <code>Promote()</code>, <code>ChangeSalary()</code>, and <code>AssignDepartment()</code>, the object becomes safer and easier to reason about.</p>
+`},
+{type:"callout", kind:"info", icon:"🏗️", text:"A good class protects invariants. If the rest of the application must constantly remember how to keep the object valid, the class is not carrying its weight."}
+]},
+
+"t5_2": {
+title: "Encapsulation",
+breadcrumb: "Chapter 5 · Object-Oriented Programming",
+subtitle: "Hide internal details, expose safe behavior, and keep objects valid by controlling how data can be read and changed.",
+badges: [{text:"Core",color:"#00d4ff"},{text:"OOP",color:"#ef4444"},{text:"Design",color:"#10b981"}],
+sections: [
+{type:"prose", title:"What Is Encapsulation?", content:`
+<p><strong>Encapsulation</strong> means grouping data and behavior together while controlling what outside code can see or modify. In C#, encapsulation is expressed with:</p>
+<ul>
+<li><strong>Access modifiers</strong> — <code>private</code>, <code>protected</code>, <code>internal</code>, <code>public</code></li>
+<li><strong>Properties</strong> — controlled access instead of exposing fields directly</li>
+<li><strong>Methods</strong> — business-safe operations instead of raw state mutation</li>
+</ul>
+<p>The purpose is simple: prevent invalid state and reduce coupling.</p>
+`},
+{type:"code", title:"Weak vs Strong Encapsulation", lang:"csharp", code:`<span class="cmt">// BAD — public mutable fields</span>
+<span class="kw">public class</span> <span class="type">OrderBad</span>
+{
+    <span class="kw">public decimal</span> Total;
+    <span class="kw">public string</span> Status = <span class="str">"New"</span>;
+}
+
+<span class="cmt">// Any caller can do this:</span>
+<span class="cmt">// order.Total = -999m;</span>
+<span class="cmt">// order.Status = "Teleporting";</span>
+
+<span class="cmt">// GOOD — protect state, expose safe operations</span>
+<span class="kw">public class</span> <span class="type">Order</span>
+{
+    <span class="kw">private readonly</span> <span class="type">List</span>&lt;<span class="type">decimal</span>&gt; _lineTotals = [];
+
+    <span class="kw">public string</span> Status { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="str">"New"</span>;
+    <span class="kw">public IReadOnlyList</span>&lt;<span class="type">decimal</span>&gt; LineTotals => _lineTotals;
+    <span class="kw">public decimal</span> Total => _lineTotals.Sum();
+
+    <span class="kw">public void</span> <span class="fn">AddLine</span>(<span class="kw">decimal</span> amount)
+    {
+        <span class="kw">if</span> (amount <= <span class="num">0</span>)
+            <span class="kw">throw new</span> <span class="type">ArgumentOutOfRangeException</span>(nameof(amount));
+        _lineTotals.Add(amount);
+    }
+
+    <span class="kw">public void</span> <span class="fn">MarkPaid</span>()
+    {
+        <span class="kw">if</span> (!_lineTotals.Any())
+            <span class="kw">throw new</span> <span class="type">InvalidOperationException</span>(<span class="str">"Cannot pay an empty order."</span>);
+        Status = <span class="str">"Paid"</span>;
+    }
+}`},
+{type:"diagram", title:"Encapsulation Boundary", svg:`
+<svg width="520" height="220" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+<rect x="30" y="30" width="210" height="150" rx="10" fill="#111827" stroke="#10b981" stroke-width="1.5"/>
+<text x="135" y="52" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#10b981">Inside Class</text>
+<text x="48" y="82" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">private fields</text>
+<text x="48" y="102" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">validation rules</text>
+<text x="48" y="122" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">invariant checks</text>
+<text x="48" y="142" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">safe state transitions</text>
+<rect x="286" y="30" width="204" height="150" rx="10" fill="#111827" stroke="#00d4ff" stroke-width="1.5"/>
+<text x="388" y="52" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#00d4ff">Outside Class</text>
+<text x="304" y="82" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">public methods</text>
+<text x="304" y="102" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">read-only views</text>
+<text x="304" y="122" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">controlled updates</text>
+<text x="304" y="142" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">clear contract</text>
+<line x1="240" y1="105" x2="286" y2="105" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 3"/>
+<text x="263" y="94" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f59e0b">boundary</text>
+</svg>`},
+{type:"callout", kind:"success", icon:"🔒", text:"Encapsulation is not about hiding everything. It is about exposing only what outside code should legitimately be allowed to do."}
+]},
+
+"t5_4": {
+title: "Polymorphism",
+breadcrumb: "Chapter 5 · Object-Oriented Programming",
+subtitle: "Write code against abstractions so different implementations can behave correctly through a shared contract.",
+badges: [{text:"Core",color:"#00d4ff"},{text:"OOP",color:"#ef4444"},{text:"Important",color:"#f59e0b"}],
+sections: [
+{type:"prose", title:"What Is Polymorphism?", content:`
+<p><strong>Polymorphism</strong> means the same call can produce different behavior depending on the actual runtime type behind an abstraction.</p>
+<p>In C#, polymorphism commonly appears in three forms:</p>
+<ul>
+<li><strong>Virtual dispatch</strong> — base class reference, derived implementation at runtime</li>
+<li><strong>Interface polymorphism</strong> — many types behind one interface</li>
+<li><strong>Compile-time polymorphism</strong> — method overloading</li>
+</ul>
+<p>The big advantage is that callers can focus on <em>what they need done</em> instead of <em>which concrete type they are talking to</em>.</p>
+`},
+{type:"diagram", title:"Polymorphic Dispatch", svg:`
+<svg width="520" height="230" viewBox="0 0 520 230" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="pma" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ef4444"/></marker></defs>
+<rect x="26" y="56" width="138" height="54" rx="8" fill="#111827" stroke="#00d4ff" stroke-width="1.5"/>
+<text x="95" y="78" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">IShape shape</text>
+<text x="95" y="96" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">caller knows only contract</text>
+<rect x="218" y="24" width="120" height="54" rx="8" fill="#111827" stroke="#ef4444" stroke-width="1.5"/>
+<text x="278" y="46" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Circle</text>
+<text x="278" y="62" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">Area() → πr²</text>
+<rect x="218" y="94" width="120" height="54" rx="8" fill="#111827" stroke="#ef4444" stroke-width="1.5"/>
+<text x="278" y="116" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Rectangle</text>
+<text x="278" y="132" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">Area() → w × h</text>
+<rect x="218" y="164" width="120" height="54" rx="8" fill="#111827" stroke="#ef4444" stroke-width="1.5"/>
+<text x="278" y="186" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Triangle</text>
+<text x="278" y="202" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">Area() → ½bh</text>
+<line x1="164" y1="83" x2="215" y2="51" stroke="#ef4444" stroke-width="1.5" marker-end="url(#pma)"/>
+<line x1="164" y1="83" x2="215" y2="121" stroke="#ef4444" stroke-width="1.5" marker-end="url(#pma)"/>
+<line x1="164" y1="83" x2="215" y2="191" stroke="#ef4444" stroke-width="1.5" marker-end="url(#pma)"/>
+<text x="405" y="88" font-family="'JetBrains Mono',monospace" font-size="9" fill="#94a3b8">Same call:</text>
+<text x="405" y="106" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">shape.Area()</text>
+<text x="405" y="124" font-family="'JetBrains Mono',monospace" font-size="9" fill="#94a3b8">Different runtime behavior</text>
+</svg>`},
+{type:"code", title:"Interface Polymorphism in Practice", lang:"csharp", code:`<span class="kw">public interface</span> <span class="type">INotificationSender</span>
+{
+    <span class="type">Task</span> <span class="fn">SendAsync</span>(<span class="kw">string</span> recipient, <span class="kw">string</span> message, <span class="type">CancellationToken</span> ct);
+}
+
+<span class="kw">public sealed class</span> <span class="type">EmailSender</span> : <span class="type">INotificationSender</span>
+{
+    <span class="kw">public</span> <span class="kw">async</span> <span class="type">Task</span> <span class="fn">SendAsync</span>(<span class="kw">string</span> recipient, <span class="kw">string</span> message, <span class="type">CancellationToken</span> ct)
+    {
+        <span class="kw">await</span> <span class="type">Task</span>.<span class="fn">Delay</span>(<span class="num">10</span>, ct);
+        <span class="type">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Email → {recipient}: {message}"</span>);
+    }
+}
+
+<span class="kw">public sealed class</span> <span class="type">SmsSender</span> : <span class="type">INotificationSender</span>
+{
+    <span class="kw">public</span> <span class="kw">async</span> <span class="type">Task</span> <span class="fn">SendAsync</span>(<span class="kw">string</span> recipient, <span class="kw">string</span> message, <span class="type">CancellationToken</span> ct)
+    {
+        <span class="kw">await</span> <span class="type">Task</span>.<span class="fn">Delay</span>(<span class="num">10</span>, ct);
+        <span class="type">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"SMS → {recipient}: {message}"</span>);
+    }
+}
+
+<span class="kw">public sealed class</span> <span class="type">NotificationService</span>(<span class="type">INotificationSender</span> sender)
+{
+    <span class="kw">public</span> <span class="type">Task</span> <span class="fn">SendWelcomeAsync</span>(<span class="kw">string</span> recipient, <span class="type">CancellationToken</span> ct) =>
+        sender.<span class="fn">SendAsync</span>(recipient, <span class="str">"Welcome!"</span>, ct);
+}`},
+{type:"scenario", title:"Scenario · depending on abstraction", content:`
+<p>If your checkout service depends on <code>EmailSender</code> directly, changing to SMS, push notification, or a combined sender requires rewriting callers. If it depends on <code>INotificationSender</code>, new senders slot in cleanly.</p>
+`},
+{type:"callout", kind:"info", icon:"🎭", text:"Polymorphism is most valuable when the caller should not have to know which concrete implementation is being used."}
+]},
+
+"t6_2": {
+title: "List<T> & ArrayList",
+breadcrumb: "Chapter 6 · Collections",
+subtitle: "Dynamic arrays in C# — why generic List<T> replaced ArrayList, and how capacity, resizing, and type safety affect real-world performance.",
+badges: [{text:"Core",color:"#00d4ff"},{text:"Performance",color:"#10b981"},{text:"Collections",color:"#f59e0b"}],
+sections: [
+{type:"prose", title:"Why List<T> Matters", content:`
+<p><code>List&lt;T&gt;</code> is the default growable collection in modern C#. It wraps an internal array and automatically resizes when needed.</p>
+<p><code>ArrayList</code> is the older non-generic collection. It stores items as <code>object</code>, which means:</p>
+<ul>
+<li>boxing for value types</li>
+<li>manual casting on read</li>
+<li>runtime type errors instead of compile-time safety</li>
+</ul>
+<p>Today, <strong>use List&lt;T&gt; almost always</strong>. ArrayList mainly matters for legacy code.</p>
+`},
+{type:"table", title:"List<T> vs ArrayList", headers:["Feature","List<T>","ArrayList"], rows:[
+["Type safety","Compile-time safe","Stores object — cast required"],
+["Value types","No boxing","Boxes int, decimal, bool, etc."],
+["Performance","Better for modern code","Worse due to boxing/casting"],
+["Use today","Default choice","Legacy only"]
+]},
+{type:"code", title:"List<T> Growth and Usage", lang:"csharp", code:`<span class="kw">var</span> numbers = <span class="kw">new</span> <span class="type">List</span>&lt;<span class="type">int</span>&gt;(capacity: <span class="num">4</span>);
+numbers.<span class="fn">Add</span>(<span class="num">10</span>);
+numbers.<span class="fn">Add</span>(<span class="num">20</span>);
+numbers.<span class="fn">Add</span>(<span class="num">30</span>);
+numbers.<span class="fn">Add</span>(<span class="num">40</span>);
+
+<span class="cmt">// Adding the 5th item triggers resize of internal array</span>
+numbers.<span class="fn">Add</span>(<span class="num">50</span>);
+
+<span class="kw">foreach</span> (<span class="kw">var</span> number <span class="kw">in</span> numbers)
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(number);
+
+<span class="cmt">// Legacy ArrayList — avoid in new code</span>
+<span class="kw">var</span> legacy = <span class="kw">new</span> <span class="type">ArrayList</span>();
+legacy.<span class="fn">Add</span>(<span class="num">10</span>);   <span class="cmt">// boxed</span>
+legacy.<span class="fn">Add</span>(<span class="num">20</span>);   <span class="cmt">// boxed</span>
+<span class="type">int</span> first = (<span class="type">int</span>)legacy[<span class="num">0</span>]; <span class="cmt">// cast required</span>`},
+{type:"callout", kind:"success", icon:"📋", text:"If you know roughly how many items a List<T> will hold, set the initial capacity. It avoids repeated internal array resizing."}
+]},
+
+"t6_6": {
+title: "IEnumerable & Iteration",
+breadcrumb: "Chapter 6 · Collections",
+subtitle: "The foundation of iteration in C# — lazy sequences, yield return, deferred execution, and why IEnumerable<T> shapes so much of the .NET ecosystem.",
+badges: [{text:"Core",color:"#00d4ff"},{text:"Important",color:"#ef4444"},{text:"Iteration",color:"#10b981"}],
+sections: [
+{type:"prose", title:"What Is IEnumerable<T>?", content:`
+<p><code>IEnumerable&lt;T&gt;</code> represents a sequence you can iterate through one item at a time. It powers:</p>
+<ul>
+<li><code>foreach</code></li>
+<li>LINQ to Objects</li>
+<li>custom lazy sequences with <code>yield return</code></li>
+</ul>
+<p>The important mental model is this: <strong>IEnumerable describes how to pull the next item, not necessarily a fully materialized collection</strong>.</p>
+<h4>Why this matters</h4>
+<p>This is why LINQ often uses deferred execution. The query is defined first and executed later when you iterate it.</p>
+`},
+{type:"diagram", title:"Deferred Iteration Flow", svg:`
+<svg width="520" height="220" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="iea" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#14b8a6"/></marker></defs>
+<rect x="18" y="62" width="130" height="56" rx="8" fill="#111827" stroke="#14b8a6" stroke-width="1.5"/>
+<text x="83" y="84" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Source data</text>
+<text x="83" y="102" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">List / Array / Iterator</text>
+<rect x="194" y="62" width="132" height="56" rx="8" fill="#111827" stroke="#14b8a6" stroke-width="1.5"/>
+<text x="260" y="84" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">IEnumerable pipeline</text>
+<text x="260" y="102" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">Where / Select / yield</text>
+<rect x="372" y="62" width="130" height="56" rx="8" fill="#111827" stroke="#14b8a6" stroke-width="1.5"/>
+<text x="437" y="84" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">foreach / ToList()</text>
+<text x="437" y="102" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">execution happens here</text>
+<line x1="148" y1="90" x2="191" y2="90" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#iea)" stroke-dasharray="6 3"/>
+<line x1="326" y1="90" x2="369" y2="90" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#iea)" stroke-dasharray="6 3"/>
+<text x="260" y="152" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#94a3b8">Until you iterate, the pipeline is just a recipe.</text>
+</svg>`},
+{type:"code", title:"yield return and Deferred Execution", lang:"csharp", code:`<span class="kw">public static IEnumerable</span>&lt;<span class="type">int</span>&gt; <span class="fn">GetEvenNumbers</span>(<span class="type">int</span> max)
+{
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i <= max; i++)
+    {
+        <span class="kw">if</span> (i % <span class="num">2</span> == <span class="num">0</span>)
+            <span class="kw">yield return</span> i; <span class="cmt">// produced on demand</span>
+    }
+}
+
+<span class="kw">var</span> query = <span class="fn">GetEvenNumbers</span>(<span class="num">10</span>)
+    .<span class="fn">Where</span>(n => n > <span class="num">2</span>)
+    .<span class="fn">Select</span>(n => n * <span class="num">10</span>);
+
+<span class="cmt">// Nothing has run yet</span>
+
+<span class="kw">foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> query)
+{
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(item);
+}
+
+<span class="cmt">// Materialize when needed</span>
+<span class="kw">var</span> list = query.<span class="fn">ToList</span>();`},
+{type:"scenario", title:"Scenario · iteration bug to avoid", content:`
+<p>If a method returns <code>IEnumerable&lt;T&gt;</code> over a database context or file handle, and the caller enumerates it after the dependency is already disposed, iteration fails. That is why deferred execution is powerful but must be paired with correct lifetime management.</p>
+`},
+{type:"callout", kind:"warn", icon:"🔄", text:"Be careful with multiple enumeration. If the sequence is expensive or stateful, calling .Count(), then .Any(), then foreach may execute the whole pipeline multiple times."}
+]},
+
+"t11_2": {
+title: "Task & Task<T>",
+breadcrumb: "Chapter 11 · Async Programming",
+subtitle: "The core async abstraction in .NET — representing work in progress, composing asynchronous flows, and handling completion, failure, and cancellation correctly.",
+badges: [{text:"Core",color:"#00d4ff"},{text:"Important",color:"#ef4444"},{text:"Async",color:"#eab308"}],
+sections: [
+{type:"prose", title:"What Is a Task?", content:`
+<p>A <code>Task</code> represents an asynchronous operation that may still be running, may already be complete, may fail, or may be canceled.</p>
+<ul>
+<li><code>Task</code> — async operation with no return value</li>
+<li><code>Task&lt;T&gt;</code> — async operation that eventually produces a result</li>
+</ul>
+<p>The important thing to understand is that a Task is <strong>not a thread</strong>. It is a promise-like object representing work.</p>
+`},
+{type:"diagram", title:"Task Lifecycle", svg:`
+<svg width="520" height="230" viewBox="0 0 520 230" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="tta" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#eab308"/></marker></defs>
+<rect x="24" y="82" width="96" height="48" rx="8" fill="#111827" stroke="#eab308" stroke-width="1.5"/>
+<text x="72" y="102" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Created</text>
+<text x="72" y="118" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">Task exists</text>
+<rect x="152" y="82" width="96" height="48" rx="8" fill="#111827" stroke="#eab308" stroke-width="1.5"/>
+<text x="200" y="102" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Running</text>
+<text x="200" y="118" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">I/O or CPU work</text>
+<rect x="286" y="28" width="96" height="48" rx="8" fill="#111827" stroke="#10b981" stroke-width="1.5"/>
+<text x="334" y="48" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">RanToCompletion</text>
+<rect x="286" y="90" width="96" height="48" rx="8" fill="#111827" stroke="#ef4444" stroke-width="1.5"/>
+<text x="334" y="110" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Faulted</text>
+<rect x="286" y="152" width="96" height="48" rx="8" fill="#111827" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="334" y="172" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Canceled</text>
+<line x1="120" y1="106" x2="149" y2="106" stroke="#eab308" stroke-width="1.5" marker-end="url(#tta)" stroke-dasharray="6 3"/>
+<line x1="248" y1="102" x2="283" y2="52" stroke="#10b981" stroke-width="1.5" marker-end="url(#tta)" stroke-dasharray="6 3"/>
+<line x1="248" y1="106" x2="283" y2="114" stroke="#ef4444" stroke-width="1.5" marker-end="url(#tta)" stroke-dasharray="6 3"/>
+<line x1="248" y1="110" x2="283" y2="176" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#tta)" stroke-dasharray="6 3"/>
+</svg>`},
+{type:"code", title:"Task Composition Patterns", lang:"csharp", code:`<span class="kw">public async</span> <span class="type">Task</span>&lt;<span class="type">WeatherForecast</span>&gt; <span class="fn">GetForecastAsync</span>(<span class="type">CancellationToken</span> ct)
+{
+    <span class="kw">await</span> <span class="type">Task</span>.<span class="fn">Delay</span>(<span class="num">100</span>, ct);
+    <span class="kw">return new</span> <span class="type">WeatherForecast</span>(DateOnly.FromDateTime(DateTime.Today), <span class="num">22</span>, <span class="str">"Sunny"</span>);
+}
+
+<span class="kw">public async</span> <span class="type">Task</span> <span class="fn">RunAsync</span>(<span class="type">CancellationToken</span> ct)
+{
+    <span class="kw">var</span> londonTask = <span class="fn">GetForecastAsync</span>(ct);
+    <span class="kw">var</span> parisTask = <span class="fn">GetForecastAsync</span>(ct);
+
+    <span class="cmt">// compose instead of awaiting one-by-one</span>
+    <span class="type">WeatherForecast</span>[] results = <span class="kw">await</span> <span class="type">Task</span>.<span class="fn">WhenAll</span>(londonTask, parisTask);
+
+    <span class="kw">var</span> fastest = <span class="kw">await</span> <span class="type">Task</span>.<span class="fn">WhenAny</span>(londonTask, parisTask);
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(<span class="kw">await</span> fastest);
+}`},
+{type:"table", title:"Task Rules That Matter", headers:["Rule","Why"], rows:[
+["Start independent tasks before awaiting", "That gives real concurrency for I/O-bound work."],
+["Use WhenAll for fan-out", "It is the clearest way to wait for multiple tasks together."],
+["Observe exceptions", "Faulted tasks must be awaited or explicitly handled."],
+["Pass CancellationToken", "Async APIs should respect cancellation, not force callers to wait forever."]
+]},
+{type:"callout", kind:"danger", icon:"⛔", text:"Calling .Result or .Wait() on tasks in async-capable code is usually a design smell. Prefer await so exceptions, cancellation, and continuations behave correctly."}
+]},
+
+"t11_3": {
+title: "ValueTask",
+breadcrumb: "Chapter 11 · Async Programming",
+subtitle: "A lower-allocation async result type for very specific high-frequency scenarios where Task would allocate too often.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"Performance",color:"#10b981"},{text:"Async",color:"#eab308"}],
+sections: [
+{type:"prose", title:"Why ValueTask Exists", content:`
+<p><code>Task</code> is the right default async return type. But if an operation completes synchronously very often, returning a Task each time can create unnecessary allocations.</p>
+<p><code>ValueTask&lt;T&gt;</code> is a struct that can either:</p>
+<ul>
+<li>wrap a result directly with no heap allocation</li>
+<li>or wrap an underlying Task when true async work is needed</li>
+</ul>
+<p>The trade-off is complexity. <strong>Use ValueTask only when profiling shows it helps.</strong></p>
+`},
+{type:"code", title:"When ValueTask Makes Sense", lang:"csharp", code:`<span class="kw">public sealed class</span> <span class="type">ConfigCache</span>
+{
+    <span class="kw">private string?</span> _cachedValue;
+
+    <span class="kw">public async</span> <span class="type">ValueTask</span>&lt;<span class="kw">string</span>&gt; <span class="fn">GetValueAsync</span>(<span class="type">CancellationToken</span> ct)
+    {
+        <span class="kw">if</span> (_cachedValue <span class="kw">is not null</span>)
+            <span class="kw">return</span> _cachedValue; <span class="cmt">// synchronous completion, no Task allocation</span>
+
+        <span class="kw">await</span> <span class="type">Task</span>.<span class="fn">Delay</span>(<span class="num">50</span>, ct); <span class="cmt">// simulate I/O</span>
+        _cachedValue = <span class="str">"loaded-from-store"</span>;
+        <span class="kw">return</span> _cachedValue;
+    }
+}`},
+{type:"table", title:"Task vs ValueTask", headers:["Question","Guidance"], rows:[
+["Use Task by default?", "Yes. It is simpler and easier to compose."],
+["When consider ValueTask?", "When the method is called very frequently and often completes synchronously."],
+["Can it be awaited multiple times?", "Do not assume that. Treat ValueTask as single-consumption unless converted."],
+["Should public APIs use it everywhere?", "No. Only where measured allocation savings justify the added complexity."]
+]},
+{type:"callout", kind:"warn", icon:"⚠️", text:"ValueTask is a performance tool, not a style preference. If you are not measuring a real allocation problem, Task is usually the better design."}
+]},
+
+"t11_4": {
+title: "Async Streams",
+breadcrumb: "Chapter 11 · Async Programming",
+subtitle: "Stream values over time with IAsyncEnumerable<T> — ideal for paged APIs, event feeds, incremental processing, and large result sets.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"C# 8+",color:"#a78bfa"},{text:"Async",color:"#eab308"}],
+sections: [
+{type:"prose", title:"What Makes Async Streams Different?", content:`
+<p><code>IEnumerable&lt;T&gt;</code> gives you values synchronously. <code>IAsyncEnumerable&lt;T&gt;</code> gives you values <strong>asynchronously over time</strong>.</p>
+<p>Use async streams when:</p>
+<ul>
+<li>data arrives gradually</li>
+<li>you do not want to buffer the whole result first</li>
+<li>each item may require asynchronous work to fetch</li>
+</ul>
+`},
+{type:"diagram", title:"Async Stream Flow", svg:`
+<svg width="520" height="220" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+<rect x="24" y="78" width="120" height="54" rx="8" fill="#111827" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="84" y="100" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Data source</text>
+<text x="84" y="118" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">paged API / DB cursor</text>
+<rect x="200" y="78" width="120" height="54" rx="8" fill="#111827" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="260" y="100" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">yield return</text>
+<text x="260" y="118" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">one item at a time</text>
+<rect x="376" y="78" width="120" height="54" rx="8" fill="#111827" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="436" y="100" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">await foreach</text>
+<text x="436" y="118" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">consume incrementally</text>
+<line x1="144" y1="105" x2="197" y2="105" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="6 3"/>
+<line x1="320" y1="105" x2="373" y2="105" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="6 3"/>
+</svg>`},
+{type:"code", title:"Streaming Results with await foreach", lang:"csharp", code:`<span class="kw">public async</span> <span class="type">IAsyncEnumerable</span>&lt;<span class="type">string</span>&gt; <span class="fn">ReadPagesAsync</span>(
+    [<span class="type">EnumeratorCancellation</span>] <span class="type">CancellationToken</span> ct = <span class="kw">default</span>)
+{
+    <span class="kw">for</span> (<span class="type">int</span> page = <span class="num">1</span>; page <= <span class="num">3</span>; page++)
+    {
+        <span class="kw">await</span> <span class="type">Task</span>.<span class="fn">Delay</span>(<span class="num">50</span>, ct);
+        <span class="kw">yield return</span> <span class="str">$"Page {page}"</span>;
+    }
+}
+
+<span class="kw">await foreach</span> (<span class="kw">var</span> page <span class="kw">in</span> <span class="fn">ReadPagesAsync</span>(ct))
+{
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(page);
+}`},
+{type:"scenario", title:"Scenario · paging through external data", content:`
+<p>If an external API has 500 pages of data, returning a List forces the caller to wait for every page before seeing the first result. With async streams, the caller starts processing page 1 while page 2 is still loading.</p>
+`},
+{type:"callout", kind:"success", icon:"🌊", text:"Async streams are ideal when the consumer can start useful work before the full data set has arrived."}
+]},
+
+"t11_6": {
+title: "ConfigureAwait & Context",
+breadcrumb: "Chapter 11 · Async Programming",
+subtitle: "Understand SynchronizationContext, continuation capture, and why ConfigureAwait(false) matters differently in libraries, ASP.NET Core, and UI apps.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"Architecture",color:"#7c3aed"},{text:"Async",color:"#eab308"}],
+sections: [
+{type:"prose", title:"What Context Capture Means", content:`
+<p>When you <code>await</code>, the runtime may capture the current context and resume the continuation back there later.</p>
+<ul>
+<li><strong>UI apps</strong> care because UI updates must return to the UI thread</li>
+<li><strong>classic ASP.NET</strong> had a request context that made blocking especially dangerous</li>
+<li><strong>ASP.NET Core</strong> usually has no SynchronizationContext, so the effect is different</li>
+</ul>
+<p><code>ConfigureAwait(false)</code> tells the awaiter: <em>do not bother resuming on the captured context</em>.</p>
+`},
+{type:"table", title:"Where ConfigureAwait(false) Helps", headers:["Environment","Guidance"], rows:[
+["Library code", "Usually use ConfigureAwait(false) so the library does not force callers back onto a captured context."],
+["ASP.NET Core app code", "Usually not required for correctness because there is no UI-style SynchronizationContext."],
+["WPF / WinForms / MAUI UI code", "Be careful. If you need to update UI after await, you may need to resume on the original context."],
+["General rule", "Use it intentionally, not mechanically."]
+]},
+{type:"code", title:"Library-style async code", lang:"csharp", code:`<span class="kw">public sealed class</span> <span class="type">ApiClient</span>(<span class="type">HttpClient</span> httpClient)
+{
+    <span class="kw">public async</span> <span class="type">Task</span>&lt;<span class="kw">string</span>&gt; <span class="fn">GetJsonAsync</span>(<span class="kw">string</span> url, <span class="type">CancellationToken</span> ct)
+    {
+        <span class="kw">using var</span> response = <span class="kw">await</span> httpClient.<span class="fn">GetAsync</span>(url, ct).<span class="fn">ConfigureAwait</span>(<span class="kw">false</span>);
+        response.<span class="fn">EnsureSuccessStatusCode</span>();
+        <span class="kw">return await</span> response.Content.<span class="fn">ReadAsStringAsync</span>(ct).<span class="fn">ConfigureAwait</span>(<span class="kw">false</span>);
+    }
+}`},
+{type:"callout", kind:"info", icon:"🧭", text:"The best question is not 'Should I always use ConfigureAwait(false)?' but 'Does this code need to resume on a specific context?'"}
+]},
+
+"t12_1": {
+title: "Stack vs Heap",
+breadcrumb: "Chapter 12 · Memory & Performance",
+subtitle: "The fundamental memory model behind C# allocations, copies, GC behavior, and why value vs reference semantics affect performance and correctness.",
+badges: [{text:"Core",color:"#00d4ff"},{text:"CLR",color:"#7c3aed"},{text:"Performance",color:"#10b981"}],
+sections: [
+{type:"prose", title:"Simple Mental Model", content:`
+<p>The <strong>stack</strong> typically holds method call frames, local value-type data, and references. The <strong>heap</strong> holds reference-type objects and data with longer or less predictable lifetime.</p>
+<p>This is not a perfect rule for every CLR optimization, but it is the right mental model for most application development.</p>
+<ul>
+<li>Value types are usually copied directly</li>
+<li>Reference types are accessed through a reference</li>
+<li>Heap allocations are tracked by the GC</li>
+</ul>
+`},
+{type:"diagram", title:"Stack vs Heap View", svg:`
+<svg width="520" height="250" viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg">
+<rect x="24" y="34" width="180" height="180" rx="10" fill="#0d2018" stroke="#10b981" stroke-width="1.5"/>
+<text x="114" y="56" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#10b981">STACK</text>
+<text x="42" y="84" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">method locals</text>
+<text x="42" y="108" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">value copies</text>
+<text x="42" y="132" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">references to objects</text>
+<rect x="286" y="34" width="210" height="180" rx="10" fill="#111827" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="391" y="56" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#7c3aed">HEAP</text>
+<text x="304" y="84" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">class instances</text>
+<text x="304" y="108" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">arrays / strings</text>
+<text x="304" y="132" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">GC-managed memory</text>
+<line x1="180" y1="150" x2="286" y2="116" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="6 3"/>
+<text x="232" y="146" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#00d4ff">reference points to object</text>
+</svg>`},
+{type:"code", title:"Why this matters in code", lang:"csharp", code:`<span class="kw">struct</span> <span class="type">Point</span>
+{
+    <span class="kw">public int</span> X;
+    <span class="kw">public int</span> Y;
+}
+
+<span class="kw">class</span> <span class="type">Customer</span>
+{
+    <span class="kw">public string</span> Name { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">""</span>;
+}
+
+<span class="type">Point</span> p1 = <span class="kw">new</span>() { X = <span class="num">1</span>, Y = <span class="num">2</span> };
+<span class="type">Point</span> p2 = p1;   <span class="cmt">// full copy</span>
+p2.X = <span class="num">99</span>;
+
+<span class="kw">var</span> c1 = <span class="kw">new</span> <span class="type">Customer</span> { Name = <span class="str">"Alice"</span> };
+<span class="kw">var</span> c2 = c1;   <span class="cmt">// same object reference</span>
+c2.Name = <span class="str">"Bob"</span>;`},
+{type:"callout", kind:"info", icon:"🧠", text:"You do not need to think about stack and heap every minute. But when performance or mutation surprises appear, this model explains a lot very quickly."}
+]},
+
+"t12_3": {
+title: "GC & Memory Management",
+breadcrumb: "Chapter 12 · Memory & Performance",
+subtitle: "How the .NET garbage collector actually helps, what it costs, and how to write allocation patterns that cooperate with it instead of fighting it.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"CLR",color:"#7c3aed"},{text:"Performance",color:"#10b981"}],
+sections: [
+{type:"prose", title:"How the GC Thinks", content:`
+<p>The .NET GC is generational. New objects start in <strong>Gen 0</strong>. Objects that survive collections are promoted to <strong>Gen 1</strong> and then <strong>Gen 2</strong>.</p>
+<p>This works because most objects die young. The GC is optimized for that reality.</p>
+<ul>
+<li><strong>Gen 0</strong> — short-lived objects</li>
+<li><strong>Gen 1</strong> — survivors from Gen 0</li>
+<li><strong>Gen 2</strong> — long-lived objects</li>
+<li><strong>LOH</strong> — large objects, typically 85 KB and above</li>
+</ul>
+`},
+{type:"diagram", title:"GC Promotion Model", svg:`
+<svg width="520" height="220" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+<rect x="24" y="78" width="110" height="54" rx="8" fill="#111827" stroke="#10b981" stroke-width="1.5"/>
+<text x="79" y="100" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Gen 0</text>
+<text x="79" y="118" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">new objects</text>
+<rect x="202" y="78" width="110" height="54" rx="8" fill="#111827" stroke="#f59e0b" stroke-width="1.5"/>
+<text x="257" y="100" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Gen 1</text>
+<text x="257" y="118" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">survivors</text>
+<rect x="380" y="78" width="110" height="54" rx="8" fill="#111827" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="435" y="100" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Gen 2 / LOH</text>
+<text x="435" y="118" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">long-lived</text>
+<line x1="134" y1="105" x2="199" y2="105" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6 3"/>
+<line x1="312" y1="105" x2="377" y2="105" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="6 3"/>
+</svg>`},
+{type:"code", title:"Allocation-aware C#", lang:"csharp", code:`<span class="cmt">// Allocates a new string every iteration</span>
+<span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < <span class="num">1000</span>; i++)
+{
+    <span class="kw">var</span> message = <span class="str">$"Item {i}"</span>;
+}
+
+<span class="cmt">// Prefer reusable buffers or builders in hot paths</span>
+<span class="kw">var</span> builder = <span class="kw">new</span> <span class="type">StringBuilder</span>();
+<span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < <span class="num">1000</span>; i++)
+{
+    builder.<span class="fn">Clear</span>();
+    builder.<span class="fn">Append</span>(<span class="str">"Item "</span>).<span class="fn">Append</span>(i);
+}`},
+{type:"scenario", title:"Scenario · allocation pressure in an API", content:`
+<p>An API endpoint handles thousands of requests per second. Each request creates many short-lived strings, arrays, and DTOs. The GC can handle that, but enough unnecessary allocation turns into frequent collections and latency spikes.</p>
+`},
+{type:"callout", kind:"success", icon:"♻️", text:"Good GC performance usually comes from allocating less, keeping object graphs simpler, and reusing large buffers where it genuinely matters."}
+]},
+
+"t12_5": {
+title: "Object Pooling",
+breadcrumb: "Chapter 12 · Memory & Performance",
+subtitle: "Reuse expensive objects and buffers instead of allocating them repeatedly in high-throughput code.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"Performance",color:"#10b981"},{text:"Reuse",color:"#00d4ff"}],
+sections: [
+{type:"prose", title:"What Is Object Pooling?", content:`
+<p>Object pooling means keeping reusable instances around instead of constantly allocating and discarding them.</p>
+<p>This helps when objects are:</p>
+<ul>
+<li>expensive to allocate or initialize</li>
+<li>used frequently</li>
+<li>safe to reset and reuse</li>
+</ul>
+<p>Common examples are arrays, StringBuilder instances, parsers, and serialization buffers.</p>
+`},
+{type:"code", title:"ArrayPool and ObjectPool examples", lang:"csharp", code:`<span class="cmt">// ArrayPool for reusable byte buffers</span>
+<span class="type">byte</span>[] buffer = <span class="type">ArrayPool</span>&lt;<span class="type">byte</span>&gt;.Shared.<span class="fn">Rent</span>(<span class="num">4096</span>);
+<span class="kw">try</span>
+{
+    <span class="cmt">// fill and use buffer</span>
+}
+<span class="kw">finally</span>
+{
+    <span class="type">ArrayPool</span>&lt;<span class="type">byte</span>&gt;.Shared.<span class="fn">Return</span>(buffer);
+}
+
+<span class="cmt">// Microsoft.Extensions.ObjectPool</span>
+<span class="kw">var</span> provider = <span class="kw">new</span> <span class="type">DefaultObjectPoolProvider</span>();
+<span class="kw">var</span> pool = provider.<span class="fn">CreateStringBuilderPool</span>();
+
+<span class="kw">var</span> sb = pool.<span class="fn">Get</span>();
+<span class="kw">try</span>
+{
+    sb.<span class="fn">Append</span>(<span class="str">"Hello "</span>).<span class="fn">Append</span>(<span class="str">"world"</span>);
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(sb.<span class="fn">ToString</span>());
+}
+<span class="kw">finally</span>
+{
+    sb.<span class="fn">Clear</span>();
+    pool.<span class="fn">Return</span>(sb);
+}`},
+{type:"table", title:"When pooling helps", headers:["Good candidate","Why"], rows:[
+["Large buffers", "Avoid repeated large allocations and LOH pressure."],
+["StringBuilder in hot paths", "Reduces repeated short-lived allocations during text composition."],
+["Expensive stateful helpers", "Avoids repeated setup cost if reset is safe."],
+["Tiny simple objects", "Usually not worth pooling; let the GC do its job."]
+]},
+{type:"callout", kind:"warn", icon:"♻️", text:"Pooling is only safe when the object can be reset completely. Reusing dirty state is worse than allocating."}
+]},
+
+"t12_6": {
+title: "BenchmarkDotNet",
+breadcrumb: "Chapter 12 · Memory & Performance",
+subtitle: "Measure C# performance correctly instead of guessing — isolate hot code paths, capture allocations, and compare alternatives with trustworthy benchmarks.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"Tooling",color:"#00d4ff"},{text:"Performance",color:"#10b981"}],
+sections: [
+{type:"prose", title:"Why proper benchmarking matters", content:`
+<p>Performance intuition is unreliable. Small changes can look faster in ad-hoc tests while actually being slower once JIT warmup, GC, and measurement noise are considered.</p>
+<p><strong>BenchmarkDotNet</strong> solves this by handling:</p>
+<ul>
+<li>warmup</li>
+<li>multiple runs</li>
+<li>statistical summary</li>
+<li>allocation metrics</li>
+<li>isolation from naive stopwatch mistakes</li>
+</ul>
+`},
+{type:"code", title:"A real microbenchmark", lang:"csharp", code:`<span class="kw">using</span> BenchmarkDotNet.Attributes;
+<span class="kw">using</span> BenchmarkDotNet.Running;
+
+[<span class="type">MemoryDiagnoser</span>]
+<span class="kw">public class</span> <span class="type">StringBenchmarks</span>
+{
+    [<span class="type">Benchmark</span>]
+    <span class="kw">public string</span> <span class="fn">Interpolation</span>() => <span class="str">$"Order-{42}"</span>;
+
+    [<span class="type">Benchmark</span>]
+    <span class="kw">public string</span> <span class="fn">Concat</span>() => string.<span class="fn">Concat</span>(<span class="str">"Order-"</span>, <span class="num">42</span>);
+}
+
+<span class="kw">public static class</span> <span class="type">Program</span>
+{
+    <span class="kw">public static void</span> <span class="fn">Main</span>() =>
+        <span class="type">BenchmarkRunner</span>.<span class="fn">Run</span>&lt;<span class="type">StringBenchmarks</span>&gt;();
+}`},
+{type:"scenario", title:"Scenario · proving an optimization", content:`
+<p>A teammate rewrites a clear LINQ expression into manual loops for performance. Instead of arguing, benchmark both versions and compare execution time plus allocations. That is the right engineering conversation.</p>
+`},
+{type:"callout", kind:"info", icon:"📈", text:"Profile first, benchmark second, optimize third. BenchmarkDotNet is for validating a suspected hot path, not for replacing architectural thinking."}
+]},
+
+"t5_6": {
+title: "Abstract Classes",
+breadcrumb: "Chapter 5 · Object-Oriented Programming",
+subtitle: "Share common implementation and force derived types to complete the contract where a plain interface is not enough.",
+badges: [{text:"Intermediate",color:"#f59e0b"},{text:"OOP",color:"#ef4444"},{text:"Design",color:"#7c3aed"}],
+sections: [
+{type:"prose", title:"When an abstract class makes sense", content:`
+<p>An <strong>abstract class</strong> is a partially complete base type. You cannot instantiate it directly, but you can inherit from it.</p>
+<p>Use an abstract class when you need:</p>
+<ul>
+<li>a shared base implementation</li>
+<li>protected helpers or state</li>
+<li>a template that derived classes must complete</li>
+</ul>
+<p>Compared with interfaces, abstract classes are best when there is a real shared behavioral core, not just a shared contract.</p>
+`},
+{type:"code", title:"Template method with abstract class", lang:"csharp", code:`<span class="kw">public abstract class</span> <span class="type">ReportGenerator</span>
+{
+    <span class="kw">public string</span> <span class="fn">Generate</span>()
+    {
+        <span class="kw">var</span> data = <span class="fn">LoadData</span>();
+        <span class="kw">var</span> formatted = <span class="fn">Format</span>(data);
+        <span class="kw">return</span> <span class="fn">AddHeader</span>() + formatted;
+    }
+
+    <span class="kw">protected virtual string</span> <span class="fn">AddHeader</span>() => <span class="str">"=== REPORT ===\n"</span>;
+    <span class="kw">protected abstract string</span> <span class="fn">LoadData</span>();
+    <span class="kw">protected abstract string</span> <span class="fn">Format</span>(<span class="kw">string</span> data);
+}
+
+<span class="kw">public sealed class</span> <span class="type">SalesReportGenerator</span> : <span class="type">ReportGenerator</span>
+{
+    <span class="kw">protected override string</span> <span class="fn">LoadData</span>() => <span class="str">"sales-data"</span>;
+    <span class="kw">protected override string</span> <span class="fn">Format</span>(<span class="kw">string</span> data) => <span class="str">$"Formatted: {data}"</span>;
+}`},
+{type:"table", title:"Abstract Class vs Interface", headers:["Question","Abstract class","Interface"], rows:[
+["Can hold state?", "Yes", "No instance state"],
+["Can provide implementation?", "Yes", "Yes for default members, but no instance fields"],
+["Multiple inheritance?", "No", "Yes, many interfaces"],
+["Best use", "Shared base behavior", "Capability contract"]
+]},
+{type:"callout", kind:"info", icon:"🧩", text:"Reach for an abstract class only when the derived types are truly part of one family with meaningful shared behavior."}
+]},
+
+"t5_7": {
+title: "Static & Sealed Classes",
+breadcrumb: "Chapter 5 · Object-Oriented Programming",
+subtitle: "Two design signals in C#: one says 'utility only', the other says 'do not inherit from this type'.",
+badges: [{text:"Intermediate",color:"#f59e0b"},{text:"Core",color:"#00d4ff"},{text:"Design",color:"#10b981"}],
+sections: [
+{type:"prose", title:"Why these modifiers matter", content:`
+<p>A <strong>static class</strong> exists only to group static members. You cannot create instances of it.</p>
+<p>A <strong>sealed class</strong> is a normal class that explicitly blocks inheritance.</p>
+<p>These modifiers communicate intent to both the compiler and other developers.</p>
+`},
+{type:"code", title:"Typical usage patterns", lang:"csharp", code:`<span class="kw">public static class</span> <span class="type">MathHelpers</span>
+{
+    <span class="kw">public static decimal</span> <span class="fn">PercentageOf</span>(<span class="kw">decimal</span> value, <span class="kw">decimal</span> percent) =>
+        value * percent / <span class="num">100m</span>;
+}
+
+<span class="kw">public sealed class</span> <span class="type">JwtTokenService</span>
+{
+    <span class="kw">public string</span> <span class="fn">CreateToken</span>(<span class="kw">string</span> userName) =>
+        <span class="str">$"token-for-{userName}"</span>;
+}`},
+{type:"scenario", title:"Scenario · utility vs service type", content:`
+<p>If a type has no state and only pure helper methods, make it static. If a service is not designed as a base type and inheritance would be dangerous or meaningless, seal it.</p>
+`},
+{type:"callout", kind:"success", icon:"🏛️", text:"Use static classes for stateless helpers and sealed classes to protect types that are not safe or useful to extend."}
+]},
+
+"t6_1": {
+title: "Arrays",
+breadcrumb: "Chapter 6 · Collections",
+subtitle: "The lowest-level built-in collection in C# — fixed size, contiguous memory, and the foundation behind many higher-level collection types.",
+badges: [{text:"Beginner",color:"#10b981"},{text:"Core",color:"#00d4ff"},{text:"Performance",color:"#f59e0b"}],
+sections: [
+{type:"prose", title:"Why arrays still matter", content:`
+<p>Arrays are fixed-size collections stored contiguously in memory. They are simple, fast, and foundational.</p>
+<p>Many other collection types use arrays internally, including <code>List&lt;T&gt;</code>.</p>
+<ul>
+<li>fast indexed access: O(1)</li>
+<li>fixed length after creation</li>
+<li>good cache locality</li>
+</ul>
+`},
+{type:"code", title:"Single, multi-dimensional, and jagged arrays", lang:"csharp", code:`<span class="type">int</span>[] numbers = [<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>];
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(numbers[<span class="num">1</span>]); <span class="cmt">// 20</span>
+
+<span class="cmt">// Multi-dimensional array</span>
+<span class="type">int</span>[,] matrix =
+{
+    { <span class="num">1</span>, <span class="num">2</span> },
+    { <span class="num">3</span>, <span class="num">4</span> }
+};
+
+<span class="cmt">// Jagged array (array of arrays)</span>
+<span class="type">int</span>[][] jagged =
+[
+    [<span class="num">1</span>, <span class="num">2</span>],
+    [<span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
+];
+
+<span class="kw">foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> numbers)
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(item);`},
+{type:"table", title:"Choose the right shape", headers:["Kind","Use when"], rows:[
+["T[]", "Simple one-dimensional sequence"],
+["T[,]", "True matrix-style two-dimensional data"],
+["T[][]", "Rows can have different lengths or you want more flexibility"]
+]},
+{type:"callout", kind:"info", icon:"📊", text:"If the size changes often, use List<T>. If the size is fixed and performance matters, arrays are often the cleanest choice."}
+]},
+
+"t6_4": {
+title: "HashSet<T> & SortedSet<T>",
+breadcrumb: "Chapter 6 · Collections",
+subtitle: "Collections optimized for uniqueness — one is hash-based and fast, the other stays ordered automatically.",
+badges: [{text:"Intermediate",color:"#f59e0b"},{text:"Core",color:"#00d4ff"},{text:"Collections",color:"#10b981"}],
+sections: [
+{type:"prose", title:"What sets are for", content:`
+<p>A set stores unique items only. That makes sets ideal for membership checks, duplicate elimination, and set operations like union and intersection.</p>
+<ul>
+<li><code>HashSet&lt;T&gt;</code> — optimized for fast lookup</li>
+<li><code>SortedSet&lt;T&gt;</code> — keeps items sorted automatically</li>
+</ul>
+`},
+{type:"code", title:"Uniqueness and set operations", lang:"csharp", code:`<span class="kw">var</span> tags = <span class="kw">new</span> <span class="type">HashSet</span>&lt;<span class="kw">string</span>&gt;(StringComparer.OrdinalIgnoreCase)
+{
+    <span class="str">"CSharp"</span>,
+    <span class="str">"dotnet"</span>,
+    <span class="str">"csharp"</span> <span class="cmt">// ignored as duplicate under comparer</span>
+};
+
+<span class="kw">var</span> backend = <span class="kw">new</span> <span class="type">HashSet</span>&lt;<span class="kw">string</span>&gt; { <span class="str">"csharp"</span>, <span class="str">"sql"</span>, <span class="str">"redis"</span> };
+<span class="kw">var</span> cloud = <span class="kw">new</span> <span class="type">HashSet</span>&lt;<span class="kw">string</span>&gt; { <span class="str">"azure"</span>, <span class="str">"redis"</span>, <span class="str">"sql"</span> };
+
+backend.<span class="fn">IntersectWith</span>(cloud); <span class="cmt">// now contains sql, redis</span>
+
+<span class="kw">var</span> ordered = <span class="kw">new</span> <span class="type">SortedSet</span>&lt;<span class="type">int</span>&gt; { <span class="num">5</span>, <span class="num">1</span>, <span class="num">9</span>, <span class="num">1</span> };
+<span class="kw">foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> ordered)
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(item); <span class="cmt">// 1, 5, 9</span>`},
+{type:"callout", kind:"success", icon:"🔵", text:"If the main question is 'Have we seen this before?' a HashSet<T> is often exactly the right tool."}
+]},
+
+"t6_5": {
+title: "Stack<T> & Queue<T>",
+breadcrumb: "Chapter 6 · Collections",
+subtitle: "Two simple but important structures: one is last-in-first-out, the other is first-in-first-out.",
+badges: [{text:"Intermediate",color:"#f59e0b"},{text:"Core",color:"#00d4ff"},{text:"Data Structures",color:"#10b981"}],
+sections: [
+{type:"prose", title:"LIFO vs FIFO", content:`
+<p><code>Stack&lt;T&gt;</code> is <strong>LIFO</strong> — last in, first out. Think undo history or recursive traversal.</p>
+<p><code>Queue&lt;T&gt;</code> is <strong>FIFO</strong> — first in, first out. Think background work, customer waiting lines, or breadth-first traversal.</p>
+`},
+{type:"code", title:"Stack and Queue in practice", lang:"csharp", code:`<span class="kw">var</span> undoStack = <span class="kw">new</span> <span class="type">Stack</span>&lt;<span class="kw">string</span>&gt;();
+undoStack.<span class="fn">Push</span>(<span class="str">"type A"</span>);
+undoStack.<span class="fn">Push</span>(<span class="str">"type B"</span>);
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(undoStack.<span class="fn">Pop</span>()); <span class="cmt">// type B</span>
+
+<span class="kw">var</span> workQueue = <span class="kw">new</span> <span class="type">Queue</span>&lt;<span class="kw">string</span>&gt;();
+workQueue.<span class="fn">Enqueue</span>(<span class="str">"job-1"</span>);
+workQueue.<span class="fn">Enqueue</span>(<span class="str">"job-2"</span>);
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(workQueue.<span class="fn">Dequeue</span>()); <span class="cmt">// job-1</span>`},
+{type:"scenario", title:"Scenario · choosing the right one", content:`
+<p>If you are processing jobs in arrival order, use a queue. If you are reversing operations or walking depth-first, use a stack. Swapping them changes behavior fundamentally.</p>
+`},
+{type:"callout", kind:"info", icon:"📐", text:"When the order of removal is the core rule of the problem, Stack<T> and Queue<T> make that rule visible in code."}
+]},
+
+"t6_7": {
+title: "Immutable Collections",
+breadcrumb: "Chapter 6 · Collections",
+subtitle: "Collections that never change in place — safer sharing, easier reasoning, and fewer accidental side effects in concurrent or functional-style code.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"Threading",color:"#7c3aed"},{text:"Safety",color:"#10b981"}],
+sections: [
+{type:"prose", title:"Why immutability helps", content:`
+<p>Immutable collections never mutate in place. Instead, operations return a new collection with the change applied.</p>
+<p>This gives important benefits:</p>
+<ul>
+<li>safe sharing across threads</li>
+<li>predictable state transitions</li>
+<li>fewer accidental side effects</li>
+</ul>
+<p>The trade-off is more allocation than a mutable collection in many scenarios.</p>
+`},
+{type:"code", title:"ImmutableList and ImmutableDictionary", lang:"csharp", code:`<span class="kw">using</span> System.Collections.Immutable;
+
+<span class="kw">var</span> original = <span class="type">ImmutableList</span>.<span class="fn">Create</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>);
+<span class="kw">var</span> updated = original.<span class="fn">Add</span>(<span class="num">4</span>);
+
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(string.Join(<span class="str">", "</span>, original)); <span class="cmt">// 1, 2, 3</span>
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(string.Join(<span class="str">", "</span>, updated));  <span class="cmt">// 1, 2, 3, 4</span>
+
+<span class="kw">var</span> settings = <span class="type">ImmutableDictionary</span>.<span class="fn">CreateBuilder</span>&lt;<span class="kw">string</span>, <span class="kw">string</span>&gt;();
+settings[<span class="str">"mode"</span>] = <span class="str">"prod"</span>;
+settings[<span class="str">"region"</span>] = <span class="str">"eu-west"</span>;
+<span class="kw">var</span> finalSettings = settings.<span class="fn">ToImmutable</span>();`},
+{type:"callout", kind:"success", icon:"🔒", text:"Immutable collections are especially useful when many parts of the application read shared data and none should be able to mutate it accidentally."}
+]},
+
+"t11_5": {
+title: "Parallel Programming",
+breadcrumb: "Chapter 11 · Async Programming",
+subtitle: "Use multiple cores for CPU-bound work with care — parallel loops, partitioning, and when parallelism helps versus hurts.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"Performance",color:"#10b981"},{text:"Concurrency",color:"#00d4ff"}],
+sections: [
+{type:"prose", title:"Async is not the same as parallel", content:`
+<p><strong>Async</strong> is mostly about not blocking while waiting. <strong>Parallelism</strong> is about doing multiple pieces of CPU work at the same time.</p>
+<p>Use parallel programming when:</p>
+<ul>
+<li>the work is CPU-bound</li>
+<li>iterations are mostly independent</li>
+<li>the overhead of scheduling is worth the gain</li>
+</ul>
+<p>Do not use parallelism automatically for tiny workloads or code with heavy shared-state contention.</p>
+`},
+{type:"code", title:"Parallel.ForEachAsync and Parallel.For", lang:"csharp", code:`<span class="kw">var</span> numbers = Enumerable.<span class="fn">Range</span>(<span class="num">1</span>, <span class="num">1000</span>).<span class="fn">ToArray</span>();
+
+<span class="cmt">// CPU-bound parallel loop</span>
+<span class="type">Parallel</span>.<span class="fn">For</span>(<span class="num">0</span>, numbers.Length, i =>
+{
+    numbers[i] = numbers[i] * numbers[i];
+});
+
+<span class="cmt">// Async-friendly parallel processing (.NET 6+)</span>
+<span class="kw">await</span> <span class="type">Parallel</span>.<span class="fn">ForEachAsync</span>(numbers, <span class="kw">async</span> (n, ct) =>
+{
+    <span class="kw">await</span> <span class="type">Task</span>.<span class="fn">Delay</span>(<span class="num">10</span>, ct);
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(n);
+});`},
+{type:"table", title:"Use parallelism carefully", headers:["Question","Guidance"], rows:[
+["CPU-bound?", "Parallelism may help."],
+["I/O-bound?", "Prefer async rather than CPU parallel loops."],
+["Shared mutable state?", "Be very careful. Contention can erase the gain."],
+["Tiny workload?", "Parallel overhead may make it slower."]
+]},
+{type:"callout", kind:"warn", icon:"⚙️", text:"Parallel code is often harder to debug and reason about. Use it when measurement shows a real benefit, not just because multiple cores exist."}
+]},
+
+"t12_4": {
+title: "Unsafe Code & Pointers",
+breadcrumb: "Chapter 12 · Memory & Performance",
+subtitle: "Low-level memory access in C# when you need to step outside the normal safety model for interop or extreme performance work.",
+badges: [{text:"Expert",color:"#ef4444"},{text:"Performance",color:"#10b981"},{text:"Interop",color:"#7c3aed"}],
+sections: [
+{type:"prose", title:"Why unsafe code exists", content:`
+<p>C# is designed to be memory-safe by default. But some scenarios need direct memory access:</p>
+<ul>
+<li>native interop</li>
+<li>working with existing unmanaged APIs</li>
+<li>specialized performance code</li>
+</ul>
+<p>Unsafe code allows pointers, fixed buffers, and address arithmetic. The cost is obvious: <strong>you are stepping outside many of the runtime's safety guarantees</strong>.</p>
+`},
+{type:"code", title:"Pointer basics", lang:"csharp", code:`<span class="kw">unsafe</span>
+{
+    <span class="type">int</span> value = <span class="num">42</span>;
+    <span class="type">int</span>* ptr = &amp;value;
+
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(*ptr); <span class="cmt">// dereference</span>
+    *ptr = <span class="num">99</span>;
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(value); <span class="cmt">// 99</span>
+}
+
+<span class="cmt">// Pin managed memory before taking a pointer into it</span>
+<span class="type">byte</span>[] bytes = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>];
+<span class="kw">unsafe</span>
+{
+    <span class="kw">fixed</span> (<span class="type">byte</span>* p = bytes)
+    {
+        <span class="type">Console</span>.<span class="fn">WriteLine</span>(p[<span class="num">0</span>]);
+    }
+}`},
+{type:"scenario", title:"Scenario · interop boundary", content:`
+<p>If you call a native library that expects a raw pointer, unsafe code may be justified. But for most application code, Span<T>, Memory<T>, and safe APIs should be the first choice.</p>
+`},
+{type:"callout", kind:"danger", icon:"⚠️", text:"Unsafe code is a last-mile tool. If a safe alternative exists and meets the performance goal, use the safe alternative."}
+]},
+
+"t7_2": {
+title: "Generic Constraints",
+breadcrumb: "Chapter 7 · Generics",
+subtitle: "Tell the compiler what a generic type parameter must support so your reusable code stays both safe and expressive.",
+badges: [{text:"Intermediate",color:"#f59e0b"},{text:"Core",color:"#00d4ff"},{text:"Generics",color:"#8b5cf6"}],
+sections: [
+{type:"prose", title:"Why constraints exist", content:`
+<p>Without constraints, a generic type parameter could be literally anything. That makes many useful operations impossible.</p>
+<p>Constraints let you say:</p>
+<ul>
+<li>this type must be a reference type</li>
+<li>this type must implement an interface</li>
+<li>this type must have a parameterless constructor</li>
+<li>this type must support numeric operators in modern generic math scenarios</li>
+</ul>
+`},
+{type:"code", title:"Common constraint combinations", lang:"csharp", code:`<span class="kw">public interface</span> <span class="type">IEntity</span>
+{
+    <span class="type">Guid</span> Id { <span class="kw">get</span>; }
+}
+
+<span class="kw">public sealed class</span> <span class="type">Repository</span>&lt;<span class="type">T</span>&gt;
+    <span class="kw">where</span> <span class="type">T</span> : <span class="kw">class</span>, <span class="type">IEntity</span>, <span class="kw">new</span>()
+{
+    <span class="kw">public T</span> <span class="fn">Create</span>() => <span class="kw">new</span> <span class="type">T</span>();
+}
+
+<span class="cmt">// Generic math (.NET 7+)</span>
+<span class="kw">public static T</span> <span class="fn">Add</span>&lt;<span class="type">T</span>&gt;(<span class="kw">T</span> left, <span class="kw">T</span> right)
+    <span class="kw">where</span> <span class="type">T</span> : System.Numerics.IAdditionOperators&lt;<span class="type">T</span>, <span class="type">T</span>, <span class="type">T</span>&gt;
+    => left + right;`},
+{type:"table", title:"Constraint intent", headers:["Constraint","What it enables"], rows:[
+["class / struct", "Control reference vs value semantics"],
+["Interface constraint", "Call members from that interface safely"],
+["new()", "Instantiate T inside the generic type"],
+["Base type constraint", "Use shared base behavior"],
+["Generic math interfaces", "Use operators across numeric-like types"]
+]},
+{type:"callout", kind:"info", icon:"🔗", text:"Constraints are what turn generic code from vague abstraction into useful reusable code."}
+]},
+
+"t7_3": {
+title: "Covariance & Contravariance",
+breadcrumb: "Chapter 7 · Generics",
+subtitle: "Variance rules explain when a generic type with one type argument can be safely used as though it had another.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"CLR",color:"#7c3aed"},{text:"Generics",color:"#8b5cf6"}],
+sections: [
+{type:"prose", title:"The simple mental model", content:`
+<p><strong>Covariance</strong> means 'more derived output is okay'. <strong>Contravariance</strong> means 'more general input is okay'.</p>
+<p>In C#:</p>
+<ul>
+<li><code>out T</code> = covariance</li>
+<li><code>in T</code> = contravariance</li>
+</ul>
+<p>The reason is safety. A producer can safely return a more specific type. A consumer can safely accept a more general type.</p>
+`},
+{type:"code", title:"Variance in interfaces and delegates", lang:"csharp", code:`<span class="kw">IEnumerable</span>&lt;<span class="type">string</span>&gt; names = <span class="kw">new</span> <span class="type">List</span>&lt;<span class="type">string</span>&gt; { <span class="str">"Alice"</span> };
+<span class="kw">IEnumerable</span>&lt;<span class="kw">object</span>&gt; objects = names; <span class="cmt">// covariance: out T</span>
+
+<span class="kw">Action</span>&lt;<span class="kw">object</span>&gt; logObject = o => <span class="type">Console</span>.<span class="fn">WriteLine</span>(o);
+<span class="kw">Action</span>&lt;<span class="type">string</span>&gt; logString = logObject; <span class="cmt">// contravariance: in T</span>
+logString(<span class="str">"hello"</span>);
+
+<span class="kw">public interface</span> <span class="type">IProducer</span>&lt;<span class="kw">out T</span>&gt;
+{
+    <span class="kw">T</span> <span class="fn">Create</span>();
+}
+
+<span class="kw">public interface</span> <span class="type">IConsumer</span>&lt;<span class="kw">in T</span>&gt;
+{
+    <span class="kw">void</span> <span class="fn">Handle</span>(<span class="kw">T</span> item);
+}`},
+{type:"callout", kind:"info", icon:"↕️", text:"If a generic type produces T, think out. If it consumes T, think in."}
+]},
+
+"t7_4": {
+title: "Generic Patterns",
+breadcrumb: "Chapter 7 · Generics",
+subtitle: "See how generics make common patterns reusable without giving up compile-time safety.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"Architecture",color:"#7c3aed"},{text:"Generics",color:"#8b5cf6"}],
+sections: [
+{type:"prose", title:"Where generic patterns shine", content:`
+<p>Generics are powerful when many types share the same structural behavior. Common pattern examples include repositories, factories, pipelines, specifications, and result wrappers.</p>
+<p>The goal is not to generalize everything. The goal is to remove meaningful duplication while keeping the code understandable.</p>
+`},
+{type:"code", title:"A generic result wrapper", lang:"csharp", code:`<span class="kw">public sealed record</span> <span class="type">Result</span>&lt;<span class="type">T</span>&gt;(<span class="kw">bool</span> IsSuccess, <span class="kw">T</span>? Value, <span class="kw">string</span>? Error)
+{
+    <span class="kw">public static</span> <span class="type">Result</span>&lt;<span class="type">T</span>&gt; <span class="fn">Ok</span>(<span class="kw">T</span> value) => <span class="kw">new</span>(<span class="kw">true</span>, value, <span class="kw">null</span>);
+    <span class="kw">public static</span> <span class="type">Result</span>&lt;<span class="type">T</span>&gt; <span class="fn">Fail</span>(<span class="kw">string</span> error) => <span class="kw">new</span>(<span class="kw">false</span>, <span class="kw">default</span>, error);
+}
+
+<span class="kw">public sealed class</span> <span class="type">Factory</span>
+{
+    <span class="kw">public static T</span> <span class="fn">Create</span>&lt;<span class="type">T</span>&gt;() <span class="kw">where</span> <span class="type">T</span> : <span class="kw">new</span>() => <span class="kw">new</span>();
+}`},
+{type:"callout", kind:"success", icon:"🏗️", text:"A good generic pattern removes duplication without hiding the business meaning of the code."}
+]},
+
+"t8_2": {
+title: "Func, Action, Predicate",
+breadcrumb: "Chapter 8 · Delegates & Functional",
+subtitle: "Built-in delegate types that cover most callback scenarios in modern C#.",
+badges: [{text:"Core",color:"#00d4ff"},{text:"Functional",color:"#ec4899"},{text:"Common",color:"#10b981"}],
+sections: [
+{type:"prose", title:"The built-in delegate family", content:`
+<p>Most modern C# code does not declare custom delegates for simple cases. It uses:</p>
+<ul>
+<li><code>Action</code> — no return value</li>
+<li><code>Func</code> — returns a value</li>
+<li><code>Predicate&lt;T&gt;</code> — specialized delegate returning bool</li>
+</ul>
+`},
+{type:"code", title:"Built-in delegates in practice", lang:"csharp", code:`<span class="kw">Action</span>&lt;<span class="kw">string</span>&gt; log = message => <span class="type">Console</span>.<span class="fn">WriteLine</span>(message);
+<span class="kw">Func</span>&lt;<span class="type">int</span>, <span class="type">int</span>, <span class="type">int</span>&gt; add = (a, b) => a + b;
+<span class="kw">Predicate</span>&lt;<span class="type">int</span>&gt; isEven = n => n % <span class="num">2</span> == <span class="num">0</span>;
+
+log(<span class="str">"Hello"</span>);
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(add(<span class="num">2</span>, <span class="num">3</span>));
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(isEven(<span class="num">10</span>));`},
+{type:"callout", kind:"info", icon:"🎯", text:"Use custom delegates only when the name itself carries useful domain meaning beyond what Func or Action already express."}
+]},
+
+"t8_3": {
+title: "Lambda Expressions",
+breadcrumb: "Chapter 8 · Delegates & Functional",
+subtitle: "Compact function syntax that powers LINQ, callbacks, mapping, filtering, and functional composition throughout C#.",
+badges: [{text:"Core",color:"#00d4ff"},{text:"C# 3.0+",color:"#a78bfa"},{text:"Functional",color:"#ec4899"}],
+sections: [
+{type:"prose", title:"What lambdas really are", content:`
+<p>A lambda expression is a concise way to write an anonymous function.</p>
+<p>Depending on the target type, a lambda can become:</p>
+<ul>
+<li>a compiled delegate</li>
+<li>an expression tree</li>
+</ul>
+<p>This is why the same syntax powers both in-memory LINQ and query translation in frameworks like EF Core.</p>
+`},
+{type:"code", title:"Statement and expression lambdas", lang:"csharp", code:`<span class="kw">Func</span>&lt;<span class="type">int</span>, <span class="type">int</span>&gt; square = x => x * x;
+
+<span class="kw">Func</span>&lt;<span class="type">int</span>, <span class="type">string</span>&gt; classify = x =>
+{
+    <span class="kw">if</span> (x < <span class="num">0</span>) <span class="kw">return</span> <span class="str">"negative"</span>;
+    <span class="kw">if</span> (x == <span class="num">0</span>) <span class="kw">return</span> <span class="str">"zero"</span>;
+    <span class="kw">return</span> <span class="str">"positive"</span>;
+};
+
+<span class="kw">var</span> result = Enumerable.<span class="fn">Range</span>(<span class="num">1</span>, <span class="num">5</span>)
+    .<span class="fn">Where</span>(x => x % <span class="num">2</span> == <span class="num">1</span>)
+    .<span class="fn">Select</span>(x => x * x)
+    .<span class="fn">ToList</span>();`},
+{type:"callout", kind:"warn", icon:"λ", text:"Lambdas can capture variables from the surrounding scope. That is powerful, but it can also create surprising closure behavior if you are not careful."}
+]},
+
+"t8_4": {
+title: "Events & Event Handlers",
+breadcrumb: "Chapter 8 · Delegates & Functional",
+subtitle: "The observer-style mechanism built into C# for in-process notifications between publishers and subscribers.",
+badges: [{text:"Core",color:"#00d4ff"},{text:"Patterns",color:"#10b981"},{text:"Events",color:"#ec4899"}],
+sections: [
+{type:"prose", title:"What makes events special", content:`
+<p>An event is built on delegates, but with an important restriction: outside code can subscribe and unsubscribe, but it cannot raise the event directly.</p>
+<p>That protects the publisher and keeps event emission under control.</p>
+`},
+{type:"code", title:"Publisher and subscriber pattern", lang:"csharp", code:`<span class="kw">public sealed class</span> <span class="type">OrderCreatedEventArgs</span>(<span class="type">Guid</span> orderId) : <span class="type">EventArgs</span>
+{
+    <span class="kw">public Guid</span> OrderId { <span class="kw">get</span>; } = orderId;
+}
+
+<span class="kw">public sealed class</span> <span class="type">OrderService</span>
+{
+    <span class="kw">public event</span> <span class="type">EventHandler</span>&lt;<span class="type">OrderCreatedEventArgs</span>&gt;? OrderCreated;
+
+    <span class="kw">public void</span> <span class="fn">CreateOrder</span>()
+    {
+        <span class="kw">var</span> id = Guid.NewGuid();
+        OrderCreated?.<span class="fn">Invoke</span>(<span class="kw">this</span>, <span class="kw">new</span> <span class="type">OrderCreatedEventArgs</span>(id));
+    }
+}
+
+<span class="kw">var</span> service = <span class="kw">new</span> <span class="type">OrderService</span>();
+service.OrderCreated += (_, e) => <span class="type">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Order created: {e.OrderId}"</span>);`},
+{type:"scenario", title:"Scenario · in-process notifications", content:`
+<p>Events are useful when one part of an application needs to react to another part without the publisher knowing every subscriber in advance. They are best for in-process notifications, not for durable cross-service messaging.</p>
+`},
+{type:"callout", kind:"info", icon:"📢", text:"For in-process notifications, events are lightweight and direct. For durable or distributed workflows, use a message bus instead."}
+]},
+
+"t8_5": {
+title: "Functional Patterns",
+breadcrumb: "Chapter 8 · Delegates & Functional",
+subtitle: "Bring selected functional ideas into C# to make code more predictable, composable, and easier to test.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"Functional",color:"#ec4899"},{text:"Design",color:"#10b981"}],
+sections: [
+{type:"prose", title:"The useful functional mindset", content:`
+<p>You do not need to turn C# into a pure functional language to benefit from functional patterns.</p>
+<p>The most valuable ideas are usually:</p>
+<ul>
+<li>prefer immutability where practical</li>
+<li>write small pure functions when possible</li>
+<li>compose behavior from functions</li>
+<li>separate transformation from side effects</li>
+</ul>
+`},
+{type:"code", title:"Small composable functions", lang:"csharp", code:`<span class="kw">static decimal</span> <span class="fn">ApplyTax</span>(<span class="kw">decimal</span> subtotal) => subtotal * <span class="num">1.18m</span>;
+<span class="kw">static decimal</span> <span class="fn">ApplyDiscount</span>(<span class="kw">decimal</span> subtotal) => subtotal - <span class="num">10m</span>;
+
+<span class="kw">var</span> total = <span class="fn">ApplyTax</span>(<span class="fn">ApplyDiscount</span>(<span class="num">100m</span>));
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(total);`},
+{type:"callout", kind:"success", icon:"🔄", text:"Functional techniques are most helpful when they reduce hidden state and make transformations obvious."}
+]},
+
+"t14_1": {
+title: "Attributes & Metadata",
+breadcrumb: "Chapter 14 · Advanced Language Features",
+subtitle: "Attach declarative information to code and let frameworks, tools, or your own runtime logic inspect it later.",
+badges: [{text:"Intermediate",color:"#f59e0b"},{text:"Runtime",color:"#7c3aed"},{text:"Metadata",color:"#00d4ff"}],
+sections: [
+{type:"prose", title:"What attributes do", content:`
+<p>Attributes let you annotate types, properties, methods, parameters, and more with extra metadata.</p>
+<p>Frameworks rely on attributes heavily for things like routing, validation, serialization, and dependency behavior.</p>
+`},
+{type:"code", title:"Custom attribute example", lang:"csharp", code:`[<span class="type">AttributeUsage</span>(<span class="type">AttributeTargets</span>.Class | <span class="type">AttributeTargets</span>.Method)]
+<span class="kw">public sealed class</span> <span class="type">FeatureAttribute</span>(<span class="kw">string</span> name) : <span class="type">Attribute</span>
+{
+    <span class="kw">public string</span> Name { <span class="kw">get</span>; } = name;
+}
+
+[<span class="type">Feature</span>(<span class="str">"Payments"</span>)]
+<span class="kw">public sealed class</span> <span class="type">PaymentService</span> { }`},
+{type:"callout", kind:"info", icon:"🏷️", text:"Attributes are declarative. They describe code so some other part of the system can act on that metadata."}
+]},
+
+"t14_2": {
+title: "Reflection",
+breadcrumb: "Chapter 14 · Advanced Language Features",
+subtitle: "Inspect types, members, and metadata at runtime when you need dynamic discovery or framework-style extensibility.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"Runtime",color:"#7c3aed"},{text:"Reflection",color:"#00d4ff"}],
+sections: [
+{type:"prose", title:"What reflection gives you", content:`
+<p>Reflection lets code inspect other code at runtime: types, properties, methods, constructors, attributes, and more.</p>
+<p>It is powerful, but slower and less discoverable than direct code. Use it when you truly need dynamic behavior.</p>
+`},
+{type:"code", title:"Inspecting a type", lang:"csharp", code:`<span class="kw">var</span> type = typeof(<span class="type">DateTime</span>);
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(type.Name);
+
+<span class="kw">foreach</span> (<span class="kw">var</span> property <span class="kw">in</span> type.<span class="fn">GetProperties</span>())
+{
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(property.Name);
+}`},
+{type:"callout", kind:"warn", icon:"🔮", text:"Reflection is useful for frameworks, plugins, and dynamic tooling. It is usually the wrong first choice for ordinary application flow."}
+]},
+
+"t14_3": {
+title: "Expression Trees",
+breadcrumb: "Chapter 14 · Advanced Language Features",
+subtitle: "Represent code as data so it can be inspected, transformed, or translated before execution.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"LINQ",color:"#10b981"},{text:"Metaprogramming",color:"#7c3aed"}],
+sections: [
+{type:"prose", title:"Why expression trees matter", content:`
+<p>An expression tree is a data structure representing code. Instead of immediately running a lambda, the runtime can inspect its structure.</p>
+<p>This is how providers like EF Core translate lambdas into SQL.</p>
+`},
+{type:"code", title:"Delegate vs expression tree", lang:"csharp", code:`<span class="kw">Func</span>&lt;<span class="type">int</span>, <span class="type">bool</span>&gt; compiled = x => x > <span class="num">10</span>;
+<span class="type">Expression</span>&lt;<span class="kw">Func</span>&lt;<span class="type">int</span>, <span class="type">bool</span>&gt;&gt; tree = x => x > <span class="num">10</span>;
+
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(tree.Body); <span class="cmt">// prints structure of the expression</span>`},
+{type:"callout", kind:"info", icon:"🌳", text:"If the code must be inspected or translated before execution, you want an expression tree. If it should just run, you want a delegate."}
+]},
+
+"t14_4": {
+title: "Source Generators",
+breadcrumb: "Chapter 14 · Advanced Language Features",
+subtitle: "Generate code at compile time instead of using runtime reflection for everything.",
+badges: [{text:"Expert",color:"#ef4444"},{text:"C# 9+",color:"#a78bfa"},{text:"Tooling",color:"#00d4ff"}],
+sections: [
+{type:"prose", title:"Why source generation matters", content:`
+<p>Source generators run during compilation and emit additional C# source. They are useful when you want boilerplate or metadata-driven code produced at compile time.</p>
+<p>This can reduce runtime reflection and improve startup or trimming compatibility.</p>
+`},
+{type:"code", title:"Conceptual generator use", lang:"csharp", code:`<span class="cmt">// You write attributed code...</span>
+[<span class="type">AutoRegister</span>]
+<span class="kw">public sealed class</span> <span class="type">OrderService</span> { }
+
+<span class="cmt">// ...and a generator emits registration code at compile time.</span>`},
+{type:"callout", kind:"info", icon:"⚙️", text:"Source generators are best when the structure is known at compile time and the generated result makes the final application simpler or faster."}
+]},
+
+"t14_5": {
+title: "Dynamic & ExpandoObject",
+breadcrumb: "Chapter 14 · Advanced Language Features",
+subtitle: "Relax compile-time type checking when interop or truly dynamic shapes justify it.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"Runtime",color:"#7c3aed"},{text:"Dynamic",color:"#00d4ff"}],
+sections: [
+{type:"prose", title:"Why dynamic exists", content:`
+<p>The <code>dynamic</code> keyword tells the compiler to defer member binding until runtime.</p>
+<p>That can be useful for COM interop, scripting-style scenarios, or data whose shape is genuinely unknown until runtime. The downside is loss of compile-time safety.</p>
+`},
+{type:"code", title:"Dynamic behavior", lang:"csharp", code:`<span class="kw">dynamic</span> value = <span class="str">"hello"</span>;
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(value.ToUpper());
+
+<span class="kw">dynamic</span> bag = <span class="kw">new</span> <span class="type">ExpandoObject</span>();
+bag.Name = <span class="str">"Alice"</span>;
+bag.Age = <span class="num">30</span>;
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(bag.Name);`},
+{type:"callout", kind:"warn", icon:"🌀", text:"Use dynamic when the problem is actually dynamic. Do not use it just to avoid designing a proper type."}
+]},
+
+"t14_6": {
+title: "Operator Overloading",
+breadcrumb: "Chapter 14 · Advanced Language Features",
+subtitle: "Give user-defined types natural operator syntax when that syntax genuinely matches the domain.",
+badges: [{text:"Intermediate",color:"#f59e0b"},{text:"Core",color:"#00d4ff"},{text:"Design",color:"#10b981"}],
+sections: [
+{type:"prose", title:"When operator overloading is appropriate", content:`
+<p>Operator overloading can make domain types feel natural, especially for math-like value objects such as Money, vectors, or units.</p>
+<p>It should improve clarity, not surprise readers.</p>
+`},
+{type:"code", title:"A simple money value object", lang:"csharp", code:`<span class="kw">public readonly record struct</span> <span class="type">Money</span>(<span class="kw">decimal</span> Amount)
+{
+    <span class="kw">public static</span> <span class="type">Money</span> <span class="kw">operator</span> +(Money left, Money right) =>
+        <span class="kw">new</span>(left.Amount + right.Amount);
+
+    <span class="kw">public static</span> <span class="type">Money</span> <span class="kw">operator</span> -(Money left, Money right) =>
+        <span class="kw">new</span>(left.Amount - right.Amount);
+}`},
+{type:"callout", kind:"info", icon:"➕", text:"If the operator meaning is not obvious, prefer a named method over operator overloading."}
+]},
+
+"t15_2": {
+title: "Common Intermediate Language",
+breadcrumb: "Chapter 15 · Compiler & Runtime",
+subtitle: "The instruction set your C# code is compiled into before JIT or AOT turns it into native machine code.",
+badges: [{text:"Expert",color:"#ef4444"},{text:"CLR",color:"#7c3aed"},{text:"IL",color:"#00d4ff"}],
+sections: [
+{type:"prose", title:"Why IL matters", content:`
+<p>C# is not compiled straight to machine code in the normal managed pipeline. It is compiled to <strong>CIL / IL</strong>, a portable instruction set plus metadata.</p>
+<p>The CLR then decides how to execute that IL through JIT or AOT-based strategies.</p>
+`},
+{type:"code", title:"Simple method and conceptual IL", lang:"csharp", code:`<span class="cmt">// C#</span>
+<span class="kw">public static int</span> <span class="fn">Add</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) => a + b;
+
+<span class="cmt">// Conceptual IL</span>
+<span class="cmt">// ldarg.0</span>
+<span class="cmt">// ldarg.1</span>
+<span class="cmt">// add</span>
+<span class="cmt">// ret</span>`},
+{type:"callout", kind:"info", icon:"📜", text:"You usually do not write IL directly, but reading a little IL helps explain what the compiler and runtime are actually doing."}
+]},
+
+"t15_3": {
+title: "GC Internals",
+breadcrumb: "Chapter 15 · Compiler & Runtime",
+subtitle: "Go deeper than surface GC knowledge: generations, roots, promotion, compaction, and why the runtime chooses the trade-offs it does.",
+badges: [{text:"Expert",color:"#ef4444"},{text:"Performance",color:"#10b981"},{text:"CLR",color:"#7c3aed"}],
+sections: [
+{type:"prose", title:"What 'internal' really means here", content:`
+<p>At a deeper level, the GC walks object graphs from roots, marks reachable objects, reclaims unreachable ones, and compacts managed memory where appropriate.</p>
+<p>The internal design balances pause time, throughput, memory efficiency, and typical allocation patterns.</p>
+`},
+{type:"table", title:"Important internal ideas", headers:["Concept","Why it matters"], rows:[
+["GC roots", "Only objects reachable from roots stay alive."],
+["Promotion", "Longer-lived objects move to older generations."],
+["Compaction", "Reduces fragmentation in compacted heaps."],
+["Server GC vs Workstation GC", "Different trade-offs for throughput vs responsiveness."]
+]},
+{type:"callout", kind:"info", icon:"🗑️", text:"GC internals are worth studying when you are diagnosing pause behavior, memory growth, or unusual allocation pressure."}
+]},
+
+"t15_4": {
+title: "AssemblyLoadContext",
+breadcrumb: "Chapter 15 · Compiler & Runtime",
+subtitle: "Control how assemblies are loaded and isolated in .NET applications, especially for plugins or advanced hosting scenarios.",
+badges: [{text:"Expert",color:"#ef4444"},{text:"Advanced",color:"#f59e0b"},{text:"Runtime",color:"#7c3aed"}],
+sections: [
+{type:"prose", title:"Why custom load contexts exist", content:`
+<p><code>AssemblyLoadContext</code> lets you control assembly loading boundaries in .NET.</p>
+<p>This matters for plugin systems, dynamic loading, unloading, and isolation scenarios where the default load context is not enough.</p>
+`},
+{type:"code", title:"Plugin-style load context sketch", lang:"csharp", code:`<span class="kw">public sealed class</span> <span class="type">PluginLoadContext</span> : <span class="type">AssemblyLoadContext</span>
+{
+    <span class="kw">public</span> <span class="type">PluginLoadContext</span>() : <span class="kw">base</span>(isCollectible: <span class="kw">true</span>) { }
+}
+
+<span class="kw">var</span> loadContext = <span class="kw">new</span> <span class="type">PluginLoadContext</span>();
+<span class="kw">var</span> assembly = loadContext.<span class="fn">LoadFromAssemblyPath</span>(pluginPath);`},
+{type:"callout", kind:"warn", icon:"📦", text:"Plugin loading is subtle. Type identity, dependency resolution, and unloading behavior all need careful design."}
+]},
+
+"t15_5": {
+title: "Native AOT",
+breadcrumb: "Chapter 15 · Compiler & Runtime",
+subtitle: "Ahead-of-time compilation for faster startup, simpler deployment, and more predictable runtime behavior in the right scenarios.",
+badges: [{text:"Expert",color:"#ef4444"},{text:"C# 12+",color:"#a78bfa"},{text:"Deployment",color:"#10b981"}],
+sections: [
+{type:"prose", title:"Why Native AOT is attractive", content:`
+<p>Native AOT compiles your application ahead of time into native code instead of relying on the normal JIT-based startup path.</p>
+<p>Benefits can include:</p>
+<ul>
+<li>faster startup</li>
+<li>smaller runtime surface in some cases</li>
+<li>improved deployment characteristics</li>
+</ul>
+<p>The trade-off is that highly dynamic features like unrestricted reflection can become harder.</p>
+`},
+{type:"code", title:"Enable Native AOT", lang:"xml", code:`<span class="cmt">&lt;Project Sdk="Microsoft.NET.Sdk"&gt;</span>
+  <span class="cmt">&lt;PropertyGroup&gt;</span>
+    <span class="cmt">&lt;TargetFramework&gt;net10.0&lt;/TargetFramework&gt;</span>
+    <span class="cmt">&lt;PublishAot&gt;true&lt;/PublishAot&gt;</span>
+  <span class="cmt">&lt;/PropertyGroup&gt;</span>
+<span class="cmt">&lt;/Project&gt;</span>`},
+{type:"table", title:"When AOT fits", headers:["Good fit","Poor fit"], rows:[
+["CLI tools, small services, startup-sensitive workloads", "Apps relying heavily on runtime code generation or unrestricted reflection"],
+["Predictable deployment pipelines", "Scenarios where dynamic runtime flexibility is the main goal"]
+]},
+{type:"callout", kind:"success", icon:"🚀", text:"Native AOT is a deployment and runtime trade-off, not a universal upgrade. Use it when startup, footprint, or runtime predictability clearly matter."}
+]},
+
 "t13_1": {
 title: "Records & Immutability",
 breadcrumb: "Chapter 13 · Modern C# Features",
@@ -2067,6 +3526,455 @@ const interviewQuestions = [
 {q:"Explain the concept of 'async all the way' and why it matters.",a:"<strong>Async all the way</strong> means: if any method in your call chain is async, ALL callers should be async. Mixing sync and async (blocking on async with .Result or .Wait()) causes deadlocks in single-threaded SynchronizationContexts (UI, ASP.NET classic) and wastes threads in thread-pool contexts. Pattern: Controller (async) → Service (async) → Repository (async) → Database (async). If you have sync code calling async, use <code>Task.Run()</code> at the boundary. Never write <code>async void</code> except for event handlers (exceptions are unobservable). Even Main() can be async: <code>static async Task Main(string[] args)</code>.",level:"Advanced",tag:"Async"},
 ];
 
+const GENERATED_BLUEPRINTS = {
+  t1: {
+    area:"C# syntax and language fundamentals",
+    use:"when establishing the shape of a program, basic data handling, null-safety, strings, and everyday coding habits",
+    avoid:"when the team skips fundamentals and jumps straight into frameworks without understanding core language behavior",
+    trade:"simple syntax choices become long-term maintainability choices; clear fundamentals reduce bugs, but require deliberate consistency",
+    flow:["Source File","Compiler Rules","Runtime Value","Program Output"],
+    code:`using System;
+
+namespace Demo.Fundamentals;
+
+public static class Program
+{
+    public static void Main(string[] args)
+    {
+        string appName = "C# Mastery";
+        int majorVersion = 14;
+        bool isModern = true;
+
+        Console.WriteLine($"{appName} on C# {majorVersion}");
+        Console.WriteLine($"Modern language features enabled: {isModern}");
+    }
+}`,
+    scenario:"A new team standardizes project templates, nullable settings, naming, and string handling so every new service starts from a clean, readable baseline.",
+    callout:"Most C# production issues are not caused by missing advanced features. They start with weak fundamentals around nulls, types, string handling, or program structure."
+  },
+  t2: {
+    area:"the C# type system and runtime semantics",
+    use:"when choosing between value and reference semantics, designing DTOs, modeling domain values, or reasoning about boxing and copying",
+    avoid:"when type choices are made only by habit without considering memory, mutability, or equality behavior",
+    trade:"richer type modeling improves correctness and expressiveness, but careless choices can add copying, boxing, mutation bugs, or GC pressure",
+    flow:["C# Type","CLR Representation","Assignment / Copy","Behavior In Code"],
+    code:`public readonly record struct Money(decimal Amount, string Currency);
+
+public sealed class Customer
+{
+    public string Name { get; init; } = string.Empty;
+    public Money CreditLimit { get; init; }
+}
+
+Money a = new(100m, "USD");
+Money b = a;          // value copy
+Customer c1 = new() { Name = "Alice", CreditLimit = a };
+Customer c2 = c1;     // reference copy`,
+    scenario:"A billing platform must decide whether a concept like Money, Coordinate, or Percentage should behave like a copied value or a shared object reference.",
+    callout:"If you get the type model right, the rest of the API becomes easier to reason about. If you get it wrong, equality, mutation, and performance all become harder."
+  },
+  t3: {
+    area:"control flow and decision logic",
+    use:"when designing readable branching, exhaustive pattern matching, and safe iteration paths in business logic",
+    avoid:"when branching becomes deeply nested and procedural logic starts hiding domain intent",
+    trade:"expressive control flow improves readability and safety, but overusing clever syntax can make intent harder to scan",
+    flow:["Input State","Condition / Pattern","Branch Selection","Result / Transition"],
+    code:`static string Classify(object value) => value switch
+{
+    int number when number > 100 => "Large integer",
+    int => "Integer",
+    string { Length: 0 } => "Empty text",
+    string text => $"Text: {text}",
+    null => "Missing",
+    _ => "Other"
+};`,
+    scenario:"An API receives different payload shapes and must route them to different validation and handling paths without turning the codebase into nested if-else blocks.",
+    callout:"Pattern matching is not just syntax candy. It is one of the strongest readability tools in modern C# when you need exhaustive branching."
+  },
+  t4: {
+    area:"methods, parameters, and reusable APIs",
+    use:"when shaping service contracts, helper methods, extension APIs, and reusable application logic",
+    avoid:"when methods become too broad, take too many parameters, or hide mutation through ref/out without strong justification",
+    trade:"a powerful method surface makes APIs pleasant to use, but weak signatures create ambiguity, side effects, and maintenance cost",
+    flow:["Caller","Method Signature","Execution Logic","Return / Side Effect"],
+    code:`public static class PriceExtensions
+{
+    public static decimal ApplyDiscount(this decimal price, decimal percent) =>
+        price - (price * percent / 100m);
+
+    public static bool TryParseDiscount(string input, out decimal discount) =>
+        decimal.TryParse(input, out discount);
+}`,
+    scenario:"A shared library exposes clean extension methods and helper APIs used across several services, preventing repeated business-rule code.",
+    callout:"Method design is API design. The choice between return value, out parameter, optional argument, and extension method affects readability more than most teams admit."
+  },
+  t5: {
+    area:"object-oriented design in C#",
+    use:"when modeling behavior-rich domains, abstractions, contracts, and extensibility boundaries",
+    avoid:"when inheritance is used just to share code or when interfaces become vague dumping grounds",
+    trade:"good OOP design improves cohesion and extension points, but bad hierarchy design creates rigidity and accidental complexity",
+    flow:["Consumer","Abstraction","Concrete Implementation","Domain Behavior"],
+    code:`public interface IOrderCalculator
+{
+    decimal CalculateTotal(Order order);
+}
+
+public sealed class DefaultOrderCalculator : IOrderCalculator
+{
+    public decimal CalculateTotal(Order order) =>
+        order.Items.Sum(i => i.Price * i.Quantity);
+}`,
+    scenario:"An e-commerce system needs clear boundaries between pricing strategies, validation rules, and fulfillment behaviors while staying testable through abstractions.",
+    callout:"Prefer composition first. Use inheritance only when the subtype truly behaves like the base type under every important rule."
+  },
+  t6: {
+    area:"collections and iteration behavior",
+    use:"when choosing data structures for lookup, ordering, uniqueness, streaming, immutability, or performance-sensitive loops",
+    avoid:"when using List<T> for everything without considering lookup cost, memory layout, or concurrency concerns",
+    trade:"the right collection can simplify code and improve performance dramatically, but each collection optimizes a different operation",
+    flow:["Input Data","Collection Choice","Iteration / Lookup","Outcome / Complexity"],
+    code:`var customersById = new Dictionary<int, string>
+{
+    [1] = "Alice",
+    [2] = "Bob"
+};
+
+if (customersById.TryGetValue(2, out var name))
+{
+    Console.WriteLine(name);
+}
+
+var uniqueTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+{
+    "dotnet", "csharp", "CSharp"
+};`,
+    scenario:"A service must handle frequent reads by ID, preserve insertion order in one workflow, and guarantee uniqueness in another.",
+    callout:"Most collection mistakes are not syntax mistakes. They are complexity mistakes."
+  },
+  t7: {
+    area:"generic design and reusable abstractions",
+    use:"when building reusable libraries, pipelines, repositories, math helpers, or type-safe frameworks",
+    avoid:"when generic APIs become so abstract that domain intent disappears",
+    trade:"generics remove duplication and avoid boxing, but over-generalization can make APIs harder to understand than duplicated code would have been",
+    flow:["Generic Contract","Constraint","Concrete Type","Reusable Execution"],
+    code:`public interface IEntity
+{
+    Guid Id { get; }
+}
+
+public sealed class Repository<T> where T : class, IEntity
+{
+    private readonly Dictionary<Guid, T> _items = new();
+
+    public void Save(T entity) => _items[entity.Id] = entity;
+    public bool TryGet(Guid id, out T? entity) => _items.TryGetValue(id, out entity);
+}`,
+    scenario:"A platform team needs one reusable abstraction for entity persistence helpers without giving up type safety or introducing boxing.",
+    callout:"Generic constraints are where reusable code becomes trustworthy. Without constraints, you often end up with vague APIs and runtime surprises."
+  },
+  t8: {
+    area:"delegates, events, and functional composition",
+    use:"when modeling callbacks, pipelines, publish-subscribe flows, or composing logic as values",
+    avoid:"when event chains become implicit control flow that nobody can trace",
+    trade:"delegates and events improve flexibility and loose coupling, but they can hide execution order and make debugging harder if overused",
+    flow:["Publisher / Caller","Delegate / Lambda","Subscriber / Handler","Side Effect / Result"],
+    code:`Func<int, int, int> add = (a, b) => a + b;
+Action<string> log = message => Console.WriteLine($"LOG: {message}");
+
+public sealed class OrderService
+{
+    public event EventHandler<OrderCreatedEventArgs>? OrderCreated;
+
+    public void Create(Order order) =>
+        OrderCreated?.Invoke(this, new OrderCreatedEventArgs(order.Id));
+}`,
+    scenario:"A UI, domain service, or in-process workflow needs extensibility hooks without hard-coding every downstream action into the same class.",
+    callout:"Events are great for notification. They are much weaker for critical business workflows that need observability and guaranteed delivery."
+  },
+  t9: {
+    area:"LINQ and data querying",
+    use:"when projecting, filtering, grouping, joining, or aggregating in-memory or remote data with concise, readable pipelines",
+    avoid:"when over-chaining LINQ harms readability or when hidden multiple enumeration hurts performance",
+    trade:"LINQ makes intent obvious and composable, but deferred execution and allocation patterns must be understood in hot paths",
+    flow:["Source Sequence","Query Operators","Projection / Aggregation","Materialized Result"],
+    code:`var topCustomers = orders
+    .Where(o => o.Total > 1000m)
+    .GroupBy(o => o.CustomerId)
+    .Select(g => new { CustomerId = g.Key, Total = g.Sum(x => x.Total) })
+    .OrderByDescending(x => x.Total)
+    .Take(5)
+    .ToList();`,
+    scenario:"A reporting service transforms in-memory data or expression-tree-backed EF queries into the exact shape a dashboard needs.",
+    callout:"Always ask where the query runs: in memory, in SQL, or as an expression tree. That single question explains most LINQ surprises."
+  },
+  t10: {
+    area:"exception handling and reliability",
+    use:"when protecting boundaries, preserving diagnostics, enforcing invariants, and separating expected outcomes from exceptional failures",
+    avoid:"when exceptions are used for normal control flow or swallowed without context",
+    trade:"exceptions provide rich error propagation, but overuse or poor handling can hide failures, hurt clarity, and impact hot-path performance",
+    flow:["Failing Operation","Exception Boundary","Catch / Log / Translate","Recovery / Propagation"],
+    code:`try
+{
+    var content = File.ReadAllText("settings.json");
+    Console.WriteLine(content);
+}
+catch (FileNotFoundException ex)
+{
+    Console.WriteLine($"Configuration missing: {ex.FileName}");
+    throw;
+}
+finally
+{
+    Console.WriteLine("Cleanup complete");
+}`,
+    scenario:"A service talks to file, HTTP, and database dependencies and needs to preserve context without hiding the underlying cause of failure.",
+    callout:"Use exceptions for exceptional failures, not for expected branching. The user experience improves when failure paths are modeled deliberately."
+  },
+  t11: {
+    area:"asynchronous and parallel programming",
+    use:"when coordinating I/O, background work, cancellation, and scalable request handling without blocking threads",
+    avoid:"when async is mixed with .Result or .Wait(), or when CPU-bound work is confused with asynchronous I/O",
+    trade:"async improves scalability and responsiveness, but it introduces state-machine behavior, cancellation complexity, and context considerations",
+    flow:["Caller","Awaited Operation","Continuation","Final Result"],
+    code:`public static async Task<string> FetchAsync(HttpClient httpClient, CancellationToken ct)
+{
+    using var response = await httpClient.GetAsync("https://example.com", ct);
+    response.EnsureSuccessStatusCode();
+    return await response.Content.ReadAsStringAsync(ct);
+}`,
+    scenario:"An ASP.NET Core endpoint fans out to multiple services and must stay responsive under load while honoring cancellation tokens.",
+    callout:"Async solves thread blocking, not slow algorithms. Profile the real bottleneck before adding complexity."
+  },
+  t12: {
+    area:"memory layout and performance engineering",
+    use:"when reducing allocations, tuning GC behavior, working with buffers, or optimizing hot paths",
+    avoid:"when micro-optimizations are applied before measuring real production bottlenecks",
+    trade:"performance-focused code can be significantly faster, but often becomes less obvious and demands stronger discipline",
+    flow:["Allocation","Memory Region","GC / Pool / Span","Observed Throughput"],
+    code:`Span<int> values = stackalloc int[] { 1, 2, 3, 4 };
+values[0] = 42;
+
+var rented = ArrayPool<byte>.Shared.Rent(1024);
+try
+{
+    // use rented buffer
+}
+finally
+{
+    ArrayPool<byte>.Shared.Return(rented);
+}`,
+    scenario:"A high-throughput API or message processor must reduce GC pauses and per-request allocations to stay within latency targets.",
+    callout:"Fast C# usually comes from fewer allocations, better data layout, and measured tradeoffs, not from heroic syntax tricks."
+  },
+  t13: {
+    area:"modern C# language features",
+    use:"when improving expressiveness, immutability, initialization safety, and boilerplate reduction in contemporary codebases",
+    avoid:"when new syntax is applied only because it is new, not because it improves intent",
+    trade:"modern features reduce boilerplate and increase clarity, but mixed style conventions can confuse teams unless standards are clear",
+    flow:["Language Feature","Compiler Lowering","Safer Model","Cleaner API"],
+    code:`public sealed class ApiOptions
+{
+    public required string BaseUrl { get; init; }
+    public required string ApiKey { get; init; }
+}
+
+public record OrderSummary(Guid Id, decimal Total, string Status);
+
+var options = new ApiOptions { BaseUrl = "https://api.example.com", ApiKey = "secret" };
+var copy = new OrderSummary(Guid.NewGuid(), 99m, "New") with { Status = "Paid" };`,
+    scenario:"A team modernizes a legacy codebase and wants safer initialization, immutable DTOs, and more expressive modeling without changing runtime architecture.",
+    callout:"Modern C# features are best when they remove accidental complexity and make domain intent easier to see."
+  },
+  t14: {
+    area:"metaprogramming and runtime inspection",
+    use:"when building frameworks, dynamic behavior, compile-time generation, or advanced diagnostics",
+    avoid:"when reflection or dynamic typing is used as a shortcut instead of explicit design",
+    trade:"advanced runtime features unlock powerful extensibility, but they can hurt discoverability, performance, and static safety if overused",
+    flow:["Metadata / Model","Reflection / Generator","Produced Behavior","Runtime Result"],
+    code:`[AttributeUsage(AttributeTargets.Class)]
+public sealed class FeatureAttribute(string name) : Attribute
+{
+    public string Name { get; } = name;
+}
+
+var type = typeof(OrderProcessor);
+foreach (var attribute in type.GetCustomAttributes())
+{
+    Console.WriteLine(attribute.GetType().Name);
+}`,
+    scenario:"A library needs to discover handlers dynamically, build source-generated code, or inspect models to create flexible runtime behavior.",
+    callout:"If reflection is your first design tool, pause. It is strongest when you truly need late binding, discovery, or generation."
+  },
+  t15: {
+    area:"compiler, CLR, and runtime internals",
+    use:"when optimizing startup, understanding IL/JIT behavior, tuning GC, or designing plugin and deployment strategies",
+    avoid:"when low-level internals knowledge is not tied to a real bottleneck or architectural requirement",
+    trade:"runtime knowledge can produce major wins in performance and deployment, but it is expensive knowledge if not applied to real constraints",
+    flow:["C# Source","IL / Metadata","JIT / AOT","Native Execution"],
+    code:`using System.Runtime.CompilerServices;
+
+public static class RuntimeDemo
+{
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int Add(int a, int b) => a + b;
+}`,
+    scenario:"A performance-critical service needs to understand whether tiered JIT, Native AOT, or GC tuning is the right response to a measured startup or latency issue.",
+    callout:"Runtime topics matter most when you can connect them to evidence: startup time, GC pause data, JIT warmup, or plugin isolation behavior."
+  }
+};
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function getBlueprintForTopic(topicId) {
+  const key = topicId.split('_')[0];
+  return GENERATED_BLUEPRINTS[key] || GENERATED_BLUEPRINTS.t1;
+}
+
+function inferTopicLevel(tags = []) {
+  if (tags.some(tag => tag.includes('Expert'))) return 'Expert';
+  if (tags.some(tag => tag.includes('Advanced'))) return 'Advanced';
+  if (tags.some(tag => tag.includes('Beginner'))) return 'Beginner';
+  return 'Core';
+}
+
+function buildGeneratedDiagram(ch, topic, blueprint) {
+  const flow = (blueprint.flow && blueprint.flow.length ? blueprint.flow : ["Concept","Compiler","Runtime","Result"]).slice(0, 4);
+  return `
+<svg width="520" height="250" viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="genarr-${topic.id}" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="${ch.color}"/>
+    </marker>
+    <style>
+      .gbox{fill:#111827;stroke:${ch.color};stroke-width:1.4}
+      .gtitle{font-family:'JetBrains Mono',monospace;font-size:9px;fill:#e2e8f0;text-anchor:middle}
+      .gsub{font-family:'JetBrains Mono',monospace;font-size:7.5px;fill:#94a3b8;text-anchor:middle}
+      .gline{stroke:${ch.color};stroke-width:1.5;fill:none;marker-end:url(#genarr-${topic.id});stroke-dasharray:6 3;animation:flow 2s linear infinite}
+    </style>
+  </defs>
+  <rect x="1" y="1" width="518" height="248" rx="10" fill="#0b1120" stroke="#1f2937" />
+  <text x="260" y="22" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="${ch.color}">${escapeHtml(topic.title)} · FLOW</text>
+  <rect class="gbox" x="18" y="70" width="105" height="54" rx="8"/>
+  <text class="gtitle" x="70" y="92">${escapeHtml(flow[0])}</text>
+  <text class="gsub" x="70" y="108">${escapeHtml(ch.title)}</text>
+  <rect class="gbox" x="145" y="70" width="105" height="54" rx="8"/>
+  <text class="gtitle" x="197" y="92">${escapeHtml(flow[1])}</text>
+  <text class="gsub" x="197" y="108">${escapeHtml(topic.title)}</text>
+  <rect class="gbox" x="272" y="70" width="105" height="54" rx="8"/>
+  <text class="gtitle" x="324" y="92">${escapeHtml(flow[2])}</text>
+  <text class="gsub" x="324" y="108">${escapeHtml(topic.desc.slice(0, 26))}</text>
+  <rect class="gbox" x="399" y="70" width="105" height="54" rx="8"/>
+  <text class="gtitle" x="451" y="92">${escapeHtml(flow[3])}</text>
+  <text class="gsub" x="451" y="108">Production outcome</text>
+
+  <line class="gline" x1="123" y1="97" x2="142" y2="97"/>
+  <line class="gline" x1="250" y1="97" x2="269" y2="97"/>
+  <line class="gline" x1="377" y1="97" x2="396" y2="97"/>
+
+  <rect x="18" y="148" width="486" height="78" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)"/>
+  <text x="30" y="168" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Why this topic matters</text>
+  <text x="30" y="188" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">${escapeHtml(topic.title)} changes how C# code is modeled, executed, or maintained in real applications.</text>
+  <text x="30" y="204" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">Use it with clear intent: correctness, readability, performance, or extensibility.</text>
+</svg>`;
+}
+
+function buildGeneratedTable(topic, blueprint) {
+  return {
+    type: 'table',
+    title: 'Definitions, Use Cases, and Trade-offs',
+    headers: ['Dimension', 'Guidance'],
+    rows: [
+      ['What is it?', `<strong>${topic.title}</strong> focuses on ${topic.desc}.`],
+      ['When to use', blueprint.use],
+      ['When to be careful', blueprint.avoid],
+      ['Trade-off', blueprint.trade],
+      ['Typical C# value', `This topic is most useful when you want clear, correct, idiomatic C# instead of accidental complexity.`]
+    ]
+  };
+}
+
+function buildGeneratedScenario(topic, blueprint) {
+  return {
+    type: 'scenario',
+    title: `Scenario · ${topic.title} in practice`,
+    content: `
+      <p>${blueprint.scenario}</p>
+      <p><strong>Use case:</strong> teams need this topic when code clarity, performance, or correctness depends on understanding the underlying C# behavior instead of copying patterns blindly.</p>
+      <p><strong>What to watch:</strong> choose the simplest construct that preserves intent, testability, and runtime safety.</p>
+    `
+  };
+}
+
+function buildGeneratedDetail(ch, topic) {
+  const blueprint = getBlueprintForTopic(topic.id);
+  const level = inferTopicLevel(topic.tags);
+  return {
+    title: topic.title,
+    breadcrumb: `Chapter ${ch.num} · ${ch.title}`,
+    subtitle: `${topic.desc}. This guide covers the definition, when to use it, trade-offs, practical C# code, visual flow, scenarios, and interview-focused context.`,
+    badges: [
+      { text: level, color: ch.color },
+      ...topic.tags.slice(0, 3).map(tag => ({
+        text: tag,
+        color: tag.includes('Advanced') || tag.includes('Performance') ? '#f59e0b' : tag.includes('Core') ? '#00d4ff' : '#94a3b8'
+      }))
+    ],
+    sections: [
+      {
+        type: 'prose',
+        title: 'What Is It?',
+        content: `
+          <p><strong>${topic.title}</strong> is part of <strong>${ch.title}</strong> and covers ${topic.desc}.</p>
+          <p>In practice, this topic matters because it changes how code is modeled, how the compiler interprets your intent, or how the runtime behaves when the code executes.</p>
+          <h4>Definition</h4>
+          <p>This topic sits in the area of <strong>${blueprint.area}</strong>. Engineers use it to write clearer APIs, safer domain models, and more maintainable production code.</p>
+        `
+      },
+      {
+        type: 'prose',
+        title: 'When To Use It and What The Trade-offs Are',
+        content: `
+          <p><strong>When to use:</strong> ${blueprint.use}</p>
+          <p><strong>When to be careful:</strong> ${blueprint.avoid}</p>
+          <p><strong>Trade-offs:</strong> ${blueprint.trade}</p>
+          <p><strong>Rule of thumb:</strong> connect the language feature to a concrete need in readability, correctness, performance, or design flexibility.</p>
+        `
+      },
+      buildGeneratedTable(topic, blueprint),
+      {
+        type: 'diagram',
+        title: `${topic.title} · Visual Flow`,
+        svg: buildGeneratedDiagram(ch, topic, blueprint)
+      },
+      {
+        type: 'code',
+        title: `C# example · ${topic.title}`,
+        lang: 'csharp',
+        code: escapeHtml(`// ${topic.title} — practical C# example
+// This sketch shows how the topic usually appears in real code.
+${blueprint.code}
+
+// Production notes:
+// 1. Keep the intent obvious.
+// 2. Prefer explicit, testable behavior over clever syntax.
+// 3. Use profiling or code review to validate trade-offs.`)
+      },
+      buildGeneratedScenario(topic, blueprint),
+      {
+        type: 'callout',
+        kind: 'info',
+        icon: '💡',
+        text: `<strong>${topic.title} takeaway:</strong> ${blueprint.callout}`
+      }
+    ]
+  };
+}
+
 
 // ============================================================
 // RENDER ENGINE
@@ -2146,8 +4054,10 @@ function selectTopic(topicId, chapterIdx) {
   const nav = document.getElementById(`nav-${topicId}`);
   if (nav) { nav.classList.add('active'); }
   
-  const detail = topicDetails[topicId];
-  if (!detail) { renderGenericDetail(topicId, chapterIdx); return; }
+  const ch = chapters[chapterIdx];
+  const topic = ch.topics.find(t => t.id === topicId);
+  if (!topic) return;
+  const detail = topicDetails[topicId] || buildGeneratedDetail(ch, topic);
   renderDetail(detail);
 }
 
@@ -2202,6 +4112,23 @@ function renderSection(s) {
     let cls = s.kind === 'info' ? 'callout-info' : s.kind === 'warn' ? 'callout-warn' : s.kind === 'success' ? 'callout-success' : 'callout-danger';
     return `<div class="callout ${cls}"><span class="callout-icon">${s.icon}</span><span>${s.text}</span></div>`;
   }
+  if (s.type === 'table') {
+    const headers = s.headers.map(h => `<th>${h}</th>`).join('');
+    const rows = s.rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('');
+    return `
+      <div class="section">
+        <div class="section-title">${s.title}</div>
+        <table class="comp-table">
+          <thead><tr>${headers}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+  if (s.type === 'scenario') return `
+    <div class="section">
+      <div class="section-title">${s.title}</div>
+      <div class="prose">${s.content}</div>
+    </div>`;
   return '';
 }
 
@@ -2242,20 +4169,7 @@ function renderGenericDetail(topicId, chapterIdx) {
   const ch = chapters[chapterIdx];
   const topic = ch.topics.find(t => t.id === topicId);
   if (!topic) return;
-  
-  document.getElementById('detailContent').innerHTML = `
-    <div class="detail-content">
-      <div class="detail-header">
-        <div class="detail-breadcrumb">${ch.title}</div>
-        <div class="detail-title">${topic.icon} ${topic.title}</div>
-        <div class="detail-subtitle">${topic.desc}</div>
-      </div>
-      <div class="callout callout-info">
-        <span class="callout-icon">📚</span>
-        <span>This topic has rich content. Explore the code examples, diagrams, and explanations by visiting adjacent topics. Use the navigation to explore all ${ch.topics.length} topics in ${ch.title}.</span>
-      </div>
-      ${renderInterviewSection(topic.title)}
-    </div>`;
+  renderDetail(buildGeneratedDetail(ch, topic));
 }
 
 function toggleQA(el) {
@@ -2359,11 +4273,6 @@ function initTheme() {
   applyTheme(queryTheme || savedTheme);
 }
 
-// Add interview button to header
-document.querySelector('.header-right').insertAdjacentHTML('afterbegin', 
-  `<button onclick="showAllInterviewQuestions()" style="background:var(--danger-bg);border:1px solid var(--danger-border);color:var(--danger-accent);padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif">🎯 Interview Q&amp;A</button>`
-);
-
 // INIT
 initTheme();
 window.addEventListener('message', (event) => {
@@ -2371,5 +4280,6 @@ window.addEventListener('message', (event) => {
 });
 buildNav();
 </script>
+<script src="/embedded/mastery-resize.js"></script>
 </body>
 </html>

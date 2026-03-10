@@ -1,6 +1,6 @@
 import { MasteryEmbedPage } from "@/components/blog/MasteryEmbedPage";
 
-const STATIC_HTML_VERSION = "2026-03-09-csharp-html-v1";
+const STATIC_HTML_VERSION = "2026-03-10-csharp-html-v6";
 
 const CSharpMastery = () => {
   return (

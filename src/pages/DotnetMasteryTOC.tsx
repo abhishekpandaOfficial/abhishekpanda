@@ -90,7 +90,7 @@ const DotnetMasteryTOC = () => {
       <main className="overflow-hidden pt-16 md:pt-20">
         <iframe
           ref={iframeRef}
-          title="Dotnet (.NET Mastery)"
+          title=".NET Core Internals Mastery"
           src={iframeSrc}
           className="block w-full border-0"
           style={{ height: iframeHeight }}

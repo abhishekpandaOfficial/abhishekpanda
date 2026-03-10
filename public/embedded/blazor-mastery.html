@@ -77,8 +77,46 @@ html,body{height:100%;overflow:hidden;background:var(--b0);color:var(--t1);font-
 .w-stats{display:flex;gap:22px}
 .wst-n{font-family:'Outfit',sans-serif;font-size:30px;font-weight:900;color:var(--p2)}
 .wst-l{font-size:10px;color:var(--t3);font-family:'Fira Code',monospace}
-.w-btn{background:linear-gradient(135deg,var(--p1),var(--a1));border:none;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;padding:11px 30px;border-radius:9px;cursor:pointer;transition:all .3s}
-.w-btn:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(124,58,237,.4)}
+.welcome-actions{
+  position:relative;isolation:isolate;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  width:min(100%,560px);padding:14px;border-radius:28px;overflow:visible;
+  background:linear-gradient(135deg,rgba(16,13,32,.82),rgba(9,12,24,.74));
+  border:1px solid rgba(54,44,86,.85);
+  box-shadow:0 24px 60px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(18px);
+}
+.welcome-actions::before{
+  content:'';position:absolute;inset:1px;border-radius:27px;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at top left,rgba(124,58,237,.18),transparent 42%),
+    radial-gradient(circle at bottom right,rgba(34,211,238,.16),transparent 40%);
+}
+.w-btn{
+  position:relative;z-index:1;flex:1 1 220px;justify-content:space-between;
+  display:inline-flex;align-items:center;gap:12px;white-space:nowrap;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,0)) padding-box,
+    linear-gradient(135deg,var(--p1),var(--a1)) border-box;
+  border:1px solid transparent;color:#fff;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;padding:8px 10px 8px 18px;border-radius:999px;cursor:pointer;transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  box-shadow:0 16px 34px rgba(124,58,237,.24), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.w-btn:hover{transform:translateY(-2px);box-shadow:0 20px 38px rgba(124,58,237,.3), inset 0 1px 0 rgba(255,255,255,.22);filter:saturate(1.06)}
+.w-btn-text{display:inline-flex;align-items:center}
+.w-btn-icon{
+  width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:rgba(8,10,20,.24);border:1px solid rgba(255,255,255,.18);font-size:13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.w-btn-secondary{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.02)) padding-box,
+    linear-gradient(135deg,var(--a1),var(--o2)) border-box;
+  box-shadow:0 16px 34px rgba(34,211,238,.18), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.w-btn-secondary:hover{box-shadow:0 20px 38px rgba(34,211,238,.24), inset 0 1px 0 rgba(255,255,255,.18)}
+.w-btn-secondary .w-btn-icon{
+  background:rgba(34,211,238,.14);border-color:rgba(255,255,255,.18);color:#e8fbff;
+}
 .w-chips{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
 .wchip{font-family:'Fira Code',monospace;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:var(--p3)}
 /* Chapter hero */
@@ -172,6 +210,10 @@ html,body{height:100%;overflow:hidden;background:var(--b0);color:var(--t1);font-
 .lv-a{color:var(--o2);border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.07)}
 .lv-e{color:var(--p3);border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.07)}
 @keyframes flow{0%{stroke-dashoffset:60}100%{stroke-dashoffset:0}}
+@media (max-width:640px){
+  .welcome-actions{width:min(100%,420px);padding:10px}
+  .w-btn{flex-basis:100%;width:100%}
+}
 </style>
 </head>
 <body>
@@ -181,7 +223,6 @@ html,body{height:100%;overflow:hidden;background:var(--b0);color:var(--t1);font-
   <div class="hdr-sep"></div>
   <div class="hdr-sub">Zero to Hero · .NET 10</div>
   <div class="hdr-r">
-    <div class="badge b-btn" onclick="showAllQA()">🎯 Interview Q&amp;A</div>
     <div class="prog-wrap">
       <span class="prog-pct" id="pct">0%</span>
       <div class="prog-track"><div class="prog-fill" id="pfill"></div></div>
@@ -219,7 +260,16 @@ html,body{height:100%;overflow:hidden;background:var(--b0);color:var(--t1);font-
         <span class="wchip">Auth &amp; Security</span><span class="wchip">Real-time</span>
         <span class="wchip">Blazor Hybrid</span><span class="wchip">Enterprise</span>
       </div>
-      <button class="w-btn" onclick="selectCh(0)">🚀 Start Learning</button>
+      <div class="welcome-actions">
+        <button class="w-btn" onclick="selectCh(0)">
+          <span class="w-btn-text">Start Blazor Mastery</span>
+          <span class="w-btn-icon" aria-hidden="true">→</span>
+        </button>
+        <button class="w-btn w-btn-secondary" onclick="showAllQA()">
+          <span class="w-btn-text">Interview Q&amp;A</span>
+          <span class="w-btn-icon" aria-hidden="true">🎯</span>
+        </button>
+      </div>
     </div>
     <div id="mcon" style="display:none"></div>
   </div>
@@ -1424,5 +1474,6 @@ function filterQA(tag,btn){
 
 buildNav();
 </script>
+<script src="/embedded/mastery-resize.js"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>.NET Mastery — Core Engineering</title>
+<title>.NET Core Internals Mastery — Core Engineering</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Familjen+Grotesk:wght@400;500;600;700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -114,12 +114,48 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--text1);f
 .ws{text-align:center}
 .ws-n{font-family:'Familjen Grotesk',sans-serif;font-size:30px;font-weight:800;color:var(--g1)}
 .ws-l{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
-.start-btn{
-  background:linear-gradient(135deg,var(--g1),var(--g2));border:none;color:#060b0f;
-  font-family:'Familjen Grotesk',sans-serif;font-size:14px;font-weight:700;
-  padding:11px 28px;border-radius:7px;cursor:pointer;transition:all .3s;
+.welcome-actions{
+  position:relative;isolation:isolate;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  width:min(100%,560px);padding:14px;border-radius:28px;overflow:visible;margin-top:4px;
+  background:linear-gradient(135deg,rgba(15,25,35,.82),rgba(10,16,24,.74));
+  border:1px solid rgba(36,61,85,.85);
+  box-shadow:0 24px 60px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(18px);
 }
-.start-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,255,163,.3)}
+.welcome-actions::before{
+  content:'';position:absolute;inset:1px;border-radius:27px;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at top left,rgba(0,255,163,.16),transparent 42%),
+    radial-gradient(circle at bottom right,rgba(0,200,255,.16),transparent 40%);
+}
+.start-btn{
+  position:relative;z-index:1;flex:1 1 220px;justify-content:space-between;
+  display:inline-flex;align-items:center;gap:12px;white-space:nowrap;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,0)) padding-box,
+    linear-gradient(135deg,var(--g1),var(--g2)) border-box;
+  border:1px solid transparent;color:#f3fbff;
+  font-family:'Familjen Grotesk',sans-serif;font-size:13px;font-weight:700;
+  padding:8px 10px 8px 18px;border-radius:999px;cursor:pointer;transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  box-shadow:0 16px 34px rgba(0,200,255,.18), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 20px 38px rgba(0,255,163,.22), inset 0 1px 0 rgba(255,255,255,.2);filter:saturate(1.06)}
+.start-btn-text{display:inline-flex;align-items:center}
+.start-btn-icon{
+  width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:rgba(6,11,15,.24);border:1px solid rgba(255,255,255,.18);font-size:13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.02)) padding-box,
+    linear-gradient(135deg,var(--g2),var(--g3)) border-box;
+  box-shadow:0 16px 34px rgba(123,97,255,.18), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary:hover{box-shadow:0 20px 38px rgba(123,97,255,.24), inset 0 1px 0 rgba(255,255,255,.18)}
+.start-btn-secondary .start-btn-icon{
+  background:rgba(123,97,255,.14);border-color:rgba(255,255,255,.18);color:#efe9ff;
+}
 
 /* CHAPTER HERO */
 .ch-hero{
@@ -214,6 +250,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--text1);f
 .dg{background:var(--code);border:1px solid var(--codeborder);border-radius:9px;overflow:hidden;margin-bottom:14px}
 .dg-hdr{padding:9px 14px;border-bottom:1px solid var(--codeborder);background:rgba(0,0,0,.3);font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
 .dg-body{padding:14px;display:flex;justify-content:center;overflow-x:auto}
+.dg-body svg,.dg-body img{display:block;max-width:min(100%,720px);height:auto;margin:0 auto}
 
 /* CALLOUT */
 .co{border-radius:7px;padding:11px 13px;margin-bottom:13px;display:flex;gap:9px;font-size:12px;line-height:1.6}
@@ -263,6 +300,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--text1);f
 .lv-i{color:var(--g5);border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.07)}
 .lv-a{color:#ff7b72;border-color:rgba(255,123,114,.3);background:rgba(255,123,114,.07)}
 .lv-e{color:var(--g3);border-color:rgba(123,97,255,.3);background:rgba(123,97,255,.07)}
+@media (max-width:640px){
+  .welcome-actions{width:min(100%,420px);padding:10px}
+  .start-btn{flex-basis:100%;width:100%}
+}
 </style>
 </head>
 <body>
@@ -271,9 +312,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--text1);f
 <div class="hdr">
   <div class="hdr-logo">.NET</div>
   <div class="hdr-sep"></div>
-  <div class="hdr-sub">Core Engineering Mastery · .NET 10</div>
+  <div class="hdr-sub">.NET Core Internals Mastery · .NET 10</div>
   <div class="hdr-r">
-    <button class="pill pill-btn pill-b" onclick="showAllQA()">🎯 Interview Q&amp;A</button>
     <div class="prog-wrap">
       <span class="prog-num" id="pct">0%</span>
       <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
@@ -297,7 +337,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--text1);f
   <div class="mp" id="mp">
     <div class="welcome" id="welcome">
       <div class="w-logo">.NET</div>
-      <div class="w-title">Core Engineering Mastery</div>
+      <div class="w-title">.NET Core Internals Mastery</div>
       <div class="w-sub">Deep dive into .NET internals — CLR, JIT, GC, async, DI, performance, and everything that runs under the hood of every .NET application.</div>
       <div class="w-stats">
         <div class="ws"><div class="ws-n">20</div><div class="ws-l">Chapters</div></div>
@@ -305,7 +345,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--text1);f
         <div class="ws"><div class="ws-n">200+</div><div class="ws-l">Q&amp;A</div></div>
         <div class="ws"><div class="ws-n">120+</div><div class="ws-l">Diagrams</div></div>
       </div>
-      <button class="start-btn" onclick="selectCh(0)">⚙️ Start Learning</button>
+      <div class="welcome-actions">
+        <button class="start-btn" onclick="selectCh(0)">
+          <span class="start-btn-text">Start .NET Mastery</span>
+          <span class="start-btn-icon" aria-hidden="true">→</span>
+        </button>
+        <button class="start-btn start-btn-secondary" onclick="showAllQA()">
+          <span class="start-btn-text">Interview Q&amp;A</span>
+          <span class="start-btn-icon" aria-hidden="true">🎯</span>
+        </button>
+      </div>
     </div>
     <div id="mcon" style="display:none"></div>
   </div>
@@ -1614,22 +1663,421 @@ function renderQASection(title){
     </div>`;
 }
 
+function escHtml(value){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function listHtml(items){
+  return `<ul>${items.map(item=>`<li>${item}</li>`).join('')}</ul>`;
+}
+
+function codeBlockHtml(title, code, lang='csharp'){
+  return `
+    <div class="sec">
+      <div class="cb">
+        <div class="cb-hdr">
+          <span class="cb-lang">${escHtml(lang)}</span>
+          <span class="cb-name">${escHtml(title)}</span>
+          <button class="cb-copy" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="cb-body"><pre>${escHtml(code)}</pre></div>
+      </div>
+    </div>`;
+}
+
+function tableHtml(headers, rows){
+  return `
+    <div class="sec">
+      <table class="ctbl">
+        <tr>${headers.map(h=>`<th>${escHtml(h)}</th>`).join('')}</tr>
+        ${rows.map(row=>`<tr>${row.map(cell=>`<td>${cell}</td>`).join('')}</tr>`).join('')}
+      </table>
+    </div>`;
+}
+
+function calloutHtml(kind, icon, text){
+  const cls = kind === 'info' ? 'co-info' : kind === 'warn' ? 'co-warn' : kind === 'ok' ? 'co-ok' : 'co-err';
+  return `<div class="co ${cls}"><span class="co-ic">${icon}</span><span>${text}</span></div>`;
+}
+
+function splitWords(text, maxChars=18, maxLines=2){
+  const words = String(text ?? '').trim().split(/\s+/).filter(Boolean);
+  if(!words.length) return [''];
+  const lines = [];
+  let current = '';
+  for(const word of words){
+    const next = current ? `${current} ${word}` : word;
+    if(next.length <= maxChars || !current){
+      current = next;
+    }else{
+      lines.push(current);
+      current = word;
+      if(lines.length === maxLines - 1) break;
+    }
+  }
+  const used = lines.join(' ').split(/\s+/).filter(Boolean).length;
+  const remainder = words.slice(used);
+  const finalLine = (current ? [current, ...remainder.slice(1)] : remainder).join(' ');
+  if(finalLine){
+    lines.push(finalLine.length > maxChars * 1.2 ? `${finalLine.slice(0, Math.max(0, maxChars - 1)).trimEnd()}…` : finalLine);
+  }
+  return lines.slice(0,maxLines);
+}
+
+function svgTextBlock(text, x, y, fill, fontSize, maxChars=18, maxLines=2, lineHeight){
+  const lines = splitWords(text, maxChars, maxLines);
+  const lh = lineHeight || fontSize + 2;
+  const startY = y - ((lines.length - 1) * lh) / 2;
+  return `<text x="${x}" y="${y}" text-anchor="middle" fill="${fill}" font-family="'DM Mono',monospace" font-size="${fontSize}">${lines.map((line, idx)=>`<tspan x="${x}" y="${startY + (idx * lh)}">${escHtml(line)}</tspan>`).join('')}</text>`;
+}
+
+function chapterPlaybook(ch){
+  const defaults = {
+    bestFor:'understanding how the runtime, libraries, and tooling behave under real production load',
+    when:[
+      'Use this knowledge when debugging behavior that basic application code cannot explain.',
+      'Reach for it when performance, startup, memory, or hosting decisions matter.',
+      'Use it in architecture and interview discussions to explain why .NET behaves the way it does.'
+    ],
+    tradeoffs:[
+      'Lower-level runtime knowledge improves decisions, but it also increases complexity.',
+      'The right answer often depends on workload shape, not on one universal best practice.',
+      'Deep internals are useful only when tied back to observable behavior and measurement.'
+    ],
+    rules:[
+      'Measure before optimizing runtime-level behavior.',
+      'Prefer readable abstractions first, then go lower level for proven hot paths.',
+      'Keep provider, host, and runtime boundaries explicit in production code.'
+    ],
+    source:'Managed code',
+    stage:'Runtime layer',
+    output:'Observed behavior'
+  };
+
+  const byNum = {
+    "01": { bestFor:'building the mental model of what .NET is and where the runtime fits', source:'Languages + SDK', stage:'Platform fundamentals', output:'Runtime-aware app model' },
+    "02": { bestFor:'understanding how .NET layers fit together from language to SDK to runtime', source:'Language + BCL + SDK', stage:'Architecture layers', output:'Platform composition' },
+    "03": { bestFor:'reasoning about the CLR execution engine, loading, verification, and runtime services', source:'Assemblies + metadata', stage:'CoreCLR engine', output:'Managed execution' },
+    "04": { bestFor:'following source code from compiler output to IL and metadata', source:'Source + Roslyn', stage:'Compilation pipeline', output:'IL + metadata' },
+    "05": { bestFor:'explaining how methods become optimized native code at runtime', source:'IL methods', stage:'JIT + optimization', output:'Native machine code' },
+    "06": { bestFor:'understanding assemblies, manifests, metadata, and versioning boundaries', source:'Assemblies', stage:'Metadata + loading', output:'Resolved runtime identity' },
+    "07": { bestFor:'memory behavior, garbage collection, disposal, and allocation strategy', source:'Object allocations', stage:'GC + heap management', output:'Surviving managed memory' },
+    "08": { bestFor:'threading, scheduling, synchronization, and lock-free tradeoffs', source:'Work items + threads', stage:'Concurrency runtime', output:'Scheduled execution' },
+    "09": { bestFor:'async infrastructure, task scheduling, cancellation, and continuations', source:'Async methods', stage:'Task + state machine', output:'Non-blocking orchestration' },
+    "10": { bestFor:'container behavior, scopes, hosting integration, and dependency graph correctness', source:'Registrations', stage:'DI + host', output:'Resolved services' },
+    "11": { bestFor:'configuration layering, options binding, and runtime reload behavior', source:'Config providers', stage:'Binding + options', output:'Typed configuration' },
+    "12": { bestFor:'logging pipelines, enrichment, and observability decisions', source:'Log events', stage:'Logger pipeline', output:'Structured telemetry' },
+    "13": { bestFor:'stream, file, and zero-copy I/O behavior under load', source:'Bytes + streams', stage:'I/O subsystem', output:'Buffered or pipeline-driven data' },
+    "14": { bestFor:'HTTP, sockets, handlers, and protocol-level networking decisions', source:'Requests + sockets', stage:'Networking stack', output:'Transport behavior' },
+    "15": { bestFor:'profiling, tracing, dump analysis, and production diagnostics', source:'Runtime events', stage:'Diagnostics pipeline', output:'Debuggable runtime signals' },
+    "16": { bestFor:'allocation trimming, Span<T>, pooling, and measured throughput improvements', source:'Hot path code', stage:'Performance tooling', output:'Lower latency / fewer allocations' },
+    "17": { bestFor:'cryptography, certificates, secrets, and data protection architecture', source:'Sensitive data', stage:'Security APIs', output:'Protected application state' },
+    "18": { bestFor:'interop boundaries, marshaling, and native integration behavior', source:'Managed/native boundary', stage:'Interop layer', output:'Marshaled calls and buffers' },
+    "19": { bestFor:'NuGet, SDK-style builds, MSBuild, and package resolution strategy', source:'Project + package metadata', stage:'Build system', output:'Build and restore graph' },
+    "20": { bestFor:'advanced runtime extensibility such as emit, analyzers, and generators', source:'Code + runtime hooks', stage:'Metaprogramming', output:'Generated or dynamic behavior' },
+  };
+  return { ...defaults, ...(byNum[ch.n] || {}) };
+}
+
+function topicSignature(id, title){
+  const map = {
+    f1:'Runtime + BCL + SDK + CLI',
+    f2:'Framework -> Core -> unified .NET',
+    f3:'Legacy framework vs modern unified runtime',
+    a1:'Language -> Runtime -> BCL -> SDK -> App model',
+    a2:'Execution engine, GC, JIT, threading, verification',
+    a4:'dotnet build / run / publish / workload / tool',
+    r1:'Loader + GC + JIT + thread pool + exception engine',
+    r2:'AssemblyLoadContext isolation boundary',
+    c3:'Source -> syntax -> semantic model -> IL -> JIT -> native',
+    j2:'Tier-0 quick JIT -> call counting -> Tier-1 optimized JIT',
+    m1:'Gen0 / Gen1 / Gen2 / LOH / POH',
+    m5:'Dispose / finalizer / using / await using',
+    th2:'ThreadPool queue + hill climbing + work stealing',
+    tp2:'Compiler-generated async state machine',
+    tp5:'TaskScheduler + SynchronizationContext + continuation flow',
+    di2:'Transient / Scoped / Singleton',
+    cf2:'IOptions / IOptionsSnapshot / IOptionsMonitor',
+    lg4:'LoggerMessage source generation',
+    io5:'PipeReader / PipeWriter / backpressure',
+    net1:'HttpClient + SocketsHttpHandler + connection pool',
+    dg2:'dotnet-trace / dotnet-counters / PerfView',
+    p2:'Span<T> / Memory<T> / stackalloc',
+    ni2:'LibraryImport source-generated interop',
+    rt5:'IIncrementalGenerator + syntax provider'
+  };
+  return map[id] || `${title} in .NET 10 / C# 14`;
+}
+
+function topicCode(id, title){
+  const map = {
+    f1:`// .NET 10 platform basics\nConsole.WriteLine(RuntimeInformation.FrameworkDescription);\nConsole.WriteLine(Environment.Version);\n\nvar sdkVersion = Environment.GetEnvironmentVariable("DOTNET_ROOT");\nConsole.WriteLine($".NET root: {sdkVersion}");`,
+    f2:`// Choosing the modern unified runtime target\n<Project Sdk="Microsoft.NET.Sdk">\n  <PropertyGroup>\n    <TargetFramework>net10.0</TargetFramework>\n    <Nullable>enable</Nullable>\n    <ImplicitUsings>enable</ImplicitUsings>\n  </PropertyGroup>\n</Project>`,
+    f3:`// Multi-targeting when migrating from .NET Framework style libraries\n<TargetFrameworks>net48;net10.0</TargetFrameworks>\n\n#if NET10_0\nConsole.WriteLine("Modern unified .NET path");\n#else\nConsole.WriteLine("Legacy compatibility path");\n#endif`,
+    f4:`using System.Runtime.InteropServices;\n\nConsole.WriteLine(RuntimeInformation.OSDescription);\nConsole.WriteLine(RuntimeInformation.ProcessArchitecture);\nConsole.WriteLine(RuntimeInformation.RuntimeIdentifier);`,
+    f5:`[LibraryImport("kernel32", SetLastError = true)]\nprivate static partial uint GetTickCount();\n\nvar managedTime = DateTime.UtcNow;\nvar nativeTime = GetTickCount();\nConsole.WriteLine($"{managedTime:o} / native tick: {nativeTime}");`,
+    a1:`var host = Host.CreateApplicationBuilder(args);\n\n// Language + app model + runtime + libraries working together\nhost.Services.AddLogging();\nhost.Services.AddOptions<AppOptions>()\n    .Bind(host.Configuration.GetSection("App"));\n\nusing var app = host.Build();\nawait app.RunAsync();`,
+    a3:`var json = JsonSerializer.Serialize(new { Name = ".NET", Version = 10 });\nusing var client = new HttpClient();\nvar bytes = Encoding.UTF8.GetBytes(json);\nConsole.WriteLine(bytes.Length);`,
+    a4:`dotnet --info\ndotnet workload list\ndotnet tool list -g\ndotnet build -c Release\ndotnet publish -c Release -r linux-x64 --self-contained false`,
+    a5:`Console.WriteLine(RuntimeInformation.FrameworkDescription); // runtime\nConsole.WriteLine(AppContext.BaseDirectory);              // app + deps\n// SDK is used at build time, runtime is used at execution time.`,
+    r1:`Console.WriteLine($"Framework: {RuntimeInformation.FrameworkDescription}");\nConsole.WriteLine($"64-bit process: {Environment.Is64BitProcess}");\nConsole.WriteLine($"GC latency mode: {GCSettings.LatencyMode}");`,
+    r2:`sealed class PluginLoadContext : AssemblyLoadContext\n{\n    public PluginLoadContext() : base(isCollectible: true) {}\n    protected override Assembly? Load(AssemblyName assemblyName) => null;\n}\n\nvar alc = new PluginLoadContext();\nvar asm = alc.LoadFromAssemblyPath(pluginPath);`,
+    r3:`var type = typeof(Dictionary<string, int>);\nConsole.WriteLine(type.TypeHandle.Value);\nConsole.WriteLine(type.AssemblyQualifiedName);`,
+    r4:`ThreadPool.GetAvailableThreads(out var workers, out var io);\nConsole.WriteLine($"Available worker threads: {workers}");`,
+    r5:`var isFullyTrusted = AppDomain.CurrentDomain.IsFullyTrusted;\nConsole.WriteLine($"Fully trusted: {isFullyTrusted}");`,
+    c1:`using Microsoft.CodeAnalysis.CSharp;\n\nvar tree = CSharpSyntaxTree.ParseText("int Add(int a,int b)=>a+b;");\nvar root = await tree.GetRootAsync();\nConsole.WriteLine(root.Kind());`,
+    c3:`// Source -> IL -> native mental model\nvar sum = Add(3, 4);\nConsole.WriteLine(sum);\n\nstatic int Add(int a, int b) => a + b;`,
+    c4:`// Use SharpLab or ildasm for real IL inspection\nvar method = typeof(string).GetMethod(nameof(string.StartsWith), [typeof(string)]);\nConsole.WriteLine(method);`,
+    c5:`var asm = typeof(string).Assembly;\nforeach (var module in asm.Modules)\n    Console.WriteLine(module.Name);`,
+    j1:`[MethodImpl(MethodImplOptions.AggressiveOptimization)]\nstatic int Sum(ReadOnlySpan<int> values)\n{\n    var total = 0;\n    foreach (var value in values) total += value;\n    return total;\n}`,
+    j2:`[MethodImpl(MethodImplOptions.AggressiveOptimization)]\nstatic double Compute(ReadOnlySpan<double> values)\n{\n    double sum = 0;\n    foreach (var v in values) sum += v;\n    return sum;\n}\n\n// DOTNET_TieredPGO=1 enables dynamic PGO`,
+    j3:`// Dynamic PGO works best on stable hot paths.\nfor (var i = 0; i < 10_000; i++)\n    total += prices[i % prices.Length];`,
+    j4:`[MethodImpl(MethodImplOptions.AggressiveInlining)]\nstatic int FastAdd(int a, int b) => a + b;`,
+    j5:`if (Avx2.IsSupported)\n{\n    Console.WriteLine("AVX2 path enabled");\n}`,
+    j6:`dotnet publish -c Release -r linux-x64 -p:PublishAot=true`,
+    as1:`var asm = Assembly.GetExecutingAssembly();\nConsole.WriteLine(asm.FullName);\nConsole.WriteLine(asm.Location);`,
+    as2:`<Version>10.0.0</Version>\n<AssemblyVersion>10.0.0.0</AssemblyVersion>\n<FileVersion>10.0.0.0</FileVersion>`,
+    as3:`sn -k key.snk\n// Use strong naming only when assembly identity requirements justify it.`,
+    as4:`var members = typeof(List<int>).GetMembers(BindingFlags.Public | BindingFlags.Instance);\nConsole.WriteLine(members.Length);`,
+    as5:`var assemblyName = new AssemblyName("DynamicDemo");\nvar assembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);`,
+    m1:`Console.WriteLine(GC.CollectionCount(0));\nConsole.WriteLine(GC.GetTotalMemory(false));\nvar info = GC.GetGCMemoryInfo();\nConsole.WriteLine(info.HeapSizeBytes);`,
+    m3:`Console.WriteLine(GCSettings.IsServerGC);\nConsole.WriteLine(GCSettings.LatencyMode);`,
+    m4:`var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);\ntry { Console.WriteLine(handle.AddrOfPinnedObject()); }\nfinally { handle.Free(); }`,
+    m5:`await using var stream = File.OpenRead(path);\nusing var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));`,
+    m6:`var rented = ArrayPool<byte>.Shared.Rent(4096);\ntry { /* use buffer */ }\nfinally { ArrayPool<byte>.Shared.Return(rented); }`,
+    m7:`Console.WriteLine(GC.GetTotalAllocatedBytes());\nConsole.WriteLine(GC.GetGCMemoryInfo().FragmentedBytes);`,
+    th1:`var thread = new Thread(() => Console.WriteLine("worker"));\nthread.IsBackground = true;\nthread.Start();`,
+    th2:`ThreadPool.QueueUserWorkItem(_ => Console.WriteLine("queued work"));\nThreadPool.GetMinThreads(out var minWorkers, out _);`,
+    th3:`lock (_gate)\n{\n    _count++;\n}`,
+    th4:`Interlocked.Increment(ref _count);\nvar snapshot = Volatile.Read(ref _state);`,
+    th5:`var channel = Channel.CreateBounded<string>(100);\nawait channel.Writer.WriteAsync("work");`,
+    th6:`while (true)\n{\n    var current = Volatile.Read(ref _value);\n    if (Interlocked.CompareExchange(ref _value, current + 1, current) == current)\n        break;\n}`,
+    tp1:`var task = Task.Run(() => Compute());\nvar result = await task;`,
+    tp2:`async Task<int> LoadAsync()\n{\n    await Task.Delay(50);\n    return 42;\n}`,
+    tp3:`await foreach (var item in ReadItemsAsync(ct))\n{\n    Console.WriteLine(item);\n}`,
+    tp4:`using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));\nawait Task.Delay(1000, cts.Token);`,
+    tp5:`await SomeLibraryCall().ConfigureAwait(false);`,
+    tp6:`public ValueTask<int> ReadFastAsync() => ValueTask.FromResult(42);`,
+    di1:`var builder = Host.CreateApplicationBuilder(args);\nbuilder.Services.AddSingleton<Clock>();\nusing var host = builder.Build();`,
+    di2:`services.AddTransient<IFormatter, JsonFormatter>();\nservices.AddScoped<RequestContext>();\nservices.AddSingleton<Clock>();`,
+    di3:`await using var scope = host.Services.CreateAsyncScope();\nvar db = scope.ServiceProvider.GetRequiredService<AppDbContext>();`,
+    di4:`services.AddKeyedScoped<ICache, BigCache>("big");`,
+    di5:`services.AddHostedService<SyncWorker>();`,
+    cf1:`var value = builder.Configuration["ConnectionStrings:Main"];`,
+    cf2:`services.AddOptions<AppOptions>()\n    .BindConfiguration("App")\n    .ValidateDataAnnotations();`,
+    cf3:`services.AddOptions<AppOptions>()\n    .Validate(o => o.TimeoutSeconds > 0, "Timeout must be positive")\n    .ValidateOnStart();`,
+    cf4:`ChangeToken.OnChange(() => config.GetReloadToken(), () => Console.WriteLine("Config changed"));`,
+    cf5:`dotnet user-secrets set "App:ApiKey" "secret-value"`,
+    lg1:`var logger = loggerFactory.CreateLogger("startup");\nlogger.LogInformation("Application booted");`,
+    lg2:`logger.LogInformation("Processed {Count} records for {TenantId}", count, tenantId);`,
+    lg3:`using (logger.BeginScope(new Dictionary<string, object>{{"TraceId", traceId}}))\n    logger.LogInformation("Scoped event");`,
+    lg4:`[LoggerMessage(EventId = 12, Level = LogLevel.Information, Message = "Handled {Path}")]
+static partial void RequestHandled(ILogger logger, string path);`,
+    lg5:`builder.Services.AddOpenTelemetry().WithTracing(t => t.AddSource("app"));`,
+    io1:`await using var stream = File.OpenRead(path);\nvar buffer = new byte[1024];\nvar read = await stream.ReadAsync(buffer);`,
+    io2:`var bytes = new byte[512];\nawait RandomAccess.ReadAsync(handle, bytes, 0);`,
+    io3:`using var mmf = MemoryMappedFile.CreateFromFile(path, FileMode.Open);`,
+    io4:`using var watcher = new FileSystemWatcher(path) { EnableRaisingEvents = true };`,
+    io5:`var reader = PipeReader.Create(stream);\nvar result = await reader.ReadAsync();`,
+    net1:`services.AddHttpClient("api")\n    .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler\n    {\n        PooledConnectionLifetime = TimeSpan.FromMinutes(2)\n    });`,
+    net2:`public sealed class LoggingHandler(ILogger<LoggingHandler> logger) : DelegatingHandler\n{\n    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)\n    {\n        logger.LogInformation("{Method} {Uri}", request.Method, request.RequestUri);\n        return await base.SendAsync(request, ct);\n    }\n}`,
+    net3:`using var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);\nawait socket.ConnectAsync(host, port);`,
+    net4:`Console.WriteLine("HTTP/3 and QUIC require platform + server support.");`,
+    net5:`using var ws = new ClientWebSocket();\nawait ws.ConnectAsync(new Uri(url), ct);`,
+    dg1:`[EventSource(Name = "Samples.Runtime")]\nsealed class RuntimeEvents : EventSource { public static RuntimeEvents Log = new(); }`,
+    dg2:`dotnet-counters monitor --process-id 1234\n\ndotnet-trace collect --process-id 1234`,
+    dg3:`dotnet-dump collect -p 1234\n\ndotnet-dump analyze dump.dmp`,
+    dg4:`using var activity = source.StartActivity("http.request");`,
+    dg5:`DiagnosticListener.AllListeners.Subscribe(new ListenerObserver());`,
+    p1:`var before = GC.GetTotalAllocatedBytes();\nRunHotPath();\nvar after = GC.GetTotalAllocatedBytes();\nConsole.WriteLine(after - before);`,
+    p2:`ReadOnlySpan<char> span = input.AsSpan().Trim();\nvar slash = span.IndexOf('/');`,
+    p3:`var stream = manager.GetStream();\nawait stream.WriteAsync(buffer);`,
+    p4:`[MemoryDiagnoser]\npublic class ParsingBenchmarks { }`,
+    p5:`var sum = items.Where(x => x > 0).Sum();`,
+    p6:`unsafe { fixed (byte* p = buffer) { Console.WriteLine((nint)p); } }`,
+    sec1:`using var sha = SHA256.Create();\nvar hash = sha.ComputeHash(data);`,
+    sec2:`var protector = provider.CreateProtector("cookies");\nvar protectedValue = protector.Protect("secret");`,
+    sec3:`using var cert = new X509Certificate2(path, password);`,
+    sec4:`var secret = builder.Configuration["Secrets:ApiKey"];`,
+    ni1:`[DllImport("user32.dll", CharSet = CharSet.Unicode)]\nstatic extern int MessageBox(IntPtr hWnd, string text, string caption, uint type);`,
+    ni2:`[LibraryImport("kernel32")] private static partial uint GetTickCount();`,
+    ni3:`[StructLayout(LayoutKind.Sequential)]\nstruct NativePoint { public int X; public int Y; }`,
+    ni4:`Console.WriteLine("COM interop should be isolated behind dedicated adapters.");`,
+    ni5:`var ptr = NativeMemory.Alloc(1024);\ntry { /* use native memory */ }\nfinally { NativeMemory.Free(ptr); }`,
+    pkg1:`dotnet restore\n\ndotnet list package --include-transitive`,
+    pkg2:`<Project Sdk="Microsoft.NET.Sdk">\n  <PropertyGroup>\n    <TargetFramework>net10.0</TargetFramework>\n  </PropertyGroup>\n</Project>`,
+    pkg3:`<Target Name="BeforeBuild">\n  <Message Text="Building..." Importance="High" />\n</Target>`,
+    pkg4:`<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>`,
+    pkg5:`public sealed class StampBuildTask : Task\n{\n    public override bool Execute() { Log.LogMessage("Stamped"); return true; }\n}`,
+    rt1:`Console.WriteLine("Runtime hosting is usually reserved for specialized hosts and embedding scenarios.");`,
+    rt2:`var dm = new DynamicMethod("Square", typeof(int), [typeof(int)]);`,
+    rt3:`Expression<Func<int,int>> expr = x => x + 1;\nConsole.WriteLine(expr);`,
+    rt4:`[DiagnosticAnalyzer(LanguageNames.CSharp)]\npublic sealed class SampleAnalyzer : DiagnosticAnalyzer { }`,
+    rt5:`[Generator]\npublic sealed class SampleGenerator : IIncrementalGenerator\n{\n    public void Initialize(IncrementalGeneratorInitializationContext context) { }\n}`,
+  };
+  return map[id] || `// ${title} in .NET 10 / C# 14\nConsole.WriteLine("${title}");`;
+}
+
+function topicScenario(id, title){
+  const map = {
+    a1:'A team needs to explain to new developers how the C# language, BCL, runtime, SDK, and app host fit together without mixing responsibilities.',
+    a4:'A platform engineer has to debug why build agents and developer machines behave differently because workloads, SDKs, or global tools are mismatched.',
+    r2:'A plugin system must load customer extensions safely and unload them without restarting the process.',
+    c3:'An interview or production debugging session requires explaining the full journey from source code to executed machine instructions.',
+    j2:'A low-latency API wants fast startup and good steady-state throughput without hand-tuning every method.',
+    m1:'An API allocates heavily under request bursts and the team needs to understand where those objects are living and dying.',
+    tp2:'A developer is confused about why async code does not block a thread while waiting on I/O.',
+    di2:'A service has lifetime bugs because scoped dependencies are being captured by singletons.',
+    net1:'A production service is seeing stale DNS entries or socket exhaustion and the team needs to understand HttpClient internals.',
+    io5:'A high-throughput parser needs backpressure and zero-copy buffer handling instead of manual stream loops.',
+    p2:'A hot parsing path is allocating too many temporary strings and needs a Span-based rewrite.'
+  };
+  return map[id] || `${title} becomes useful when the team needs to connect runtime behavior to a real operational, performance, or architecture decision.`;
+}
+
+function topicInterview(id, title){
+  const map = {
+    a1:{q:'How would you explain the main architecture layers of .NET?',a:'Start with the language and compiler, then the runtime and JIT/GC services, then the BCL and higher-level frameworks, then the SDK and host tooling. The key point is that each layer solves a different responsibility.'},
+    r2:{q:'What replaced AppDomain as the real isolation boundary in modern .NET?',a:'AssemblyLoadContext. In modern .NET, AppDomain is mostly a compatibility surface, while AssemblyLoadContext handles loading isolation and unloadable plugin scenarios.'},
+    c3:{q:'What are the major stages in the .NET compilation pipeline?',a:'Source code is parsed and compiled by Roslyn into IL and metadata. Then the CLR loads the assembly, and the JIT or AOT pipeline turns IL into native code for the target platform.'},
+    j2:{q:'Why does tiered compilation matter in .NET 10?',a:'Because it balances startup and throughput. Methods start with quick Tier-0 code and are recompiled as hotter Tier-1 code with better optimizations when the runtime has enough evidence.'},
+    tp2:{q:'What does the C# compiler generate for async/await?',a:'A state machine that implements IAsyncStateMachine, plus a method builder and captured locals stored as fields so execution can resume after each await.'},
+    di2:{q:'What is a captive dependency?',a:'A longer-lived service, usually a singleton, indirectly holding a shorter-lived scoped dependency, which can cause stale state and lifetime bugs.'}
+  };
+  return map[id] || {q:`What is the most important thing to understand about ${title}?`,a:`The right answer explains what ${title} does, where it sits in the .NET stack, when it runs, and what trade-offs it creates in real systems.`};
+}
+
+function renderGeneratedDiagram(ch, t, play){
+  return `
+    <div class="sec">
+      <div class="dg">
+        <div class="dg-hdr">${escHtml(t.title.toUpperCase())} · RUNTIME FLOW</div>
+        <div class="dg-body">
+          <svg viewBox="0 0 420 230" width="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="gdnet" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+                <polygon points="0 0,7 2.5,0 5" fill="${ch.c}"></polygon>
+              </marker>
+            </defs>
+            <rect x="12" y="34" width="84" height="34" rx="7" fill="${ch.bg}" stroke="${ch.c}" stroke-width="1.2"></rect>
+            ${svgTextBlock(play.source,54,52,ch.c,9,13,2,10)}
+
+            <rect x="116" y="34" width="110" height="34" rx="7" fill="#0f1923" stroke="#243d55" stroke-width="1.2"></rect>
+            ${svgTextBlock(t.title,171,52,'#dde6f0',9,17,2,10)}
+
+            <rect x="246" y="34" width="100" height="34" rx="7" fill="#0f1923" stroke="#00c8ff" stroke-width="1.2"></rect>
+            ${svgTextBlock(play.stage,296,52,'#00c8ff',9,15,2,10)}
+
+            <rect x="366" y="34" width="42" height="34" rx="7" fill="${ch.bg}" stroke="${ch.c}" stroke-width="1.2"></rect>
+            ${svgTextBlock('Result',387,52,ch.c,8,8,1,10)}
+
+            <line x1="96" y1="51" x2="116" y2="51" stroke="${ch.c}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#gdnet)">
+              <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.15s" repeatCount="indefinite"></animate>
+            </line>
+            <line x1="226" y1="51" x2="246" y2="51" stroke="${ch.c}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#gdnet)">
+              <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.15s" repeatCount="indefinite"></animate>
+            </line>
+            <line x1="346" y1="51" x2="366" y2="51" stroke="${ch.c}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#gdnet)">
+              <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.15s" repeatCount="indefinite"></animate>
+            </line>
+
+            ${svgTextBlock(topicSignature(t.id, t.title),171,95,'#8a9db5',8,20,2,9)}
+            ${svgTextBlock(play.bestFor,210,148,'#8a9db5',8,54,3,10)}
+            ${svgTextBlock(`Output: ${play.output}`,210,196,'#56d364',8,44,2,10)}
+          </svg>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderGeneratedDetail(id, chi){
+  const ch = CHS[chi];
+  const t = ch?.topics.find(x=>x.id===id);
+  if(!ch || !t) return '';
+  const play = chapterPlaybook(ch);
+  const interview = topicInterview(id, t.title);
+
+  const pills = [
+    {t: ch.title, c: ch.c},
+    {t: '.NET 10', c: '#00c8ff'},
+    {t: 'C# 14', c: '#56d364'},
+    ...(t.tags || []).slice(0,2).map(tag => ({ t: tag, c: ch.c }))
+  ];
+
+  const pillHtml = pills.map(p=>`<span class="dp" style="color:${p.c};border-color:${p.c}44;background:${p.c}11">${escHtml(p.t)}</span>`).join('');
+  const compareRows = [
+    ['Topic', escHtml(t.title)],
+    ['Signature / shape', escHtml(topicSignature(id, t.title))],
+    ['Execution / behavior', escHtml(play.stage)],
+    ['Best fit', escHtml(play.bestFor)],
+    ['Main trade-off', escHtml(play.tradeoffs[0])]
+  ];
+
+  return `
+    <div class="dc">
+      <div class="d-bread">${ch.title} · .NET Core Internals Mastery</div>
+      <div class="d-title">${t.icon} ${t.title}</div>
+      <div class="d-sub">${t.desc}. This guide is written in the same stronger style as the richer mastery pages: what it is, where it fits, .NET 10 / C# 14 code, runtime flow, trade-offs, scenarios, and interview context.</div>
+      <div class="d-pills">${pillHtml}</div>
+
+      <div class="sec">
+        <div class="sec-t">What It Is</div>
+        <div class="prose">
+          <p><strong>${t.title}</strong> belongs to <strong>${ch.title}</strong> and is best used for <strong>${play.bestFor}</strong>.</p>
+        </div>
+      </div>
+
+      ${tableHtml(['Quick fact', 'Detail'], compareRows)}
+
+      <div class="sec">
+        <div class="sec-t">When To Use It</div>
+        <div class="prose">${listHtml(play.when)}</div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t">Trade-offs</div>
+        <div class="prose">${listHtml(play.tradeoffs)}</div>
+      </div>
+
+      ${renderGeneratedDiagram(ch, t, play)}
+
+      ${codeBlockHtml(`${t.title} — .NET 10 / C# 14`, topicCode(id, t.title))}
+
+      ${calloutHtml('info','💡',`<strong>Definition</strong> ${escHtml(t.title)} is part of the ${escHtml(ch.title)} surface area. The right mental model is to understand the boundary it owns in the runtime or framework, then map that to measurable behavior.`)}
+
+      <div class="sec">
+        <div class="sec-t">Scenario & Use Case</div>
+        <div class="prose"><p>${escHtml(topicScenario(id, t.title))}</p></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t">Production Rules</div>
+        <div class="prose">${listHtml(play.rules)}</div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t">🎯 Interview Question</div>
+        <div class="qa open">
+          <div class="qa-q" onclick="toggleQA(this)">
+            <span class="qa-qi">Q</span>
+            <span class="qa-qt">${escHtml(interview.q)}</span>
+            <span class="qa-lv lv-i">Intermediate</span>
+            <span class="qa-ar">▶</span>
+          </div>
+          <div class="qa-a"><div class="qa-at">${escHtml(interview.a)}</div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
 function renderGeneric(id,chi){
   document.getElementById('re').style.display='none';
   document.getElementById('rcon').style.display='block';
-  const ch=CHS[chi];
-  const t=ch.topics.find(x=>x.id===id);
-  if(!t)return;
-  document.getElementById('rcon').innerHTML=`
-    <div class="dc">
-      <div class="d-bread">${ch.title}</div>
-      <div class="d-title">${t.icon} ${t.title}</div>
-      <div class="d-sub">${t.desc}</div>
-      <div class="co co-info"><span class="co-ic">📚</span>
-        <span>This topic is part of <strong>${ch.title}</strong>. Explore the ${ch.topics.length} topics in this chapter using the topic cards.</span>
-      </div>
-      ${renderQASection(t.title)}
-    </div>`;
+  document.getElementById('rcon').innerHTML = renderGeneratedDetail(id,chi);
 }
 
 function toggleQA(el){el.parentElement.classList.toggle('open')}
@@ -1686,7 +2134,7 @@ function showAllQA(){
     </div>`).join('');
   document.getElementById('rcon').innerHTML=`
     <div class="dc">
-      <div class="d-bread">.NET Mastery — Interview Prep</div>
+      <div class="d-bread">.NET Core Internals Mastery — Interview Prep</div>
       <div class="d-title">🎯 Interview Questions</div>
       <div class="d-sub">${QA.length} questions · CLR, GC, JIT, Async, DI, Performance, Networking and more.</div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px">
@@ -1706,5 +2154,6 @@ function fQA(tag,btn){
 // ── INIT ──
 buildNav();
 </script>
+<script src="/embedded/mastery-resize.js"></script>
 </body>
 </html>

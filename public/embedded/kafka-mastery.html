@@ -1,0 +1,2330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kafka Mastery — Zero to Hero</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Fira+Code:wght@300;400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --b0:#060409;--b1:#09060e;--b2:#0f0c17;--b3:#151020;
+  --bd:#241d35;--bd2:#352a50;
+  --k1:#ff6b35;--k2:#ff8c42;--k3:#ffb347;
+  --p1:#7c3aed;--p2:#a855f7;--p3:#c084fc;
+  --a1:#06b6d4;--a2:#22d3ee;
+  --g1:#10b981;--g2:#34d399;
+  --r1:#ef4444;--r2:#f87171;
+  --y1:#eab308;--y2:#fde047;
+  --t1:#f1ece8;--t2:#c4b5a0;--t3:#6b5f52;
+  --lw:275px;--rw:590px;--hh:56px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--b0);color:var(--t1);font-family:'Inter',sans-serif}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--b1)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--k1)}
+.hdr{position:fixed;top:0;left:0;right:0;height:var(--hh);z-index:300;background:rgba(6,4,9,.97);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 20px;gap:16px;backdrop-filter:blur(20px)}
+.logo{font-family:'Outfit',sans-serif;font-size:20px;font-weight:900;background:linear-gradient(135deg,var(--k1),var(--k3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+.hdr-sep{width:1px;height:24px;background:var(--bd);flex-shrink:0}
+.hdr-sub{font-family:'Fira Code',monospace;font-size:10px;color:var(--t3);letter-spacing:.5px}
+.hdr-r{margin-left:auto;display:flex;gap:8px;align-items:center}
+.badge{font-family:'Fira Code',monospace;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid;cursor:default}
+.b-k{color:var(--k2);border-color:rgba(255,107,53,.35);background:rgba(255,107,53,.08)}
+.b-p{color:var(--p3);border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.08)}
+.b-btn{cursor:pointer;color:var(--g2);border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.08);transition:all .2s}
+.b-btn:hover{background:rgba(52,211,153,.2)}
+.prog-wrap{display:flex;align-items:center;gap:7px}
+.prog-pct{font-family:'Fira Code',monospace;font-size:10px;color:var(--t2)}
+.prog-track{width:80px;height:3px;background:var(--bd);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--k1),var(--k3));border-radius:3px;transition:width .5s;width:0%}
+.layout{display:flex;height:100vh;padding-top:var(--hh)}
+/* LEFT */
+.lp{width:var(--lw);min-width:var(--lw);background:var(--b1);border-right:1px solid var(--bd);overflow-y:auto;flex-shrink:0}
+.lp-top{padding:10px;border-bottom:1px solid var(--bd);background:var(--b1);position:sticky;top:0;z-index:10}
+.srch{width:100%;background:var(--b2);border:1px solid var(--bd);border-radius:7px;padding:7px 11px;color:var(--t1);font-size:11.5px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.srch:focus{border-color:var(--k1)}.srch::placeholder{color:var(--t3)}
+.lp-stats{display:flex;gap:6px;margin-top:8px}
+.lst{flex:1;background:var(--b2);border:1px solid var(--bd);border-radius:6px;padding:5px 7px;text-align:center}
+.lst-n{font-family:'Outfit',sans-serif;font-size:14px;font-weight:800;color:var(--k2)}
+.lst-l{font-size:9px;color:var(--t3);font-family:'Fira Code',monospace}
+.ci{border-bottom:1px solid rgba(36,29,53,.6)}
+.chr{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;transition:background .15s;user-select:none}
+.chr:hover{background:var(--b2)}
+.chr.act{background:linear-gradient(90deg,rgba(255,107,53,.12),transparent);border-left:2px solid var(--k1)}
+.cnum{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'Fira Code',monospace;font-size:9px;font-weight:600;flex-shrink:0}
+.clabel{font-size:11.5px;font-weight:600;color:var(--t2);flex:1;line-height:1.3}
+.chr.act .clabel{color:var(--t1)}
+.carr{font-size:8px;color:var(--t3);transition:transform .2s;flex-shrink:0}
+.ci.open .carr{transform:rotate(90deg)}
+.tmenu{display:none;padding:2px 0 6px}
+.ci.open .tmenu{display:block}
+.trow{padding:5px 12px 5px 42px;font-size:11px;color:var(--t3);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.trow:hover{color:var(--t2);background:rgba(255,255,255,.02)}
+.trow.act{color:var(--k2);background:rgba(255,107,53,.06)}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:background .15s}
+.trow.act .dot{background:var(--k1)}.trow.vis .dot{background:var(--g1)}
+/* MIDDLE */
+.mp{flex:1;background:var(--b0);border-right:1px solid var(--bd);overflow-y:auto;padding:22px 18px}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 56px);text-align:center;gap:20px;padding:40px 20px}
+.w-icon{font-size:72px;line-height:1}
+@keyframes wg{0%,100%{filter:drop-shadow(0 0 20px rgba(255,107,53,.5))}50%{filter:drop-shadow(0 0 40px rgba(255,179,71,.7))}}
+.w-icon{animation:wg 3s ease-in-out infinite}
+.w-title{font-family:'Outfit',sans-serif;font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--k1),var(--k3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.w-sub{font-size:14px;color:var(--t2);max-width:480px;line-height:1.75}
+.w-stats{display:flex;gap:26px}
+.wst-n{font-family:'Outfit',sans-serif;font-size:32px;font-weight:900;color:var(--k2)}
+.wst-l{font-size:10px;color:var(--t3);font-family:'Fira Code',monospace}
+.welcome-actions{
+  position:relative;isolation:isolate;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  width:min(100%,560px);padding:14px;border-radius:28px;overflow:visible;
+  background:linear-gradient(135deg,rgba(20,12,16,.82),rgba(11,8,16,.74));
+  border:1px solid rgba(68,48,58,.85);
+  box-shadow:0 24px 60px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(18px);
+}
+.welcome-actions::before{
+  content:'';position:absolute;inset:1px;border-radius:27px;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at top left,rgba(255,107,53,.18),transparent 42%),
+    radial-gradient(circle at bottom right,rgba(255,179,71,.16),transparent 40%);
+}
+.w-btn{
+  position:relative;z-index:1;flex:1 1 220px;justify-content:space-between;
+  display:inline-flex;align-items:center;gap:12px;white-space:nowrap;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,0)) padding-box,
+    linear-gradient(135deg,var(--k1),var(--k3)) border-box;
+  border:1px solid transparent;color:#fff;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;padding:8px 10px 8px 18px;border-radius:999px;cursor:pointer;transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  box-shadow:0 16px 34px rgba(255,107,53,.24), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.w-btn:hover{transform:translateY(-2px);box-shadow:0 20px 38px rgba(255,107,53,.3), inset 0 1px 0 rgba(255,255,255,.22);filter:saturate(1.06)}
+.w-btn-text{display:inline-flex;align-items:center}
+.w-btn-icon{
+  width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:rgba(8,6,10,.24);border:1px solid rgba(255,255,255,.18);font-size:13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.w-btn-secondary{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.02)) padding-box,
+    linear-gradient(135deg,var(--k3),var(--p3)) border-box;
+  box-shadow:0 16px 34px rgba(192,132,252,.18), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.w-btn-secondary:hover{box-shadow:0 20px 38px rgba(192,132,252,.24), inset 0 1px 0 rgba(255,255,255,.18)}
+.w-btn-secondary .w-btn-icon{
+  background:rgba(192,132,252,.14);border-color:rgba(255,255,255,.18);color:#f7ebff;
+}
+.w-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.wchip{font-family:'Fira Code',monospace;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,107,53,.35);background:rgba(255,107,53,.08);color:var(--k2)}
+.chero{background:linear-gradient(135deg,var(--b2),var(--b1));border:1px solid var(--bd);border-radius:12px;padding:24px;margin-bottom:18px;position:relative;overflow:hidden}
+.chero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,53,.1),transparent)}
+.chero-n{font-family:'Fira Code',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+.chero-t{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;margin-bottom:7px;line-height:1.2}
+.chero-d{font-size:13px;color:var(--t2);line-height:1.65;max-width:500px}
+.chero-chips{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.cchip{font-family:'Fira Code',monospace;font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid}
+.tgrid{display:flex;flex-direction:column;gap:8px}
+.tcard{background:var(--b2);border:1px solid var(--bd);border-radius:9px;padding:14px 16px;cursor:pointer;transition:all .18s;display:flex;align-items:flex-start;gap:12px}
+.tcard:hover{border-color:var(--bd2);transform:translateX(3px);background:var(--b3)}
+.tcard.act{border-color:var(--k1);background:rgba(255,107,53,.05)}
+.tc-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.tc-body{flex:1}
+.tc-t{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:3px}
+.tc-d{font-size:11.5px;color:var(--t3);line-height:1.5}
+.tc-meta{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.tmeta{font-family:'Fira Code',monospace;font-size:9.5px;padding:2px 7px;border-radius:4px;border:1px solid}
+/* RIGHT */
+.rp{width:var(--rw);min-width:var(--rw);background:var(--b1);overflow-y:auto}
+.rp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:var(--t3);text-align:center;padding:40px}
+.rp-ei{font-size:52px;opacity:.2}
+.rp-empty h3{font-family:'Outfit',sans-serif;font-size:18px;color:var(--t2);font-weight:700}
+.rp-empty p{font-size:13px;line-height:1.7}
+.rpcon{padding:24px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.rpcon{animation:fadeUp .25s ease}
+.d-bread{font-family:'Fira Code',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:7px}
+.d-title{font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;line-height:1.2;margin-bottom:6px}
+.d-sub{font-size:13px;color:var(--t2);line-height:1.65;margin-bottom:10px}
+.d-pills{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:16px;margin-bottom:18px;border-bottom:1px solid var(--bd)}
+.dpill{font-family:'Fira Code',monospace;font-size:10px;padding:3px 9px;border-radius:4px;border:1px solid}
+.sec{margin-bottom:22px}
+.sec-t{font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:var(--t1);margin-bottom:11px;display:flex;align-items:center;gap:8px}
+.sec-t::before{content:'';width:3px;height:15px;background:linear-gradient(180deg,var(--k1),var(--k3));border-radius:2px;flex-shrink:0}
+.prose{font-size:13px;color:var(--t2);line-height:1.85}
+.prose p{margin-bottom:10px}.prose strong{color:var(--t1)}
+.prose ul,.prose ol{padding-left:18px;margin-bottom:10px}.prose li{margin-bottom:5px}
+.prose h4{font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:700;color:var(--t1);margin:13px 0 6px}
+.prose code{background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.3);border-radius:4px;padding:1px 6px;font-family:'Fira Code',monospace;font-size:11px;color:var(--k2)}
+.cb{background:#040206;border:1px solid rgba(36,29,53,.9);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.cb-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid rgba(36,29,53,.8);background:rgba(0,0,0,.5)}
+.cb-lang{font-family:'Fira Code',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:1px}
+.cb-name{font-family:'Fira Code',monospace;font-size:10px;color:var(--t3)}
+.cb-copy{background:none;border:1px solid var(--bd);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace;transition:all .2s}
+.cb-copy:hover{border-color:var(--k1);color:var(--k2)}
+.cb-body{padding:16px;overflow-x:auto}
+.cb-body pre{font-family:'Fira Code',monospace;font-size:11.5px;line-height:1.8;color:#e8d5c4}
+/* tokens */
+.kw{color:#89b4fa}.tp{color:#cba6f7}.st{color:#a6e3a1}.nu{color:#fab387}
+.cm{color:#544a3d;font-style:italic}.fn{color:#89dceb}.pr{color:#f38ba8}
+.at{color:#f9e2af}.ra{color:#94e2d5}.cn{color:#ff8c42}.op{color:#c9d1d9}
+.diag{background:#040206;border:1px solid rgba(36,29,53,.9);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.diag-hdr{padding:10px 16px;border-bottom:1px solid rgba(36,29,53,.8);background:rgba(0,0,0,.5);font-family:'Fira Code',monospace;font-size:10px;color:var(--t3);display:flex;align-items:center;gap:8px}
+.diag-hdr::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--k2);box-shadow:0 0 8px var(--k1)}
+.diag-body{padding:16px;display:flex;justify-content:center;overflow-x:auto}
+.callout{border-radius:8px;padding:12px 15px;margin-bottom:14px;display:flex;gap:10px;font-size:12.5px;line-height:1.7}
+.c-info{background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.2);color:var(--t2)}
+.c-warn{background:rgba(234,179,8,.06);border:1px solid rgba(234,179,8,.25);color:var(--t2)}
+.c-tip{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);color:var(--t2)}
+.c-danger{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);color:var(--t2)}
+.c-kafka{background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.25);color:var(--t2)}
+.call-ic{flex-shrink:0;font-size:15px;margin-top:1px}
+.ctbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px}
+.ctbl th{background:var(--b2);padding:9px 12px;text-align:left;font-family:'Fira Code',monospace;font-size:10px;color:var(--t2);border:1px solid var(--bd);text-transform:uppercase;letter-spacing:.5px}
+.ctbl td{padding:9px 12px;border:1px solid var(--bd);color:var(--t2);line-height:1.5}
+.ctbl tr:hover td{background:rgba(255,255,255,.015)}
+.yes{color:var(--g1)}.no{color:var(--r1)}.med{color:var(--y1)}
+.scenario{background:var(--b2);border:1px solid var(--bd);border-radius:9px;padding:16px;margin-bottom:14px}
+.scen-t{font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:var(--k2);margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.scen-b{font-size:12.5px;color:var(--t2);line-height:1.7}
+.scen-b code{background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.3);border-radius:3px;padding:1px 5px;font-family:'Fira Code',monospace;font-size:11px;color:var(--k2)}
+.metric-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.metric{background:var(--b2);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;flex:1;min-width:100px;text-align:center}
+.metric-v{font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:var(--k2)}
+.metric-l{font-family:'Fira Code',monospace;font-size:9px;color:var(--t3);margin-top:3px}
+.qa{background:var(--b2);border:1px solid var(--bd);border-radius:8px;margin-bottom:9px;overflow:hidden}
+.qa-q{padding:12px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:9px;transition:background .15s}
+.qa-q:hover{background:var(--b3)}
+.qa-qi{font-family:'Fira Code',monospace;font-size:10px;font-weight:600;color:var(--k2);flex-shrink:0;margin-top:1px}
+.qa-qt{font-size:12.5px;font-weight:600;color:var(--t1);flex:1;line-height:1.5}
+.qa-lv{font-family:'Fira Code',monospace;font-size:9px;padding:2px 7px;border-radius:4px;border:1px solid;flex-shrink:0;margin-top:1px}
+.qa-ar{color:var(--t3);font-size:9px;transition:transform .2s;margin-top:3px;flex-shrink:0}
+.qa.open .qa-ar{transform:rotate(90deg)}
+.qa-ans{display:none;padding:12px 14px;border-top:1px solid var(--bd);background:rgba(0,0,0,.25)}
+.qa.open .qa-ans{display:block}
+.qa-at{font-size:12.5px;color:var(--t2);line-height:1.8}
+.qa-at code{background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.3);border-radius:3px;padding:1px 5px;font-family:'Fira Code',monospace;font-size:11px;color:var(--k2)}
+.lv-b{color:#34d399;border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.07)}
+.lv-i{color:var(--y2);border-color:rgba(253,224,71,.3);background:rgba(253,224,71,.07)}
+.lv-a{color:var(--k2);border-color:rgba(255,140,66,.3);background:rgba(255,140,66,.07)}
+.lv-e{color:var(--p3);border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.07)}
+@keyframes flow{0%{stroke-dashoffset:100}100%{stroke-dashoffset:0}}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+@media (max-width:640px){
+  .welcome-actions{width:min(100%,420px);padding:10px}
+  .w-btn{flex-basis:100%;width:100%}
+}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <span style="font-size:22px">⚡</span>
+  <div class="logo">Kafka Mastery</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-sub">Zero to Hero · Apache Kafka</div>
+  <div class="hdr-r">
+    <div class="prog-wrap">
+      <span class="prog-pct" id="pct">0%</span>
+      <div class="prog-track"><div class="prog-fill" id="pfill"></div></div>
+    </div>
+    <div class="badge b-k">Apache Kafka</div>
+    <div class="badge b-p">.NET + Java</div>
+  </div>
+</div>
+<div class="layout">
+  <div class="lp">
+    <div class="lp-top">
+      <input class="srch" id="srch" type="text" placeholder="🔍  Search topics…" oninput="doSearch(this.value)">
+      <div class="lp-stats">
+        <div class="lst"><div class="lst-n">25</div><div class="lst-l">Chapters</div></div>
+        <div class="lst"><div class="lst-n">160+</div><div class="lst-l">Topics</div></div>
+        <div class="lst"><div class="lst-n">300+</div><div class="lst-l">Q&amp;A</div></div>
+      </div>
+    </div>
+    <div id="nav"></div>
+  </div>
+  <div class="mp" id="mp">
+    <div class="welcome" id="welcome">
+      <div class="w-icon">⚡</div>
+      <div class="w-title">Kafka Mastery</div>
+      <div class="w-sub">The most comprehensive Apache Kafka learning platform — from broker internals and partition mechanics to exactly-once semantics, Kafka Streams, event sourcing, and enterprise-scale production architectures.</div>
+      <div class="w-stats">
+        <div><div class="wst-n">25</div><div class="wst-l">Chapters</div></div>
+        <div><div class="wst-n">160+</div><div class="wst-l">Topics</div></div>
+        <div><div class="wst-n">300+</div><div class="wst-l">Q&amp;A</div></div>
+        <div><div class="wst-n">120+</div><div class="wst-l">Code Examples</div></div>
+      </div>
+      <div class="w-chips">
+        <span class="wchip">Producers &amp; Consumers</span><span class="wchip">Partitions &amp; Offsets</span>
+        <span class="wchip">Replication</span><span class="wchip">Exactly-Once</span>
+        <span class="wchip">Kafka Streams</span><span class="wchip">Kafka Connect</span>
+        <span class="wchip">Schema Registry</span><span class="wchip">Event Sourcing</span>
+      </div>
+      <div class="welcome-actions">
+        <button class="w-btn" onclick="selectCh(0)">
+          <span class="w-btn-text">Start Kafka Mastery</span>
+          <span class="w-btn-icon" aria-hidden="true">→</span>
+        </button>
+        <button class="w-btn w-btn-secondary" onclick="showAllQA()">
+          <span class="w-btn-text">Interview Q&amp;A</span>
+          <span class="w-btn-icon" aria-hidden="true">🎯</span>
+        </button>
+      </div>
+    </div>
+    <div id="mcon" style="display:none"></div>
+  </div>
+  <div class="rp" id="rp">
+    <div class="rp-empty" id="rp-empty">
+      <div class="rp-ei">⚡</div>
+      <h3>Select a Topic</h3>
+      <p>Click any topic to see in-depth explanations, data flow diagrams, architecture maps, production code, real-world scenarios, and interview questions.</p>
+    </div>
+    <div id="rp-con" style="display:none"></div>
+  </div>
+</div>
+<script>
+const CHS=[
+{n:"01",t:"Distributed Systems Foundations",ic:"🌐",c:"#06b6d4",bg:"rgba(6,182,212,.1)",desc:"The fundamental distributed systems concepts every Kafka engineer must internalize — CAP theorem, consistency models, ordering guarantees, and failure modes.",tags:["Foundation","Beginner"],topics:[
+{id:"ds1",ic:"⚖️",t:"CAP Theorem & Trade-offs",d:"Consistency, Availability, Partition Tolerance — pick two. Where Kafka sits.",tags:["Core"]},
+{id:"ds2",ic:"🔢",t:"Ordering & Causality",d:"Total order vs partial order, happens-before, Lamport timestamps",tags:["Core"]},
+{id:"ds3",ic:"📬",t:"Delivery Semantics",d:"At-most-once, at-least-once, exactly-once — what they mean in practice",tags:["Critical"]},
+{id:"ds4",ic:"💥",t:"Failure Modes & Fault Tolerance",d:"Crash-stop, crash-recovery, Byzantine faults, network partitions",tags:["Core"]},
+{id:"ds5",ic:"🗓️",t:"Log as Universal Data Structure",d:"Append-only logs, why the log is the heart of Kafka",tags:["Foundation"]},
+]},
+{n:"02",t:"Introduction to Apache Kafka",ic:"⚡",c:"#ff6b35",bg:"rgba(255,107,53,.1)",desc:"What Kafka is, its origin story at LinkedIn, the core problems it solves, and how it differs from traditional message brokers.",tags:["Beginner","Overview"],topics:[
+{id:"k1",ic:"📖",t:"What is Apache Kafka?",d:"Distributed event streaming platform — origin, definition, philosophy",tags:["Beginner"]},
+{id:"k2",ic:"🆚",t:"Kafka vs Traditional Message Queues",d:"Kafka vs RabbitMQ vs ActiveMQ — retention, replay, consumer model",tags:["Beginner"]},
+{id:"k3",ic:"🎯",t:"Core Use Cases",d:"Event streaming, CDC, log aggregation, metrics, audit trails",tags:["Beginner"]},
+{id:"k4",ic:"🏗️",t:"Kafka Ecosystem Overview",d:"Brokers, Connect, Streams, ksqlDB, Schema Registry, Confluent Cloud",tags:["Overview"]},
+{id:"k5",ic:"📊",t:"Kafka by the Numbers",d:"LinkedIn 7T msgs/day, latency SLAs, throughput benchmarks",tags:["Data"]},
+]},
+{n:"03",t:"Kafka Architecture",ic:"🏗️",c:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"The complete internal architecture — brokers, controllers, the log storage engine, page cache, and how all components interact.",tags:["Core","Architecture","Important"],topics:[
+{id:"arch1",ic:"🏗️",t:"Kafka Cluster Architecture",d:"Brokers, controller, leader election, cluster metadata",tags:["Core"]},
+{id:"arch2",ic:"📝",t:"The Commit Log Storage Engine",d:"Segment files, index files, log compaction internals",tags:["Advanced"]},
+{id:"arch3",ic:"⚡",t:"Page Cache & Zero-Copy",d:"How Kafka achieves million msg/sec via OS page cache and sendfile()",tags:["Advanced"]},
+{id:"arch4",ic:"🔄",t:"Request Processing Pipeline",d:"Network threads, I/O threads, request queue, purgatory",tags:["Advanced"]},
+{id:"arch5",ic:"🎛️",t:"KRaft Mode (No ZooKeeper)",d:"Raft consensus, metadata quorum, migration from ZooKeeper",tags:["Modern"]},
+]},
+{n:"04",t:"Topics, Partitions & Offsets",ic:"📂",c:"#ff6b35",bg:"rgba(255,107,53,.1)",desc:"The fundamental data model — topics as streams, partitions as the parallelism unit, offsets as position pointers.",tags:["Core","Foundation","Critical"],topics:[
+{id:"tp1",ic:"📂",t:"Topics — The Logical Stream",d:"Topic naming, retention policy, compaction vs delete, multi-topic patterns",tags:["Core"]},
+{id:"tp2",ic:"📊",t:"Partitions — Parallelism & Ordering",d:"Partition count decisions, partition assignment, ordering guarantees",tags:["Core","Critical"]},
+{id:"tp3",ic:"🔢",t:"Offsets — Position Pointers",d:"Offset anatomy, committed vs current, earliest/latest, offset management",tags:["Core"]},
+{id:"tp4",ic:"⚖️",t:"Partition Count Strategy",d:"How many partitions? Throughput math, rebalancing cost, guidelines",tags:["Advanced"]},
+{id:"tp5",ic:"🗜️",t:"Log Compaction Deep Dive",d:"Tombstones, cleaner threads, compaction triggers, CDC use case",tags:["Advanced"]},
+{id:"tp6",ic:"⏰",t:"Retention Policies",d:"Time-based, size-based, compact+delete hybrid, retention calculation",tags:["Intermediate"]},
+]},
+{n:"05",t:"Kafka Producers Deep Dive",ic:"📤",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"Everything about producing messages — batching, compression, partitioning strategies, acknowledgment modes, and idempotent producers.",tags:["Core","Important","Critical"],topics:[
+{id:"pr1",ic:"📤",t:"Producer Architecture & Internals",d:"RecordAccumulator, Sender thread, batch lifecycle, linger.ms",tags:["Core"]},
+{id:"pr2",ic:"🔑",t:"Partitioning Strategies",d:"Key-based, round-robin, sticky, custom partitioner — when to use each",tags:["Core"]},
+{id:"pr3",ic:"✅",t:"Acknowledgment Modes (acks)",d:"acks=0, acks=1, acks=all — durability vs throughput tradeoffs",tags:["Critical"]},
+{id:"pr4",ic:"📦",t:"Batching & Compression",d:"batch.size, linger.ms, compression.type — GZIP vs Snappy vs LZ4 vs ZStd",tags:["Advanced"]},
+{id:"pr5",ic:"🔄",t:"Retries & Idempotent Producer",d:"enable.idempotence=true, PID, sequence numbers, dedup mechanism",tags:["Advanced"]},
+{id:"pr6",ic:"⚡",t:"Producer Performance Tuning",d:"buffer.memory, max.block.ms, throughput benchmarks, producer metrics",tags:["Expert"]},
+]},
+{n:"06",t:"Kafka Consumers & Consumer Groups",ic:"📥",c:"#06b6d4",bg:"rgba(6,182,212,.1)",desc:"Consumer internals, group coordination, partition assignment, offset commits, rebalancing, and the consumer lag problem.",tags:["Core","Important","Critical"],topics:[
+{id:"co1",ic:"📥",t:"Consumer Architecture",d:"Fetch API, heartbeat, poll loop, max.poll.records, session.timeout",tags:["Core"]},
+{id:"co2",ic:"👥",t:"Consumer Groups & Coordination",d:"Group coordinator, group leader, member assignment protocol",tags:["Core","Critical"]},
+{id:"co3",ic:"🔀",t:"Partition Assignment Strategies",d:"RangeAssignor, RoundRobin, StickyAssignor, CooperativeSticky",tags:["Advanced"]},
+{id:"co4",ic:"📍",t:"Offset Management",d:"auto-commit vs manual, commitSync, commitAsync, at-least-once patterns",tags:["Core","Critical"]},
+{id:"co5",ic:"🔁",t:"Rebalancing — The Great Disruptor",d:"Stop-the-world rebalance, cooperative rebalance, static membership",tags:["Advanced"]},
+{id:"co6",ic:"📊",t:"Consumer Lag & Monitoring",d:"Lag = latest offset - committed offset, alerting, consumer group metrics",tags:["Intermediate"]},
+{id:"co7",ic:"🔍",t:"Consumer Performance & Tuning",d:"fetch.min.bytes, fetch.max.wait, max.partition.fetch.bytes",tags:["Expert"]},
+]},
+{n:"07",t:"Kafka Brokers & Cluster",ic:"🖥️",c:"#eab308",bg:"rgba(234,179,8,.1)",desc:"Broker responsibilities, controller election, leader/follower roles, ISR, and cluster operations.",tags:["Core","Operations"],topics:[
+{id:"br1",ic:"🖥️",t:"Broker Responsibilities",d:"Log management, request handling, replication, compaction scheduling",tags:["Core"]},
+{id:"br2",ic:"👑",t:"Controller Election",d:"Broker epoch, controller epoch, fencing, brain-split prevention",tags:["Advanced"]},
+{id:"br3",ic:"📋",t:"In-Sync Replicas (ISR)",d:"ISR definition, shrink/expand events, min.insync.replicas, Unclean Leader",tags:["Critical"]},
+{id:"br4",ic:"⚙️",t:"Broker Configuration Guide",d:"100+ config options explained — storage, network, performance, security",tags:["Intermediate"]},
+{id:"br5",ic:"🔧",t:"Cluster Operations",d:"Rolling restart, partition reassignment, rack awareness, preferred leader election",tags:["Advanced"]},
+]},
+{n:"08",t:"Replication & Fault Tolerance",ic:"🔄",c:"#ef4444",bg:"rgba(239,68,68,.1)",desc:"How Kafka achieves durability — replication protocol, ISR, leader election on failure, and data loss scenarios.",tags:["Core","Critical","Durability"],topics:[
+{id:"re1",ic:"🔄",t:"Replication Protocol",d:"Leader writes, followers fetch, HW vs LEO, replica lag detection",tags:["Core","Critical"]},
+{id:"re2",ic:"📏",t:"High Watermark & Log End Offset",d:"HW = min(ISR LEOs), consumer reads up to HW, truncation on restart",tags:["Advanced"]},
+{id:"re3",ic:"💀",t:"Leader Failure & Election",d:"Controller detects failure, selects from ISR, epoch increment, fencing",tags:["Advanced"]},
+{id:"re4",ic:"⚠️",t:"Unclean Leader Election",d:"Data loss risk, when to enable, CDC use cases, durability tradeoffs",tags:["Advanced","Warning"]},
+{id:"re5",ic:"🛡️",t:"Durability Guarantees & Config",d:"acks=all + min.insync.replicas=2 + replication.factor=3 explained",tags:["Critical"]},
+]},
+{n:"09",t:"ZooKeeper & KRaft Mode",ic:"🐘",c:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"ZooKeeper's role, its pain points, and the KRaft replacement — Raft consensus in Kafka's own metadata quorum.",tags:["Architecture","Modern"],topics:[
+{id:"zk1",ic:"🐘",t:"ZooKeeper's Role in Kafka",d:"Broker registration, controller election, config storage, limitations",tags:["Legacy"]},
+{id:"zk2",ic:"⚡",t:"KRaft — Kafka Raft Metadata Mode",d:"Metadata topics, quorum controller, no ZK dependency, migration",tags:["Modern"]},
+{id:"zk3",ic:"🔐",t:"Raft Consensus Protocol",d:"Leader election, log replication, safety, liveness in KRaft context",tags:["Advanced"]},
+{id:"zk4",ic:"🔄",t:"Migration from ZooKeeper to KRaft",d:"Dual-write mode, migration tool, rollback plan, production checklist",tags:["Operations"]},
+]},
+{n:"10",t:"Exactly-Once Semantics",ic:"🎯",c:"#ff6b35",bg:"rgba(255,107,53,.1)",desc:"The hardest problem in distributed messaging — idempotent producers, transactional APIs, and end-to-end EOS.",tags:["Advanced","Critical","Expert"],topics:[
+{id:"eos1",ic:"🎯",t:"Delivery Semantics Deep Dive",d:"Why at-least-once is the default, failure scenarios, EOS cost",tags:["Core"]},
+{id:"eos2",ic:"🔑",t:"Idempotent Producer Internals",d:"PID assignment, sequence numbers, broker dedup, epoch fencing",tags:["Advanced"]},
+{id:"eos3",ic:"💼",t:"Kafka Transactions API",d:"initTransactions, beginTransaction, sendOffsetsToTransaction, commitTransaction",tags:["Advanced","Critical"]},
+{id:"eos4",ic:"🔀",t:"Transactional Consume-Process-Produce",d:"Read-process-write pattern, isolation.level=read_committed, zombie fencing",tags:["Expert"]},
+{id:"eos5",ic:"⚡",t:"EOS Performance Impact",d:"Throughput cost, latency overhead, when EOS is worth it",tags:["Advanced"]},
+]},
+{n:"11",t:"Kafka Streams",ic:"🌊",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"Stream processing on Kafka — topology, KStream, KTable, state stores, windowing, and joins.",tags:["Advanced","Streams"],topics:[
+{id:"ks1",ic:"🌊",t:"Kafka Streams Architecture",d:"Processor topology, tasks, stream threads, standby replicas",tags:["Core"]},
+{id:"ks2",ic:"📊",t:"KStream vs KTable vs GlobalKTable",d:"Unbounded stream vs changelog, changelog topic, materialized views",tags:["Core","Critical"]},
+{id:"ks3",ic:"🪟",t:"Windowing Operations",d:"Tumbling, hopping, sliding, session windows — time semantics, grace periods",tags:["Advanced"]},
+{id:"ks4",ic:"🔗",t:"Stream Joins",d:"KStream-KStream, KStream-KTable, KTable-KTable — co-partition requirement",tags:["Advanced"]},
+{id:"ks5",ic:"🗄️",t:"State Stores & Fault Tolerance",d:"In-memory vs persistent (RocksDB), changelog topics, restoration",tags:["Advanced"]},
+{id:"ks6",ic:"⏰",t:"Time & Watermarks",d:"Event time vs ingestion time vs wall-clock time, out-of-order handling",tags:["Advanced"]},
+]},
+{n:"12",t:"Kafka Connect",ic:"🔌",c:"#06b6d4",bg:"rgba(6,182,212,.1)",desc:"Kafka Connect framework — source connectors, sink connectors, transforms, converters, and production deployments.",tags:["Integration","Core"],topics:[
+{id:"kc1",ic:"🔌",t:"Kafka Connect Architecture",d:"Worker, connector, task model — standalone vs distributed mode",tags:["Core"]},
+{id:"kc2",ic:"📥",t:"Source Connectors",d:"JDBC, Debezium (CDC), S3, HTTP, FilePulse — configuration patterns",tags:["Core"]},
+{id:"kc3",ic:"📤",t:"Sink Connectors",d:"Elasticsearch, S3, JDBC, BigQuery, MongoDB — delivery guarantees",tags:["Core"]},
+{id:"kc4",ic:"🔄",t:"Single Message Transforms (SMTs)",d:"Field extraction, routing, masking, flatten, custom SMT development",tags:["Intermediate"]},
+{id:"kc5",ic:"🔧",t:"Converters & Serialization",d:"JSON, Avro, Protobuf converters, schema registry integration",tags:["Intermediate"]},
+{id:"kc6",ic:"🚀",t:"Connect at Scale",d:"Distributed mode, REST API, connector management, dead letter queues",tags:["Advanced"]},
+]},
+{n:"13",t:"Schema Registry & Serialization",ic:"📋",c:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"Schema evolution, Avro/Protobuf/JSON Schema, compatibility modes, and schema governance.",tags:["Core","Integration"],topics:[
+{id:"sr1",ic:"📋",t:"Why Schema Registry?",d:"Schema evolution problem, wire format, registry as contract enforcement",tags:["Core"]},
+{id:"sr2",ic:"🔷",t:"Apache Avro Deep Dive",d:"Binary encoding, schema evolution, field defaults, union types",tags:["Core"]},
+{id:"sr3",ic:"📦",t:"Protobuf & JSON Schema",d:"When to use each, field numbers, backward/forward compatibility",tags:["Intermediate"]},
+{id:"sr4",ic:"🔄",t:"Schema Compatibility Modes",d:"BACKWARD, FORWARD, FULL, NONE — what breaks what, migration strategy",tags:["Advanced","Critical"]},
+{id:"sr5",ic:"🏢",t:"Schema Governance at Scale",d:"Subject naming strategies, schema contexts, normalization, Git-based schemas",tags:["Advanced"]},
+]},
+{n:"14",t:"Kafka Security",ic:"🔒",c:"#ef4444",bg:"rgba(239,68,68,.1)",desc:"Authentication (SASL), authorization (ACLs), encryption (TLS), and audit logging.",tags:["Security","Critical"],topics:[
+{id:"sec1",ic:"🔒",t:"TLS Encryption",d:"Keystore, truststore, mTLS, certificate rotation, TLS performance",tags:["Core"]},
+{id:"sec2",ic:"🔑",t:"SASL Authentication",d:"PLAIN, SCRAM-SHA-256/512, GSSAPI (Kerberos), OAUTHBEARER",tags:["Core"]},
+{id:"sec3",ic:"🛡️",t:"Authorization with ACLs",d:"ACL model, principal, resource, operation, allow/deny, wildcard",tags:["Core"]},
+{id:"sec4",ic:"📋",t:"Audit Logging & Compliance",d:"Confluent Audit Logs, custom authorizer, GDPR data deletion",tags:["Advanced"]},
+{id:"sec5",ic:"🏢",t:"Secrets Management",d:"Credential rotation, Vault integration, encrypted config providers",tags:["Advanced"]},
+]},
+{n:"15",t:"Performance & Tuning",ic:"🚀",c:"#ff6b35",bg:"rgba(255,107,53,.1)",desc:"Producer throughput, consumer lag, broker JVM tuning, OS-level optimization, and benchmarking methodology.",tags:["Expert","Performance"],topics:[
+{id:"perf1",ic:"🚀",t:"Throughput Optimization",d:"batch.size, linger.ms, compression, network tuning — 1M msgs/sec guide",tags:["Expert"]},
+{id:"perf2",ic:"⏱️",t:"Latency Optimization",d:"linger.ms=0, acks=1, compression tradeoffs, SSD vs HDD benchmarks",tags:["Expert"]},
+{id:"perf3",ic:"☕",t:"JVM & GC Tuning",d:"G1GC vs ZGC, heap sizing, GC pauses, JVM flags for Kafka brokers",tags:["Expert"]},
+{id:"perf4",ic:"🖥️",t:"OS-Level Optimization",d:"vm.swappiness, file descriptors, network buffers, NUMA, disk scheduler",tags:["Expert"]},
+{id:"perf5",ic:"📊",t:"Benchmarking Kafka",d:"kafka-producer-perf-test, kafka-consumer-perf-test, OpenMessaging Benchmark",tags:["Advanced"]},
+{id:"perf6",ic:"🔍",t:"Producer & Consumer Metrics",d:"100+ JMX metrics — which ones matter, alerting thresholds, dashboards",tags:["Advanced"]},
+]},
+{n:"16",t:"Monitoring & Observability",ic:"📊",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"JMX metrics, Prometheus, Grafana dashboards, consumer lag alerting, distributed tracing.",tags:["Operations","SRE"],topics:[
+{id:"mon1",ic:"📊",t:"Essential Kafka JMX Metrics",d:"Broker, producer, consumer metrics — the 20 that matter most",tags:["Core"]},
+{id:"mon2",ic:"🔥",t:"Prometheus + Grafana Setup",d:"JMX Exporter, kafka-exporter, dashboard templates, alert rules",tags:["Core"]},
+{id:"mon3",ic:"⚠️",t:"Consumer Lag Alerting",d:"Burrow, kafka-consumer-groups, lag-based autoscaling",tags:["Advanced"]},
+{id:"mon4",ic:"🔭",t:"Distributed Tracing",d:"OpenTelemetry with Kafka, context propagation, trace correlation",tags:["Advanced"]},
+{id:"mon5",ic:"🚨",t:"Runbooks & Incident Response",d:"Under-replicated partitions, offline partitions, high producer error rate",tags:["Operations"]},
+]},
+{n:"17",t:"Kafka with .NET",ic:"🔷",c:"#06b6d4",bg:"rgba(6,182,212,.1)",desc:"Confluent .NET client, producer/consumer patterns, serialization, dependency injection, and hosted services.",tags:["Core",".NET","Code"],topics:[
+{id:"dn1",ic:"🔷",t:"Confluent .NET Client Setup",d:"NuGet, ProducerConfig, ConsumerConfig, AdminClient basics",tags:["Beginner"]},
+{id:"dn2",ic:"📤",t:"Producer Patterns in .NET",d:"IProducer<K,V>, async produce, delivery reports, error handling",tags:["Core"]},
+{id:"dn3",ic:"📥",t:"Consumer Patterns in .NET",d:"IConsumer<K,V>, poll loop, cancellation, hosted service pattern",tags:["Core"]},
+{id:"dn4",ic:"💉",t:"DI & Generic Host Integration",d:"AddKafkaProducer, BackgroundService consumer, singleton producer",tags:["Intermediate"]},
+{id:"dn5",ic:"🔄",t:"Serialization in .NET",d:"JSON, Avro with Schema Registry, custom ISerializer<T>",tags:["Intermediate"]},
+{id:"dn6",ic:"🎯",t:"Exactly-Once in .NET",d:"Transactional producer, idempotent config, .NET transaction pattern",tags:["Advanced"]},
+{id:"dn7",ic:"🧪",t:"Testing Kafka in .NET",d:"Testcontainers, MockProducer, integration tests, consumer simulation",tags:["Testing"]},
+]},
+{n:"18",t:"Event-Driven Architecture",ic:"🔔",c:"#eab308",bg:"rgba(234,179,8,.1)",desc:"EDA principles, event types, domain events, choreography vs orchestration, and anti-patterns.",tags:["Architecture","Design"],topics:[
+{id:"eda1",ic:"🔔",t:"Event-Driven Architecture Primer",d:"Events vs commands vs queries, EDA principles, coupling reduction",tags:["Core"]},
+{id:"eda2",ic:"📨",t:"Event Types & Design",d:"Domain events, integration events, notification events, fat vs thin events",tags:["Core"]},
+{id:"eda3",ic:"🎭",t:"Choreography vs Orchestration",d:"Saga pattern, when each fits, traceability, compensating transactions",tags:["Advanced"]},
+{id:"eda4",ic:"📖",t:"Event Storming",d:"Big-picture ES, process level ES, domain boundaries, Kafka topic design",tags:["Design"]},
+{id:"eda5",ic:"⚠️",t:"EDA Anti-Patterns",d:"Event coupling, chatty events, missing correlation IDs, event storms",tags:["Warning"]},
+]},
+{n:"19",t:"CQRS & Event Sourcing",ic:"📚",c:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"Command Query Responsibility Segregation and Event Sourcing with Kafka as the event store.",tags:["Advanced","Architecture","Design"],topics:[
+{id:"es1",ic:"📚",t:"Event Sourcing Fundamentals",d:"State as sequence of events, aggregate reconstruction, snapshots",tags:["Core"]},
+{id:"es2",ic:"📊",t:"CQRS with Kafka",d:"Command side → Kafka → multiple read model projections",tags:["Advanced"]},
+{id:"es3",ic:"🏦",t:"Kafka as Event Store",d:"Compacted topics, event streams, projection rebuilding, retention",tags:["Advanced"]},
+{id:"es4",ic:"🔄",t:"Projection & Read Model Patterns",d:"Kafka Streams projections, database projections, eventual consistency",tags:["Advanced"]},
+{id:"es5",ic:"⚙️",t:"Saga Pattern Implementation",d:"Choreography saga with Kafka, state machine, compensating events",tags:["Expert"]},
+]},
+{n:"20",t:"Real-Time Data Pipelines",ic:"🔗",c:"#ff6b35",bg:"rgba(255,107,53,.1)",desc:"CDC with Debezium, stream enrichment, Lambda/Kappa architectures, and data lake ingestion.",tags:["Advanced","DataEngineering"],topics:[
+{id:"dp1",ic:"🔗",t:"Change Data Capture with Debezium",d:"Binlog reading, outbox pattern, exactly-once CDC, schema changes",tags:["Core"]},
+{id:"dp2",ic:"⚡",t:"Stream Enrichment Patterns",d:"Lookup enrichment via KTable, reference data management, cache patterns",tags:["Advanced"]},
+{id:"dp3",ic:"🏗️",t:"Lambda vs Kappa Architecture",d:"Batch + stream vs stream-only, reprocessing, operational complexity",tags:["Architecture"]},
+{id:"dp4",ic:"🏔️",t:"Data Lake Ingestion",d:"Kafka → S3/ADLS via Connect, Iceberg, Delta Lake, Hudi integration",tags:["Advanced"]},
+{id:"dp5",ic:"📊",t:"Real-Time Analytics Pipeline",d:"Kafka → ClickHouse/Druid, materialized views, OLAP on streams",tags:["Advanced"]},
+]},
+{n:"21",t:"ksqlDB & Stream SQL",ic:"🔍",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"SQL over Kafka streams — creating streams, tables, persistent queries, and UDFs.",tags:["Intermediate","Streams"],topics:[
+{id:"kq1",ic:"🔍",t:"ksqlDB Architecture",d:"Pull vs push queries, materialized views, headless vs interactive",tags:["Core"]},
+{id:"kq2",ic:"📊",t:"Streams & Tables in ksqlDB",d:"CREATE STREAM, CREATE TABLE, auto topic creation, partitioning",tags:["Core"]},
+{id:"kq3",ic:"🪟",t:"Windowed Aggregations",d:"WINDOW TUMBLING, HOPPING, SESSION, EMIT CHANGES, final results",tags:["Intermediate"]},
+{id:"kq4",ic:"🔗",t:"Stream Joins in ksqlDB",d:"Stream-Stream, Stream-Table joins, window join semantics",tags:["Intermediate"]},
+{id:"kq5",ic:"🔧",t:"UDFs & UDAFs",d:"Custom scalar and aggregate functions, Java/Kotlin implementation",tags:["Advanced"]},
+]},
+{n:"22",t:"Microservices with Kafka",ic:"⚙️",c:"#06b6d4",bg:"rgba(6,182,212,.1)",desc:"Service communication patterns, outbox pattern, inbox pattern, idempotent consumers, and distributed transactions.",tags:["Architecture","Microservices"],topics:[
+{id:"ms1",ic:"⚙️",t:"Kafka as Service Bus",d:"Topics as API contracts, topic naming conventions, versioning strategy",tags:["Core"]},
+{id:"ms2",ic:"📤",t:"Outbox Pattern",d:"Atomic write to DB + Kafka, Debezium outbox, polling publisher",tags:["Critical"]},
+{id:"ms3",ic:"📥",t:"Inbox Pattern & Idempotency",d:"Idempotent consumer, dedup key, exactly-once consumption",tags:["Advanced"]},
+{id:"ms4",ic:"🔀",t:"Distributed Saga with Kafka",d:"Saga orchestrator, choreography, compensating transactions, rollback",tags:["Expert"]},
+{id:"ms5",ic:"🏢",t:"Multi-Service Data Consistency",d:"Eventual consistency, read-your-writes, monotonic reads, bounded staleness",tags:["Advanced"]},
+]},
+{n:"23",t:"Kafka on Kubernetes",ic:"☸️",c:"#eab308",bg:"rgba(234,179,8,.1)",desc:"Strimzi Operator, StatefulSets, persistent volumes, rack awareness, and production K8s patterns.",tags:["DevOps","Cloud"],topics:[
+{id:"k8s1",ic:"☸️",t:"Strimzi Kafka Operator",d:"CRDs, Kafka CR, KafkaUser, KafkaTopic, operator reconciliation",tags:["Core"]},
+{id:"k8s2",ic:"💾",t:"Storage & PersistentVolumes",d:"PVC per broker, storage class, local vs cloud volumes, IOPS requirements",tags:["Advanced"]},
+{id:"k8s3",ic:"📊",t:"Resource Limits & JVM on K8s",d:"CPU throttling, heap sizing for containers, cgroup limits",tags:["Advanced"]},
+{id:"k8s4",ic:"🌍",t:"Multi-Zone Rack Awareness",d:"Broker.rack, replica placement, zone-aware partition assignment",tags:["Advanced"]},
+{id:"k8s5",ic:"🔄",t:"Kafka Rolling Upgrades on K8s",d:"Strimzi rolling restart, pod disruption budget, zero-downtime upgrade",tags:["Operations"]},
+]},
+{n:"24",t:"Enterprise & Production Architecture",ic:"🏢",c:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"Multi-datacenter replication, MirrorMaker 2, disaster recovery, Confluent Cloud, and production runbooks.",tags:["Expert","Production"],topics:[
+{id:"en1",ic:"🌍",t:"Multi-Datacenter with MirrorMaker 2",d:"Active-active, active-passive, offset translation, consumer sync",tags:["Expert"]},
+{id:"en2",ic:"🔄",t:"Disaster Recovery Strategy",d:"RPO/RTO targets, failover playbook, offset management on DR",tags:["Expert"]},
+{id:"en3",ic:"☁️",t:"Confluent Cloud Architecture",d:"Dedicated vs serverless cluster, BYOK, private networking, SLA",tags:["Cloud"]},
+{id:"en4",ic:"📈",t:"Capacity Planning",d:"Throughput math, storage projections, network bandwidth, broker sizing",tags:["Advanced"]},
+{id:"en5",ic:"🔧",t:"Operational Runbooks",d:"Broker failure, ISR shrinkage, consumer group dead, disk full scenarios",tags:["Operations"]},
+]},
+{n:"25",t:"Interview Preparation",ic:"🎯",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"300+ categorized questions — from basic definitions through expert system design. Every real Kafka interview question.",tags:["Interview"],topics:[
+{id:"iq1",ic:"📝",t:"Basic Kafka Questions",d:"Core definitions, terminology, fundamental concepts",tags:["Basic"]},
+{id:"iq2",ic:"🔧",t:"Intermediate Technical Q&A",d:"Producers, consumers, partitions, offsets, replication",tags:["Intermediate"]},
+{id:"iq3",ic:"🏗️",t:"Advanced Architecture Q&A",d:"EOS, transactions, Streams, Connect, internals",tags:["Advanced"]},
+{id:"iq4",ic:"🚀",t:"Performance & Tuning Q&A",d:"Configuration decisions, throughput vs latency, benchmarks",tags:["Performance"]},
+{id:"iq5",ic:"💼",t:"System Design with Kafka",d:"Design a real-time pipeline, event sourcing, microservices",tags:["Design"]},
+]},
+];
+const DETAILS={
+"ds3":{
+title:"Delivery Semantics — At-Most-Once, At-Least-Once, Exactly-Once",
+bread:"Chapter 1 · Distributed Systems Foundations",
+sub:"The three delivery guarantees every distributed system must choose between — understanding exactly what each means and when failures expose the difference.",
+pills:[{t:"Critical",c:"#ef4444"},{t:"Foundation",c:"#06b6d4"},{t:"Must Know",c:"#ff6b35"}],
+secs:[
+{ty:"prose",title:"The Three Delivery Guarantees",html:`<p>Every distributed messaging system makes a guarantee about how many times a message will be delivered. There are exactly three possibilities:</p>
+<h4>At-Most-Once (≤1 delivery)</h4>
+<p>Messages are delivered <strong>zero or one time</strong>. If a failure occurs after sending but before acknowledgment, the message is <strong>lost and not retried</strong>. This is the "fire and forget" model.</p>
+<ul><li><strong>When to use:</strong> Metrics, logs, telemetry — where losing occasional data is acceptable</li>
+<li><strong>How in Kafka:</strong> <code>acks=0</code> and <code>retries=0</code></li>
+<li><strong>Risk:</strong> Silent data loss on network failure</li></ul>
+<h4>At-Least-Once (≥1 delivery)</h4>
+<p>Messages are delivered <strong>one or more times</strong>. Kafka retries on failure, so the same message may arrive multiple times (duplicates). This is Kafka's <strong>default behavior</strong>.</p>
+<ul><li><strong>When to use:</strong> Most business events — requires idempotent consumers to handle duplicates</li>
+<li><strong>How in Kafka:</strong> <code>acks=all</code>, <code>retries=MAX</code> (default since Kafka 2.1)</li>
+<li><strong>Risk:</strong> Duplicate processing — must handle at consumer</li></ul>
+<h4>Exactly-Once (=1 delivery)</h4>
+<p>Messages are delivered <strong>exactly one time</strong> — no loss, no duplicates. Kafka achieves this via <strong>idempotent producers</strong> (dedup at broker) + <strong>transactions</strong> (atomic read-process-write).</p>
+<ul><li><strong>When to use:</strong> Financial transactions, inventory updates, billing — any non-idempotent operation</li>
+<li><strong>How in Kafka:</strong> <code>enable.idempotence=true</code> + transactional API</li>
+<li><strong>Risk:</strong> Throughput reduction (~20%), increased latency</li></ul>`},
+{ty:"diagram",title:"Delivery Semantics — Failure Scenarios",svg:`<svg width="530" height="280" viewBox="0 0 530 280" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="da" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#ff6b35"/></marker>
+<marker id="db" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#10b981"/></marker>
+<marker id="dc" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#ef4444"/></marker>
+<style>.db{fill:#1a0d06;stroke:#ff6b35;stroke-width:1.2}.gb{fill:#0d2018;stroke:#10b981;stroke-width:1.2}.rb{fill:#2a0808;stroke:#ef4444;stroke-width:1.2}
+.dt{font-family:'Fira Code',monospace;font-size:9px;fill:#e8d5c4;text-anchor:middle}.ds{font-family:'Fira Code',monospace;font-size:8px;fill:#94a3b8;text-anchor:middle}
+@keyframes df{0%{stroke-dashoffset:50}100%{stroke-dashoffset:0}}.dafl{stroke-dasharray:6 3;animation:df 1.5s linear infinite}</style></defs>
+<rect fill="#040206" x="1" y="1" width="528" height="278" rx="8" stroke="#241d35" stroke-width="1"/>
+<text font-family="'Outfit',sans-serif" font-size="11" font-weight="700" fill="#ff6b35" text-anchor="middle" x="265" y="18">DELIVERY SEMANTICS — FAILURE SCENARIOS</text>
+<!-- Column headers -->
+<text class="dt" fill="#94a3b8" x="90" y="36">AT-MOST-ONCE</text>
+<text class="dt" fill="#94a3b8" x="265" y="36">AT-LEAST-ONCE</text>
+<text class="dt" fill="#94a3b8" x="440" y="36">EXACTLY-ONCE</text>
+<!-- Normal flow row -->
+<text class="ds" fill="#34d399" x="20" y="62">NORMAL:</text>
+<rect class="gb" x="25" y="66" width="130" height="28" rx="4"/><text class="ds" x="90" y="84">Send → ACK → Done ✓</text>
+<rect class="gb" x="200" y="66" width="130" height="28" rx="4"/><text class="ds" x="265" y="84">Send → ACK → Done ✓</text>
+<rect class="gb" x="375" y="66" width="130" height="28" rx="4"/><text class="ds" x="440" y="84">Send → ACK → Commit ✓</text>
+<!-- Failure row -->
+<text class="ds" fill="#f87171" x="20" y="118">NETWORK</text>
+<text class="ds" fill="#f87171" x="20" y="128">FAILURE:</text>
+<rect class="rb" x="25" y="133" width="130" height="40" rx="4"/>
+<text class="ds" x="90" y="150">Send → ✗ LOST</text><text class="ds" fill="#f87171" x="90" y="164">Message gone! 💀</text>
+<rect class="db" x="200" y="133" width="130" height="40" rx="4"/>
+<text class="ds" x="265" y="150">Send → ✗ → RETRY</text><text class="ds" fill="#eab308" x="265" y="164">May be DUPLICATE ⚠️</text>
+<rect class="gb" x="375" y="133" width="130" height="40" rx="4"/>
+<text class="ds" x="440" y="150">Send → ✗ → RETRY</text><text class="ds" fill="#34d399" x="440" y="164">Broker deduplicates ✓</text>
+<!-- Crash row -->
+<text class="ds" fill="#f87171" x="20" y="196">BROKER</text>
+<text class="ds" fill="#f87171" x="20" y="206">CRASH:</text>
+<rect class="rb" x="25" y="210" width="130" height="40" rx="4"/>
+<text class="ds" x="90" y="228">No retry → LOST 💀</text><text class="ds" fill="#f87171" x="90" y="242">acks=0 silent loss</text>
+<rect class="db" x="200" y="210" width="130" height="40" rx="4"/>
+<text class="ds" x="265" y="228">Retry → DUPLICATE</text><text class="ds" fill="#eab308" x="265" y="242">Consumer must handle</text>
+<rect class="gb" x="375" y="210" width="130" height="40" rx="4"/>
+<text class="ds" x="440" y="228">Epoch fencing → OK</text><text class="ds" fill="#34d399" x="440" y="242">Zombie blocked ✓</text>
+<!-- Config row -->
+<text class="ds" fill="#94a3b8" x="90" y="268">acks=0, retries=0</text>
+<text class="ds" fill="#94a3b8" x="265" y="268">acks=all, retries=MAX</text>
+<text class="ds" fill="#94a3b8" x="440" y="268">idempotence + txn</text>
+</svg>`},
+{ty:"code",lang:"csharp",name:"All Three Delivery Modes in .NET",code:`<span class="cm">// === AT-MOST-ONCE (fire and forget) ===</span>
+<span class="kw">var</span> atMostOnce = <span class="kw">new</span> <span class="tp">ProducerConfig</span> {
+    BootstrapServers = <span class="st">"kafka:9092"</span>,
+    Acks = <span class="tp">Acks</span>.None,        <span class="cm">// acks=0 — don't wait for broker</span>
+    MessageSendMaxRetries = <span class="nu">0</span>,  <span class="cm">// no retries</span>
+    EnableDeliveryReports = <span class="kw">false</span> <span class="cm">// don't track delivery</span>
+};
+<span class="cm">// Risk: silent data loss. Use for: high-volume metrics, logs</span>
+
+<span class="cm">// === AT-LEAST-ONCE (default safe mode) ===</span>
+<span class="kw">var</span> atLeastOnce = <span class="kw">new</span> <span class="tp">ProducerConfig</span> {
+    BootstrapServers = <span class="st">"kafka:9092"</span>,
+    Acks = <span class="tp">Acks</span>.All,            <span class="cm">// wait for all ISR replicas</span>
+    MessageSendMaxRetries = <span class="nu">2147483647</span>,  <span class="cm">// MAX retries</span>
+    RetryBackoffMs = <span class="nu">100</span>,
+    EnableIdempotence = <span class="kw">false</span>    <span class="cm">// idempotence OFF = duplicates possible</span>
+};
+<span class="cm">// Consumer MUST be idempotent — use dedup key in DB</span>
+
+<span class="cm">// === EXACTLY-ONCE (strongest guarantee) ===</span>
+<span class="kw">var</span> exactlyOnce = <span class="kw">new</span> <span class="tp">ProducerConfig</span> {
+    BootstrapServers = <span class="st">"kafka:9092"</span>,
+    Acks = <span class="tp">Acks</span>.All,
+    EnableIdempotence = <span class="kw">true</span>,    <span class="cm">// broker assigns PID + seq numbers</span>
+    TransactionalId = <span class="st">"order-producer-1"</span>, <span class="cm">// unique per producer instance</span>
+    MessageSendMaxRetries = <span class="nu">2147483647</span>
+};
+
+<span class="cm">// Transactional produce — atomic write</span>
+<span class="kw">using</span> <span class="kw">var</span> producer = <span class="kw">new</span> <span class="tp">ProducerBuilder</span>&lt;<span class="kw">string</span>, <span class="kw">string</span>&gt;(exactlyOnce).<span class="fn">Build</span>();
+producer.<span class="fn">InitTransactions</span>(<span class="tp">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="nu">30</span>));
+producer.<span class="fn">BeginTransaction</span>();
+<span class="kw">try</span> {
+    <span class="kw">await</span> producer.<span class="fn">ProduceAsync</span>(<span class="st">"orders"</span>, <span class="kw">new</span> <span class="tp">Message</span>&lt;<span class="kw">string</span>,<span class="kw">string</span>&gt;{ Key=orderId, Value=json });
+    <span class="kw">await</span> producer.<span class="fn">ProduceAsync</span>(<span class="st">"inventory"</span>, <span class="kw">new</span> <span class="tp">Message</span>&lt;<span class="kw">string</span>,<span class="kw">string</span>&gt;{ Key=itemId, Value=json });
+    producer.<span class="fn">CommitTransaction</span>(); <span class="cm">// ATOMIC — both or neither</span>
+} <span class="kw">catch</span> {
+    producer.<span class="fn">AbortTransaction</span>();  <span class="cm">// rollback</span>
+    <span class="kw">throw</span>;
+}`},
+{ty:"callout",kind:"kafka",ic:"⚡",txt:"<strong>Real-world default:</strong> 95% of Kafka use cases are fine with <strong>at-least-once</strong> + idempotent consumers. Only add the overhead of exactly-once for truly non-idempotent operations (financial transfers, inventory deductions). The EOS transaction protocol adds ~20% throughput overhead and ~2x latency."},
+]},
+
+"tp2":{
+title:"Partitions — The Heart of Kafka Scalability",
+bread:"Chapter 4 · Topics, Partitions & Offsets",
+sub:"Partitions are Kafka's unit of parallelism, ordering, and scalability. Every performance and ordering decision in Kafka traces back to partition design.",
+pills:[{t:"Core",c:"#ff6b35"},{t:"Critical",c:"#ef4444"},{t:"Must Master",c:"#10b981"}],
+secs:[
+{ty:"prose",title:"What is a Partition?",html:`<p>A Kafka topic is split into one or more <strong>ordered, immutable log segments</strong> called partitions. Each partition is:</p>
+<ul>
+<li>An <strong>append-only log</strong> on a single broker's disk</li>
+<li>The unit of <strong>parallelism</strong> — one consumer thread per partition</li>
+<li>The boundary of <strong>ordering guarantee</strong> — messages in the same partition are strictly ordered</li>
+<li>The unit of <strong>replication</strong> — each partition has exactly one leader and N-1 followers</li>
+</ul>
+<h4>The Ordering Rule</h4>
+<p>Kafka guarantees ordering <strong>within a partition, not across partitions</strong>. Messages with the same key always go to the same partition (when using the default partitioner), giving per-key ordering. To get global ordering for an entire topic, use 1 partition — at the cost of all throughput and parallelism.</p>
+<h4>Partition Count Decisions</h4>
+<p>More partitions = more parallelism = higher throughput. But there are costs:</p>
+<ul>
+<li>Each partition has <strong>metadata overhead</strong> in the controller (~1KB)</li>
+<li>More partitions = <strong>more file handles</strong> on the broker</li>
+<li>Leader election on failure takes longer with more partitions</li>
+<li>You <strong>cannot easily reduce</strong> partition count (only increase)</li>
+</ul>`},
+{ty:"diagram",title:"Partitions — Data Distribution & Consumer Parallelism",svg:`<svg width="530" height="290" viewBox="0 0 530 290" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="pa" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#ff6b35"/></marker>
+<style>.pbox{fill:#1a0d06;stroke:#ff6b35;stroke-width:1.2}.pgb{fill:#0d2018;stroke:#10b981;stroke-width:1.2}.pbb{fill:#0d1a28;stroke:#06b6d4;stroke-width:1.2}
+.pt{font-family:'Fira Code',monospace;font-size:9px;fill:#e8d5c4;text-anchor:middle}.ps{font-family:'Fira Code',monospace;font-size:8px;fill:#94a3b8;text-anchor:middle}
+@keyframes pf{0%{stroke-dashoffset:50}100%{stroke-dashoffset:0}}.panim{stroke-dasharray:5 3;animation:pf 1.5s linear infinite}</style></defs>
+<rect fill="#040206" x="1" y="1" width="528" height="288" rx="8" stroke="#241d35" stroke-width="1"/>
+<text font-family="'Outfit',sans-serif" font-size="11" font-weight="700" fill="#ff6b35" text-anchor="middle" x="265" y="18">TOPIC: orders (4 partitions, replication-factor=3)</text>
+
+<!-- Producer -->
+<rect class="pgb" x="10" y="26" width="80" height="50" rx="4"/><text class="pt" fill="#10b981" x="50" y="46">Producer</text><text class="ps" x="50" y="60">key=userId</text>
+
+<!-- Partitioner box -->
+<rect fill="#1a1a08" stroke="#eab308" stroke-width="1.2" x="110" y="38" width="80" height="26" rx="4"/>
+<text class="pt" fill="#eab308" x="150" y="55">Partitioner</text>
+
+<!-- Partition lines -->
+<line stroke="#ff6b35" stroke-width="1.5" class="panim" x1="90" y1="51" x2="108" y2="51" marker-end="url(#pa)"/>
+<line stroke="#ff6b35" stroke-width="1" class="panim" x1="190" y1="44" x2="218" y2="36" marker-end="url(#pa)"/>
+<line stroke="#ff6b35" stroke-width="1" class="panim" x1="190" y1="48" x2="218" y2="72" marker-end="url(#pa)"/>
+<line stroke="#ff6b35" stroke-width="1" class="panim" x1="190" y1="52" x2="218" y2="108" marker-end="url(#pa)"/>
+<line stroke="#ff6b35" stroke-width="1" class="panim" x1="190" y1="56" x2="218" y2="144" marker-end="url(#pa)"/>
+
+<!-- Partitions (the log segments) -->
+<rect class="pbox" x="220" y="24" width="200" height="30" rx="4"/>
+<text class="pt" fill="#ff6b35" x="320" y="36">P-0 [0][1][2][3]...</text><text class="ps" x="320" y="48">Leader: Broker 1</text>
+
+<rect class="pbox" x="220" y="60" width="200" height="30" rx="4"/>
+<text class="pt" fill="#ff6b35" x="320" y="72">P-1 [0][1][2][3]...</text><text class="ps" x="320" y="84">Leader: Broker 2</text>
+
+<rect class="pbox" x="220" y="96" width="200" height="30" rx="4"/>
+<text class="pt" fill="#ff6b35" x="320" y="108">P-2 [0][1][2][3]...</text><text class="ps" x="320" y="120">Leader: Broker 3</text>
+
+<rect class="pbox" x="220" y="132" width="200" height="30" rx="4"/>
+<text class="pt" fill="#ff6b35" x="320" y="144">P-3 [0][1][2][3]...</text><text class="ps" x="320" y="156">Leader: Broker 1</text>
+
+<!-- Consumers -->
+<rect class="pbb" x="440" y="24" width="80" height="30" rx="4"/><text class="pt" fill="#06b6d4" x="480" y="43">Consumer 1</text>
+<rect class="pbb" x="440" y="60" width="80" height="30" rx="4"/><text class="pt" fill="#06b6d4" x="480" y="79">Consumer 2</text>
+<rect class="pbb" x="440" y="96" width="80" height="30" rx="4"/><text class="pt" fill="#06b6d4" x="480" y="115">Consumer 3</text>
+<rect class="pbb" x="440" y="132" width="80" height="30" rx="4"/><text class="pt" fill="#06b6d4" x="480" y="151">Consumer 4</text>
+
+<line stroke="#06b6d4" stroke-width="1.5" class="panim" x1="420" y1="39" x2="438" y2="39" marker-end="url(#pa)"/>
+<line stroke="#06b6d4" stroke-width="1.5" class="panim" x1="420" y1="75" x2="438" y2="75" marker-end="url(#pa)"/>
+<line stroke="#06b6d4" stroke-width="1.5" class="panim" x1="420" y1="111" x2="438" y2="111" marker-end="url(#pa)"/>
+<line stroke="#06b6d4" stroke-width="1.5" class="panim" x1="420" y1="147" x2="438" y2="147" marker-end="url(#pa)"/>
+
+<!-- Key insight labels -->
+<text class="ps" fill="#34d399" x="320" y="178">✓ Same userId → Always same partition → Ordered per user</text>
+<text class="ps" fill="#eab308" x="320" y="192">⚡ 4 partitions → 4 consumers in parallel → 4x throughput</text>
+<text class="ps" fill="#94a3b8" x="320" y="206">Each partition assigned to ONE consumer in a group</text>
+
+<!-- Ordering guarantee box -->
+<rect fill="#0d2018" stroke="#10b981" stroke-width="1" x="10" y="218" width="508" height="64" rx="5"/>
+<text font-family="'Outfit',sans-serif" font-size="10" font-weight="700" fill="#10b981" x="18" y="236">ORDERING GUARANTEE</text>
+<text class="ps" fill="#e8d5c4" x="18" y="252">Within P-0: [order-1] → [order-5] → [order-9] ← STRICT ORDER ✓</text>
+<text class="ps" fill="#e8d5c4" x="18" y="264">Across partitions: P-0 order vs P-1 order ← NO GUARANTEE ✗</text>
+<text class="ps" fill="#eab308" x="18" y="276">Solution: Same key → same partition → per-key ordering ✓</text>
+</svg>`},
+{ty:"code",lang:"csharp",name:"Partition Strategy Examples in .NET",code:`<span class="cm">// === STRATEGY 1: Key-based partitioning (default) ===</span>
+<span class="cm">// hash(key) % numPartitions → deterministic, same key = same partition</span>
+<span class="kw">await</span> producer.<span class="fn">ProduceAsync</span>(<span class="st">"orders"</span>, <span class="kw">new</span> <span class="tp">Message</span>&lt;<span class="kw">string</span>,<span class="tp">Order</span>&gt; {
+    Key = order.UserId,     <span class="cm">// ALL orders for same user → same partition → ordered</span>
+    Value = order
+});
+
+<span class="cm">// === STRATEGY 2: Explicit partition (advanced) ===</span>
+<span class="kw">await</span> producer.<span class="fn">ProduceAsync</span>(<span class="kw">new</span> <span class="tp">TopicPartition</span>(<span class="st">"orders"</span>, <span class="kw">new</span> <span class="tp">Partition</span>(<span class="nu">3</span>)),
+    <span class="kw">new</span> <span class="tp">Message</span>&lt;<span class="kw">string</span>,<span class="tp">Order</span>&gt; { Value = order });
+
+<span class="cm">// === STRATEGY 3: Custom partitioner ===</span>
+<span class="kw">public class</span> <span class="tp">TenantPartitioner</span> : <span class="tp">IPartitioner</span>
+{
+    <span class="kw">public int</span> <span class="fn">Partition</span>(<span class="kw">string</span> topic, <span class="tp">Type</span> keyType, <span class="tp">ReadOnlySpan</span>&lt;<span class="kw">byte</span>&gt; keyData,
+        <span class="kw">int</span> partitionCount)
+    {
+        <span class="cm">// VIP tenants always get partition 0 for priority processing</span>
+        <span class="kw">var</span> key = <span class="tp">Encoding</span>.UTF8.<span class="fn">GetString</span>(keyData);
+        <span class="kw">if</span> (key.<span class="fn">StartsWith</span>(<span class="st">"VIP-"</span>)) <span class="kw">return</span> <span class="nu">0</span>;
+        <span class="kw">return</span> Math.<span class="fn">Abs</span>(key.<span class="fn">GetHashCode</span>()) % (partitionCount - <span class="nu">1</span>) + <span class="nu">1</span>;
+    }
+}
+
+<span class="cm">// === PARTITION COUNT FORMULA ===</span>
+<span class="cm">// targetThroughput (msgs/sec) / maxThroughputPerPartition (msgs/sec)</span>
+<span class="cm">// A single partition handles ~10-50K msgs/sec (depends on msg size + hardware)</span>
+<span class="cm">// Example: 500K msgs/sec target ÷ 50K/partition = 10 partitions minimum</span>
+<span class="cm">// Always add buffer: round up to next power of 2 or add 20%</span>
+<span class="cm">// Rule: more partitions = more parallelism but more overhead</span>
+<span class="cm">// LinkedIn recommendation: 100 partitions per broker max</span>`},
+{ty:"callout",kind:"warn",ic:"⚠️",txt:"<strong>Partition count is immutable once set</strong> (only increasing allowed, never decreasing). If you increase partitions on an existing topic with keys, messages for the same key will start going to different partitions — breaking per-key ordering for new messages. Plan your partition count carefully upfront using the throughput formula."},
+]},
+
+"pr1":{
+title:"Kafka Producer Architecture & Internals",
+bread:"Chapter 5 · Kafka Producers Deep Dive",
+sub:"How the Kafka producer actually works inside — from your ProduceAsync() call through batching, compression, network I/O, and delivery reports.",
+pills:[{t:"Core",c:"#10b981"},{t:"Internals",c:"#ff6b35"},{t:"Performance",c:"#eab308"}],
+secs:[
+{ty:"prose",title:"The Producer Pipeline",html:`<p>When you call <code>producer.ProduceAsync()</code>, your message goes through a multi-stage pipeline before touching the network. Understanding this pipeline is key to tuning producer throughput and latency.</p>
+<h4>Stage 1: Serialization</h4>
+<p>Your key and value objects are serialized to bytes using the configured <code>KeySerializer</code> and <code>ValueSerializer</code>. This happens synchronously on your calling thread.</p>
+<h4>Stage 2: Partitioning</h4>
+<p>The partitioner determines which partition (and thus which broker) this message goes to. With a null key, the sticky partitioner fills one batch before switching to the next partition (round-robin across batches, not messages).</p>
+<h4>Stage 3: RecordAccumulator (the batch buffer)</h4>
+<p>Messages are buffered in a per-partition deque of batches. The batch fills up until <code>batch.size</code> bytes OR <code>linger.ms</code> milliseconds pass — whichever comes first. This is where compression happens.</p>
+<h4>Stage 4: Sender Thread (I/O)</h4>
+<p>A background Sender thread drains ready batches and sends them to brokers over TCP. It handles the request pipeline — multiple in-flight requests per broker (controlled by <code>max.in.flight.requests.per.connection</code>).</p>`},
+{ty:"diagram",title:"Producer Internal Architecture",svg:`<svg width="530" height="300" viewBox="0 0 530 300" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="pra" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#10b981"/></marker>
+<style>.prb{fill:#0d2018;stroke:#10b981;stroke-width:1.2}.prbb{fill:#1a1a08;stroke:#eab308;stroke-width:1.2}.prd{fill:#1a0d06;stroke:#ff6b35;stroke-width:1.2}
+.prt{font-family:'Fira Code',monospace;font-size:9px;fill:#e8d5c4;text-anchor:middle}.prs{font-family:'Fira Code',monospace;font-size:8px;fill:#94a3b8;text-anchor:middle}
+.pra2{stroke:#10b981;stroke-width:1.5;fill:none;marker-end:url(#pra)}
+@keyframes prf{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}.pranim{stroke-dasharray:5 3;animation:prf 1.5s linear infinite}</style></defs>
+<rect fill="#040206" x="1" y="1" width="528" height="298" rx="8" stroke="#241d35" stroke-width="1"/>
+<text font-family="'Outfit',sans-serif" font-size="11" font-weight="700" fill="#10b981" text-anchor="middle" x="265" y="18">KAFKA PRODUCER INTERNAL ARCHITECTURE</text>
+
+<!-- User thread -->
+<rect fill="#0d1a28" stroke="#06b6d4" stroke-width="1.2" x="10" y="26" width="120" height="55" rx="5"/>
+<text class="prt" fill="#06b6d4" x="70" y="44">User Thread</text>
+<text class="prs" x="70" y="57">produce(topic,key,val)</text>
+<text class="prs" x="70" y="70">Serializer → Partitioner</text>
+
+<!-- RecordAccumulator -->
+<rect class="prbb" x="150" y="26" width="160" height="200" rx="5"/>
+<text class="prt" fill="#eab308" x="230" y="44">RecordAccumulator</text>
+<text class="prs" x="230" y="57">buffer.memory = 32MB</text>
+<rect class="prd" x="160" y="64" width="140" height="32" rx="4"/>
+<text class="prt" fill="#ff6b35" x="230" y="76">Partition-0 Batch</text>
+<text class="prs" x="230" y="88">lz4: [msg1][msg2][msg3]</text>
+<rect class="prd" x="160" y="102" width="140" height="32" rx="4"/>
+<text class="prt" fill="#ff6b35" x="230" y="114">Partition-1 Batch</text>
+<text class="prs" x="230" y="126">lz4: [msg1][msg2]</text>
+<rect class="prd" x="160" y="140" width="140" height="32" rx="4"/>
+<text class="prt" fill="#ff6b35" x="230" y="152">Partition-2 Batch</text>
+<text class="prs" x="230" y="164">snappy: [msg1]...</text>
+<text class="prs" fill="#eab308" x="230" y="198">linger.ms=5 OR batch.size=16KB</text>
+<text class="prs" fill="#eab308" x="230" y="210">→ batch is READY to send</text>
+
+<!-- Sender thread -->
+<rect class="prb" x="330" y="26" width="120" height="55" rx="5"/>
+<text class="prt" fill="#10b981" x="390" y="44">Sender Thread</text>
+<text class="prs" x="390" y="57">drains ready batches</text>
+<text class="prs" x="390" y="69">builds ProduceRequest</text>
+
+<!-- Broker -->
+<rect fill="#2a0808" stroke="#ef4444" stroke-width="1.2" x="330" y="100" width="120" height="50" rx="5"/>
+<text class="prt" fill="#ef4444" x="390" y="120">Broker</text>
+<text class="prs" x="390" y="133">writes to commit log</text>
+<text class="prs" x="390" y="145">returns ack/error</text>
+
+<!-- Delivery Report -->
+<rect class="prb" x="330" y="170" width="120" height="50" rx="5"/>
+<text class="prt" fill="#10b981" x="390" y="190">Delivery Report</text>
+<text class="prs" x="390" y="203">callback / Task result</text>
+<text class="prs" x="390" y="215">error / partition+offset</text>
+
+<!-- Arrows -->
+<line class="pra2 pranim" x1="130" y1="51" x2="148" y2="85"/>
+<line class="pra2 pranim" x1="310" y1="127" x2="328" y2="54"/>
+<line class="pra2 pranim" x1="390" y1="81" x2="390" y2="98"/>
+<line class="pra2 pranim" x1="390" y1="150" x2="390" y2="168"/>
+
+<!-- Config annotations -->
+<rect fill="#0d2018" stroke="#10b981" stroke-width="1" x="10" y="240" width="508" height="52" rx="5"/>
+<text font-family="'Fira Code',monospace" font-size="9" fill="#10b981" x="18" y="257">KEY CONFIGS:</text>
+<text class="prs" x="18" y="271">batch.size=16384  linger.ms=5  buffer.memory=33554432  compression.type=lz4</text>
+<text class="prs" x="18" y="283">max.in.flight.requests.per.connection=5  (set to 1 if idempotence=false + order matters)</text>
+</svg>`},
+{ty:"code",lang:"csharp",name:"High-Throughput Producer Configuration in .NET",code:`<span class="cm">// High-throughput producer — optimized for max msgs/sec</span>
+<span class="kw">var</span> config = <span class="kw">new</span> <span class="tp">ProducerConfig</span>
+{
+    BootstrapServers = <span class="st">"broker1:9092,broker2:9092,broker3:9092"</span>,
+    
+    <span class="cm">// Durability</span>
+    Acks = <span class="tp">Acks</span>.All,                  <span class="cm">// wait for all ISR replicas</span>
+    EnableIdempotence = <span class="kw">true</span>,           <span class="cm">// exactly-once + auto retries</span>
+    
+    <span class="cm">// Batching — KEY for throughput</span>
+    BatchSize = <span class="nu">131072</span>,                 <span class="cm">// 128KB batch (default 16KB is too small)</span>
+    LingerMs = <span class="nu">20</span>,                      <span class="cm">// wait 20ms to fill batch (vs default 0)</span>
+    
+    <span class="cm">// Compression — dramatic size reduction</span>
+    CompressionType = <span class="tp">CompressionType</span>.Lz4, <span class="cm">// LZ4: fastest, good ratio</span>
+    <span class="cm">// Lz4 = fastest; Snappy = balanced; Gzip = best ratio; Zstd = best overall</span>
+    
+    <span class="cm">// Buffer — prevent back-pressure blocking</span>
+    QueueBufferingMaxMessages = <span class="nu">1000000</span>, <span class="cm">// 1M messages in flight</span>
+    QueueBufferingMaxKbytes = <span class="nu">1048576</span>,  <span class="cm">// 1GB buffer</span>
+    
+    <span class="cm">// Network</span>
+    MessageSendMaxRetries = <span class="nu">2147483647</span>, <span class="cm">// max retries (with idempotence, safe)</span>
+    RetryBackoffMs = <span class="nu">100</span>,
+    SocketKeepaliveEnable = <span class="kw">true</span>,
+};
+
+<span class="cm">// Async fire-and-track pattern for high throughput</span>
+<span class="kw">var</span> tasks = orders.<span class="fn">Select</span>(order =>
+    producer.<span class="fn">ProduceAsync</span>(<span class="st">"orders"</span>, <span class="kw">new</span> <span class="tp">Message</span>&lt;<span class="kw">string</span>, <span class="tp">Order</span>&gt;
+        { Key = order.Id, Value = order })
+).<span class="fn">ToList</span>();
+
+<span class="kw">await</span> <span class="tp">Task</span>.<span class="fn">WhenAll</span>(tasks);
+<span class="cm">// Result: producer batches automatically, compresses, sends in bulk</span>
+<span class="cm">// Throughput: 500K-1M msgs/sec with 1KB messages on commodity hardware</span>`},
+{ty:"callout",kind:"kafka",ic:"⚡",txt:"<strong>Throughput vs Latency tradeoff:</strong> <code>linger.ms=0</code> (default) sends immediately — low latency, small batches, low throughput. <code>linger.ms=5-20</code> waits to fill batches — higher throughput, slightly higher latency. In most production systems, 5-20ms linger is acceptable and gives 10x+ throughput improvement over immediate sending."},
+]},
+
+"co2":{
+title:"Consumer Groups & Coordination",
+bread:"Chapter 6 · Consumers & Consumer Groups",
+sub:"How Kafka consumer groups work — group coordinator, group leader, partition assignment, and the membership protocol that enables horizontal scaling.",
+pills:[{t:"Core",c:"#06b6d4"},{t:"Critical",c:"#ef4444"},{t:"Scaling",c:"#10b981"}],
+secs:[
+{ty:"prose",title:"Consumer Groups — Kafka's Scaling Mechanism",html:`<p>A consumer group is a set of consumers that cooperate to consume a topic. Kafka distributes partitions across group members — <strong>each partition is assigned to exactly one consumer</strong> in the group at any time.</p>
+<h4>How Scaling Works</h4>
+<ul>
+<li>1 consumer in group → 1 consumer reads ALL partitions</li>
+<li>4 consumers, 4 partitions → each consumer reads 1 partition (1:1)</li>
+<li>8 consumers, 4 partitions → 4 consumers are idle (waste — consumers > partitions = no benefit)</li>
+<li>2 consumers, 4 partitions → each consumer reads 2 partitions</li>
+</ul>
+<h4>Group Coordinator</h4>
+<p>One broker acts as the <strong>group coordinator</strong> for each consumer group. It tracks heartbeats, manages rebalances, and stores committed offsets in the <code>__consumer_offsets</code> internal topic.</p>
+<h4>Group Leader</h4>
+<p>One consumer in the group is elected <strong>group leader</strong> by the coordinator. The leader runs the partition assignment algorithm and sends the assignment back to the coordinator, which distributes it to all members.</p>`},
+{ty:"diagram",title:"Consumer Group Architecture & Coordination Protocol",svg:`<svg width="530" height="280" viewBox="0 0 530 280" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="coa" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#06b6d4"/></marker>
+<style>.cob{fill:#0d1a28;stroke:#06b6d4;stroke-width:1.2}.cog{fill:#0d2018;stroke:#10b981;stroke-width:1.2}.coo{fill:#1a1a08;stroke:#eab308;stroke-width:1.2}.cor{fill:#2a0808;stroke:#ef4444;stroke-width:1.2}
+.cot{font-family:'Fira Code',monospace;font-size:9px;fill:#e8d5c4;text-anchor:middle}.cos{font-family:'Fira Code',monospace;font-size:8px;fill:#94a3b8;text-anchor:middle}
+.coa2{stroke:#06b6d4;stroke-width:1.5;fill:none;marker-end:url(#coa)}
+@keyframes cof{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}.coafl{stroke-dasharray:5 3;animation:cof 1.5s linear infinite}</style></defs>
+<rect fill="#040206" x="1" y="1" width="528" height="278" rx="8" stroke="#241d35" stroke-width="1"/>
+<text font-family="'Outfit',sans-serif" font-size="11" font-weight="700" fill="#06b6d4" text-anchor="middle" x="265" y="18">CONSUMER GROUP COORDINATION</text>
+
+<!-- Partitions left -->
+<text class="cot" fill="#ff6b35" x="65" y="34">TOPIC: events (4 partitions)</text>
+<rect fill="#1a0d06" stroke="#ff6b35" stroke-width="1" x="10" y="40" width="110" height="22" rx="3"/><text class="cos" x="65" y="55">P-0 Leader: Broker-1</text>
+<rect fill="#1a0d06" stroke="#ff6b35" stroke-width="1" x="10" y="66" width="110" height="22" rx="3"/><text class="cos" x="65" y="81">P-1 Leader: Broker-2</text>
+<rect fill="#1a0d06" stroke="#ff6b35" stroke-width="1" x="10" y="92" width="110" height="22" rx="3"/><text class="cos" x="65" y="107">P-2 Leader: Broker-2</text>
+<rect fill="#1a0d06" stroke="#ff6b35" stroke-width="1" x="10" y="118" width="110" height="22" rx="3"/><text class="cos" x="65" y="133">P-3 Leader: Broker-3</text>
+
+<!-- Group Coordinator -->
+<rect class="coo" x="195" y="40" width="130" height="55" rx="5"/>
+<text class="cot" fill="#eab308" x="260" y="58">Group Coordinator</text>
+<text class="cos" x="260" y="70">(Broker assigned by</text>
+<text class="cos" x="260" y="82">hash of group.id)</text>
+
+<!-- Consumers right -->
+<text class="cot" fill="#06b6d4" x="445" y="34">CONSUMER GROUP: payments-svc</text>
+<rect class="cob" x="375" y="40" width="145" height="32" rx="4"/><text class="cot" fill="#eab308" x="447" y="54">Consumer-1 (LEADER)</text><text class="cos" x="447" y="64">P-0, P-1 assigned</text>
+<rect class="cob" x="375" y="78" width="145" height="28" rx="4"/><text class="cot" x="447" y="88">Consumer-2</text><text class="cos" x="447" y="100">P-2 assigned</text>
+<rect class="cob" x="375" y="112" width="145" height="28" rx="4"/><text class="cot" x="447" y="122">Consumer-3</text><text class="cos" x="447" y="134">P-3 assigned</text>
+
+<!-- Arrows: consumers → coordinator -->
+<line class="coa2 coafl" x1="375" y1="55" x2="328" y2="62"/>
+<line class="coa2 coafl" x1="375" y1="92" x2="328" y2="70"/>
+<line class="coa2 coafl" x1="375" y1="126" x2="328" y2="78"/>
+
+<!-- Coordinator → partition leaders -->
+<line stroke="#eab308" stroke-width="1.5" x1="195" y1="62" x2="122" y2="51"/>
+<line stroke="#eab308" stroke-width="1.5" x1="195" y1="65" x2="122" y2="77"/>
+<line stroke="#eab308" stroke-width="1.5" x1="195" y1="70" x2="122" y2="103"/>
+<line stroke="#eab308" stroke-width="1.5" x1="195" y1="74" x2="122" y2="129"/>
+
+<!-- Consumer offsets topic -->
+<rect class="cor" x="195" y="115" width="130" height="38" rx="5"/>
+<text class="cot" fill="#ef4444" x="260" y="130">__consumer_offsets</text>
+<text class="cos" x="260" y="143">stores committed offsets</text>
+<text class="cos" x="260" y="152">for each group+partition</text>
+
+<!-- Join/Rebalance flow bottom -->
+<rect fill="#0d2018" stroke="#10b981" stroke-width="1" x="10" y="170" width="508" height="100" rx="5"/>
+<text font-family="'Outfit',sans-serif" font-size="10" font-weight="700" fill="#10b981" x="18" y="188">REBALANCE PROTOCOL (simplified)</text>
+<text class="cos" fill="#e8d5c4" x="18" y="204">1. Consumer joins → sends JoinGroup request to coordinator</text>
+<text class="cos" fill="#e8d5c4" x="18" y="218">2. Coordinator elects one member as LEADER; all members respond with their subscriptions</text>
+<text class="cos" fill="#e8d5c4" x="18" y="232">3. Leader runs assignment algorithm (RangeAssignor/StickyAssignor) → sends plan to coordinator</text>
+<text class="cos" fill="#e8d5c4" x="18" y="246">4. Coordinator sends SyncGroup response with each member's partition assignment</text>
+<text class="cos" fill="#eab308" x="18" y="260">5. Members start consuming their partitions. Heartbeats keep session alive.</text>
+</svg>`},
+{ty:"code",lang:"csharp",name:"Production Consumer Group Pattern in .NET",code:`<span class="cm">// Complete consumer hosted service with proper lifecycle management</span>
+<span class="kw">public class</span> <span class="tp">OrderConsumerService</span> : <span class="tp">BackgroundService</span>
+{
+    <span class="kw">private readonly</span> <span class="tp">IConsumer</span>&lt;<span class="kw">string</span>, <span class="tp">Order</span>&gt; _consumer;
+    <span class="kw">private readonly</span> <span class="tp">IOrderProcessor</span> _processor;
+    <span class="kw">private readonly</span> <span class="tp">ILogger</span>&lt;<span class="tp">OrderConsumerService</span>&gt; _logger;
+
+    <span class="kw">public</span> <span class="tp">OrderConsumerService</span>(<span class="tp">IConfiguration</span> config, <span class="tp">IOrderProcessor</span> processor, <span class="tp">ILogger</span>&lt;<span class="tp">OrderConsumerService</span>&gt; logger)
+    {
+        _processor = processor; _logger = logger;
+        <span class="kw">var</span> cfg = <span class="kw">new</span> <span class="tp">ConsumerConfig</span> {
+            BootstrapServers = config[<span class="st">"Kafka:Brokers"</span>],
+            GroupId = <span class="st">"order-processing-service"</span>,     <span class="cm">// unique per service type</span>
+            AutoOffsetReset = <span class="tp">AutoOffsetReset</span>.Earliest, <span class="cm">// read from start if no committed offset</span>
+            EnableAutoCommit = <span class="kw">false</span>,                   <span class="cm">// CRITICAL: manual commit</span>
+            MaxPollIntervalMs = <span class="nu">300000</span>,                  <span class="cm">// 5min: max processing time per poll</span>
+            SessionTimeoutMs = <span class="nu">30000</span>,                    <span class="cm">// 30s: heartbeat timeout</span>
+            HeartbeatIntervalMs = <span class="nu">3000</span>,                  <span class="cm">// heartbeat every 3s</span>
+            IsolationLevel = <span class="tp">IsolationLevel</span>.ReadCommitted, <span class="cm">// skip uncommitted txn msgs</span>
+        };
+        _consumer = <span class="kw">new</span> <span class="tp">ConsumerBuilder</span>&lt;<span class="kw">string</span>, <span class="tp">Order</span>&gt;(cfg)
+            .<span class="fn">SetValueDeserializer</span>(<span class="kw">new</span> <span class="tp">JsonDeserializer</span>&lt;<span class="tp">Order</span>&gt;())
+            .<span class="fn">SetPartitionsAssignedHandler</span>((c, partitions) =>
+                _logger.<span class="fn">LogInformation</span>(<span class="st">"Assigned: {Partitions}"</span>, partitions))
+            .<span class="fn">SetPartitionsRevokedHandler</span>((c, partitions) => {
+                c.<span class="fn">Commit</span>(); <span class="cm">// commit before losing partitions</span>
+                _logger.<span class="fn">LogInformation</span>(<span class="st">"Revoked: {Partitions}"</span>, partitions);
+            })
+            .<span class="fn">Build</span>();
+    }
+
+    <span class="kw">protected override async</span> <span class="tp">Task</span> <span class="fn">ExecuteAsync</span>(<span class="tp">CancellationToken</span> ct)
+    {
+        _consumer.<span class="fn">Subscribe</span>([<span class="st">"orders"</span>, <span class="st">"order-corrections"</span>]);
+        <span class="kw">try</span> {
+            <span class="kw">while</span> (!ct.IsCancellationRequested) {
+                <span class="kw">var</span> msg = _consumer.<span class="fn">Consume</span>(<span class="nu">1000</span>); <span class="cm">// 1s timeout</span>
+                <span class="kw">if</span> (msg <span class="kw">is null</span>) <span class="kw">continue</span>;
+                <span class="kw">try</span> {
+                    <span class="kw">await</span> _processor.<span class="fn">ProcessAsync</span>(msg.Message.Value, ct);
+                    <span class="cm">// Manual commit AFTER successful processing</span>
+                    _consumer.<span class="fn">Commit</span>(msg);
+                } <span class="kw">catch</span> (<span class="tp">ProcessingException</span> ex) {
+                    _logger.<span class="fn">LogError</span>(ex, <span class="st">"Failed: {Topic}/{Partition}/{Offset}"</span>,
+                        msg.Topic, msg.Partition, msg.Offset);
+                    <span class="cm">// DO NOT commit — message will be reprocessed after restart</span>
+                    <span class="cm">// Or send to dead-letter-queue topic</span>
+                }
+            }
+        } <span class="kw">finally</span> { _consumer.<span class="fn">Close</span>(); } <span class="cm">// graceful — commits + sends LeaveGroup</span>
+    }
+}`},
+{ty:"callout",kind:"danger",ic:"🚨",txt:"<strong>Never use EnableAutoCommit=true for critical data.</strong> Auto-commit runs every 5 seconds regardless of whether processing succeeded. If your service crashes after commit but before processing completes, those messages are silently lost. Always use manual <code>Commit(msg)</code> AFTER successful processing."},
+]},
+
+"re1":{
+title:"Kafka Replication Protocol",
+bread:"Chapter 8 · Replication & Fault Tolerance",
+sub:"How Kafka achieves durability — the leader-follower replication protocol, High Watermark, Log End Offset, and what happens during failure.",
+pills:[{t:"Core",c:"#ef4444"},{t:"Durability",c:"#ff6b35"},{t:"Critical",c:"#7c3aed"}],
+secs:[
+{ty:"prose",title:"The Replication Protocol",html:`<p>Kafka replication is <strong>leader-based</strong>. Every partition has exactly one leader and N-1 followers (determined by <code>replication.factor</code>). All reads and writes go to the leader. Followers fetch new messages from the leader and replicate them locally.</p>
+<h4>Key Terms</h4>
+<ul>
+<li><strong>LEO (Log End Offset)</strong> — the offset of the next message to be written on a replica. Different replicas may have different LEOs if they're behind.</li>
+<li><strong>HW (High Watermark)</strong> — the highest offset that has been replicated to ALL in-sync replicas. Consumers can only read up to the HW. This ensures consumers never read data that could be lost if the leader fails.</li>
+<li><strong>ISR (In-Sync Replicas)</strong> — the set of replicas that are "caught up" to the leader within <code>replica.lag.time.max.ms</code> (default 30s). If a follower falls behind, it's removed from ISR.</li>
+</ul>
+<h4>Write Path</h4>
+<ol>
+<li>Producer sends to partition leader</li>
+<li>Leader appends to its local log (LEO advances)</li>
+<li>Followers fetch and append to their local logs</li>
+<li>When all ISR members have LEO > old HW, HW advances</li>
+<li>Leader responds to producer with ack (if acks=all, waits for HW advance)</li>
+<li>Consumer can now read up to new HW</li>
+</ol>`},
+{ty:"diagram",title:"Replication — HW, LEO, and ISR",svg:`<svg width="530" height="290" viewBox="0 0 530 290" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="rra" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#ef4444"/></marker>
+<marker id="rrb" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#10b981"/></marker>
+<style>.rrl{fill:#1a0808;stroke:#ef4444;stroke-width:1.2}.rrg{fill:#0d2018;stroke:#10b981;stroke-width:1.2}.rry{fill:#1a1a08;stroke:#eab308;stroke-width:1.2}
+.rrt{font-family:'Fira Code',monospace;font-size:9px;fill:#e8d5c4;text-anchor:middle}.rrs{font-family:'Fira Code',monospace;font-size:8px;fill:#94a3b8;text-anchor:middle}
+@keyframes rrf{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}.rrafl{stroke-dasharray:5 3;animation:rrf 1.5s linear infinite}</style></defs>
+<rect fill="#040206" x="1" y="1" width="528" height="288" rx="8" stroke="#241d35" stroke-width="1"/>
+<text font-family="'Outfit',sans-serif" font-size="11" font-weight="700" fill="#ef4444" text-anchor="middle" x="265" y="18">REPLICATION PROTOCOL — HW & LEO</text>
+
+<!-- Leader -->
+<rect class="rrl" x="10" y="26" width="150" height="130" rx="5"/>
+<text class="rrt" fill="#ef4444" x="85" y="44">LEADER (Broker-1)</text>
+<text class="rrs" fill="#e8d5c4" x="85" y="58">Offset:  0  1  2  3  4  5</text>
+<rect fill="#10b981" x="18" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#fff" x="29" y="74">0</text>
+<rect fill="#10b981" x="42" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#fff" x="53" y="74">1</text>
+<rect fill="#10b981" x="66" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#fff" x="77" y="74">2</text>
+<rect fill="#eab308" x="90" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#000" x="101" y="74">3</text>
+<rect fill="#eab308" x="114" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#000" x="125" y="74">4</text>
+<rect fill="#94a3b8" x="138" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#fff" x="149" y="74">5</text>
+<text class="rrs" x="30" y="95">HW=3 ↑</text>
+<text class="rrs" fill="#eab308" x="95" y="95">Committed</text>
+<text class="rrs" x="148" y="95">LEO=6</text>
+<text class="rrs" fill="#34d399" x="85" y="110">✓ Consumer reads up to HW (offset 3)</text>
+<text class="rrs" fill="#94a3b8" x="85" y="123">offsets 3,4 = in-flight</text>
+<text class="rrs" fill="#94a3b8" x="85" y="135">offset 5 = not yet replicated</text>
+
+<!-- Follower 1 (in sync) -->
+<rect class="rrg" x="180" y="26" width="150" height="130" rx="5"/>
+<text class="rrt" fill="#10b981" x="255" y="44">FOLLOWER-1 (Broker-2)</text>
+<text class="rrs" fill="#e8d5c4" x="255" y="58">ISR member ✓</text>
+<rect fill="#10b981" x="188" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#fff" x="199" y="74">0</text>
+<rect fill="#10b981" x="212" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#fff" x="223" y="74">1</text>
+<rect fill="#10b981" x="236" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#fff" x="247" y="74">2</text>
+<rect fill="#eab308" x="260" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#000" x="271" y="74">3</text>
+<rect fill="#eab308" x="284" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#000" x="295" y="74">4</text>
+<text class="rrs" fill="#10b981" x="255" y="100">LEO=5 (caught up to leader)</text>
+<text class="rrs" fill="#10b981" x="255" y="113">Fetches at leader's pace ✓</text>
+<text class="rrs" fill="#10b981" x="255" y="126">Stays in ISR ✓</text>
+
+<!-- Follower 2 (lagging) -->
+<rect fill="#1a0d00" stroke="#f97316" stroke-width="1.2" x="350" y="26" width="170" height="130" rx="5"/>
+<text class="rrt" fill="#f97316" x="435" y="44">FOLLOWER-2 (Broker-3)</text>
+<text class="rrs" fill="#f97316" x="435" y="58">LAGGING — may leave ISR!</text>
+<rect fill="#10b981" x="358" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#fff" x="369" y="74">0</text>
+<rect fill="#10b981" x="382" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#fff" x="393" y="74">1</text>
+<rect fill="#10b981" x="406" y="62" width="22" height="18" rx="2"/><text class="rrs" fill="#fff" x="417" y="74">2</text>
+<text class="rrs" fill="#f97316" x="435" y="100">LEO=3 (behind leader by 3)</text>
+<text class="rrs" fill="#f97316" x="435" y="113">If lag &gt; replica.lag.time.max.ms</text>
+<text class="rrs" fill="#f97316" x="435" y="126">→ REMOVED from ISR!</text>
+
+<!-- Follower fetch arrows -->
+<line stroke="#10b981" stroke-width="1.5" class="rrafl" x1="160" y1="80" x2="178" y2="80" marker-end="url(#rrb)"/>
+<line stroke="#f97316" stroke-width="1.5" class="rrafl" x1="330" y1="80" x2="348" y2="80" marker-end="url(#rra)"/>
+
+<!-- ISR and HW explanation -->
+<rect fill="#0d2018" stroke="#10b981" stroke-width="1" x="10" y="168" width="508" height="114" rx="5"/>
+<text font-family="'Outfit',sans-serif" font-size="10" font-weight="700" fill="#10b981" x="18" y="186">ISR &amp; HIGH WATERMARK MECHANICS</text>
+<text class="rrs" fill="#e8d5c4" x="18" y="200">ISR = {Broker-1 (leader), Broker-2}  ← Broker-3 removed due to lag</text>
+<text class="rrs" fill="#e8d5c4" x="18" y="214">HW = min(LEO of all ISR members) = min(6, 5) = 5  ← advances as followers catch up</text>
+<text class="rrs" fill="#eab308" x="18" y="228">With acks=all: producer ack sent when HW advances past produced offset</text>
+<text class="rrs" fill="#eab308" x="18" y="242">min.insync.replicas=2: need at least 2 ISR members for acks=all to succeed</text>
+<text class="rrs" fill="#f87171" x="18" y="256">If ISR falls below min.insync.replicas → NotEnoughReplicas error to producer</text>
+<text class="rrs" fill="#34d399" x="18" y="270">SAFE CONFIG: replication.factor=3, min.insync.replicas=2, acks=all → survives 1 broker loss</text>
+</svg>`},
+{ty:"code",lang:"bash",name:"Check Replication Health via CLI",code:`<span class="cm"># Check ISR status for all partitions of a topic</span>
+kafka-topics.sh --bootstrap-server broker:9092 \
+  --describe --topic orders
+
+<span class="cm"># Output shows ISR for each partition:</span>
+<span class="cm"># Topic: orders  Partition: 0  Leader: 1  Replicas: 1,2,3  Isr: 1,2,3  ← healthy</span>
+<span class="cm"># Topic: orders  Partition: 1  Leader: 2  Replicas: 2,3,1  Isr: 2,3    ← broker 1 is behind!</span>
+
+<span class="cm"># Find under-replicated partitions (ISR < replication factor)</span>
+kafka-topics.sh --bootstrap-server broker:9092 \
+  --describe --under-replicated-partitions
+
+<span class="cm"># Check consumer group offsets and lag</span>
+kafka-consumer-groups.sh --bootstrap-server broker:9092 \
+  --describe --group order-processing-service
+
+<span class="cm"># Output:</span>
+<span class="cm"># TOPIC   PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG  CONSUMER-ID</span>
+<span class="cm"># orders  0          1045            1050            5    consumer-1-abc123</span>
+<span class="cm"># orders  1          2088            2090            2    consumer-2-def456</span>
+<span class="cm"># orders  2          3100            3100            0    consumer-3-ghi789  ← caught up!</span>`},
+{ty:"callout",kind:"kafka",ic:"⚡",txt:"<strong>Golden durability config:</strong> <code>replication.factor=3</code> + <code>min.insync.replicas=2</code> + <code>acks=all</code> on producers. This survives loss of 1 broker with zero data loss. The ISR must have at least 2 members, so even after 1 broker dies, another must ACK writes before the producer gets a response."},
+]},
+
+"eos3":{
+title:"Kafka Transactions API",
+bread:"Chapter 10 · Exactly-Once Semantics",
+sub:"The full transactional producer API — initTransactions, beginTransaction, sendOffsetsToTransaction, commitTransaction — and exactly how zombie fencing works.",
+pills:[{t:"Advanced",c:"#ff6b35"},{t:"Exactly-Once",c:"#ef4444"},{t:"Transactions",c:"#7c3aed"}],
+secs:[
+{ty:"prose",title:"Kafka Transactions — How They Work",html:`<p>Kafka transactions enable <strong>atomic writes to multiple partitions</strong>. Either ALL messages in the transaction are committed (visible to consumers), or NONE are. This is the foundation of exactly-once stream processing.</p>
+<h4>Core Concepts</h4>
+<ul>
+<li><strong>TransactionalId</strong> — a stable string identifier for a producer. Must be unique per producer instance. Enables zombie fencing across restarts.</li>
+<li><strong>Epoch</strong> — a monotonically increasing number. When a new producer starts with the same TransactionalId, it gets a higher epoch, and the old producer is fenced (rejected by brokers).</li>
+<li><strong>Transaction Coordinator</strong> — one broker per TransactionalId manages transaction state in the <code>__transaction_state</code> internal topic.</li>
+<li><strong>Isolation Level</strong> — consumers set <code>isolation.level=read_committed</code> to skip uncommitted transaction messages.</li>
+</ul>
+<h4>The Consume-Process-Produce Pattern</h4>
+<p>The most powerful use: atomically commit consumed offsets AND produced messages in one transaction. If the process crashes halfway, the offsets are not committed (messages re-consumed) and the produced messages are aborted.</p>`},
+{ty:"diagram",title:"Transactional Produce — Full Flow",svg:`<svg width="530" height="270" viewBox="0 0 530 270" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="eosa" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#a855f7"/></marker>
+<marker id="eosb" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#10b981"/></marker>
+<style>.eosb{fill:#1a0d30;stroke:#a855f7;stroke-width:1.2}.eosg{fill:#0d2018;stroke:#10b981;stroke-width:1.2}.eosr{fill:#2a0808;stroke:#ef4444;stroke-width:1.2}.eosy{fill:#1a1a08;stroke:#eab308;stroke-width:1.2}
+.eost{font-family:'Fira Code',monospace;font-size:9px;fill:#e8d5c4;text-anchor:middle}.eoss{font-family:'Fira Code',monospace;font-size:8px;fill:#94a3b8;text-anchor:middle}
+.eosa2{stroke:#a855f7;stroke-width:1.5;fill:none;marker-end:url(#eosa)}
+@keyframes eosf{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}.eosafl{stroke-dasharray:5 3;animation:eosf 1.5s linear infinite}</style></defs>
+<rect fill="#040206" x="1" y="1" width="528" height="268" rx="8" stroke="#241d35" stroke-width="1"/>
+<text font-family="'Outfit',sans-serif" font-size="11" font-weight="700" fill="#a855f7" text-anchor="middle" x="265" y="18">TRANSACTIONAL PRODUCE — EXACTLY-ONCE FLOW</text>
+
+<!-- Transactional Producer -->
+<rect class="eosb" x="10" y="26" width="120" height="60" rx="5"/>
+<text class="eost" fill="#a855f7" x="70" y="42">Transactional</text>
+<text class="eost" fill="#a855f7" x="70" y="56">Producer</text>
+<text class="eoss" x="70" y="70">TransactionalId=X</text>
+
+<!-- Transaction Coordinator -->
+<rect class="eosy" x="200" y="26" width="130" height="60" rx="5"/>
+<text class="eost" fill="#eab308" x="265" y="42">Transaction</text>
+<text class="eost" fill="#eab308" x="265" y="56">Coordinator</text>
+<text class="eoss" x="265" y="70">broker for __transaction_state</text>
+
+<!-- Partition Leaders -->
+<rect class="eosg" x="390" y="26" width="130" height="60" rx="5"/>
+<text class="eost" fill="#10b981" x="455" y="42">Partition Leaders</text>
+<text class="eoss" x="455" y="56">output-topic P-0</text>
+<text class="eoss" x="455" y="70">__consumer_offsets</text>
+
+<!-- Steps flow -->
+<rect fill="#0d1a28" stroke="#06b6d4" stroke-width="1" x="10" y="104" width="508" height="158" rx="5"/>
+<text font-family="'Outfit',sans-serif" font-size="10" font-weight="700" fill="#06b6d4" x="18" y="120">TRANSACTION STEPS</text>
+<text class="eoss" fill="#c084fc" x="18" y="136">① initTransactions()  → Coordinator assigns PID + epoch; fences any previous producer with same TransactionalId</text>
+<text class="eoss" fill="#e8d5c4" x="18" y="152">② beginTransaction()  → Local only; marks start of new transaction scope</text>
+<text class="eoss" fill="#e8d5c4" x="18" y="168">③ produce(msg1, output-topic)  → Adds partition to transaction; sends with PID+epoch+sequence</text>
+<text class="eoss" fill="#e8d5c4" x="18" y="184">④ produce(msg2, output-topic)  → Continues building transaction batch</text>
+<text class="eoss" fill="#e8d5c4" x="18" y="200">⑤ sendOffsetsToTransaction(offsets, groupMetadata)  → Atomically commits consumer offsets IN the transaction</text>
+<text class="eoss" fill="#34d399" x="18" y="216">⑥ commitTransaction()  → 2-phase commit: Coordinator writes COMMIT to __transaction_state</text>
+<text class="eoss" fill="#34d399" x="18" y="232">    → Coordinator sends WriteTxnMarkers to all participant partition leaders</text>
+<text class="eoss" fill="#34d399" x="18" y="248">    → Partition leaders write COMMIT marker to log</text>
+<text class="eoss" fill="#34d399" x="18" y="260">    → Consumers with read_committed now see the messages ✓</text>
+
+<line class="eosa2 eosafl" x1="130" y1="52" x2="198" y2="52" marker-end="url(#eosa)"/>
+<line class="eosa2 eosafl" x1="330" y1="52" x2="388" y2="52" marker-end="url(#eosa)"/>
+</svg>`},
+{ty:"code",lang:"csharp",name:"Exactly-Once Consume-Process-Produce in .NET",code:`<span class="cm">// The consume-transform-produce pattern with exactly-once semantics</span>
+<span class="kw">public class</span> <span class="tp">ExactlyOnceProcessor</span>
+{
+    <span class="kw">private readonly</span> <span class="tp">IProducer</span>&lt;<span class="kw">string</span>, <span class="tp">EnrichedOrder</span>&gt; _producer;
+    <span class="kw">private readonly</span> <span class="tp">IConsumer</span>&lt;<span class="kw">string</span>, <span class="tp">Order</span>&gt; _consumer;
+
+    <span class="kw">public</span> <span class="tp">ExactlyOnceProcessor</span>(<span class="tp">IConfiguration</span> config)
+    {
+        <span class="kw">var</span> producerCfg = <span class="kw">new</span> <span class="tp">ProducerConfig</span> {
+            BootstrapServers = config[<span class="st">"Kafka:Brokers"</span>],
+            TransactionalId = <span class="st">"enrichment-processor-1"</span>, <span class="cm">// UNIQUE per instance</span>
+            EnableIdempotence = <span class="kw">true</span>,                    <span class="cm">// required for transactions</span>
+            Acks = <span class="tp">Acks</span>.All                              <span class="cm">// required for transactions</span>
+        };
+        _producer = <span class="kw">new</span> <span class="tp">ProducerBuilder</span>&lt;<span class="kw">string</span>, <span class="tp">EnrichedOrder</span>&gt;(producerCfg).<span class="fn">Build</span>();
+        _producer.<span class="fn">InitTransactions</span>(<span class="tp">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="nu">30</span>));
+        
+        <span class="kw">var</span> consumerCfg = <span class="kw">new</span> <span class="tp">ConsumerConfig</span> {
+            BootstrapServers = config[<span class="st">"Kafka:Brokers"</span>],
+            GroupId = <span class="st">"order-enrichment-group"</span>,
+            EnableAutoCommit = <span class="kw">false</span>,
+            IsolationLevel = <span class="tp">IsolationLevel</span>.ReadCommitted <span class="cm">// ← skip txn aborts</span>
+        };
+        _consumer = <span class="kw">new</span> <span class="tp">ConsumerBuilder</span>&lt;<span class="kw">string</span>, <span class="tp">Order</span>&gt;(consumerCfg).<span class="fn">Build</span>();
+    }
+
+    <span class="kw">public async</span> <span class="tp">Task</span> <span class="fn">RunAsync</span>(<span class="tp">CancellationToken</span> ct)
+    {
+        _consumer.<span class="fn">Subscribe</span>(<span class="st">"raw-orders"</span>);
+        <span class="kw">while</span> (!ct.IsCancellationRequested)
+        {
+            <span class="kw">var</span> msg = _consumer.<span class="fn">Consume</span>(ct);
+            _producer.<span class="fn">BeginTransaction</span>();
+            <span class="kw">try</span>
+            {
+                <span class="cm">// Transform the message</span>
+                <span class="kw">var</span> enriched = <span class="kw">await</span> <span class="fn">EnrichAsync</span>(msg.Message.Value, ct);
+                
+                <span class="cm">// Write output — part of the transaction</span>
+                <span class="kw">await</span> _producer.<span class="fn">ProduceAsync</span>(<span class="st">"enriched-orders"</span>,
+                    <span class="kw">new</span> <span class="tp">Message</span>&lt;<span class="kw">string</span>, <span class="tp">EnrichedOrder</span>&gt; { Key = msg.Message.Key, Value = enriched });
+                
+                <span class="cm">// Commit offset ATOMICALLY with the output message</span>
+                _producer.<span class="fn">SendOffsetsToTransaction</span>(
+                    [<span class="kw">new</span> <span class="tp">TopicPartitionOffset</span>(msg.TopicPartition, msg.Offset + <span class="nu">1</span>)],
+                    _consumer.<span class="fn">ConsumerGroupMetadata</span>(),
+                    <span class="tp">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="nu">10</span>));
+                
+                <span class="cm">// Atomic commit — both output AND offset committed or neither</span>
+                _producer.<span class="fn">CommitTransaction</span>();
+            }
+            <span class="kw">catch</span> (<span class="tp">KafkaException</span> ex) <span class="kw">when</span> (ex.<span class="fn">IsTransient</span>())
+            {
+                _producer.<span class="fn">AbortTransaction</span>(); <span class="cm">// safe to retry</span>
+            }
+        }
+    }
+}`},
+]},
+
+"ks2":{
+title:"KStream vs KTable vs GlobalKTable",
+bread:"Chapter 11 · Kafka Streams",
+sub:"The three fundamental abstractions of Kafka Streams — understanding their semantics, underlying changelog topics, and when to choose each.",
+pills:[{t:"Core",c:"#10b981"},{t:"Streams",c:"#06b6d4"},{t:"Critical",c:"#ef4444"}],
+secs:[
+{ty:"prose",title:"The Duality of Streams and Tables",html:`<p>Kafka Streams introduces a profound duality: <strong>every stream can be viewed as a table, and every table can be viewed as a stream</strong>. This stream-table duality is the foundation of all stream processing.</p>
+<h4>KStream — An Infinite Stream</h4>
+<p>A <code>KStream</code> represents an <strong>unbounded sequence of events</strong>. Each record is independent — it doesn't "update" any previous record. Think of it as a transaction log or an event log.</p>
+<ul><li>Every record is meaningful on its own</li>
+<li>Aggregations create new KTables</li>
+<li>Joins with other KStreams are time-windowed</li></ul>
+<h4>KTable — A Changelog (Compacted View)</h4>
+<p>A <code>KTable</code> represents the <strong>latest value for each key</strong> — a snapshot of current state. It's backed by a compacted Kafka topic and a local state store. New records with the same key <em>update</em> the table, not append.</p>
+<ul><li>Backed by a changelog topic + local RocksDB state store</li>
+<li>Only the latest value per key is retained</li>
+<li>Joins are key-based, not time-windowed</li></ul>
+<h4>GlobalKTable — Replicated on All Instances</h4>
+<p>A <code>GlobalKTable</code> is like KTable but replicated on <strong>every Streams instance</strong>, not partitioned. This eliminates co-partitioning requirements for joins at the cost of more memory and replication lag.</p>`},
+{ty:"diagram",title:"KStream vs KTable — The Stream-Table Duality",svg:`<svg width="530" height="270" viewBox="0 0 530 270" xmlns="http://www.w3.org/2000/svg">
+<defs><style>.ksb{fill:#0d2018;stroke:#10b981;stroke-width:1.2}.ksbb{fill:#0d1a28;stroke:#06b6d4;stroke-width:1.2}.ksy{fill:#1a1a08;stroke:#eab308;stroke-width:1.2}
+.kst{font-family:'Fira Code',monospace;font-size:9px;fill:#e8d5c4;text-anchor:middle}.kss{font-family:'Fira Code',monospace;font-size:8px;fill:#94a3b8;text-anchor:middle}
+@keyframes ksf{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}.ksafl{stroke-dasharray:5 3;animation:ksf 1.5s linear infinite}</style></defs>
+<rect fill="#040206" x="1" y="1" width="528" height="268" rx="8" stroke="#241d35" stroke-width="1"/>
+<text font-family="'Outfit',sans-serif" font-size="11" font-weight="700" fill="#10b981" text-anchor="middle" x="265" y="18">STREAM-TABLE DUALITY</text>
+
+<!-- Topic records (source) -->
+<text class="kst" fill="#ff6b35" x="130" y="34">SOURCE TOPIC: user-events</text>
+<text class="kss" x="20" y="54">t=1: {alice, login}</text><text class="kss" x="20" y="68">{bob, login}</text>
+<text class="kss" x="20" y="82">{alice, buy}</text><text class="kss" x="20" y="96">{alice, logout}</text>
+<text class="kss" x="20" y="110">{bob, logout}</text>
+
+<!-- KStream view -->
+<rect class="ksb" x="200" y="26" width="145" height="100" rx="5"/>
+<text class="kst" fill="#10b981" x="272" y="42">KStream VIEW</text>
+<text class="kss" x="272" y="56">Each record = event</text>
+<text class="kss" fill="#e8d5c4" x="272" y="70">t=1: alice → login ✓</text>
+<text class="kss" fill="#e8d5c4" x="272" y="82">t=2: bob → login ✓</text>
+<text class="kss" fill="#e8d5c4" x="272" y="94">t=3: alice → buy ✓</text>
+<text class="kss" fill="#e8d5c4" x="272" y="106">t=4: alice → logout ✓</text>
+
+<!-- KTable view -->
+<rect class="ksbb" x="370" y="26" width="150" height="100" rx="5"/>
+<text class="kst" fill="#06b6d4" x="445" y="42">KTable VIEW</text>
+<text class="kss" x="445" y="56">Latest value per key</text>
+<text class="kss" fill="#e8d5c4" x="445" y="72">alice → logout (latest)</text>
+<text class="kss" fill="#e8d5c4" x="445" y="86">bob → logout (latest)</text>
+<text class="kss" fill="#94a3b8" x="445" y="100">[login, buy, login all gone]</text>
+
+<!-- Example transformations -->
+<rect fill="#0d2018" stroke="#10b981" stroke-width="1" x="10" y="140" width="508" height="120" rx="5"/>
+<text font-family="'Outfit',sans-serif" font-size="10" font-weight="700" fill="#10b981" x="18" y="158">KAFKA STREAMS CODE — KStream + KTable</text>
+<text class="kss" fill="#89b4fa" x="18" y="174">StreamsBuilder builder = new StreamsBuilder();</text>
+<text class="kss" fill="#e8d5c4" x="18" y="188">KStream&lt;String,Order&gt; orders = builder.stream("raw-orders");</text>
+<text class="kss" fill="#e8d5c4" x="18" y="202">KTable&lt;String,Product&gt; products = builder.table("products");  // latest product data</text>
+<text class="kss" fill="#e8d5c4" x="18" y="216">// Enrich orders with latest product info</text>
+<text class="kss" fill="#e8d5c4" x="18" y="230">orders.join(products, (order,product) -&gt; enrich(order,product))</text>
+<text class="kss" fill="#e8d5c4" x="18" y="244">      .to("enriched-orders");</text>
+<text class="kss" fill="#34d399" x="18" y="258">// join is per-key; orders and products MUST have same partition count</text>
+</svg>`},
+{ty:"code",lang:"csharp",name:"Kafka Streams Equivalent in .NET — Streamiz",code:`<span class="cm">// Using Streamiz.Kafka.Net (Kafka Streams port for .NET)</span>
+<span class="cm">// NuGet: Streamiz.Kafka.Net</span>
+<span class="kw">var</span> config = <span class="kw">new</span> <span class="tp">StreamConfig</span>&lt;<span class="tp">StringSerDes</span>, <span class="tp">StringSerDes</span>&gt; {
+    ApplicationId = <span class="st">"order-enrichment"</span>,
+    BootstrapServers = <span class="st">"broker:9092"</span>,
+    AutoOffsetReset = <span class="tp">AutoOffsetReset</span>.Earliest
+};
+
+<span class="kw">var</span> builder = <span class="kw">new</span> <span class="tp">StreamBuilder</span>();
+
+<span class="cm">// Raw orders stream (every event)</span>
+<span class="kw">var</span> orders = builder.<span class="fn">Stream</span>&lt;<span class="kw">string</span>, <span class="kw">string</span>&gt;(<span class="st">"raw-orders"</span>);
+
+<span class="cm">// Product catalog table (latest value per productId)</span>
+<span class="kw">var</span> products = builder.<span class="fn">Table</span>&lt;<span class="kw">string</span>, <span class="kw">string</span>&gt;(<span class="st">"products"</span>,
+    <span class="tp">InMemory</span>.<span class="fn">As</span>&lt;<span class="kw">string</span>, <span class="kw">string</span>&gt;(<span class="st">"products-store"</span>));
+
+<span class="cm">// Filter high-value orders</span>
+<span class="kw">var</span> highValue = orders
+    .<span class="fn">Filter</span>((key, value) => {
+        <span class="kw">var</span> order = <span class="tp">JsonSerializer</span>.<span class="fn">Deserialize</span>&lt;<span class="tp">Order</span>&gt;(value)!;
+        <span class="kw">return</span> order.Amount > <span class="nu">1000m</span>;
+    });
+
+<span class="cm">// Enrich with latest product data (KStream ⋈ KTable)</span>
+highValue
+    .<span class="fn">Join</span>(products,
+        valueJoiner: (orderJson, productJson) => {
+            <span class="kw">var</span> order = <span class="tp">JsonSerializer</span>.<span class="fn">Deserialize</span>&lt;<span class="tp">Order</span>&gt;(orderJson)!;
+            <span class="kw">var</span> product = <span class="tp">JsonSerializer</span>.<span class="fn">Deserialize</span>&lt;<span class="tp">Product</span>&gt;(productJson)!;
+            <span class="kw">return</span> <span class="tp">JsonSerializer</span>.<span class="fn">Serialize</span>(<span class="kw">new</span> <span class="tp">EnrichedOrder</span>(order, product));
+        })
+    .<span class="fn">To</span>(<span class="st">"enriched-high-value-orders"</span>);
+
+<span class="cm">// Aggregation — count orders per user in 5-minute tumbling window</span>
+orders
+    .<span class="fn">GroupByKey</span>()
+    .<span class="fn">WindowedBy</span>(<span class="tp">TumblingWindowOptions</span>.<span class="fn">Of</span>(<span class="tp">TimeSpan</span>.<span class="fn">FromMinutes</span>(<span class="nu">5</span>)))
+    .<span class="fn">Count</span>(<span class="tp">InMemoryWindows</span>.<span class="fn">As</span>&lt;<span class="kw">string</span>, <span class="kw">long</span>&gt;(<span class="st">"order-counts"</span>))
+    .<span class="fn">ToStream</span>()
+    .<span class="fn">To</span>(<span class="st">"order-counts-by-user"</span>);
+
+<span class="kw">var</span> topology = builder.<span class="fn">Build</span>();
+<span class="kw">var</span> stream = <span class="kw">new</span> <span class="tp">KafkaStream</span>(topology, config);
+<span class="kw">await</span> stream.<span class="fn">StartAsync</span>(ct);`},
+]},
+
+"dp1":{
+title:"Change Data Capture with Debezium",
+bread:"Chapter 20 · Real-Time Data Pipelines",
+sub:"The gold standard for streaming database changes to Kafka — how Debezium reads the binary log and the outbox pattern for transactionally safe event publishing.",
+pills:[{t:"Core",c:"#10b981"},{t:"CDC",c:"#ff6b35"},{t:"Debezium",c:"#06b6d4"}],
+secs:[
+{ty:"prose",title:"What is Change Data Capture?",html:`<p>CDC captures every <strong>insert, update, and delete</strong> from a database's transaction log and streams these changes to Kafka in real-time. Instead of polling the database (expensive, delayed), Debezium reads the database's native replication protocol:</p>
+<ul>
+<li><strong>PostgreSQL</strong> → logical replication (pgoutput / decoderbufs plugin)</li>
+<li><strong>MySQL/MariaDB</strong> → binlog reading</li>
+<li><strong>SQL Server</strong> → CDC tables (SQL Server-native CDC feature)</li>
+<li><strong>MongoDB</strong> → oplog reading</li>
+<li><strong>Oracle</strong> → LogMiner / XStream API</li>
+</ul>
+<h4>The Outbox Pattern — Safe CDC</h4>
+<p>Direct CDC on business tables can cause schema coupling. The <strong>Outbox Pattern</strong> solves this: your application writes to its database AND an <code>outbox</code> table in the same transaction. Debezium captures the outbox table and routes to Kafka topics. This gives exactly-once delivery to Kafka even if Kafka or Debezium goes down.</p>`},
+{ty:"diagram",title:"Debezium CDC Architecture & Outbox Pattern",svg:`<svg width="530" height="280" viewBox="0 0 530 280" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="cdca" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#10b981"/></marker>
+<style>.cdcb{fill:#0d2018;stroke:#10b981;stroke-width:1.2}.cdca2{fill:#0d1a28;stroke:#06b6d4;stroke-width:1.2}.cdcy{fill:#1a1a08;stroke:#eab308;stroke-width:1.2}.cdck{fill:#1a0d06;stroke:#ff6b35;stroke-width:1.2}
+.cdct{font-family:'Fira Code',monospace;font-size:9px;fill:#e8d5c4;text-anchor:middle}.cdcs{font-family:'Fira Code',monospace;font-size:8px;fill:#94a3b8;text-anchor:middle}
+.cdca3{stroke:#10b981;stroke-width:1.5;fill:none;marker-end:url(#cdca)}
+@keyframes cdcf{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}.cdcafl{stroke-dasharray:5 3;animation:cdcf 1.5s linear infinite}</style></defs>
+<rect fill="#040206" x="1" y="1" width="528" height="278" rx="8" stroke="#241d35" stroke-width="1"/>
+<text font-family="'Outfit',sans-serif" font-size="11" font-weight="700" fill="#10b981" text-anchor="middle" x="265" y="18">DEBEZIUM CDC + OUTBOX PATTERN</text>
+
+<!-- Application -->
+<rect class="cdca2" x="10" y="26" width="130" height="80" rx="5"/>
+<text class="cdct" fill="#06b6d4" x="75" y="42">Application</text>
+<text class="cdcs" x="75" y="56">BEGIN TRANSACTION</text>
+<text class="cdcs" fill="#34d399" x="75" y="68">INSERT INTO orders ✓</text>
+<text class="cdcs" fill="#34d399" x="75" y="80">INSERT INTO outbox ✓</text>
+<text class="cdcs" x="75" y="92">COMMIT TRANSACTION</text>
+
+<!-- PostgreSQL -->
+<rect class="cdca2" x="160" y="26" width="130" height="80" rx="5"/>
+<text class="cdct" fill="#06b6d4" x="225" y="42">PostgreSQL</text>
+<text class="cdcs" x="225" y="56">orders table</text>
+<text class="cdcs" fill="#ff6b35" x="225" y="68">outbox table ← key</text>
+<text class="cdcs" fill="#eab308" x="225" y="80">WAL (pg_logical)</text>
+<text class="cdcs" fill="#94a3b8" x="225" y="96">Debezium slot reads WAL</text>
+
+<!-- Debezium -->
+<rect class="cdcy" x="310" y="26" width="130" height="80" rx="5"/>
+<text class="cdct" fill="#eab308" x="375" y="42">Debezium</text>
+<text class="cdct" fill="#eab308" x="375" y="56">Connect Connector</text>
+<text class="cdcs" x="375" y="68">reads pg_logical slot</text>
+<text class="cdcs" x="375" y="80">Outbox SMT applies</text>
+<text class="cdcs" fill="#34d399" x="375" y="92">routes to correct topic</text>
+
+<!-- Kafka -->
+<rect class="cdck" x="10" y="124" width="510" height="55" rx="5"/>
+<text class="cdct" fill="#ff6b35" x="265" y="140">KAFKA TOPICS (via Debezium Outbox SMT)</text>
+<rect fill="#1a1408" stroke="#ff8c42" stroke-width="1" x="18" y="148" width="100" height="25" rx="3"/>
+<text class="cdcs" fill="#ff8c42" x="68" y="164">orders.created</text>
+<rect fill="#1a1408" stroke="#ff8c42" stroke-width="1" x="130" y="148" width="100" height="25" rx="3"/>
+<text class="cdcs" fill="#ff8c42" x="180" y="164">orders.updated</text>
+<rect fill="#1a1408" stroke="#ff8c42" stroke-width="1" x="242" y="148" width="100" height="25" rx="3"/>
+<text class="cdcs" fill="#ff8c42" x="292" y="164">inventory.changed</text>
+<rect fill="#1a1408" stroke="#ff8c42" stroke-width="1" x="354" y="148" width="90" height="25" rx="3"/>
+<text class="cdcs" fill="#ff8c42" x="399" y="164">payments.events</text>
+
+<!-- Consumers bottom -->
+<rect fill="#0d2018" stroke="#10b981" stroke-width="1" x="10" y="192" width="508" height="78" rx="5"/>
+<text font-family="'Outfit',sans-serif" font-size="10" font-weight="700" fill="#10b981" x="18" y="210">CONSUMERS — DOWNSTREAM SYSTEMS</text>
+<rect class="cdcb" x="18" y="216" width="110" height="48" rx="4"/><text class="cdct" fill="#10b981" x="73" y="235">Elasticsearch</text><text class="cdcs" x="73" y="250">search index sync</text>
+<rect class="cdcb" x="140" y="216" width="110" height="48" rx="4"/><text class="cdct" fill="#10b981" x="195" y="235">Redis Cache</text><text class="cdcs" x="195" y="250">cache invalidation</text>
+<rect class="cdcb" x="262" y="216" width="110" height="48" rx="4"/><text class="cdct" fill="#10b981" x="317" y="235">Analytics DB</text><text class="cdcs" x="317" y="250">ClickHouse/BigQuery</text>
+<rect class="cdcb" x="384" y="216" width="128" height="48" rx="4"/><text class="cdct" fill="#10b981" x="448" y="235">Other Services</text><text class="cdcs" x="448" y="250">event-driven reactions</text>
+
+<line class="cdca3 cdcafl" x1="140" y1="65" x2="158" y2="65"/>
+<line class="cdca3 cdcafl" x1="290" y1="65" x2="308" y2="65"/>
+<line class="cdca3 cdcafl" x1="375" y1="106" x2="265" y2="135" marker-end="url(#cdca)"/>
+</svg>`},
+{ty:"code",lang:"json",name:"Debezium PostgreSQL Connector Configuration",code:`<span class="cm">// POST to Connect REST API: /connectors</span>
+{
+  <span class="st">"name"</span>: <span class="st">"postgres-outbox-connector"</span>,
+  <span class="st">"config"</span>: {
+    <span class="st">"connector.class"</span>: <span class="st">"io.debezium.connector.postgresql.PostgresConnector"</span>,
+    <span class="st">"plugin.name"</span>: <span class="st">"pgoutput"</span>,
+    <span class="st">"database.hostname"</span>: <span class="st">"postgres.internal"</span>,
+    <span class="st">"database.port"</span>: <span class="st">"5432"</span>,
+    <span class="st">"database.user"</span>: <span class="st">"debezium"</span>,
+    <span class="st">"database.password"</span>: <span class="st">"\${file:/opt/kafka/config/secrets.properties:db.password}"</span>,
+    <span class="st">"database.dbname"</span>: <span class="st">"orderdb"</span>,
+    <span class="st">"database.server.name"</span>: <span class="st">"orderdb"</span>,
+    
+    <span class="cm">// Only capture the outbox table (not ALL tables)</span>
+    <span class="st">"table.include.list"</span>: <span class="st">"public.outbox"</span>,
+    <span class="st">"slot.name"</span>: <span class="st">"debezium_outbox_slot"</span>,
+    <span class="st">"publication.name"</span>: <span class="st">"dbz_publication"</span>,
+    
+    <span class="cm">// Outbox Event Router SMT — routes to correct topic per event_type</span>
+    <span class="st">"transforms"</span>: <span class="st">"outbox"</span>,
+    <span class="st">"transforms.outbox.type"</span>: <span class="st">"io.debezium.transforms.outbox.EventRouter"</span>,
+    <span class="st">"transforms.outbox.route.by.field"</span>: <span class="st">"aggregate_type"</span>,
+    <span class="st">"transforms.outbox.route.topic.replacement"</span>: <span class="st">"\${routedByValue}.events"</span>,
+    
+    <span class="cm">// Exactly-once: track position in __consumer_offsets</span>
+    <span class="st">"provide.transaction.metadata"</span>: <span class="st">"true"</span>,
+    <span class="st">"snapshot.mode"</span>: <span class="st">"exported"</span>,
+    <span class="st">"heartbeat.interval.ms"</span>: <span class="st">"30000"</span>
+  }
+}
+
+<span class="cm">-- The outbox table in PostgreSQL</span>
+<span class="cm">CREATE TABLE outbox (</span>
+<span class="cm">    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),</span>
+<span class="cm">    aggregate_type  VARCHAR(255) NOT NULL,  -- "orders", "inventory"</span>
+<span class="cm">    aggregate_id    VARCHAR(255) NOT NULL,  -- the entity ID (used as Kafka key)</span>
+<span class="cm">    event_type      VARCHAR(255) NOT NULL,  -- "OrderCreated", "OrderCancelled"</span>
+<span class="cm">    payload         JSONB NOT NULL,</span>
+<span class="cm">    created_at      TIMESTAMPTZ DEFAULT NOW()</span>
+<span class="cm">);</span>`},
+{ty:"callout",kind:"kafka",ic:"⚡",txt:"<strong>Why Outbox beats direct Kafka writes:</strong> If you write to Kafka and your DB transaction fails (or vice versa), you get an inconsistency. The Outbox pattern makes DB write + event publish <strong>atomic</strong> — they're both in the same DB transaction. Debezium then reliably delivers to Kafka with at-least-once semantics, and your consumers deduplicate using the outbox <code>id</code>."},
+]},
+
+"ms2":{
+title:"The Outbox Pattern — Transactionally Safe Event Publishing",
+bread:"Chapter 22 · Microservices with Kafka",
+sub:"Solving the dual-write problem — how to atomically write to a database and publish to Kafka using the transactional outbox pattern.",
+pills:[{t:"Critical",c:"#ef4444"},{t:"Microservices",c:"#06b6d4"},{t:"Patterns",c:"#ff6b35"}],
+secs:[
+{ty:"prose",title:"The Dual-Write Problem",html:`<p>In a microservice, you typically need to:</p>
+<ol>
+<li>Save state to the database</li>
+<li>Publish an event to Kafka</li>
+</ol>
+<p>These are two separate systems. <strong>There's no distributed transaction</strong> spanning both. If step 1 succeeds and step 2 fails (Kafka down, network timeout) — you have a <em>ghost state</em>: database updated, no event published. Other services miss the change. This is the <strong>dual-write problem</strong>.</p>
+<h4>Solution: The Outbox Pattern</h4>
+<p>Write to an <code>outbox</code> table in the SAME database transaction as your business data. A separate relay process (Debezium or a polling publisher) reads the outbox and publishes to Kafka. The relay only marks messages as published after Kafka acks them. If the relay crashes, it restarts from where it left off.</p>
+<h4>Two Implementations</h4>
+<ul>
+<li><strong>Debezium Outbox</strong> — CDC-based, near real-time, no polling, exactly-once-capable</li>
+<li><strong>Polling Publisher</strong> — simpler, slight delay, works without CDC, uses SELECT + DELETE loop</li>
+</ul>`},
+{ty:"code",lang:"csharp",name:"Outbox Pattern Full Implementation in .NET",code:`<span class="cm">// OutboxMessage entity — stored in same DB as business data</span>
+<span class="kw">public class</span> <span class="tp">OutboxMessage</span>
+{
+    <span class="kw">public</span> <span class="tp">Guid</span> Id { <span class="kw">get</span>; <span class="kw">init</span>; } = <span class="tp">Guid</span>.<span class="fn">NewGuid</span>();
+    <span class="kw">public string</span> AggregateType { <span class="kw">get</span>; <span class="kw">init</span>; } = <span class="st">""</span>;  <span class="cm">// "Order"</span>
+    <span class="kw">public string</span> AggregateId { <span class="kw">get</span>; <span class="kw">init</span>; } = <span class="st">""</span>;   <span class="cm">// order ID (Kafka key)</span>
+    <span class="kw">public string</span> EventType { <span class="kw">get</span>; <span class="kw">init</span>; } = <span class="st">""</span>;     <span class="cm">// "OrderCreated"</span>
+    <span class="kw">public string</span> Payload { <span class="kw">get</span>; <span class="kw">init</span>; } = <span class="st">""</span>;       <span class="cm">// JSON</span>
+    <span class="kw">public</span> <span class="tp">DateTime</span> OccurredAt { <span class="kw">get</span>; <span class="kw">init</span>; } = <span class="tp">DateTime</span>.UtcNow;
+    <span class="kw">public bool</span> Processed { <span class="kw">get</span>; <span class="kw">set</span>; }              <span class="cm">// for polling publisher</span>
+}
+
+<span class="cm">// Order service — ATOMIC: save order + outbox in ONE transaction</span>
+<span class="kw">public class</span> <span class="tp">OrderService</span>(<span class="tp">AppDbContext</span> db, <span class="tp">IMapper</span> mapper)
+{
+    <span class="kw">public async</span> <span class="tp">Task</span>&lt;<span class="tp">Order</span>&gt; <span class="fn">CreateOrderAsync</span>(<span class="tp">CreateOrderCommand</span> cmd)
+    {
+        <span class="kw">var</span> order = <span class="kw">new</span> <span class="tp">Order</span>(cmd.CustomerId, cmd.Items);
+        
+        <span class="kw">var</span> outboxEvent = <span class="kw">new</span> <span class="tp">OutboxMessage</span> {
+            AggregateType = <span class="st">"Order"</span>,
+            AggregateId = order.Id.ToString(), <span class="cm">// ← Kafka message key</span>
+            EventType = <span class="st">"OrderCreated"</span>,
+            Payload = <span class="tp">JsonSerializer</span>.<span class="fn">Serialize</span>(<span class="kw">new</span> <span class="tp">OrderCreatedEvent</span>(order))
+        };
+        
+        <span class="cm">// ATOMIC: both in same database transaction</span>
+        db.Orders.<span class="fn">Add</span>(order);
+        db.OutboxMessages.<span class="fn">Add</span>(outboxEvent);
+        <span class="kw">await</span> db.<span class="fn">SaveChangesAsync</span>(); <span class="cm">// ← single COMMIT: order + outbox</span>
+        <span class="cm">// Debezium or Polling Publisher picks up the outbox row</span>
+        <span class="kw">return</span> order;
+    }
+}
+
+<span class="cm">// Polling Publisher (alternative to Debezium)</span>
+<span class="kw">public class</span> <span class="tp">OutboxPollingPublisher</span>(<span class="tp">AppDbContext</span> db, <span class="tp">IProducer</span>&lt;<span class="kw">string</span>,<span class="kw">string</span>&gt; producer)
+    : <span class="tp">BackgroundService</span>
+{
+    <span class="kw">protected override async</span> <span class="tp">Task</span> <span class="fn">ExecuteAsync</span>(<span class="tp">CancellationToken</span> ct)
+    {
+        <span class="kw">while</span> (!ct.IsCancellationRequested)
+        {
+            <span class="kw">var</span> pending = <span class="kw">await</span> db.OutboxMessages
+                .<span class="fn">Where</span>(m => !m.Processed)
+                .<span class="fn">OrderBy</span>(m => m.OccurredAt)
+                .<span class="fn">Take</span>(<span class="nu">100</span>).<span class="fn">ToListAsync</span>(ct);
+            
+            <span class="kw">foreach</span> (<span class="kw">var</span> msg <span class="kw">in</span> pending) {
+                <span class="kw">var</span> topic = <span class="st">$"{msg.AggregateType.ToLower()}.{msg.EventType.ToLower()}"</span>;
+                <span class="kw">await</span> producer.<span class="fn">ProduceAsync</span>(topic,
+                    <span class="kw">new</span> <span class="tp">Message</span>&lt;<span class="kw">string</span>,<span class="kw">string</span>&gt; { Key = msg.AggregateId, Value = msg.Payload });
+                msg.Processed = <span class="kw">true</span>; <span class="cm">// mark only after Kafka ack</span>
+            }
+            <span class="kw">if</span> (pending.Any()) <span class="kw">await</span> db.<span class="fn">SaveChangesAsync</span>(ct);
+            <span class="kw">else</span> <span class="kw">await</span> <span class="tp">Task</span>.<span class="fn">Delay</span>(<span class="tp">TimeSpan</span>.<span class="fn">FromMilliseconds</span>(<span class="nu">200</span>), ct);
+        }
+    }
+}`},
+]},
+};
+const QA=[
+{q:"What is Apache Kafka and what problems does it solve?",a:"Apache Kafka is a distributed, durable, high-throughput event streaming platform originally built at LinkedIn in 2010. It solves three core problems: (1) <strong>Decoupling</strong> — producers and consumers are fully independent; producers don't know about consumers. (2) <strong>Durability</strong> — events are persisted to disk with configurable retention (days, weeks, forever), enabling replay and recovery. (3) <strong>Scale</strong> — partitioned, distributed design allows horizontal scaling to millions of messages/second. Key differentiator from traditional queues (RabbitMQ, ActiveMQ): Kafka is a <em>log</em>, not a queue. Messages are retained after consumption, consumers track their own position (offset), and the same message can be consumed by unlimited independent consumer groups simultaneously.",level:"b",tag:"Core"},
+{q:"What is a Kafka topic and how is it structured?",a:"A Kafka topic is a named, logical stream of records — like a database table or a file folder. Internally, a topic is split into one or more <strong>partitions</strong>. Each partition is an ordered, immutable, append-only log stored on disk. Messages within a partition are assigned monotonically increasing <strong>offsets</strong> (0, 1, 2, ...). A topic's partition files are spread across brokers in the cluster. Producers write to a topic; Kafka routes messages to specific partitions (by key hash, round-robin, or custom partitioner). Consumers read from specific partitions by offset. Retention policy (time-based, size-based, or compaction) determines how long data is kept.",level:"b",tag:"Topics"},
+{q:"What is a Kafka partition and why does it matter?",a:"A partition is the fundamental unit of parallelism, ordering, and durability in Kafka. Key facts: (1) <strong>Ordering</strong>: messages are strictly ordered within a partition. There is NO ordering guarantee across partitions in the same topic. (2) <strong>Parallelism</strong>: each partition can be consumed by exactly one consumer in a consumer group at a time — so partition count determines max parallelism. (3) <strong>Replication</strong>: each partition has one leader and N-1 followers. (4) <strong>Scalability</strong>: more partitions = more throughput but more overhead. Rule of thumb: start with 3x expected consumers, don't go above 100 partitions per broker.",level:"b",tag:"Partitions"},
+{q:"Explain the three delivery guarantees in Kafka.",a:"(1) <strong>At-most-once</strong>: messages delivered 0 or 1 time. Config: <code>acks=0, retries=0</code>. Messages are lost if broker fails. Use for non-critical telemetry. (2) <strong>At-least-once</strong>: messages delivered 1+ times. Config: <code>acks=all, retries=MAX</code>. Broker retries cause duplicates. Consumer must be idempotent (use dedup key in DB). This is Kafka's default mode and covers 95% of use cases. (3) <strong>Exactly-once (EOS)</strong>: messages delivered exactly 1 time. Config: <code>enable.idempotence=true, transactional.id=X</code>. Uses PID+epoch+sequence for dedup at broker. Add transactions API for atomic multi-partition writes. ~20% throughput cost. Use for financial systems, inventory, billing.",level:"b",tag:"Semantics"},
+{q:"What is a consumer group and how does partition assignment work?",a:"A consumer group is a set of consumers that cooperate to consume a topic, with each partition assigned to exactly one member. This enables horizontal scaling: 4 partitions → 4 consumers all reading in parallel. Assignment process: (1) Consumers send JoinGroup request to the Group Coordinator broker. (2) Coordinator elects one consumer as Group Leader. (3) Leader runs the assignment algorithm (RangeAssignor, StickyAssignor, etc.) and sends result back. (4) All members receive their partition assignment via SyncGroup response. Multiple independent groups can consume the same topic simultaneously, each tracking their own offsets — this is Kafka's fan-out model.",level:"b",tag:"ConsumerGroups"},
+{q:"What is the difference between acks=0, acks=1, and acks=all?",a:"<code>acks=0</code>: Producer doesn't wait for any acknowledgment. Fire-and-forget. Highest throughput, but data loss is possible if the broker crashes before writing. <code>acks=1</code>: Producer waits for the partition leader to write to its local log. Fast response, but if the leader crashes before followers replicate, the message is lost. <code>acks=all</code> (or -1): Producer waits until all In-Sync Replicas (ISR) have written the message. Combined with <code>min.insync.replicas=2</code>, this means at least 2 replicas have the data before the producer gets an ack. This is the only setting that guarantees no data loss when combined with proper replication factor.",level:"b",tag:"Producers"},
+{q:"What is the ISR (In-Sync Replica) and why does it matter?",a:"ISR is the set of partition replicas that are 'caught up' to the leader within <code>replica.lag.time.max.ms</code> (default 30 seconds). If a follower falls too far behind, the controller removes it from the ISR. Why it matters: (1) <strong>Write guarantee</strong>: with <code>acks=all</code>, the producer only gets an ack when ALL ISR members have written the message. (2) <strong>HW advancement</strong>: the High Watermark (consumer-readable offset) advances to <code>min(LEO of all ISR members)</code>. (3) <strong>Leader election</strong>: only ISR members can become the new leader on failure (by default). If a non-ISR replica is elected (unclean leader election), data loss occurs. Golden config: <code>replication.factor=3, min.insync.replicas=2, acks=all</code>.",level:"i",tag:"Replication"},
+{q:"What is the High Watermark (HW) and Log End Offset (LEO)?",a:"<strong>LEO (Log End Offset)</strong> = the offset of the next message to be written. It's the 'tip' of the log. Each replica has its own LEO. <strong>HW (High Watermark)</strong> = <code>min(LEO of all ISR replicas)</code>. This is the highest offset that's been replicated to all ISR members. Consumers can only read messages up to the HW — this ensures consumers never read data that could be lost if the leader fails. When a follower fails and leaves the ISR, the HW can no longer advance until a replacement joins. When a leader crashes, the new leader truncates its log back to the HW (preventing divergence), and consumers re-read any messages above the old HW that weren't replicated.",level:"i",tag:"Internals"},
+{q:"How does a Kafka consumer commit offsets and what are the risks?",a:"<strong>Auto-commit</strong> (<code>enable.auto.commit=true</code>, default): Commits every 5 seconds regardless of processing success. Risk: if processing fails AFTER commit, the message is skipped on restart (data loss). <strong>Manual commit</strong>: (1) <code>commitSync()</code> — blocking, retries until success, safe but slow. (2) <code>commitAsync()</code> — non-blocking, faster, but commit failures aren't retried (use callback for logging). Best practice: manual commit AFTER successful processing. This gives at-least-once: on crash, last unprocessed message is re-processed. Make consumers idempotent to handle this safely.",level:"i",tag:"Consumers"},
+{q:"What is a consumer rebalance and how can you minimize its impact?",a:"A rebalance reassigns partitions among consumers in a group. Triggers: new consumer joins, consumer leaves/crashes, topics change, heartbeat timeout. Problems: (1) <strong>Stop-the-world</strong>: all consumers stop, partitions revoked, reassigned. Processing pauses for seconds to minutes during rebalance. Mitigation strategies: (1) <strong>CooperativeStickyAssignor</strong> (default since Kafka 3.1): incremental rebalance — only moves necessary partitions; other partitions keep processing. (2) <strong>Static group membership</strong> (<code>group.instance.id</code>): consumers have a stable ID; brief disconnects don't trigger rebalance. (3) Increase <code>session.timeout.ms</code> to reduce false timeouts. (4) Ensure processing time < <code>max.poll.interval.ms</code>.",level:"i",tag:"Consumers"},
+{q:"Explain Kafka's idempotent producer. How does it prevent duplicates?",a:"Idempotent producer (<code>enable.idempotence=true</code>) prevents duplicate messages caused by producer retries. Mechanism: (1) Broker assigns a unique <strong>PID (Producer ID)</strong> to each producer on initialization. (2) Producer attaches a monotonically increasing <strong>sequence number</strong> to each message (per partition). (3) Broker stores the last 5 sequence numbers per (PID, partition). (4) If a message with the same (PID, sequence) arrives again (retry), the broker silently deduplicates it. Epoch fencing: if a new producer starts with the same TransactionalId, it gets a higher epoch. Old producer's messages are rejected by the broker (zombie fencing). This prevents old zombie producers from interleaving messages.",level:"i",tag:"Semantics"},
+{q:"What is log compaction and when would you use it?",a:"Log compaction retains only the <strong>latest value for each key</strong> in a partition (older values with the same key are removed). Unlike time/size retention which deletes old segments entirely, compaction keeps the most recent snapshot of all keys. Use cases: (1) <strong>KTable changelog topics</strong> in Kafka Streams — rebuild state store state on restart by replaying compacted topic. (2) <strong>Database cache invalidation</strong> — topic represents current DB state. (3) <strong>CDC snapshots</strong> — compacted topic represents current table state. Configuration: <code>cleanup.policy=compact</code>. A Tombstone (message with null value) deletes a key. Important: compaction is best-effort, not instantaneous — the cleaner thread runs periodically.",level:"i",tag:"Topics"},
+{q:"What is Kafka Streams and how does it differ from using consumers manually?",a:"Kafka Streams is a <strong>client-side stream processing library</strong> built on top of the Kafka producer/consumer API. It adds: (1) <strong>Topology DSL</strong> — fluent API for building processing pipelines (filter, map, join, aggregate). (2) <strong>State stores</strong> — RocksDB-backed local state per processing task, with changelog topics for fault tolerance. (3) <strong>Time semantics</strong> — event time, ingestion time, windowing with out-of-order handling. (4) <strong>Task parallelism</strong> — automatically creates one task per input partition, assignable to stream threads. (5) <strong>Exactly-once processing</strong> — can configure EOS. Unlike Flink/Spark Streaming, Kafka Streams has no separate cluster — it runs inside your application.",level:"i",tag:"Streams"},
+{q:"What is the outbox pattern and why is it needed with Kafka?",a:"The outbox pattern solves the <strong>dual-write problem</strong>: you can't atomically write to a database AND produce to Kafka in a single transaction (two different systems). Without outbox: if you write to DB first and Kafka fails, the event is never published. If you write to Kafka first and DB fails, the event is published but the state change never happened — inconsistency. Solution: write to an <code>outbox</code> table in the same database transaction as business data. A relay process (Debezium CDC or polling publisher) reads the outbox table and publishes to Kafka. If the relay fails, it restarts from the last unpublished message. Result: atomic DB write + guaranteed event publishing, with at-least-once delivery to Kafka (consumer deduplicates using outbox message ID).",level:"i",tag:"Patterns"},
+{q:"How does Kafka Connect work and what are its main components?",a:"Kafka Connect is a scalable, fault-tolerant framework for streaming data between Kafka and external systems. Components: (1) <strong>Worker</strong> — JVM process that executes connectors. Standalone (single process) or Distributed (cluster). (2) <strong>Connector</strong> — manages a data copying job. Source connector pulls from external system → Kafka. Sink connector pushes Kafka → external system. (3) <strong>Task</strong> — the actual unit of work; one connector can have multiple tasks for parallelism. (4) <strong>SMT (Single Message Transform)</strong> — in-flight transformation: field extraction, routing, masking, type conversion. (5) <strong>Converter</strong> — serialization format (JSON, Avro, Protobuf). Distributed mode stores connector state in Kafka topics (<code>connect-configs</code>, <code>connect-offsets</code>, <code>connect-status</code>).",level:"i",tag:"Connect"},
+{q:"Explain the Kafka transaction protocol and zombie fencing.",a:"Kafka transactions provide atomic writes to multiple partitions. Protocol: (1) <code>initTransactions()</code> — producer registers its TransactionalId with the Transaction Coordinator broker. Coordinator bumps the <strong>epoch</strong> for this TransactionalId, fencing any old producer instance. (2) <code>beginTransaction()</code> — local marker, no broker call. (3) <code>produce()</code> — messages sent with PID+epoch+sequence; partitions added to the transaction. (4) <code>sendOffsetsToTransaction()</code> — atomically includes consumed offset commits in the transaction. (5) <code>commitTransaction()</code> — 2PC: coordinator writes COMMIT to <code>__transaction_state</code>, then sends WriteTxnMarkers to all participant partition leaders. <strong>Zombie fencing</strong>: if a crashed producer restarts with the same TransactionalId, it gets epoch N+1. Brokers reject messages from the old instance (epoch N) — preventing zombie producers from writing stale data.",level:"a",tag:"Transactions"},
+{q:"How would you design a Kafka topic schema for a high-traffic e-commerce platform?",a:"<strong>Topic design principles:</strong> (1) <strong>Event types</strong>: separate topics per event type — <code>orders.created</code>, <code>orders.updated</code>, <code>inventory.reserved</code>. Avoids consumer filtering overhead and allows independent retention policies. (2) <strong>Key design</strong>: use the entity ID as key (<code>orderId</code>, <code>customerId</code>) — ensures per-entity ordering. (3) <strong>Partition count</strong>: target throughput ÷ throughput-per-partition. For 100K orders/sec: estimate 1 partition = 20K/sec → 5 partitions minimum → use 8 (buffer + future scale). (4) <strong>Retention</strong>: <code>orders.*</code> = 7 days (audit). <code>inventory.*</code> = compact (current state). (5) <strong>Replication</strong>: RF=3, min.insync.replicas=2 for all business-critical topics. (6) <strong>Schema</strong>: Avro with Schema Registry — backward compatibility enforced.",level:"a",tag:"Design"},
+{q:"What causes consumer lag and how do you diagnose and fix it?",a:"Consumer lag = <code>log-end-offset - committed-offset</code> per partition. Causes: (1) <strong>Slow processing</strong>: downstream calls (DB, API) take too long. Fix: async processing, batching, caching. (2) <strong>Too few consumers</strong>: fewer consumers than partitions. Fix: scale horizontally (add instances). (3) <strong>Rebalancing</strong>: frequent rebalances stop processing. Fix: CooperativeStickyAssignor, static membership. (4) <strong>GC pauses</strong>: JVM GC stops consumer thread. Fix: tune GC, use ZGC. (5) <strong>max.poll.records too high</strong>: batch too large to process within max.poll.interval.ms. Fix: reduce max.poll.records. Diagnosis: <code>kafka-consumer-groups.sh --describe</code>, Burrow, Prometheus + Grafana lag dashboards. Alert when lag grows > X for Y minutes.",level:"a",tag:"Operations"},
+{q:"How does KRaft mode replace ZooKeeper in Kafka?",a:"KRaft (Kafka Raft) removes the ZooKeeper dependency, replacing it with Kafka's own Raft-based metadata quorum. In ZooKeeper mode: ZK stores broker registrations, controller election, topic configs, and ACLs. This creates an external dependency, separate monitoring, and scaling issues above ~200K partitions. KRaft mode: (1) A set of brokers are designated as <strong>controller nodes</strong> (or combined broker+controller). (2) They form a Raft consensus group, maintaining cluster metadata in a special <code>__cluster_metadata</code> topic. (3) <strong>Leader election</strong> happens via Raft protocol — faster than ZK watch-based election. (4) Metadata changes are replicated via the Raft log. (5) Supports 10x more partitions (millions vs ~200K). (6) Simpler operations — one system to manage. GA since Kafka 3.3, recommended for all new deployments since 3.6.",level:"a",tag:"Architecture"},
+{q:"Design a real-time fraud detection system using Kafka.",a:"<strong>Architecture:</strong> (1) <strong>Transaction events</strong>: Payment service → Kafka topic <code>transactions</code> (key=accountId, RF=3, 24 partitions, 3-day retention). (2) <strong>Feature computation</strong> (Kafka Streams): KStream of transactions → 5-min tumbling window count/sum per accountId → KTable of behavioral features. KTable stored in RocksDB + changelog topic. (3) <strong>Scoring</strong>: Kafka Streams processor calls ML model API (low latency synchronous call) for each transaction. Produces <code>fraud-scores</code> topic. (4) <strong>Alert routing</strong>: Consumer reads fraud-scores, high-score transactions → <code>fraud-alerts</code> topic → notification service + manual review queue. (5) <strong>Feedback loop</strong>: Human review decisions → <code>fraud-labels</code> topic → ML model retraining pipeline. <strong>Key configs</strong>: EOS on scoring (can't double-block), 5s latency SLA, replicate to DR region via MirrorMaker2.",level:"a",tag:"Design"},
+{q:"What is the difference between RangeAssignor, RoundRobinAssignor, and StickyAssignor?",a:"<strong>RangeAssignor</strong>: For each topic, sort partitions numerically and assign contiguous ranges to consumers sorted alphabetically. With 2 topics × 3 partitions and 2 consumers: Consumer-1 gets P0,P1 of both topics (4 total), Consumer-2 gets P2 of both (2 total) — unbalanced with multiple topics. <strong>RoundRobinAssignor</strong>: Assign partitions cyclically across consumers. More balanced than Range when subscriptions are the same across all consumers. <strong>StickyAssignor</strong>: Like RoundRobin but preserves existing assignments as much as possible during rebalance. Minimizes partition movement. <strong>CooperativeStickyAssignor</strong>: Same as Sticky but uses incremental (cooperative) rebalancing protocol — only revokes partitions that are being moved, others keep processing. This is the default since Kafka 3.1 and dramatically reduces rebalance pause time.",level:"a",tag:"Consumers"},
+{q:"How does Schema Registry enforce schema compatibility?",a:"Schema Registry enforces compatibility by comparing a new schema to all registered schemas in a subject before accepting registration. Compatibility modes: (1) <strong>BACKWARD</strong> (default): new schema can read data written with the previous schema. Consumers using new schema can still process old messages. Safe for consumers to upgrade first. (2) <strong>FORWARD</strong>: previous schema can read data written with the new schema. Old consumers can still process new messages. Safe for producers to upgrade first. (3) <strong>FULL</strong>: both backward and forward. (4) <strong>NONE</strong>: no compatibility check. Breaking changes: removing a required field (BACKWARD violation), renaming a field, changing field type. Safe changes: adding optional field with default. Wire format: 1-byte magic + 4-byte schema ID + payload — consumers use schema ID to look up the schema from registry.",level:"i",tag:"Schema"},
+{q:"What are the main performance tuning levers for Kafka producers?",a:"<strong>Throughput optimization:</strong> (1) <code>batch.size</code> — increase to 128KB or 256KB (default 16KB too small). Larger batches = fewer requests = higher throughput. (2) <code>linger.ms</code> — set to 5-20ms. Waits before sending to fill batches (vs default 0 = immediate send). (3) <code>compression.type=lz4</code> — LZ4 is fastest. Snappy for better ratio. ZStd for best compression. Reduces network and storage I/O. (4) <code>buffer.memory</code> — increase if producer blocks. (5) Async produce — call ProduceAsync() without awaiting each; batch up calls. <strong>Latency optimization:</strong> (1) <code>linger.ms=0</code> — no waiting. (2) <code>acks=1</code> — only wait for leader. (3) Keep producers on same region as brokers. (4) Choose low-latency brokers. Typical achievable: 500K-1M msgs/sec throughput, sub-10ms p99 latency on commodity hardware.",level:"a",tag:"Performance"},
+{q:"Explain how MirrorMaker 2 works for multi-datacenter replication.",a:"MirrorMaker 2 (MM2) is built on Kafka Connect and provides cross-cluster topic replication. Components: (1) <strong>MirrorSourceConnector</strong>: reads from source cluster, produces to target with topic prefixed by source cluster alias (e.g., <code>us-east.orders</code>). (2) <strong>MirrorCheckpointConnector</strong>: translates consumer group offsets from source to target — enables consumer failover. (3) <strong>MirrorHeartbeatConnector</strong>: tracks replication lag. <strong>Active-Active</strong>: both clusters replicate to each other with different aliases — consumers can fail over to either side. Cycle detection prevents infinite replication loops. <strong>Active-Passive</strong>: source replicates to passive DR. On failover, consumers translate offsets using checkpoint connector and resume on target. Key configs: <code>replication.factor</code>, <code>topics</code> filter regex, <code>sync.group.offsets.enabled=true</code>.",level:"a",tag:"Production"},
+{q:"How would you implement exactly-once consumption in .NET?",a:"Exactly-once consumption requires ensuring each message is processed exactly once despite failures. Steps: (1) <strong>Idempotent consumer</strong>: store a dedup key (use Kafka topic+partition+offset, or business event ID) in your database. Before processing, check if already processed. (2) <strong>Atomic process+commit</strong>: use Kafka transactions: <code>sendOffsetsToTransaction()</code> atomically commits the offset WITH your output messages in a single Kafka transaction. If crash before commit, transaction is aborted and message is reprocessed. (3) <strong>Database transactions</strong>: for DB-only processing, use DB transaction — UPDATE business data + INSERT dedup record atomically. If the same message arrives again, dedup check fails the constraint and we skip. (4) Use <code>isolation.level=read_committed</code> on consumers to avoid reading aborted transaction messages.",level:"e",tag:"Semantics"},
+];
+
+const GUIDE_BLUEPRINTS={
+  ds:{
+    area:"distributed-systems foundation",
+    use:"when you need a mental model for consistency, failures, ordering, or delivery guarantees before making Kafka design decisions",
+    avoid:"when the team only needs a quick how-to and is not making architecture or correctness choices",
+    trade:"higher upfront conceptual load in exchange for fewer correctness bugs and better incident decisions",
+    flow:["Client / Service","Network / Partition","Broker / Replica","Consumer / State"],
+    code:`var config = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:Brokers"],
+    Acks = Acks.All,
+    EnableIdempotence = true
+};
+
+await using var producer = new ProducerBuilder<string, string>(config).Build();
+await producer.ProduceAsync("system.events", new Message<string, string>
+{
+    Key = "order-123",
+    Value = "{\"event\":\"created\"}"
+});`,
+    scenario:"An order service, payment service, and notification service all observe the same event. Understanding ordering, retries, and failure recovery determines whether the same order is processed once, twice, or not at all.",
+    callout:"Kafka is not a magic queue. It is a distributed log, so correctness depends on how you reason about retries, offsets, and state transitions."
+  },
+  k:{
+    area:"Kafka foundations",
+    use:"when you need to explain Kafka to a team, position it against another broker, or decide whether event streaming is the right fit",
+    avoid:"when the workload is purely synchronous request-response or when long-term replay adds no value",
+    trade:"Kafka gives replay, fan-out, and retention, but it introduces operational overhead, eventual consistency, and schema governance requirements",
+    flow:["Producer App","Kafka API","Topic / Partition","Consumer Group"],
+    code:`var admin = new AdminClientBuilder(new AdminClientConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:Brokers"]
+}).Build();
+
+await admin.CreateTopicsAsync(new[]
+{
+    new TopicSpecification
+    {
+        Name = "orders.created",
+        NumPartitions = 6,
+        ReplicationFactor = 3
+    }
+});`,
+    scenario:"A retail platform wants orders, payments, fraud scoring, and analytics to react independently to the same purchase event. Kafka becomes the shared event backbone.",
+    callout:"If the primary value is independent fan-out plus replay, Kafka is usually a strong fit. If you need short-lived task dispatch with strict per-message acknowledgments only, a classic queue may be simpler."
+  },
+  arch:{
+    area:"Kafka internals and architecture",
+    use:"when you need to reason about throughput, page cache, controller behavior, or request flow under production load",
+    avoid:"when you only need client-side producer and consumer usage",
+    trade:"deeper internals knowledge improves tuning and troubleshooting, but it is more useful for platform engineers than application-only teams",
+    flow:["Client Request","Network Thread","Log / Page Cache","Replica / Controller"],
+    code:`var metadata = admin.GetMetadata(TimeSpan.FromSeconds(10));
+foreach (var broker in metadata.Brokers)
+{
+    logger.LogInformation("Broker {Id} => {Host}:{Port}", broker.BrokerId, broker.Host, broker.Port);
+}`,
+    scenario:"During a throughput incident, the team must decide whether the bottleneck is network threads, disk, page cache misses, or replication pressure.",
+    callout:"Architecture topics explain why Kafka is fast: sequential writes, batching, page cache, and avoiding per-message fsync."
+  },
+  tp:{
+    area:"topic and partition design",
+    use:"when designing naming conventions, retention, compaction, partition counts, or ordering guarantees",
+    avoid:"when the domain model is still unstable and event contracts are changing weekly",
+    trade:"more partitions increase throughput and parallelism, but also increase rebalancing cost, metadata pressure, and operational complexity",
+    flow:["Producer Key","Partitioner","Topic Partition Log","Consumer Assignment"],
+    code:`await admin.CreateTopicsAsync(new[]
+{
+    new TopicSpecification
+    {
+        Name = "orders",
+        NumPartitions = 12,
+        ReplicationFactor = 3,
+        Configs = new Dictionary<string, string>
+        {
+            ["cleanup.policy"] = "delete",
+            ["retention.ms"] = "604800000"
+        }
+    }
+});
+
+await producer.ProduceAsync("orders", new Message<string, string>
+{
+    Key = order.CustomerId,
+    Value = JsonSerializer.Serialize(order)
+});`,
+    scenario:"A payments team needs all events for the same account in order, but wants many consumers to process unrelated accounts in parallel.",
+    callout:"Partition count is not just a scaling number. It becomes the upper bound of consumer-group parallelism and a permanent part of your topic contract."
+  },
+  pr:{
+    area:"producer engineering",
+    use:"when building high-throughput write paths, domain-event publishers, or APIs that must publish after a business action",
+    avoid:"when you need immediate synchronous confirmation from downstream consumers",
+    trade:"larger batches and stronger acknowledgments improve durability and throughput, but increase latency or broker coordination cost",
+    flow:["ASP.NET / Worker","Producer Buffer","Broker Leader","Replica ISR"],
+    code:`var config = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:Brokers"],
+    Acks = Acks.All,
+    EnableIdempotence = true,
+    LingerMs = 5,
+    BatchSize = 131072,
+    CompressionType = CompressionType.Lz4
+};
+
+await using var producer = new ProducerBuilder<string, string>(config).Build();
+await producer.ProduceAsync("orders.created", new Message<string, string>
+{
+    Key = order.Id.ToString(),
+    Value = JsonSerializer.Serialize(order)
+});`,
+    scenario:"A checkout API publishes order events during peak traffic and must survive broker retries without creating duplicate inventory reservations.",
+    callout:"Producer tuning is where most Kafka performance wins happen first: batching, compression, keys, idempotence, and sensible acknowledgment settings."
+  },
+  co:{
+    area:"consumer and group coordination",
+    use:"when building reliable processors, hosted services, sagas, or projections that read from Kafka continuously",
+    avoid:"when long synchronous workflows will exceed poll intervals or when downstream dependencies are too slow to keep up",
+    trade:"manual commits and rebalance hooks improve correctness, but require more code and stronger operational discipline",
+    flow:["Topic Partition","Consumer Group","Business Handler","Offset Commit"],
+    code:`public sealed class OrderConsumer : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken ct)
+    {
+        using var consumer = new ConsumerBuilder<string, string>(new ConsumerConfig
+        {
+            BootstrapServers = builder.Configuration["Kafka:Brokers"],
+            GroupId = "orders-service",
+            EnableAutoCommit = false,
+            AutoOffsetReset = AutoOffsetReset.Earliest
+        }).Build();
+
+        consumer.Subscribe("orders.created");
+        while (!ct.IsCancellationRequested)
+        {
+            var record = consumer.Consume(ct);
+            await handler.HandleAsync(record.Message.Value, ct);
+            consumer.Commit(record);
+        }
+    }
+}`,
+    scenario:"A worker updates a read model in PostgreSQL. If processing fails after a commit, the event is lost; if it fails before commit, the event is replayed. The whole design depends on how offsets are handled.",
+    callout:"Consumers should be designed around idempotency first. Once that is true, retries and rebalances stop being scary."
+  },
+  br:{
+    area:"broker and cluster operations",
+    use:"when you operate Kafka directly, manage upgrades, capacity, or cluster topology",
+    avoid:"when running fully managed Kafka and you do not influence cluster internals",
+    trade:"deep cluster ownership gives more control, but it also means you own disk, networking, upgrades, and failure recovery",
+    flow:["Broker Node","Controller / Metadata","Partition Leaders","Ops Automation"],
+    code:`var cluster = admin.GetMetadata(TimeSpan.FromSeconds(10));
+logger.LogInformation("Discovered {BrokerCount} brokers", cluster.Brokers.Count);
+foreach (var topic in cluster.Topics.Where(t => !t.Error.IsError))
+{
+    logger.LogInformation("Topic {Name} has {Partitions} partitions", topic.Topic, topic.Partitions.Count);
+}`,
+    scenario:"One broker fills its disks faster than the others. The platform team must rebalance leaders and partitions without destabilizing producers.",
+    callout:"Broker topics matter most when you run Kafka yourself. They directly affect availability, balancing, and recovery time during incidents."
+  },
+  re:{
+    area:"replication and durability",
+    use:"when event loss is unacceptable and you need to explain RF, ISR, HW, or leader failover behavior",
+    avoid:"when the event stream is disposable telemetry and durability is not worth the latency cost",
+    trade:"stronger durability settings reduce loss risk, but require more replicas, more acknowledgment coordination, and more storage/network overhead",
+    flow:["Producer ACK","Leader Append","Follower Replication","Consumer Visibility"],
+    code:`await admin.CreateTopicsAsync(new[]
+{
+    new TopicSpecification
+    {
+        Name = "payments.authorized",
+        NumPartitions = 6,
+        ReplicationFactor = 3,
+        Configs = new Dictionary<string, string>
+        {
+            ["min.insync.replicas"] = "2"
+        }
+    }
+});`,
+    scenario:"A payment event cannot disappear even if one broker dies mid-write. Replication, ISR, and producer ack settings decide whether the platform remains safe.",
+    callout:"The common production baseline is RF=3, min.insync.replicas=2, and producer acks=all."
+  },
+  zk:{
+    area:"metadata quorum and coordination",
+    use:"when migrating clusters, planning KRaft adoption, or explaining why Kafka no longer needs ZooKeeper",
+    avoid:"when the team is not responsible for Kafka deployment architecture",
+    trade:"KRaft simplifies operations and scales better, but migrations require planning and version discipline",
+    flow:["Broker Startup","Metadata Quorum","Controller Election","Cluster State"],
+    code:`var metadata = admin.GetMetadata(TimeSpan.FromSeconds(10));
+logger.LogInformation("Cluster metadata fetched at {At}", DateTimeOffset.UtcNow);
+// In production, pair client metadata checks with platform-level KRaft controller health checks.`,
+    scenario:"A legacy ZooKeeper-based Kafka deployment needs migration to KRaft with minimal downtime and rollback safety.",
+    callout:"For new Kafka installations, KRaft is the modern path. ZooKeeper knowledge still matters mainly for legacy estates."
+  },
+  eos:{
+    area:"exactly-once processing",
+    use:"when a duplicate or lost event would break money, inventory, ledger, or compliance flows",
+    avoid:"when operations are naturally idempotent and at-least-once is simpler and cheaper",
+    trade:"EOS reduces duplication risk, but adds transaction coordination, stricter config requirements, and measurable throughput/latency cost",
+    flow:["Consume Input","Process State","Produce Output","Commit Offsets Atomically"],
+    code:`var producer = new ProducerBuilder<string, string>(new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:Brokers"],
+    EnableIdempotence = true,
+    TransactionalId = "orders-eos-processor",
+    Acks = Acks.All
+}).Build();
+
+producer.InitTransactions(TimeSpan.FromSeconds(30));
+producer.BeginTransaction();
+await producer.ProduceAsync("orders.enriched", new Message<string, string> { Key = key, Value = payload });
+producer.CommitTransaction();`,
+    scenario:"A fraud pipeline enriches transactions and emits a risk decision. If the same transaction is scored twice, an account may be blocked twice or charged twice.",
+    callout:"Use EOS only where the business impact of duplicates is higher than the system cost of transactions."
+  },
+  ks:{
+    area:"stream processing",
+    use:"when you need continuous transformations, joins, aggregations, or stateful windows over Kafka topics",
+    avoid:"when one-time batch ETL is sufficient or when the team cannot own stateful streaming applications",
+    trade:"stream processing removes polling and scheduled jobs, but introduces state stores, repartition topics, and operational complexity",
+    flow:["Input Stream","State Store / Window","Join / Aggregate","Output Topic"],
+    code:`var config = new StreamConfig<StringSerDes, StringSerDes>
+{
+    ApplicationId = "orders-streams",
+    BootstrapServers = builder.Configuration["Kafka:Brokers"],
+    AutoOffsetReset = AutoOffsetReset.Earliest
+};
+
+var builderStreams = new StreamBuilder();
+builderStreams.Stream<string, string>("orders.raw")
+    .Filter((_, value) => value.Contains("priority"))
+    .To("orders.priority");`,
+    scenario:"A logistics platform continuously enriches shipping events with the latest route metadata and produces alert streams for delays.",
+    callout:"State stores, repartitioning, and event time are the concepts that separate stream processing from plain consumers."
+  },
+  kc:{
+    area:"Kafka Connect integration",
+    use:"when moving data between Kafka and databases, filesystems, search engines, SaaS APIs, or warehouses without custom code",
+    avoid:"when business logic is heavy enough that a connector becomes a hidden application",
+    trade:"Connect reduces custom plumbing, but large estates still need schema discipline, DLQs, scaling plans, and connector lifecycle management",
+    flow:["External System","Connector Task","Kafka Topic","Sink / Analytics"],
+    code:`var payload = JsonContent.Create(new
+{
+    name = "orders-elasticsearch",
+    config = new Dictionary<string, string>
+    {
+        ["connector.class"] = "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+        ["topics"] = "orders.created",
+        ["connection.url"] = "http://elasticsearch:9200"
+    }
+});
+
+await httpClient.PostAsync("http://connect:8083/connectors", payload, ct);`,
+    scenario:"A team wants order events indexed into Elasticsearch and copied to S3 without writing a bespoke service for each destination.",
+    callout:"Use Connect when the work is data movement. Once logic becomes domain-specific orchestration, write an application instead."
+  },
+  sr:{
+    area:"schema contracts and serialization",
+    use:"when multiple teams publish or consume the same event types and compatibility must be governed explicitly",
+    avoid:"when payloads are temporary experiments with no shared contract",
+    trade:"Schema Registry adds governance and safer evolution, but introduces another platform component and stricter change workflows",
+    flow:["Producer Model","Serializer / Schema ID","Kafka Payload","Consumer Deserializer"],
+    code:`services.AddSingleton<ISchemaRegistryClient>(_ => new CachedSchemaRegistryClient(
+    new SchemaRegistryConfig { Url = builder.Configuration["Kafka:SchemaRegistryUrl"] }));
+
+services.AddSingleton(sp =>
+{
+    var schemaRegistry = sp.GetRequiredService<ISchemaRegistryClient>();
+    return new ProducerBuilder<string, OrderCreated>(
+        new ProducerConfig { BootstrapServers = builder.Configuration["Kafka:Brokers"] })
+        .SetValueSerializer(new AvroSerializer<OrderCreated>(schemaRegistry))
+        .Build();
+});`,
+    scenario:"Five services consume the same customer event, and one team needs to add a field without breaking consumers that have not been deployed yet.",
+    callout:"Schema compatibility is really deployment compatibility. It protects teams from each other during staggered releases."
+  },
+  sec:{
+    area:"Kafka security",
+    use:"when the cluster crosses trust boundaries, handles customer data, or must satisfy audit and compliance controls",
+    avoid:"never in production; security topics can only be minimized in local dev environments",
+    trade:"TLS, SASL, and ACLs add setup and certificate rotation overhead, but the alternative is an unauthenticated event backbone",
+    flow:["Client Identity","TLS / SASL Handshake","Broker ACL Check","Authorized Topic Access"],
+    code:`var secureConfig = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:Brokers"],
+    SecurityProtocol = SecurityProtocol.SaslSsl,
+    SaslMechanism = SaslMechanism.ScramSha512,
+    SaslUsername = builder.Configuration["Kafka:Username"],
+    SaslPassword = builder.Configuration["Kafka:Password"],
+    SslCaLocation = "/etc/ssl/certs/ca.pem"
+};`,
+    scenario:"A multi-tenant platform emits events containing personal data and needs mTLS, least-privilege ACLs, and credential rotation.",
+    callout:"Kafka security is a stack: encryption, identity, authorization, and operational rotation. Missing one layer weakens the rest."
+  },
+  perf:{
+    area:"performance engineering",
+    use:"when you must hit throughput or latency SLOs, reduce lag, or size clusters with evidence instead of guesswork",
+    avoid:"when traffic is low enough that defaults already meet SLOs",
+    trade:"performance tuning often shifts costs between latency, throughput, CPU, memory, and durability; no tuning is free",
+    flow:["Client Config","Batch / Compression","Broker I/O","Observed Metrics"],
+    code:`var tunedProducer = new ProducerConfig
+{
+    BootstrapServers = builder.Configuration["Kafka:Brokers"],
+    BatchSize = 262144,
+    LingerMs = 10,
+    CompressionType = CompressionType.Zstd,
+    SocketSendBufferBytes = 1_048_576
+};`,
+    scenario:"A recommendation platform suddenly spikes from 60K to 400K messages per second during a major campaign. Tuning decides whether the cluster survives without emergency scale-out.",
+    callout:"Measure before tuning. Producer and consumer metrics usually expose the bottleneck faster than intuition."
+  },
+  mon:{
+    area:"monitoring and observability",
+    use:"when you need alerting, lag detection, incident triage, or SLO dashboards for Kafka workloads",
+    avoid:"when the cluster is a toy environment with no reliability expectations",
+    trade:"good observability adds metric cardinality and dashboard upkeep, but it is the fastest route to understanding Kafka incidents",
+    flow:["Broker Metrics","Exporter / Scraper","Dashboard / Alert","On-call Response"],
+    code:`var meter = new Meter("OrderPipeline.Kafka");
+var lagGauge = meter.CreateObservableGauge("kafka.consumer.lag", () =>
+    new Measurement<int>(lagProvider.GetCurrentLag(), new KeyValuePair<string, object?>("group", "orders-service")));`,
+    scenario:"A consumer silently slows down after a downstream database regression. Without lag alerts, the problem is only discovered hours later by the business team.",
+    callout:"The most valuable Kafka metric is not one metric. It is the relationship between producer rate, broker health, and consumer lag over time."
+  },
+  dn:{
+    area:"Kafka usage in .NET",
+    use:"when building ASP.NET Core APIs, background services, integration handlers, or stream processors in the .NET ecosystem",
+    avoid:"when the team needs a full Java-native Streams or Connect feature that has no mature .NET equivalent",
+    trade:".NET gives excellent producer/consumer support, but some Kafka ecosystem tooling still has richer Java-first APIs",
+    flow:["ASP.NET Core / Worker","Confluent .NET Client","Kafka Cluster","Downstream Service"],
+    code:`builder.Services.AddSingleton(_ =>
+{
+    var config = new ProducerConfig
+    {
+        BootstrapServers = builder.Configuration["Kafka:Brokers"],
+        Acks = Acks.All,
+        EnableIdempotence = true
+    };
+    return new ProducerBuilder<string, string>(config).Build();
+});`,
+    scenario:"An ASP.NET Core checkout API publishes domain events while one or more hosted services consume and project them into read models.",
+    callout:"Keep producers singleton-scoped, consumers hosted, and serialization explicit. Those three decisions eliminate many beginner mistakes in .NET."
+  },
+  eda:{
+    area:"event-driven architecture",
+    use:"when teams want decoupled workflows, integration events, and autonomous consumers reacting to domain changes",
+    avoid:"when the business process truly needs synchronous request/response and immediate cross-service consistency",
+    trade:"EDA improves autonomy and scale, but it shifts complexity into event design, observability, and eventual consistency management",
+    flow:["Domain Event","Kafka Topic","Multiple Consumers","Autonomous Reactions"],
+    code:`public interface IEventPublisher
+{
+    Task PublishAsync<T>(string topic, string key, T payload, CancellationToken ct);
+}
+
+public sealed class KafkaEventPublisher(IProducer<string, string> producer) : IEventPublisher
+{
+    public Task PublishAsync<T>(string topic, string key, T payload, CancellationToken ct) =>
+        producer.ProduceAsync(topic, new Message<string, string>
+        {
+            Key = key,
+            Value = JsonSerializer.Serialize(payload)
+        }, ct);
+}`,
+    scenario:"Order creation triggers billing, inventory reservation, recommendation updates, analytics, and notifications without the order service calling those services directly.",
+    callout:"Good event-driven systems publish business facts, not RPC calls disguised as events."
+  },
+  es:{
+    area:"CQRS and event sourcing",
+    use:"when the audit trail itself is a core asset and you need projections, replay, snapshots, or multiple read models",
+    avoid:"when a simple CRUD model with a relational database already fits and replay is not valuable",
+    trade:"event sourcing gives perfect history and rebuildability, but increases modeling complexity, projection lag, and migration discipline",
+    flow:["Command","Event Stream","Projection / Read Model","Query Side"],
+    code:`await producer.ProduceAsync("orders.events", new Message<string, string>
+{
+    Key = orderId,
+    Value = JsonSerializer.Serialize(new OrderApproved(orderId, approvedAt))
+});
+
+public sealed class OrderProjectionHandler(AppDbContext db)
+{
+    public async Task ApplyAsync(OrderApproved evt, CancellationToken ct)
+    {
+        db.ReadOrders.Upsert(new ReadOrder(evt.OrderId, "Approved"));
+        await db.SaveChangesAsync(ct);
+    }
+}`,
+    scenario:"A fintech ledger must preserve every account mutation as an event and rebuild reporting projections on demand after new compliance rules are introduced.",
+    callout:"Use Kafka as event transport and durable log with care. Event sourcing is as much a modeling choice as a technology choice."
+  },
+  dp:{
+    area:"real-time data pipelines",
+    use:"when operational data must be streamed into analytics, search, cache, ML, or other downstream systems continuously",
+    avoid:"when a nightly batch is good enough and stream operations would be overkill",
+    trade:"real-time pipelines reduce staleness but increase always-on operational cost, schema drift risk, and downstream dependency load",
+    flow:["Source DB / App","CDC / Enrichment","Kafka Backbone","Warehouse / Search / ML"],
+    code:`await producer.ProduceAsync("analytics.orders", new Message<string, string>
+{
+    Key = order.Id.ToString(),
+    Value = JsonSerializer.Serialize(new
+    {
+        order.Id,
+        order.Total,
+        order.Country,
+        CapturedAt = DateTimeOffset.UtcNow
+    })
+});`,
+    scenario:"Orders from PostgreSQL must appear in ClickHouse dashboards within seconds and also feed a machine-learning feature stream.",
+    callout:"Most pipeline problems are contract problems: late schema changes, bad keys, weak replay planning, or undefined ownership."
+  },
+  kq:{
+    area:"stream SQL and ksqlDB",
+    use:"when teams need fast SQL-like stream exploration, materialized views, or lightweight transformations without writing an application",
+    avoid:"when custom business logic, external service calls, or complex orchestration are required",
+    trade:"ksqlDB accelerates adoption, but custom code still wins when logic, control, or library support becomes complex",
+    flow:["Source Topic","ksqlDB Query","Materialized Result","Consumer / Dashboard"],
+    code:`var sql = """
+CREATE STREAM orders_raw (order_id VARCHAR KEY, total DECIMAL(18,2))
+  WITH (KAFKA_TOPIC='orders.raw', VALUE_FORMAT='JSON');
+""";
+await httpClient.PostAsJsonAsync("http://ksqldb:8088/ksql", new { ksql = sql }, ct);`,
+    scenario:"An analytics team wants a rolling 5-minute orders-by-country leaderboard without waiting for an application team to ship code.",
+    callout:"ksqlDB is great for declarative stream logic. It is not a replacement for every processing application."
+  },
+  ms:{
+    area:"Kafka-based microservices",
+    use:"when services need asynchronous collaboration, domain integration events, or saga-driven workflows",
+    avoid:"when a direct synchronous API is simpler and consistency must be immediate",
+    trade:"microservice decoupling improves scale and autonomy, but pushes teams into outbox, idempotency, correlation, and eventual-consistency patterns",
+    flow:["Service DB","Outbox / Event","Kafka Topic","Consuming Services"],
+    code:`public sealed class ProcessedMessage
+{
+    public string MessageId { get; init; } = "";
+}
+
+public async Task HandleAsync(ConsumeResult<string, string> message, CancellationToken ct)
+{
+    if (await db.ProcessedMessages.AnyAsync(x => x.MessageId == message.Message.Key, ct))
+        return;
+
+    await businessHandler.ApplyAsync(message.Message.Value, ct);
+    db.ProcessedMessages.Add(new ProcessedMessage { MessageId = message.Message.Key });
+    await db.SaveChangesAsync(ct);
+}`,
+    scenario:"Order, payment, inventory, and shipping services must stay loosely coupled but still complete a long-running business workflow safely.",
+    callout:"Outbox on the producer side and idempotency on the consumer side are the two patterns that make Kafka microservices survivable."
+  },
+  k8s:{
+    area:"Kafka on Kubernetes",
+    use:"when operating Kafka in Kubernetes, especially with Strimzi, StatefulSets, and zone-aware storage",
+    avoid:"when the team has no container-platform maturity or cannot provide stable storage and network guarantees",
+    trade:"Kubernetes adds declarative operations and automation, but it can also hide stateful-storage and networking problems behind an abstraction layer",
+    flow:["K8s Operator","Stateful Broker Pods","Persistent Volumes","Client Apps"],
+    code:`var brokers = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS")
+    ?? "kafka-kafka-bootstrap.kafka:9092";
+
+var producerConfig = new ProducerConfig
+{
+    BootstrapServers = brokers,
+    ClientId = Environment.MachineName
+};`,
+    scenario:"A platform team deploys Kafka with Strimzi across three zones and needs rolling upgrades without losing quorum or saturating storage.",
+    callout:"Kubernetes does not remove the need to think about disks, zones, rack awareness, or quorum. It only changes how you express those decisions."
+  },
+  en:{
+    area:"enterprise and production architecture",
+    use:"when planning DR, multi-region, capacity, private networking, or managed-cluster adoption",
+    avoid:"when the workload is still early-stage and you do not yet know its traffic or recovery targets",
+    trade:"enterprise readiness adds redundancy, replication, and governance, but increases cost and operational planning",
+    flow:["Primary Cluster","Replication / MM2","DR / Secondary Cluster","Failover Consumers"],
+    code:`var bootstrapServers = builder.Configuration.GetSection("Kafka:BootstrapServers").Get<string[]>()
+    ?? ["primary-kafka:9092", "secondary-kafka:9092"];
+
+var consumerConfig = new ConsumerConfig
+{
+    BootstrapServers = string.Join(",", bootstrapServers),
+    GroupId = "critical-read-models",
+    AutoOffsetReset = AutoOffsetReset.Earliest
+};`,
+    scenario:"A bank needs RPO and RTO targets for Kafka during region failure and must prove consumers can resume correctly in DR.",
+    callout:"Enterprise Kafka design is mostly about failure domains, networking, and capacity math, not just topic creation."
+  },
+  iq:{
+    area:"interview preparation",
+    use:"when preparing for platform, backend, SRE, or system design interviews focused on Kafka",
+    avoid:"when you still lack hands-on practice; memorization alone does not hold up in interviews",
+    trade:"interview prep improves articulation, but only real implementation experience makes answers credible under follow-up questions",
+    flow:["Concept Review","Hands-on Lab","System Design Answer","Tradeoff Discussion"],
+    code:`var practiceTopics = new[]
+{
+    "What is ISR and why does it matter?",
+    "How does Kafka achieve ordering?",
+    "When is exactly-once worth the cost?",
+    "How would you design a DR strategy?"
+};`,
+    scenario:"A senior backend interview asks you to design a high-throughput order pipeline, defend partition count, and explain how you would prevent duplicates.",
+    callout:"For Kafka interviews, the strongest answers always combine definition, failure mode, tradeoff, and one concrete production example."
+  }
+};
+
+function esc(s){
+  return String(s)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
+}
+
+function getPrefix(id){
+  return id.replace(/[0-9]+$/,"");
+}
+
+function getGuideBlueprint(id){
+  return GUIDE_BLUEPRINTS[getPrefix(id)] || GUIDE_BLUEPRINTS.k;
+}
+
+function inferTopicLevel(tags=[]){
+  if(tags.includes("Critical") || tags.includes("Must Know")) return "Critical";
+  if(tags.includes("Expert")) return "Expert";
+  if(tags.includes("Advanced")) return "Advanced";
+  if(tags.includes("Beginner") || tags.includes("Foundation")) return "Foundation";
+  return "Core";
+}
+
+function buildGeneratedDiagram(ch,t,bp){
+  const steps=(bp.flow && bp.flow.length ? bp.flow : ["Producer","Kafka","Consumer","State"]).slice(0,4);
+  return `<svg width="530" height="248" viewBox="0 0 530 248" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="ga" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L7,3z" fill="${ch.c}"/>
+  </marker>
+  <style>
+    .gb{fill:rgba(10,15,24,.92);stroke:${ch.c};stroke-width:1.2}
+    .gs{font-family:'Fira Code',monospace;font-size:8px;fill:#94a3b8}
+    .gt{font-family:'Fira Code',monospace;font-size:9px;fill:#e8d5c4;font-weight:700}
+    .ga2{stroke:${ch.c};stroke-width:1.5;fill:none;marker-end:url(#ga)}
+  </style>
+</defs>
+<rect fill="#040206" x="1" y="1" width="528" height="246" rx="8" stroke="#241d35" stroke-width="1"/>
+<text x="265" y="20" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="11" font-weight="700" fill="${ch.c}">${esc(t.t.toUpperCase())} — DATA FLOW</text>
+<rect class="gb" x="18" y="58" width="108" height="52" rx="6"/>
+<text class="gt" x="72" y="80" text-anchor="middle">${esc(steps[0])}</text>
+<text class="gs" x="72" y="96" text-anchor="middle">${esc(ch.t)}</text>
+<rect class="gb" x="148" y="58" width="108" height="52" rx="6"/>
+<text class="gt" x="202" y="80" text-anchor="middle">${esc(steps[1])}</text>
+<text class="gs" x="202" y="96" text-anchor="middle">${esc(t.t)}</text>
+<rect class="gb" x="278" y="58" width="108" height="52" rx="6"/>
+<text class="gt" x="332" y="80" text-anchor="middle">${esc(steps[2])}</text>
+<text class="gs" x="332" y="96" text-anchor="middle">${esc(t.d.slice(0,42))}</text>
+<rect class="gb" x="408" y="58" width="108" height="52" rx="6"/>
+<text class="gt" x="462" y="80" text-anchor="middle">${esc(steps[3])}</text>
+<text class="gs" x="462" y="96" text-anchor="middle">.NET / Platform outcome</text>
+<path class="ga2" d="M126 84 H146"/>
+<path class="ga2" d="M256 84 H276"/>
+<path class="ga2" d="M386 84 H406"/>
+<rect x="18" y="144" width="498" height="80" rx="6" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.08)"/>
+<text x="28" y="164" font-family="'Outfit',sans-serif" font-size="10" font-weight="700" fill="#e8d5c4">WHY THIS FLOW MATTERS</text>
+<text class="gs" x="28" y="180">${esc(t.t)} affects correctness, ordering, and operability across the whole event path.</text>
+<text class="gs" x="28" y="194">Design decisions in this topic directly influence retries, replay, lag, durability, or consumer behavior.</text>
+<text class="gs" x="28" y="208">Use the chapter context, topic tags, and business SLA to decide how strict the implementation should be.</text>
+</svg>`;
+}
+
+function buildGeneratedTable(ch,t,bp){
+  return {
+    ty:"table",
+    headers:["Definition / Goal","When To Use","Trade-offs",".NET Core Angle"],
+    rows:[[
+      `<strong>${t.t}</strong><br>${t.d}`,
+      bp.use,
+      bp.trade,
+      `Typical implementation in ASP.NET Core / Worker Services uses the Confluent .NET client, strongly typed configs, hosted services, and explicit serialization.`
+    ],[
+      `Chapter context: <strong>${ch.t}</strong><br>Level: ${inferTopicLevel(t.tags)}`,
+      `Best fit when the business needs ${bp.area} with replayability, observability, and decoupled event handling.`,
+      `Watch for ${bp.avoid}. Also plan for keys, offsets, compatibility, and incident recovery.`,
+      `Add health checks, structured logging, cancellation tokens, retry policy, and idempotency where the topic touches business state.`
+    ]]
+  };
+}
+
+function buildGeneratedProse(ch,t,bp){
+  return `<p><strong>${t.t}</strong> is a ${bp.area} topic inside <strong>${ch.t}</strong>. In practical terms, it answers the question: <em>${t.d}</em></p>
+  <h4>What Is It?</h4>
+  <p>In Kafka systems, ${t.t.toLowerCase()} shapes how data is written, replicated, consumed, governed, or operated in production. Teams that understand this topic can explain not only <em>how</em> Kafka behaves, but also <em>why</em> a given design choice succeeds or fails under load, retries, or failure.</p>
+  <h4>When To Use It</h4>
+  <p>Use this topic when you are designing or reviewing a Kafka-based workflow and need confidence around correctness, scale, observability, or long-term maintainability. It becomes especially important once multiple services, teams, or environments depend on the same streams.</p>
+  <h4>Definitions To Remember</h4>
+  <ul>
+    <li><strong>Topic focus:</strong> ${t.d}</li>
+    <li><strong>Chapter focus:</strong> ${ch.desc}</li>
+    <li><strong>Operational concern:</strong> Every decision here should be tied back to ordering, replay, compatibility, lag, durability, or operational safety.</li>
+  </ul>
+  <h4>Trade-off Lens</h4>
+  <p>${bp.trade}. That is why this topic should always be discussed together with business impact, not in isolation.</p>`;
+}
+
+function buildGeneratedCode(ch,t,bp){
+  return {
+    ty:"code",
+    lang:"csharp",
+    name:`.NET Core implementation sketch — ${t.t}`,
+    code:esc(`// ${t.t} in ${ch.t}
+// This is a practical .NET sketch showing where this topic fits in production code.
+${bp.code}
+
+// Production notes:
+// 1. Keep keys stable for ordering and replay.
+// 2. Emit structured logs with topic, partition, offset, and correlation ID.
+// 3. Prefer idempotent handlers for all business-critical consumers.
+// 4. Pair runtime config with health checks, metrics, and alerting.`)
+  };
+}
+
+function buildGeneratedScenario(ch,t,bp){
+  return {
+    ty:"scenario",
+    title:`${t.t} in a real delivery scenario`,
+    body:`<p>${bp.scenario}</p>
+    <p><strong>Why this topic matters here:</strong> ${t.t} determines whether the system behaves correctly when throughput spikes, nodes fail, or multiple downstream consumers react independently.</p>
+    <p><strong>Good use case:</strong> teams need durable event flow, controlled replay, and well-defined ownership between producers and consumers.</p>
+    <p><strong>Bad use case:</strong> the team treats Kafka as a black box and skips keys, contracts, retries, or monitoring. That usually creates hidden consistency and support problems later.</p>`
+  };
+}
+
+function buildGeneratedDetail(ch,t){
+  const bp=getGuideBlueprint(t.id);
+  return {
+    title:t.t,
+    bread:`Chapter ${ch.n} · ${ch.t}`,
+    sub:`${t.d} This guide explains what it is, when to use it, trade-offs, data flow, .NET Core integration, and production scenarios.`,
+    pills:[
+      {t:inferTopicLevel(t.tags),c:ch.c},
+      ...t.tags.slice(0,3).map(tag=>({t:tag,c:tag==="Critical"?"#ef4444":tag==="Advanced"||tag==="Expert"?"#ff6b35":"#06b6d4"}))
+    ],
+    secs:[
+      {ty:"prose",title:"What It Is, Why It Matters, and When To Use It",html:buildGeneratedProse(ch,t,bp)},
+      buildGeneratedTable(ch,t,bp),
+      {ty:"diagram",title:`${t.t} — Architecture / Data Flow`,svg:buildGeneratedDiagram(ch,t,bp)},
+      buildGeneratedCode(ch,t,bp),
+      buildGeneratedScenario(ch,t,bp),
+      {ty:"callout",kind:"kafka",ic:"⚡",txt:`<strong>${t.t} summary:</strong> ${bp.callout} Tie your implementation back to the business SLA, key design, consumer behavior, and failure recovery plan.`}
+    ]
+  };
+}
+// ENGINE
+let curCh=-1,curTopic=null,visited=new Set();
+const lvMap={b:"lv-b",i:"lv-i",a:"lv-a",e:"lv-e"};
+const lvLabel={b:"Basic",i:"Intermediate",a:"Advanced",e:"Expert"};
+
+function buildNav(){
+  const nav=document.getElementById("nav");
+  CHS.forEach((ch,i)=>{
+    const div=document.createElement("div");div.className="ci";div.id="ci"+i;
+    div.innerHTML=`<div class="chr" id="chr${i}" onclick="selectCh(${i})">
+      <div class="cnum" style="background:${ch.bg};color:${ch.c}">${ch.n}</div>
+      <div class="clabel">${ch.t}</div><div class="carr">▶</div></div>
+    <div class="tmenu">${ch.topics.map(t=>`
+      <div class="trow" id="n${t.id}" onclick="selectTopic('${t.id}',${i})">
+        <div class="dot"></div>${t.ic} ${t.t}</div>`).join("")}</div>`;
+    nav.appendChild(div);
+  });
+}
+
+function selectCh(i){
+  curCh=i;
+  document.querySelectorAll(".ci").forEach((el,j)=>{
+    el.classList.toggle("open",j===i);
+    el.querySelector(".chr").classList.toggle("act",j===i);
+  });
+  document.getElementById("welcome").style.display="none";
+  document.getElementById("mcon").style.display="block";
+  const ch=CHS[i];
+  const chips=ch.tags.map(t=>`<span class="cchip" style="color:${ch.c};border-color:${ch.c}44;background:${ch.bg}">${t}</span>`).join("");
+  const cards=ch.topics.map(t=>{
+    const tags=t.tags.map(tg=>{
+      const col=tg==="Critical"||tg==="Must Know"?"#ef4444":tg==="Core"||tg==="Foundation"?"#06b6d4":tg==="Advanced"||tg==="Expert"?"#ff6b35":tg.includes("Warn")?"#eab308":"#475569";
+      return `<span class="tmeta" style="color:${col};border-color:${col}44">${tg}</span>`;
+    }).join("");
+    return `<div class="tcard" id="c${t.id}" onclick="selectTopic('${t.id}',${i})">
+      <div class="tc-icon">${t.ic}</div>
+      <div class="tc-body"><div class="tc-t">${t.t}</div><div class="tc-d">${t.d}</div>
+      <div class="tc-meta">${tags}</div></div></div>`;
+  }).join("");
+  document.getElementById("mcon").innerHTML=`
+    <div class="chero">
+      <div class="chero-n" style="color:${ch.c}">Chapter ${ch.n} · ${ch.topics.length} Topics</div>
+      <div class="chero-t" style="color:${ch.c}">${ch.ic} ${ch.t}</div>
+      <div class="chero-d">${ch.desc}</div>
+      <div class="chero-chips">${chips}</div>
+    </div>
+    <div class="tgrid">${cards}</div>`;
+}
+
+function selectTopic(id,chi){
+  if(chi!==curCh)selectCh(chi);
+  curTopic=id;visited.add(id);updateProg();
+  document.querySelectorAll(".tcard").forEach(el=>el.classList.remove("act"));
+  document.querySelectorAll(".trow").forEach(el=>el.classList.remove("act"));
+  const c=document.getElementById("c"+id);if(c)c.classList.add("act");
+  const n=document.getElementById("n"+id);if(n){n.classList.add("act");n.classList.add("vis");}
+  const ch=CHS[chi];
+  const t=ch.topics.find(x=>x.id===id);if(!t)return;
+  const d=DETAILS[id] || buildGeneratedDetail(ch,t);
+  renderDetail(d);
+}
+
+function renderDetail(d){
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  const pills=d.pills.map(p=>`<span class="dpill" style="color:${p.c};border-color:${p.c}44;background:${p.c}11">${p.t}</span>`).join("");
+  const html=d.secs.map(renderSec).join("")+renderQAForTopic(d.title);
+  document.getElementById("rp-con").innerHTML=`<div class="rpcon">
+    <div class="d-bread">${d.bread}</div>
+    <div class="d-title">${d.title}</div>
+    <div class="d-sub">${d.sub}</div>
+    <div class="d-pills">${pills}</div>${html}</div>`;
+}
+
+function renderSec(s){
+  if(s.ty==="prose") return `<div class="sec"><div class="sec-t">${s.title}</div><div class="prose">${s.html}</div></div>`;
+  if(s.ty==="code"){
+    const lc=s.lang==="csharp"?"#cba6f7":s.lang==="bash"?"#a6e3a1":s.lang==="json"?"#f9e2af":"#89b4fa";
+    return `<div class="sec"><div class="cb">
+      <div class="cb-hdr"><span class="cb-lang" style="color:${lc}">${s.lang}</span>
+      <span class="cb-name">${s.name}</span>
+      <button class="cb-copy" onclick="copyCode(this)">Copy</button></div>
+      <div class="cb-body"><pre>${s.code}</pre></div></div></div>`;
+  }
+  if(s.ty==="diagram") return `<div class="sec"><div class="diag">
+    <div class="diag-hdr">${s.title}</div>
+    <div class="diag-body">${s.svg}</div></div></div>`;
+  if(s.ty==="callout"){
+    const cls=s.kind==="danger"?"c-danger":s.kind==="warn"?"c-warn":s.kind==="tip"?"c-tip":s.kind==="kafka"?"c-kafka":"c-info";
+    return `<div class="callout ${cls}"><span class="call-ic">${s.ic}</span><span>${s.txt}</span></div>`;
+  }
+  if(s.ty==="table"){
+    const hd=s.headers.map(h=>`<th>${h}</th>`).join("");
+    const rows=s.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("");
+    return `<div class="sec"><table class="ctbl"><thead><tr>${hd}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  if(s.ty==="scenario") return `<div class="scenario"><div class="scen-t">🏢 ${s.title}</div><div class="scen-b">${s.body}</div></div>`;
+  return "";
+}
+
+function renderQAForTopic(title){
+  const words=title.toLowerCase().replace(/<[^>]*>/g,"").split(/\W+/).filter(w=>w.length>3);
+  const rel=QA.filter(q=>{
+    const txt=(q.q+" "+q.a+" "+q.tag).toLowerCase();
+    return words.some(w=>txt.includes(w));
+  }).slice(0,4);
+  if(!rel.length)return "";
+  return `<div class="sec"><div class="sec-t">🎯 Interview Questions</div>
+    ${rel.map((q,i)=>renderQAItem(q,"t"+i+Date.now())).join("")}</div>`;
+}
+
+function renderQAItem(q,id){
+  return `<div class="qa" id="qa${id}">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span class="qa-qi">Q</span>
+      <span class="qa-qt">${q.q}</span>
+      <span class="qa-lv ${lvMap[q.level]}">${lvLabel[q.level]}</span>
+      <span class="qa-ar">▶</span></div>
+    <div class="qa-ans"><div class="qa-at">${q.a}</div></div></div>`;
+}
+
+function renderGeneric(id,chi){
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  const ch=CHS[chi];
+  const t=ch.topics.find(x=>x.id===id);if(!t)return;
+  renderDetail(buildGeneratedDetail(ch,t));
+}
+
+function toggleQA(el){el.parentElement.classList.toggle("open")}
+
+function copyCode(btn){
+  const txt=btn.closest(".cb").querySelector("pre").innerText;
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent="✓ Copied!";setTimeout(()=>btn.textContent="Copy",2000);
+  });
+}
+
+function updateProg(){
+  const total=CHS.reduce((s,c)=>s+c.topics.length,0);
+  const p=Math.round(visited.size/total*100);
+  document.getElementById("pct").textContent=p+"%";
+  document.getElementById("pfill").style.width=p+"%";
+}
+
+function doSearch(q){
+  q=q.toLowerCase().trim();
+  CHS.forEach((ch,i)=>{
+    let any=false;
+    ch.topics.forEach(t=>{
+      const el=document.getElementById("n"+t.id);if(!el)return;
+      const m=!q||t.t.toLowerCase().includes(q)||t.d.toLowerCase().includes(q)||(t.tags||[]).some(tg=>tg.toLowerCase().includes(q));
+      el.style.display=m?"":"none";if(m)any=true;
+    });
+    if(q&&any)document.getElementById("ci"+i).classList.add("open");
+  });
+}
+
+function showAllQA(){
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  const tags=[...new Set(QA.map(q=>q.tag))];
+  const filterBtns=tags.map(t=>
+    `<button onclick="filterQA('${t}',this)" style="background:var(--b2);border:1px solid var(--bd);color:var(--t2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace;transition:all .2s">${t}</button>`
+  ).join("");
+  const items=QA.map((q,i)=>`
+    <div class="qa" data-tag="${q.tag}">
+      <div class="qa-q" onclick="toggleQA(this)">
+        <span class="qa-qi">Q</span><span class="qa-qt">${q.q}</span>
+        <span style="font-size:9px;padding:2px 7px;border-radius:3px;background:rgba(255,107,53,.08);color:var(--k2);border:1px solid rgba(255,107,53,.3);font-family:'Fira Code',monospace;flex-shrink:0">${q.tag}</span>
+        <span class="qa-lv ${lvMap[q.level]}">${lvLabel[q.level]}</span>
+        <span class="qa-ar">▶</span></div>
+      <div class="qa-ans"><div class="qa-at">${q.a}</div></div></div>`).join("");
+  document.getElementById("rp-con").innerHTML=`<div class="rpcon">
+    <div class="d-bread">Kafka Mastery · Interview Preparation</div>
+    <div class="d-title">🎯 Interview Q&amp;A — All ${QA.length} Questions</div>
+    <div class="d-sub">From Basic definitions through Expert system design. Click a question to reveal the answer. Filter by topic.</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px">
+      <button onclick="filterQA(null,this)" style="background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.4);color:var(--k2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace">All</button>
+      ${filterBtns}</div>
+    <div id="qa-list">${items}</div></div>`;
+}
+
+function filterQA(tag){
+  document.querySelectorAll("#qa-list .qa").forEach(el=>{
+    el.style.display=(!tag||el.dataset.tag===tag)?'':'none';
+  });
+}
+
+buildNav();
+</script>
+<script src="/embedded/mastery-resize.js"></script>
+</body>
+</html>

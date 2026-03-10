@@ -51,6 +51,8 @@ const LLMVisualizer = lazy(() => import("./pages/llm-visualizer"));
 const CSharpMastery = lazy(() => import("./pages/CSharpMastery"));
 const LinqMastery = lazy(() => import("./pages/LinqMastery"));
 const DotnetMastery = lazy(() => import("./pages/DotnetMastery"));
+const MicroservicesMastery = lazy(() => import("./pages/MicroservicesMastery"));
+const KafkaMastery = lazy(() => import("./pages/KafkaMastery"));
 const BlazorMastery = lazy(() => import("./pages/BlazorMastery"));
 const EFCoreMastery = lazy(() => import("./pages/EFCoreMastery"));
 const AzureMasteryGuide = lazy(() => import("./pages/AzureMasteryGuide"));
@@ -169,6 +171,8 @@ const App = () => {
                 <Route path="/cheatsheets/csharp-mastery" element={<CSharpMastery />} />
                 <Route path="/cheatsheets/linq-mastery" element={<LinqMastery />} />
                 <Route path="/cheatsheets/dotnet-mastery" element={<DotnetMastery />} />
+                <Route path="/cheatsheets/microservices-mastery" element={<MicroservicesMastery />} />
+                <Route path="/cheatsheets/kafka-mastery" element={<KafkaMastery />} />
                 <Route path="/cheatsheets/blazor-mastery" element={<BlazorMastery />} />
                 <Route path="/cheatsheets/efcore-mastery" element={<EFCoreMastery />} />
                 <Route path="/cheatsheets/dotnet-mastery-toc" element={<Navigate to="/cheatsheets/dotnet-mastery" replace />} />
@@ -178,6 +182,8 @@ const App = () => {
                 <Route path="/blogs/angular-mastery" element={<Navigate to="/cheatsheets/angular-mastery" replace />} />
                 <Route path="/blogs/linq-mastery" element={<Navigate to="/cheatsheets/linq-mastery" replace />} />
                 <Route path="/blogs/dotnet-mastery" element={<Navigate to="/cheatsheets/dotnet-mastery" replace />} />
+                <Route path="/blogs/microservices-mastery" element={<Navigate to="/cheatsheets/microservices-mastery" replace />} />
+                <Route path="/blogs/kafka-mastery" element={<Navigate to="/cheatsheets/kafka-mastery" replace />} />
                 <Route path="/blogs/blazor-mastery" element={<Navigate to="/cheatsheets/blazor-mastery" replace />} />
                 <Route path="/blogs/:seriesSlug" element={<LegacyCheatsheetSeriesRedirect />} />
                 <Route path="/blog/techhub" element={<TechHub />} />
@@ -206,6 +212,8 @@ const App = () => {
                 <Route path="/csharp-mastery" element={<Navigate to="/cheatsheets/csharp-mastery" replace />} />
                 <Route path="/linq-mastery" element={<Navigate to="/cheatsheets/linq-mastery" replace />} />
                 <Route path="/dotnet-mastery" element={<Navigate to="/cheatsheets/dotnet-mastery" replace />} />
+                <Route path="/microservices-mastery" element={<Navigate to="/cheatsheets/microservices-mastery" replace />} />
+                <Route path="/kafka-mastery" element={<Navigate to="/cheatsheets/kafka-mastery" replace />} />
                 <Route path="/blazor-mastery" element={<Navigate to="/cheatsheets/blazor-mastery" replace />} />
                 <Route path="/efcore-mastery" element={<Navigate to="/cheatsheets/efcore-mastery" replace />} />
                 <Route path="/dotnet-mastery-toc" element={<Navigate to="/cheatsheets/dotnet-mastery" replace />} />

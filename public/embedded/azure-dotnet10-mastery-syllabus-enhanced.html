@@ -127,12 +127,48 @@ html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--t
 .welcome-stat{min-width:112px;padding:16px 18px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border)}
 .welcome-stat-num{font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--az-cyan)}
 .welcome-stat-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);font-family:var(--font-code)}
-.start-btn{
-  background:linear-gradient(135deg,var(--az-blue),#005fa9);color:#fff;border:none;border-radius:999px;padding:12px 18px;
-  font-size:13px;font-weight:700;cursor:pointer;transition:transform .2s ease, box-shadow .2s ease;
-  box-shadow:0 10px 30px rgba(0,120,212,.24);
+.welcome-actions{
+  position:relative;isolation:isolate;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  width:min(100%,560px);padding:14px;border-radius:28px;overflow:visible;
+  background:linear-gradient(135deg,rgba(19,32,51,.82),rgba(13,23,40,.74));
+  border:1px solid rgba(51,85,125,.85);
+  box-shadow:0 24px 60px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(18px);
 }
-.start-btn:hover{transform:translateY(-2px)}
+.welcome-actions::before{
+  content:'';position:absolute;inset:1px;border-radius:27px;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at top left,rgba(0,120,212,.18),transparent 42%),
+    radial-gradient(circle at bottom right,rgba(0,188,242,.16),transparent 40%);
+}
+.start-btn{
+  position:relative;z-index:1;flex:1 1 220px;justify-content:space-between;
+  display:inline-flex;align-items:center;gap:12px;white-space:nowrap;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,0)) padding-box,
+    linear-gradient(135deg,var(--az-blue),var(--az-cyan)) border-box;
+  color:#fff;border:1px solid transparent;border-radius:999px;padding:8px 10px 8px 18px;
+  font-size:13px;font-weight:700;cursor:pointer;transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  box-shadow:0 16px 34px rgba(0,120,212,.22), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 20px 38px rgba(0,120,212,.28), inset 0 1px 0 rgba(255,255,255,.22);filter:saturate(1.06)}
+.start-btn-text{display:inline-flex;align-items:center}
+.start-btn-icon{
+  width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:rgba(8,17,31,.24);border:1px solid rgba(255,255,255,.18);font-size:13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.02)) padding-box,
+    linear-gradient(135deg,var(--az-cyan),var(--az-green)) border-box;
+  color:var(--text-primary);
+  box-shadow:0 16px 34px rgba(0,188,242,.16), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary:hover{box-shadow:0 20px 38px rgba(0,188,242,.22), inset 0 1px 0 rgba(255,255,255,.18)}
+.start-btn-secondary .start-btn-icon{
+  background:rgba(0,188,242,.14);border-color:rgba(255,255,255,.18);color:#e6fbff;
+}
 .chapter-hero{
   background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));border:1px solid var(--border);border-radius:14px;padding:24px;
   margin-bottom:20px;position:relative;overflow:hidden;
@@ -237,12 +273,26 @@ html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--t
 .qa-answer{display:none;padding:12px 14px;border-top:1px solid var(--border);background:rgba(0,0,0,.12)}
 .qa-item.open .qa-answer{display:block}
 .qa-answer-text{font-size:12px;color:var(--text-secondary);line-height:1.75}
+.qa-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.qa-filter-btn{
+  background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);border-radius:999px;
+  padding:7px 12px;font-size:10.5px;font-family:var(--font-code);cursor:pointer;transition:all .18s ease;
+}
+.qa-filter-btn:hover,.qa-filter-btn.active{
+  color:#fff;border-color:rgba(0,188,242,.35);
+  background:linear-gradient(135deg,rgba(0,120,212,.22),rgba(0,188,242,.24));
+  box-shadow:0 10px 24px rgba(0,188,242,.12);
+}
 @media (max-width:1180px){
   html,body{overflow:auto}
   .layout{height:auto;min-height:100vh;display:block}
   .left-panel,.right-panel{width:100%;min-width:0;border-right:none;border-left:none}
   .left-panel{border-bottom:1px solid var(--border)}
   .middle-panel{border-right:none;border-bottom:1px solid var(--border)}
+}
+@media (max-width:640px){
+  .welcome-actions{width:min(100%,420px);padding:10px}
+  .start-btn{flex-basis:100%;width:100%}
 }
 </style>
 </head>
@@ -278,7 +328,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--t
         <div class="welcome-stat"><div class="welcome-stat-num">20</div><div class="welcome-stat-label">Deep Dives</div></div>
         <div class="welcome-stat"><div class="welcome-stat-num">1</div><div class="welcome-stat-label">Cloud Playbook</div></div>
       </div>
-      <button class="start-btn" onclick="selectChapter(0)">Start With Azure Foundations</button>
+      <div class="welcome-actions">
+        <button class="start-btn" onclick="selectChapter(0)">
+          <span class="start-btn-text">Start With Azure Foundations</span>
+          <span class="start-btn-icon" aria-hidden="true">→</span>
+        </button>
+        <button class="start-btn start-btn-secondary" onclick="showAllInterviewQuestions()">
+          <span class="start-btn-text">Interview Q&amp;A</span>
+          <span class="start-btn-icon" aria-hidden="true">🎯</span>
+        </button>
+      </div>
     </div>
     <div id="chapterContent" style="display:none"></div>
   </div>
@@ -1216,6 +1275,53 @@ function renderInterviewSection(topicTitle) {
     </div>`;
 }
 
+function showAllInterviewQuestions() {
+  document.getElementById('detailEmpty').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'block';
+
+  const levelColors = { Basic:'#00c896', Intermediate:'#ffb900', Advanced:'#0078d4', Expert:'#ff6a5c' };
+  const tags = [...new Set(interviewQuestions.map((q) => q.tag))];
+  const filterBtns = tags.map((tag) =>
+    `<button class="qa-filter-btn" onclick='filterQA(${JSON.stringify(tag)}, this)'>${tag}</button>`
+  ).join('');
+
+  const qHTML = interviewQuestions.map((q) => {
+    const levelColor = levelColors[q.level] || '#9fb1c8';
+    return `
+      <div class="qa-item" data-tag="${q.tag}">
+        <div class="qa-question" onclick="toggleQA(this)">
+          <span class="qa-q-icon">Q</span>
+          <span class="qa-q-text">${q.q}</span>
+          <span class="qa-level" style="background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44">${q.level}</span>
+          <span class="qa-arrow">▶</span>
+        </div>
+        <div class="qa-answer"><div class="qa-answer-text">${q.a}</div></div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-content">
+      <div class="detail-header">
+        <div class="detail-breadcrumb">Azure Mastery · Interview Prep</div>
+        <div class="detail-title">🎯 Interview Questions &amp; Answers</div>
+        <div class="detail-subtitle">${interviewQuestions.length} curated Azure architecture questions across identity, networking, compute, containers, observability, cost, and platform delivery.</div>
+      </div>
+      <div class="qa-filter-bar">
+        <button class="qa-filter-btn active" onclick="filterQA('', this)">All Topics</button>
+        ${filterBtns}
+      </div>
+      <div id="qaList">${qHTML}</div>
+    </div>`;
+}
+
+function filterQA(tag, btn) {
+  document.querySelectorAll('.qa-filter-btn').forEach((item) => item.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('#qaList .qa-item').forEach((item) => {
+    item.style.display = (!tag || item.dataset.tag === tag) ? '' : 'none';
+  });
+}
+
 function renderGenericDetail(topicId, chapterIdx) {
   const chapter = chapters[chapterIdx];
   const topic = chapter.topics.find((item) => item.id === topicId);
@@ -1297,5 +1403,6 @@ window.addEventListener('message', (event) => {
 
 buildNav();
 </script>
+<script src="/embedded/mastery-resize.js"></script>
 </body>
 </html>

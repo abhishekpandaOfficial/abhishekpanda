@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, Code2, Cloud, Brain, Database, Cpu, ArrowRight, Newspaper, Shield, Headphones, Car } from "lucide-react";
+import { Sparkles, Code2, Cloud, Brain, Database, Cpu, ArrowRight, Shield, FolderOpen } from "lucide-react";
 import abhishekAvatar from "@/assets/abhishek-avatar.png";
 import abhishekAvatarAlt from "@/assets/abhishek-avatar-alt.png";
 import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
@@ -70,24 +70,12 @@ const nameTypographyVariants = [
   "typo-ap-9",
 ];
 
-const projectCtas = [
+const primaryCtas = [
   {
-    label: "Newstack",
-    href: "https://newstack.live",
-    icon: Newspaper,
+    label: "View Projects",
+    to: "/projects",
+    icon: FolderOpen,
     className: "border-border/60 bg-card/80 text-foreground hover:border-primary/35 hover:text-primary",
-  },
-  {
-    label: "Groovify",
-    icon: Headphones,
-    disabled: true,
-    className: "border-border/50 bg-muted/50 text-muted-foreground/80",
-  },
-  {
-    label: "Drivanaa",
-    icon: Car,
-    disabled: true,
-    className: "border-border/50 bg-muted/50 text-muted-foreground/80",
   },
   {
     label: "Phantom VPN",
@@ -350,36 +338,20 @@ export const HeroSection = () => {
             transition={{ duration: 0.45, delay: 0.58 }}
             className="mb-5"
           >
+            <div className="mb-3 text-xs uppercase tracking-[0.16em] text-muted-foreground">Start Here</div>
             <div className="flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
-              {projectCtas.map((cta) => {
+              {primaryCtas.map((cta) => {
                 const content = (
                   <>
                     <cta.icon className="h-4 w-4 shrink-0 md:h-[18px] md:w-[18px]" />
                     <span className="min-w-0">
                       {cta.label}
-                      {cta.disabled ? <span className="ml-2 text-xs uppercase tracking-wide text-muted-foreground">Coming Soon</span> : null}
                     </span>
-                    {!cta.disabled ? (
-                      <ArrowRight className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:translate-x-1" />
-                    ) : null}
+                    <ArrowRight className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:translate-x-1" />
                   </>
                 );
 
-                const className = `group inline-flex items-center justify-center gap-2 rounded-2xl border px-5 py-3 text-sm font-semibold backdrop-blur-xl transition sm:flex-1 sm:basis-[calc(50%-0.375rem)] lg:flex-none ${cta.className}`;
-
-                if (cta.disabled) {
-                  return (
-                    <button
-                      key={cta.label}
-                      type="button"
-                      disabled
-                      aria-disabled="true"
-                      className={`${className} cursor-not-allowed opacity-70`}
-                    >
-                      {content}
-                    </button>
-                  );
-                }
+                const className = `group inline-flex items-center justify-center gap-2 rounded-2xl border px-5 py-3 text-sm font-semibold backdrop-blur-xl transition sm:flex-1 sm:basis-[calc(50%-0.375rem)] xl:basis-[calc(20%-0.6rem)] ${cta.className}`;
 
                 if (cta.href) {
                   return (
@@ -402,33 +374,9 @@ export const HeroSection = () => {
                 );
               })}
             </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.6 }}
-            className="mb-4"
-          >
-            <Link
-              to="/openowl"
-              className="group mx-auto max-w-3xl flex items-center gap-3 rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-3 md:p-4 shadow-[0_10px_24px_rgba(15,23,42,0.12)] dark:shadow-[0_10px_30px_rgba(2,6,23,0.55)] hover:shadow-[0_0_30px_rgba(56,189,248,0.3)] transition-all duration-300"
-            >
-              <div className="relative h-14 w-14 md:h-16 md:w-16 shrink-0">
-                <div className="absolute inset-0 rounded-full border border-emerald-400/45 animate-spin [animation-duration:8s]" />
-                <div className="absolute inset-[5px] rounded-full border border-sky-400/45 animate-spin [animation-direction:reverse] [animation-duration:12s]" />
-                <div className="absolute inset-[10px] rounded-full border border-sky-300/45 bg-slate-900/90 flex items-center justify-center text-xl md:text-2xl shadow-[0_0_20px_rgba(56,189,248,0.28)]">
-                  🦉
-                </div>
-              </div>
-              <div className="text-left min-w-0">
-                <div className="text-sm md:text-base font-bold text-foreground">OpenOwl AI Assistant</div>
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  Theme-aware conversational assistant for website intelligence, model discovery, and realtime updates.
-                </p>
-                <p className="mt-1 text-[11px] uppercase tracking-wide text-primary/85">Development phase · Open-source LLM integration soon</p>
-              </div>
-            </Link>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Open the main engineering blogs, jump into AI/ML mastery tracks, read articles, or go directly to active product work.
+            </p>
           </motion.div>
 
         </div>
