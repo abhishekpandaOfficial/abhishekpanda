@@ -131,7 +131,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);height:100vh
 .close-btn:hover{background:var(--border);color:var(--text)}
 .right-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
 .right-tabs::-webkit-scrollbar{height:0}
-.r-tab{padding:9px 15px;font-size:10.5px;color:var(--text3);font-family:var(--mono);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;letter-spacing:.5px}
+.r-tab{padding:9px 15px;font-size:10.5px;color:var(--text3);font-family:var(--mono);cursor:pointer;border:0;border-bottom:2px solid transparent;background:transparent;transition:all .2s;white-space:nowrap;letter-spacing:.5px}
 .r-tab:hover{color:var(--text)}
 .r-tab.active{color:var(--g1);border-bottom-color:var(--g1)}
 .right-body{flex:1;overflow-y:auto;padding:18px}
@@ -221,6 +221,16 @@ strong{color:var(--text)}
 .w3-label{font-size:9px;font-family:var(--mono);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
 .w3-text{font-size:11px;color:var(--text2);line-height:1.55}
 
+/* FLOW GRID */
+.flow-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 14px}
+.flow-node{position:relative;background:linear-gradient(180deg,rgba(12,21,36,.96),rgba(8,15,26,.96));border:1px solid rgba(56,189,248,.18);border-radius:10px;padding:12px;overflow:hidden}
+.flow-node::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 0%,rgba(255,255,255,.05) 45%,transparent 65%);transform:translateX(-120%);animation:flowSweep 3.8s ease-in-out infinite}
+.flow-step{font-size:9px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.flow-title{font-size:11.5px;font-family:var(--mono);font-weight:700;color:var(--text);margin-bottom:5px}
+.flow-copy{font-size:11px;color:var(--text2);line-height:1.55}
+@keyframes flowSweep{0%{transform:translateX(-120%)}55%,100%{transform:translateX(140%)}}
+@media (max-width:760px){.flow-grid{grid-template-columns:1fr}}
+
 /* ARCH DIAGRAM helpers */
 .arr-g{fill:#38bdf8} .arr-d{fill:#131f30}
 .ft{fill:#7ba8c8;font-family:'Fira Code',monospace;font-size:11px}
@@ -309,11 +319,12 @@ strong{color:var(--text)}
 // ═══════════════════════════════════════════════════════
 const CHAPTERS = [
 {id:'foundations',icon:'🏗️',color:'#38bdf8',bg:'rgba(56,189,248,.1)',title:'Monolith vs Microservices',sub:'Foundations & Decision Framework',level:'BEGINNER',lc:'#38bdf8',
- desc:'Understand the architectural decision that changes everything. Compare monolith, modular monolith, and microservices architectures with real-world case studies.',
+ desc:'Understand the architectural decision that changes everything. Compare monolith, SOA, modular monolith, and microservices architectures with real-world case studies.',
  topics:[
   {id:'monolith',icon:'🏢',title:'What Is a Monolith?',desc:'Single deployable unit — pros, cons, when it wins',tags:['beginner'],tabs:['Overview','Diagram','Code','When to Use']},
   {id:'microservices',icon:'⚡',title:'What Are Microservices?',desc:'Autonomous services with independent data stores',tags:['beginner'],tabs:['Overview','Diagram','Code','Principles']},
-  {id:'modular-monolith',icon:'🧩',title:'Modular Monolith',desc:'The sweet spot — bounded modules, single deploy',tags:['beginner','dotnet'],tabs:['Overview','Code','Migration Path']},
+  {id:'soa',icon:'🏛️',title:'Service-Oriented Architecture (SOA)',desc:'Shared enterprise services coordinated across business capabilities',tags:['beginner'],tabs:['Overview','Diagram','Code','When to Use']},
+  {id:'modular-monolith',icon:'🧩',title:'Modular Monolith',desc:'The sweet spot — bounded modules, single deploy',tags:['beginner','dotnet'],tabs:['Overview','Diagram','Code','Migration Path']},
   {id:'decision',icon:'🎯',title:'Decision Framework',desc:'When to choose which architecture',tags:['beginner'],tabs:['Framework','Anti-patterns','Real Cases']},
   {id:'distributed-monolith',icon:'⚠️',title:'Distributed Monolith Anti-Pattern',desc:'The worst of both worlds — how to detect and fix',tags:['advanced'],tabs:['Overview','Signs','Fix']},
 ]},
@@ -454,6 +465,128 @@ const CHAPTERS = [
 ]},
 ];
 
+const CHAPTER_GUIDES = {
+  foundations: {
+    lens: 'architecture shape and deployment coupling',
+    example: 'a product team deciding whether checkout should stay inside the monolith or break out',
+    tradeoff: 'simplicity today versus autonomous delivery later',
+    metrics: ['deploy frequency', 'change-failure rate', 'coordination overhead'],
+    stages: ['Client entry', 'Business boundary', 'Data ownership', 'Release outcome'],
+  },
+  decomposition: {
+    lens: 'domain boundaries and business capability mapping',
+    example: 'a legacy commerce platform separating catalog, checkout, pricing, and customer accounts',
+    tradeoff: 'clear ownership versus accidental cross-context leakage',
+    metrics: ['cross-team dependencies', 'shared model churn', 'boundary violations'],
+    stages: ['Domain event', 'Context boundary', 'Contract bridge', 'Independent evolution'],
+  },
+  integration: {
+    lens: 'traffic routing, service collaboration, and discovery',
+    example: 'external traffic entering through a gateway while internal services coordinate with explicit policies',
+    tradeoff: 'centralized control versus runtime complexity',
+    metrics: ['p95 latency', 'hop count', 'policy coverage'],
+    stages: ['Ingress', 'Policy layer', 'Service interaction', 'Operational feedback'],
+  },
+  'database-patterns': {
+    lens: 'data ownership, consistency boundaries, and read/write shaping',
+    example: 'an order platform splitting write-side correctness from read-side scale',
+    tradeoff: 'strong local consistency versus distributed coordination cost',
+    metrics: ['replication lag', 'projection freshness', 'schema ownership'],
+    stages: ['Command', 'State change', 'Projection/event', 'Read path'],
+  },
+  consistency: {
+    lens: 'reliable delivery, replay safety, and duplicate protection',
+    example: 'saving an order and publishing an event without losing or replaying it incorrectly',
+    tradeoff: 'delivery guarantees versus throughput and operational overhead',
+    metrics: ['publish lag', 'duplicate rate', 'dead-letter volume'],
+    stages: ['Write intent', 'Durable handoff', 'Consumer guardrail', 'Recovery path'],
+  },
+  resiliency: {
+    lens: 'failure isolation and graceful degradation',
+    example: 'protecting checkout when a pricing or payment dependency starts timing out',
+    tradeoff: 'higher resilience versus stricter request budgets and fallback complexity',
+    metrics: ['error budget burn', 'retry amplification', 'timeout percentage'],
+    stages: ['Request', 'Resilience policy', 'Dependency call', 'Degraded or healthy result'],
+  },
+  security: {
+    lens: 'identity, trust boundaries, and abuse protection',
+    example: 'combining user auth at the edge with zero-trust service-to-service controls inside the platform',
+    tradeoff: 'stronger isolation versus certificate, token, and policy management overhead',
+    metrics: ['unauthorized attempts', 'policy misses', 'secret rotation age'],
+    stages: ['Identity source', 'Token or certificate', 'Authorization gate', 'Protected resource'],
+  },
+  observability: {
+    lens: 'request visibility, diagnosis speed, and operational evidence',
+    example: 'following one slow checkout request across gateway, order, payment, and inventory services',
+    tradeoff: 'deeper telemetry versus storage cost and signal noise',
+    metrics: ['trace coverage', 'MTTR', 'cardinality control'],
+    stages: ['Instrumentation', 'Collection', 'Correlation', 'Alert or insight'],
+  },
+  deployment: {
+    lens: 'safe release flow and zero-downtime operations',
+    example: 'shipping a risky checkout change with rollback options and progressive exposure',
+    tradeoff: 'release flexibility versus platform maturity and deployment complexity',
+    metrics: ['rollback time', 'deployment success rate', 'traffic split health'],
+    stages: ['Build artifact', 'Cluster rollout', 'Traffic decision', 'Release verification'],
+  },
+  testing: {
+    lens: 'confidence layers and production-safe verification',
+    example: 'catching a breaking contract before it reaches a downstream consumer in production',
+    tradeoff: 'faster feedback versus environmental realism',
+    metrics: ['contract coverage', 'flaky test rate', 'escape defects'],
+    stages: ['Expectation', 'Environment', 'Interaction', 'Confidence signal'],
+  },
+  communication: {
+    lens: 'protocol choice, coupling style, and message flow',
+    example: 'choosing between REST, gRPC, Kafka, and RabbitMQ for the same business workflow',
+    tradeoff: 'directness versus decoupling and replayability',
+    metrics: ['payload size', 'consumer lag', 'request fan-out'],
+    stages: ['Producer', 'Transport', 'Delivery contract', 'Consumer behavior'],
+  },
+  configuration: {
+    lens: 'runtime settings, dynamic refresh, and secret hygiene',
+    example: 'changing feature rollout, connection settings, or secrets without a risky redeploy',
+    tradeoff: 'centralized control versus dependency on config infrastructure',
+    metrics: ['config drift', 'refresh latency', 'secret exposure risk'],
+    stages: ['Source of truth', 'Application bind', 'Runtime refresh', 'Audit trail'],
+  },
+  versioning: {
+    lens: 'contract evolution without consumer breakage',
+    example: 'adding fields and deprecating old APIs while older mobile clients still run in the wild',
+    tradeoff: 'fast evolution versus long compatibility tails',
+    metrics: ['breaking-change incidents', 'deprecated traffic share', 'consumer migration progress'],
+    stages: ['Current contract', 'Safe change', 'Compatibility window', 'Retirement'],
+  },
+  multitenancy: {
+    lens: 'tenant isolation, routing, and compliance boundaries',
+    example: 'serving SMB and enterprise tenants from one platform with different isolation guarantees',
+    tradeoff: 'lower unit cost versus stronger tenant isolation',
+    metrics: ['tenant noisy-neighbor rate', 'isolation exceptions', 'provisioning lead time'],
+    stages: ['Tenant context', 'Routing decision', 'Data isolation', 'Audit/compliance'],
+  },
+  finops: {
+    lens: 'cost visibility, right-sizing, and scale efficiency',
+    example: 'controlling spend during traffic spikes without hurting latency or reliability',
+    tradeoff: 'overprovisioning safety versus unit-economics discipline',
+    metrics: ['cost per request', 'idle resource ratio', 'autoscale efficiency'],
+    stages: ['Demand signal', 'Capacity decision', 'Spend attribution', 'Optimization loop'],
+  },
+  organizational: {
+    lens: 'service ownership, team boundaries, and operational accountability',
+    example: 'aligning stream-aligned teams, platform support, and runbooks so services stay operable',
+    tradeoff: 'local autonomy versus platform consistency',
+    metrics: ['handoff count', 'on-call load', 'ownership clarity'],
+    stages: ['Team boundary', 'Service responsibility', 'Platform support', 'Operational learning'],
+  },
+  interview: {
+    lens: 'explanation clarity and tradeoff reasoning',
+    example: 'turning a distributed systems topic into a concise, defensible interview answer',
+    tradeoff: 'breadth of patterns versus depth of reasoning',
+    metrics: ['signal density', 'tradeoff clarity', 'system-design completeness'],
+    stages: ['Question framing', 'Pattern choice', 'Tradeoff explanation', 'Production finish'],
+  },
+};
+
 // ═══════════════════════════════════════════════════════
 // GENERIC CONTENT HELPERS
 // ═══════════════════════════════════════════════════════
@@ -471,6 +604,115 @@ function getTopicContext(cid, tid) {
   const topic = chapter?.topics.find((item) => item.id === tid);
   if (!chapter || !topic) return null;
   return { chapter, topic };
+}
+
+function getChapterGuide(chapterId) {
+  return CHAPTER_GUIDES[chapterId] || CHAPTER_GUIDES.foundations;
+}
+
+function buildTopicExample(ctx, tab, kind) {
+  const guide = getChapterGuide(ctx.chapter.id);
+  if (kind === 'comparison') {
+    return `Use ${ctx.topic.title.toLowerCase()} when the team must explicitly compare options instead of defaulting to the most familiar stack. In practice, that looks like ${guide.example}.`;
+  }
+  if (kind === 'diagnostics') {
+    return `During an incident review, ${ctx.topic.title.toLowerCase()} becomes the lens for explaining what failed first, how the blast radius spread, and which guardrail should have existed before the outage.`;
+  }
+  if (kind === 'implementation') {
+    return `A strong ${tab.toLowerCase()} tab shows the runtime shape, the platform hooks, and the minimum code needed to make ${ctx.topic.title.toLowerCase()} observable and supportable in production.`;
+  }
+  return `${ctx.topic.title} usually matters once teams see ${ctx.topic.desc.toLowerCase()}. The practical question is how to apply it without losing ${guide.tradeoff}.`;
+}
+
+function buildTopicFailureMode(ctx, tab, kind) {
+  const guide = getChapterGuide(ctx.chapter.id);
+  if (kind === 'diagnostics') {
+    return `${ctx.topic.title} fails when teams react to symptoms only. Trace the first bad signal, identify the boundary that leaked, and add a guardrail that survives the next spike or retry storm.`;
+  }
+  if (kind === 'comparison') {
+    return `The common mistake is picking ${ctx.topic.title.toLowerCase()} because it sounds modern, then paying for it through slower delivery, more operational burden, and unclear ownership.`;
+  }
+  return `The failure mode is hidden coupling: teams adopt ${ctx.topic.title.toLowerCase()} but skip the ownership, telemetry, rollback, or contract discipline required to support ${guide.lens}.`;
+}
+
+function buildTopicSuccessSignal(ctx, tab, kind) {
+  const guide = getChapterGuide(ctx.chapter.id);
+  const firstMetric = guide.metrics[0] || 'delivery lead time';
+  if (kind === 'implementation') {
+    return `Success shows up as clean traces, predictable rollouts, and a steady ${firstMetric} trend after ${ctx.topic.title.toLowerCase()} lands.`;
+  }
+  if (kind === 'comparison') {
+    return `A good decision lowers coordination cost and keeps the team able to explain, operate, and reverse the choice under pressure.`;
+  }
+  return `The win condition is simple: ${ctx.topic.title.toLowerCase()} makes the system easier to reason about while improving ${guide.metrics.slice(0, 2).join(' and ')}.`;
+}
+
+function buildFlowStages(ctx, tab, kind) {
+  const guide = getChapterGuide(ctx.chapter.id);
+  const stages = guide.stages || ['Input', 'Core', 'Data', 'Outcome'];
+
+  if (kind === 'comparison') {
+    return [
+      [stages[0], `${ctx.topic.title} enters the conversation because the default choice no longer fits current scale, team, or compliance pressure.`],
+      [stages[1], `${tab} forces an explicit tradeoff review instead of relying on intuition or historical habit.`],
+      [stages[2], `The chosen path changes contracts, data handling, or ownership boundaries across ${ctx.chapter.title.toLowerCase()}.`],
+      [stages[3], `Document the default, the exceptions, and the rollback trigger before standardizing.`],
+    ];
+  }
+
+  if (kind === 'diagnostics') {
+    return [
+      [stages[0], `Start with the first visible signal: error spikes, lag, timeouts, or policy rejects tied to ${ctx.topic.title.toLowerCase()}.`],
+      [stages[1], `Trace the failing hop and the boundary that leaked responsibility or overload.`],
+      [stages[2], `Confirm whether state, contracts, retries, or human ownership made the issue harder to contain.`],
+      [stages[3], `Add the smallest durable fix: tighter limits, clearer contracts, stronger telemetry, or safer compensation.`],
+    ];
+  }
+
+  if (kind === 'implementation') {
+    return [
+      [stages[0], `Traffic or messages reach ${ctx.topic.title.toLowerCase()} through a clearly named contract instead of an implicit dependency.`],
+      [stages[1], `${tab} applies the runtime policy, routing rule, or framework integration that makes behavior predictable.`],
+      [stages[2], `State changes, secrets, or transport settings stay local to the owning service boundary.`],
+      [stages[3], `Operators can validate the result through health checks, telemetry, and a fast rollback path.`],
+    ];
+  }
+
+  if (kind === 'playbook') {
+    return [
+      [stages[0], `Define why ${ctx.topic.title.toLowerCase()} exists and which failure or scaling pressure it is supposed to remove.`],
+      [stages[1], `Encode rules in code, config, or platform policy so behavior stays consistent across releases.`],
+      [stages[2], `Review signals from ${guide.metrics.slice(0, 2).join(' and ')} before broad rollout.`],
+      [stages[3], `Keep a reversal plan, because a reversible rollout is safer than a theoretically perfect one.`],
+    ];
+  }
+
+  return [
+    [stages[0], `${ctx.topic.title} begins with a business or platform pressure, not with a tool or framework decision.`],
+    [stages[1], `The core boundary for ${ctx.topic.title.toLowerCase()} is where teams protect autonomy and reduce unnecessary coordination.`],
+    [stages[2], `Data, contracts, and runtime policies should reflect the owning service instead of leaking across boundaries.`],
+    [stages[3], `The outcome is only valuable if the team can explain, observe, and safely operate it in production.`],
+  ];
+}
+
+function renderFlowGrid(stages) {
+  return `<div class="flow-grid">${stages.map((stage, index) => `
+    <div class="flow-node" style="border-color:${index === 0 ? 'rgba(56,189,248,.26)' : 'rgba(26,45,69,.9)'}">
+      <div class="flow-step">Step ${index + 1}</div>
+      <div class="flow-title">${escHtml(stage[0])}</div>
+      <div class="flow-copy">${escHtml(stage[1])}</div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function renderInsightGrid(cards) {
+  return `<div class="w3-grid">${cards.map((card) => `
+    <div class="w3-card">
+      <div class="w3-icon">${card.icon}</div>
+      <div class="w3-label" style="color:${card.color}">${escHtml(card.label)}</div>
+      <div class="w3-text">${escHtml(card.text)}</div>
+    </div>
+  `).join('')}</div>`;
 }
 
 function renderList(items) {
@@ -519,45 +761,10 @@ function inferLibraries(topic, tab) {
 }
 
 function buildDiagramNodes(ctx, tab, kind) {
-  const topicLabel = ctx.topic.title.replace(/\s+/g, ' ').split(' ').slice(0, 2).join(' ');
-  if (kind === 'diagnostics') {
-    return [
-      ['Signal', 'Symptoms appear'],
-      ['Trace', 'Find root cause'],
-      ['Guardrail', 'Add limit or rule'],
-      ['Outcome', 'Safer production'],
-    ];
-  }
-  if (kind === 'comparison') {
-    return [
-      ['Option A', ctx.topic.title.split(' ')[0]],
-      ['Tradeoff', tab],
-      ['Decision', ctx.chapter.title.split(' ')[0]],
-      ['Outcome', 'Operate safely'],
-    ];
-  }
-  if (kind === 'implementation') {
-    return [
-      ['Client', 'Request or event'],
-      ['Policy', tab],
-      ['Service', topicLabel],
-      ['Ops', 'Logs + metrics'],
-    ];
-  }
-  if (kind === 'playbook') {
-    return [
-      ['Intent', tab],
-      ['Rule', 'Protect reliability'],
-      ['Execution', topicLabel],
-      ['Review', 'Measure result'],
-    ];
-  }
-  return [
-    ['Entry', ctx.chapter.title.split(' ')[0]],
-    ['Core', topicLabel],
-    ['Data', 'State + events'],
-    ['Outcome', 'Scale and clarity'],
-  ];
+  return buildFlowStages(ctx, tab, kind).map(([label, detail]) => [
+    label,
+    detail.length > 24 ? `${detail.slice(0, 24).trim()}...` : detail,
+  ]);
 }
 
 function renderGeneratedDiagram(ctx, tab, kind) {
@@ -650,6 +857,60 @@ function buildGeneratedCode(ctx, tab, kind) {
     ].join('\n');
   }
 
+  if (/retry|jitter/.test(lower)) {
+    return [
+      'builder.Services.AddHttpClient("pricing")',
+      '  .AddStandardResilienceHandler(options =>',
+      '  {',
+      '      options.Retry.MaxRetryAttempts = 4;',
+      '      options.Retry.Delay = TimeSpan.FromMilliseconds(200);',
+      '      options.Retry.UseJitter = true;',
+      '      options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(20);',
+      '  });',
+    ].join('\n');
+  }
+
+  if (/circuit-breaker|pipeline/.test(lower)) {
+    return [
+      'builder.Services.AddHttpClient<PaymentClient>()',
+      '  .AddResilienceHandler("payment-pipeline", (pipeline, context) =>',
+      '  {',
+      '      pipeline.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions',
+      '      {',
+      '          FailureRatio = 0.5,',
+      '          MinimumThroughput = 20,',
+      '          BreakDuration = TimeSpan.FromSeconds(30)',
+      '      });',
+      '      pipeline.AddTimeout(TimeSpan.FromSeconds(2));',
+      '  });',
+    ].join('\n');
+  }
+
+  if (/timeout/.test(lower)) {
+    return [
+      'builder.Services.AddHttpClient<InventoryClient>()',
+      '  .AddStandardResilienceHandler(o =>',
+      '  {',
+      '      o.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(4);',
+      '      o.AttemptTimeout.Timeout = TimeSpan.FromSeconds(1.2);',
+      '  });',
+    ].join('\n');
+  }
+
+  if (/fallback/.test(lower)) {
+    return [
+      'app.MapGet("/catalog/{id}", async (string id, CatalogClient catalog, IDistributedCache cache) =>',
+      '{',
+      '    var cached = await cache.GetStringAsync($"catalog:{id}");',
+      '    try { return Results.Ok(await catalog.GetAsync(id)); }',
+      '    catch (Exception) when (cached is not null)',
+      '    {',
+      '        return Results.Ok(JsonSerializer.Deserialize<CatalogSnapshot>(cached));',
+      '    }',
+      '});',
+    ].join('\n');
+  }
+
   if (/dockerfile/.test(lower)) {
     return [
       'FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build',
@@ -691,6 +952,164 @@ function buildGeneratedCode(ctx, tab, kind) {
       '  .WithStatus(HttpStatusCode.OK)',
       '  .WithJsonBody(new { id = 42, name = "Premium Catalog Item" })',
       '  .VerifyAsync(async ctx => await providerClient.GetFromJsonAsync<CatalogItem>(ctx.MockServerUri + "/api/catalog/42"));',
+    ].join('\n');
+  }
+
+  if (/idempotency/.test(lower)) {
+    return [
+      'app.MapPost("/payments", async (HttpContext http, PaymentRequest req, PaymentDbContext db) =>',
+      '{',
+      '    var key = http.Request.Headers["Idempotency-Key"].ToString();',
+      '    var existing = await db.ProcessedRequests.FindAsync(key);',
+      '    if (existing is not null) return Results.Json(existing.ResponseBody, statusCode: existing.StatusCode);',
+      '    var result = await ProcessPaymentAsync(req, db);',
+      '    db.ProcessedRequests.Add(ProcessedRequest.From(key, result));',
+      '    await db.SaveChangesAsync();',
+      '    return Results.Ok(result);',
+      '});',
+    ].join('\n');
+  }
+
+  if (/inbox/.test(lower)) {
+    return [
+      'public sealed class OrderCreatedConsumer(OrderDbContext db) : IConsumer<OrderCreated>',
+      '{',
+      '    public async Task Consume(ConsumeContext<OrderCreated> context)',
+      '    {',
+      '        var messageId = context.MessageId ?? throw new InvalidOperationException("MessageId required");',
+      '        if (await db.InboxMessages.AnyAsync(x => x.MessageId == messageId)) return;',
+      '        db.InboxMessages.Add(new InboxMessage(messageId, context.Message.OrderId));',
+      '        db.ReadModels.Add(OrderProjection.From(context.Message));',
+      '        await db.SaveChangesAsync();',
+      '    }',
+      '}',
+    ].join('\n');
+  }
+
+  if (/jwt|oauth|service-to-service/.test(lower)) {
+    return [
+      'builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)',
+      '  .AddJwtBearer(options =>',
+      '  {',
+      '      options.Authority = "https://identity.platform.internal";',
+      '      options.Audience = "orders-api";',
+      '      options.MapInboundClaims = false;',
+      '  });',
+      'builder.Services.AddAuthorizationBuilder()',
+      '  .AddPolicy("orders.read", policy => policy.RequireClaim("scope", "orders.read"));',
+    ].join('\n');
+  }
+
+  if (/rbac|policy builder/.test(lower)) {
+    return [
+      'builder.Services.AddAuthorizationBuilder()',
+      '  .AddPolicy("orders.manage", policy => policy',
+      '      .RequireAuthenticatedUser()',
+      '      .RequireRole("Operations", "Admin")',
+      '      .RequireClaim("tenant_access", "orders"));',
+      'app.MapPost("/orders/{id}/cancel", CancelOrder)',
+      '   .RequireAuthorization("orders.manage");',
+    ].join('\n');
+  }
+
+  if (/rate-limiting|algorithms/.test(lower)) {
+    return [
+      'builder.Services.AddRateLimiter(options =>',
+      '  options.AddTokenBucketLimiter("checkout", bucket =>',
+      '  {',
+      '      bucket.TokenLimit = 120;',
+      '      bucket.TokensPerPeriod = 40;',
+      '      bucket.ReplenishmentPeriod = TimeSpan.FromSeconds(10);',
+      '      bucket.QueueLimit = 0;',
+      '  }));',
+      'app.MapPost("/checkout", Checkout).RequireRateLimiting("checkout");',
+    ].join('\n');
+  }
+
+  if (/logging|log levels/.test(lower)) {
+    return [
+      'Log.Logger = new LoggerConfiguration()',
+      '  .Enrich.FromLogContext()',
+      '  .Enrich.WithProperty("service", "order-service")',
+      '  .WriteTo.Console(new RenderedCompactJsonFormatter())',
+      '  .CreateLogger();',
+      'builder.Host.UseSerilog();',
+    ].join('\n');
+  }
+
+  if (/health checks/.test(lower)) {
+    return [
+      'builder.Services.AddHealthChecks()',
+      '  .AddNpgSql(builder.Configuration.GetConnectionString("Orders")!)',
+      '  .AddRedis(builder.Configuration.GetConnectionString("Redis")!, name: "cache");',
+      'app.MapHealthChecks("/health/live", new() { Predicate = _ => false });',
+      'app.MapHealthChecks("/health/ready", new() { Predicate = reg => reg.Tags.Contains("ready") });',
+    ].join('\n');
+  }
+
+  if (/testcontainers/.test(lower)) {
+    return [
+      'public sealed class OrderApiFixture : IAsyncLifetime',
+      '{',
+      '    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder().Build();',
+      '    public async Task InitializeAsync() => await _postgres.StartAsync();',
+      '    public Task DisposeAsync() => _postgres.DisposeAsync().AsTask();',
+      '}',
+    ].join('\n');
+  }
+
+  if (/grpc|proto definition|streaming/.test(lower)) {
+    return [
+      'syntax = "proto3";',
+      'service OrderQuery {',
+      '  rpc GetOrder (GetOrderRequest) returns (OrderReply);',
+      '  rpc StreamOrderEvents (OrderStreamRequest) returns (stream OrderEventReply);',
+      '}',
+      'message GetOrderRequest { string order_id = 1; }',
+      'message OrderReply { string order_id = 1; string status = 2; }',
+    ].join('\n');
+  }
+
+  if (/feature flags|microsoft\.featuremanagement/.test(lower)) {
+    return [
+      'builder.Services.AddFeatureManagement()',
+      '  .AddFeatureFilter<TargetingFilter>();',
+      'app.MapPost("/checkout", async (CheckoutRequest req, IFeatureManager features) =>',
+      '    await features.IsEnabledAsync("new-checkout")',
+      '      ? CheckoutV2(req)',
+      '      : CheckoutV1(req));',
+    ].join('\n');
+  }
+
+  if (/api-versioning|deprecation/.test(lower)) {
+    return [
+      'builder.Services.AddApiVersioning(options =>',
+      '  {',
+      '      options.DefaultApiVersion = new ApiVersion(1, 0);',
+      '      options.AssumeDefaultVersionWhenUnspecified = true;',
+      '      options.ReportApiVersions = true;',
+      '      options.ApiVersionReader = new HeaderApiVersionReader("api-version");',
+      '  });',
+    ].join('\n');
+  }
+
+  if (/tenant-aware ef core|rls/.test(lower)) {
+    return [
+      'modelBuilder.Entity<Order>()',
+      '  .HasQueryFilter(order => order.TenantId == _tenantContext.CurrentTenantId);',
+      'builder.Entity<Order>().Property(x => x.TenantId).HasMaxLength(64);',
+      'await db.Database.ExecuteSqlRawAsync("ALTER TABLE orders ENABLE ROW LEVEL SECURITY;");',
+    ].join('\n');
+  }
+
+  if (/tenant-aware routing|middleware/.test(lower)) {
+    return [
+      'app.Use(async (context, next) =>',
+      '{',
+      '    var tenant = context.User.FindFirst("tenant_id")?.Value ?? context.Request.Host.Host.Split(".")[0];',
+      '    context.Items["tenant-id"] = tenant;',
+      '    await next();',
+      '});',
     ].join('\n');
   }
 
@@ -776,7 +1195,7 @@ function buildGeneratedCode(ctx, tab, kind) {
     'var builder = WebApplication.CreateBuilder(args);',
     'builder.Services.AddProblemDetails();',
     'builder.Services.AddOpenApi();',
-    topic.tags.includes('dotnet') ? 'builder.Services.AddHealthChecks();' : 'builder.Services.AddHostedService<BackgroundProjectionWorker>();',
+    ctx.topic.tags.includes('dotnet') ? 'builder.Services.AddHealthChecks();' : 'builder.Services.AddHostedService<BackgroundProjectionWorker>();',
     '',
     'var app = builder.Build();',
     `app.MapGet("/${ctx.topic.id}", () => Results.Ok(new`,
@@ -790,57 +1209,77 @@ function buildGeneratedCode(ctx, tab, kind) {
 }
 
 function buildGeneratedRows(ctx, tab, kind) {
+  const guide = getChapterGuide(ctx.chapter.id);
   const libraries = inferLibraries(ctx.topic, tab);
   const leadLibrary = libraries[0] || 'Core platform';
   return [
     ['Primary focus', escHtml(tab)],
-    ['Topic anchor', escHtml(ctx.topic.title)],
-    ['Operational goal', escHtml(`Keep ${ctx.topic.title.toLowerCase()} reliable under real traffic and team scale`)],
+    ['Why it matters', escHtml(buildTopicExample(ctx, tab, kind))],
+    ['Failure mode', escHtml(buildTopicFailureMode(ctx, tab, kind))],
+    ['Success signal', escHtml(buildTopicSuccessSignal(ctx, tab, kind))],
     ['Suggested stack', escHtml(libraries.join(', ') || 'ASP.NET Core, PostgreSQL, Kafka, OpenTelemetry')],
-    ['Review lens', escHtml(kind === 'comparison' ? 'Compare tradeoffs before standardizing' : 'Validate behavior, failure mode, and rollback path')],
+    ['Review lens', escHtml(kind === 'comparison' ? 'Compare tradeoffs before standardizing' : `Use ${guide.lens} to review the change before rollout`)],
     ['Production note', escHtml(`${leadLibrary} should be wired with tracing, health checks, and clear ownership boundaries`)],
   ];
 }
 
 function buildGeneratedBullets(ctx, tab, kind) {
+  const guide = getChapterGuide(ctx.chapter.id);
   const libraries = inferLibraries(ctx.topic, tab);
   if (kind === 'comparison') {
     return [
-      `<strong>Choose by pressure:</strong> select the option that reduces coupling, protects deployment speed, and fits the team maturity around ${escHtml(ctx.topic.title.toLowerCase())}.`,
-      `<strong>Evaluate tradeoffs explicitly:</strong> latency, reliability, developer ergonomics, observability, and rollback difficulty should all be written down before adopting ${escHtml(tab)}.`,
-      `<strong>Standardize around one path:</strong> once chosen, document the default library set such as ${escHtml(libraries.join(', ') || 'ASP.NET Core + PostgreSQL + Kafka')}.`,
+      `<strong>Choose by pressure:</strong> compare options against ${escHtml(guide.tradeoff)}, not against architecture fashion.`,
+      `<strong>Evaluate tradeoffs explicitly:</strong> latency, reliability, team ownership, rollback cost, and observability should all be written down before adopting ${escHtml(tab)}.`,
+      `<strong>Standardize around one path:</strong> once chosen, document the default library set such as ${escHtml(libraries.join(', ') || 'ASP.NET Core + PostgreSQL + Kafka')} and the exceptions that justify deviation.`,
     ];
   }
   if (kind === 'diagnostics') {
     return [
       `<strong>Watch the signals:</strong> errors, queue lag, saturation, and noisy retries are the first hints that ${escHtml(ctx.topic.title)} is drifting into an anti-pattern.`,
       `<strong>Trace the blast radius:</strong> inspect upstream callers, downstream dependencies, and ownership boundaries before changing implementation details.`,
-      `<strong>Fix with guardrails:</strong> add budgets, retries, limits, or contracts so the problem does not return in the next release.`,
+      `<strong>Fix with guardrails:</strong> add budgets, retries, limits, contracts, or runbook steps so the problem does not return in the next release.`,
+    ];
+  }
+  if (kind === 'implementation') {
+    return [
+      `<strong>Start with the contract:</strong> make entrypoints, message shapes, and ownership boundaries explicit before selecting infrastructure.`,
+      `<strong>Wire the platform hooks:</strong> use ${escHtml(libraries.join(', ') || 'ASP.NET Core, PostgreSQL, messaging, and telemetry')} only where they reduce operational risk around ${escHtml(ctx.topic.title.toLowerCase())}.`,
+      `<strong>Operate the feature:</strong> build in health checks, dashboards, alerts, and a rollback trigger from the start.`,
+    ];
+  }
+  if (kind === 'playbook') {
+    return [
+      `<strong>Write the rule down:</strong> define the default behavior for ${escHtml(ctx.topic.title.toLowerCase())} before implementation spreads across teams.`,
+      `<strong>Roll out in slices:</strong> use feature flags, traffic shaping, or isolated environments so validation happens before full exposure.`,
+      `<strong>Review outcomes:</strong> check ${escHtml(guide.metrics.slice(0, 2).join(' and '))} after release instead of assuming the pattern helped because deployment succeeded.`,
     ];
   }
   return [
     `<strong>Start from intent:</strong> ${escHtml(tab)} should explain why ${escHtml(ctx.topic.title.toLowerCase())} exists before jumping into tools.`,
-    `<strong>Wire the supporting stack:</strong> use ${escHtml(libraries.join(', ') || 'ASP.NET Core, PostgreSQL, messaging, and telemetry')} where it improves autonomy and observability.`,
+    `<strong>Match the chapter lens:</strong> in this part of the syllabus, the real goal is ${escHtml(guide.lens)}.`,
     `<strong>Close the loop:</strong> every implementation should include failure handling, metrics, and a rollback or degradation plan.`,
   ];
 }
 
 function buildGeneratedGuardrails(ctx, tab, kind) {
+  const guide = getChapterGuide(ctx.chapter.id);
   return [
     `<strong>Autonomy first:</strong> avoid shared databases or hidden runtime dependencies while implementing ${escHtml(ctx.topic.title)}.`,
     `<strong>Trace every critical hop:</strong> ${escHtml(tab)} should expose correlation IDs, metrics, and logs so operators can explain behavior under load.`,
+    `<strong>Protect the tradeoff:</strong> do not let ${escHtml(ctx.topic.title.toLowerCase())} erode ${escHtml(guide.tradeoff)} through undocumented exceptions.`,
     `<strong>Rollback path:</strong> every change should have a safe reversal plan, especially when ${escHtml(ctx.chapter.title.toLowerCase())} affects live traffic or data consistency.`,
   ];
 }
 
 function buildGeneratedScenario(ctx, tab, kind) {
+  const guide = getChapterGuide(ctx.chapter.id);
   if (kind === 'comparison') {
-    return `A platform team is reviewing ${ctx.topic.title.toLowerCase()} for a growing commerce system. The right answer is not the most fashionable option, but the one that reduces coordination cost, fits team maturity, and leaves a safe migration path.`;
+    return `A platform team is reviewing ${ctx.topic.title.toLowerCase()} for a growing commerce system. The right answer is not the most fashionable option, but the one that protects ${guide.tradeoff} and leaves a safe migration path.`;
   }
   if (kind === 'diagnostics') {
     return `An incident review shows that ${ctx.topic.title.toLowerCase()} is failing under partial outages. This tab should help the team identify the signal, isolate the dependency chain, and add the smallest guardrail that prevents repeat failure.`;
   }
-  return `A product team is scaling ${ctx.topic.title.toLowerCase()} in a real .NET platform. ${tab} becomes valuable when the team must explain tradeoffs clearly, implement the pattern safely, and keep the resulting service observable in production.`;
+  return `A product team is scaling ${ctx.topic.title.toLowerCase()} in a real .NET platform. ${tab} becomes valuable when the team must explain tradeoffs clearly, implement the pattern safely, and keep the resulting service observable in production. A good review still comes back to ${guide.lens}.`;
 }
 
 function renderStructuredFallback(cid, tid, tab) {
@@ -848,17 +1287,26 @@ function renderStructuredFallback(cid, tid, tab) {
   if (!ctx) return '';
 
   const kind = classifyTab(tab);
+  const guide = getChapterGuide(ctx.chapter.id);
   const rows = buildGeneratedRows(ctx, tab, kind);
   const bullets = buildGeneratedBullets(ctx, tab, kind);
   const guardrails = buildGeneratedGuardrails(ctx, tab, kind);
   const scenario = buildGeneratedScenario(ctx, tab, kind);
   const code = buildGeneratedCode(ctx, tab, kind);
+  const flowStages = buildFlowStages(ctx, tab, kind);
+  const insights = [
+    { icon: '🧪', label: 'Example', text: buildTopicExample(ctx, tab, kind), color: ctx.chapter.color },
+    { icon: '⚠️', label: 'Failure Mode', text: buildTopicFailureMode(ctx, tab, kind), color: '#fbbf24' },
+    { icon: '📈', label: 'Success Signal', text: buildTopicSuccessSignal(ctx, tab, kind), color: '#4ade80' },
+  ];
   const icon = kind === 'comparison' ? '⚖️' : kind === 'diagnostics' ? '🧭' : kind === 'implementation' ? '🛠️' : kind === 'playbook' ? '📋' : '🧠';
 
   return `
     <div class="sec">${icon} ${escHtml(ctx.topic.title)} · ${escHtml(tab)}</div>
     <p class="bd"><strong>${escHtml(tab)}</strong> for <strong>${escHtml(ctx.topic.title)}</strong> should be read as a production decision surface, not a definition dump. The goal is to connect architecture intent, implementation detail, operational behavior, and failure handling in one place.</p>
-    <div class="callout info"><strong>STRUCTURED APPROACH</strong>Start with the decision and boundary. Then show the flow, the concrete .NET implementation shape, the libraries involved, and the production guardrails that stop the pattern from becoming accidental complexity.</div>
+    <div class="callout info"><strong>STRUCTURED APPROACH</strong>Start with the chapter lens of ${escHtml(guide.lens)}. Then show the flow, the concrete .NET implementation shape, the libraries involved, and the production guardrails that stop the pattern from becoming accidental complexity.</div>
+    ${renderFlowGrid(flowStages)}
+    ${renderInsightGrid(insights)}
     ${renderTable(['Lens', 'Guidance'], rows)}
     ${renderGeneratedDiagram(ctx, tab, kind)}
     <div class="sec">Implementation Focus</div>
@@ -867,6 +1315,24 @@ function renderStructuredFallback(cid, tid, tab) {
     <div class="sec">Production Guardrails</div>
     ${renderList(guardrails)}
     <div class="callout tip"><strong>REAL-WORLD SCENARIO</strong>${escHtml(scenario)}</div>
+  `;
+}
+
+function renderComingSoon(cid, tid, tab) {
+  const ctx = getTopicContext(cid, tid);
+  if (!ctx) {
+    return `<div class="empty-r"><span style="font-size:28px">⚡</span><span>Coming soon</span></div>`;
+  }
+
+  return `
+    <div class="sec">⏳ ${escHtml(ctx.topic.title)} · ${escHtml(tab)}</div>
+    <p class="bd">This tab is intentionally marked <strong>Coming Soon</strong>. The goal is to avoid duplicated generic content and only publish topic-specific explanations, code, diagrams, animated flows, and case studies once they are fully authored.</p>
+    <div class="callout warn"><strong>COMING SOON</strong>Planned content for this tab: explanation, .NET implementation, architecture diagram, animated data flow, production tradeoffs, use cases, failure modes, and a real case study.</div>
+    <div class="w3-grid">
+      <div class="w3-card"><div class="w3-icon">📚</div><div class="w3-label" style="color:${ctx.chapter.color}">Chapter</div><div class="w3-text">${escHtml(ctx.chapter.title)}</div></div>
+      <div class="w3-card"><div class="w3-icon">${ctx.topic.icon}</div><div class="w3-label" style="color:#fbbf24">Topic</div><div class="w3-text">${escHtml(ctx.topic.title)}</div></div>
+      <div class="w3-card"><div class="w3-icon">🧭</div><div class="w3-label" style="color:#4ade80">Planned Tab</div><div class="w3-text">${escHtml(tab)}</div></div>
+    </div>
   `;
 }
 
@@ -879,163 +1345,607 @@ function getContent(cid, tid, tab) {
   // ── FOUNDATIONS ──────────────────────────────────────
   if(k==='foundations:monolith:Overview') return `
 <div class="sec">🏢 What Is a Monolith?</div>
-<p class="bd"><strong>A monolith</strong> is a single deployable unit where all business logic, UI, data access, and domain operations are tightly bundled together. When you deploy, you deploy everything at once — and when one part fails, the whole system is at risk.</p>
-<div class="callout info"><strong>📖 REAL WORLD</strong>StackOverflow ran as a single ASP.NET monolith serving millions of developers. It worked brilliantly — until team size crossed ~50 engineers and every deployment became a coordination nightmare.</div>
+<p class="bd"><strong>A monolith</strong> is a single deployable application where presentation, business logic, background jobs, and data access live in one runtime and usually one database. It is the default starting point for many products because it optimizes for delivery speed, not for organizational autonomy.</p>
+<div class="callout info"><strong>WHAT GOOD LOOKS LIKE</strong>A good monolith still has internal boundaries: clear modules, explicit contracts, isolated tests, and no random cross-feature data access. A bad monolith is not a monolith problem. It is a design problem.</div>
+${renderInsightGrid([
+  { icon: '⚡', label: 'Strength', text: 'Fastest path from idea to working product when one team owns the whole app.', color: '#38bdf8' },
+  { icon: '🧱', label: 'Constraint', text: 'Deployment, scaling, and failures happen at application level rather than feature level.', color: '#fbbf24' },
+  { icon: '🏢', label: 'Best Fit', text: 'Early-stage products, small teams, domains that are still changing, and low platform maturity.', color: '#4ade80' },
+])}
+${renderFlowGrid([
+  ['Single request', 'Browser or mobile app sends one request into one application boundary.'],
+  ['In-process execution', 'Controllers, services, repositories, and jobs collaborate without network hops.'],
+  ['Shared persistence', 'One transactional database keeps writes simple and strongly consistent.'],
+  ['Whole-app release', 'Every deploy ships the entire application even if only one feature changed.'],
+])}
+${renderTable(['Lens', 'Monolith'], [
+  ['Deployment unit', 'One deployable artifact'],
+  ['Scaling model', 'Scale the whole app together'],
+  ['Data model', 'Usually one database and one schema boundary'],
+  ['Failure mode', 'Shared process means one leak or deadlock can hurt unrelated features'],
+  ['Typical win', 'Speed, simplicity, local debugging, ACID transactions'],
+  ['Typical pain', 'Coordination overhead, long release trains, tight coupling over time'],
+])}
+<div class="sec">Use Cases</div>
 <ul class="fl">
-<li><strong>✅ Simple development</strong> — one codebase, one repo, one deploy</li>
-<li><strong>✅ Easy debugging</strong> — single process, shared memory, no network</li>
-<li><strong>✅ Simple transactions</strong> — one database, full ACID guarantees</li>
-<li><strong>❌ Scale everything or nothing</strong> — can't scale one feature independently</li>
-<li><strong>❌ One bug = full outage</strong> — a NullReferenceException in email can crash payments</li>
-<li><strong>❌ Team coordination</strong> — 20 devs in one repo = constant merge conflicts</li>
-<li><strong>❌ Technology lock-in</strong> — must use same framework everywhere</li>
-</ul>`;
+<li><strong>Internal business systems</strong> where the user base is moderate and business rules change weekly.</li>
+<li><strong>New SaaS products</strong> where product-market fit matters more than independent deployment pipelines.</li>
+<li><strong>Regulated workflows</strong> where strong local transactions are more important than elastic service-by-service scaling.</li>
+</ul>
+<div class="callout tip"><strong>CASE STUDIES</strong>Stack Overflow is a classic example of a monolith that stayed fast because the team kept the application highly optimized. Early Shopify also gained enormous product velocity from a monolith before selectively extracting specific high-pressure capabilities later.</div>`;
 
   if(k==='foundations:monolith:Diagram') return `
-<div class="sec">🏗️ Monolith Architecture Diagram</div>
-<div class="dw"><div class="dt">MONOLITH — SINGLE DEPLOYABLE UNIT</div>
-<svg viewBox="0 0 420 280" width="100%" style="max-height:280px">
-<defs><marker id="ma1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#38bdf8"/></marker></defs>
-<rect x="130" y="10" width="160" height="34" rx="6" fill="rgba(56,189,248,.1)" stroke="#38bdf8" stroke-width="1.5"/>
-<text x="210" y="25" text-anchor="middle" class="ft-g" font-size="11">👤 All Traffic → App</text>
-<text x="210" y="39" text-anchor="middle" class="ft" font-size="9">Single entry point</text>
-<line x1="210" y1="44" x2="210" y2="62" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#ma1)"/>
-<rect x="60" y="64" width="300" height="170" rx="8" fill="rgba(248,113,113,.05)" stroke="#f87171" stroke-width="2" stroke-dasharray="6 3"/>
-<text x="210" y="82" text-anchor="middle" fill="#f87171" font-family="'Fira Code',monospace" font-size="11" font-weight="700">MyApp.exe — One Deployable</text>
-<rect x="80" y="90" width="260" height="28" rx="5" fill="rgba(248,113,113,.1)" stroke="rgba(248,113,113,.3)" stroke-width="1"/>
-<text x="210" y="109" text-anchor="middle" class="ft" font-size="10">🖥️ UI Layer</text>
-<rect x="80" y="123" width="260" height="28" rx="5" fill="rgba(248,113,113,.1)" stroke="rgba(248,113,113,.3)" stroke-width="1"/>
-<text x="210" y="142" text-anchor="middle" class="ft" font-size="10">⚙️ Business Logic (Orders, Catalog, Payments, Users)</text>
-<rect x="80" y="156" width="260" height="28" rx="5" fill="rgba(248,113,113,.1)" stroke="rgba(248,113,113,.3)" stroke-width="1"/>
-<text x="210" y="175" text-anchor="middle" class="ft" font-size="10">📧 Email · 🔔 Notifications · 🔧 Auth · 📊 Reports</text>
-<rect x="80" y="189" width="260" height="28" rx="5" fill="rgba(248,113,113,.08)" stroke="rgba(248,113,113,.2)" stroke-width="1"/>
-<text x="210" y="208" text-anchor="middle" class="ft" font-size="10">📊 Data Access Layer</text>
-<line x1="210" y1="234" x2="210" y2="252" stroke="#475569" stroke-width="1.5" marker-end="url(#ma1)"/>
-<rect x="130" y="254" width="160" height="22" rx="5" fill="#0c1524" stroke="#1a2d45"/>
-<text x="210" y="268" text-anchor="middle" class="ft" font-size="10">💾 Single Shared Database</text>
+<div class="sec">🏗️ Monolith Architecture + Animated Request Flow</div>
+<div class="dw"><div class="dt">ONE APP, ONE PROCESS, ONE DATABASE</div>
+<svg viewBox="0 0 560 330" width="100%" style="max-height:330px">
+<defs>
+  <marker id="monArrow" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#38bdf8"/></marker>
+  <style>
+    .mon-line{stroke:#38bdf8;stroke-width:1.5;fill:none;marker-end:url(#monArrow);stroke-dasharray:6 4;animation:monDash 2s linear infinite}
+    .mon-core{fill:rgba(248,113,113,.05);stroke:#f87171;stroke-width:1.4;stroke-dasharray:7 5}
+    .mon-node{fill:rgba(12,21,36,.95);stroke:#1e3a4a;stroke-width:1.2}
+    .mon-pill{fill:rgba(56,189,248,.12);stroke:#38bdf8}
+    .mon-db{fill:rgba(248,113,113,.10);stroke:#f87171;stroke-width:1.1}
+    .mon-ring{fill:none;stroke:#38bdf8;stroke-width:1.2;stroke-dasharray:5 5;opacity:.7}
+    @keyframes monDash{to{stroke-dashoffset:-20}}
+  </style>
+</defs>
+<rect x="210" y="18" width="140" height="34" rx="17" class="mon-pill"/>
+<text x="280" y="39" text-anchor="middle" class="ft-g">Web / Mobile / Admin</text>
+<line x1="280" y1="52" x2="280" y2="78" class="mon-line"/>
+<ellipse cx="280" cy="178" rx="175" ry="106" class="mon-core"/>
+<text x="280" y="88" text-anchor="middle" fill="#f87171" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Single Deployable Application</text>
+<circle cx="280" cy="165" r="56" class="mon-node"/>
+<circle cx="280" cy="165" r="68" class="mon-ring"/>
+<text x="280" y="157" text-anchor="middle" class="ft-g">Shared Runtime</text>
+<text x="280" y="172" text-anchor="middle" class="ft" font-size="9">controllers</text>
+<text x="280" y="185" text-anchor="middle" class="ft" font-size="9">services</text>
+<text x="280" y="198" text-anchor="middle" class="ft" font-size="9">jobs</text>
+<rect x="125" y="118" width="112" height="42" rx="21" class="mon-node"/>
+<text x="181" y="140" text-anchor="middle" class="ft-g">UI / API</text>
+<text x="181" y="153" text-anchor="middle" class="ft" font-size="9">routing + handlers</text>
+<rect x="323" y="118" width="112" height="42" rx="21" class="mon-node"/>
+<text x="379" y="140" text-anchor="middle" fill="#4ade80" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Domain Logic</text>
+<text x="379" y="153" text-anchor="middle" class="ft" font-size="9">orders / billing / users</text>
+<rect x="126" y="208" width="122" height="42" rx="21" class="mon-node"/>
+<text x="187" y="230" text-anchor="middle" fill="#fbbf24" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Background Jobs</text>
+<text x="187" y="243" text-anchor="middle" class="ft" font-size="9">email / reports / sync</text>
+<rect x="312" y="208" width="126" height="42" rx="21" class="mon-node"/>
+<text x="375" y="230" text-anchor="middle" fill="#a78bfa" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Repositories</text>
+<text x="375" y="243" text-anchor="middle" class="ft" font-size="9">one transaction boundary</text>
+<line x1="237" y1="150" x2="245" y2="154" class="mon-line"/>
+<line x1="323" y1="150" x2="315" y2="154" class="mon-line"/>
+<line x1="226" y1="216" x2="246" y2="199" class="mon-line"/>
+<line x1="312" y1="216" x2="314" y2="197" class="mon-line"/>
+<line x1="280" y1="233" x2="280" y2="279" class="mon-line"/>
+<ellipse cx="280" cy="296" rx="92" ry="18" class="mon-db"/>
+<line x1="188" y1="296" x2="372" y2="296" stroke="#f87171" stroke-width="1.1"/>
+<ellipse cx="280" cy="286" rx="92" ry="18" class="mon-db"/>
+<line x1="188" y1="286" x2="372" y2="286" stroke="#f87171" stroke-width="1.1"/>
+<text x="280" y="290" text-anchor="middle" class="ft">Single relational database</text>
 </svg></div>
-<div class="callout danger"><strong>⚠️ RISK</strong>In a monolith, a memory leak in the reporting module can crash the payment processor. All modules share the same process and memory space.</div>`;
+${renderFlowGrid([
+  ['Step 1', 'A request enters one application boundary and is routed internally without network hops.'],
+  ['Step 2', 'Business logic across multiple capabilities can collaborate directly in memory.'],
+  ['Step 3', 'One transaction can update multiple tables with strong consistency.'],
+  ['Step 4', 'Any deployment or runtime issue affects the same application unit.'],
+])}
+<div class="callout danger"><strong>BLAST RADIUS</strong>The strength of in-process collaboration is also the risk: one runaway query, lock, or memory leak can degrade unrelated capabilities because they share the same app and infrastructure budget.</div>`;
 
   if(k==='foundations:monolith:Code') return `
-<div class="sec">💻 Monolith — Tightly Coupled Code</div>
-<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — Monolith Order Controller</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
-<div class="cb-body"><span class="cm">// ❌ Monolith: All concerns in ONE project, ONE deploy</span>
-[<span class="at">ApiController</span>]
-[<span class="at">Route</span>(<span class="str">"api/orders"</span>)]
-<span class="kw">public class</span> <span class="ty">OrderController</span> : <span class="ty">ControllerBase</span>
+<div class="sec">💻 Monolith Code Shape</div>
+<p class="bd">This example is intentionally realistic: a monolith can still be clean, but the application coordinates everything inside one deployable boundary.</p>
+${renderCodeBlock('C# .NET 10 - Monolith Order Flow', `// One application, one deploy, one DbContext boundary
+[ApiController]
+[Route("api/orders")]
+public sealed class OrderController(
+    ApplicationDbContext db,
+    PricingService pricing,
+    PaymentService payments,
+    EmailService email) : ControllerBase
 {
-    <span class="kw">private readonly</span> <span class="ty">ApplicationDbContext</span> _db;   <span class="cm">// shared DB!</span>
-    <span class="kw">private readonly</span> <span class="ty">EmailService</span> _email;         <span class="cm">// tightly coupled</span>
-    <span class="kw">private readonly</span> <span class="ty">InventoryService</span> _inv;        <span class="cm">// tightly coupled</span>
-    <span class="kw">private readonly</span> <span class="ty">PaymentService</span> _pay;          <span class="cm">// tightly coupled</span>
-
-    [<span class="at">HttpPost</span>]
-    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">IActionResult</span>&gt; <span class="mt">CreateOrder</span>(<span class="ty">OrderDto</span> dto)
+    [HttpPost]
+    public async Task<IResult> Create(CreateOrderRequest request, CancellationToken ct)
     {
-        <span class="cm">// Everything in one transaction — all or nothing</span>
-        <span class="kw">var</span> stock = <span class="kw">await</span> _inv.<span class="mt">CheckStockAsync</span>(dto.ProductId);
-        <span class="kw">if</span> (stock &lt; dto.Quantity) <span class="kw">return</span> <span class="mt">BadRequest</span>(<span class="str">"Out of stock"</span>);
+        var customer = await db.Customers.FindAsync([request.CustomerId], ct);
+        if (customer is null) return Results.NotFound();
 
-        <span class="kw">var</span> order = <span class="kw">new</span> <span class="ty">Order</span> { <span class="cm">/* ... */</span> };
-        _db.Orders.<span class="mt">Add</span>(order);
-        <span class="kw">await</span> _db.<span class="mt">SaveChangesAsync</span>();            <span class="cm">// one shared DB</span>
-        <span class="kw">await</span> _pay.<span class="mt">ChargeAsync</span>(dto.CustomerId);   <span class="cm">// in-process call</span>
-        <span class="kw">await</span> _email.<span class="mt">SendConfirmationAsync</span>(order); <span class="cm">// blocks response!</span>
-        <span class="kw">return</span> <span class="mt">Ok</span>(order);
+        var items = await db.Products
+            .Where(x => request.Items.Select(i => i.ProductId).Contains(x.Id))
+            .ToListAsync(ct);
+
+        var total = pricing.Calculate(items, request.Items);
+
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
+
+        var order = Order.Create(customer.Id, total, request.Items);
+        db.Orders.Add(order);
+        await db.SaveChangesAsync(ct);
+
+        await payments.ChargeAsync(order.Id, total, ct);
+        await email.SendConfirmationAsync(customer.Email, order.Id, ct);
+
+        await tx.CommitAsync(ct);
+        return Results.Created($"/api/orders/{order.Id}", new { order.Id, total });
     }
-}</div></div>`;
+}`)}
+<div class="callout warn"><strong>WHY THIS FEELS GOOD</strong>Everything is easy to debug and transact. The cost appears later, when each new feature adds more dependencies into the same process and every release becomes a team-wide coordination event.</div>`;
 
   if(k==='foundations:monolith:When to Use') return `
 <div class="sec">🎯 When Monolith Is the Right Choice</div>
-<div class="w3-grid">
-<div class="w3-card"><div class="w3-icon">✅</div><div class="w3-label" style="color:#4ade80">USE MONOLITH WHEN</div><div class="w3-text">Team &lt; 15 engineers. Domain boundaries unclear. Early-stage startup. Limited DevOps maturity. Need fast iteration.</div></div>
-<div class="w3-card"><div class="w3-icon">❌</div><div class="w3-label" style="color:#f87171">AVOID WHEN</div><div class="w3-text">5+ teams deploying independently. Different scaling needs per domain. Multiple tech stacks required. Team &gt; 50 engineers.</div></div>
-<div class="w3-card"><div class="w3-icon">🔄</div><div class="w3-label" style="color:#38bdf8">MIGRATION SIGNAL</div><div class="w3-text">Checkout performance bottleneck. Team coordination overhead. One module's failure causes full outage repeatedly.</div></div>
-</div>
-<div class="callout tip"><strong>💡 SHOPIFY'S APPROACH</strong>Shopify ran as a Rails monolith until 2016. They extracted only the checkout flow when it became a bottleneck — not everything at once. "Modular monolith first, microservice when justified."</div>`;
+${renderTable(['Decision signal', 'Use monolith', 'Move away from monolith'], [
+  ['Team size', 'One or two stream teams', 'Many teams with separate release cadences'],
+  ['Domain clarity', 'Still evolving quickly', 'Boundaries stable and well understood'],
+  ['Operational maturity', 'Small platform team or none', 'Strong CI/CD, observability, SRE practices'],
+  ['Scaling pattern', 'Most capabilities scale together', 'One or two capabilities dominate traffic'],
+  ['Regulatory need', 'Simple compliance model', 'Different data isolation rules per capability'],
+])}
+${renderInsightGrid([
+  { icon: '✅', label: 'Choose It', text: 'When speed of change matters more than independent service ownership.', color: '#4ade80' },
+  { icon: '❌', label: 'Avoid It', text: 'When release trains, runtime coupling, or scaling bottlenecks are already hurting the business.', color: '#f87171' },
+  { icon: '🔄', label: 'Migration Trigger', text: 'When a specific capability repeatedly needs separate scaling, resilience, or team ownership.', color: '#38bdf8' },
+])}
+<div class="sec">Mini Case Studies</div>
+<ul class="fl">
+<li><strong>Startup SaaS</strong>: one product team ships faster with a monolith because every feature crosses the same few business areas.</li>
+<li><strong>Internal ERP</strong>: a monolith keeps strong transactions across finance, approval, and audit tables without distributed consistency design.</li>
+<li><strong>Growing commerce platform</strong>: monolith works until checkout and catalog need different release velocity and scale profiles.</li>
+</ul>`;
 
   if(k==='foundations:microservices:Overview') return `
 <div class="sec">⚡ What Are Microservices?</div>
-<p class="bd"><strong>Microservices</strong> decompose a system into small, independently deployable services — each owning a single business capability with its own data store. Teams can deploy the Order Service without touching the Payment Service.</p>
-<div class="callout warn"><strong>⚠️ KEY INSIGHT</strong>Microservices are NOT about making services small. They're about making them AUTONOMOUS. A service that can't be deployed without coordinating with 5 other teams isn't a microservice — it's a distributed monolith.</div>
-<table class="tbl">
-<tr><th>Property</th><th>Microservice</th><th>Monolith</th></tr>
-<tr><td>Deployment</td><td>Independent per service</td><td>All or nothing</td></tr>
-<tr><td>Database</td><td>Own database (polyglot)</td><td>Shared database</td></tr>
-<tr><td>Team ownership</td><td>One team per service</td><td>Multiple teams, one repo</td></tr>
-<tr><td>Scaling</td><td>Per-service (Order × 10, Catalog × 3)</td><td>Scale everything</td></tr>
-<tr><td>Tech stack</td><td>Different per service (Go, .NET, Node)</td><td>One stack</td></tr>
-<tr><td>Failure isolation</td><td>Circuit breakers contain blast radius</td><td>One crash = full outage</td></tr>
-</table>`;
+<p class="bd"><strong>Microservices</strong> split a platform into independently deployable services, each owning a business capability, its own operational lifecycle, and usually its own data boundary. The point is not smallness. The point is <strong>autonomy</strong>.</p>
+<div class="callout warn"><strong>KEY INSIGHT</strong>If a team cannot deploy, scale, and observe a service without coordinating every step with other teams, it is not getting the real benefit of microservices. It is just paying the cost of distribution.</div>
+${renderTable(['Architecture', 'Primary unit of change', 'Data ownership', 'Typical coupling'], [
+  ['Monolith', 'Application', 'Shared database', 'In-process dependency'],
+  ['SOA', 'Enterprise service / integration contract', 'Often shared master systems', 'Central governance or ESB'],
+  ['Modular monolith', 'Module inside one app', 'Shared database with strong module rules', 'In-process but explicit'],
+  ['Microservices', 'Service', 'Database per service', 'Network contracts and async events'],
+])}
+${renderFlowGrid([
+  ['Independent deploy', 'Order service can ship without redeploying billing, inventory, or catalog.'],
+  ['Service-owned data', 'Each service controls its schema, migrations, and storage choices.'],
+  ['Observable contracts', 'APIs, events, retries, and telemetry become first-class architecture decisions.'],
+  ['Bounded blast radius', 'A failure should degrade one capability rather than the whole platform.'],
+])}
+<div class="sec">Use Cases</div>
+<ul class="fl">
+<li><strong>Large product organizations</strong> with multiple teams releasing independently every day.</li>
+<li><strong>Uneven scale</strong> where search, checkout, notifications, and reporting have very different load shapes.</li>
+<li><strong>Heterogeneous systems</strong> where some workloads need streaming, others need low-latency APIs, and others need batch jobs.</li>
+</ul>
+<div class="callout tip"><strong>CASE STUDIES</strong>Netflix popularized microservices for independent scaling and deployment. Amazon is also a canonical example of service ownership at organizational scale. The lesson is not “copy them”. The lesson is “their architecture matches their team and traffic model”.</div>`;
+
+  if(k==='foundations:microservices:Diagram') return `
+<div class="sec">🌐 Microservices Architecture + Animated Data Flow</div>
+<div class="dw"><div class="dt">EDGE TO SERVICES TO EVENT STREAM</div>
+<svg viewBox="0 0 620 360" width="100%" style="max-height:360px">
+<defs>
+  <marker id="msArrow" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#38bdf8"/></marker>
+  <style>
+    .ms-line{stroke:#38bdf8;stroke-width:1.6;fill:none;marker-end:url(#msArrow);stroke-dasharray:7 4;animation:msDash 1.8s linear infinite}
+    .ms-event{stroke:#fbbf24;stroke-width:1.6;fill:none;marker-end:url(#msArrow);stroke-dasharray:5 4;animation:msDash 1.2s linear infinite}
+    .svc{fill:rgba(12,21,36,.96);stroke:#1a2d45;stroke-width:1.2}
+    .svc-a{stroke:#38bdf8}.svc-b{stroke:#4ade80}.svc-c{stroke:#f97316}
+    .db{fill:none;stroke-width:1.1}
+    @keyframes msDash{to{stroke-dashoffset:-22}}
+  </style>
+</defs>
+<rect x="220" y="18" width="180" height="34" rx="17" fill="rgba(56,189,248,.12)" stroke="#38bdf8"/>
+<text x="310" y="39" text-anchor="middle" class="ft-g">Web / Mobile Clients</text>
+<line x1="310" y1="52" x2="310" y2="82" class="ms-line"/>
+<rect x="210" y="86" width="200" height="38" rx="19" fill="rgba(249,115,22,.10)" stroke="#f97316"/>
+<text x="310" y="109" text-anchor="middle" fill="#f97316" font-family="'Fira Code',monospace" font-size="11" font-weight="700">API Gateway / BFF</text>
+<path d="M310 124 C250 150, 196 158, 140 166" class="ms-line"/>
+<path d="M310 124 C310 146, 310 150, 310 166" class="ms-line"/>
+<path d="M310 124 C370 150, 426 158, 480 166" class="ms-line"/>
+<circle cx="140" cy="176" r="44" class="svc svc-a"/>
+<text x="140" y="170" text-anchor="middle" class="ft-g">Order</text>
+<text x="140" y="184" text-anchor="middle" class="ft" font-size="9">service</text>
+<text x="140" y="242" text-anchor="middle" class="ft" font-size="9">own DB + outbox</text>
+<ellipse cx="140" cy="260" rx="46" ry="10" class="db" stroke="#38bdf8"/>
+<ellipse cx="140" cy="252" rx="46" ry="10" class="db" stroke="#38bdf8"/>
+<line x1="94" y1="252" x2="186" y2="252" stroke="#38bdf8" stroke-width="1.1"/>
+<circle cx="310" cy="176" r="44" class="svc svc-b"/>
+<text x="310" y="170" text-anchor="middle" fill="#4ade80" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Catalog</text>
+<text x="310" y="184" text-anchor="middle" class="ft" font-size="9">service</text>
+<text x="310" y="242" text-anchor="middle" class="ft" font-size="9">cached read model</text>
+<ellipse cx="310" cy="260" rx="46" ry="10" class="db" stroke="#4ade80"/>
+<ellipse cx="310" cy="252" rx="46" ry="10" class="db" stroke="#4ade80"/>
+<line x1="264" y1="252" x2="356" y2="252" stroke="#4ade80" stroke-width="1.1"/>
+<circle cx="480" cy="176" r="44" class="svc svc-c"/>
+<text x="480" y="170" text-anchor="middle" fill="#f97316" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Payment</text>
+<text x="480" y="184" text-anchor="middle" class="ft" font-size="9">service</text>
+<text x="480" y="242" text-anchor="middle" class="ft" font-size="9">provider integration</text>
+<ellipse cx="480" cy="260" rx="46" ry="10" class="db" stroke="#f97316"/>
+<ellipse cx="480" cy="252" rx="46" ry="10" class="db" stroke="#f97316"/>
+<line x1="434" y1="252" x2="526" y2="252" stroke="#f97316" stroke-width="1.1"/>
+<path d="M140 218 C170 250, 228 278, 278 290" class="ms-event"/>
+<path d="M480 218 C450 250, 392 278, 342 290" class="ms-event"/>
+<rect x="230" y="286" width="160" height="36" rx="18" fill="rgba(251,191,36,.10)" stroke="#fbbf24"/>
+<text x="310" y="309" text-anchor="middle" fill="#fbbf24" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Event Bus / Stream</text>
+<rect x="70" y="306" width="108" height="24" rx="12" fill="rgba(56,189,248,.08)" stroke="#38bdf8"/>
+<text x="124" y="322" text-anchor="middle" class="ft" font-size="9">Notifications</text>
+<rect x="460" y="306" width="96" height="24" rx="12" fill="rgba(167,139,250,.08)" stroke="#a78bfa"/>
+<text x="508" y="322" text-anchor="middle" class="ft" font-size="9">Search</text>
+<rect x="274" y="332" width="72" height="20" rx="10" fill="rgba(74,222,128,.08)" stroke="#4ade80"/>
+<text x="310" y="346" text-anchor="middle" class="ft" font-size="9">Analytics</text>
+<line x1="230" y1="304" x2="178" y2="318" class="ms-event"/>
+<line x1="390" y1="304" x2="460" y2="318" class="ms-event"/>
+<line x1="310" y1="322" x2="310" y2="332" class="ms-event"/>
+</svg></div>
+${renderFlowGrid([
+  ['Step 1', 'Clients hit an edge gateway that handles routing, auth, rate limits, and coarse-grained composition.'],
+  ['Step 2', 'Gateway calls only the services needed for the request. Each service owns its own runtime and data.'],
+  ['Step 3', 'Critical state changes publish events for asynchronous downstream processing.'],
+  ['Step 4', 'Non-critical capabilities such as analytics, notifications, and search consume events without coupling the request path.'],
+])}`;
 
   if(k==='foundations:microservices:Code') return `
 <div class="sec">💻 Autonomous Microservice — .NET 10 Minimal API</div>
-<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — Order Microservice (Minimal API)</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
-<div class="cb-body"><span class="cm">// ✅ Microservice: Owns ONLY the order domain</span>
-<span class="kw">var</span> builder = <span class="ty">WebApplication</span>.<span class="mt">CreateBuilder</span>(args);
+${renderCodeBlock('C# .NET 10 - Order Service', `var builder = WebApplication.CreateBuilder(args);
 
-<span class="cm">// Its OWN database — never shared</span>
-builder.Services.<span class="mt">AddDbContext</span>&lt;<span class="ty">OrderDbContext</span>&gt;(opt =&gt;
-    opt.<span class="mt">UseNpgsql</span>(builder.Configuration
-        .<span class="mt">GetConnectionString</span>(<span class="str">"OrderDb"</span>)));
+builder.Services.AddProblemDetails();
+builder.Services.AddOpenApi();
+builder.Services.AddDbContext<OrderDbContext>(opt =>
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("OrderDb")));
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOutboxWriter, EfOutboxWriter>();
+builder.Services.AddScoped<IClock, SystemClock>();
 
-builder.Services.<span class="mt">AddScoped</span>&lt;<span class="ty">IOrderRepository</span>, <span class="ty">OrderRepository</span>&gt;();
-builder.Services.<span class="mt">AddScoped</span>&lt;<span class="ty">IEventPublisher</span>, <span class="ty">KafkaEventPublisher</span>&gt;();
+var app = builder.Build();
 
-<span class="kw">var</span> app = builder.<span class="mt">Build</span>();
-
-app.<span class="mt">MapPost</span>(<span class="str">"/orders"</span>, <span class="kw">async</span> (
-    <span class="ty">CreateOrderCommand</span> cmd,
-    <span class="ty">IOrderRepository</span> repo,
-    <span class="ty">IEventPublisher</span> publisher) =&gt;
+app.MapPost("/orders", async (
+    CreateOrderRequest request,
+    IOrderRepository orders,
+    IOutboxWriter outbox,
+    OrderDbContext db,
+    CancellationToken ct) =>
 {
-    <span class="kw">var</span> order = <span class="ty">Order</span>.<span class="mt">Create</span>(cmd);        <span class="cm">// domain logic</span>
-    <span class="kw">await</span> repo.<span class="mt">SaveAsync</span>(order);          <span class="cm">// own DB</span>
-    <span class="kw">await</span> publisher.<span class="mt">PublishAsync</span>(         <span class="cm">// async event — no coupling!</span>
-        <span class="kw">new</span> <span class="ty">OrderCreatedEvent</span>(order.Id, order.CustomerId));
-    <span class="kw">return</span> <span class="ty">Results</span>.<span class="mt">Accepted</span>(<span class="str">$"/orders/{order.Id}"</span>, order);
+    var order = Order.Create(request.CustomerId, request.Items);
+
+    await using var tx = await db.Database.BeginTransactionAsync(ct);
+    await orders.AddAsync(order, ct);
+    await outbox.AddAsync(new OrderCreatedIntegrationEvent(order.Id, order.CustomerId), ct);
+    await db.SaveChangesAsync(ct);
+    await tx.CommitAsync(ct);
+
+    return Results.Accepted($"/orders/{order.Id}", new { order.Id, order.Status });
 });
 
-app.<span class="mt">Run</span>();</div></div>
-<div class="callout info"><strong>✅ AUTONOMY CHECK</strong>Can this service be deployed without touching any other service? Does it own its database schema? Can it operate independently when other services are down? If yes to all — it's a real microservice.</div>`;
+app.MapGet("/orders/{id:guid}", async (Guid id, IOrderRepository orders, CancellationToken ct) =>
+    await orders.FindAsync(id, ct) is { } order
+        ? Results.Ok(order)
+        : Results.NotFound());
+
+app.Run();`)}
+<div class="callout info"><strong>AUTONOMY CHECK</strong>This service owns its schema, its API contract, its integration event, and its deployable artifact. That is the baseline for real microservice behavior.</div>`;
+
+  if(k==='foundations:microservices:Principles') return `
+<div class="sec">🧠 Microservices Principles</div>
+${renderInsightGrid([
+  { icon: '🧩', label: 'Business Capability', text: 'Split around domain boundaries, not technical layers.', color: '#38bdf8' },
+  { icon: '🗄️', label: 'Own Your Data', text: 'Each service controls its schema and data lifecycle.', color: '#4ade80' },
+  { icon: '📦', label: 'Independent Deploy', text: 'Releasing one service should not require a synchronized platform release.', color: '#fbbf24' },
+])}
+<ul class="fl">
+<li><strong>Smart boundaries, dumb pipes</strong>: keep domain logic in services, not hidden inside transport middleware.</li>
+<li><strong>Observable by default</strong>: every important API call and event publish should be traceable and measurable.</li>
+<li><strong>Asynchronous where it helps</strong>: use events to reduce temporal coupling, not because async is fashionable.</li>
+<li><strong>Design for failure</strong>: retries, timeouts, circuit breakers, idempotency, and dead-letter handling are not optional.</li>
+<li><strong>You build it, you run it</strong>: architecture works only when ownership includes operations.</li>
+</ul>
+<div class="sec">Case Studies</div>
+<ul class="fl">
+<li><strong>Netflix</strong>: independent service ownership plus aggressive observability and resilience patterns.</li>
+<li><strong>Amazon</strong>: service boundaries aligned with team ownership and platform APIs.</li>
+<li><strong>Common failure case</strong>: teams split code into services but keep a shared database, shared release train, and opaque runtime dependencies.</li>
+</ul>`;
+
+  if(k==='foundations:soa:Overview') return `
+<div class="sec">🏛️ Service-Oriented Architecture (SOA)</div>
+<p class="bd"><strong>SOA</strong> organizes systems around reusable enterprise services and shared integration contracts. It often emphasizes orchestration, enterprise governance, canonical schemas, and integration across many business systems rather than fully autonomous product teams.</p>
+<div class="callout info"><strong>MENTAL MODEL</strong>SOA was built to help large enterprises connect many systems of record. Microservices were built to help product teams ship and operate independently at high speed. They are related, but they optimize for different organizational problems.</div>
+${renderTable(['Lens', 'SOA', 'Microservices'], [
+  ['Typical goal', 'Enterprise integration and reuse', 'Independent product delivery'],
+  ['Integration style', 'Shared contracts, orchestration, ESB or central mediation', 'Lightweight APIs and events'],
+  ['Data model', 'Often several shared master systems', 'Service-owned persistence'],
+  ['Governance', 'Central architecture and standards', 'More local team ownership with platform guardrails'],
+  ['Release cadence', 'Slower, coordinated enterprise programs', 'Faster, service-level deployment cadence'],
+])}
+<div class="sec">Where SOA Still Fits</div>
+<ul class="fl">
+<li><strong>Enterprise back-office integration</strong> across ERP, CRM, billing, compliance, and identity systems.</li>
+<li><strong>Canonical business services</strong> where one shared contract must serve many downstream systems for years.</li>
+<li><strong>Large regulated organizations</strong> that value central governance more than rapid decentralized change.</li>
+</ul>`;
+
+  if(k==='foundations:soa:Diagram') return `
+<div class="sec">🗺️ SOA Diagram + Animated Mediation Flow</div>
+<div class="dw"><div class="dt">MULTIPLE SYSTEMS CONNECT THROUGH SHARED ENTERPRISE INTEGRATION</div>
+<svg viewBox="0 0 620 340" width="100%" style="max-height:340px">
+<defs>
+  <marker id="soaArrow" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#fbbf24"/></marker>
+  <style>
+    .soa-line{stroke:#fbbf24;stroke-width:1.5;fill:none;marker-end:url(#soaArrow);stroke-dasharray:7 4;animation:soaDash 2.1s linear infinite}
+    .soa-node{fill:rgba(12,21,36,.96);stroke:#1a2d45;stroke-width:1.2}
+    .soa-band{fill:rgba(251,191,36,.06);stroke:#fbbf24;stroke-width:1.4;stroke-dasharray:7 5}
+    @keyframes soaDash{to{stroke-dashoffset:-22}}
+  </style>
+</defs>
+<text x="120" y="40" text-anchor="middle" class="ft" font-size="10">Systems of Record</text>
+<text x="310" y="40" text-anchor="middle" fill="#fbbf24" font-family="'Fira Code',monospace" font-size="10" font-weight="700">Enterprise Mediation</text>
+<text x="500" y="40" text-anchor="middle" class="ft" font-size="10">Reusable Business Services</text>
+<rect x="58" y="56" width="124" height="40" rx="20" class="soa-node"/>
+<text x="120" y="79" text-anchor="middle" class="ft-g">CRM</text>
+<rect x="58" y="132" width="124" height="40" rx="20" class="soa-node"/>
+<text x="120" y="155" text-anchor="middle" class="ft-g">ERP</text>
+<rect x="58" y="208" width="124" height="40" rx="20" class="soa-node"/>
+<text x="120" y="231" text-anchor="middle" class="ft-g">Identity</text>
+<ellipse cx="310" cy="152" rx="96" ry="84" class="soa-band"/>
+<circle cx="310" cy="152" r="44" fill="rgba(251,191,36,.12)" stroke="#fbbf24" stroke-width="1.4"/>
+<text x="310" y="144" text-anchor="middle" fill="#fbbf24" font-family="'Fira Code',monospace" font-size="11" font-weight="700">ESB</text>
+<text x="310" y="159" text-anchor="middle" class="ft" font-size="9">routing</text>
+<text x="310" y="172" text-anchor="middle" class="ft" font-size="9">policies</text>
+<text x="310" y="86" text-anchor="middle" class="ft" font-size="9">canonical schema</text>
+<text x="310" y="246" text-anchor="middle" class="ft" font-size="9">transforms + orchestration</text>
+<path d="M182 76 C220 76, 236 96, 266 121" class="soa-line"/>
+<path d="M182 152 C220 152, 236 152, 258 152" class="soa-line"/>
+<path d="M182 228 C220 228, 236 208, 266 183" class="soa-line"/>
+<rect x="438" y="56" width="124" height="40" rx="20" class="soa-node"/>
+<text x="500" y="79" text-anchor="middle" fill="#4ade80" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Customer Service</text>
+<rect x="438" y="132" width="124" height="40" rx="20" class="soa-node"/>
+<text x="500" y="155" text-anchor="middle" fill="#38bdf8" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Billing Service</text>
+<rect x="438" y="208" width="124" height="40" rx="20" class="soa-node"/>
+<text x="500" y="231" text-anchor="middle" fill="#f97316" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Order Service</text>
+<path d="M354 121 C384 98, 402 78, 438 76" class="soa-line"/>
+<path d="M362 152 C394 152, 412 152, 438 152" class="soa-line"/>
+<path d="M354 183 C384 206, 402 226, 438 228" class="soa-line"/>
+<text x="500" y="278" text-anchor="middle" class="ft" font-size="9">shared enterprise contracts</text>
+</svg></div>
+${renderFlowGrid([
+  ['Step 1', 'Existing enterprise systems emit or receive standardized messages.'],
+  ['Step 2', 'A central mediation layer transforms, routes, secures, and orchestrates the interactions.'],
+  ['Step 3', 'Shared business services expose enterprise-level capabilities to many consumers.'],
+  ['Step 4', 'Central governance improves consistency but can become a bottleneck if every change flows through it.'],
+])}`;
+
+  if(k==='foundations:soa:Code') return `
+<div class="sec">💻 SOA Integration Adapter Example</div>
+<p class="bd">This is not a pure microservice. It is an enterprise integration adapter that exposes a stable contract and delegates into internal handlers.</p>
+${renderCodeBlock('C# .NET 10 - SOAP-style enterprise adapter', `builder.Services.AddSoapCore();
+builder.Services.AddScoped<ICustomerMasterService, CustomerMasterService>();
+
+var app = builder.Build();
+
+app.UseRouting();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.UseSoapEndpoint<ICustomerMasterService>(
+        "/soa/customer-master.svc",
+        new SoapEncoderOptions(),
+        SoapSerializer.DataContractSerializer);
+});
+
+[ServiceContract]
+public interface ICustomerMasterService
+{
+    [OperationContract]
+    Task<CustomerRecordResponse> GetCustomerAsync(CustomerRecordRequest request);
+}
+
+public sealed class CustomerMasterService(ICustomerRepository repository) : ICustomerMasterService
+{
+    public async Task<CustomerRecordResponse> GetCustomerAsync(CustomerRecordRequest request)
+    {
+        var customer = await repository.FindByExternalIdAsync(request.ExternalId);
+        return new CustomerRecordResponse(customer.Id, customer.Name, customer.Status);
+    }
+}`)}
+<div class="callout warn"><strong>SOA TRADEOFF</strong>The contract can be durable and enterprise-friendly, but changes often move slower because many consumers depend on the same canonical shape.</div>`;
+
+  if(k==='foundations:soa:When to Use') return `
+<div class="sec">🎯 When SOA Is a Better Fit Than Microservices</div>
+${renderTable(['Question', 'SOA leans yes when...', 'Microservices leans yes when...'], [
+  ['Are you integrating many legacy systems?', 'Yes, especially ERP/CRM/mainframe ecosystems', 'Not the main problem'],
+  ['Do you need canonical enterprise contracts?', 'Yes, one standard model must serve many consumers', 'No, teams can own local contracts'],
+  ['Is central governance required?', 'Yes, architecture and data standards are tightly controlled', 'Teams can move faster with platform guardrails'],
+  ['Is product speed the main driver?', 'Usually not', 'Usually yes'],
+])}
+<div class="callout tip"><strong>RULE OF THUMB</strong>Use SOA when the problem is enterprise integration across systems of record. Use microservices when the problem is team autonomy, independent releases, and service-level scaling.</div>`;
+
+  if(k==='foundations:modular-monolith:Overview') return `
+<div class="sec">🧩 Modular Monolith</div>
+<p class="bd"><strong>A modular monolith</strong> is one deployable application with strongly separated modules inside it. It gives you monolith simplicity with much better internal discipline, and it is often the best starting point when domains are becoming clearer but full distribution is still premature.</p>
+${renderTable(['Property', 'Plain monolith', 'Modular monolith'], [
+  ['Internal boundaries', 'Loose or accidental', 'Explicit and enforced'],
+  ['Cross-module access', 'Often direct and messy', 'Via contracts, facades, or internal events'],
+  ['Database usage', 'Shared and unconstrained', 'Shared engine, but schema ownership is controlled'],
+  ['Migration readiness', 'Low', 'High because modules already mirror service candidates'],
+])}
+${renderInsightGrid([
+  { icon: '⚖️', label: 'Sweet Spot', text: 'Better boundaries than a plain monolith without paying the full cost of distributed systems.', color: '#38bdf8' },
+  { icon: '📦', label: 'One Deploy', text: 'You still release one artifact, which keeps CI/CD and debugging simpler.', color: '#4ade80' },
+  { icon: '🚦', label: 'Best Use', text: 'When boundaries are getting clearer but service extraction is still too early or too expensive.', color: '#fbbf24' },
+])}`;
+
+  if(k==='foundations:modular-monolith:Diagram') return `
+<div class="sec">🗂️ Modular Monolith Diagram</div>
+<div class="dw"><div class="dt">ONE APP, MULTIPLE EXPLICIT MODULES</div>
+<svg viewBox="0 0 600 330" width="100%" style="max-height:330px">
+<defs>
+  <marker id="mmArrow" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#38bdf8"/></marker>
+  <style>
+    .mm-line{stroke:#38bdf8;stroke-width:1.5;fill:none;marker-end:url(#mmArrow);stroke-dasharray:6 4;animation:mmDash 1.8s linear infinite}
+    .mm-shell{fill:rgba(56,189,248,.04);stroke:#38bdf8;stroke-width:1.4;stroke-dasharray:7 5}
+    .mm-node{fill:rgba(12,21,36,.96);stroke:#1a2d45;stroke-width:1.2}
+    @keyframes mmDash{to{stroke-dashoffset:-18}}
+  </style>
+</defs>
+<ellipse cx="300" cy="166" rx="210" ry="116" class="mm-shell"/>
+<text x="300" y="58" text-anchor="middle" class="ft-g">Single Deployable Application</text>
+<circle cx="300" cy="160" r="48" class="mm-node"/>
+<text x="300" y="153" text-anchor="middle" fill="#f97316" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Host</text>
+<text x="300" y="167" text-anchor="middle" class="ft" font-size="9">API + workers</text>
+<text x="300" y="180" text-anchor="middle" class="ft" font-size="9">composition root</text>
+<rect x="120" y="94" width="120" height="40" rx="20" class="mm-node"/>
+<text x="180" y="117" text-anchor="middle" class="ft-g">Order Module</text>
+<rect x="360" y="94" width="120" height="40" rx="20" class="mm-node"/>
+<text x="420" y="117" text-anchor="middle" fill="#4ade80" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Catalog Module</text>
+<rect x="120" y="198" width="120" height="40" rx="20" class="mm-node"/>
+<text x="180" y="221" text-anchor="middle" fill="#fbbf24" font-family="'Fira Code',monospace" font-size="11" font-weight="700">Billing Module</text>
+<rect x="360" y="198" width="120" height="40" rx="20" class="mm-node"/>
+<text x="420" y="221" text-anchor="middle" fill="#a78bfa" font-family="'Fira Code',monospace" font-size="11" font-weight="700">User Module</text>
+<path d="M240 114 C265 120, 275 130, 286 138" class="mm-line"/>
+<path d="M360 114 C336 120, 325 130, 314 138" class="mm-line"/>
+<path d="M240 218 C265 208, 276 198, 287 188" class="mm-line"/>
+<path d="M360 218 C336 208, 325 198, 314 188" class="mm-line"/>
+<text x="180" y="145" text-anchor="middle" class="ft" font-size="9">commands / policies</text>
+<text x="420" y="145" text-anchor="middle" class="ft" font-size="9">queries / pricing</text>
+<text x="180" y="249" text-anchor="middle" class="ft" font-size="9">payments / invoicing</text>
+<text x="420" y="249" text-anchor="middle" class="ft" font-size="9">identity / profile</text>
+<ellipse cx="300" cy="292" rx="110" ry="18" fill="rgba(248,113,113,.10)" stroke="#f87171" stroke-width="1.1"/>
+<line x1="190" y1="292" x2="410" y2="292" stroke="#f87171" stroke-width="1.1"/>
+<ellipse cx="300" cy="282" rx="110" ry="18" fill="rgba(248,113,113,.10)" stroke="#f87171" stroke-width="1.1"/>
+<line x1="190" y1="282" x2="410" y2="282" stroke="#f87171" stroke-width="1.1"/>
+<text x="300" y="286" text-anchor="middle" class="ft">Shared database engine with module-owned schema boundaries</text>
+</svg></div>
+${renderFlowGrid([
+  ['Step 1', 'Feature requests enter one host application.'],
+  ['Step 2', 'The host delegates work to explicit modules rather than letting features call each other arbitrarily.'],
+  ['Step 3', 'Modules communicate through contracts, facades, or in-process domain events.'],
+  ['Step 4', 'When one module outgrows the host, it is easier to extract because its boundary already exists.'],
+])}`;
 
   if(k==='foundations:modular-monolith:Code') return `
-<div class="sec">🧩 Modular Monolith — Explicit Module Boundaries</div>
-<p class="bd">Modules live in separate assemblies with explicit contracts. Deployed as one unit — extract to microservice only when justified.</p>
-<div class="cb"><div class="cb-hdr"><span class="cb-lang">C# .NET 10 — Modular Monolith Registration</span><button class="cp-btn" onclick="cp(this)">Copy</button></div>
-<div class="cb-body"><span class="cm">// Each module is a separate C# project (assembly)</span>
-<span class="kw">public static class</span> <span class="ty">OrderModule</span>
+<div class="sec">💻 Modular Monolith — Explicit Module Boundaries</div>
+<p class="bd">Modules live in separate assemblies with explicit contracts. Deployed as one unit, but structured so extraction remains possible later.</p>
+${renderCodeBlock('C# .NET 10 - Modular monolith registration', `public static class OrderModule
 {
-    <span class="kw">public static</span> <span class="ty">IServiceCollection</span> <span class="mt">AddOrderModule</span>(
-        <span class="kw">this</span> <span class="ty">IServiceCollection</span> services, <span class="ty">IConfiguration</span> config)
+    public static IServiceCollection AddOrderModule(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
-        services.<span class="mt">AddDbContext</span>&lt;<span class="ty">OrderDbContext</span>&gt;(opt =&gt;
-            opt.<span class="mt">UseNpgsql</span>(config.<span class="mt">GetConnectionString</span>(<span class="str">"Orders"</span>)));
-        services.<span class="mt">AddScoped</span>&lt;<span class="ty">IOrderService</span>, <span class="ty">OrderService</span>&gt;();
+        services.AddDbContext<OrderDbContext>(opt =>
+            opt.UseNpgsql(configuration.GetConnectionString("Orders")));
 
-        <span class="cm">// Expose ONLY this facade — no direct DbContext leakage</span>
-        services.<span class="mt">AddScoped</span>&lt;<span class="ty">IOrderQueryFacade</span>, <span class="ty">OrderQueryFacade</span>&gt;();
-        <span class="kw">return</span> services;
+        services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IOrderQueryFacade, OrderQueryFacade>();
+        services.AddScoped<IOrderModule, OrderModuleFacade>();
+        return services;
     }
 }
 
-<span class="cm">// Program.cs — clean module composition</span>
-builder.Services.<span class="mt">AddOrderModule</span>(builder.Configuration);
-builder.Services.<span class="mt">AddCatalogModule</span>(builder.Configuration);
-builder.Services.<span class="mt">AddPaymentModule</span>(builder.Configuration);
+builder.Services.AddOrderModule(builder.Configuration);
+builder.Services.AddCatalogModule(builder.Configuration);
+builder.Services.AddBillingModule(builder.Configuration);
 
-<span class="cm">// When Order needs Customer data — use the facade, never DbContext</span>
-<span class="kw">public sealed class</span> <span class="ty">OrderService</span>(
-    <span class="ty">IOrderRepository</span> orders,
-    <span class="ty">ICustomerQueryFacade</span> customers) <span class="cm">// ← explicit contract</span>
+public sealed class CheckoutApplicationService(
+    IOrderModule orders,
+    ICatalogModule catalog)
 {
-    <span class="kw">public async</span> <span class="ty">Task</span>&lt;<span class="ty">Order</span>&gt; <span class="mt">CreateAsync</span>(<span class="ty">CreateOrderCommand</span> cmd)
+    public async Task<CheckoutResult> ExecuteAsync(CheckoutCommand command)
     {
-        <span class="kw">var</span> customer = <span class="kw">await</span> customers
-            .<span class="mt">GetByIdAsync</span>(cmd.CustomerId); <span class="cm">// in-process, but via interface</span>
-        <span class="cm">// ...</span>
+        var pricing = await catalog.GetPricingAsync(command.Items);
+        return await orders.PlaceOrderAsync(command.CustomerId, pricing, command.Items);
     }
-}</div></div>`;
+}`)}
+<div class="callout tip"><strong>KEY RULE</strong>Modules may share a runtime, but they should not share arbitrary internal classes or reach across schema ownership boundaries directly.</div>`;
+
+  if(k==='foundations:modular-monolith:Migration Path') return `
+<div class="sec">🛣️ Migration Path: Modular Monolith to Microservices</div>
+${renderFlowGrid([
+  ['Step 1', 'Enforce module boundaries inside one application first.'],
+  ['Step 2', 'Move cross-module calls behind interfaces, facades, or domain events.'],
+  ['Step 3', 'Measure which module truly needs independent scale, release cadence, or data isolation.'],
+  ['Step 4', 'Extract only that module into a service, leaving the rest in the host until another pressure justifies change.'],
+])}
+${renderTable(['Extraction trigger', 'What to do'], [
+  ['Traffic spike isolated to one capability', 'Extract that module behind an API or event contract'],
+  ['Team ownership split is stable', 'Give one team full lifecycle ownership of the extracted capability'],
+  ['Compliance or isolation requirement appears', 'Move data and runtime into a separate service boundary'],
+  ['No concrete pain exists', 'Do not extract yet'],
+])}
+<div class="callout info"><strong>GOOD STRATEGY</strong>This approach avoids the expensive mistake of distributing a system before the business and team boundaries are stable.</div>`;
+
+  if(k==='foundations:decision:Framework') return `
+<div class="sec">🎯 Architecture Decision Framework</div>
+<p class="bd">Choose architecture by <strong>business pressure</strong>, <strong>team shape</strong>, and <strong>operational maturity</strong>. The right choice is the one with the lowest total coordination cost for the current stage of the platform.</p>
+${renderTable(['Decision factor', 'Monolith', 'SOA', 'Modular monolith', 'Microservices'], [
+  ['Team model', '1 small team', 'Large enterprise programs', '1-3 teams', 'Many autonomous teams'],
+  ['Domain maturity', 'Low', 'Medium-high', 'Medium', 'High'],
+  ['Integration pressure', 'Low', 'Very high', 'Medium', 'High but product-driven'],
+  ['Operational complexity tolerance', 'Low', 'Medium-high', 'Medium', 'High'],
+  ['Independent deployment need', 'Low', 'Medium', 'Medium', 'High'],
+])}
+${renderInsightGrid([
+  { icon: '1', label: 'Start', text: 'If boundaries are unclear, start with monolith or modular monolith.', color: '#38bdf8' },
+  { icon: '2', label: 'Integrate', text: 'If the main problem is enterprise system integration, SOA may fit better.', color: '#fbbf24' },
+  { icon: '3', label: 'Scale Teams', text: 'Use microservices when stable bounded contexts and team autonomy justify distribution.', color: '#4ade80' },
+])}`;
+
+  if(k==='foundations:decision:Anti-patterns') return `
+<div class="sec">🚫 Architecture Anti-Patterns</div>
+<ul class="fl">
+<li><strong>Premature microservices</strong>: splitting into services before domain boundaries are stable.</li>
+<li><strong>Shared database across services</strong>: destroys autonomy and creates hidden coupling.</li>
+<li><strong>One repo, one release train, many “services”</strong>: looks distributed but behaves like a tightly coupled monolith.</li>
+<li><strong>Central platform bottleneck</strong>: every change requires one architecture or infra team to approve and implement it.</li>
+<li><strong>Tool-led architecture</strong>: choosing Kafka, Istio, or Kubernetes before understanding the business problem.</li>
+</ul>
+<div class="callout danger"><strong>COMMON MISTAKE</strong>Teams often compare architecture styles by features only. The correct comparison is by tradeoff: delivery speed, failure isolation, team ownership, scale profile, and compliance burden.</div>`;
+
+  if(k==='foundations:decision:Real Cases') return `
+<div class="sec">📚 Real Cases</div>
+${renderTable(['Scenario', 'Best fit', 'Why'], [
+  ['New B2B SaaS with one team', 'Monolith', 'Maximize delivery speed and product learning'],
+  ['Enterprise integration across CRM, ERP, finance, identity', 'SOA', 'Shared contracts and central integration matter most'],
+  ['Fast-growing app with clearer domains but limited platform maturity', 'Modular monolith', 'Preserve simplicity while preparing clean boundaries'],
+  ['Marketplace platform with many teams and uneven traffic', 'Microservices', 'Independent scale and team ownership justify distribution'],
+])}
+<div class="callout tip"><strong>OPERATING PRINCIPLE</strong>Architectures are not promotions. Microservices are not “level 4”. They are just one tool for one class of organizational and technical problems.</div>`;
+
+  if(k==='foundations:distributed-monolith:Overview') return `
+<div class="sec">⚠️ Distributed Monolith Anti-Pattern</div>
+<p class="bd"><strong>A distributed monolith</strong> looks like microservices from the outside but behaves like a monolith operationally. Services are separately deployed in name only; in reality they depend on each other so tightly that any change, outage, or migration still becomes a platform-wide event.</p>
+${renderInsightGrid([
+  { icon: '🧨', label: 'Symptom', text: 'One request fans out synchronously across too many services.', color: '#f87171' },
+  { icon: '🔗', label: 'Root Cause', text: 'Hidden runtime coupling, shared data, or synchronized release requirements.', color: '#fbbf24' },
+  { icon: '🛠️', label: 'Fix', text: 'Re-draw boundaries, reduce sync chains, and restore ownership of data and release lifecycle.', color: '#38bdf8' },
+])}
+${renderFlowGrid([
+  ['Step 1', 'A client request enters the platform and immediately starts a deep chain of sync calls.'],
+  ['Step 2', 'Each service depends on another service being live right now.'],
+  ['Step 3', 'One slow dependency causes retries, timeouts, and cascading latency.'],
+  ['Step 4', 'Teams realize they cannot safely deploy one capability without coordinating many others.'],
+])}`;
+
+  if(k==='foundations:distributed-monolith:Signs') return `
+<div class="sec">🔎 Signs You Built a Distributed Monolith</div>
+${renderTable(['Sign', 'What it looks like in practice'], [
+  ['Shared database', 'Several services read or write the same schema directly'],
+  ['Synchronous request chains', 'Checkout requires 5-8 live service calls to succeed'],
+  ['Release coupling', 'Service A cannot be released until B, C, and D release too'],
+  ['No local fallback', 'A dependency outage breaks the entire user journey'],
+  ['Opaque ownership', 'Teams do not know who owns the end-to-end failure'],
+  ['Chatty APIs', 'Services exchange many tiny calls to complete one business action'],
+])}
+<div class="callout warn"><strong>ARCHITECT CHECK</strong>Ask one question: if Service X is down, which user journeys still work? If the answer is “almost none”, your boundaries are probably wrong.</div>`;
+
+  if(k==='foundations:distributed-monolith:Fix') return `
+<div class="sec">🧯 How to Fix a Distributed Monolith</div>
+${renderFlowGrid([
+  ['Step 1', 'Stop new coupling: freeze shared-database access and document current sync chains.'],
+  ['Step 2', 'Move each capability toward owning its own data and API contract.'],
+  ['Step 3', 'Replace non-critical sync calls with asynchronous events, projections, or caches.'],
+  ['Step 4', 'Add resilience policies and simplify the highest-risk user journey first.'],
+])}
+<ul class="fl">
+<li><strong>Collapse bad boundaries if needed</strong>: sometimes two “services” should become one module again.</li>
+<li><strong>Extract read models</strong>: avoid cross-service joins by building projections or cached views.</li>
+<li><strong>Make ownership explicit</strong>: one team must own the end-to-end business capability and on-call responsibility.</li>
+<li><strong>Measure the repair</strong>: watch hop count, p95 latency, and release coordination cost.</li>
+</ul>`;
 
   // ── DECOMPOSITION ────────────────────────────────────
   if(k==='decomposition:ddd:Overview') return `
@@ -1731,10 +2641,7 @@ app.<span class="mt">MapPost</span>(<span class="str">"/checkout"</span>, <span 
 </svg></div>
 <div class="callout tip"><strong>🏆 AMAZON PRIME DAY</strong>Prime Day processes ~37.5 orders/sec at peak. Catalog served via CDN + read replicas. Inventory used Redis Lua scripts for atomic decrements. Orders via Kafka async processing.</div>`;
 
-  const structuredFallback = renderStructuredFallback(cid, tid, tab);
-  if (structuredFallback) return structuredFallback;
-
-  return `<div class="empty-r"><span style="font-size:28px">⚡</span><span>Unable to render "${escHtml(tab)}"</span></div>`;
+  return renderComingSoon(cid, tid, tab);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1833,7 +2740,7 @@ function selChapter(id) {
   </div>
 </div>
 <div class="topics-grid">${ch.topics.map(t=>`
-<div class="t-card ${activeTopic===t.id?'active':''}" onclick="selTopic('${ch.id}','${t.id}')">
+<div class="t-card ${activeTopic===t.id?'active':''}" onclick="selTopic(this,'${ch.id}','${t.id}')">
   <span class="t-icon">${t.icon}</span>
   <div class="t-title">${t.title}</div>
   <div class="t-desc">${t.desc}</div>
@@ -1843,10 +2750,10 @@ function selChapter(id) {
   closeRight();
 }
 
-function selTopic(cid, tid) {
+function selTopic(card, cid, tid) {
   activeTopic=tid;
   document.querySelectorAll('.t-card').forEach(c=>c.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  if (card) card.classList.add('active');
   const ch=CHAPTERS.find(c=>c.id===cid);
   const topic=ch?.topics.find(t=>t.id===tid);
   if(!topic) return;
@@ -1855,13 +2762,14 @@ function selTopic(cid, tid) {
   document.getElementById('rightTitle').textContent=topic.title;
   const tabs=topic.tabs||['Overview'];
   document.getElementById('rightTabs').innerHTML=tabs.map((tab,i)=>`
-<div class="r-tab ${i===0?'active':''}" onclick="selTab(this,'${cid}','${tid}','${tab.replace(/'/g,"\\'")}')">${tab}</div>`).join('');
+<button type="button" class="r-tab ${i===0?'active':''}" onclick="selTab(this,'${cid}','${tid}','${encodeURIComponent(tab)}')">${escHtml(tab)}</button>`).join('');
   renderTab(cid,tid,tabs[0]);
 }
 
-function selTab(el,cid,tid,tab) {
+function selTab(el,cid,tid,encodedTab) {
   document.querySelectorAll('.r-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
+  const tab = decodeURIComponent(encodedTab);
   renderTab(cid,tid,tab);
 }
 

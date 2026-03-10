@@ -1,6 +1,6 @@
 import { MasteryEmbedPage } from "@/components/blog/MasteryEmbedPage";
 
-const STATIC_HTML_VERSION = "2026-03-10-microservices-html-v1";
+const STATIC_HTML_VERSION = "2026-03-10-microservices-html-v3";
 
 const MicroservicesMastery = () => {
   return (
