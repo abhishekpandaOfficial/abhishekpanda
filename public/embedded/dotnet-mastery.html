@@ -288,12 +288,26 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--text1);f
 .qa-q:hover{background:var(--bg3)}
 .qa-qi{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--g2);flex-shrink:0;margin-top:1px}
 .qa-qt{font-size:12px;font-weight:600;color:var(--text1);flex:1;line-height:1.5}
+.qa-kicker{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.qa-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.qa-pill{font-size:8.5px;padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;border:1px solid}
+.qa-legend{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}
+.qa-stat{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:12px 0;font-size:11.5px;color:var(--text2);line-height:1.7}
+.qa-stat strong{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text1)}
 .qa-lv{font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;border:1px solid;flex-shrink:0;margin-top:2px}
 .qa-ar{color:var(--text3);font-size:9px;transition:transform .2s;margin-top:3px;flex-shrink:0}
 .qa.open .qa-ar{transform:rotate(90deg)}
 .qa-a{display:none;padding:11px 13px;border-top:1px solid var(--border);background:rgba(0,0,0,.2)}
 .qa.open .qa-a{display:block}
 .qa-at{font-size:11.5px;color:var(--text2);line-height:1.75}
+.interview-sketch{width:100%;min-width:520px;height:auto;display:block}
+.sketch-box{fill:rgba(10,16,24,.95);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.sketch-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.06em;fill:var(--text1)}
+.sketch-copy{font-family:'DM Mono',monospace;font-size:8.5px;fill:var(--text2)}
+.sketch-arrow{fill:none;stroke:var(--g2);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:8 6;animation:sketchDash 12s linear infinite}
+.sketch-arrow.alt{stroke:var(--g3);animation-duration:10s}
+.sketch-arrow.soft{stroke:var(--g1);animation-duration:15s}
+@keyframes sketchDash{to{stroke-dashoffset:-140}}
 
 /* Level colors */
 .lv-b{color:#56d364;border-color:rgba(86,211,100,.3);background:rgba(86,211,100,.07)}
@@ -338,11 +352,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--text1);f
     <div class="welcome" id="welcome">
       <div class="w-logo">.NET</div>
       <div class="w-title">.NET Core Internals Mastery</div>
-      <div class="w-sub">Deep dive into .NET internals — CLR, JIT, GC, async, DI, performance, and everything that runs under the hood of every .NET application.</div>
+      <div class="w-sub">Deep dive into .NET internals — CLR, JIT, GC, async, DI, performance, and everything that runs under the hood of every .NET application, now with 540 tagged interview questions and answers.</div>
       <div class="w-stats">
-        <div class="ws"><div class="ws-n">20</div><div class="ws-l">Chapters</div></div>
+        <div class="ws"><div class="ws-n">21</div><div class="ws-l">Chapters</div></div>
         <div class="ws"><div class="ws-n">100+</div><div class="ws-l">Topics</div></div>
-        <div class="ws"><div class="ws-n">200+</div><div class="ws-l">Q&amp;A</div></div>
+        <div class="ws"><div class="ws-n">540+</div><div class="ws-l">Q&amp;A</div></div>
         <div class="ws"><div class="ws-n">120+</div><div class="ws-l">Diagrams</div></div>
       </div>
       <div class="welcome-actions">
@@ -580,6 +594,15 @@ const CHS = [
   {id:"rt3",icon:"🌳",title:"Expression Trees (Revisited)",desc:"Compile, DebugView, visitor pattern",tags:["Advanced","LINQ"]},
   {id:"rt4",icon:"🔍",title:"Roslyn Analyzers",desc:"DiagnosticAnalyzer, CodeFix, IOperation",tags:["Advanced","Roslyn"]},
   {id:"rt5",icon:"🔮",title:"Source Generators",desc:"IIncrementalGenerator, SyntaxProvider, output",tags:["Advanced","Roslyn"]},
+ ]},
+{n:"21",title:"Interview Q&A",icon:"🎯",c:"#00c8ff",bg:"rgba(0,200,255,0.1)",
+ desc:"540 tagged .NET Core internals interview questions across four levels: direct, scenario, logical twist, architecture, production debugging, and .NET 10 reasoning.",
+ tags:["Interview","CLR","GC","JIT","Performance"],
+ topics:[
+  {id:"iq-junior",icon:"🟢",title:"Junior Questions (135)",desc:"Fundamentals, direct questions, and runtime basics for early-career interviews",tags:["Basic","Interview"]},
+  {id:"iq-mid",icon:"🟡",title:"Mid-Level Questions (135)",desc:"Applied internals, diagnostics, and production reasoning",tags:["Intermediate","Interview"]},
+  {id:"iq-senior",icon:"🟠",title:"Senior Questions (135)",desc:"Deep performance, hosting, async, and architecture trade-offs",tags:["Advanced","Interview"]},
+  {id:"iq-architect",icon:"🔴",title:"Architect Questions (135)",desc:"System-level decisions, cross-team standards, and runtime strategy",tags:["Expert","Interview"]},
  ]},
 ];
 
@@ -1515,6 +1538,267 @@ const QA = [
 {q:"How do you diagnose high memory usage in a .NET application?",a:"<strong>Step 1:</strong> Use <code>dotnet-counters monitor</code> to confirm heap growth vs. managed vs. unmanaged. <strong>Step 2:</strong> Capture a GC heap dump with <code>dotnet-gcdump</code> — lightweight, shows live object graph. Analyze with Visual Studio or PerfView. <strong>Step 3:</strong> For full heap analysis, <code>dotnet-dump collect</code> then <code>dotnet-dump analyze</code> → <code>dumpheap -stat</code> to find top allocating types, <code>gcroot &lt;address&gt;</code> to find what's keeping objects alive. <strong>Common causes:</strong> event handler leaks (+=, no -=), static collections growing forever, cache without eviction, LOH fragmentation, finalizer queue backup. <strong>Prevention:</strong> always unsubscribe events, use WeakReference for caches, set cache size limits.",level:"a",tag:"Diagnostics"},
 ];
 
+const DOTNET_INTERVIEW_LEVEL_ORDER = ['iq-junior', 'iq-mid', 'iq-senior', 'iq-architect'];
+const DOTNET_INTERVIEW_LEVELS = {
+  'iq-junior': {
+    title: 'Junior Interview Card',
+    levelLabel: 'Junior',
+    badgeClass: 'lv-b',
+    accent: '#56d364',
+    summary: 'Direct questions, clear definitions, and first-principles runtime understanding.'
+  },
+  'iq-mid': {
+    title: 'Mid-Level Interview Card',
+    levelLabel: 'Mid-Level',
+    badgeClass: 'lv-i',
+    accent: '#ffd700',
+    summary: 'Production debugging, applied trade-offs, and diagnosing what the runtime is doing.'
+  },
+  'iq-senior': {
+    title: 'Senior Interview Card',
+    levelLabel: 'Senior',
+    badgeClass: 'lv-a',
+    accent: '#ff6b35',
+    summary: 'Deep performance, advanced hosting, concurrency, and operational decisions.'
+  },
+  'iq-architect': {
+    title: 'Architect Interview Card',
+    levelLabel: 'Architect',
+    badgeClass: 'lv-e',
+    accent: '#7b61ff',
+    summary: 'System-wide platform decisions, team standards, runtime strategy, and failure analysis.'
+  }
+};
+
+const DOTNET_INTERVIEW_DOMAIN_ORDER = [
+  'clr','gc','jit','async','threading','di','hosting','config','networking','io','diagnostics','performance','interop','security','build'
+];
+const DOTNET_INTERVIEW_DOMAINS = {
+  clr:{label:'CLR', focus:'CoreCLR execution engine, managed code, metadata, and assembly loading', scenario:'a plugin-heavy service host starts leaking collectible AssemblyLoadContexts', code:'AssemblyLoadContext', signal:'type identity mismatch across load contexts', anti:'assuming the same assembly name always means the same runtime type'},
+  gc:{label:'GC', focus:'generational collection, LOH, pinning, promotions, and finalization', scenario:'an API shows rising Gen2 pauses after adding large JSON payload handling', code:'ArrayPool<byte>.Shared', signal:'Gen2 collections and LOH fragmentation increase', anti:'allocating large buffers per request and trusting the GC to absorb it'},
+  jit:{label:'JIT', focus:'tiered compilation, PGO, inlining, ReadyToRun, and native code generation', scenario:'startup improves after ReadyToRun, but steady-state throughput drops in hot paths', code:'DOTNET_TieredPGO=1', signal:'Tier-1 optimized methods differ from Tier-0 startup paths', anti:'tuning one benchmark without checking startup versus throughput trade-offs'},
+  async:{label:'Async/Await', focus:'state machines, continuations, context capture, and async coordination', scenario:'a background workflow stalls because blocking calls were mixed with async I/O', code:'ConfigureAwait(false)', signal:'thread pool growth with low CPU usage and blocked continuations', anti:'calling .Result on async paths in application code'},
+  threading:{label:'Threading', focus:'thread pool, starvation, synchronization, scheduling, and work-stealing', scenario:'request latency spikes while CPU is low because synchronous work blocks worker threads', code:'ThreadPool.SetMinThreads', signal:'thread pool queue length rises before CPU saturation', anti:'fixing starvation by blindly creating dedicated threads everywhere'},
+  di:{label:'Dependency Injection', focus:'service lifetimes, scopes, validation, and composition roots', scenario:'a singleton caches a scoped service and leaks tenant-specific request data', code:'ValidateScopes = true', signal:'stale scoped state survives across requests', anti:'treating singleton lifetimes as free performance wins'},
+  hosting:{label:'Hosting', focus:'Generic Host, app startup, middleware bootstrapping, and service defaults', scenario:'multiple workers and APIs need one standard host policy for logging, resilience, and health checks', code:'builder.Services.AddOpenTelemetry()', signal:'teams drift because shared host defaults are missing', anti:'copy-pasting startup code across services with no platform baseline'},
+  config:{label:'Configuration', focus:'provider layering, options binding, reload behavior, and secret flow', scenario:'production settings differ from staging because env vars override JSON unexpectedly', code:'IOptionsMonitor<T>', signal:'effective values do not match appsettings files', anti:'assuming configuration is a single source instead of a layered chain'},
+  networking:{label:'Networking', focus:'SocketsHttpHandler, DNS refresh, HTTP/2, HTTP/3, connection pooling', scenario:'outbound calls fail after an endpoint IP rotates while old sockets remain pooled', code:'PooledConnectionLifetime', signal:'healthy app logic with stale network routes', anti:'creating new HttpClient instances per request'},
+  io:{label:'I/O', focus:'Pipelines, streams, backpressure, buffers, and file/socket throughput', scenario:'a custom protocol parser allocates heavily while reading framed messages', code:'PipeReader', signal:'allocation profiles point to repeated small buffer copies', anti:'using string-based parsing for binary or framed protocols'},
+  diagnostics:{label:'Diagnostics', focus:'EventPipe, counters, dumps, traces, and observability hooks', scenario:'a service slows down only in production and needs live investigation without restart', code:'dotnet-trace collect', signal:'you need evidence before changing runtime settings', anti:'guessing about bottlenecks without collecting counters or traces'},
+  performance:{label:'Performance', focus:'Span<T>, pooling, allocation control, benchmarking, and hotspots', scenario:'a hot serialization path regresses after adding convenience abstractions', code:'BenchmarkDotNet', signal:'allocations rise while algorithmic work stays constant', anti:'optimizing cold paths because they look low-level'},
+  interop:{label:'Interop', focus:'P/Invoke, marshaling, native memory, and ABI boundaries', scenario:'a native library call works on Windows but corrupts memory on Linux', code:'[LibraryImport]', signal:'platform-specific calling convention or marshaling mismatch', anti:'assuming C signatures map 1:1 to managed declarations'},
+  security:{label:'Security', focus:'crypto APIs, TLS, certificates, secrets, and secure defaults', scenario:'certificate validation differs across environments after a trust chain change', code:'X509Chain', signal:'the same outbound call passes locally and fails in production', anti:'turning off certificate validation to unblock deployments'},
+  build:{label:'Build & Packaging', focus:'NuGet restore, MSBuild evaluation, SDK pipeline, and artifacts', scenario:'two services compile differently because transitive package versions drift by branch', code:'Directory.Packages.props', signal:'build outputs differ without source changes', anti:'treating restore and build graphs as deterministic without pinning versions'}
+};
+
+const DOTNET_INTERVIEW_TAG_COLORS = {
+  'Direct':'color:#56d364;border-color:rgba(86,211,100,.35);background:rgba(86,211,100,.08)',
+  'Indirect':'color:#8a9db5;border-color:rgba(138,157,181,.28);background:rgba(138,157,181,.08)',
+  'Scenario':'color:#00c8ff;border-color:rgba(0,200,255,.3);background:rgba(0,200,255,.08)',
+  'Logical Twist':'color:#ff6b35;border-color:rgba(255,107,53,.3);background:rgba(255,107,53,.08)',
+  'Architecture':'color:#7b61ff;border-color:rgba(123,97,255,.34);background:rgba(123,97,255,.08)',
+  'Tradeoff':'color:#ffd700;border-color:rgba(255,215,0,.32);background:rgba(255,215,0,.08)',
+  'Production Debugging':'color:#00ffa3;border-color:rgba(0,255,163,.32);background:rgba(0,255,163,.08)',
+  '.NET 10':'color:#e3f2ff;border-color:rgba(227,242,255,.26);background:rgba(227,242,255,.08)',
+  'Performance':'color:#ff7b72;border-color:rgba(255,123,114,.32);background:rgba(255,123,114,.08)',
+  'Real World':'color:#f4b8ff;border-color:rgba(244,184,255,.28);background:rgba(244,184,255,.08)',
+  'Whiteboard':'color:#4cc9f0;border-color:rgba(76,201,240,.28);background:rgba(76,201,240,.08)',
+  'Diagnostics':'color:#a5d6ff;border-color:rgba(165,214,255,.28);background:rgba(165,214,255,.08)'
+};
+
+const DOTNET_INTERVIEW_TEMPLATES = {
+  'iq-junior': [
+    domain => ({
+      tags:['Direct', domain.label, '.NET 10'],
+      q:`What does ${domain.label} mean inside .NET, and why should an application engineer care about it?`,
+      a:`${domain.label} matters because it controls ${domain.focus}. An engineer should care because this affects production behavior, not just internals trivia. In simple terms: if you understand ${domain.label}, you can explain why a .NET app starts, runs, allocates, blocks, or fails the way it does. In .NET 10 conversations, tie it back to how platform defaults, diagnostics, and runtime features improve measurable behavior instead of memorizing names only.`
+    }),
+    domain => ({
+      tags:['Direct', 'Use Case', domain.label],
+      q:`Give one simple use case where understanding ${domain.label} helps you write better code.`,
+      a:`A practical use case is ${domain.scenario}. Understanding ${domain.label} lets you choose the right API or runtime setting early. For example, you would look at ${domain.code} or a related runtime feature because the underlying behavior is controlled by ${domain.label}, not by surface syntax alone.`
+    }),
+    domain => ({
+      tags:['Scenario', 'Production Debugging', domain.label],
+      q:`You are asked to investigate ${domain.scenario}. What would you check first?`,
+      a:`Start with observable evidence. First confirm the symptom through logs, counters, or traces. Then inspect the runtime area most closely tied to ${domain.label}. The first signal to verify is that ${domain.signal}. Only after that should you change code or runtime settings. This sequence shows discipline: measure, narrow, then fix.`
+    }),
+    domain => ({
+      tags:['Logical Twist', 'Tradeoff', domain.label],
+      q:`A teammate says, "We do not need to understand ${domain.label}; the framework handles it for us." Why is that weak reasoning?`,
+      a:`That statement is weak because the framework provides abstractions, but production failures still surface through runtime behavior. ${domain.label} explains the cost model and failure modes behind those abstractions. If a team ignores it, they will misread symptoms, overcorrect blindly, and struggle in interviews when asked to justify trade-offs beyond happy-path code.`
+    }),
+    domain => ({
+      tags:['Indirect', 'Architecture', domain.label],
+      q:`How would you explain ${domain.label} to a teammate without going too low-level?`,
+      a:`Explain it as the runtime boundary responsible for ${domain.focus}. Then connect it to one application outcome: throughput, latency, memory, startup, safety, or maintainability. The goal is not to dump internals; it is to show which part of the runtime owns the behavior and how that changes engineering decisions.`
+    }),
+    domain => ({
+      tags:['Whiteboard', domain.label, 'Real World'],
+      q:`On a whiteboard, what flow would you draw to explain ${domain.label} during an interview?`,
+      a:`Draw the application entry point, then the runtime boundary for ${domain.label}, then the observable result. Keep the flow simple: input, runtime processing, output. Add one production example such as ${domain.scenario}. This shows you can communicate the concept clearly under interview pressure.`
+    }),
+    domain => ({
+      tags:['Direct', 'Diagnostics', domain.label],
+      q:`Which signal or tool helps you verify whether ${domain.label} is involved in a problem?`,
+      a:`Use the tool closest to the runtime symptom: counters, traces, dumps, or targeted logs. A strong answer mentions that the first clue is ${domain.signal}. Then name a fitting tool or API, such as ${domain.code}, EventPipe tooling, benchmark traces, or host diagnostics depending on the domain.`
+    }),
+    domain => ({
+      tags:['Scenario', '.NET 10', 'Production Debugging'],
+      q:`How would you speak about ${domain.label} in a modern .NET 10 interview instead of giving an old .NET Framework answer?`,
+      a:`Anchor the answer in current runtime behavior and platform defaults. Mention modern hosting, diagnostics, service defaults, source-generated paths, or updated runtime optimizations where relevant. The important part is to explain what changed operationally, not to recite old framework-era rules that no longer fit cross-platform .NET.`
+    }),
+    domain => ({
+      tags:['Logical Twist', domain.label, 'Tradeoff'],
+      q:`What is one common mistake teams make when they first start learning ${domain.label}?`,
+      a:`A frequent mistake is ${domain.anti}. Teams often over-trust abstractions or optimize the wrong layer. A better approach is to connect ${domain.label} to measured behavior, confirm the bottleneck, and only then adjust code, configuration, or runtime settings.`
+    })
+  ],
+  'iq-mid': [
+    domain => ({
+      tags:['Scenario', 'Production Debugging', domain.label],
+      q:`A production incident points to ${domain.label}. Walk through your investigation order.`,
+      a:`My order is: confirm the symptom, capture lightweight evidence, correlate it with the runtime area, then narrow to one hypothesis at a time. For ${domain.label}, that means I would start from ${domain.signal}, validate it with counters or traces, inspect the code paths using ${domain.code}, and only then test a fix. This avoids changing two variables at once during incident response.`
+    }),
+    domain => ({
+      tags:['Tradeoff', 'Architecture', domain.label],
+      q:`What trade-off would you explain before changing a system because of ${domain.label}?`,
+      a:`I would explain that tuning ${domain.label} usually improves one axis while risking another. For example, you may gain throughput but increase startup time, reduce allocations but add complexity, or simplify hosting while limiting flexibility. The right answer depends on workload shape, operational constraints, and how often the path is exercised.`
+    }),
+    domain => ({
+      tags:['Indirect', '.NET 10', domain.label],
+      q:`Which modern .NET 10 capability changes how you talk about ${domain.label} in interviews?`,
+      a:`The best answer ties ${domain.label} to current runtime and platform capabilities such as better diagnostics, tiered compilation behavior, host defaults, source generation, or improved libraries. The point is to show you know the current engineering model rather than giving a historical answer frozen in older framework versions.`
+    }),
+    domain => ({
+      tags:['Scenario', 'Diagnostics', domain.label],
+      q:`If dashboards suggest ${domain.label} is the bottleneck, what evidence would prove it and what evidence would disprove it?`,
+      a:`To prove it, I would want direct runtime evidence around ${domain.signal}. To disprove it, I would show that the symptom remains unchanged even when I inspect or isolate the ${domain.label} path. This matters in interviews because strong engineers know how to falsify a theory, not just argue for one.`
+    }),
+    domain => ({
+      tags:['Logical Twist', 'Architecture', domain.label],
+      q:`When can a change that looks correct for ${domain.label} still make the system worse overall?`,
+      a:`It can happen when the local improvement shifts cost to another boundary. For example, better throughput in one runtime area can raise memory pressure, debugging difficulty, or operational drift somewhere else. That is why I describe ${domain.label} as part of a whole execution model instead of an isolated trick.`
+    }),
+    domain => ({
+      tags:['Use Case', 'Real World', domain.label],
+      q:`Give a realistic platform or product scenario where teams publicly talk about concerns close to ${domain.label}.`,
+      a:`Publicly available talks and docs from cloud-scale platforms often discuss issues adjacent to ${domain.label}: latency budgets, connection management, memory pressure, compilation, or diagnostics. The exact internal implementation may be private, but the engineering pattern is public: teams invest in the runtime area because it directly shapes reliability, cost, or throughput.`
+    }),
+    domain => ({
+      tags:['Direct', 'Whiteboard', domain.label],
+      q:`How would you whiteboard the boundary between application code and ${domain.label}?`,
+      a:`I would draw application code first, then the runtime or framework boundary owned by ${domain.label}, then the external effect such as network I/O, memory pressure, native calls, or startup latency. I would mark where measurement happens and where the failure signal appears. That shows I understand both the boundary and the observable outcome.`
+    }),
+    domain => ({
+      tags:['Performance', 'Tradeoff', domain.label],
+      q:`What performance misconception appears often around ${domain.label}?`,
+      a:`A common misconception is assuming that lower-level automatically means faster. With ${domain.label}, faster only matters if the path is hot, measurable, and aligned to the workload. Otherwise you just trade maintainability for theoretical gains. The correct answer includes measurement and context.`
+    }),
+    domain => ({
+      tags:['Scenario', '.NET 10', 'Architecture'],
+      q:`How would you standardize team guidance around ${domain.label} for a .NET 10 platform?`,
+      a:`I would define one default policy, one diagnostic path, and one escalation rule. The policy says how teams should use the feature by default. The diagnostic path says what signal to capture first. The escalation rule says when platform engineers should step in. This keeps runtime decisions consistent across services instead of tribal.`
+    })
+  ],
+  'iq-senior': [
+    domain => ({
+      tags:['Architecture', 'Scenario', domain.label],
+      q:`Design a senior-level mitigation plan for ${domain.scenario}. What would you change immediately and what would you change later?`,
+      a:`Immediately, I would reduce blast radius by addressing the most observable symptom around ${domain.signal}. Then I would add targeted diagnostics and ship the smallest safe fix, often around ${domain.code}. Later, I would standardize the pattern, add tests or benchmarks, and document the runtime rule so the same domain-level issue does not return in a different service.`
+    }),
+    domain => ({
+      tags:['Logical Twist', 'Production Debugging', domain.label],
+      q:`How would you respond if logs point at ${domain.label}, but the real issue turns out to be elsewhere?`,
+      a:`I would treat ${domain.label} as a hypothesis, not a conclusion. Senior debugging means correlating multiple signals before acting. If the data shows the symptom is downstream of another cause, I pivot quickly, explain why the original signal was misleading, and capture that learning in the runbook so the team avoids false positives next time.`
+    }),
+    domain => ({
+      tags:['Tradeoff', 'Performance', domain.label],
+      q:`Which trade-off around ${domain.label} separates senior engineers from intermediate engineers?`,
+      a:`Senior engineers explain the second-order cost. They know that improving ${domain.label} can affect deployment shape, debugging quality, portability, memory layout, latency distribution, or team usability. The differentiator is not knowing the mechanism only; it is being able to say when the mechanism is worth the organizational cost.`
+    }),
+    domain => ({
+      tags:['Architecture', '.NET 10', domain.label],
+      q:`How would you incorporate ${domain.label} into a reusable .NET 10 platform baseline?`,
+      a:`I would encode the default through shared hosting or infrastructure packages, expose the safe tuning knobs, and document the evidence path. In .NET 10 terms, this means making runtime behavior visible through modern diagnostics and platform defaults instead of relying on every service team to rediscover the same internals decision.`
+    }),
+    domain => ({
+      tags:['Scenario', 'Real World', domain.label],
+      q:`Name a real-world system pattern where ${domain.label} clearly matters even if the internal code is not public.`,
+      a:`Any high-scale API platform, streaming system, commerce backend, or developer tooling service has to manage concerns adjacent to ${domain.label}. Public docs and conference material often discuss latency, allocation, startup, DNS refresh, certificate validation, build graphs, or diagnostics. The exact code may be private, but the runtime pressure is public and makes the domain relevant.`
+    }),
+    domain => ({
+      tags:['Whiteboard', 'Architecture', domain.label],
+      q:`What diagram would you draw to teach a team how ${domain.label} affects production behavior?`,
+      a:`I would draw a left-to-right flow: application request, framework boundary, ${domain.label} processing, runtime effect, external symptom. Then I would animate the decision path verbally: where work queues, buffering, allocation, blocking, or compilation appear, and where counters or traces can verify it. This is the kind of whiteboard answer that interviewers remember.`
+    }),
+    domain => ({
+      tags:['Production Debugging', 'Diagnostics', domain.label],
+      q:`Which runbook entry should always exist for incidents related to ${domain.label}?`,
+      a:`The runbook should name the primary symptom, the first signal to capture, the safest temporary mitigation, the toolset to use, and the rollback condition. For ${domain.label}, I would explicitly include how to confirm ${domain.signal} and which runtime artifact or API is most relevant before code changes are attempted.`
+    }),
+    domain => ({
+      tags:['Logical Twist', 'Tradeoff', '.NET 10'],
+      q:`Why can copying an optimization from one .NET service into another be a mistake when ${domain.label} is involved?`,
+      a:`Because the optimization may have been valid for one workload shape only. Different request patterns, payload sizes, allocation profiles, plugin models, or deployment environments change the correct answer. Senior engineers reuse principles, not cargo-cult fixes. ${domain.label} has to be revalidated against the new system.`
+    }),
+    domain => ({
+      tags:['Scenario', 'Architecture', 'Performance'],
+      q:`You need both deep observability and strong performance around ${domain.label}. How do you balance the two?`,
+      a:`I would keep low-cost signals always on, use heavier tools only during targeted windows, and prefer structured evidence over permanent verbose logging. The balance comes from understanding the cost profile of the runtime feature and designing diagnostics that scale with the incident, not with every request.`
+    })
+  ],
+  'iq-architect': [
+    domain => ({
+      tags:['Architecture', 'Scenario', domain.label],
+      q:`At platform level, how would you define standards for ${domain.label} across many .NET teams?`,
+      a:`I would define one golden path, one exception process, and one measurement contract. The golden path gives teams safe defaults for ${domain.label}. The exception process prevents ad hoc tuning. The measurement contract forces teams to justify deviations with data. That is how platform architecture avoids runtime chaos at scale.`
+    }),
+    domain => ({
+      tags:['Logical Twist', 'Architecture', 'Tradeoff'],
+      q:`When should an architect refuse a runtime-level optimization request involving ${domain.label}?`,
+      a:`I would refuse when the team cannot prove the pain, when the optimization complicates ownership without measurable gain, or when the request hides a higher-level design flaw. Runtime changes are powerful, but they are not a substitute for clean architecture, sane traffic patterns, or disciplined diagnostics.`
+    }),
+    domain => ({
+      tags:['Scenario', '.NET 10', 'Real World'],
+      q:`How would you explain the business value of investing in ${domain.label} knowledge for a .NET 10 platform team?`,
+      a:`The business value comes from fewer incidents, faster diagnosis, better cost control, and stronger engineering consistency. Teams that understand ${domain.label} avoid repeating the same runtime mistakes and can reason about modern .NET behavior more precisely during reviews, migrations, and capacity planning.`
+    }),
+    domain => ({
+      tags:['Whiteboard', 'Architecture', domain.label],
+      q:`If an interview panel asks you to whiteboard the platform implications of ${domain.label}, what is your structure?`,
+      a:`I structure it as policy, observability, guardrails, and escape hatches. Policy says the default. Observability says how to verify it. Guardrails stop common misuse. Escape hatches define when specialized workloads can diverge. This framing turns ${domain.label} from a low-level detail into platform architecture.`
+    }),
+    domain => ({
+      tags:['Tradeoff', 'Real World', domain.label],
+      q:`Which trade-off around ${domain.label} matters most when a company operates many services, not just one?`,
+      a:`Consistency versus local optimization. At scale, the wrong local optimization creates operational fragmentation. Architects choose defaults that are good enough for most workloads, then allow limited exceptions. That is usually more valuable than allowing every team to hand-tune ${domain.label} independently.`
+    }),
+    domain => ({
+      tags:['Production Debugging', 'Architecture', domain.label],
+      q:`How do you prevent repeated incidents related to ${domain.label} across multiple teams?`,
+      a:`After the first incident, I would convert the fix into platform guidance: shared libraries, templates, dashboards, alerts, and a short runbook. Then I would teach the failure mode using the exact evidence trail. The goal is not just to fix one service; it is to remove the class of failure from the platform where possible.`
+    }),
+    domain => ({
+      tags:['Logical Twist', 'Whiteboard', domain.label],
+      q:`An interviewer asks for the "best" approach to ${domain.label}. How do you answer without sounding vague?`,
+      a:`I say there is no universal best approach without workload context, then I state the decision variables clearly: latency goals, memory limits, deployment model, developer ergonomics, debugging needs, and production evidence. That answer is not vague; it is disciplined architecture reasoning.`
+    }),
+    domain => ({
+      tags:['Scenario', 'Architecture', '.NET 10'],
+      q:`You are modernizing a mixed fleet to current .NET. How does ${domain.label} affect migration strategy?`,
+      a:`Migration strategy should separate language changes, host changes, runtime changes, and diagnostics changes. ${domain.label} often changes the operational behavior enough that you need side-by-side evidence before rollout. I would establish baselines first, migrate incrementally, and compare runtime signals before broad adoption.`
+    }),
+    domain => ({
+      tags:['Real World', 'Architecture', 'Tradeoff'],
+      q:`Why do publicly documented high-scale .NET systems invest in runtime and internals literacy instead of staying purely at framework level?`,
+      a:`Because high-scale systems eventually run into runtime-shaped limits: memory, compilation, thread scheduling, connection reuse, native boundaries, build determinism, or diagnostics overhead. Public case studies may not reveal every internal implementation, but they consistently show that platform teams need internals literacy to keep services fast, stable, and operable.`
+    })
+  ]
+};
+
+const DOTNET_INTERVIEW_CACHE = new Map();
+
 // ═══════════════════════════════════════════════════════════
 // RENDER ENGINE
 // ═══════════════════════════════════════════════════════════
@@ -2074,9 +2358,149 @@ function renderGeneratedDetail(id, chi){
     </div>`;
 }
 
+function renderInterviewTag(tag){
+  return `<span class="qa-pill" style="${DOTNET_INTERVIEW_TAG_COLORS[tag] || 'color:var(--text2);border-color:rgba(138,157,181,.28);background:rgba(138,157,181,.08)'}">${escHtml(tag)}</span>`;
+}
+
+function getDotnetInterviewTotal(){
+  return DOTNET_INTERVIEW_LEVEL_ORDER.reduce((sum, key)=>sum + buildDotnetInterviewBank(key).length, 0);
+}
+
+function buildDotnetInterviewBank(levelKey){
+  if(DOTNET_INTERVIEW_CACHE.has(levelKey)) return DOTNET_INTERVIEW_CACHE.get(levelKey);
+  const templates = DOTNET_INTERVIEW_TEMPLATES[levelKey] || DOTNET_INTERVIEW_TEMPLATES['iq-junior'];
+  const bank = [];
+  DOTNET_INTERVIEW_DOMAIN_ORDER.forEach(domainKey=>{
+    const domain = DOTNET_INTERVIEW_DOMAINS[domainKey];
+    templates.forEach((template, index)=>{
+      const qa = template(domain, index);
+      bank.push({
+        id: `${levelKey}-${domainKey}-${index + 1}`,
+        levelKey,
+        levelLabel: DOTNET_INTERVIEW_LEVELS[levelKey].levelLabel,
+        badgeClass: DOTNET_INTERVIEW_LEVELS[levelKey].badgeClass,
+        domain: domain.label,
+        question: qa.q,
+        answer: qa.a,
+        tags: qa.tags
+      });
+    });
+  });
+  DOTNET_INTERVIEW_CACHE.set(levelKey, bank);
+  return bank;
+}
+
+function splitInterviewSketchText(text, maxChars=16){
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  const lines = [];
+  let current = '';
+  words.forEach(word=>{
+    const next = current ? `${current} ${word}` : word;
+    if(next.length <= maxChars || !current){
+      current = next;
+    }else{
+      lines.push(current);
+      current = word;
+    }
+  });
+  if(current) lines.push(current);
+  return lines.slice(0,3);
+}
+
+function renderInterviewSketchLines(lines, x, y){
+  return `<text x="${x}" y="${y}" text-anchor="middle" class="sketch-copy">${lines.map((line, idx)=>`<tspan x="${x}" y="${y + (idx * 12)}">${escHtml(line)}</tspan>`).join('')}</text>`;
+}
+
+function renderDotnetInterviewSketch(levelKey){
+  const meta = DOTNET_INTERVIEW_LEVELS[levelKey] || DOTNET_INTERVIEW_LEVELS['iq-junior'];
+  const left = splitInterviewSketchText('Runtime signals');
+  const center = splitInterviewSketchText(meta.levelLabel + ' interview reasoning');
+  const right = splitInterviewSketchText('Code + architecture explanation');
+  return `
+    <div class="sec">
+      <div class="dg">
+        <div class="dg-hdr">Interview Flow Sketch</div>
+        <div class="dg-body">
+          <svg class="interview-sketch" viewBox="0 0 560 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label=".NET internals interview sketch">
+            <defs>
+              <marker id="idotnetArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="${meta.accent}"></path>
+              </marker>
+            </defs>
+            <rect x="24" y="30" width="140" height="68" rx="14" class="sketch-box" stroke="#00ffa3"></rect>
+            <text x="94" y="52" text-anchor="middle" class="sketch-title">OBSERVE</text>
+            ${renderInterviewSketchLines(left, 94, 70)}
+
+            <rect x="210" y="22" width="140" height="84" rx="14" class="sketch-box" stroke="${meta.accent}"></rect>
+            <text x="280" y="48" text-anchor="middle" class="sketch-title">${escHtml(meta.levelLabel.toUpperCase())}</text>
+            ${renderInterviewSketchLines(center, 280, 68)}
+
+            <rect x="396" y="30" width="140" height="68" rx="14" class="sketch-box" stroke="#00c8ff"></rect>
+            <text x="466" y="52" text-anchor="middle" class="sketch-title">EXPLAIN</text>
+            ${renderInterviewSketchLines(right, 466, 70)}
+
+            <rect x="170" y="142" width="220" height="48" rx="14" class="sketch-box" stroke="#243d55"></rect>
+            <text x="280" y="162" text-anchor="middle" class="sketch-title">MEASURE → REASON → DECIDE</text>
+            ${renderInterviewSketchLines(splitInterviewSketchText('Tie CLR, GC, JIT, async, hosting, and diagnostics to production outcomes', 42), 280, 178)}
+
+            <path d="M164 64 C182 64, 188 64, 210 64" class="sketch-arrow soft" marker-end="url(#idotnetArrow)"></path>
+            <path d="M350 64 C372 64, 378 64, 396 64" class="sketch-arrow" marker-end="url(#idotnetArrow)"></path>
+            <path d="M280 106 C280 116, 280 126, 280 142" class="sketch-arrow alt" marker-end="url(#idotnetArrow)"></path>
+          </svg>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderInterviewDetail(levelKey){
+  const meta = DOTNET_INTERVIEW_LEVELS[levelKey] || DOTNET_INTERVIEW_LEVELS['iq-junior'];
+  const bank = buildDotnetInterviewBank(levelKey);
+  const uniqueTags = [...new Set(bank.flatMap(item=>item.tags))];
+  const legend = uniqueTags.slice(0,10).map(renderInterviewTag).join('');
+  const items = bank.map((item, index)=>`
+    <div class="qa" data-tags="${item.tags.join('|')}">
+      <div class="qa-q" onclick="toggleQA(this)">
+        <div style="flex:1;min-width:0">
+          <div class="qa-kicker">${escHtml(item.domain)} · ${escHtml(meta.levelLabel)} · Q${index + 1}</div>
+          <div class="qa-qt">${escHtml(item.question)}</div>
+          <div class="qa-meta">${item.tags.map(renderInterviewTag).join('')}</div>
+        </div>
+        <span class="qa-lv ${meta.badgeClass}">${escHtml(meta.levelLabel)}</span>
+        <span class="qa-ar">▶</span>
+      </div>
+      <div class="qa-a"><div class="qa-at">${item.answer}</div></div>
+    </div>`).join('');
+
+  document.getElementById('re').style.display='none';
+  document.getElementById('rcon').style.display='block';
+  document.getElementById('rcon').innerHTML = `
+    <div class="dc">
+      <div class="d-bread">.NET Core Internals Mastery · Interview Q&amp;A</div>
+      <div class="d-title">🎯 ${escHtml(meta.title)}</div>
+      <div class="d-sub">${escHtml(meta.summary)} Each card contains 135 questions across direct, scenario, logical twist, architecture, production debugging, and .NET 10 reasoning.</div>
+      <div class="d-pills">
+        <span class="dp" style="color:${meta.accent};border-color:${meta.accent}44;background:${meta.accent}11">${escHtml(meta.levelLabel)}</span>
+        <span class="dp" style="color:#00c8ff;border-color:#00c8ff44;background:#00c8ff11">135 Questions</span>
+        <span class="dp" style="color:#56d364;border-color:#56d36444;background:#56d36411">15 Domains</span>
+      </div>
+      <div class="qa-stat"><strong>Coverage</strong><br>${escHtml(meta.levelLabel)} interview prep for CLR, GC, JIT, async, threading, DI, hosting, config, networking, I/O, diagnostics, performance, interop, security, and build internals.</div>
+      <div class="qa-legend">${legend}</div>
+      ${renderDotnetInterviewSketch(levelKey)}
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+        <button class="cb-copy" onclick="filterInterviewQA(this,'all')" style="color:var(--g2);border-color:var(--g2)">All</button>
+        ${uniqueTags.map(tag=>`<button class="cb-copy" onclick="filterInterviewQA(this,'${escHtml(tag).replace(/'/g, '&#39;')}')">${escHtml(tag)}</button>`).join('')}
+      </div>
+      <div id="interviewQaList">${items}</div>
+    </div>`;
+}
+
 function renderGeneric(id,chi){
   document.getElementById('re').style.display='none';
   document.getElementById('rcon').style.display='block';
+  if(DOTNET_INTERVIEW_LEVELS[id]){
+    renderInterviewDetail(id);
+    return;
+  }
   document.getElementById('rcon').innerHTML = renderGeneratedDetail(id,chi);
 }
 
@@ -2113,42 +2537,24 @@ function filterNav(q){
 }
 
 function showAllQA(){
-  document.getElementById('re').style.display='none';
-  document.getElementById('rcon').style.display='block';
-  const lcMap={b:'lv-b',i:'lv-i',a:'lv-a',e:'lv-e'};
-  const lbMap={b:'Basic',i:'Intermediate',a:'Advanced',e:'Expert'};
-  const tags=[...new Set(QA.map(q=>q.tag))];
-  const filters=tags.map(t=>
-    `<button onclick="fQA('${t}',this)" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace">${t}</button>`
-  ).join('');
-  const items=QA.map((q,i)=>`
-    <div class="qa" data-tag="${q.tag}">
-      <div class="qa-q" onclick="toggleQA(this)">
-        <span class="qa-qi">Q</span>
-        <span class="qa-qt">${q.q}</span>
-        <span style="font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(0,200,255,.08);color:var(--g2);border:1px solid rgba(0,200,255,.2);font-family:'DM Mono',monospace;flex-shrink:0">${q.tag}</span>
-        <span class="qa-lv ${lcMap[q.level]}">${lbMap[q.level]}</span>
-        <span class="qa-ar">▶</span>
-      </div>
-      <div class="qa-a"><div class="qa-at">${q.a}</div></div>
-    </div>`).join('');
-  document.getElementById('rcon').innerHTML=`
-    <div class="dc">
-      <div class="d-bread">.NET Core Internals Mastery — Interview Prep</div>
-      <div class="d-title">🎯 Interview Questions</div>
-      <div class="d-sub">${QA.length} questions · CLR, GC, JIT, Async, DI, Performance, Networking and more.</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px">
-        <button onclick="fQA(null,this)" style="background:var(--g2)22;border:1px solid var(--g2)44;color:var(--g2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace">All</button>
-        ${filters}
-      </div>
-      <div id="qaList">${items}</div>
-    </div>`;
+  const interviewIndex = CHS.findIndex(ch => ch.title === 'Interview Q&A');
+  if(interviewIndex === -1) return;
+  selectCh(interviewIndex);
+  document.getElementById('re').style.display='flex';
+  document.getElementById('rcon').style.display='none';
 }
 
-function fQA(tag,btn){
-  document.querySelectorAll('#qaList .qa').forEach(el=>{
-    el.style.display=(!tag||el.dataset.tag===tag)?'':'none';
+function filterInterviewQA(btn, tag){
+  document.querySelectorAll('#interviewQaList .qa').forEach(el=>{
+    const tags = (el.dataset.tags || '').split('|');
+    el.style.display = (tag === 'all' || tags.includes(tag)) ? '' : 'none';
   });
+  btn.parentElement.querySelectorAll('.cb-copy').forEach(el=>{
+    el.style.color = '';
+    el.style.borderColor = '';
+  });
+  btn.style.color = 'var(--g2)';
+  btn.style.borderColor = 'var(--g2)';
 }
 
 // ── INIT ──

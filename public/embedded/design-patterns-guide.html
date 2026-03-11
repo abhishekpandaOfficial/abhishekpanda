@@ -3083,6 +3083,7 @@ function Sidebar({ selectedId, onSelect }) {
       <div style={{marginBottom:"12px",borderBottom:"1px solid rgba(255,255,255,0.06)",paddingBottom:"10px"}}>
         {[
           {id:"intro", emoji:"🎨", label:"Introduction",  sub:"What, Why, History"},
+          {id:"interview", emoji:"🎯", label:"Interview Q&A", sub:"552 Questions · 4 Cards"},
         ].map(item=>(
           <button key={item.id} onClick={()=>onSelect(item.id)} style={{
             width:"100%",display:"flex",alignItems:"center",gap:"8px",
@@ -3383,6 +3384,7 @@ function Home({ onSelect }) {
     {n:"5",l:"Creational",c:"#f59e0b",e:"🏗️"},
     {n:"7",l:"Structural",c:"#06b6d4",e:"🏛️"},
     {n:"11",l:"Behavioral",c:"#a855f7",e:"🎭"},
+    {n:"552",l:"Interview Q&A",c:"#34d399",e:"🎯"},
   ];
   return (
     <div style={{animation:"slideUp 0.5s ease"}}>
@@ -3397,6 +3399,15 @@ function Home({ onSelect }) {
         <p style={{color:"#6b7280",fontFamily:"Inter,sans-serif",fontSize:"15px",maxWidth:"500px",margin:"0 auto 24px"}}>
           All 23 patterns with C# code, animations, SOLID principles & enterprise examples
         </p>
+        <div style={{display:"flex",gap:"10px",justifyContent:"center",flexWrap:"wrap",marginBottom:"18px"}}>
+          <button onClick={() => onSelect("interview")} style={{
+            background:"linear-gradient(135deg,rgba(52,211,153,0.2),rgba(6,182,212,0.18))",
+            border:"1px solid rgba(52,211,153,0.35)", color:"#d1fae5", padding:"10px 18px",
+            borderRadius:"999px", cursor:"pointer", fontFamily:"Inter,sans-serif", fontWeight:"700", fontSize:"13px"
+          }}>
+            🎯 Interview Q&amp;A
+          </button>
+        </div>
         <div style={{display:"flex",gap:"12px",justifyContent:"center",flexWrap:"wrap"}}>
           {stats.map(s => (
             <div key={s.n+s.l} style={{background:`${s.c}12`,border:`1px solid ${s.c}33`,borderRadius:"12px",
@@ -3448,14 +3459,210 @@ function Home({ onSelect }) {
   );
 }
 
+const DESIGN_INTERVIEW_TRACKS = {
+  junior: {
+    title: '🟢 Junior Card',
+    shortTitle: 'Junior',
+    color: '#34d399',
+    summary: 'Foundations, direct definitions, and first pattern selection questions.',
+    samplePattern: 'singleton',
+    templates: [
+      (p) => ({ tags:['Direct','Use Case'], q:`What problem does the ${p.name} pattern solve?`, a:`${p.name} solves the recurring problem of ${String(p.what).toLowerCase()}. In interviews, the strongest answer starts with the problem shape first, then explains why a normal direct implementation becomes harder to maintain without the pattern.` }),
+      (p) => ({ tags:['Direct','Scenario'], q:`When should you consider ${p.name} in a C# codebase?`, a:`Use ${p.name} when the system repeatedly needs ${p.when[0] || 'this collaboration style'} and the design pressure matches the pattern instead of being forced into it. A good answer includes one concrete use case and one warning about overusing it.` }),
+      (p) => ({ tags:['Use Case','Real World'], q:`Give one practical .NET or enterprise example of ${p.name}.`, a:`A practical example of ${p.name} is ${p.enterprise[0] || p.tagline}. Mentioning a real usage context shows you understand where the pattern is useful instead of only memorizing the textbook diagram.` }),
+      (p) => ({ tags:['Direct','SOLID'], q:`Which SOLID principles does ${p.name} support and why?`, a:`${p.name} supports ${p.solid.join(', ')} because its structure promotes the boundary described in the pattern. The right explanation is to connect the pattern’s collaborating objects back to one or two concrete SOLID outcomes instead of listing letters only.` }),
+      (p) => ({ tags:['Logical','Tradeoff'], q:`What is the biggest beginner mistake when applying ${p.name}?`, a:`The biggest mistake is using ${p.name} because the name sounds impressive rather than because the problem matches. That creates extra classes or indirection with no real payoff, which is worse than simple direct code.` }),
+      (p) => ({ tags:['Whiteboard','Flow'], q:`How would you draw ${p.name} quickly in an interview whiteboard round?`, a:`Draw the key roles, the direction of collaboration, and the reason the objects are separated. For ${p.name}, the interviewer wants to see that you know the object interaction and not just the class names.` }),
+    ]
+  },
+  mid: {
+    title: '🟡 Mid-Level Card',
+    shortTitle: 'Mid-Level',
+    color: '#f59e0b',
+    summary: 'Implementation reasoning, object collaboration, and scenario-driven pattern choice.',
+    samplePattern: 'adapter',
+    templates: [
+      (p) => ({ tags:['Scenario','Architecture'], q:`You inherit code with the design pressure described by ${p.name}. How do you decide whether the pattern is justified?`, a:`I check whether the problem is recurring, whether the collaboration is stable enough to deserve a named boundary, and whether the pattern reduces future edits. For ${p.name}, I would compare the current code against the pattern’s intended collaboration and use the pattern only if it clearly lowers coupling or clarifies extension.` }),
+      (p) => ({ tags:['Code','Scenario'], q:`How would you implement ${p.name} in C# without overengineering it?`, a:`I would start with the smallest useful roles, implement the collaboration explicitly, and keep the code close to the use case. The mistake is to create every textbook class if the concrete codebase only needs a lighter version. In C#, interfaces, records, and composition should support the pattern, not dominate it.` }),
+      (p) => ({ tags:['Flow','Logical'], q:`What object interaction must stay true for ${p.name} to remain valid?`, a:`The essential interaction is ${String(p.how).toLowerCase()}. If that interaction is missing, then the code may use the same class names but not actually express the pattern correctly. That is a common interview trap.` }),
+      (p) => ({ tags:['Tradeoff','Scenario'], q:`What is a realistic tradeoff of using ${p.name}?`, a:`The main tradeoff is extra indirection in exchange for a cleaner collaboration boundary. That is valuable when the underlying problem keeps recurring, but expensive when the variation or complexity never actually arrives.` }),
+      (p) => ({ tags:['Use Case','Real World'], q:`How would you explain ${p.name} to a teammate using a real product scenario?`, a:`I would map the pattern to a product behavior, such as ${p.enterprise[1] || p.enterprise[0] || p.tagline}, then show which role each object plays. Real scenarios make the collaboration easier to reason about and easier to defend in interviews.` }),
+      (p) => ({ tags:['Logical','Refactoring'], q:`What code smell suggests a refactor toward ${p.name}?`, a:`A repeated smell is duplicated branching or unstable object wiring around the same behavior family. When those edits spread across files, the collaboration likely wants a clearer pattern boundary.` }),
+    ]
+  },
+  senior: {
+    title: '🔴 Senior Card',
+    shortTitle: 'Senior',
+    color: '#ef4444',
+    summary: 'Tradeoffs, failure modes, refactoring strategy, and production-level design judgement.',
+    samplePattern: 'strategy',
+    templates: [
+      (p) => ({ tags:['Architecture','Scenario'], q:`A production team keeps breaking code around ${p.name}-shaped behavior. What senior-level refactor would you drive?`, a:`I would first isolate the unstable behavior boundary, then move the collaboration toward the roles implied by ${p.name}. The refactor should reduce blast radius, preserve behavior with tests, and make future extension safer without forcing an academic rewrite.` }),
+      (p) => ({ tags:['Tradeoff','Performance'], q:`What performance or complexity risk can come with ${p.name}?`, a:`The risk is not usually raw CPU cost first; it is complexity cost. More objects, more indirection, and harder tracing can be worth it when the pattern protects a real pressure. If not, the pattern becomes ceremony that slows the team down.` }),
+      (p) => ({ tags:['Scenario','Logical'], q:`How do you know when code only looks like ${p.name} but is not actually using it correctly?`, a:`If the roles are named after the pattern but the collaboration does not match the problem, it is fake pattern usage. The senior answer is to test the code against the pattern’s intent, not the class names alone.` }),
+      (p) => ({ tags:['Real World','Architecture'], q:`Where does ${p.name} show up in real enterprise .NET systems?`, a:`Patterns like ${p.name} show up anywhere teams need stable extension seams, cleaner dependency direction, or safer workflow composition. The right answer names a plausible business context and explains the pressure that made the pattern worthwhile.` }),
+      (p) => ({ tags:['Flow','Scenario'], q:`If you had to debug a bug in a ${p.name} implementation, what would you inspect first?`, a:`I would inspect the collaboration boundary: who owns the decision, who forwards control, and where state or side effects cross the seam. In pattern-heavy code, debugging starts from interaction flow before line-by-line implementation details.` }),
+      (p) => ({ tags:['Code','Refactoring'], q:`What is the safest way to migrate messy code toward ${p.name} without freezing delivery?`, a:`Change one seam at a time, keep tests and behavior visible, and migrate the callers gradually. A good migration uses the pattern to reduce risk, not to justify a full rewrite.` }),
+    ]
+  },
+  architect: {
+    title: '🏆 Architect Card',
+    shortTitle: 'Architect',
+    color: '#8b5cf6',
+    summary: 'Pattern governance, long-horizon system design, and team-wide technical standards.',
+    samplePattern: 'observer',
+    templates: [
+      (p) => ({ tags:['Architecture','Whiteboard'], q:`How would you justify standardizing ${p.name} across multiple teams?`, a:`I would justify it only if the problem repeats often enough that a common collaboration style reduces review cost, bug risk, and onboarding time. Standardization should create a paved road, not a mandatory pattern checklist.` }),
+      (p) => ({ tags:['Scenario','Governance'], q:`When should an architect reject a proposal to use ${p.name}?`, a:`Reject it when the problem does not match, when direct code is still clearer, or when the pattern adds more organizational cost than design safety. Pattern choice should be evidence-based, not prestige-based.` }),
+      (p) => ({ tags:['Logical','Tradeoff'], q:`What is the long-term maintenance risk of overusing ${p.name}?`, a:`The long-term risk is a codebase full of named abstractions that few engineers can trace quickly. That hurts delivery speed, onboarding, and debugging. Architects need to preserve pattern literacy without turning every object graph into a textbook exercise.` }),
+      (p) => ({ tags:['Real World','System Design'], q:`How would you describe ${p.name} in a system-design interview rather than a low-level coding round?`, a:`I would focus on responsibilities, ownership boundaries, and how the pattern controls change at system scale. The interview answer should explain why the collaboration exists and what business or platform pressure it resolves.` }),
+      (p) => ({ tags:['.NET 10','Architecture'], q:`What modern .NET guidance would you pair with ${p.name}?`, a:`I would pair the pattern with current .NET defaults like DI, minimal APIs, background services, or messaging abstractions where relevant. The goal is to show how the pattern lives inside a current platform, not as a 1994 diagram isolated from modern code.` }),
+      (p) => ({ tags:['Scenario','Logical'], q:`What ADR would you write before adopting ${p.name} broadly?`, a:`The ADR should capture the recurring pain, why direct code is no longer enough, how the pattern changes ownership and extension, what rollback looks like, and which anti-patterns the team should avoid while implementing it.` }),
+    ]
+  }
+};
+
+function buildDesignInterviewBank(trackKey) {
+  const track = DESIGN_INTERVIEW_TRACKS[trackKey];
+  if (!track) return [];
+  return ALL_PATTERNS.flatMap(pattern =>
+    track.templates.map((template, index) => ({
+      id: `${trackKey}-${pattern.id}-${index + 1}`,
+      pattern,
+      trackKey,
+      question: template(pattern).q,
+      answer: template(pattern).a,
+      tags: template(pattern).tags
+    }))
+  );
+}
+
+function renderInterviewTag(tag) {
+  const colors = {
+    'Direct':'#34d399','Use Case':'#06b6d4','Scenario':'#f59e0b','Architecture':'#8b5cf6',
+    'Logical':'#ef4444','Tradeoff':'#f97316','Whiteboard':'#c4b5fd','Flow':'#22d3ee',
+    'Real World':'#f472b6','Code':'#60a5fa','Refactoring':'#fbbf24','Performance':'#fb7185',
+    '.NET 10':'#99f6e4','SOLID':'#4ade80','Governance':'#fde047','System Design':'#a78bfa'
+  };
+  const color = colors[tag] || '#94a3b8';
+  return (
+    <span key={tag} style={{
+      fontSize:'9px',padding:'2px 6px',borderRadius:'999px',fontFamily:'JetBrains Mono,monospace',
+      border:`1px solid ${color}44`,color,background:`${color}15`
+    }}>{tag}</span>
+  );
+}
+
+function InterviewHub({ onSelectTrack }) {
+  return (
+    <div style={{animation:"slideUp 0.5s ease"}}>
+      <div style={{textAlign:"center",padding:"24px 0 20px"}}>
+        <div style={{fontSize:"54px",marginBottom:"10px"}}>🎯</div>
+        <h1 style={{fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"clamp(24px,4vw,38px)",margin:"0 0 10px 0",
+          background:"linear-gradient(135deg,#34d399,#06b6d4,#8b5cf6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+          Design Patterns Interview Mastery
+        </h1>
+        <p style={{color:"#9ca3af",fontSize:"14px",maxWidth:"680px",margin:"0 auto 18px"}}>
+          552 interview questions across all 23 GoF patterns, split into four cards so you can prepare from fundamentals to architect-level pattern judgement.
+        </p>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"12px"}}>
+        {Object.entries(DESIGN_INTERVIEW_TRACKS).map(([key, track]) => {
+          const count = buildDesignInterviewBank(key).length;
+          return (
+            <button key={key} onClick={() => onSelectTrack(key)} style={{
+              background:"rgba(255,255,255,0.03)",border:`1px solid ${track.color}33`,borderRadius:"16px",padding:"18px",
+              textAlign:"left",cursor:"pointer"
+            }}>
+              <div style={{fontSize:"24px",marginBottom:"8px"}}>{track.title.split(' ')[0]}</div>
+              <div style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"700",fontSize:"18px",marginBottom:"6px"}}>{track.shortTitle}</div>
+              <div style={{color:"#9ca3af",fontSize:"12px",lineHeight:"1.6",marginBottom:"10px"}}>{track.summary}</div>
+              <div style={{display:"flex",gap:"8px",flexWrap:"wrap"}}>
+                <span style={{fontSize:"10px",fontFamily:"JetBrains Mono,monospace",color:track.color,border:`1px solid ${track.color}44`,background:`${track.color}15`,padding:"3px 8px",borderRadius:"999px"}}>{count} Questions</span>
+                <span style={{fontSize:"10px",fontFamily:"JetBrains Mono,monospace",color:"#94a3b8",border:"1px solid rgba(148,163,184,0.3)",padding:"3px 8px",borderRadius:"999px"}}>23 Patterns</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function InterviewTrackDetail({ trackKey }) {
+  const track = DESIGN_INTERVIEW_TRACKS[trackKey];
+  const questions = buildDesignInterviewBank(trackKey);
+  const [filter, setFilter] = useState("");
+  const samplePattern = ALL_PATTERNS.find(p => p.id === track.samplePattern) || ALL_PATTERNS[0];
+  const filtered = filter ? questions.filter(q => q.tags.includes(filter) || q.pattern.name === filter) : questions;
+  const allTags = ['Direct','Use Case','Scenario','Architecture','Logical','Tradeoff','Whiteboard','Flow','Real World','Code','Refactoring','.NET 10'];
+
+  return (
+    <div style={{animation:"fadeIn 0.25s ease"}}>
+      <div style={{background:`linear-gradient(135deg, ${track.color}18, rgba(255,255,255,0.03))`,border:`1px solid ${track.color}33`,borderRadius:"16px",padding:"18px",marginBottom:"16px"}}>
+        <div style={{color:track.color,fontFamily:"JetBrains Mono,monospace",fontSize:"11px",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"6px"}}>Interview Card</div>
+        <div style={{color:"#fff",fontFamily:"Syne,sans-serif",fontWeight:"800",fontSize:"24px",marginBottom:"6px"}}>{track.title}</div>
+        <div style={{color:"#9ca3af",fontSize:"13px",lineHeight:"1.7",marginBottom:"10px"}}>{questions.length} questions. {track.summary}</div>
+        <div style={{display:"flex",gap:"8px",flexWrap:"wrap"}}>{allTags.map(renderInterviewTag)}</div>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1.1fr .9fr",gap:"16px",marginBottom:"18px"}}>
+        <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"14px",padding:"16px"}}>
+          <h3 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontSize:"15px",margin:"0 0 10px 0"}}>⚡ Interview Flow Diagram</h3>
+          <FlowDiagram pattern={samplePattern} color={track.color} />
+        </div>
+        <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"14px",padding:"16px"}}>
+          <h3 style={{color:"#fff",fontFamily:"Syne,sans-serif",fontSize:"15px",margin:"0 0 10px 0"}}>💻 Sample Pattern Code</h3>
+          <CodeBlock code={samplePattern.withPattern} color={track.color} />
+        </div>
+      </div>
+
+      <div style={{display:"flex",gap:"8px",flexWrap:"wrap",marginBottom:"16px"}}>
+        <button onClick={() => setFilter("")} style={{
+          background:filter===""?`${track.color}22`:"rgba(255,255,255,0.04)",border:`1px solid ${filter===""?`${track.color}55`:"rgba(255,255,255,0.08)"}`,
+          color:filter===""?track.color:"#9ca3af",padding:"7px 12px",borderRadius:"999px",cursor:"pointer",fontSize:"10px",fontFamily:"JetBrains Mono,monospace"
+        }}>All</button>
+        {allTags.map(tag => (
+          <button key={tag} onClick={() => setFilter(tag)} style={{
+            background:filter===tag?`${track.color}22`:"rgba(255,255,255,0.04)",border:`1px solid ${filter===tag?`${track.color}55`:"rgba(255,255,255,0.08)"}`,
+            color:filter===tag?track.color:"#9ca3af",padding:"7px 12px",borderRadius:"999px",cursor:"pointer",fontSize:"10px",fontFamily:"JetBrains Mono,monospace"
+          }}>{tag}</button>
+        ))}
+      </div>
+
+      <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
+        {filtered.map((q, index) => (
+          <details key={q.id} style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${track.color}22`,borderRadius:"12px",padding:"12px 14px"}}>
+            <summary style={{cursor:"pointer",listStyle:"none",display:"flex",alignItems:"flex-start",gap:"10px"}}>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{color:"#6b7280",fontFamily:"JetBrains Mono,monospace",fontSize:"10px",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"6px"}}>
+                  {q.pattern.name} · Q{index + 1}
+                </div>
+                <div style={{color:"#fff",fontSize:"13px",lineHeight:"1.6",fontWeight:"600"}}>{q.question}</div>
+                <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginTop:"8px"}}>{q.tags.map(renderInterviewTag)}</div>
+              </div>
+              <span style={{color:track.color,fontSize:"10px",fontFamily:"JetBrains Mono,monospace",border:`1px solid ${track.color}44`,padding:"3px 8px",borderRadius:"999px"}}>{q.pattern.cat}</span>
+            </summary>
+            <div style={{marginTop:"12px",paddingTop:"12px",borderTop:"1px solid rgba(255,255,255,0.06)",color:"#d1d5db",fontSize:"13px",lineHeight:"1.75"}}>
+              {q.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── ROOT APP ────────────────────────────────────────────────────────────────
 function App() {
   const [selectedId, setSelectedId] = useState("intro");
+  const [interviewTrack, setInterviewTrack] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
   const [scrollPct, setScrollPct] = useState(0);
   const contentRef = useRef(null);
   const selectedPattern = ALL_PATTERNS.find(p => p.id === selectedId);
+  const isInterview = selectedId === "interview";
   const showRightSidebar = viewportWidth >= 1200;
 
   useEffect(() => {
@@ -3489,6 +3696,7 @@ function App() {
   const topBarLabel = selectedPattern
     ? `${selectedPattern.emoji} ${selectedPattern.name}`
     : selectedId === "intro" ? "🎨 Introduction"
+    : selectedId === "interview" ? `🎯 Design Patterns Interview${interviewTrack ? ` · ${DESIGN_INTERVIEW_TRACKS[interviewTrack].shortTitle}` : ''}`
     : selectedId === "blog"  ? "🚀 Add to Blog"
     : "🎯 GoF Design Patterns · All 23";
 
@@ -3499,7 +3707,7 @@ function App() {
       <style>{INJECTED_STYLES}</style>
       <div style={{display:"flex",height:"100vh",background:"#0a0a0f",overflow:"hidden",fontFamily:"Inter,sans-serif"}}>
         {sidebarOpen && (
-          <Sidebar selectedId={selectedId} onSelect={id => setSelectedId(id)} />
+          <Sidebar selectedId={selectedId} onSelect={id => { setSelectedId(id); if (id !== 'interview') setInterviewTrack(''); }} />
         )}
         <div ref={contentRef} style={{flex:1,overflowY:"auto",background:"#0a0a0f",minWidth:0}}>
           {/* Top bar */}
@@ -3512,7 +3720,7 @@ function App() {
               ☰
             </button>
             {showBack && (
-              <button onClick={() => setSelectedId(null)} style={{
+              <button onClick={() => { setSelectedId(null); setInterviewTrack(''); }} style={{
                 background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",
                 color:"#9ca3af",padding:"6px 10px",borderRadius:"6px",cursor:"pointer",fontSize:"12px",fontFamily:"Inter,sans-serif"}}>
                 ← All Patterns
@@ -3538,9 +3746,10 @@ function App() {
           {/* Content router */}
           <div style={{padding:"20px",maxWidth:showRightSidebar?"980px":"960px",margin:"0 auto"}}>
             {selectedId === "intro"    ? <IntroPage /> :
+             selectedId === "interview" ? (interviewTrack ? <InterviewTrackDetail trackKey={interviewTrack} /> : <InterviewHub onSelectTrack={setInterviewTrack} />) :
              selectedId === "blog"     ? <BlogGuidePage /> :
              selectedPattern           ? <PatternDetail pattern={selectedPattern} /> :
-                                         <Home onSelect={setSelectedId} />}
+                                         <Home onSelect={(id) => { setSelectedId(id); if (id !== 'interview') setInterviewTrack(''); }} />}
           </div>
         </div>
         {showRightSidebar && (

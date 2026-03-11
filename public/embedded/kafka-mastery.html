@@ -238,7 +238,7 @@ html,body{height:100%;overflow:hidden;background:var(--b0);color:var(--t1);font-
       <div class="lp-stats">
         <div class="lst"><div class="lst-n">25</div><div class="lst-l">Chapters</div></div>
         <div class="lst"><div class="lst-n">160+</div><div class="lst-l">Topics</div></div>
-        <div class="lst"><div class="lst-n">300+</div><div class="lst-l">Q&amp;A</div></div>
+        <div class="lst"><div class="lst-n">576</div><div class="lst-l">Q&amp;A</div></div>
       </div>
     </div>
     <div id="nav"></div>
@@ -251,7 +251,7 @@ html,body{height:100%;overflow:hidden;background:var(--b0);color:var(--t1);font-
       <div class="w-stats">
         <div><div class="wst-n">25</div><div class="wst-l">Chapters</div></div>
         <div><div class="wst-n">160+</div><div class="wst-l">Topics</div></div>
-        <div><div class="wst-n">300+</div><div class="wst-l">Q&amp;A</div></div>
+        <div><div class="wst-n">576</div><div class="wst-l">Q&amp;A</div></div>
         <div><div class="wst-n">120+</div><div class="wst-l">Code Examples</div></div>
       </div>
       <div class="w-chips">
@@ -460,12 +460,11 @@ const CHS=[
 {id:"en4",ic:"📈",t:"Capacity Planning",d:"Throughput math, storage projections, network bandwidth, broker sizing",tags:["Advanced"]},
 {id:"en5",ic:"🔧",t:"Operational Runbooks",d:"Broker failure, ISR shrinkage, consumer group dead, disk full scenarios",tags:["Operations"]},
 ]},
-{n:"25",t:"Interview Preparation",ic:"🎯",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"300+ categorized questions — from basic definitions through expert system design. Every real Kafka interview question.",tags:["Interview"],topics:[
-{id:"iq1",ic:"📝",t:"Basic Kafka Questions",d:"Core definitions, terminology, fundamental concepts",tags:["Basic"]},
-{id:"iq2",ic:"🔧",t:"Intermediate Technical Q&A",d:"Producers, consumers, partitions, offsets, replication",tags:["Intermediate"]},
-{id:"iq3",ic:"🏗️",t:"Advanced Architecture Q&A",d:"EOS, transactions, Streams, Connect, internals",tags:["Advanced"]},
-{id:"iq4",ic:"🚀",t:"Performance & Tuning Q&A",d:"Configuration decisions, throughput vs latency, benchmarks",tags:["Performance"]},
-{id:"iq5",ic:"💼",t:"System Design with Kafka",d:"Design a real-time pipeline, event sourcing, microservices",tags:["Design"]},
+{n:"25",t:"Interview Preparation",ic:"🎯",c:"#10b981",bg:"rgba(16,185,129,.1)",desc:"576 Kafka interview questions split across four cards — from direct definitions through architecture, production scenarios, diagrams, code, and system design.",tags:["Interview"],topics:[
+{id:"iq-junior",ic:"🟢",t:"Junior Questions (144)",d:"Foundations, direct definitions, first-use-case explanations, and safe Kafka basics",tags:["Basic"]},
+{id:"iq-mid",ic:"🟡",t:"Mid-Level Questions (144)",d:"Applied producers, consumers, partitions, schemas, and debugging scenarios",tags:["Intermediate"]},
+{id:"iq-senior",ic:"🔴",t:"Senior Questions (144)",d:"Tradeoffs, failures, operations, performance, and production judgement",tags:["Advanced"]},
+{id:"iq-architect",ic:"🏆",t:"Architect Questions (144)",d:"System design, multi-team standards, DR, governance, and platform strategy",tags:["Design"]},
 ]},
 ];
 const DETAILS={
@@ -1465,33 +1464,87 @@ secs:[
 }`},
 ]},
 };
-const QA=[
-{q:"What is Apache Kafka and what problems does it solve?",a:"Apache Kafka is a distributed, durable, high-throughput event streaming platform originally built at LinkedIn in 2010. It solves three core problems: (1) <strong>Decoupling</strong> — producers and consumers are fully independent; producers don't know about consumers. (2) <strong>Durability</strong> — events are persisted to disk with configurable retention (days, weeks, forever), enabling replay and recovery. (3) <strong>Scale</strong> — partitioned, distributed design allows horizontal scaling to millions of messages/second. Key differentiator from traditional queues (RabbitMQ, ActiveMQ): Kafka is a <em>log</em>, not a queue. Messages are retained after consumption, consumers track their own position (offset), and the same message can be consumed by unlimited independent consumer groups simultaneously.",level:"b",tag:"Core"},
-{q:"What is a Kafka topic and how is it structured?",a:"A Kafka topic is a named, logical stream of records — like a database table or a file folder. Internally, a topic is split into one or more <strong>partitions</strong>. Each partition is an ordered, immutable, append-only log stored on disk. Messages within a partition are assigned monotonically increasing <strong>offsets</strong> (0, 1, 2, ...). A topic's partition files are spread across brokers in the cluster. Producers write to a topic; Kafka routes messages to specific partitions (by key hash, round-robin, or custom partitioner). Consumers read from specific partitions by offset. Retention policy (time-based, size-based, or compaction) determines how long data is kept.",level:"b",tag:"Topics"},
-{q:"What is a Kafka partition and why does it matter?",a:"A partition is the fundamental unit of parallelism, ordering, and durability in Kafka. Key facts: (1) <strong>Ordering</strong>: messages are strictly ordered within a partition. There is NO ordering guarantee across partitions in the same topic. (2) <strong>Parallelism</strong>: each partition can be consumed by exactly one consumer in a consumer group at a time — so partition count determines max parallelism. (3) <strong>Replication</strong>: each partition has one leader and N-1 followers. (4) <strong>Scalability</strong>: more partitions = more throughput but more overhead. Rule of thumb: start with 3x expected consumers, don't go above 100 partitions per broker.",level:"b",tag:"Partitions"},
-{q:"Explain the three delivery guarantees in Kafka.",a:"(1) <strong>At-most-once</strong>: messages delivered 0 or 1 time. Config: <code>acks=0, retries=0</code>. Messages are lost if broker fails. Use for non-critical telemetry. (2) <strong>At-least-once</strong>: messages delivered 1+ times. Config: <code>acks=all, retries=MAX</code>. Broker retries cause duplicates. Consumer must be idempotent (use dedup key in DB). This is Kafka's default mode and covers 95% of use cases. (3) <strong>Exactly-once (EOS)</strong>: messages delivered exactly 1 time. Config: <code>enable.idempotence=true, transactional.id=X</code>. Uses PID+epoch+sequence for dedup at broker. Add transactions API for atomic multi-partition writes. ~20% throughput cost. Use for financial systems, inventory, billing.",level:"b",tag:"Semantics"},
-{q:"What is a consumer group and how does partition assignment work?",a:"A consumer group is a set of consumers that cooperate to consume a topic, with each partition assigned to exactly one member. This enables horizontal scaling: 4 partitions → 4 consumers all reading in parallel. Assignment process: (1) Consumers send JoinGroup request to the Group Coordinator broker. (2) Coordinator elects one consumer as Group Leader. (3) Leader runs the assignment algorithm (RangeAssignor, StickyAssignor, etc.) and sends result back. (4) All members receive their partition assignment via SyncGroup response. Multiple independent groups can consume the same topic simultaneously, each tracking their own offsets — this is Kafka's fan-out model.",level:"b",tag:"ConsumerGroups"},
-{q:"What is the difference between acks=0, acks=1, and acks=all?",a:"<code>acks=0</code>: Producer doesn't wait for any acknowledgment. Fire-and-forget. Highest throughput, but data loss is possible if the broker crashes before writing. <code>acks=1</code>: Producer waits for the partition leader to write to its local log. Fast response, but if the leader crashes before followers replicate, the message is lost. <code>acks=all</code> (or -1): Producer waits until all In-Sync Replicas (ISR) have written the message. Combined with <code>min.insync.replicas=2</code>, this means at least 2 replicas have the data before the producer gets an ack. This is the only setting that guarantees no data loss when combined with proper replication factor.",level:"b",tag:"Producers"},
-{q:"What is the ISR (In-Sync Replica) and why does it matter?",a:"ISR is the set of partition replicas that are 'caught up' to the leader within <code>replica.lag.time.max.ms</code> (default 30 seconds). If a follower falls too far behind, the controller removes it from the ISR. Why it matters: (1) <strong>Write guarantee</strong>: with <code>acks=all</code>, the producer only gets an ack when ALL ISR members have written the message. (2) <strong>HW advancement</strong>: the High Watermark (consumer-readable offset) advances to <code>min(LEO of all ISR members)</code>. (3) <strong>Leader election</strong>: only ISR members can become the new leader on failure (by default). If a non-ISR replica is elected (unclean leader election), data loss occurs. Golden config: <code>replication.factor=3, min.insync.replicas=2, acks=all</code>.",level:"i",tag:"Replication"},
-{q:"What is the High Watermark (HW) and Log End Offset (LEO)?",a:"<strong>LEO (Log End Offset)</strong> = the offset of the next message to be written. It's the 'tip' of the log. Each replica has its own LEO. <strong>HW (High Watermark)</strong> = <code>min(LEO of all ISR replicas)</code>. This is the highest offset that's been replicated to all ISR members. Consumers can only read messages up to the HW — this ensures consumers never read data that could be lost if the leader fails. When a follower fails and leaves the ISR, the HW can no longer advance until a replacement joins. When a leader crashes, the new leader truncates its log back to the HW (preventing divergence), and consumers re-read any messages above the old HW that weren't replicated.",level:"i",tag:"Internals"},
-{q:"How does a Kafka consumer commit offsets and what are the risks?",a:"<strong>Auto-commit</strong> (<code>enable.auto.commit=true</code>, default): Commits every 5 seconds regardless of processing success. Risk: if processing fails AFTER commit, the message is skipped on restart (data loss). <strong>Manual commit</strong>: (1) <code>commitSync()</code> — blocking, retries until success, safe but slow. (2) <code>commitAsync()</code> — non-blocking, faster, but commit failures aren't retried (use callback for logging). Best practice: manual commit AFTER successful processing. This gives at-least-once: on crash, last unprocessed message is re-processed. Make consumers idempotent to handle this safely.",level:"i",tag:"Consumers"},
-{q:"What is a consumer rebalance and how can you minimize its impact?",a:"A rebalance reassigns partitions among consumers in a group. Triggers: new consumer joins, consumer leaves/crashes, topics change, heartbeat timeout. Problems: (1) <strong>Stop-the-world</strong>: all consumers stop, partitions revoked, reassigned. Processing pauses for seconds to minutes during rebalance. Mitigation strategies: (1) <strong>CooperativeStickyAssignor</strong> (default since Kafka 3.1): incremental rebalance — only moves necessary partitions; other partitions keep processing. (2) <strong>Static group membership</strong> (<code>group.instance.id</code>): consumers have a stable ID; brief disconnects don't trigger rebalance. (3) Increase <code>session.timeout.ms</code> to reduce false timeouts. (4) Ensure processing time < <code>max.poll.interval.ms</code>.",level:"i",tag:"Consumers"},
-{q:"Explain Kafka's idempotent producer. How does it prevent duplicates?",a:"Idempotent producer (<code>enable.idempotence=true</code>) prevents duplicate messages caused by producer retries. Mechanism: (1) Broker assigns a unique <strong>PID (Producer ID)</strong> to each producer on initialization. (2) Producer attaches a monotonically increasing <strong>sequence number</strong> to each message (per partition). (3) Broker stores the last 5 sequence numbers per (PID, partition). (4) If a message with the same (PID, sequence) arrives again (retry), the broker silently deduplicates it. Epoch fencing: if a new producer starts with the same TransactionalId, it gets a higher epoch. Old producer's messages are rejected by the broker (zombie fencing). This prevents old zombie producers from interleaving messages.",level:"i",tag:"Semantics"},
-{q:"What is log compaction and when would you use it?",a:"Log compaction retains only the <strong>latest value for each key</strong> in a partition (older values with the same key are removed). Unlike time/size retention which deletes old segments entirely, compaction keeps the most recent snapshot of all keys. Use cases: (1) <strong>KTable changelog topics</strong> in Kafka Streams — rebuild state store state on restart by replaying compacted topic. (2) <strong>Database cache invalidation</strong> — topic represents current DB state. (3) <strong>CDC snapshots</strong> — compacted topic represents current table state. Configuration: <code>cleanup.policy=compact</code>. A Tombstone (message with null value) deletes a key. Important: compaction is best-effort, not instantaneous — the cleaner thread runs periodically.",level:"i",tag:"Topics"},
-{q:"What is Kafka Streams and how does it differ from using consumers manually?",a:"Kafka Streams is a <strong>client-side stream processing library</strong> built on top of the Kafka producer/consumer API. It adds: (1) <strong>Topology DSL</strong> — fluent API for building processing pipelines (filter, map, join, aggregate). (2) <strong>State stores</strong> — RocksDB-backed local state per processing task, with changelog topics for fault tolerance. (3) <strong>Time semantics</strong> — event time, ingestion time, windowing with out-of-order handling. (4) <strong>Task parallelism</strong> — automatically creates one task per input partition, assignable to stream threads. (5) <strong>Exactly-once processing</strong> — can configure EOS. Unlike Flink/Spark Streaming, Kafka Streams has no separate cluster — it runs inside your application.",level:"i",tag:"Streams"},
-{q:"What is the outbox pattern and why is it needed with Kafka?",a:"The outbox pattern solves the <strong>dual-write problem</strong>: you can't atomically write to a database AND produce to Kafka in a single transaction (two different systems). Without outbox: if you write to DB first and Kafka fails, the event is never published. If you write to Kafka first and DB fails, the event is published but the state change never happened — inconsistency. Solution: write to an <code>outbox</code> table in the same database transaction as business data. A relay process (Debezium CDC or polling publisher) reads the outbox table and publishes to Kafka. If the relay fails, it restarts from the last unpublished message. Result: atomic DB write + guaranteed event publishing, with at-least-once delivery to Kafka (consumer deduplicates using outbox message ID).",level:"i",tag:"Patterns"},
-{q:"How does Kafka Connect work and what are its main components?",a:"Kafka Connect is a scalable, fault-tolerant framework for streaming data between Kafka and external systems. Components: (1) <strong>Worker</strong> — JVM process that executes connectors. Standalone (single process) or Distributed (cluster). (2) <strong>Connector</strong> — manages a data copying job. Source connector pulls from external system → Kafka. Sink connector pushes Kafka → external system. (3) <strong>Task</strong> — the actual unit of work; one connector can have multiple tasks for parallelism. (4) <strong>SMT (Single Message Transform)</strong> — in-flight transformation: field extraction, routing, masking, type conversion. (5) <strong>Converter</strong> — serialization format (JSON, Avro, Protobuf). Distributed mode stores connector state in Kafka topics (<code>connect-configs</code>, <code>connect-offsets</code>, <code>connect-status</code>).",level:"i",tag:"Connect"},
-{q:"Explain the Kafka transaction protocol and zombie fencing.",a:"Kafka transactions provide atomic writes to multiple partitions. Protocol: (1) <code>initTransactions()</code> — producer registers its TransactionalId with the Transaction Coordinator broker. Coordinator bumps the <strong>epoch</strong> for this TransactionalId, fencing any old producer instance. (2) <code>beginTransaction()</code> — local marker, no broker call. (3) <code>produce()</code> — messages sent with PID+epoch+sequence; partitions added to the transaction. (4) <code>sendOffsetsToTransaction()</code> — atomically includes consumed offset commits in the transaction. (5) <code>commitTransaction()</code> — 2PC: coordinator writes COMMIT to <code>__transaction_state</code>, then sends WriteTxnMarkers to all participant partition leaders. <strong>Zombie fencing</strong>: if a crashed producer restarts with the same TransactionalId, it gets epoch N+1. Brokers reject messages from the old instance (epoch N) — preventing zombie producers from writing stale data.",level:"a",tag:"Transactions"},
-{q:"How would you design a Kafka topic schema for a high-traffic e-commerce platform?",a:"<strong>Topic design principles:</strong> (1) <strong>Event types</strong>: separate topics per event type — <code>orders.created</code>, <code>orders.updated</code>, <code>inventory.reserved</code>. Avoids consumer filtering overhead and allows independent retention policies. (2) <strong>Key design</strong>: use the entity ID as key (<code>orderId</code>, <code>customerId</code>) — ensures per-entity ordering. (3) <strong>Partition count</strong>: target throughput ÷ throughput-per-partition. For 100K orders/sec: estimate 1 partition = 20K/sec → 5 partitions minimum → use 8 (buffer + future scale). (4) <strong>Retention</strong>: <code>orders.*</code> = 7 days (audit). <code>inventory.*</code> = compact (current state). (5) <strong>Replication</strong>: RF=3, min.insync.replicas=2 for all business-critical topics. (6) <strong>Schema</strong>: Avro with Schema Registry — backward compatibility enforced.",level:"a",tag:"Design"},
-{q:"What causes consumer lag and how do you diagnose and fix it?",a:"Consumer lag = <code>log-end-offset - committed-offset</code> per partition. Causes: (1) <strong>Slow processing</strong>: downstream calls (DB, API) take too long. Fix: async processing, batching, caching. (2) <strong>Too few consumers</strong>: fewer consumers than partitions. Fix: scale horizontally (add instances). (3) <strong>Rebalancing</strong>: frequent rebalances stop processing. Fix: CooperativeStickyAssignor, static membership. (4) <strong>GC pauses</strong>: JVM GC stops consumer thread. Fix: tune GC, use ZGC. (5) <strong>max.poll.records too high</strong>: batch too large to process within max.poll.interval.ms. Fix: reduce max.poll.records. Diagnosis: <code>kafka-consumer-groups.sh --describe</code>, Burrow, Prometheus + Grafana lag dashboards. Alert when lag grows > X for Y minutes.",level:"a",tag:"Operations"},
-{q:"How does KRaft mode replace ZooKeeper in Kafka?",a:"KRaft (Kafka Raft) removes the ZooKeeper dependency, replacing it with Kafka's own Raft-based metadata quorum. In ZooKeeper mode: ZK stores broker registrations, controller election, topic configs, and ACLs. This creates an external dependency, separate monitoring, and scaling issues above ~200K partitions. KRaft mode: (1) A set of brokers are designated as <strong>controller nodes</strong> (or combined broker+controller). (2) They form a Raft consensus group, maintaining cluster metadata in a special <code>__cluster_metadata</code> topic. (3) <strong>Leader election</strong> happens via Raft protocol — faster than ZK watch-based election. (4) Metadata changes are replicated via the Raft log. (5) Supports 10x more partitions (millions vs ~200K). (6) Simpler operations — one system to manage. GA since Kafka 3.3, recommended for all new deployments since 3.6.",level:"a",tag:"Architecture"},
-{q:"Design a real-time fraud detection system using Kafka.",a:"<strong>Architecture:</strong> (1) <strong>Transaction events</strong>: Payment service → Kafka topic <code>transactions</code> (key=accountId, RF=3, 24 partitions, 3-day retention). (2) <strong>Feature computation</strong> (Kafka Streams): KStream of transactions → 5-min tumbling window count/sum per accountId → KTable of behavioral features. KTable stored in RocksDB + changelog topic. (3) <strong>Scoring</strong>: Kafka Streams processor calls ML model API (low latency synchronous call) for each transaction. Produces <code>fraud-scores</code> topic. (4) <strong>Alert routing</strong>: Consumer reads fraud-scores, high-score transactions → <code>fraud-alerts</code> topic → notification service + manual review queue. (5) <strong>Feedback loop</strong>: Human review decisions → <code>fraud-labels</code> topic → ML model retraining pipeline. <strong>Key configs</strong>: EOS on scoring (can't double-block), 5s latency SLA, replicate to DR region via MirrorMaker2.",level:"a",tag:"Design"},
-{q:"What is the difference between RangeAssignor, RoundRobinAssignor, and StickyAssignor?",a:"<strong>RangeAssignor</strong>: For each topic, sort partitions numerically and assign contiguous ranges to consumers sorted alphabetically. With 2 topics × 3 partitions and 2 consumers: Consumer-1 gets P0,P1 of both topics (4 total), Consumer-2 gets P2 of both (2 total) — unbalanced with multiple topics. <strong>RoundRobinAssignor</strong>: Assign partitions cyclically across consumers. More balanced than Range when subscriptions are the same across all consumers. <strong>StickyAssignor</strong>: Like RoundRobin but preserves existing assignments as much as possible during rebalance. Minimizes partition movement. <strong>CooperativeStickyAssignor</strong>: Same as Sticky but uses incremental (cooperative) rebalancing protocol — only revokes partitions that are being moved, others keep processing. This is the default since Kafka 3.1 and dramatically reduces rebalance pause time.",level:"a",tag:"Consumers"},
-{q:"How does Schema Registry enforce schema compatibility?",a:"Schema Registry enforces compatibility by comparing a new schema to all registered schemas in a subject before accepting registration. Compatibility modes: (1) <strong>BACKWARD</strong> (default): new schema can read data written with the previous schema. Consumers using new schema can still process old messages. Safe for consumers to upgrade first. (2) <strong>FORWARD</strong>: previous schema can read data written with the new schema. Old consumers can still process new messages. Safe for producers to upgrade first. (3) <strong>FULL</strong>: both backward and forward. (4) <strong>NONE</strong>: no compatibility check. Breaking changes: removing a required field (BACKWARD violation), renaming a field, changing field type. Safe changes: adding optional field with default. Wire format: 1-byte magic + 4-byte schema ID + payload — consumers use schema ID to look up the schema from registry.",level:"i",tag:"Schema"},
-{q:"What are the main performance tuning levers for Kafka producers?",a:"<strong>Throughput optimization:</strong> (1) <code>batch.size</code> — increase to 128KB or 256KB (default 16KB too small). Larger batches = fewer requests = higher throughput. (2) <code>linger.ms</code> — set to 5-20ms. Waits before sending to fill batches (vs default 0 = immediate send). (3) <code>compression.type=lz4</code> — LZ4 is fastest. Snappy for better ratio. ZStd for best compression. Reduces network and storage I/O. (4) <code>buffer.memory</code> — increase if producer blocks. (5) Async produce — call ProduceAsync() without awaiting each; batch up calls. <strong>Latency optimization:</strong> (1) <code>linger.ms=0</code> — no waiting. (2) <code>acks=1</code> — only wait for leader. (3) Keep producers on same region as brokers. (4) Choose low-latency brokers. Typical achievable: 500K-1M msgs/sec throughput, sub-10ms p99 latency on commodity hardware.",level:"a",tag:"Performance"},
-{q:"Explain how MirrorMaker 2 works for multi-datacenter replication.",a:"MirrorMaker 2 (MM2) is built on Kafka Connect and provides cross-cluster topic replication. Components: (1) <strong>MirrorSourceConnector</strong>: reads from source cluster, produces to target with topic prefixed by source cluster alias (e.g., <code>us-east.orders</code>). (2) <strong>MirrorCheckpointConnector</strong>: translates consumer group offsets from source to target — enables consumer failover. (3) <strong>MirrorHeartbeatConnector</strong>: tracks replication lag. <strong>Active-Active</strong>: both clusters replicate to each other with different aliases — consumers can fail over to either side. Cycle detection prevents infinite replication loops. <strong>Active-Passive</strong>: source replicates to passive DR. On failover, consumers translate offsets using checkpoint connector and resume on target. Key configs: <code>replication.factor</code>, <code>topics</code> filter regex, <code>sync.group.offsets.enabled=true</code>.",level:"a",tag:"Production"},
-{q:"How would you implement exactly-once consumption in .NET?",a:"Exactly-once consumption requires ensuring each message is processed exactly once despite failures. Steps: (1) <strong>Idempotent consumer</strong>: store a dedup key (use Kafka topic+partition+offset, or business event ID) in your database. Before processing, check if already processed. (2) <strong>Atomic process+commit</strong>: use Kafka transactions: <code>sendOffsetsToTransaction()</code> atomically commits the offset WITH your output messages in a single Kafka transaction. If crash before commit, transaction is aborted and message is reprocessed. (3) <strong>Database transactions</strong>: for DB-only processing, use DB transaction — UPDATE business data + INSERT dedup record atomically. If the same message arrives again, dedup check fails the constraint and we skip. (4) Use <code>isolation.level=read_committed</code> on consumers to avoid reading aborted transaction messages.",level:"e",tag:"Semantics"},
+const KAFKA_INTERVIEW_TRACKS={
+  "iq-junior":{title:"🟢 Junior Card",shortTitle:"Junior",level:"b",color:"#10b981",summary:"Direct definitions, first use cases, and core Kafka mental models."},
+  "iq-mid":{title:"🟡 Mid-Level Card",shortTitle:"Mid-Level",level:"i",color:"#eab308",summary:"Applied producer/consumer reasoning, schemas, offsets, and debugging flow."},
+  "iq-senior":{title:"🔴 Senior Card",shortTitle:"Senior",level:"a",color:"#ef4444",summary:"Tradeoffs, failure modes, tuning, operations, and production judgement."},
+  "iq-architect":{title:"🏆 Architect Card",shortTitle:"Architect",level:"e",color:"#a855f7",summary:"System design, platform standards, DR, governance, and long-horizon architecture."}
+};
+
+const KAFKA_INTERVIEW_DOMAINS=[
+  {key:"foundations",title:"Distributed Systems Foundations",tag:"Foundations",problem:"CAP, ordering, consistency, and delivery guarantees",useCase:"deciding whether Kafka is even the right system for a workflow",failure:"teams assume Kafka gives global ordering or exactly-once for free",dotnet:"Hosted services should make offset, retry, and cancellation boundaries explicit."},
+  {key:"intro",title:"Introduction to Kafka",tag:"Core",problem:"what Kafka is, what it is not, and where it fits",useCase:"explaining Kafka to a team choosing between queue, broker, and log",failure:"using Kafka where simple request-response or task queue semantics would be simpler",dotnet:"Use clear producer and consumer abstractions, not hidden static clients."},
+  {key:"architecture",title:"Kafka Architecture",tag:"Architecture",problem:"broker roles, controller behavior, page cache, and zero-copy",useCase:"reasoning about throughput and how Kafka stays fast under load",failure:"treating broker internals as irrelevant when sizing or debugging",dotnet:"Client code should respect broker behavior through batching and sane acks."},
+  {key:"partitions",title:"Topics, Partitions & Offsets",tag:"Partitions",problem:"parallelism, ordering, and positioning in the log",useCase:"designing keys and partition counts for stable throughput",failure:"choosing partition keys that destroy ordering or create hot partitions",dotnet:"Message key choice in .NET producers is a business decision, not a serializer detail."},
+  {key:"producers",title:"Kafka Producers",tag:"Producers",problem:"batching, acks, retries, partitioning, compression",useCase:"shipping durable events with high throughput and acceptable latency",failure:"throughput collapses because batching and linger are left at poor defaults",dotnet:"Use singleton producers and explicit producer config in DI."},
+  {key:"consumers",title:"Consumers & Groups",tag:"Consumers",problem:"poll loop, commits, lag, rebalances, assignment",useCase:"building long-running processors and hosted services safely",failure:"auto-commit or slow handlers create invisible data loss or lag storms",dotnet:"BackgroundService consumers should commit only after successful business handling."},
+  {key:"brokers",title:"Brokers & Cluster",tag:"Operations",problem:"broker responsibilities, leader placement, and balancing",useCase:"running Kafka clusters or talking to platform teams",failure:"teams ignore cluster topology until availability incidents happen",dotnet:"Client code should be topology-aware through bootstrap and retry posture."},
+  {key:"replication",title:"Replication & Fault Tolerance",tag:"Replication",problem:"ISR, HW, LEO, leader election, and durability",useCase:"designing no-data-loss guarantees",failure:"acks and ISR are mismatched, so data looks durable but is not",dotnet:"Producer config must align with broker replication policy."},
+  {key:"kraft",title:"ZooKeeper & KRaft",tag:"Architecture",problem:"metadata quorum, controller election, and operational model",useCase:"modern Kafka deployments and migration planning",failure:"legacy assumptions from ZooKeeper mode leak into KRaft decisions",dotnet:"Mostly operational, but app teams should understand why cluster behavior changed."},
+  {key:"eos",title:"Exactly-Once Semantics",tag:"Semantics",problem:"idempotence, transactions, and end-to-end correctness",useCase:"financial, inventory, and non-idempotent processing flows",failure:"teams pay EOS complexity cost where idempotent consumers would be enough",dotnet:"Transaction boundaries in .NET must be explicit and easy to reason about."},
+  {key:"streams",title:"Kafka Streams",tag:"Streams",problem:"stateful stream processing and stream-table duality",useCase:"aggregations, windows, joins, and event-driven projections",failure:"teams adopt streaming without understanding local state stores",dotnet:"Use Streamiz or equivalent thoughtfully; state and changelogs still matter."},
+  {key:"connect",title:"Kafka Connect",tag:"Connect",problem:"moving data in and out of Kafka without custom code",useCase:"database sinks, CDC, search indexing, and warehouse loading",failure:"connector behavior is treated as magic and schema/SMT choices go unmanaged",dotnet:"App teams should still understand the connector contract around their topics."},
+  {key:"schema",title:"Schema Registry & Serialization",tag:"Schema",problem:"compatibility, Avro/Protobuf/JSON schema, and governance",useCase:"safe evolution of event contracts",failure:"events become unversioned JSON blobs with no compatibility discipline",dotnet:"Typed serializers and registry-aware producers keep contracts explicit."},
+  {key:"security",title:"Kafka Security",tag:"Security",problem:"TLS, SASL, ACLs, and operational hardening",useCase:"protecting regulated or multi-tenant event platforms",failure:"security is bolted on late and breaks clients at rollout time",dotnet:"Security config should be externalized and rotated safely."},
+  {key:"performance",title:"Performance & Tuning",tag:"Performance",problem:"throughput, latency, batching, JVM/OS tuning",useCase:"improving pipeline performance under real load",failure:"tuning starts before measurement, or one metric is optimized at the expense of another",dotnet:"Benchmark producer, consumer, and serialization behavior together."},
+  {key:"observability",title:"Monitoring & Observability",tag:"Observability",problem:"JMX, lag, dashboards, tracing, and alerting",useCase:"detecting incidents before customers do",failure:"teams watch broker uptime but not lag growth or throughput imbalance",dotnet:"Emit domain and consumer metrics, not only app logs."},
+  {key:"dotnet",title:"Kafka with .NET",tag:".NET",problem:"Confluent client usage, DI, hosted services, and testing",useCase:"building .NET producers, consumers, workers, and API integrations",failure:"threading, lifetime, and serializer choices are hidden until production",dotnet:"Use singleton producers, scoped handlers, and explicit serialization boundaries."},
+  {key:"eda",title:"Event-Driven Architecture",tag:"Architecture",problem:"event contracts, choreography, and system decoupling",useCase:"microservices reacting independently to the same business event",failure:"events become remote procedure calls in disguise",dotnet:"Handlers should react to events, not recreate request-response coupling."},
+  {key:"cqrs",title:"CQRS & Event Sourcing",tag:"Patterns",problem:"command/read split and rebuilding state from events",useCase:"audit-heavy domains with derived read models",failure:"teams copy event sourcing because it sounds advanced, not because the domain needs it",dotnet:"Projection and idempotency code must be explicit and testable."},
+  {key:"pipelines",title:"Real-Time Data Pipelines",tag:"Pipelines",problem:"CDC, enrichment, analytics, and lakehouse ingestion",useCase:"moving operational data into analytical and ML systems in real time",failure:"pipelines drift because ownership of topics and transformations is unclear",dotnet:"Service boundaries should define event ownership before data engineering scales them out."},
+  {key:"ksqldb",title:"ksqlDB & Stream SQL",tag:"Streams",problem:"SQL over streams and persistent queries",useCase:"teams wanting stream processing without full custom code",failure:"SQL hides the same state and ordering complexity rather than removing it",dotnet:"Know when to use platform SQL and when application code should own the logic."},
+  {key:"microservices",title:"Microservices with Kafka",tag:"Patterns",problem:"outbox, inbox, saga, and asynchronous contracts",useCase:"event-driven service integration with low coupling",failure:"dual-write and duplicate side effects create consistency bugs",dotnet:"Outbox plus idempotent consumer patterns are the safe default."},
+  {key:"kubernetes",title:"Kafka on Kubernetes",tag:"DevOps",problem:"Strimzi, storage, StatefulSets, and rolling upgrades",useCase:"platform teams running Kafka in-cluster",failure:"treating Kafka like a stateless deployment",dotnet:"App teams still need to understand service discovery and maintenance windows."},
+  {key:"enterprise",title:"Enterprise & Production Architecture",tag:"Production",problem:"MM2, DR, runbooks, and global topology",useCase:"banks, marketplaces, and platforms with strict RPO/RTO",failure:"DR is discussed but never practiced",dotnet:"Client failover strategy should be part of the architecture story."}
 ];
+
+const KAFKA_INTERVIEW_TEMPLATES={
+  "iq-junior":[
+    d=>({tags:["Direct","Use Case"],q:`What does ${d.title} mean in Kafka, in simple words?`,a:`${d.title} is mainly about ${d.problem}. In simple words, it matters because Kafka behavior stops being mysterious once you understand this boundary. A practical use case is ${d.useCase}.`}),
+    d=>({tags:["Direct","Scenario"],q:`When would a Kafka engineer first need to understand ${d.title}?`,a:`A Kafka engineer needs ${d.title} as soon as the team must explain a real behavior instead of repeating a definition. The usual trigger is ${d.useCase}.`}),
+    d=>({tags:["Use Case","Real World"],q:`Give one realistic product or platform scenario where ${d.title} matters.`,a:`A realistic scenario is ${d.useCase}. In interviews, naming the real pressure matters more than repeating textbook wording.`}),
+    d=>({tags:["Logical","Tradeoff"],q:`What is one common beginner misunderstanding about ${d.title}?`,a:`A common misunderstanding is ${d.failure}. Good Kafka answers correct the misconception before jumping to config values.`}),
+    d=>({tags:[".NET","Code"],q:`How should .NET engineers think about ${d.title}?`,a:`For .NET teams, ${d.dotnet} The key is to make the boundary visible in code and configuration rather than hiding it behind helper methods.`}),
+    d=>({tags:["Whiteboard","Flow"],q:`How would you sketch ${d.title} on a whiteboard in a Kafka interview?`,a:`I would draw the producer, broker-side boundary, consumer or downstream state, and the failure or guarantee that the topic introduces. The point is to show the data flow and the ownership boundary clearly.`})
+  ],
+  "iq-mid":[
+    d=>({tags:["Scenario","Architecture"],q:`A production issue points toward ${d.title}. What do you inspect first?`,a:`I start from the most observable symptom and trace it back to the ${d.title} boundary. For Kafka, that means checking whether the incident actually matches ${d.problem} before changing config blindly.`}),
+    d=>({tags:["Code","Scenario"],q:`How would you implement or configure ${d.title} safely in a .NET service?`,a:`I would keep the code explicit, push broker-facing configuration into typed options, and make retries, commits, or serialization decisions visible in the code review. ${d.dotnet}`}),
+    d=>({tags:["Tradeoff","Logical"],q:`What tradeoff appears first when teams go deeper into ${d.title}?`,a:`The main tradeoff is extra control in exchange for more responsibility. Kafka gives you powerful guarantees and scale controls, but the team must actively manage the side effects instead of assuming defaults are always correct.`}),
+    d=>({tags:["Use Case","Architecture"],q:`How would you explain ${d.title} to another engineer using a business example?`,a:`I would start with the business pressure: ${d.useCase}. Then I would show how ${d.title} changes the flow of data, ownership, or failure handling in that system.`}),
+    d=>({tags:["Scenario","Real World"],q:`What real-world failure often reveals weak understanding of ${d.title}?`,a:`A classic failure is ${d.failure}. It usually appears only under retries, rebalances, broker failure, or scaling events, which is why shallow Kafka knowledge breaks down fast.`}),
+    d=>({tags:[".NET","Architecture"],q:`Which .NET design choice most affects how well you handle ${d.title}?`,a:`The biggest design choice is whether the app makes the Kafka boundary explicit. In .NET, that usually means clear hosted-service loops, explicit serializers, scoped handlers, and visible configuration around commits or retries.`})
+  ],
+  "iq-senior":[
+    d=>({tags:["Architecture","Scenario"],q:`How would you refactor a weak implementation around ${d.title} without freezing delivery?`,a:`I would first isolate the risky boundary, then change one seam at a time while keeping behavior measurable. The goal is to reduce the blast radius around ${d.title}, not launch a rewrite disguised as cleanup.`}),
+    d=>({tags:["Tradeoff","Performance"],q:`What senior-level tradeoff should be explained before changing ${d.title} in production?`,a:`The senior answer should explain what gets better, what gets worse, and which SLA matters most. Kafka tuning without a stated tradeoff usually becomes accidental complexity.`}),
+    d=>({tags:["Scenario","Logical"],q:`How do you tell when a team says they handle ${d.title}, but the design is still unsafe?`,a:`Look for missing proof. If the team cannot explain the failure mode, offset or key behavior, recovery path, or replay consequences around ${d.title}, then the safety claim is probably decorative.`}),
+    d=>({tags:["Operations","Real World"],q:`Where does ${d.title} show up in real production incidents?`,a:`It shows up where throughput, retries, scaling, or failover expose the design assumptions. Real incidents usually reveal that a guarantee was assumed rather than actually designed and tested.`}),
+    d=>({tags:["Code","Refactoring"],q:`What code review smell tells you ${d.title} is not handled robustly in .NET?`,a:`A common smell is infrastructure-heavy code with hidden Kafka behavior. If commits, retries, serialization, or idempotency are buried in helper layers, then reviewers cannot verify the design correctly.`}),
+    d=>({tags:["Scenario","Flow"],q:`What end-to-end flow would you walk through to teach ${d.title} to a team?`,a:`I would walk from producer intent to broker behavior to consumer action to recovery path. Teams learn Kafka best when they can see how one message behaves under the normal path and under failure.`})
+  ],
+  "iq-architect":[
+    d=>({tags:["Architecture","Whiteboard"],q:`How would you justify a platform standard around ${d.title} across many teams?`,a:`I would justify it only if the same Kafka pressure keeps recurring. Then I would define a default design, evidence requirements, and operational guardrails so teams do not invent incompatible versions of the same solution.`}),
+    d=>({tags:["Scenario","Governance"],q:`When should an architect reject a proposed solution involving ${d.title}?`,a:`Reject it when the team cannot explain the actual pressure, when the added complexity outweighs the operational benefit, or when the pattern is being used as status rather than as a design response.`}),
+    d=>({tags:["Tradeoff","System Design"],q:`What long-term maintenance risk comes from weak decisions around ${d.title}?`,a:`The long-term risk is a platform that nobody can reason about consistently. Kafka systems become expensive when guarantees, schemas, ownership, and replay behavior differ service by service.`}),
+    d=>({tags:["Real World","Architecture"],q:`How would you present ${d.title} in a system-design interview?`,a:`I would explain the business pressure, the Kafka boundary, the guarantee being sought, the operational cost, and the rollback or recovery posture. That shows architecture judgement, not just command knowledge.`}),
+    d=>({tags:[".NET","Architecture"],q:`What modern .NET standard would you pair with ${d.title} on a platform team?`,a:`I would pair it with typed configuration, hosted services, structured telemetry, resilience defaults, and clear message contracts. The .NET standard should make Kafka behavior reviewable and repeatable across teams.`}),
+    d=>({tags:["Scenario","Logical"],q:`What ADR would you write before standardizing a solution around ${d.title}?`,a:`The ADR should capture the recurring pain, the exact Kafka guarantee or flow being chosen, why simpler options are not enough, how failure will be tested, and what rollback path exists if the standard proves too expensive.`})
+  ]
+};
+
+function buildKafkaInterviewBank(trackKey){
+  const templates=KAFKA_INTERVIEW_TEMPLATES[trackKey]||[];
+  const level=KAFKA_INTERVIEW_TRACKS[trackKey]?.level||"b";
+  return KAFKA_INTERVIEW_DOMAINS.flatMap(domain=>
+    templates.map((template,index)=>{
+      const qa=template(domain);
+      return {id:`${trackKey}-${domain.key}-${index+1}`,q:qa.q,a:qa.a,level,tag:domain.tag,tags:[...qa.tags,domain.tag],domain:domain.title,track:trackKey};
+    })
+  );
+}
+
+const QA=[...Object.keys(KAFKA_INTERVIEW_TRACKS).flatMap(buildKafkaInterviewBank)];
 
 const GUIDE_BLUEPRINTS={
   ds:{
@@ -2255,7 +2308,106 @@ function renderQAItem(q,id){
     <div class="qa-ans"><div class="qa-at">${q.a}</div></div></div>`;
 }
 
+function renderKafkaInterviewPill(tag){
+  const colors={
+    "Direct":"#10b981","Use Case":"#06b6d4","Scenario":"#ff6b35","Architecture":"#a855f7","Logical":"#ef4444",
+    "Tradeoff":"#eab308","Whiteboard":"#c4b5fd","Flow":"#38bdf8","Real World":"#f472b6","Code":"#60a5fa",
+    "Refactoring":"#fbbf24","Performance":"#fb7185",".NET":"#22d3ee","Governance":"#fde68a","System Design":"#a78bfa",
+    "Foundations":"#06b6d4","Core":"#10b981","Architecture":"#a855f7","Partitions":"#ff6b35","Producers":"#34d399",
+    "Consumers":"#38bdf8","Operations":"#eab308","Replication":"#ef4444","Semantics":"#f97316","Streams":"#10b981",
+    "Connect":"#06b6d4","Schema":"#a855f7","Security":"#ef4444","Observability":"#22c55e","Patterns":"#f59e0b",
+    "Pipelines":"#fb923c","DevOps":"#eab308","Production":"#8b5cf6"
+  };
+  const c=colors[tag]||"#64748b";
+  return `<span style="font-size:8.5px;padding:2px 6px;border-radius:4px;font-family:'Fira Code',monospace;border:1px solid ${c}44;color:${c};background:${c}15">${tag}</span>`;
+}
+
+function renderKafkaInterviewHub(activeTrack=""){
+  document.getElementById("welcome").style.display="none";
+  document.getElementById("mcon").style.display="block";
+  const cards=Object.entries(KAFKA_INTERVIEW_TRACKS).map(([key,track])=>{
+    const count=buildKafkaInterviewBank(key).length;
+    return `<div class="tcard ${activeTrack===key?"act":""}" id="iqc-${key}" onclick="selectKafkaInterviewTrack('${key}')">
+      <div class="tc-icon">${track.title.split(" ")[0]}</div>
+      <div class="tc-body"><div class="tc-t">${track.shortTitle} (${count})</div>
+      <div class="tc-d">${track.summary}</div>
+      <div class="tc-meta">
+        <span class="tmeta" style="color:${track.color};border-color:${track.color}44">${count} Questions</span>
+        <span class="tmeta" style="color:#10b981;border-color:#10b98144">Kafka</span>
+      </div></div></div>`;
+  }).join("");
+  document.getElementById("mcon").innerHTML=`
+    <div class="chero">
+      <div class="chero-n" style="color:#10b981">Interview Mastery · 4 Cards</div>
+      <div class="chero-t" style="color:#10b981">🎯 Kafka Interview Q&amp;A</div>
+      <div class="chero-d">576 generated Kafka interview questions across producers, consumers, streams, EOS, Connect, .NET integration, platform operations, and system design.</div>
+      <div class="chero-chips">
+        <span class="cchip" style="color:#10b981;border-color:#10b98144;background:rgba(16,185,129,.1)">576 Questions</span>
+        <span class="cchip" style="color:#06b6d4;border-color:#06b6d444;background:rgba(6,182,212,.1)">4 Cards</span>
+        <span class="cchip" style="color:#a855f7;border-color:#a855f744;background:rgba(168,85,247,.1)">23+ Domains</span>
+        <span class="cchip" style="color:#ff6b35;border-color:#ff6b3544;background:rgba(255,107,53,.1)">Scenarios + Design</span>
+      </div>
+    </div>
+    <div class="tgrid">${cards}</div>`;
+
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  document.getElementById("rp-con").innerHTML = activeTrack ? renderKafkaInterviewTrack(activeTrack) : `
+    <div class="rpcon">
+      <div class="d-bread">Kafka Mastery · Interview Preparation</div>
+      <div class="d-title">🎯 Interview Q&amp;A</div>
+      <div class="d-sub">Choose one of the four interview cards from the middle panel. Each card covers the full Kafka surface, but with a different level of depth and expected reasoning style.</div>
+      <div class="callout c-kafka"><span class="call-ic">⚡</span><span><strong>Structure:</strong> Junior focuses on definitions and first use cases, Mid-Level on implementation and debugging, Senior on tradeoffs and operations, Architect on system design and platform standards.</span></div>
+    </div>`;
+}
+
+function renderKafkaInterviewTrack(trackKey){
+  const track=KAFKA_INTERVIEW_TRACKS[trackKey];
+  const qs=buildKafkaInterviewBank(trackKey);
+  const tags=["Direct","Use Case","Scenario","Architecture","Logical","Tradeoff","Whiteboard","Flow","Real World","Code","Performance",".NET","System Design"];
+  const items=qs.map((q,i)=>`
+    <div class="qa" data-tags="${q.tags.join("|")}|${q.tag}">
+      <div class="qa-q" onclick="toggleQA(this)">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:9px;color:var(--t3);font-family:'Fira Code',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px">${q.domain} · ${track.shortTitle} · Q${i+1}</div>
+          <span class="qa-qt">${q.q}</span>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">${q.tags.map(renderKafkaInterviewPill).join("")}${renderKafkaInterviewPill(q.tag)}</div>
+        </div>
+        <span class="qa-lv ${lvMap[q.level]}">${lvLabel[q.level]}</span>
+        <span class="qa-ar">▶</span></div>
+      <div class="qa-ans"><div class="qa-at">${q.a}</div></div></div>`).join("");
+  return `<div class="rpcon">
+    <div class="d-bread">Kafka Mastery · Interview Preparation</div>
+    <div class="d-title">${track.title}</div>
+    <div class="d-sub">${qs.length} questions. ${track.summary}</div>
+    <div style="background:var(--b2);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin:12px 0;font-size:11.5px;color:var(--t2);line-height:1.7"><strong style="font-family:'Fira Code',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t1)">Coverage</strong><br>This card spans Kafka fundamentals, architecture, delivery semantics, Streams, Connect, Schema Registry, performance, observability, .NET integration, microservices, Kubernetes, and enterprise operations.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px">${tags.map(renderKafkaInterviewPill).join("")}</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px">
+      <button onclick="filterKafkaQA('',this)" style="background:${track.color}22;border:1px solid ${track.color}55;color:${track.color};padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace">All</button>
+      ${tags.map(t=>`<button onclick="filterKafkaQA('${t}',this)" style="background:var(--b2);border:1px solid var(--bd);color:var(--t2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace;transition:all .2s">${t}</button>`).join("")}
+    </div>
+    <div id="qa-list">${items}</div></div>`;
+}
+
+function selectKafkaInterviewTrack(trackKey){
+  const idx=CHS.findIndex(ch=>ch.t==="Interview Preparation");
+  if(idx!==-1){
+    curCh=idx;
+    document.querySelectorAll(".ci").forEach((el,j)=>{
+      el.classList.toggle("open",j===idx);
+      el.querySelector(".chr").classList.toggle("act",j===idx);
+    });
+    document.querySelectorAll(".tcard").forEach(el=>el.classList.remove("act"));
+    const c=document.getElementById("iqc-"+trackKey);if(c)c.classList.add("act");
+  }
+  renderKafkaInterviewHub(trackKey);
+}
+
 function renderGeneric(id,chi){
+  if(KAFKA_INTERVIEW_TRACKS[id]){
+    renderKafkaInterviewTrack(id);
+    return;
+  }
   document.getElementById("rp-empty").style.display="none";
   document.getElementById("rp-con").style.display="block";
   const ch=CHS[chi];
@@ -2293,33 +2445,21 @@ function doSearch(q){
 }
 
 function showAllQA(){
-  document.getElementById("rp-empty").style.display="none";
-  document.getElementById("rp-con").style.display="block";
-  const tags=[...new Set(QA.map(q=>q.tag))];
-  const filterBtns=tags.map(t=>
-    `<button onclick="filterQA('${t}',this)" style="background:var(--b2);border:1px solid var(--bd);color:var(--t2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace;transition:all .2s">${t}</button>`
-  ).join("");
-  const items=QA.map((q,i)=>`
-    <div class="qa" data-tag="${q.tag}">
-      <div class="qa-q" onclick="toggleQA(this)">
-        <span class="qa-qi">Q</span><span class="qa-qt">${q.q}</span>
-        <span style="font-size:9px;padding:2px 7px;border-radius:3px;background:rgba(255,107,53,.08);color:var(--k2);border:1px solid rgba(255,107,53,.3);font-family:'Fira Code',monospace;flex-shrink:0">${q.tag}</span>
-        <span class="qa-lv ${lvMap[q.level]}">${lvLabel[q.level]}</span>
-        <span class="qa-ar">▶</span></div>
-      <div class="qa-ans"><div class="qa-at">${q.a}</div></div></div>`).join("");
-  document.getElementById("rp-con").innerHTML=`<div class="rpcon">
-    <div class="d-bread">Kafka Mastery · Interview Preparation</div>
-    <div class="d-title">🎯 Interview Q&amp;A — All ${QA.length} Questions</div>
-    <div class="d-sub">From Basic definitions through Expert system design. Click a question to reveal the answer. Filter by topic.</div>
-    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px">
-      <button onclick="filterQA(null,this)" style="background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.4);color:var(--k2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace">All</button>
-      ${filterBtns}</div>
-    <div id="qa-list">${items}</div></div>`;
+  renderKafkaInterviewHub();
 }
 
-function filterQA(tag){
+function filterKafkaQA(tag,btn){
+  btn?.parentElement?.querySelectorAll("button").forEach(el=>{
+    el.style.color="";el.style.borderColor="";el.style.background="";
+  });
+  if(btn){
+    btn.style.color="var(--k2)";
+    btn.style.borderColor="rgba(255,107,53,.4)";
+    btn.style.background="rgba(255,107,53,.15)";
+  }
   document.querySelectorAll("#qa-list .qa").forEach(el=>{
-    el.style.display=(!tag||el.dataset.tag===tag)?'':'none';
+    const tags=(el.dataset.tags||"").split("|");
+    el.style.display=(!tag||tags.includes(tag))?'':'none';
   });
 }
 

@@ -257,6 +257,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--t
 .qa-question:hover{background:var(--bg-hover)}
 .qa-q-icon{font-size:11px;font-weight:700;color:var(--accent);font-family:var(--font-code);margin-top:1px;flex-shrink:0}
 .qa-q-text{font-size:12.5px;font-weight:500;color:var(--text-primary);flex:1;line-height:1.5}
+.qa-kicker{font-size:9px;color:var(--text-muted);font-family:var(--font-code);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.qa-qmeta{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.qa-pill{font-size:8.5px;padding:2px 6px;border-radius:4px;font-family:var(--font-code);border:1px solid}
+.qa-legend{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}
+.qa-stat{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:12px 0;font-size:11.5px;color:var(--text-secondary);line-height:1.7}
+.qa-stat strong{font-family:var(--font-code);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-primary)}
 .qa-level{font-size:9px;padding:2px 6px;border-radius:3px;font-family:var(--font-code);margin-top:2px;flex-shrink:0}
 .qa-arrow{color:var(--text-muted);font-size:10px;transition:transform .25s;margin-top:3px}
 .qa-item.open .qa-arrow{transform:rotate(90deg)}
@@ -322,7 +328,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--t
         <div class="welcome-stat"><div class="welcome-stat-num">10</div><div class="welcome-stat-label">Chapters</div></div>
         <div class="welcome-stat"><div class="welcome-stat-num">40</div><div class="welcome-stat-label">Topics</div></div>
         <div class="welcome-stat"><div class="welcome-stat-num">SOLID</div><div class="welcome-stat-label">Principles</div></div>
-        <div class="welcome-stat"><div class="welcome-stat-num">OOP</div><div class="welcome-stat-label">Architecture</div></div>
+        <div class="welcome-stat"><div class="welcome-stat-num">250</div><div class="welcome-stat-label">Interview Q&amp;A</div></div>
       </div>
       <div class="welcome-actions">
         <button class="start-btn" onclick="selectChapter(0)">
@@ -785,18 +791,187 @@ const topicDetails = {
   }
 };
 
-const interviewQuestions = [
-  {tag:"solid", level:"Basic", q:"What problem is SOLID trying to solve in real systems?", a:"SOLID is about controlling change. It reduces coupling, improves testability, and makes extension safer so new requirements do not force risky edits across unrelated areas."},
-  {tag:"srp", level:"Basic", q:"What does Single Responsibility actually mean?", a:"A class or module should have one reason to change. It is about change pressure, not just class size. Business logic, persistence, formatting, and notifications usually represent different responsibilities."},
-  {tag:"ocp", level:"Intermediate", q:"How do you apply Open/Closed Principle in C#?", a:"Usually by introducing a stable abstraction and plugging in new implementations. Strategy, handler, and provider patterns are common OCP moves in C# and ASP.NET Core."},
-  {tag:"lsp", level:"Intermediate", q:"Why is LSP more than 'a subclass inherits a base class'?", a:"Because inheritance alone says nothing about behavioral compatibility. Callers must be able to use a subtype anywhere the base type is expected without defensive special cases or broken assumptions."},
-  {tag:"isp", level:"Intermediate", q:"How do you know an interface violates ISP?", a:"Large mocks, unused members, frequent NotImplementedException, and implementations that only need a fraction of the contract are strong indicators."},
-  {tag:"dip", level:"Intermediate", q:"What is Dependency Inversion in practical architecture terms?", a:"High-level policy depends on abstractions rather than concrete infrastructure. That keeps business logic stable while infrastructure changes around it."},
-  {tag:"smells", level:"Advanced", q:"What anti-pattern often indicates SRP failure?", a:"The god class. It usually grows because multiple unrelated concerns were allowed to accumulate in one place over time."},
-  {tag:"refactoring", level:"Advanced", q:"When should you replace conditionals with polymorphism?", a:"When repeated branching drives the same family of variant behavior across a codebase. One isolated conditional is not always a problem, but repeated branching often signals missing extension seams."},
-  {tag:"architecture", level:"Advanced", q:"Can SOLID become overengineering?", a:"Yes. If abstractions are added without real volatility, test pressure, or policy boundaries, the design becomes more indirect without becoming easier to change."},
-  {tag:"interview", level:"Basic", q:"How would you explain SOLID quickly in an interview?", a:"I would describe it as a set of principles that reduce reasons to touch stable code, improve substitutability and contract clarity, and keep high-level policy from depending on low-level details."}
+const SOLID_INTERVIEW_PRINCIPLES = {
+  srp: {
+    label: 'SRP',
+    focus: 'one reason to change for a module or class',
+    example: 'splitting policy, persistence, and formatting in one workflow',
+    anti: 'one service class validates, saves, logs, and sends email'
+  },
+  ocp: {
+    label: 'OCP',
+    focus: 'extension through new implementations instead of repeated edits to stable code',
+    example: 'adding another pricing rule by introducing a new strategy implementation',
+    anti: 'editing the same if/else tree every time a new behavior arrives'
+  },
+  lsp: {
+    label: 'LSP',
+    focus: 'behavioral substitutability between base contracts and subtypes',
+    example: 'a subtype preserving all expectations promised by the base abstraction',
+    anti: 'a subclass throwing NotSupportedException for expected base behavior'
+  },
+  isp: {
+    label: 'ISP',
+    focus: 'small focused contracts instead of oversized multipurpose interfaces',
+    example: 'splitting read and write responsibilities into separate interfaces',
+    anti: 'forcing implementations to carry unused members and fake methods'
+  },
+  dip: {
+    label: 'DIP',
+    focus: 'high-level policy depending on abstractions instead of infrastructure details',
+    example: 'injecting a payment abstraction into checkout logic instead of constructing a concrete gateway directly',
+    anti: 'business rules new up infrastructure classes inside methods'
+  }
+};
+
+const SOLID_INTERVIEW_VARIANTS = [
+  { level:'Basic', tags:['Direct','Use Case'] },
+  { level:'Intermediate', tags:['Scenario','Architecture'] },
+  { level:'Advanced', tags:['Logical Twist','Tradeoff'] },
+  { level:'Advanced', tags:['Scenario','.NET 10'] },
+  { level:'Expert', tags:['Whiteboard','Real World'] }
 ];
+
+const SOLID_INTERVIEW_TEMPLATES = [
+  (p) => ({
+    q: `What does ${p.label} mean in practical design terms?`,
+    a: `${p.label} is about ${p.focus}. In practical terms, it protects a code boundary so changes stay local. A good example is ${p.example}. The warning sign is ${p.anti}.`
+  }),
+  (p) => ({
+    q: `Why does ${p.label} matter more in a large codebase than in a toy example?`,
+    a: `In a toy example, weak structure may survive because the blast radius is small. In a large codebase, ${p.label} matters because change pressure is constant. If the boundary is weak, one requirement can ripple through many unrelated files and teams.`
+  }),
+  (p) => ({
+    q: `Give a small refactoring that improves ${p.label} without changing behavior.`,
+    a: `A safe refactoring is to isolate the main pressure first, then move the related logic behind a smaller, clearer boundary. For ${p.label}, that often means separating the responsibility or contract that changes most often while keeping behavior identical from the caller's point of view.`
+  }),
+  (p) => ({
+    q: `What code smell usually tells you ${p.label} is being violated?`,
+    a: `A strong warning sign is ${p.anti}. More generally, if one change request keeps forcing unrelated edits or one contract makes several implementations awkward, ${p.label} is probably being violated.`
+  }),
+  (p) => ({
+    q: `How would you explain ${p.label} to a junior developer in one minute?`,
+    a: `I would say that ${p.label} helps keep one kind of design pressure in one place. When unrelated reasons to change are mixed together, the code becomes harder to trust. A simple example is ${p.example}.`
+  }),
+  (p) => ({
+    q: `How does ${p.label} improve testability?`,
+    a: `${p.label} improves testability because clear boundaries are easier to isolate. When the design matches the principle, tests become narrower, mocks become smaller, and failures become easier to diagnose.`
+  }),
+  (p) => ({
+    q: `When can applying ${p.label} too aggressively turn into overengineering?`,
+    a: `It becomes overengineering when the team adds indirection without a real pressure to protect. If there is no meaningful variation point or change boundary yet, extra abstraction makes the design harder to read without making it easier to change.`
+  }),
+  (p) => ({
+    q: `What interview scenario would quickly reveal whether a candidate really understands ${p.label}?`,
+    a: `Ask the candidate to refactor a small but messy service and explain the first design boundary they would change. Someone who understands ${p.label} will talk about responsibility, contract shape, and change pressure, not just renaming classes.`
+  }),
+  (p) => ({
+    q: `How does ${p.label} connect to modern .NET design?`,
+    a: `In modern .NET, ${p.label} shows up through dependency injection, focused handlers, minimal contracts, and clearer separation between policy and infrastructure. The important part is not the framework feature itself, but the boundary it helps express.`
+  }),
+  (p) => ({
+    q: `What is the most common misunderstanding teams have about ${p.label}?`,
+    a: `A common misunderstanding is treating ${p.label} as a slogan rather than a real design decision. Teams say they follow it, but the code still shows ${p.anti}. The principle only matters when it changes how responsibilities and contracts are actually drawn.`
+  })
+];
+
+const SOLID_INTERVIEW_TAG_STYLES = {
+  'Direct':'color:#38bdf8;border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.08)',
+  'Use Case':'color:#4ade80;border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.08)',
+  'Scenario':'color:#fb923c;border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.08)',
+  'Architecture':'color:#a78bfa;border-color:rgba(167,139,250,.32);background:rgba(167,139,250,.08)',
+  'Logical Twist':'color:#f472b6;border-color:rgba(244,114,182,.3);background:rgba(244,114,182,.08)',
+  'Tradeoff':'color:#facc15;border-color:rgba(250,204,21,.3);background:rgba(250,204,21,.08)',
+  '.NET 10':'color:#99f6e4;border-color:rgba(153,246,228,.3);background:rgba(153,246,228,.08)',
+  'Whiteboard':'color:#c4b5fd;border-color:rgba(196,181,253,.3);background:rgba(196,181,253,.08)',
+  'Real World':'color:#fdba74;border-color:rgba(253,186,116,.3);background:rgba(253,186,116,.08)',
+  'SOLID':'color:#6384ff;border-color:rgba(99,132,255,.3);background:rgba(99,132,255,.08)',
+  'SRP':'color:#38bdf8;border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.08)',
+  'OCP':'color:#fb923c;border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.08)',
+  'LSP':'color:#4ade80;border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.08)',
+  'ISP':'color:#f472b6;border-color:rgba(244,114,182,.3);background:rgba(244,114,182,.08)',
+  'DIP':'color:#facc15;border-color:rgba(250,204,21,.3);background:rgba(250,204,21,.08)'
+};
+
+function buildSolidInterviewBank() {
+  const questions = [];
+  Object.entries(SOLID_INTERVIEW_PRINCIPLES).forEach(([key, principle]) => {
+    SOLID_INTERVIEW_VARIANTS.forEach((variant) => {
+      SOLID_INTERVIEW_TEMPLATES.forEach((template) => {
+        const qa = template(principle);
+        questions.push({
+          tag: key,
+          level: variant.level,
+          principle: principle.label,
+          q: qa.q,
+          a: qa.a,
+          tags: [...variant.tags, 'SOLID', principle.label]
+        });
+      });
+    });
+  });
+  return questions;
+}
+
+const interviewQuestions = buildSolidInterviewBank();
+
+const SOLID_INTERVIEW_TRACKS = {
+  junior: {
+    title: '🟢 Junior Card',
+    shortTitle: 'Junior',
+    color: '#38bdf8',
+    summary: 'Foundations, direct definitions, and first practical examples.',
+    match: (q) => q.level === 'Basic'
+  },
+  mid: {
+    title: '🟡 Mid-Level Card',
+    shortTitle: 'Mid-Level',
+    color: '#fb923c',
+    summary: 'Applied design decisions, code review signals, and refactoring moves.',
+    match: (q) => q.level === 'Intermediate'
+  },
+  senior: {
+    title: '🔴 Senior Card',
+    shortTitle: 'Senior',
+    color: '#a78bfa',
+    summary: 'Tradeoffs, scenarios, and failure analysis under production pressure.',
+    match: (q) => q.level === 'Advanced'
+  },
+  architect: {
+    title: '🏆 Architect Card',
+    shortTitle: 'Architect',
+    color: '#4ade80',
+    summary: 'Whiteboard reasoning, architecture framing, and long-horizon design judgement.',
+    match: (q) => q.level === 'Expert'
+  }
+};
+
+function renderSolidInterviewPill(tag) {
+  return `<span class="qa-pill" style="${SOLID_INTERVIEW_TAG_STYLES[tag] || 'color:#94a3b8;border-color:rgba(148,163,184,.28);background:rgba(148,163,184,.08)'}">${tag}</span>`;
+}
+
+function buildSolidInterviewTrack(trackKey) {
+  const track = SOLID_INTERVIEW_TRACKS[trackKey];
+  return interviewQuestions.filter((q) => track?.match(q));
+}
+
+function renderSolidInterviewHubCards(activeTrack = '') {
+  return Object.entries(SOLID_INTERVIEW_TRACKS).map(([key, track]) => {
+    const count = buildSolidInterviewTrack(key).length;
+    return `
+      <div class="topic-card ${activeTrack === key ? 'active' : ''}" id="solid-interview-card-${key}" onclick="selectSolidInterviewTrack('${key}')">
+        <div class="topic-card-icon">${track.title.split(' ')[0]}</div>
+        <div class="topic-card-body">
+          <div class="topic-card-title">${track.shortTitle} (${count})</div>
+          <div class="topic-card-desc">${track.summary}</div>
+          <div class="topic-card-meta">
+            <span class="meta-tag" style="color:${track.color};border-color:${track.color}33">${count} Questions</span>
+            <span class="meta-tag" style="color:#94a3b8;border-color:#94a3b833">SOLID</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
 
 let currentChapter = -1;
 let currentTopic = null;
@@ -933,52 +1108,94 @@ function renderSection(section) {
 function renderInterviewSection(topicTitle) {
   const relevant = interviewQuestions.filter((q) => {
     const keys = topicTitle.toLowerCase().split(/\s+/);
-    return keys.some((key) => q.q.toLowerCase().includes(key) || q.a.toLowerCase().includes(key) || q.tag.toLowerCase().includes(key));
-  }).slice(0, 4);
+    return keys.some((key) => q.q.toLowerCase().includes(key) || q.a.toLowerCase().includes(key) || q.tag.toLowerCase().includes(key) || q.principle.toLowerCase().includes(key));
+  }).slice(0, topicTitle.toLowerCase().includes('solid') ? 10 : 6);
   if (!relevant.length) return '';
 
   const levelColors = { Basic:'#38bdf8', Intermediate:'#fb923c', Advanced:'#a78bfa', Expert:'#4ade80' };
-  return `<div class="section"><div class="section-title">Interview Questions</div>${relevant.map((q) => {
+  return `<div class="section"><div class="section-title">Interview Questions</div>${relevant.map((q, index) => {
     const levelColor = levelColors[q.level] || '#94a3b8';
-    return `<div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><span class="qa-q-icon">Q</span><span class="qa-q-text">${q.q}</span><span class="qa-level" style="background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44">${q.level}</span><span class="qa-arrow">▶</span></div><div class="qa-answer"><div class="qa-answer-text">${q.a}</div></div></div>`;
+    return `<div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="flex:1;min-width:0"><div class="qa-kicker">${q.principle} · Q${index + 1}</div><div class="qa-q-text">${q.q}</div><div class="qa-qmeta">${q.tags.map(renderSolidInterviewPill).join('')}</div></div><span class="qa-level" style="background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44">${q.level}</span><span class="qa-arrow">▶</span></div><div class="qa-answer"><div class="qa-answer-text">${q.a}</div></div></div>`;
   }).join('')}</div>`;
 }
 
-function showAllInterviewQuestions() {
+function renderSolidInterviewHub(activeTrack = '') {
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('chapterContent').style.display = 'block';
+  document.getElementById('chapterContent').innerHTML = `
+    <div class="chapter-hero">
+      <div class="chapter-hero-num">Interview Mastery · 4 Cards</div>
+      <div class="chapter-hero-title" style="color:#c4b5fd">🎯 SOLID Interview Q&amp;A</div>
+      <div class="chapter-hero-desc">250 generated questions split across four cards so you can prepare from beginner articulation through architect-level SOLID reasoning.</div>
+      <div class="chapter-hero-tags">
+        ${['250 Questions','4 Cards','SRP → DIP','Scenario + Logical','.NET 10'].map(renderSolidInterviewPill).join('')}
+      </div>
+    </div>
+    <div class="topics-grid">${renderSolidInterviewHubCards(activeTrack)}</div>`;
+
   document.getElementById('detailEmpty').style.display = 'none';
   document.getElementById('detailContent').style.display = 'block';
-
-  const levelColors = { Basic:'#38bdf8', Intermediate:'#fb923c', Advanced:'#a78bfa', Expert:'#4ade80' };
-  const tags = [...new Set(interviewQuestions.map((q) => q.tag))];
-  const filterBtns = tags.map((tag) =>
-    `<button class="qa-filter-btn" onclick='filterQA(${JSON.stringify(tag)}, this)'>${tag}</button>`
-  ).join('');
-
-  const qHTML = interviewQuestions.map((q) => {
-    const levelColor = levelColors[q.level] || '#94a3b8';
-    return `<div class="qa-item" data-tag="${q.tag}"><div class="qa-question" onclick="toggleQA(this)"><span class="qa-q-icon">Q</span><span class="qa-q-text">${q.q}</span><span class="qa-level" style="background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44">${q.level}</span><span class="qa-arrow">▶</span></div><div class="qa-answer"><div class="qa-answer-text">${q.a}</div></div></div>`;
-  }).join('');
-
-  document.getElementById('detailContent').innerHTML = `
+  document.getElementById('detailContent').innerHTML = activeTrack ? renderSolidInterviewTrackDetail(activeTrack) : `
     <div class="detail-content">
       <div class="detail-header">
         <div class="detail-breadcrumb">SOLID Mastery · Interview Prep</div>
-        <div class="detail-title">🎯 Interview Questions &amp; Answers</div>
-        <div class="detail-subtitle">${interviewQuestions.length} curated SOLID and OOP architecture questions covering design tradeoffs, smells, refactoring patterns, and interview articulation.</div>
+        <div class="detail-title">🎯 Interview Q&amp;A</div>
+        <div class="detail-subtitle>Select one of the four cards from the middle panel. Each card focuses on a different interview level and still covers all five principles.</div>
       </div>
+      <div class="qa-stat"><strong>Structure</strong><br>Junior covers direct explanation, mid-level covers implementation reasoning, senior covers tradeoffs and scenarios, and architect covers whiteboard and system-level articulation.</div>
+      <div class="qa-legend">${['Junior','Mid-Level','Senior','Architect','SOLID','SRP','OCP','LSP','ISP','DIP'].map(renderSolidInterviewPill).join('')}</div>
+    </div>`;
+}
+
+function renderSolidInterviewTrackDetail(trackKey) {
+  const track = SOLID_INTERVIEW_TRACKS[trackKey];
+  const questions = buildSolidInterviewTrack(trackKey);
+  const levelColors = { Basic:'#38bdf8', Intermediate:'#fb923c', Advanced:'#a78bfa', Expert:'#4ade80' };
+  const tags = ['Direct','Use Case','Scenario','Architecture','Logical Twist','Tradeoff','.NET 10','Whiteboard','Real World','SOLID','SRP','OCP','LSP','ISP','DIP'];
+  const qHTML = questions.map((q, index) => {
+    const levelColor = levelColors[q.level] || '#94a3b8';
+    return `<div class="qa-item" data-tags="${q.tags.join('|')}|${q.principle}"><div class="qa-question" onclick="toggleQA(this)"><div style="flex:1;min-width:0"><div class="qa-kicker">${q.principle} · ${track.shortTitle} · Q${index + 1}</div><div class="qa-q-text">${q.q}</div><div class="qa-qmeta">${q.tags.map(renderSolidInterviewPill).join('')}</div></div><span class="qa-level" style="background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44">${q.level}</span><span class="qa-arrow">▶</span></div><div class="qa-answer"><div class="qa-answer-text">${q.a}</div></div></div>`;
+  }).join('');
+
+  return `
+    <div class="detail-content">
+      <div class="detail-header">
+        <div class="detail-breadcrumb">SOLID Mastery · Interview Prep</div>
+        <div class="detail-title">${track.title}</div>
+        <div class="detail-subtitle">${questions.length} questions focused on ${track.summary.toLowerCase()}</div>
+      </div>
+      <div class="qa-stat"><strong>Coverage</strong><br>${track.summary} This card still spans SRP, OCP, LSP, ISP, and DIP so the prep stays balanced.</div>
+      <div class="qa-legend">${tags.map(renderSolidInterviewPill).join('')}</div>
       <div class="qa-filter-bar">
         <button class="qa-filter-btn active" onclick="filterQA('', this)">All Topics</button>
-        ${filterBtns}
+        ${tags.map((tag) => `<button class="qa-filter-btn" onclick='filterQA(${JSON.stringify(tag)}, this)'>${tag}</button>`).join('')}
       </div>
       <div id="qaList">${qHTML}</div>
     </div>`;
+}
+
+function showAllInterviewQuestions() {
+  currentChapter = -1;
+  currentTopic = null;
+  document.querySelectorAll('.topic-card').forEach((el) => el.classList.remove('active'));
+  document.querySelectorAll('.topic-item').forEach((el) => el.classList.remove('active'));
+  document.querySelectorAll('.chapter-item').forEach((el) => {
+    el.classList.remove('open');
+    el.querySelector('.chapter-header')?.classList.remove('active');
+  });
+  renderSolidInterviewHub();
+}
+
+function selectSolidInterviewTrack(trackKey) {
+  renderSolidInterviewHub(trackKey);
 }
 
 function filterQA(tag, btn) {
   document.querySelectorAll('.qa-filter-btn').forEach((item) => item.classList.remove('active'));
   if (btn) btn.classList.add('active');
   document.querySelectorAll('#qaList .qa-item').forEach((item) => {
-    item.style.display = (!tag || item.dataset.tag === tag) ? '' : 'none';
+    const tags = (item.dataset.tags || '').split('|');
+    item.style.display = (!tag || tags.includes(tag)) ? '' : 'none';
   });
 }
 
