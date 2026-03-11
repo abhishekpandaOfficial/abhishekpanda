@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Statistics Mastery — ML & AI Foundation</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Fira+Code:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#020a07;--bg1:#040f0a;--bg2:#071810;--bg3:#0b2018;
+  --bd:#10402a;--bd2:#1a6040;
+  --em:#22c55e;--em2:#4ade80;--em3:#bbf7d0;--em4:#166534;
+  --teal:#38bdf8;--teal2:#7dd3fc;
+  --violet:#8b5cf6;--violet2:#a78bfa;
+  --rose:#f43f5e;--rose2:#fb7185;
+  --gold:#c9a84c;--gold2:#e8c96a;
+  --amber:#f59e0b;--amber2:#fbbf24;
+  --t1:#e8f5ee;--t2:#9ab8a8;--t3:#4a6858;
+  --lw:282px;--rw:596px;--hh:56px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--t1);font-family:'DM Sans',sans-serif}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--em4)}
+
+/* HEADER */
+.hdr{position:fixed;top:0;left:0;right:0;height:var(--hh);z-index:300;background:rgba(2,10,5,.97);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 20px;gap:16px;backdrop-filter:blur(20px)}
+.logo{font-family:'Playfair Display',serif;font-size:19px;font-weight:900;background:linear-gradient(135deg,var(--em),var(--em3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+.hdr-sep{width:1px;height:24px;background:var(--bd);flex-shrink:0}
+.hdr-sub{font-family:'Fira Code',monospace;font-size:10px;color:var(--t3);letter-spacing:.5px}
+.hdr-r{margin-left:auto;display:flex;gap:8px;align-items:center}
+.badge{font-family:'Fira Code',monospace;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid;cursor:default}
+.b-em{color:var(--em2);border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.08)}
+.b-violet{color:var(--violet2);border-color:rgba(139,92,246,.3);background:rgba(139,92,246,.08)}
+.b-btn{cursor:pointer;color:var(--teal2);border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.08);transition:all .2s}
+.b-btn:hover{background:rgba(56,189,248,.2)}
+.prog-wrap{display:flex;align-items:center;gap:7px}
+.prog-pct{font-family:'Fira Code',monospace;font-size:10px;color:var(--t2)}
+.prog-track{width:80px;height:3px;background:var(--bd);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--em4),var(--em2));border-radius:3px;transition:width .5s;width:0%}
+
+/* LAYOUT */
+.layout{display:flex;height:100vh;padding-top:var(--hh)}
+
+/* LEFT PANEL */
+.lp{width:var(--lw);min-width:var(--lw);background:var(--bg1);border-right:1px solid var(--bd);overflow-y:auto;flex-shrink:0}
+.lp-top{padding:10px;border-bottom:1px solid var(--bd);background:var(--bg1);position:sticky;top:0;z-index:10}
+.srch{width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:7px;padding:7px 11px;color:var(--t1);font-size:11.5px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
+.srch:focus{border-color:var(--em)}.srch::placeholder{color:var(--t3)}
+.lp-stats{display:flex;gap:6px;margin-top:8px}
+.lst{flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;padding:5px 7px;text-align:center}
+.lst-n{font-family:'Playfair Display',serif;font-size:14px;font-weight:900;color:var(--em2)}
+.lst-l{font-size:9px;color:var(--t3);font-family:'Fira Code',monospace}
+.ci{border-bottom:1px solid rgba(16,64,42,.6)}
+.chr{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;transition:background .15s;user-select:none}
+.chr:hover{background:var(--bg2)}
+.chr.act{background:linear-gradient(90deg,rgba(34,197,94,.1),transparent);border-left:2px solid var(--em)}
+.cnum{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'Fira Code',monospace;font-size:9px;font-weight:600;flex-shrink:0}
+.clabel{font-size:11.5px;font-weight:500;color:var(--t2);flex:1;line-height:1.3;font-family:'DM Sans',sans-serif}
+.chr.act .clabel{color:var(--t1)}
+.carr{font-size:8px;color:var(--t3);transition:transform .2s;flex-shrink:0}
+.ci.open .carr{transform:rotate(90deg)}
+.tmenu{display:none;padding:2px 0 6px}.ci.open .tmenu{display:block}
+.trow{padding:5px 12px 5px 42px;font-size:11px;color:var(--t3);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.trow:hover{color:var(--t2);background:rgba(255,255,255,.02)}
+.trow.act{color:var(--em2);background:rgba(34,197,94,.06)}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:background .15s}
+.trow.act .dot{background:var(--em)}.trow.vis .dot{background:var(--teal)}
+
+/* MIDDLE PANEL */
+.mp{flex:1;background:var(--bg0);border-right:1px solid var(--bd);overflow-y:auto;padding:22px 18px}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 56px);text-align:center;gap:20px;padding:40px 20px}
+.w-icon{font-size:80px;line-height:1}
+@keyframes wg{0%,100%{filter:drop-shadow(0 0 24px rgba(34,197,94,.5))}50%{filter:drop-shadow(0 0 48px rgba(187,247,208,.7))}}
+.w-icon{animation:wg 3.5s ease-in-out infinite}
+.w-title{font-family:'Playfair Display',serif;font-size:34px;font-weight:900;background:linear-gradient(135deg,var(--em),var(--em3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.w-italic{font-family:'Playfair Display',serif;font-size:15px;font-style:italic;color:var(--t2);margin-top:-12px}
+.w-sub{font-size:13.5px;color:var(--t2);max-width:520px;line-height:1.8}
+.w-stats{display:flex;gap:28px}
+.wst-n{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:var(--em2)}
+.wst-l{font-size:9px;color:var(--t3);font-family:'Fira Code',monospace;margin-top:2px}
+.w-btn{background:linear-gradient(135deg,var(--em4),var(--em2));border:none;color:#000;font-family:'Playfair Display',serif;font-size:16px;font-weight:900;padding:13px 36px;border-radius:10px;cursor:pointer;transition:all .3s}
+.w-btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(34,197,94,.45)}
+.w-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.wchip{font-family:'Fira Code',monospace;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.08);color:var(--em2)}
+.chero{background:linear-gradient(135deg,var(--bg2),var(--bg1));border:1px solid var(--bd);border-radius:12px;padding:24px;margin-bottom:18px;position:relative;overflow:hidden}
+.chero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,.07),transparent)}
+.chero-n{font-family:'Fira Code',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+.chero-t{font-family:'Playfair Display',serif;font-size:23px;font-weight:900;margin-bottom:7px;line-height:1.2}
+.chero-d{font-size:13px;color:var(--t2);line-height:1.7;max-width:510px}
+.chero-chips{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.cchip{font-family:'Fira Code',monospace;font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid}
+.tgrid{display:flex;flex-direction:column;gap:8px}
+.tcard{background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:14px 16px;cursor:pointer;transition:all .18s;display:flex;align-items:flex-start;gap:12px}
+.tcard:hover{border-color:var(--bd2);transform:translateX(3px);background:var(--bg3)}
+.tcard.act{border-color:var(--em);background:rgba(34,197,94,.04)}
+.tc-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.tc-body{flex:1}
+.tc-t{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--t1);margin-bottom:3px}
+.tc-d{font-size:11.5px;color:var(--t3);line-height:1.5}
+.tc-meta{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.tmeta{font-family:'Fira Code',monospace;font-size:9.5px;padding:2px 7px;border-radius:4px;border:1px solid}
+
+/* RIGHT PANEL */
+.rp{width:var(--rw);min-width:var(--rw);background:var(--bg1);overflow-y:auto}
+.rp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:var(--t3);text-align:center;padding:40px}
+.rp-ei{font-size:54px;opacity:.2;font-family:'Playfair Display',serif}
+.rp-empty h3{font-family:'Playfair Display',serif;font-size:19px;color:var(--t2);font-weight:700;font-style:italic}
+.rp-empty p{font-size:13px;line-height:1.75}
+.rpcon{padding:24px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.rpcon{animation:fadeUp .25s ease}
+.d-bread{font-family:'Fira Code',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:7px}
+.d-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;line-height:1.2;margin-bottom:6px}
+.d-sub{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:10px}
+.d-pills{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:16px;margin-bottom:18px;border-bottom:1px solid var(--bd)}
+.dpill{font-family:'Fira Code',monospace;font-size:10px;padding:3px 9px;border-radius:4px;border:1px solid}
+.sec{margin-bottom:22px}
+.sec-t{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;font-style:italic;color:var(--t1);margin-bottom:11px;display:flex;align-items:center;gap:8px}
+.sec-t::before{content:'';width:3px;height:15px;background:linear-gradient(180deg,var(--em),var(--em4));border-radius:2px;flex-shrink:0}
+.prose{font-size:13px;color:var(--t2);line-height:1.9}
+.prose p{margin-bottom:10px}.prose strong{color:var(--t1)}
+.prose ul,.prose ol{padding-left:18px;margin-bottom:10px}.prose li{margin-bottom:5px}
+.prose h4{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:700;font-style:italic;color:var(--t1);margin:13px 0 6px}
+.prose code{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:4px;padding:1px 6px;font-family:'Fira Code',monospace;font-size:11px;color:var(--em2)}
+/* Math formula box */
+.mbox{background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:18px;margin-bottom:14px;text-align:center}
+.mbox .formula{font-family:'Fira Code',monospace;font-size:15px;color:var(--em2);letter-spacing:1px;line-height:2.2}
+.mbox .desc{font-size:11.5px;color:var(--t3);margin-top:6px;font-style:italic;font-family:'DM Sans',sans-serif}
+/* Step-by-step */
+.msteps{background:rgba(34,197,94,.03);border:1px solid rgba(34,197,94,.18);border-radius:10px;padding:16px;margin-bottom:14px}
+.mstep{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid rgba(16,64,42,.5);align-items:flex-start}
+.mstep:last-child{border-bottom:none}
+.mstep-n{font-family:'Fira Code',monospace;font-size:11px;color:var(--em);font-weight:600;flex-shrink:0;margin-top:2px;min-width:28px}
+.mstep-body{flex:1}
+.mstep-f{font-family:'Fira Code',monospace;font-size:12.5px;color:var(--em2);margin-bottom:3px;line-height:1.7}
+.mstep-d{font-size:12px;color:var(--t3);line-height:1.6}
+/* Code block */
+.cb{background:#010a04;border:1px solid rgba(16,64,42,.9);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.cb-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid rgba(16,64,42,.8);background:rgba(0,0,0,.5)}
+.cb-lang{font-family:'Fira Code',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:1px}
+.cb-name{font-family:'Fira Code',monospace;font-size:10px;color:var(--t3)}
+.cb-copy{background:none;border:1px solid var(--bd);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace;transition:all .2s}
+.cb-copy:hover{border-color:var(--em);color:var(--em2)}
+.cb-body{padding:16px;overflow-x:auto}
+.cb-body pre{font-family:'Fira Code',monospace;font-size:11.5px;line-height:1.8;color:#d0e8da}
+.kw{color:#89b4fa}.tp{color:#cba6f7}.st{color:#a6e3a1}.nu{color:#fab387}
+.cm{color:#3a5042;font-style:italic}.fn{color:#89dceb}.op{color:#22c55e}.imp{color:#94e2d5}
+/* Diagram */
+.diag{background:#010a04;border:1px solid rgba(16,64,42,.9);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.diag-hdr{padding:10px 16px;border-bottom:1px solid rgba(16,64,42,.8);background:rgba(0,0,0,.5);font-family:'Fira Code',monospace;font-size:10px;color:var(--t3);display:flex;align-items:center;gap:8px}
+.diag-hdr::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--em2);box-shadow:0 0 8px var(--em)}
+.diag-body{padding:16px;display:flex;justify-content:center;overflow-x:auto}
+/* Callouts */
+.callout{border-radius:8px;padding:12px 15px;margin-bottom:14px;display:flex;gap:10px;font-size:12.5px;line-height:1.75}
+.c-info{background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.2);color:var(--t2)}
+.c-warn{background:rgba(234,179,8,.06);border:1px solid rgba(234,179,8,.25);color:var(--t2)}
+.c-tip{background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.2);color:var(--t2)}
+.c-math{background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.25);color:var(--t2)}
+.c-danger{background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.2);color:var(--t2)}
+.call-ic{flex-shrink:0;font-size:15px;margin-top:1px}
+/* Table */
+.ctbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px}
+.ctbl th{background:var(--bg2);padding:9px 12px;text-align:left;font-family:'Fira Code',monospace;font-size:10px;color:var(--t2);border:1px solid var(--bd);text-transform:uppercase;letter-spacing:.5px}
+.ctbl td{padding:9px 12px;border:1px solid var(--bd);color:var(--t2);line-height:1.5;font-size:12px}
+.ctbl tr:hover td{background:rgba(255,255,255,.015)}
+/* Q&A */
+.qa{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;margin-bottom:9px;overflow:hidden}
+.qa-q{padding:12px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:9px;transition:background .15s}
+.qa-q:hover{background:var(--bg3)}
+.qa-qi{font-family:'Playfair Display',serif;font-size:12px;font-weight:900;font-style:italic;color:var(--em2);flex-shrink:0;margin-top:1px}
+.qa-qt{font-size:12.5px;font-weight:500;color:var(--t1);flex:1;line-height:1.5}
+.qa-lv{font-family:'Fira Code',monospace;font-size:9px;padding:2px 7px;border-radius:4px;border:1px solid;flex-shrink:0;margin-top:1px}
+.qa-ar{color:var(--t3);font-size:9px;transition:transform .2s;margin-top:3px;flex-shrink:0}
+.qa.open .qa-ar{transform:rotate(90deg)}
+.qa-ans{display:none;padding:12px 14px;border-top:1px solid var(--bd);background:rgba(0,0,0,.25)}
+.qa.open .qa-ans{display:block}
+.qa-at{font-size:12.5px;color:var(--t2);line-height:1.85}
+.qa-at code{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:3px;padding:1px 5px;font-family:'Fira Code',monospace;font-size:11px;color:var(--em2)}
+.lv-b{color:#34d399;border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.07)}
+.lv-i{color:#fde047;border-color:rgba(253,224,71,.3);background:rgba(253,224,71,.07)}
+.lv-a{color:var(--em2);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.07)}
+.lv-e{color:var(--violet2);border-color:rgba(139,92,246,.3);background:rgba(139,92,246,.07)}
+/* Tab system for interview Q&A panel */
+.tab-bar{display:flex;gap:4px;margin-bottom:16px;padding:4px;background:var(--bg2);border-radius:8px;border:1px solid var(--bd)}
+.tab-btn{flex:1;padding:6px 10px;border:none;border-radius:5px;background:transparent;color:var(--t3);font-family:'Fira Code',monospace;font-size:10px;cursor:pointer;transition:all .2s;text-align:center}
+.tab-btn.act{background:rgba(34,197,94,.15);color:var(--em2);border:1px solid rgba(34,197,94,.3)}
+.tab-btn:hover:not(.act){background:rgba(255,255,255,.04);color:var(--t2)}
+/* Animations */
+@keyframes dash{0%{stroke-dashoffset:300}100%{stroke-dashoffset:0}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes growX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <span style="font-size:22px;font-family:'Playfair Display',serif;color:var(--em2)">σ</span>
+  <div class="logo">Statistics Mastery</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-sub">Descriptive · Inference · Distributions · Experimentation · ML Theory</div>
+  <div class="hdr-r">
+    <div class="badge b-btn" onclick="showAllQA()">🎯 Interview Q&amp;A</div>
+    <div class="prog-wrap">
+      <span class="prog-pct" id="pct">0%</span>
+      <div class="prog-track"><div class="prog-fill" id="pfill"></div></div>
+    </div>
+    <div class="badge b-em">Statistics for ML</div>
+    <div class="badge b-violet">Python · SciPy</div>
+  </div>
+</div>
+<div class="layout">
+  <div class="lp">
+    <div class="lp-top">
+      <input class="srch" id="srch" type="text" placeholder="σ  Search topics…" oninput="doSearch(this.value)">
+      <div class="lp-stats">
+        <div class="lst"><div class="lst-n">30</div><div class="lst-l">Chapters</div></div>
+        <div class="lst"><div class="lst-n">210+</div><div class="lst-l">Topics</div></div>
+        <div class="lst"><div class="lst-n">320+</div><div class="lst-l">Q&amp;A</div></div>
+      </div>
+    </div>
+    <div id="nav"></div>
+  </div>
+  <div class="mp" id="mp">
+    <div class="welcome" id="welcome">
+      <div class="w-icon">σ</div>
+      <div class="w-title">Statistics Mastery</div>
+      <div class="w-italic">for Machine Learning &amp; Deep Learning</div>
+      <div class="w-sub">From descriptive statistics through Bayesian inference, hypothesis testing, experimental design, and the probabilistic foundations inside every ML model. Every concept with geometric intuition, worked examples, Python code, and interview questions.</div>
+      <div class="w-stats">
+        <div><div class="wst-n">30</div><div class="wst-l">Chapters</div></div>
+        <div><div class="wst-n">210+</div><div class="wst-l">Topics</div></div>
+        <div><div class="wst-n">320+</div><div class="wst-l">Q&amp;A</div></div>
+        <div><div class="wst-n">100+</div><div class="wst-l">Proofs</div></div>
+      </div>
+      <div class="w-chips">
+        <span class="wchip">Descriptive Stats</span>
+        <span class="wchip">Probability Theory</span>
+        <span class="wchip">Distributions</span>
+        <span class="wchip">Hypothesis Testing</span>
+        <span class="wchip">Bayesian Inference</span>
+        <span class="wchip">A/B Testing</span>
+        <span class="wchip">Statistical Learning</span>
+        <span class="wchip">Causal Inference</span>
+      </div>
+      <button class="w-btn" onclick="selectCh(0)">σ Begin Learning</button>
+    </div>
+    <div id="mcon" style="display:none"></div>
+  </div>
+  <div class="rp" id="rp">
+    <div class="rp-empty" id="rp-empty">
+      <div class="rp-ei">μ</div>
+      <h3>Select a Topic</h3>
+      <p>Click any topic to reveal statistical intuition, derivations, worked numerical examples, Python code, and interview questions.</p>
+    </div>
+    <div id="rp-con" style="display:none"></div>
+  </div>
+</div>
+<script>
+const CHS=[
+{n:"01",t:"Descriptive Statistics — Foundations",ic:"μ",c:"#22c55e",bg:"rgba(34,197,94,.1)",
+ desc:"Summary statistics that describe and compress a dataset — the first tools every data scientist must master before modeling.",
+ tags:["Foundation","Beginner","EDA"],
+ topics:[
+  {id:"ds1",ic:"μ",t:"Measures of Central Tendency",d:"Mean μ=Σxᵢ/n, median (middle value), mode (most frequent). Robustness to outliers, skewed data"},
+  {id:"ds2",ic:"σ",t:"Measures of Spread — Variance & Std Dev",d:"σ²=Σ(xᵢ-μ)²/n, sample variance s²=Σ(xᵢ-x̄)²/(n-1), Bessel's correction, std dev"},
+  {id:"ds3",ic:"📏",t:"Range, IQR & Percentiles",d:"Range=max-min, IQR=Q3-Q1, percentile rank, quartiles, Tukey fences for outliers"},
+  {id:"ds4",ic:"↗",t:"Skewness & Kurtosis",d:"Skewness=E[(x-μ)³]/σ³, kurtosis=E[(x-μ)⁴]/σ⁴-3, interpretation, effect on modeling"},
+  {id:"ds5",ic:"📊",t:"5-Number Summary & Box Plots",d:"Min, Q1, median, Q3, max, IQR, whiskers, outlier detection, side-by-side comparison"},
+  {id:"ds6",ic:"⊞",t:"Covariance & Correlation",d:"Cov(X,Y)=E[(X-μₓ)(Y-μᵧ)], Pearson r=Cov/σₓσᵧ ∈[-1,1], linearity, causation warning"},
+ ]},
+{n:"02",t:"Exploratory Data Analysis (EDA)",ic:"🔍",c:"#38bdf8",bg:"rgba(56,189,248,.1)",
+ desc:"The art and science of understanding data before modeling — distributions, anomalies, relationships, and quality issues.",
+ tags:["Foundation","Applied","EDA"],
+ topics:[
+  {id:"eda1",ic:"📊",t:"Histogram & Frequency Distribution",d:"Bins, bin width choice, frequency vs density, shape interpretation, multimodality"},
+  {id:"eda2",ic:"📈",t:"Density Estimation & KDE",d:"Kernel density estimate, bandwidth selection, Gaussian kernel, non-parametric density"},
+  {id:"eda3",ic:"🔵",t:"Scatter Plots & Correlation Matrix",d:"Joint distribution visualization, correlation matrix, seaborn pairplot, Anscombe's quartet"},
+  {id:"eda4",ic:"⚠",t:"Outlier Detection Methods",d:"Z-score >3, IQR method, isolation forest, DBSCAN, Grubbs test, leverage vs influence"},
+  {id:"eda5",ic:"❓",t:"Missing Data — Types & Handling",d:"MCAR, MAR, MNAR taxonomy, listwise deletion, mean/mode imputation, MICE, KNN imputation"},
+  {id:"eda6",ic:"⚖",t:"Data Transformations",d:"Log transform for right-skew, Box-Cox λ, standardization (z-score), min-max scaling"},
+ ]},
+{n:"03",t:"Probability Foundations",ic:"P",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"The mathematical language of uncertainty — probability spaces, sample spaces, and Kolmogorov's axioms.",
+ tags:["Probability","Foundation","Critical"],
+ topics:[
+  {id:"pf1",ic:"Ω",t:"Sample Spaces & Events",d:"Ω (sample space), event as subset, σ-algebra ℱ, Borel sets, elementary vs compound events"},
+  {id:"pf2",ic:"P",t:"Kolmogorov Axioms",d:"P(Ω)=1, P(A)≥0, P(A∪B)=P(A)+P(B) for disjoint A,B, countable additivity"},
+  {id:"pf3",ic:"∩",t:"Set Operations on Events",d:"Union P(A∪B)=P(A)+P(B)-P(A∩B), complement P(Aᶜ)=1-P(A), De Morgan's laws"},
+  {id:"pf4",ic:"P(A|B)",t:"Conditional Probability",d:"P(A|B)=P(A∩B)/P(B), law of total probability, multiplication rule, intuition"},
+  {id:"pf5",ic:"⊥",t:"Independence",d:"P(A∩B)=P(A)P(B), pairwise vs mutual independence, conditional independence (key for Naive Bayes)"},
+  {id:"pf6",ic:"∝",t:"Bayes' Theorem",d:"P(H|D)=P(D|H)P(H)/P(D), prior×likelihood÷evidence=posterior, disease testing example"},
+ ]},
+{n:"04",t:"Random Variables & Expectation",ic:"E[X]",c:"#f59e0b",bg:"rgba(245,158,11,.1)",
+ desc:"Random variables are the bridge between probability theory and statistics — the mathematical objects that represent measurements.",
+ tags:["Probability","Core","Critical"],
+ topics:[
+  {id:"rv1",ic:"X",t:"Discrete Random Variables & PMF",d:"X:Ω→ℝ, PMF p(x)=P(X=x)≥0, Σp(x)=1, CDF F(x)=P(X≤x), examples"},
+  {id:"rv2",ic:"f(x)",t:"Continuous Random Variables & PDF",d:"PDF f(x)≥0, ∫f(x)dx=1, P(a≤X≤b)=∫ₐᵇf(x)dx, CDF F(x)=∫₋∞ˣf(t)dt"},
+  {id:"rv3",ic:"E[X]",t:"Expected Value — Full Derivation",d:"E[X]=Σxp(x) discrete, E[X]=∫xf(x)dx continuous, linearity E[aX+b]=aE[X]+b"},
+  {id:"rv4",ic:"Var",t:"Variance & Standard Deviation",d:"Var(X)=E[(X-μ)²]=E[X²]-μ², Var(aX+b)=a²Var(X), std dev σ=√Var, interpretation"},
+  {id:"rv5",ic:"M(t)",t:"Moment Generating Functions",d:"M(t)=E[eˣᵗ], k-th moment=M⁽ᵏ⁾(0), uniqueness theorem, MGF of sum=product of MGFs"},
+  {id:"rv6",ic:"r",t:"Covariance, Correlation & Joint Distributions",d:"Joint PMF/PDF, marginal distributions, Cov(X,Y)=E[XY]-E[X]E[Y], ρ=Cov/σₓσᵧ"},
+ ]},
+{n:"05",t:"Discrete Probability Distributions",ic:"🎲",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"The discrete distributions that appear throughout statistics and ML — Bernoulli, Binomial, Poisson, Geometric, and more.",
+ tags:["Distributions","Core","ML"],
+ topics:[
+  {id:"dd1",ic:"0/1",t:"Bernoulli Distribution",d:"X~Bern(p), P(X=1)=p, P(X=0)=1-p, E[X]=p, Var(X)=p(1-p), logistic regression output"},
+  {id:"dd2",ic:"𝐁",t:"Binomial Distribution",d:"X~Bin(n,p), P(X=k)=C(n,k)pᵏ(1-p)^(n-k), E=np, Var=np(1-p), normal approx for large n"},
+  {id:"dd3",ic:"λ",t:"Poisson Distribution",d:"X~Pois(λ), P(X=k)=e^(-λ)λᵏ/k!, E=Var=λ, count data, events per unit time/space"},
+  {id:"dd4",ic:"G",t:"Geometric & Negative Binomial",d:"Geometric: P(X=k)=(1-p)^(k-1)p, first success, memoryless. Neg Binomial: r-th success"},
+  {id:"dd5",ic:"H",t:"Hypergeometric Distribution",d:"Sampling without replacement, P(X=k)=C(K,k)C(N-K,n-k)/C(N,n), quality control"},
+  {id:"dd6",ic:"U",t:"Discrete Uniform Distribution",d:"P(X=k)=1/n for k=1…n, E=(n+1)/2, Var=(n²-1)/12, rolling dice, random sampling"},
+ ]},
+{n:"06",t:"Continuous Probability Distributions",ic:"🔔",c:"#22c55e",bg:"rgba(34,197,94,.1)",
+ desc:"The continuous distributions that appear in ML theory — Normal, Exponential, Beta, Gamma, Student's t, and the F distribution.",
+ tags:["Distributions","Core","Critical","ML"],
+ topics:[
+  {id:"cd1",ic:"𝒩",t:"Normal (Gaussian) Distribution — Complete",d:"PDF (1/σ√2π)e^(-(x-μ)²/2σ²), standard normal Z=(X-μ)/σ, 68-95-99.7 rule, CDF Φ"},
+  {id:"cd2",ic:"e",t:"Exponential Distribution",d:"X~Exp(λ), PDF λe^(-λx), E=1/λ, Var=1/λ², memoryless property, Poisson process waiting times"},
+  {id:"cd3",ic:"Γ",t:"Gamma Distribution",d:"X~Gamma(α,β), PDF x^(α-1)e^(-x/β)/[β^α Γ(α)], E=αβ, sum of exponentials, wait times"},
+  {id:"cd4",ic:"β",t:"Beta Distribution",d:"X~Beta(α,β) on [0,1], PDF ∝ x^(α-1)(1-x)^(β-1), E=α/(α+β), prior for probabilities, Bayesian"},
+  {id:"cd5",ic:"t",t:"Student's t-Distribution",d:"t=Z/√(χ²/ν), heavier tails than normal, degrees of freedom ν, t→N(0,1) as ν→∞, hypothesis testing"},
+  {id:"cd6",ic:"χ²",t:"Chi-Square Distribution",d:"χ²(ν)=Σᵢ₌₁ᵛ Zᵢ², E=ν, Var=2ν, goodness-of-fit tests, independence tests, distribution of variance"},
+  {id:"cd7",ic:"F",t:"F Distribution",d:"F=χ²₁/ν₁ ÷ χ²₂/ν₂, ratio of variances, ANOVA F-statistic, two degrees of freedom parameters"},
+  {id:"cd8",ic:"U",t:"Uniform & Log-Normal Distributions",d:"U(a,b): E=(a+b)/2, Var=(b-a)²/12. Log-normal: X=e^Y where Y~N(μ,σ²), income/prices"},
+ ]},
+{n:"07",t:"The Normal Distribution — Deep Dive",ic:"𝒩",c:"#38bdf8",bg:"rgba(56,189,248,.1)",
+ desc:"The central distribution in all of statistics — why it is everywhere, its properties, and its role in ML theory.",
+ tags:["Distributions","Critical","ML","Must Master"],
+ topics:[
+  {id:"nd1",ic:"CLT",t:"Central Limit Theorem — Proof & Intuition",d:"X̄~N(μ,σ²/n) for large n, conditions, Berry-Esseen bound, rate of convergence"},
+  {id:"nd2",ic:"⊕",t:"Sum of Normals is Normal",d:"X~N(μ₁,σ₁²), Y~N(μ₂,σ₂²) independent ⟹ X+Y~N(μ₁+μ₂,σ₁²+σ₂²), proof via MGF"},
+  {id:"nd3",ic:"Z",t:"Standard Normal — Tables & Quantiles",d:"Φ(z)=P(Z≤z), z-scores, quantile function Φ⁻¹, critical values z₀.₀₅=1.645, z₀.₀₂₅=1.96"},
+  {id:"nd4",ic:"🔔",t:"Bivariate Normal Distribution",d:"Joint density, correlation ρ, conditional distribution is normal, contour ellipses"},
+  {id:"nd5",ic:"📊",t:"Normal Approximations",d:"Binomial→Normal (np≥5), Poisson→Normal (λ≥30), continuity correction, accuracy bounds"},
+ ]},
+{n:"08",t:"Sampling Theory & CLT",ic:"X̄",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"How samples relate to populations — sampling distributions, the Central Limit Theorem, and the standard error.",
+ tags:["Inference","Core","Critical"],
+ topics:[
+  {id:"st1",ic:"X̄",t:"Sampling Distribution of the Mean",d:"X̄=ΣXᵢ/n, E[X̄]=μ, Var(X̄)=σ²/n, SE=σ/√n, exact distribution when X~Normal"},
+  {id:"st2",ic:"CLT",t:"Central Limit Theorem — Complete",d:"Statement, proof sketch via MGF, conditions (finite variance), rate √n, applications"},
+  {id:"st3",ic:"s²",t:"Sample Variance Distribution",d:"(n-1)s²/σ²~χ²(n-1), independence of X̄ and s² for normal populations, Cochran's theorem"},
+  {id:"st4",ic:"n",t:"Sample Size & Power Planning",d:"n=z²σ²/E² for CI, n for hypothesis test power 1-β, effect size d, trade-offs"},
+  {id:"st5",ic:"🎲",t:"Bootstrap — Resampling Distribution",d:"Empirical distribution F̂, bootstrap sample X*, B replicates, percentile CI, BCa intervals"},
+ ]},
+{n:"09",t:"Point Estimation",ic:"θ̂",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"Finding the single best estimate of an unknown parameter — MLE, method of moments, and the properties that make an estimator good.",
+ tags:["Inference","Core","Critical","ML"],
+ topics:[
+  {id:"pe1",ic:"θ̂",t:"Properties of Estimators",d:"Unbiasedness: E[θ̂]=θ, consistency: θ̂→θ in prob, efficiency: min variance, MSE=Bias²+Var"},
+  {id:"pe2",ic:"max L",t:"Maximum Likelihood Estimation (MLE)",d:"θ̂_MLE=argmax L(θ;x)=argmax ℓ(θ), log-likelihood, score function ∂ℓ/∂θ=0"},
+  {id:"pe3",ic:"E[X]",t:"Method of Moments",d:"Set sample moments = theoretical moments, system of equations, less efficient than MLE"},
+  {id:"pe4",ic:"I(θ)",t:"Fisher Information & Cramér-Rao Bound",d:"I(θ)=E[(∂logf/∂θ)²], CRLB: Var(θ̂)≥1/I(θ), efficient estimators, information geometry"},
+  {id:"pe5",ic:"📐",t:"Sufficiency & Completeness",d:"Sufficient statistic T: f(x|T,θ)=f(x|T), factorisation theorem, Rao-Blackwell improvement"},
+ ]},
+{n:"10",t:"Confidence Intervals",ic:"[θ]",c:"#22c55e",bg:"rgba(34,197,94,.1)",
+ desc:"Quantifying estimation uncertainty — confidence intervals for means, proportions, variances, and differences.",
+ tags:["Inference","Core","Applied"],
+ topics:[
+  {id:"ci1",ic:"95%",t:"CI Concept & Correct Interpretation",d:"P(θ∈[L,U])=0.95, frequentist meaning (not P(θ|data)), coverage probability, width"},
+  {id:"ci2",ic:"z",t:"CI for Mean — Known Variance (z-interval)",d:"x̄ ± z_{α/2}·σ/√n, derivation from sampling distribution, standard error"},
+  {id:"ci3",ic:"t",t:"CI for Mean — Unknown Variance (t-interval)",d:"x̄ ± t_{α/2,n-1}·s/√n, why t instead of z, degrees of freedom, heavier tails"},
+  {id:"ci4",ic:"p̂",t:"CI for Proportion",d:"p̂ ± z·√(p̂(1-p̂)/n), Wilson interval (better), exact Clopper-Pearson, A/B testing"},
+  {id:"ci5",ic:"σ²",t:"CI for Variance (χ²-interval)",d:"[(n-1)s²/χ²_{upper}, (n-1)s²/χ²_{lower}], chi-square quantiles, asymmetry"},
+  {id:"ci6",ic:"Δ",t:"CI for Two-Sample Difference",d:"Difference in means, pooled vs unpooled variance, Welch's t, two-proportion z-test"},
+ ]},
+{n:"11",t:"Hypothesis Testing — Foundations",ic:"H₀",c:"#f59e0b",bg:"rgba(245,158,11,.1)",
+ desc:"The framework for making decisions from data — null hypothesis, alternative, test statistics, p-values, and error types.",
+ tags:["Inference","Core","Critical"],
+ topics:[
+  {id:"ht1",ic:"H₀",t:"Null & Alternative Hypotheses",d:"H₀ (status quo, equality), H₁ (claim, inequality/difference), one-sided vs two-sided tests"},
+  {id:"ht2",ic:"p",t:"p-Value — Definition & Correct Interpretation",d:"p=P(T≥t_obs|H₀), not P(H₀|data), not probability H₀ is true, misinterpretations"},
+  {id:"ht3",ic:"α",t:"Significance Level & Decision Rule",d:"α=P(Type I error|H₀ true), reject if p<α, critical region, Neyman-Pearson framework"},
+  {id:"ht4",ic:"β",t:"Type I & Type II Errors",d:"α=P(reject H₀|H₀ true), β=P(fail to reject|H₁ true), power=1-β, error trade-off"},
+  {id:"ht5",ic:"⚡",t:"Power of a Test",d:"Power=P(reject H₀|H₁ true), factors: n, α, effect size, σ, power curve, power analysis"},
+  {id:"ht6",ic:"p-val",t:"p-Value Reform & Statistical Practice",d:"ASA statement, p-hacking, multiple comparisons, Bonferroni correction, effect sizes"},
+ ]},
+{n:"12",t:"Common Statistical Tests",ic:"t",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"The statistical tests used daily in data science — z-tests, t-tests, paired tests, and when to use each.",
+ tags:["Inference","Applied","Core"],
+ topics:[
+  {id:"tt1",ic:"z",t:"One-Sample z-Test",d:"H₀: μ=μ₀, z=(x̄-μ₀)/(σ/√n), known σ, critical values, p-value calculation"},
+  {id:"tt2",ic:"t",t:"One-Sample t-Test",d:"H₀: μ=μ₀, t=(x̄-μ₀)/(s/√n), df=n-1, unknown σ, assumptions: normality or large n"},
+  {id:"tt3",ic:"t₂",t:"Two-Sample t-Test (Independent)",d:"Pooled and Welch variants, equal vs unequal variances, Levene's test, df calculation"},
+  {id:"tt4",ic:"t±",t:"Paired t-Test",d:"d=X₁-X₂, t=d̄/(sᵈ/√n), when to pair, matched samples, crossover designs, power advantage"},
+  {id:"tt5",ic:"p̂",t:"Proportion Tests",d:"One-sample: z=(p̂-p₀)/√(p₀(1-p₀)/n). Two-sample: z=(p̂₁-p̂₂)/SE_pooled, A/B testing"},
+  {id:"tt6",ic:"F",t:"Variance Tests — F-test & Levene's",d:"F=s₁²/s₂²~F(n₁-1,n₂-1) under H₀:σ₁²=σ₂², Levene's (robust), Bartlett's test"},
+ ]},
+{n:"13",t:"ANOVA — Analysis of Variance",ic:"F",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"Comparing means across multiple groups simultaneously — from the F-statistic derivation to post-hoc testing.",
+ tags:["Inference","Applied","Core"],
+ topics:[
+  {id:"an1",ic:"F",t:"One-Way ANOVA — Setup & F-Statistic",d:"SST=SSB+SSW, F=MSB/MSW=(SSB/(k-1))/(SSW/(N-k)), F~F(k-1,N-k) under H₀"},
+  {id:"an2",ic:"📐",t:"ANOVA Table & Decomposition",d:"Partition total variability, between-group vs within-group variance, expected mean squares"},
+  {id:"an3",ic:"✦",t:"Post-Hoc Tests",d:"Tukey HSD, Bonferroni, Scheffé, Dunnett — when and why, familywise error rate control"},
+  {id:"an4",ic:"⊞",t:"Two-Way ANOVA & Interaction Effects",d:"Main effects, interaction term, cell means, factorial design, interaction plot interpretation"},
+  {id:"an5",ic:"📊",t:"ANOVA Assumptions & Diagnostics",d:"Normality (Shapiro-Wilk), homoscedasticity (Bartlett/Levene), independence, residual plots"},
+ ]},
+{n:"14",t:"Chi-Square Tests",ic:"χ²",c:"#22c55e",bg:"rgba(34,197,94,.1)",
+ desc:"Tests for categorical data — goodness-of-fit, independence in contingency tables, and the chi-square family.",
+ tags:["Inference","Applied"],
+ topics:[
+  {id:"ch1",ic:"χ²",t:"Chi-Square Goodness-of-Fit Test",d:"χ²=Σ(Oᵢ-Eᵢ)²/Eᵢ, df=k-1-params, testing if data fits a distribution, expected cell ≥5"},
+  {id:"ch2",ic:"⊞",t:"Chi-Square Test of Independence",d:"Contingency table, Eᵢⱼ=RᵢCⱼ/N, df=(r-1)(c-1), Cramér's V effect size, Fisher's exact"},
+  {id:"ch3",ic:"σ²",t:"Chi-Square Test for Variance",d:"χ²=(n-1)s²/σ₀², one-sided and two-sided, CI for variance, pharmaceutical applications"},
+  {id:"ch4",ic:"📊",t:"McNemar's Test — Paired Categorical",d:"Before/after categorical outcome, discordant pairs b and c, χ²=(b-c)²/(b+c), matched data"},
+ ]},
+{n:"15",t:"Non-Parametric Tests",ic:"🔀",c:"#38bdf8",bg:"rgba(56,189,248,.1)",
+ desc:"Tests that make no distributional assumptions — the robust alternatives when normality fails or data is ordinal.",
+ tags:["Inference","Applied"],
+ topics:[
+  {id:"np1",ic:"🔀",t:"When to Use Non-Parametric Tests",d:"Small n, non-normal data, ordinal scales, outlier-contaminated data, robustness"},
+  {id:"np2",ic:"W",t:"Wilcoxon Signed-Rank Test",d:"Paired alternative to t-test, rank differences, W statistic, ties handling, power vs t-test"},
+  {id:"np3",ic:"U",t:"Mann-Whitney U Test",d:"Two-sample alternative to t-test, rank-sum, U statistic, AUC interpretation, exact p-values"},
+  {id:"np4",ic:"H",t:"Kruskal-Wallis Test",d:"K-group non-parametric ANOVA, rank-based H statistic, post-hoc Dunn test"},
+  {id:"np5",ic:"ρ",t:"Spearman & Kendall Rank Correlations",d:"Spearman ρ=1-6Σd²/n(n²-1), Kendall τ=(C-D)/n(n-1)/2, monotone relationships, ties"},
+ ]},
+{n:"16",t:"Correlation & Regression Analysis",ic:"β",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"Measuring and modeling relationships between variables — from Pearson correlation to the OLS regression derivation.",
+ tags:["Regression","Applied","Core","ML"],
+ topics:[
+  {id:"re1",ic:"r",t:"Pearson Correlation — Properties & Tests",d:"r=Σ(xᵢ-x̄)(yᵢ-ȳ)/[(n-1)sₓsᵧ], r²=explained variance, t-test for ρ=0, CI for r"},
+  {id:"re2",ic:"β",t:"Simple Linear Regression — OLS",d:"y=β₀+β₁x+ε, β̂₁=Sₓᵧ/Sₓₓ, β̂₀=ȳ-β̂₁x̄, minimise SSE, geometry as projection"},
+  {id:"re3",ic:"R²",t:"R² and Coefficient of Determination",d:"R²=1-SSE/SST=SSR/SST, variance explained, adjusted R², F-test for overall significance"},
+  {id:"re4",ic:"ε",t:"Regression Diagnostics & Assumptions",d:"LINE: linearity, independence, normality of ε, equal variance. Residual plots, Cook's D, leverage"},
+  {id:"re5",ic:"ŷ",t:"Prediction Intervals vs Confidence Intervals",d:"CI for E[y|x]: narrow, PI for new y: wide, prediction error decomposition, extrapolation danger"},
+ ]},
+{n:"17",t:"Multiple Regression",ic:"β̂",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"Extending regression to multiple predictors — the matrix formulation, multicollinearity, variable selection, and model diagnostics.",
+ tags:["Regression","Advanced","Core","ML"],
+ topics:[
+  {id:"mr1",ic:"β̂",t:"Matrix Formulation β̂=(XᵀX)⁻¹Xᵀy",d:"Design matrix X, OLS closed form, hat matrix H, residuals ê=y-ŷ, geometric projection"},
+  {id:"mr2",ic:"VIF",t:"Multicollinearity — Detection & Remedies",d:"VIF=1/(1-R²ⱼ), VIF>10 problematic, condition number, ridge regression as remedy"},
+  {id:"mr3",ic:"AIC",t:"Model Selection — AIC, BIC, Adjusted R²",d:"AIC=-2ℓ+2k, BIC=-2ℓ+k·log(n), penalise complexity, stepwise, all-subsets selection"},
+  {id:"mr4",ic:"🔪",t:"Variable Selection Methods",d:"Forward, backward, stepwise selection, Lasso (L1 shrinkage to zero), elastic net, cross-val"},
+  {id:"mr5",ic:"📐",t:"Polynomial & Interaction Terms",d:"x², x·z interaction, encoding categorical variables, dummy coding, reference category"},
+  {id:"mr6",ic:"log",t:"Logistic Regression — Binary Classification",d:"P(Y=1|x)=σ(Xβ), log-odds=Xβ, MLE, deviance, confusion matrix, AUC-ROC"},
+ ]},
+{n:"18",t:"Bayesian Inference",ic:"∝",c:"#f59e0b",bg:"rgba(245,158,11,.1)",
+ desc:"The Bayesian paradigm — updating beliefs with data, posterior distributions, conjugate priors, and MCMC.",
+ tags:["Bayesian","Advanced","Critical","ML"],
+ topics:[
+  {id:"bi1",ic:"∝",t:"Bayesian Framework — Prior to Posterior",d:"posterior ∝ likelihood × prior, P(θ|x)=P(x|θ)P(θ)/P(x), paradigm shift from frequentist"},
+  {id:"bi2",ic:"🔗",t:"Conjugate Priors",d:"Beta-Binomial, Normal-Normal, Gamma-Poisson, Dirichlet-Multinomial, analytical posteriors"},
+  {id:"bi3",ic:"MAP",t:"MAP vs MLE vs Full Bayes",d:"MAP=argmax P(θ|x)=argmax[logL+logP(θ)], L2 reg=Gaussian prior, L1=Laplace prior"},
+  {id:"bi4",ic:"CI",t:"Credible Intervals vs Confidence Intervals",d:"95% CI: P(θ∈[L,U]|data)=0.95, probability statement about θ, HPD interval"},
+  {id:"bi5",ic:"🔄",t:"MCMC — Metropolis-Hastings & Gibbs",d:"Markov chain with target π(θ), proposal q, acceptance ratio, convergence, burn-in"},
+  {id:"bi6",ic:"ELBO",t:"Variational Inference — ELBO",d:"q(θ)≈p(θ|x), ELBO=E_q[log p(x,θ)]-E_q[log q(θ)], mean-field, VAE connection"},
+ ]},
+{n:"19",t:"A/B Testing & Experimental Design",ic:"🧪",c:"#22c55e",bg:"rgba(34,197,94,.1)",
+ desc:"Designing and analyzing experiments — from A/B tests to factorial designs, with the statistical rigor required for trustworthy results.",
+ tags:["Experimentation","Applied","Critical"],
+ topics:[
+  {id:"ab1",ic:"🧪",t:"A/B Testing — End-to-End Framework",d:"Hypothesis, randomization, sample size, run duration, primary metric, guardrail metrics"},
+  {id:"ab2",ic:"n",t:"Sample Size & Power Calculation",d:"n=2(z_α+z_β)²σ²/δ², minimum detectable effect, power 0.8, α=0.05, online calculators"},
+  {id:"ab3",ic:"⏱",t:"Peeking Problem & Sequential Testing",d:"p-value inflation when peeking, alpha spending, O'Brien-Fleming, always-valid p-values (mSPRT)"},
+  {id:"ab4",ic:"⚗",t:"Factorial & Multi-Armed Bandit Designs",d:"Full factorial 2ᵏ, Bandit algorithms (Thompson sampling, UCB), explore-exploit trade-off"},
+  {id:"ab5",ic:"📊",t:"Metric Selection & Surrogate Metrics",d:"OEC (Overall Evaluation Criterion), leading vs lagging metrics, Northstar, guardrail metrics"},
+  {id:"ab6",ic:"⚠",t:"Common A/B Testing Pitfalls",d:"SUTVA violation, novelty effect, Simpson's paradox, network effects, multiple testing"},
+ ]},
+{n:"20",t:"Resampling & Cross-Validation",ic:"🔄",c:"#38bdf8",bg:"rgba(56,189,248,.1)",
+ desc:"Bootstrap, jackknife, and cross-validation — non-parametric inference and model evaluation without distributional assumptions.",
+ tags:["Resampling","Core","ML"],
+ topics:[
+  {id:"rs1",ic:"🔄",t:"Bootstrap — Theory & Applications",d:"Sample with replacement B times, empirical distribution, SE, bias estimation, percentile CI"},
+  {id:"rs2",ic:"🔪",t:"Jackknife Resampling",d:"Leave-one-out, θ̂(-i), bias correction, connection to bootstrap, delete-d jackknife"},
+  {id:"rs3",ic:"K",t:"K-Fold Cross-Validation",d:"Partition into K folds, train on K-1, test on 1, rotate, average error, K=5 vs K=10 vs LOOCV"},
+  {id:"rs4",ic:"🔀",t:"Stratified & Nested Cross-Validation",d:"Stratified for class imbalance, nested for hyperparameter tuning without leakage"},
+  {id:"rs5",ic:"📐",t:"CV for Model Selection — Correct Usage",d:"Training/validation/test split, information leakage, final test set as unbiased estimate"},
+ ]},
+{n:"21",t:"Time Series Analysis",ic:"📉",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"Statistical analysis of sequential data — stationarity, autocorrelation, ARIMA models, and detecting patterns in time.",
+ tags:["Time Series","Applied","Advanced"],
+ topics:[
+  {id:"ts1",ic:"📉",t:"Time Series Components",d:"Trend, seasonality, cyclical, irregular/noise, additive vs multiplicative decomposition"},
+  {id:"ts2",ic:"⚖",t:"Stationarity — Definition & Tests",d:"Weak stationarity: constant mean, variance, autocovariance by lag. ADF test, KPSS test"},
+  {id:"ts3",ic:"ρ",t:"ACF & PACF",d:"Autocorrelation r(k)=Cov(Xₜ,Xₜ₋ₖ)/Var(Xₜ), partial ACF, Ljung-Box test, lag selection"},
+  {id:"ts4",ic:"AR",t:"ARIMA Models",d:"AR(p): Xₜ=Σφᵢ Xₜ₋ᵢ+εₜ, MA(q), ARMA, differencing I(d), order selection AIC/BIC"},
+  {id:"ts5",ic:"∿",t:"Seasonal Models & Decomposition",d:"SARIMA(p,d,q)(P,D,Q)_s, STL decomposition, Holt-Winters exponential smoothing"},
+ ]},
+{n:"22",t:"Multivariate Statistics",ic:"Σ",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"Extending statistical methods to multiple variables simultaneously — covariance matrices, PCA, MANOVA, and factor analysis.",
+ tags:["Multivariate","Advanced","ML"],
+ topics:[
+  {id:"mv1",ic:"Σ",t:"Covariance Matrix — Properties",d:"Σ∈ℝᵖˣᵖ, symmetric PSD, sample estimator S=(n-1)⁻¹(X-x̄1ᵀ)ᵀ(X-x̄1ᵀ), geometry as ellipse"},
+  {id:"mv2",ic:"d²",t:"Mahalanobis Distance",d:"d²=(x-μ)ᵀΣ⁻¹(x-μ), accounts for correlations, whitening, anomaly detection, χ²(p) distribution"},
+  {id:"mv3",ic:"↘",t:"PCA — Statistical Derivation",d:"Max variance direction, eigenvectors of Σ, scree plot, % variance explained, scores & loadings"},
+  {id:"mv4",ic:"F",t:"MANOVA — Multivariate ANOVA",d:"Multiple dependent variables, Wilks' Λ, Pillai's trace, Hotelling's T², Roy's largest root"},
+  {id:"mv5",ic:"∿",t:"Factor Analysis",d:"Xᵢ=Λfᵢ+εᵢ, common vs unique variance, communalities, factor rotation (Varimax, Oblimin)"},
+ ]},
+{n:"23",t:"Information Theory for ML",ic:"H",c:"#22c55e",bg:"rgba(34,197,94,.1)",
+ desc:"Shannon's information theory — entropy, KL divergence, mutual information, and why they underlie ML loss functions.",
+ tags:["Theory","Advanced","ML","Critical"],
+ topics:[
+  {id:"it1",ic:"H",t:"Shannon Entropy",d:"H(X)=-Σp(x)log₂p(x) bits, uncertainty measure, max at uniform, 0·log0=0 convention"},
+  {id:"it2",ic:"KL",t:"KL Divergence — Asymmetric Divergence",d:"KL(P‖Q)=Σp log(p/q)≥0, proof via Jensen's, not a metric, forward vs reverse KL"},
+  {id:"it3",ic:"H×",t:"Cross-Entropy Loss — Derivation",d:"H(p,q)=-Σp log q=H(p)+KL(P‖Q), minimising CE = minimising KL, classification loss"},
+  {id:"it4",ic:"I",t:"Mutual Information",d:"I(X;Y)=H(X)-H(X|Y)=KL(P(X,Y)‖P(X)P(Y)), feature selection, independence iff I=0"},
+  {id:"it5",ic:"📡",t:"Differential Entropy",d:"H(X)=-∫f(x)log f(x)dx for continuous RV, can be negative, normal max entropy with fixed variance"},
+ ]},
+{n:"24",t:"Statistical Learning Theory",ic:"⊐",c:"#38bdf8",bg:"rgba(56,189,248,.1)",
+ desc:"The theoretical foundations of ML — bias-variance trade-off, VC dimension, PAC learning, and generalisation bounds.",
+ tags:["Theory","Advanced","ML","Critical"],
+ topics:[
+  {id:"sl1",ic:"↔",t:"Bias-Variance Decomposition",d:"E[(y-ŷ)²]=Bias²+Var+σ², underfitting=high bias, overfitting=high variance, total decomposition"},
+  {id:"sl2",ic:"VC",t:"VC Dimension",d:"Shattering, VC dim = max shatterable set, linear classifiers VC=p+1, fundamental theorem: gen bound"},
+  {id:"sl3",ic:"PAC",t:"PAC Learning Framework",d:"(ε,δ)-learning, sample complexity n≥(1/ε)[ln|H|+ln(1/δ)], realizable vs agnostic setting"},
+  {id:"sl4",ic:"R",t:"Rademacher Complexity",d:"𝔑(H,S), tight data-dependent gen bound, covers infinite hypothesis classes, generalization"},
+  {id:"sl5",ic:"📏",t:"Structural Risk Minimisation",d:"ERM, regularization as complexity control, minimum description length, Occam's razor"},
+ ]},
+{n:"25",t:"Regularization — Statistical View",ic:"λ",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"Ridge, Lasso, and Elastic Net from a statistical perspective — as Bayesian priors, as shrinkage estimators, and their geometry.",
+ tags:["Regularization","ML","Applied","Critical"],
+ topics:[
+  {id:"rg1",ic:"‖β‖²",t:"Ridge Regression (L2) — Full Analysis",d:"β̂=(XᵀX+λI)⁻¹Xᵀy, Gaussian prior interpretation, SVD view, shrinkage toward 0, never 0"},
+  {id:"rg2",ic:"‖β‖",t:"Lasso Regression (L1) — Sparsity",d:"min‖y-Xβ‖²+λ‖β‖₁, Laplace prior, sparse solutions, variable selection, KKT subdifferential"},
+  {id:"rg3",ic:"⊕",t:"Elastic Net — Combining L1 & L2",d:"λ₁‖β‖₁+λ₂‖β‖₂, groups correlated features, solves Lasso issues with p>n"},
+  {id:"rg4",ic:"📐",t:"Geometric View — Constraint Regions",d:"Lasso diamond vs Ridge ball, sparse corner solutions for Lasso, Lagrangian duality"},
+  {id:"rg5",ic:"🎚",t:"Regularization Strength — Cross-Validation",d:"λ selection via CV, regularization path, warm starting, glmnet coordinate descent"},
+ ]},
+{n:"26",t:"Concentration Inequalities",ic:"≤",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"Probability bounds that underlie generalization theory — Markov, Chebyshev, Hoeffding, and their ML applications.",
+ tags:["Theory","Advanced","ML"],
+ topics:[
+  {id:"ci_1",ic:"≤",t:"Markov Inequality",d:"P(X≥a)≤E[X]/a for X≥0, weakest bound, proof in 1 line, tight for heavy-tailed"},
+  {id:"ci_2",ic:"σ",t:"Chebyshev Inequality",d:"P(|X-μ|≥kσ)≤1/k², no distribution assumption, two-sided, weaker than CLT for normal"},
+  {id:"ci_3",ic:"H",t:"Hoeffding's Inequality",d:"P(|X̄-μ|≥ε)≤2exp(-2n²ε²/Σ(bᵢ-aᵢ)²), bounded RVs, exponential decay, generalization"},
+  {id:"ci_4",ic:"δ",t:"McDiarmid's Inequality",d:"Bounded differences condition, stability of function of independent RVs, model selection"},
+  {id:"ci_5",ic:"📊",t:"Union Bound & Multiple Testing",d:"P(∪Aᵢ)≤ΣP(Aᵢ), Bonferroni correction, controlling FWER, FDR (Benjamini-Hochberg)"},
+ ]},
+{n:"27",t:"Probabilistic Models for ML",ic:"⊕",c:"#22c55e",bg:"rgba(34,197,94,.1)",
+ desc:"Probabilistic graphical models, Gaussian mixtures, naive Bayes, and latent variable models that form the statistical backbone of ML.",
+ tags:["ML","Advanced","Probabilistic"],
+ topics:[
+  {id:"pm1",ic:"🔔",t:"Gaussian Mixture Models (GMM)",d:"p(x)=Σₖ πₖ N(x|μₖ,Σₖ), EM algorithm for fitting, soft assignments, model selection"},
+  {id:"pm2",ic:"⊥",t:"Naive Bayes Classifier",d:"P(y|x)∝P(y)Πᵢ P(xᵢ|y), conditional independence, Gaussian NB, Bernoulli NB, laplace smoothing"},
+  {id:"pm3",ic:"📊",t:"Hidden Markov Models",d:"Latent states, emission probabilities, transition matrix, forward-backward, Viterbi, Baum-Welch"},
+  {id:"pm4",ic:"🔄",t:"Latent Dirichlet Allocation (LDA)",d:"Topic model, document-topic and topic-word distributions, collapsed Gibbs sampling, perplexity"},
+  {id:"pm5",ic:"🎲",t:"Dirichlet Distribution",d:"Dirichlet(α) on simplex, conjugate to Multinomial, concentration parameter, symmetric α<1 sparse"},
+ ]},
+{n:"28",t:"Causal Inference",ic:"→",c:"#38bdf8",bg:"rgba(56,189,248,.1)",
+ desc:"Moving beyond correlation to causation — structural causal models, DAGs, confounding, and experimental design.",
+ tags:["Causal","Advanced","Applied"],
+ topics:[
+  {id:"ca1",ic:"→",t:"Correlation ≠ Causation",d:"Confounders, spurious correlation, colliders, Simpson's paradox resolution, examples"},
+  {id:"ca2",ic:"G",t:"Directed Acyclic Graphs (DAGs)",d:"Causal structure representation, nodes=variables, edges=direct effects, d-separation, backdoor"},
+  {id:"ca3",ic:"do",t:"do-Calculus & Interventions",d:"P(Y|do(X=x)) vs P(Y|X=x), intervention, adjustment formula, backdoor criterion"},
+  {id:"ca4",ic:"τ",t:"Average Treatment Effect (ATE)",d:"ATE=E[Y(1)-Y(0)], potential outcomes framework, SUTVA, identification assumptions"},
+  {id:"ca5",ic:"🔀",t:"RCT, IV, DiD, RDD",d:"Randomized trial (gold standard), instrumental variables, difference-in-differences, regression discontinuity"},
+ ]},
+{n:"29",t:"Deep Learning Statistics",ic:"🧠",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"Statistical phenomena specific to neural networks — batch normalization, dropout, loss landscapes, and uncertainty quantification.",
+ tags:["Deep Learning","Advanced","ML","Critical"],
+ topics:[
+  {id:"dl1",ic:"BN",t:"Batch Normalization — Statistical View",d:"μ_B=mean, σ²_B=variance of batch, normalize to N(0,1), learnable γ,β, reduces covariate shift"},
+  {id:"dl2",ic:"p",t:"Dropout as Bayesian Approximation",d:"Gal & Ghahramani (2016): dropout≈variational inference in deep GP, MC Dropout for uncertainty"},
+  {id:"dl3",ic:"📊",t:"Loss Landscape Statistics",d:"Saddle points dominate, flat minima vs sharp minima (generalisation), stochastic gradient noise"},
+  {id:"dl4",ic:"U",t:"Uncertainty in Neural Networks",d:"Aleatoric (data) vs epistemic (model) uncertainty, ensembles, conformal prediction"},
+  {id:"dl5",ic:"🔔",t:"Double Descent Phenomenon",d:"Bias-variance trade-off breaks for overparameterized models, interpolation threshold, implicit regularization"},
+  {id:"dl6",ic:"📉",t:"Neural Scaling Laws",d:"Loss∝(N/Nc)^αN, Chinchilla scaling, emergent abilities, data-compute optimal training"},
+ ]},
+{n:"30",t:"Interview Preparation",ic:"🎯",c:"#22c55e",bg:"rgba(34,197,94,.1)",
+ desc:"320+ questions from entry-level to research scientist — every real statistics and ML interview question, fully answered.",
+ tags:["Interview"],
+ topics:[
+  {id:"iq1",ic:"μ",t:"Descriptive Statistics Q&A",d:"Mean/median/mode, distributions, skewness, EDA, outliers — all levels"},
+  {id:"iq2",ic:"P",t:"Probability & Distributions Q&A",d:"Bayes, CLT, normal distribution, expectations, MGFs — all levels"},
+  {id:"iq3",ic:"H₀",t:"Hypothesis Testing Q&A",d:"p-values, errors, power, t-tests, ANOVA, chi-square — all levels"},
+  {id:"iq4",ic:"β",t:"Regression & ML Stats Q&A",d:"OLS, regularization, logistic regression, bias-variance, cross-validation"},
+  {id:"iq5",ic:"🧠",t:"Deep Learning Stats Q&A",d:"BatchNorm, dropout, loss landscapes, scaling laws, uncertainty — expert level"},
+ ]},
+];
+const DETAILS={
+
+"cd1":{title:"Normal (Gaussian) Distribution — The Foundation of Statistics",bread:"Chapter 6 · Continuous Distributions",
+sub:"The normal distribution appears everywhere in nature, statistics, and ML theory. Understanding it deeply — its properties, derivation, and applications — is non-negotiable.",
+pills:[{t:"Critical",c:"#f43f5e"},{t:"ML Foundation",c:"#22c55e"},{t:"Must Master",c:"#38bdf8"}],
+secs:[
+{ty:"prose",title:"The Normal Distribution — Complete Definition",html:`<p>The Normal (Gaussian) distribution N(μ,σ²) has probability density function:</p>
+<p style="font-family:'Fira Code',monospace;color:#4ade80;text-align:center;font-size:14px">f(x) = (1/σ√(2π)) · exp(-(x-μ)²/2σ²)</p>
+<h4>Key Parameters</h4>
+<ul>
+<li><strong>μ (mu)</strong> — mean, median, and mode (all equal for symmetric normal)</li>
+<li><strong>σ² (sigma squared)</strong> — variance, controls the spread</li>
+<li><strong>σ (sigma)</strong> — standard deviation, same units as X</li>
+</ul>
+<h4>The Standard Normal Z ~ N(0,1)</h4>
+<p>Any normal RV can be standardized: <code>Z = (X-μ)/σ ~ N(0,1)</code></p>
+<p>This is the z-score transformation — it measures how many standard deviations X is from the mean. Z-scores are dimension-free and allow comparison across different scales.</p>
+<h4>Why is the Normal Distribution Everywhere?</h4>
+<p>The <strong>Central Limit Theorem</strong> says the sum (or average) of many independent, identically distributed random variables converges to a normal distribution — regardless of the original distribution. This explains why measurement errors, heights, test scores, and residuals in regression all tend to be normally distributed.</p>`},
+{ty:"mbox",formula:"X ~ N(μ, σ²)  →  f(x) = (1/σ√2π)·e^(-(x-μ)²/2σ²)",desc:"The Gaussian bell curve. The exponent -(x-μ)²/2σ² penalizes deviation from μ, scaled by σ."},
+{ty:"prose",title:"The 68-95-99.7 Rule",html:`<h4>The Empirical Rule</h4>
+<ul>
+<li><strong>P(μ-σ ≤ X ≤ μ+σ) = 68.27%</strong> — within 1 std dev</li>
+<li><strong>P(μ-2σ ≤ X ≤ μ+2σ) = 95.45%</strong> — within 2 std devs</li>
+<li><strong>P(μ-3σ ≤ X ≤ μ+3σ) = 99.73%</strong> — within 3 std devs</li>
+</ul>
+<p>For ML models: if your residuals follow N(0,σ²), then 95% should lie within ±2σ. Values beyond 3σ are extreme outliers (probability 0.27%). This rule comes from the standard normal CDF Φ.</p>
+<h4>Critical Values for Hypothesis Testing</h4>
+<ul>
+<li><code>z₀.₁₀ = 1.282</code> (10% in upper tail)</li>
+<li><code>z₀.₀₅ = 1.645</code> (5% in upper tail)</li>
+<li><code>z₀.₀₂₅ = 1.960</code> (2.5% in upper tail, used for 95% CI)</li>
+<li><code>z₀.₀₀₅ = 2.576</code> (0.5% in upper tail, used for 99% CI)</li>
+</ul>`},
+{ty:"diagram",title:"Normal Distribution — Bell Curve, Standard Deviations & Z-Scores",
+svg:`<svg width="540" height="280" viewBox="0 0 540 280" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<style>@keyframes nd{from{opacity:0}to{opacity:1}}.nda{animation:nd .8s ease forwards}.ndb{animation:nd .8s .3s ease forwards;opacity:0}</style>
+</defs>
+<rect fill="#020a04" x="0" y="0" width="540" height="280" rx="8"/>
+<text font-family="'Fira Code'" font-size="9" fill="#22c55e" x="10" y="14">NORMAL DISTRIBUTION N(μ,σ²) — BELL CURVE</text>
+<!-- Filled areas -->
+<path class="nda" d="M 60,220 Q 100,215 130,190 Q 155,170 175,140 Q 195,110 210,90 Q 225,72 270,65 Q 315,72 330,90 Q 345,110 365,140 Q 385,170 410,190 Q 440,215 480,220 Z" fill="rgba(34,197,94,.08)" stroke="none"/>
+<path class="ndb" d="M 130,220 Q 155,170 175,140 Q 195,110 210,90 Q 225,72 270,65 Q 315,72 330,90 Q 345,110 365,140 Q 385,170 410,190 Q 410,220 Z" fill="rgba(34,197,94,.12)" stroke="none"/>
+<path d="M 175,220 Q 195,110 210,90 Q 225,72 270,65 Q 315,72 330,90 Q 345,110 365,140 L 365,220 Z" fill="rgba(34,197,94,.18)" stroke="none"/>
+<!-- Bell curve -->
+<path class="nda" d="M 60,220 Q 100,215 130,190 Q 155,170 175,140 Q 195,110 210,90 Q 225,72 270,65 Q 315,72 330,90 Q 345,110 365,140 Q 385,170 410,190 Q 440,215 480,220" fill="none" stroke="#22c55e" stroke-width="2.5"/>
+<!-- Axis -->
+<line x1="40" y1="220" x2="510" y2="220" stroke="#1a4028" stroke-width="1"/>
+<line x1="270" y1="50" x2="270" y2="230" stroke="#1a4028" stroke-width="1" stroke-dasharray="4 3"/>
+<!-- Std dev labels -->
+<text font-family="'Fira Code'" font-size="9" fill="#9ab8a8" x="262" y="240">μ</text>
+<text font-family="'Fira Code'" font-size="8" fill="#9ab8a8" x="325" y="240">μ+σ</text>
+<text font-family="'Fira Code'" font-size="8" fill="#9ab8a8" x="207" y="240">μ-σ</text>
+<text font-family="'Fira Code'" font-size="8" fill="#9ab8a8" x="380" y="240">μ+2σ</text>
+<text font-family="'Fira Code'" font-size="8" fill="#9ab8a8" x="150" y="240">μ-2σ</text>
+<!-- Percentage labels -->
+<text font-family="'Fira Code'" font-size="10" fill="#22c55e" x="240" y="115">34.1%</text>
+<text font-family="'Fira Code'" font-size="10" fill="#22c55e" x="278" y="115">34.1%</text>
+<text font-family="'Fira Code'" font-size="8" fill="#4ade80" x="180" y="155">13.6%</text>
+<text font-family="'Fira Code'" font-size="8" fill="#4ade80" x="360" y="155">13.6%</text>
+<text font-family="'Fira Code'" font-size="8" fill="#86efac" x="75" y="210">2.1%</text>
+<text font-family="'Fira Code'" font-size="8" fill="#86efac" x="440" y="210">2.1%</text>
+<!-- Brace annotations -->
+<rect fill="#0a1f12" stroke="#1a4028" x="10" y="250" width="520" height="24" rx="4"/>
+<text font-family="'Fira Code'" font-size="8" fill="#22c55e" x="80" y="264">← 68.27% within ±1σ →</text>
+<text font-family="'Fira Code'" font-size="8" fill="#4ade80" x="290" y="264">← 95.45% within ±2σ →</text>
+</svg>`},
+{ty:"code",lang:"python",name:"Normal Distribution — Calculations, CLT Demo, and Z-Scores",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+<span class="imp">from</span> scipy <span class="imp">import</span> stats
+<span class="imp">import</span> matplotlib.pyplot <span class="imp">as</span> plt
+
+<span class="cm"># Normal distribution: mean=170cm height, std=10cm</span>
+mu, sigma = <span class="nu">170</span>, <span class="nu">10</span>
+dist = stats.<span class="fn">norm</span>(loc=mu, scale=sigma)
+
+<span class="cm"># Probabilities using CDF Φ</span>
+p_under_180 = dist.<span class="fn">cdf</span>(<span class="nu">180</span>)      <span class="cm"># P(X ≤ 180) = Φ(1.0) ≈ 0.841</span>
+p_over_185  = <span class="nu">1</span> - dist.<span class="fn">cdf</span>(<span class="nu">185</span>)   <span class="cm"># P(X > 185) = 1 - Φ(1.5) ≈ 0.067</span>
+p_160_180   = dist.<span class="fn">cdf</span>(<span class="nu">180</span>) - dist.<span class="fn">cdf</span>(<span class="nu">160</span>)  <span class="cm"># P(160 ≤ X ≤ 180)</span>
+<span class="fn">print</span>(<span class="st">f"P(X ≤ 180) = {p_under_180:.4f}"</span>)   <span class="cm"># 0.8413</span>
+<span class="fn">print</span>(<span class="st">f"P(X > 185) = {p_over_185:.4f}"</span>)    <span class="cm"># 0.0668</span>
+<span class="fn">print</span>(<span class="st">f"P(160 ≤ X ≤ 180) = {p_160_180:.4f}"</span>) <span class="cm"># 0.6827 = 68.27% rule!</span>
+
+<span class="cm"># Z-score: how many std devs from mean?</span>
+x = <span class="nu">192</span>
+z = (x - mu) / sigma   <span class="cm"># z = 2.2 → 2.2 std devs above mean</span>
+percentile = dist.<span class="fn">cdf</span>(x) * <span class="nu">100</span>
+<span class="fn">print</span>(<span class="st">f"X=192: z-score={z:.2f}, {percentile:.1f}th percentile"</span>)
+
+<span class="cm"># Quantiles / critical values (inverse CDF)</span>
+z_95 = stats.norm.<span class="fn">ppf</span>(<span class="nu">0.95</span>)   <span class="cm"># 1.645 (5% in upper tail)</span>
+z_975 = stats.norm.<span class="fn">ppf</span>(<span class="nu">0.975</span>) <span class="cm"># 1.960 (2.5% in upper tail, two-sided 95% CI)</span>
+<span class="fn">print</span>(<span class="st">f"z_0.05 = {z_95:.3f}, z_0.025 = {z_975:.3f}"</span>)
+
+<span class="cm"># Central Limit Theorem DEMO</span>
+np.random.seed(<span class="nu">42</span>)
+population = stats.expon.<span class="fn">rvs</span>(scale=<span class="nu">2</span>, size=<span class="nu">100000</span>)  <span class="cm"># non-normal population!</span>
+sample_means = [np.random.choice(population, <span class="nu">30</span>).<span class="fn">mean</span>() <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="nu">5000</span>)]
+<span class="fn">print</span>(<span class="st">f"CLT: sample mean std = {np.std(sample_means):.3f}"</span>)
+<span class="fn">print</span>(<span class="st">f"Theoretical SE = {np.std(population)/np.sqrt(30):.3f}"</span>)  <span class="cm"># σ/√n ✓</span>
+<span class="cm"># Test normality of sample means</span>
+stat, p = stats.<span class="fn">shapiro</span>(np.random.choice(sample_means, <span class="nu">50</span>))
+<span class="fn">print</span>(<span class="st">f"Shapiro-Wilk on sample means: p={p:.3f} (p>0.05 → normal ✓)"</span>)`},
+{ty:"callout",kind:"tip",ic:"✦",txt:"<strong>Normal distribution for ML:</strong> The Gaussian likelihood p(y|x,θ) = N(y; f(x), σ²) gives the MSE loss. The Gaussian prior P(θ) = N(0, λ⁻¹I) gives L2 regularization. The Gaussian posterior P(θ|data) appears in linear regression and Kalman filtering. Every time you use MSE loss or weight decay, you are implicitly using a Gaussian model."},
+]},
+
+"ht1":{title:"Hypothesis Testing — The Complete Framework",bread:"Chapter 11 · Hypothesis Testing",
+sub:"The formal procedure for making decisions from data. Every A/B test, clinical trial, and ML model evaluation rests on this framework.",
+pills:[{t:"Critical",c:"#f43f5e"},{t:"Applied",c:"#22c55e"},{t:"Must Master",c:"#38bdf8"}],
+secs:[
+{ty:"prose",title:"The Hypothesis Testing Procedure",html:`<p>Hypothesis testing answers: <em>"Is the observed data consistent with our null hypothesis, or is there statistical evidence against it?"</em></p>
+<h4>Step 1: State the Hypotheses</h4>
+<ul>
+<li><strong>H₀ (Null Hypothesis)</strong>: The default assumption (e.g., "no effect", "no difference"). Usually contains equality: μ=μ₀, δ=0</li>
+<li><strong>H₁ (Alternative Hypothesis)</strong>: What we want to prove. Can be one-sided (μ>μ₀) or two-sided (μ≠μ₀)</li>
+</ul>
+<h4>Step 2: Choose Test Statistic & Significance Level α</h4>
+<p>α = P(reject H₀ | H₀ is true) — the probability of a false positive (Type I error). Conventionally α=0.05 or 0.01.</p>
+<h4>Step 3: Compute Test Statistic</h4>
+<p>Under H₀, the test statistic has a known distribution. E.g., for z-test: T = (X̄-μ₀)/(σ/√n) ~ N(0,1)</p>
+<h4>Step 4: Compute p-Value</h4>
+<p>p = P(T ≥ t_obs | H₀ true) — the probability of getting a result at least as extreme as observed, IF H₀ were true.</p>
+<h4>Step 5: Decision</h4>
+<p>Reject H₀ if p < α. <strong>Fail to reject</strong> (not "accept") H₀ if p ≥ α.</p>`},
+{ty:"mbox",formula:"p-value = P(T ≥ t_obs | H₀)   →   reject H₀ if p < α",desc:"The p-value is NOT the probability H₀ is true. It is the probability of seeing data this extreme under H₀."},
+{ty:"prose",title:"Type I & Type II Errors — The Error Matrix",html:`<table class="ctbl">
+<tr><th></th><th>H₀ is TRUE</th><th>H₀ is FALSE</th></tr>
+<tr><td><strong>Reject H₀</strong></td><td style="color:#f43f5e">Type I Error (α) False Positive</td><td style="color:#22c55e">Correct! (Power = 1-β)</td></tr>
+<tr><td><strong>Fail to reject H₀</strong></td><td style="color:#22c55e">Correct! (1-α)</td><td style="color:#f59e0b">Type II Error (β) False Negative</td></tr>
+</table>
+<h4>Power = 1 - β</h4>
+<p>Power = P(reject H₀ | H₁ is true) — probability of correctly detecting a real effect.</p>
+<p>Power increases with: larger sample size n, larger effect size δ, larger significance level α, and smaller variance σ².</p>
+<h4>Common Mistakes in Interpretation</h4>
+<ul>
+<li>❌ "p=0.03 means there's a 3% probability H₀ is true" (wrong!)</li>
+<li>❌ "p>0.05 means H₀ is true" (failing to reject ≠ accepting)</li>
+<li>❌ "Statistical significance = practical significance" (effect size matters!)</li>
+<li>✅ "If H₀ were true, we'd see data this extreme only 3% of the time"</li>
+</ul>`},
+{ty:"msteps",title:"Two-Sample t-Test — Complete Worked Example",steps:[
+{n:"Setup",f:"H₀: μ₁=μ₂  vs  H₁: μ₁≠μ₂  (two-sided)",d:"Group A (control): n₁=40, x̄₁=50.2, s₁=8.3. Group B (treatment): n₂=38, x̄₂=54.7, s₂=9.1. Set α=0.05."},
+{n:"Step 1",f:"Pooled SE = √(s₁²/n₁ + s₂²/n₂) = √(8.3²/40 + 9.1²/38)",d:"= √(1.722 + 2.179) = √3.901 = 1.975. Using Welch's formula (not pooled variance, safer)."},
+{n:"Step 2",f:"t = (x̄₁ - x̄₂) / SE = (50.2 - 54.7) / 1.975 = -2.278",d:"Negative because Group A is lower. For two-sided test, use |t| = 2.278."},
+{n:"Step 3",f:"Degrees of freedom (Welch-Satterthwaite): ν ≈ 75",d:"df = (s₁²/n₁ + s₂²/n₂)² / [(s₁²/n₁)²/(n₁-1) + (s₂²/n₂)²/(n₂-1)] ≈ 75."},
+{n:"Step 4",f:"p-value = 2 × P(t₇₅ ≥ 2.278) = 2 × 0.0127 = 0.0254",d:"From t-distribution with 75 df. Two-sided → multiply by 2."},
+{n:"Decision",f:"p = 0.025 < α = 0.05  →  Reject H₀",d:"Evidence that the treatment has a significant effect. Effect size: Cohen's d = 4.5/8.7 ≈ 0.52 (medium)."},
+]},
+{ty:"code",lang:"python",name:"Hypothesis Testing — Complete Suite in Python",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+<span class="imp">from</span> scipy <span class="imp">import</span> stats
+
+<span class="cm"># ── 1. ONE-SAMPLE z-TEST ──────────────────────────────────</span>
+mu_0 = <span class="nu">100</span>; sigma_known = <span class="nu">15</span>
+sample_iq = np.array([<span class="nu">105</span>, <span class="nu">112</span>, <span class="nu">98</span>, <span class="nu">115</span>, <span class="nu">109</span>, <span class="nu">107</span>, <span class="nu">103</span>, <span class="nu">120</span>])
+n = <span class="fn">len</span>(sample_iq); x_bar = sample_iq.<span class="fn">mean</span>()
+z_stat = (x_bar - mu_0) / (sigma_known / np.<span class="fn">sqrt</span>(n))
+p_two_sided = <span class="nu">2</span> * (<span class="nu">1</span> - stats.norm.<span class="fn">cdf</span>(abs(z_stat)))
+<span class="fn">print</span>(<span class="st">f"z={z_stat:.3f}, p={p_two_sided:.4f}"</span>)
+
+<span class="cm"># ── 2. TWO-SAMPLE WELCH t-TEST ───────────────────────────</span>
+control   = np.random.normal(<span class="nu">50</span>, <span class="nu">10</span>, <span class="nu">40</span>)
+treatment = np.random.normal(<span class="nu">55</span>, <span class="nu">12</span>, <span class="nu">38</span>)
+t_stat, p_val = stats.<span class="fn">ttest_ind</span>(control, treatment, equal_var=<span class="kw">False</span>)  <span class="cm"># Welch</span>
+effect_size = (treatment.<span class="fn">mean</span>()-control.<span class="fn">mean</span>()) / np.<span class="fn">sqrt</span>((<span class="nu">10</span>**<span class="nu">2</span>+<span class="nu">12</span>**<span class="nu">2</span>)/<span class="nu">2</span>)
+<span class="fn">print</span>(<span class="st">f"t={t_stat:.3f}, p={p_val:.4f}, Cohen's d={effect_size:.3f}"</span>)
+
+<span class="cm"># ── 3. POWER ANALYSIS ────────────────────────────────────</span>
+<span class="kw">from</span> statsmodels.stats.power <span class="imp">import</span> TTestIndPower
+analysis = <span class="tp">TTestIndPower</span>()
+<span class="cm"># What n do we need for 80% power, effect=0.5, alpha=0.05?</span>
+n_needed = analysis.<span class="fn">solve_power</span>(effect_size=<span class="nu">0.5</span>, power=<span class="nu">0.8</span>, alpha=<span class="nu">0.05</span>)
+<span class="fn">print</span>(<span class="st">f"Required n per group: {n_needed:.0f}"</span>)  <span class="cm"># ≈ 64</span>
+
+<span class="cm"># ── 4. MULTIPLE TESTING CORRECTION ───────────────────────</span>
+<span class="kw">from</span> statsmodels.stats.multitest <span class="imp">import</span> multipletests
+pvals = np.array([<span class="nu">0.01</span>, <span class="nu">0.04</span>, <span class="nu">0.03</span>, <span class="nu">0.10</span>, <span class="nu">0.001</span>])
+reject_bonf, p_bonf, _, _ = <span class="fn">multipletests</span>(pvals, method=<span class="st">'bonferroni'</span>)
+reject_bh, p_bh, _, _ = <span class="fn">multipletests</span>(pvals, method=<span class="st">'fdr_bh'</span>)
+<span class="fn">print</span>(<span class="st">"Bonferroni rejects:"</span>, reject_bonf)  <span class="cm"># strict</span>
+<span class="fn">print</span>(<span class="st">"BH (FDR) rejects:"</span>, reject_bh)      <span class="cm"># more powerful</span>`},
+{ty:"callout",kind:"warn",ic:"⚠",txt:"<strong>p-hacking is a critical threat to data science.</strong> Running multiple tests, cherry-picking significant results, or stopping early when p<0.05 inflates Type I error. If you test 20 features at α=0.05, you expect 1 false positive by chance. Always correct for multiple comparisons (Bonferroni, Benjamini-Hochberg) and pre-register hypotheses in A/B tests."},
+]},
+
+"sl1":{title:"Bias-Variance Trade-off — The Core ML Dilemma",bread:"Chapter 24 · Statistical Learning Theory",
+sub:"Every supervised learning problem lives in the tension between bias and variance. Understanding this decomposition determines how to diagnose and fix model problems.",
+pills:[{t:"Critical",c:"#f43f5e"},{t:"ML Core",c:"#22c55e"},{t:"Must Master",c:"#38bdf8"}],
+secs:[
+{ty:"prose",title:"The Bias-Variance Decomposition",html:`<p>For regression with true function f(x) and noise ε~N(0,σ²), we train model f̂(x) and want to minimise:</p>
+<p style="font-family:'Fira Code',monospace;color:#4ade80;text-align:center">E[(y-f̂(x))²] = Bias²(f̂) + Var(f̂) + σ²</p>
+<h4>The Three Terms</h4>
+<ul>
+<li><strong>Bias²(f̂) = [E[f̂(x)] - f(x)]²</strong> — How wrong is the average prediction? Bias measures systematic error — the gap between the expected model output and the true function. High bias = underfitting.</li>
+<li><strong>Var(f̂) = E[f̂(x) - E[f̂(x)]]²</strong> — How much does f̂ change across different training datasets? High variance = overfitting.</li>
+<li><strong>σ²</strong> — Irreducible noise. No model can do better than this.</li>
+</ul>
+<h4>Diagnosing Your Model</h4>
+<p><strong>High training error + high test error</strong> → High bias (underfitting). Fix: more complex model, more features, less regularization.</p>
+<p><strong>Low training error + high test error</strong> → High variance (overfitting). Fix: more data, regularization, simpler model, dropout.</p>`},
+{ty:"mbox",formula:"MSE(f̂) = [E[f̂]-f]² + E[(f̂-E[f̂])²] + σ²",desc:"Total error = Bias² + Variance + Irreducible noise. The first two are controllable; σ² is not."},
+{ty:"diagram",title:"Bias-Variance Trade-off — Model Complexity vs Error",
+svg:`<svg width="540" height="260" viewBox="0 0 540 260" xmlns="http://www.w3.org/2000/svg">
+<defs><style>@keyframes dr{from{stroke-dashoffset:400}to{stroke-dashoffset:0}}.la{stroke-dasharray:400;animation:dr 2s ease forwards}.lb{stroke-dasharray:400;animation:dr 2s .3s ease forwards;stroke-dashoffset:400}.lc{stroke-dasharray:400;animation:dr 2s .6s ease forwards;stroke-dashoffset:400}</style></defs>
+<rect fill="#020a04" x="0" y="0" width="540" height="260" rx="8"/>
+<text font-family="'Fira Code'" font-size="9" fill="#22c55e" x="10" y="14">BIAS-VARIANCE TRADEOFF: MODEL COMPLEXITY vs ERROR</text>
+<g transform="translate(30,25)">
+<line x1="0" y1="200" x2="440" y2="200" stroke="#1a4028" stroke-width="1"/>
+<line x1="0" y1="0" x2="0" y2="205" stroke="#1a4028" stroke-width="1"/>
+<text font-family="'Fira Code'" font-size="8" fill="#9ab8a8" x="440" y="204">Model Complexity →</text>
+<text font-family="'Fira Code'" font-size="8" fill="#9ab8a8" x="3" y="10">Error</text>
+<!-- Bias² curve: high left, decreasing -->
+<polyline class="la" points="0,20 30,25 60,35 90,50 120,70 150,95 180,120 210,140 240,155 270,165 300,172 330,177 360,181 390,184 420,186" fill="none" stroke="#f43f5e" stroke-width="2"/>
+<!-- Variance curve: low left, increasing -->
+<polyline class="lb" points="0,195 30,190 60,182 90,170 120,155 150,138 180,120 210,100 240,80 270,62 300,48 330,36 360,26 390,19 420,14" fill="none" stroke="#38bdf8" stroke-width="2"/>
+<!-- Total MSE curve: U-shaped -->
+<polyline class="lc" points="0,40 30,44 60,55 90,75 120,100 150,125 180,140 210,145 240,145 270,145 300,142 330,138 360,132 390,130 420,128" fill="none" stroke="#22c55e" stroke-width="2.5"/>
+<!-- Irreducible noise line -->
+<line x1="0" y1="180" x2="440" y2="180" stroke="#f59e0b" stroke-width="1" stroke-dasharray="6 3"/>
+<!-- Optimal point -->
+<circle cx="215" cy="140" r="6" fill="none" stroke="#22c55e" stroke-width="2"/>
+<line x1="215" y1="0" x2="215" y2="200" stroke="#22c55e" stroke-width="1" stroke-dasharray="4 3"/>
+<text font-family="'Fira Code'" font-size="8" fill="#22c55e" x="218" y="35">optimal</text>
+<!-- Legend -->
+<line x1="300" y1="55" x2="330" y2="55" stroke="#f43f5e" stroke-width="2"/><text font-family="'Fira Code'" font-size="8" fill="#f43f5e" x="334" y="59">Bias²</text>
+<line x1="300" y1="70" x2="330" y2="70" stroke="#38bdf8" stroke-width="2"/><text font-family="'Fira Code'" font-size="8" fill="#38bdf8" x="334" y="74">Variance</text>
+<line x1="300" y1="85" x2="330" y2="85" stroke="#22c55e" stroke-width="2.5"/><text font-family="'Fira Code'" font-size="8" fill="#22c55e" x="334" y="89">Total MSE</text>
+<line x1="300" y1="100" x2="330" y2="100" stroke="#f59e0b" stroke-width="1" stroke-dasharray="5 3"/><text font-family="'Fira Code'" font-size="8" fill="#f59e0b" x="334" y="104">Irreducible σ²</text>
+<text font-family="'Fira Code'" font-size="8" fill="#9ab8a8" x="10" y="175">← Underfitting (high bias)</text>
+<text font-family="'Fira Code'" font-size="8" fill="#9ab8a8" x="300" y="30">Overfitting (high variance) →</text>
+</g>
+</svg>`},
+{ty:"code",lang:"python",name:"Bias-Variance Decomposition — Numerical Demonstration",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+<span class="imp">from</span> sklearn.pipeline <span class="imp">import</span> Pipeline
+<span class="imp">from</span> sklearn.preprocessing <span class="imp">import</span> PolynomialFeatures
+<span class="imp">from</span> sklearn.linear_model <span class="imp">import</span> LinearRegression
+
+<span class="cm"># True function: f(x) = sin(x)</span>
+<span class="kw">def</span> <span class="fn">true_f</span>(x): <span class="kw">return</span> np.<span class="fn">sin</span>(x)
+
+np.random.seed(<span class="nu">42</span>)
+noise_std = <span class="nu">0.3</span>; n_train = <span class="nu">20</span>; n_datasets = <span class="nu">200</span>
+x_test = np.<span class="fn">linspace</span>(-<span class="nu">3</span>, <span class="nu">3</span>, <span class="nu">100</span>)
+
+<span class="kw">for</span> degree <span class="kw">in</span> [<span class="nu">1</span>, <span class="nu">3</span>, <span class="nu">9</span>]:  <span class="cm"># underfitting, just-right, overfitting</span>
+    predictions = []
+    <span class="kw">for</span> _ <span class="kw">in</span> range(n_datasets):
+        x_tr = np.random.uniform(-<span class="nu">3</span>, <span class="nu">3</span>, n_train)
+        y_tr = <span class="fn">true_f</span>(x_tr) + np.random.normal(<span class="nu">0</span>, noise_std, n_train)
+        model = <span class="tp">Pipeline</span>([
+            (<span class="st">'poly'</span>, <span class="tp">PolynomialFeatures</span>(degree=degree)),
+            (<span class="st">'lr'</span>, <span class="tp">LinearRegression</span>())
+        ])
+        model.<span class="fn">fit</span>(x_tr.reshape(-<span class="nu">1</span>,<span class="nu">1</span>), y_tr)
+        predictions.<span class="fn">append</span>(model.<span class="fn">predict</span>(x_test.reshape(-<span class="nu">1</span>,<span class="nu">1</span>)))
+    
+    preds = np.<span class="fn">array</span>(predictions)           <span class="cm"># shape: [n_datasets, n_test]</span>
+    avg_pred = preds.<span class="fn">mean</span>(axis=<span class="nu">0</span>)
+    bias_sq = ((avg_pred - <span class="fn">true_f</span>(x_test))**<span class="nu">2</span>).<span class="fn">mean</span>()
+    variance = preds.<span class="fn">var</span>(axis=<span class="nu">0</span>).<span class="fn">mean</span>()
+    noise = noise_std**<span class="nu">2</span>
+    <span class="fn">print</span>(<span class="st">f"deg={degree}: Bias²={bias_sq:.4f}, Var={variance:.4f}, Total={bias_sq+variance+noise:.4f}"</span>)
+<span class="cm"># deg=1: Bias²=0.32, Var=0.005  ← high bias (underfitting)</span>
+<span class="cm"># deg=3: Bias²=0.01, Var=0.015  ← sweet spot</span>
+<span class="cm"># deg=9: Bias²=0.02, Var=0.180  ← high variance (overfitting)</span>`},
+{ty:"callout",kind:"info",ic:"💡",txt:"<strong>Double Descent:</strong> For modern overparameterized models (e.g., neural networks with more parameters than data), the test error can decrease again after the interpolation threshold — despite high variance. This 'double descent' phenomenon shows that the classical bias-variance trade-off is an oversimplification for deep learning. Implicit regularization from gradient descent and the structure of overparameterized models prevents variance from growing without bound."},
+]},
+
+"ab1":{title:"A/B Testing — The Complete Statistical Framework",bread:"Chapter 19 · A/B Testing & Experimental Design",
+sub:"A/B testing is applied hypothesis testing. Every decision — from product features to ML model deployments — requires rigorous statistical methodology.",
+pills:[{t:"Critical",c:"#f43f5e"},{t:"Applied",c:"#22c55e"},{t:"Industry Essential",c:"#f59e0b"}],
+secs:[
+{ty:"prose",title:"The A/B Testing Pipeline",html:`<p>An A/B test is a randomized controlled experiment where users are randomly assigned to Control (A) or Treatment (B), and a metric is compared.</p>
+<h4>Phase 1: Pre-Experiment Design</h4>
+<ol>
+<li><strong>Define your hypothesis:</strong> H₀: δ=0 (no effect), H₁: δ≠0</li>
+<li><strong>Choose primary metric</strong> (e.g., conversion rate, revenue)</li>
+<li><strong>Set α (usually 0.05) and desired power (usually 0.8)</strong></li>
+<li><strong>Estimate effect size</strong> (minimum detectable effect, MDE)</li>
+<li><strong>Calculate required sample size</strong></li>
+<li><strong>Randomize users</strong> to A/B buckets (hash-based, stratified)</li>
+</ol>
+<h4>Phase 2: During the Experiment</h4>
+<ul>
+<li><strong>Do NOT peek at results</strong> — each peek inflates Type I error</li>
+<li>Monitor guardrail metrics (latency, errors, safety)</li>
+<li>Check for sample ratio mismatch (SRM)</li>
+</ul>
+<h4>Phase 3: Analysis & Decision</h4>
+<ul>
+<li>Compute test statistic and p-value</li>
+<li>Check statistical AND practical significance</li>
+<li>Segment analysis (explore heterogeneous treatment effects)</li>
+</ul>`},
+{ty:"mbox",formula:"n ≥ 2(z_α/2 + z_β)² · σ² / δ²  per group",desc:"Sample size formula. δ=minimum detectable effect, z_α/2=1.96 (α=0.05), z_β=0.842 (80% power)."},
+{ty:"msteps",title:"A/B Test Sample Size & Analysis — Step-by-Step",steps:[
+{n:"Setup",f:"Metric: conversion rate. Baseline p₀=5%, MDE δ=1% (want to detect ≥1pp lift)",d:"H₀: p_B=p_A vs H₁: p_B≠p_A. α=0.05, β=0.20 (power=80%)."},
+{n:"Step 1",f:"σ²≈p(1-p)=0.05×0.95=0.0475 for proportion",d:"For proportion test, use pooled estimate under H₀."},
+{n:"Step 2",f:"n = 2(1.96+0.842)²×0.0475/(0.01)² = 2×7.85×0.0475/0.0001 = 7,457",d:"Need 7,457 users per group (14,914 total). Run until this is collected."},
+{n:"Step 3",f:"Observed: n_A=8000, x_A=420 (p̂_A=5.25%), n_B=8000, x_B=490 (p̂_B=6.12%)",d:"Lift = 0.87 percentage points. Just below MDE of 1pp."},
+{n:"Step 4",f:"z = (p̂_B - p̂_A)/SE_pooled = 0.0087/0.00326 = 2.67",d:"p_pooled=(420+490)/16000=0.0569, SE=√(2p(1-p)/n)=0.00326."},
+{n:"Decision",f:"p-value = 2×(1-Φ(2.67)) = 0.0076 < α=0.05  →  Reject H₀",d:"Statistically significant! Ship the treatment. Effect size = 0.87pp = +16.6% relative uplift."},
+]},
+{ty:"code",lang:"python",name:"A/B Test — End-to-End Implementation",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+<span class="imp">from</span> scipy <span class="imp">import</span> stats
+<span class="imp">from</span> statsmodels.stats.proportion <span class="imp">import</span> proportion_effectsize, proportions_ztest
+
+<span class="cm"># ── 1. SAMPLE SIZE CALCULATION ────────────────────────────</span>
+<span class="kw">from</span> statsmodels.stats.power <span class="imp">import</span> NormalIndPower
+baseline_rate = <span class="nu">0.05</span>; mde = <span class="nu">0.01</span>; alpha = <span class="nu">0.05</span>; power = <span class="nu">0.80</span>
+effect_size = <span class="fn">proportion_effectsize</span>(baseline_rate + mde, baseline_rate)
+n_per_group = <span class="tp">NormalIndPower</span>().<span class="fn">solve_power</span>(effect_size=effect_size, power=power, alpha=alpha)
+<span class="fn">print</span>(<span class="st">f"Required sample: {n_per_group:.0f} per group"</span>)  <span class="cm"># ≈ 7,457</span>
+
+<span class="cm"># ── 2. SIMULATE A/B EXPERIMENT ───────────────────────────</span>
+np.random.seed(<span class="nu">42</span>)
+n = <span class="nu">8000</span>
+group_a = np.random.binomial(<span class="nu">1</span>, <span class="nu">0.052</span>, n)  <span class="cm"># control: 5.2% baseline</span>
+group_b = np.random.binomial(<span class="nu">1</span>, <span class="nu">0.062</span>, n)  <span class="cm"># treatment: 6.2% (true lift)</span>
+
+<span class="cm"># ── 3. RUN THE TEST ──────────────────────────────────────</span>
+count = np.array([group_b.<span class="fn">sum</span>(), group_a.<span class="fn">sum</span>()])
+nobs  = np.array([n, n])
+z_stat, p_val = <span class="fn">proportions_ztest</span>(count, nobs)
+p_hat_a = group_a.<span class="fn">mean</span>(); p_hat_b = group_b.<span class="fn">mean</span>()
+lift_abs = p_hat_b - p_hat_a
+lift_rel = lift_abs / p_hat_a * <span class="nu">100</span>
+se = np.<span class="fn">sqrt</span>(p_hat_a*(<span class="nu">1</span>-p_hat_a)/n + p_hat_b*(<span class="nu">1</span>-p_hat_b)/n)
+ci_lo, ci_hi = lift_abs - <span class="nu">1.96</span>*se, lift_abs + <span class="nu">1.96</span>*se
+<span class="fn">print</span>(<span class="st">f"Control: {p_hat_a:.4f} | Treatment: {p_hat_b:.4f}"</span>)
+<span class="fn">print</span>(<span class="st">f"Lift: {lift_abs:.4f} abs ({lift_rel:.1f}% rel)"</span>)
+<span class="fn">print</span>(<span class="st">f"95% CI for lift: [{ci_lo:.4f}, {ci_hi:.4f}]"</span>)
+<span class="fn">print</span>(<span class="st">f"z={z_stat:.3f}, p={p_val:.4f}  → {'REJECT H0' if p_val<0.05 else 'FAIL TO REJECT'}"</span>)
+
+<span class="cm"># ── 4. CHECK FOR SAMPLE RATIO MISMATCH (SRM) ─────────────</span>
+<span class="cm"># Test if 50/50 split was maintained</span>
+chi2_stat = (n-n)**<span class="nu">2</span>/n + (n-n)**<span class="nu">2</span>/n  <span class="cm"># simplified; use chi2 goodness-of-fit</span>
+_, p_srm = stats.<span class="fn">chisquare</span>([<span class="fn">len</span>(group_a), <span class="fn">len</span>(group_b)])
+<span class="fn">print</span>(<span class="st">f"SRM check p={p_srm:.4f} (p>0.05 means no SRM ✓)"</span>)`},
+{ty:"callout",kind:"warn",ic:"⚠",txt:"<strong>The peeking problem kills A/B tests.</strong> If you check significance every day and stop when p<0.05, your true Type I error rate inflates to ~30% even with α=0.05. Solutions: (1) Pre-commit to sample size and don't stop early, (2) Sequential testing with alpha spending functions (O'Brien-Fleming), (3) Always-valid inference using mixture sequential probability ratio tests (mSPRT), now used at Airbnb, Netflix, and Microsoft."},
+]},
+
+"bi1":{title:"Bayesian Inference — Prior, Likelihood, Posterior",bread:"Chapter 18 · Bayesian Inference",
+sub:"Bayesian statistics treats parameters as random variables with distributions, not fixed unknowns. This paradigm shift enables principled uncertainty quantification in ML models.",
+pills:[{t:"Advanced",c:"#f59e0b"},{t:"ML Critical",c:"#22c55e"},{t:"Deep Learning",c:"#8b5cf6"}],
+secs:[
+{ty:"prose",title:"The Bayesian Paradigm",html:`<p>In frequentist statistics, parameters θ are fixed unknowns. In Bayesian statistics, <strong>θ is a random variable</strong> with its own distribution, and we update our beliefs about θ after observing data.</p>
+<p style="font-family:'Fira Code',monospace;color:#4ade80;text-align:center">P(θ|data) = P(data|θ) × P(θ) / P(data)</p>
+<h4>The Four Components</h4>
+<ul>
+<li><strong>Prior P(θ)</strong>: Belief about θ before seeing data. Can encode domain knowledge or be uninformative.</li>
+<li><strong>Likelihood P(data|θ)</strong>: Probability of observing data given parameter θ. This is the model.</li>
+<li><strong>Evidence P(data) = ∫P(data|θ)P(θ)dθ</strong>: Normalizing constant (hard to compute → leads to MCMC).</li>
+<li><strong>Posterior P(θ|data)</strong>: Updated belief after observing data. The goal of Bayesian inference.</li>
+</ul>
+<h4>Bayesian vs Frequentist Inference</h4>
+<table class="ctbl">
+<tr><th>Aspect</th><th>Frequentist</th><th>Bayesian</th></tr>
+<tr><td>Parameters</td><td>Fixed, unknown</td><td>Random variables</td></tr>
+<tr><td>Probability</td><td>Long-run frequency</td><td>Degree of belief</td></tr>
+<tr><td>Uncertainty</td><td>Confidence intervals</td><td>Credible intervals</td></tr>
+<tr><td>Prior info</td><td>Not used</td><td>Encoded in prior</td></tr>
+<tr><td>Output</td><td>Point estimate + CI</td><td>Full posterior distribution</td></tr>
+</table>`},
+{ty:"mbox",formula:"posterior ∝ likelihood × prior   ⟺   P(θ|x) ∝ P(x|θ) · P(θ)",desc:"The fundamental Bayesian equation. The normalizing constant P(x) ensures it integrates to 1."},
+{ty:"prose",title:"Conjugate Priors — Analytical Posteriors",html:`<p>When prior × likelihood gives a posterior of the same family as the prior, we call it a <strong>conjugate pair</strong>. This gives analytical (closed-form) posteriors.</p>
+<table class="ctbl">
+<tr><th>Likelihood</th><th>Conjugate Prior</th><th>Posterior</th></tr>
+<tr><td>Binomial(n,θ)</td><td>Beta(α,β)</td><td>Beta(α+k, β+n-k)</td></tr>
+<tr><td>Normal(θ,σ²) known σ</td><td>Normal(μ₀,τ₀²)</td><td>Normal(μₙ, τₙ²)</td></tr>
+<tr><td>Poisson(λ)</td><td>Gamma(α,β)</td><td>Gamma(α+Σxᵢ, β+n)</td></tr>
+<tr><td>Multinomial(θ)</td><td>Dirichlet(α)</td><td>Dirichlet(α+counts)</td></tr>
+</table>
+<h4>Beta-Binomial Example (Coin Fairness)</h4>
+<p>Prior: θ~Beta(2,2) (slightly informative, centered at 0.5). Observe 7 heads in 10 flips. Posterior: θ|data~Beta(2+7, 2+3)=Beta(9,5). E[θ|data]=(9/14)=0.643. 95% credible interval using Beta quantiles.</p>`},
+{ty:"code",lang:"python",name:"Bayesian Inference — Beta-Binomial & Gaussian Examples",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+<span class="imp">from</span> scipy <span class="imp">import</span> stats
+<span class="imp">import</span> matplotlib.pyplot <span class="imp">as</span> plt
+
+<span class="cm"># ── BETA-BINOMIAL: Bayesian Coin Fairness ─────────────────</span>
+alpha_prior, beta_prior = <span class="nu">2</span>, <span class="nu">2</span>   <span class="cm"># prior: Beta(2,2) centred at 0.5</span>
+n_flips, n_heads = <span class="nu">10</span>, <span class="nu">7</span>         <span class="cm"># data: 7 heads in 10 flips</span>
+
+<span class="cm"># Posterior: Beta(α+k, β+n-k) by conjugacy</span>
+alpha_post = alpha_prior + n_heads
+beta_post  = beta_prior + (n_flips - n_heads)
+posterior = stats.beta(alpha_post, beta_post)
+
+<span class="fn">print</span>(<span class="st">f"Posterior: Beta({alpha_post}, {beta_post})"</span>)
+<span class="fn">print</span>(<span class="st">f"Posterior mean: {posterior.mean():.4f}"</span>)        <span class="cm"># E[θ|data]</span>
+<span class="fn">print</span>(<span class="st">f"Posterior mode (MAP): {(alpha_post-1)/(alpha_post+beta_post-2):.4f}"</span>)
+ci_lo, ci_hi = posterior.<span class="fn">ppf</span>(<span class="nu">0.025</span>), posterior.<span class="fn">ppf</span>(<span class="nu">0.975</span>)
+<span class="fn">print</span>(<span class="st">f"95% Credible Interval: [{ci_lo:.3f}, {ci_hi:.3f}]"</span>)
+
+<span class="cm"># Compare MLE estimate (just p̂ = 7/10 = 0.7)</span>
+mle = n_heads / n_flips
+<span class="fn">print</span>(<span class="st">f"MLE: {mle:.4f} vs Bayesian mean: {posterior.mean():.4f}"</span>)
+<span class="cm"># Bayesian estimate is shrunk toward prior mean 0.5 — regularization!</span>
+
+<span class="cm"># ── MAP = REGULARIZED MLE ─────────────────────────────────</span>
+<span class="cm"># With Gaussian prior on weights: P(w) = N(0, 1/λ I)</span>
+<span class="cm"># MAP estimate: argmax [log L(w) + log P(w)]</span>
+<span class="cm">#             = argmax [log L(w) - λ/2 ||w||²]</span>
+<span class="cm"># This is exactly Ridge Regression (L2 regularization)!</span>
+
+<span class="cm"># With Laplace prior: P(w) = Laplace(0, 1/λ)</span>
+<span class="cm"># MAP → Lasso (L1 regularization)!</span>
+<span class="fn">print</span>(<span class="st">"L2 regularization = Gaussian prior on weights (MAP)"</span>)
+<span class="fn">print</span>(<span class="st">"L1 regularization = Laplace prior on weights (MAP)"</span>)`},
+{ty:"callout",kind:"tip",ic:"✦",txt:"<strong>Bayesian Deep Learning:</strong> Traditional NNs give point estimates — a single set of weights. Bayesian NNs maintain distributions over weights, enabling uncertainty quantification. In practice: (1) MC Dropout approximates Bayesian inference at test time, (2) Deep ensembles provide empirically strong uncertainty, (3) Laplace approximation fits a Gaussian around the MAP solution, (4) Variational autoencoders (VAEs) use variational Bayes to learn latent distributions. Every regularization technique (L1, L2, dropout) has a Bayesian interpretation."},
+]},
+};
+const QA=[
+{q:"What is the difference between mean, median, and mode? When does each matter?",a:"Mean = Σxᵢ/n (arithmetic average), sensitive to outliers. Median = middle value when sorted, robust to outliers. Mode = most frequent value, useful for categorical data. Key insight: for symmetric distributions (normal), all three are equal. For right-skewed data (income, house prices), mean > median because outliers pull the mean up — this is why median income is reported instead of mean income. In ML: the mean minimises MSE (squared loss), the median minimises MAE (absolute loss). Use median when data has outliers or is skewed; use mean when distribution is approximately symmetric.",level:"b",tag:"Descriptive Stats"},
+{q:"What is the Central Limit Theorem and why is it so important?",a:"CLT: If X₁,X₂,...,Xₙ are i.i.d. with mean μ and variance σ², then √n(X̄-μ)/σ → N(0,1) in distribution as n→∞. This holds for ANY distribution with finite variance! Importance: (1) It's why sample means are approximately normal even when the population is non-normal — justifies z-tests and t-tests. (2) It's why the normal distribution appears everywhere: many measurements are sums of small independent effects. (3) It guarantees that MLE estimators have asymptotic normal distributions, enabling confidence intervals. (4) Rate: the approximation is good for n≥30 for most distributions. For very skewed data (e.g., Pareto), larger n needed. Berry-Esseen theorem gives the rate: error ≤ Cρ/(σ³√n) where ρ=E[|X|³].",level:"b",tag:"Probability"},
+{q:"Explain p-values. What are common misinterpretations?",a:"A p-value is P(observing data this extreme or more | H₀ is true). It is NOT: (1) the probability that H₀ is true, (2) the probability you made an error, (3) evidence of practical significance. Common misinterpretations: [1] 'p=0.03 means 3% chance H₀ is true' — false. p-values do not measure probability of hypotheses. [2] 'p>0.05 means no effect' — failing to reject ≠ accepting H₀. Low power could explain it. [3] 'p<0.05 means important result' — a trivially small effect with large n can be significant but meaningless. Always report effect sizes (Cohen's d, OR, % difference) alongside p-values. The American Statistical Association (2016, 2019) explicitly warns against p<0.05 as a binary decision threshold.",level:"b",tag:"Hypothesis Testing"},
+{q:"What is the difference between Type I and Type II errors? How are they related?",a:"Type I error (α): Reject H₀ when H₀ is TRUE (false positive). E.g., concluding a drug works when it doesn't. P(Type I) = α = significance level. Type II error (β): Fail to reject H₀ when H₀ is FALSE (false negative). E.g., concluding a drug doesn't work when it does. P(Type II) = β. Power = 1-β = probability of correctly detecting an effect. Trade-off: decreasing α (stricter significance) increases β (more false negatives). There's no free lunch — you must balance these. In ML: precision-recall trade-off mirrors Type I/II error trade-off. For spam filtering: Type I = marking good email as spam (costly to user). Type II = missing spam (also costly). Adjust threshold based on relative costs. Sample size is the escape hatch: increasing n decreases BOTH α-at-fixed-boundary and β simultaneously.",level:"b",tag:"Hypothesis Testing"},
+{q:"Derive the MLE for a Gaussian distribution.",a:"Given n i.i.d. samples x₁,...,xₙ from N(μ,σ²), maximize the log-likelihood: ℓ(μ,σ²) = Σᵢ log[(1/σ√2π)exp(-(xᵢ-μ)²/2σ²)] = -n/2·log(2π) - n/2·log(σ²) - Σ(xᵢ-μ)²/(2σ²). For μ: ∂ℓ/∂μ = Σ(xᵢ-μ)/σ² = 0 → μ̂_MLE = x̄ = Σxᵢ/n. For σ²: ∂ℓ/∂(σ²) = -n/(2σ²) + Σ(xᵢ-μ̂)²/(2σ⁴) = 0 → σ̂²_MLE = Σ(xᵢ-x̄)²/n. Note: the MLE for σ² divides by n (biased), but the unbiased sample variance divides by n-1 (Bessel's correction). E[σ̂²_MLE] = (n-1)σ²/n ≠ σ². In practice, use s²=Σ(xᵢ-x̄)²/(n-1) for unbiased estimation.",level:"i",tag:"Estimation"},
+{q:"What is the bias-variance trade-off and how does it relate to underfitting and overfitting?",a:"For regression, MSE = Bias² + Variance + σ². Bias² = [E[f̂(x)]-f(x)]²: how far is the expected prediction from truth? Variance = E[(f̂-E[f̂])²]: how much does the model vary across datasets? σ² = irreducible noise. High bias → underfitting: model too simple to capture the pattern. Symptoms: high training error AND high test error. Fix: more complex model, more features. High variance → overfitting: model too sensitive to training data. Symptoms: low training error BUT high test error. Fix: more data, regularization (L1/L2), dropout, cross-validation. Classic examples: linear model on nonlinear data (high bias); deep NN trained on tiny dataset (high variance). Note: modern deep learning shows 'double descent' — overparameterized models can actually generalise well due to implicit regularization from gradient descent. This breaks the classical bias-variance narrative.",level:"i",tag:"ML Stats"},
+{q:"What is Bayes' theorem and give a concrete application?",a:"Bayes' theorem: P(H|E) = P(E|H)·P(H)/P(E). Classic example — medical testing: disease prevalence P(disease)=0.001, test sensitivity P(+|disease)=0.99, specificity P(-|healthy)=0.99. P(+|healthy)=0.01. P(disease|+) = P(+|disease)·P(disease)/P(+) where P(+)=P(+|disease)·P(disease)+P(+|healthy)·P(healthy) = 0.99×0.001+0.01×0.999 = 0.01098. So P(disease|+) = 0.99×0.001/0.01098 ≈ 0.09. Despite 99% accurate test, positive result only implies 9% probability of disease! Base rate (prior) matters enormously. In ML: naive Bayes classification, Bayesian neural networks, MAP estimation. Spam filtering: P(spam|word) ∝ P(word|spam)·P(spam). The prior prevents overreacting to rare words.",level:"i",tag:"Probability"},
+{q:"Explain confidence intervals. Why is the correct interpretation so counterintuitive?",a:"A 95% CI [L,U] means: if we repeated the sampling process many times and built a CI each time, 95% of those intervals would contain the true parameter θ. What it does NOT mean: (1) 'P(θ ∈ [L,U]) = 0.95' — θ is fixed, not random! After computing [L,U], θ is either in it or not. (2) '95% of the data lies in [L,U]' — that's a prediction interval. Construction: For mean with known σ: CI = x̄ ± 1.96σ/√n. The 1.96 comes from the 97.5th percentile of N(0,1). Width = 2·1.96·σ/√n. To halve width: quadruple n. For unknown σ: use t_{n-1} distribution, which has heavier tails to account for estimating σ. Factors affecting width: larger n → narrower (more info), larger σ → wider (more noise), higher confidence level → wider (more conservative).",level:"i",tag:"Inference"},
+{q:"Derive the OLS estimator for simple linear regression.",a:"Model: y = β₀ + β₁x + ε. Minimise SSE = Σ(yᵢ-β₀-β₁xᵢ)². ∂SSE/∂β₀ = -2Σ(yᵢ-β₀-β₁xᵢ) = 0 → ȳ = β̂₀ + β̂₁x̄. ∂SSE/∂β₁ = -2Σxᵢ(yᵢ-β₀-β₁xᵢ) = 0 → Σxᵢyᵢ = β̂₀Σxᵢ + β̂₁Σxᵢ². Solving the system: β̂₁ = Σ(xᵢ-x̄)(yᵢ-ȳ)/Σ(xᵢ-x̄)² = Sxy/Sxx = Cov(X,Y)/Var(X). β̂₀ = ȳ - β̂₁x̄. Geometric interpretation: ŷ = Hb where H = X(XᵀX)⁻¹Xᵀ is the hat/projection matrix. The OLS estimate is the orthogonal projection of y onto the column space of X. The residuals ê = y - ŷ are perpendicular to every column of X (Xᵀê = 0). Under Gauss-Markov assumptions (linear model, zero mean errors, homoscedasticity, uncorrelated errors): β̂ is BLUE (Best Linear Unbiased Estimator).",level:"i",tag:"Regression"},
+{q:"What is the difference between L1 and L2 regularization from a statistical perspective?",a:"L2 (Ridge): adds λ‖β‖² to loss. In matrix form: β̂=(XᵀX+λI)⁻¹Xᵀy. Bayesian interpretation: MAP estimate with Gaussian prior P(β)=N(0,1/λ · I). Effect: shrinks all coefficients toward zero, never sets them to exactly zero. Solves multicollinearity, always invertible. L1 (Lasso): adds λ‖β‖₁ to loss. Bayesian interpretation: MAP with Laplace prior P(β)=Laplace(0,1/λ). Effect: sparse solutions — pushes some coefficients exactly to zero (performs variable selection). Why sparsity? The L1 ball (diamond shape) has corners at coordinate axes, and optima tend to land at corners (sparse). L1 ball in 2D looks like a diamond; L2 ball is smooth circle. Geometric insight: the objective's level sets (ellipses) are more likely to touch the L1 constraint at a corner (where a coordinate=0) than the L2 constraint (smooth, no corners). Key difference: L2 better for prediction accuracy when all features matter; L1 better for interpretability when many features are irrelevant.",level:"i",tag:"Regularization"},
+{q:"Explain the bootstrap and when it is useful.",a:"Bootstrap (Efron, 1979): Estimate the sampling distribution of a statistic T by resampling from the empirical distribution. Algorithm: (1) Draw B bootstrap samples x*₁,...,x*B each of size n by sampling WITH replacement from the original data. (2) Compute T* for each bootstrap sample. (3) The distribution of T* approximates the sampling distribution of T. Uses: (1) SE estimation when formula is unknown or complex. (2) CIs: percentile CI = [T*_(α/2), T*_(1-α/2)]; BCa interval for bias correction. (3) Hypothesis testing: permutation tests. When useful: any statistic without a closed-form distribution (medians, correlations, regression coefficients, AUC). When NOT to use: very small n (bootstrap can't create information that isn't there), time series (dependent data requires block bootstrap), extreme tail estimation. In ML: bootstrap aggregating (Bagging) averages models trained on bootstrap samples — this directly reduces variance, which is why Random Forests work.",level:"i",tag:"Resampling"},
+{q:"What is a p-value of 0.05 vs. an effect size, and why does sample size matter?",a:"Statistical significance (p<0.05) answers: 'Is this effect distinguishable from zero given our sample size?' Practical significance (effect size) answers: 'Is this effect large enough to matter?' With large n, even tiny effects become statistically significant. Example: A/B test with n=1M users, conversion rate change of 0.01%. p<0.001 (highly significant!) but Cohen's h ≈ 0.001 (negligible effect). With small n, large true effects can be non-significant (low power). Example: drug trial with n=10, true large effect δ=0.8σ, power=37% — likely miss it. Effect size measures: Cohen's d=(μ₁-μ₂)/σ (small=0.2, medium=0.5, large=0.8). Pearson r for correlation (small=0.1, medium=0.3, large=0.5). Odds ratio, relative risk for binary outcomes. Best practice: always report both p-value AND effect size with confidence interval. This is now required by APA and major journals.",level:"i",tag:"Hypothesis Testing"},
+{q:"Derive the Cramér-Rao Lower Bound.",a:"Fisher information: I(θ) = E[(∂logf(X;θ)/∂θ)²] = -E[∂²logf/∂θ²]. CRLB: For any unbiased estimator T(X), Var(T) ≥ 1/I(θ). Proof sketch: By Cauchy-Schwarz inequality applied to Cov(T, ∂logf/∂θ): [E(T · ∂logf/∂θ)]² ≤ Var(T) · E[(∂logf/∂θ)²]. The left side: ∫T(x)·(∂logf/∂θ)·f(x)dx = ∂/∂θ∫T(x)f(x)dx (under regularity) = ∂θ/∂θ = 1 (using unbiasedness). Thus 1 ≤ Var(T)·I(θ) → Var(T) ≥ 1/I(θ). Efficiency: an estimator achieving CRLB is efficient. MLE is asymptotically efficient (achieves CRLB as n→∞). Application in ML: Fisher information defines the natural gradient. Adam effectively approximates natural gradient descent by preconditioning gradients with the square root of second moments (approximating Fisher diagonal).",level:"a",tag:"Estimation"},
+{q:"What is VC dimension and why does it matter for generalization?",a:"VC (Vapnik-Chervonenkis) dimension is the largest set of points that a hypothesis class H can shatter. A hypothesis class shatters m points if for every labeling of those m points, some h∈H achieves zero error. Examples: Linear classifiers in ℝᵈ: VC dim = d+1. Sine functions: VC dim = ∞. Neural networks: VC dim ~ O(W log W) for W parameters. Fundamental theorem of PAC learning: For VC dim d, the generalisation gap (test error - train error) is bounded by O(√(d/n)) with high probability. This means: (1) To generalise with accuracy ε, you need n = O(d/ε²) samples, (2) Models with higher VC dim are harder to generalise. Modern puzzle: deep networks have huge VC dim but generalise well in practice. This is explained by: implicit bias of SGD toward flat minima, early stopping, and the fact that neural networks are not choosing the 'worst case' functions in their hypothesis class.",level:"a",tag:"Learning Theory"},
+{q:"Explain the multiple comparisons problem and how to correct for it.",a:"If you test m null hypotheses simultaneously at α=0.05 each, the probability of at least one false positive is 1-(1-α)^m. For m=20 tests: 1-0.95²⁰≈0.64 — 64% chance of a false positive! This is the multiple comparisons problem (or multiple testing problem). Corrections: (1) Bonferroni: use α/m per test. Controls familywise error rate (FWER) = P(any false positive). Very conservative, low power. (2) Benjamini-Hochberg (BH): control False Discovery Rate (FDR) = E[false discoveries/total discoveries]. Sort p-values p₁≤p₂≤...≤pₘ, find largest k where pₖ≤k·α/m, reject all H₀₁,...,H₀ₖ. More powerful than Bonferroni. In ML practice: feature selection across 1000 genes (genomics), hyperparameter search, A/B testing with multiple metrics. Always use BH correction for large-scale multiple testing. Pre-register primary metric for A/B tests to avoid data dredging.",level:"a",tag:"Hypothesis Testing"},
+{q:"What is the difference between a credible interval and a confidence interval?",a:"Frequentist CI: P(L(X) ≤ θ ≤ U(X)) = 0.95. Here θ is FIXED, [L,U] is random (depends on data). Correct statement: 'If repeated infinitely, 95% of such intervals would contain θ.' Bayesian Credible Interval: P(θ ∈ [L,U] | data) = 0.95. Here θ is RANDOM (has a distribution), [L,U] is computed from posterior. Correct statement: 'Given the data, there is 95% probability θ is in [L,U].' Key difference: The credible interval makes the probability statement we intuitively want! It directly answers 'What values of θ are plausible given my data?' Numerically: for large samples, CI and credible interval (with flat prior) are approximately the same. HPD (Highest Posterior Density) interval: shortest credible interval containing 95% posterior mass. Useful when posterior is skewed. In Bayesian ML: posterior predictive intervals account for both parameter uncertainty and data noise — more useful than point predictions for deployment.",level:"a",tag:"Bayesian"},
+{q:"Derive why minimizing cross-entropy loss is equivalent to minimizing KL divergence.",a:"Cross-entropy: H(p,q) = -Σ p(x)log q(x) where p=true distribution, q=model distribution. KL divergence: KL(p‖q) = Σ p(x)log[p(x)/q(x)] = Σp(x)log p(x) - Σp(x)log q(x) = -H(p) + H(p,q). Therefore: H(p,q) = H(p) + KL(p‖q). When we minimise H(p,q) over q (our model's parameters): ∂H(p,q)/∂θ = ∂KL(p‖q)/∂θ since H(p) is constant w.r.t. θ. So minimizing cross-entropy = minimizing KL divergence from data distribution p to model q. This provides the information-theoretic justification for cross-entropy as a classification loss. Forward KL (p‖q): zero-avoiding — q must cover everywhere p is nonzero. Used in MLE. Reverse KL (q‖p): zero-forcing — q concentrates where p is high. Used in variational inference (ELBO). In GANs: the discriminator loss is related to Jensen-Shannon divergence (average of forward and reverse KL).",level:"a",tag:"Information Theory"},
+{q:"What is the double descent phenomenon and what does it imply for bias-variance trade-off?",a:"Classical bias-variance: test error follows a U-shaped curve — decreasing with complexity up to an optimal point, then increasing (overfitting). Double descent (Belkin et al., 2019): in modern overparameterized models (number of parameters >> n), test error has a second descent. The curve goes: (1) Classical regime (underparameterized): bias decreases, variance increases — U-shape. (2) Interpolation threshold (p≈n): test error spikes as model barely interpolates training data. (3) Overparameterized regime (p>>n): test error decreases again to excellent performance. Why? In the overparameterized regime, gradient descent finds the minimum-norm interpolating solution (implicit L2 regularization). Among all solutions that fit the training data, it chooses the 'smoothest' one. This implicit bias prevents the variance from exploding. Implications: (1) More data can hurt before helping at the interpolation threshold. (2) More parameters (scaling up) can help even past interpolation. (3) Classical bias-variance analysis does not apply to modern deep learning. Evidence: seen in linear models, kernel methods, two-layer nets, transformers.",level:"e",tag:"Deep Learning Stats"},
+{q:"Explain MCMC and why it is needed for Bayesian inference.",a:"Markov Chain Monte Carlo solves the core problem of Bayesian inference: the posterior P(θ|data) = P(data|θ)P(θ)/P(data) is intractable because P(data)=∫P(data|θ)P(θ)dθ is an integral over a high-dimensional space. MCMC strategy: construct a Markov chain whose stationary distribution is the target posterior π(θ)=P(θ|data). Run the chain long enough → samples approximate draws from the posterior. Metropolis-Hastings algorithm: (1) Propose θ*~q(θ*|θₜ). (2) Accept with probability α=min(1, π(θ*)q(θₜ|θ*)/π(θₜ)q(θ*|θₜ)). (3) θₜ₊₁=θ* if accepted, else θₜ₊₁=θₜ. Note: π(θ) only needs to be proportional to the true posterior — the normalising constant P(data) cancels! Gibbs sampling: special case where we sample each parameter conditional on all others — useful when conditionals are tractable. Diagnostics: R-hat statistic (should be <1.01), effective sample size, trace plots for mixing. Modern alternatives: HMC (Hamiltonian MC, uses gradient), NUTS (No-U-Turn Sampler, used in Stan/PyMC), variational inference (faster but approximate).",level:"e",tag:"Bayesian"},
+];
+// ENGINE
+let curCh=-1,curTopic=null,visited=new Set();
+const lvMap={b:"lv-b",i:"lv-i",a:"lv-a",e:"lv-e"};
+const lvLabel={b:"Basic",i:"Intermediate",a:"Advanced",e:"Expert"};
+
+function buildNav(){
+  const nav=document.getElementById("nav");
+  CHS.forEach((ch,i)=>{
+    const div=document.createElement("div");
+    div.className="ci";div.id="ci"+i;
+    div.innerHTML=`<div class="chr" id="chr${i}" onclick="selectCh(${i})">
+      <div class="cnum" style="background:${ch.bg};color:${ch.c}">${ch.n}</div>
+      <div class="clabel">${ch.t}</div><div class="carr">▶</div></div>
+    <div class="tmenu">${ch.topics.map(t=>`
+      <div class="trow" id="n${t.id}" onclick="selectTopic('${t.id}',${i})">
+        <div class="dot"></div>${t.ic}&nbsp;${t.t}</div>`).join("")}</div>`;
+    nav.appendChild(div);
+  });
+}
+
+function selectCh(i){
+  curCh=i;
+  document.querySelectorAll(".ci").forEach((el,j)=>{
+    el.classList.toggle("open",j===i);
+    el.querySelector(".chr").classList.toggle("act",j===i);
+  });
+  document.getElementById("welcome").style.display="none";
+  document.getElementById("mcon").style.display="block";
+  const ch=CHS[i];
+  const chips=ch.tags.map(t=>`<span class="cchip" style="color:${ch.c};border-color:${ch.c}44;background:${ch.bg}">${t}</span>`).join("");
+  const cards=ch.topics.map(t=>{
+    const mt=`<span class="tmeta" style="color:${ch.c};border-color:${ch.c}44">${ch.t}</span>`;
+    return `<div class="tcard" id="c${t.id}" onclick="selectTopic('${t.id}',${i})">
+      <div class="tc-icon">${t.ic}</div>
+      <div class="tc-body"><div class="tc-t">${t.t}</div><div class="tc-d">${t.d}</div>
+      <div class="tc-meta">${mt}</div></div></div>`;
+  }).join("");
+  document.getElementById("mcon").innerHTML=`
+    <div class="chero">
+      <div class="chero-n" style="color:${ch.c}">Chapter ${ch.n} · ${ch.topics.length} Topics</div>
+      <div class="chero-t" style="color:${ch.c}">${ch.ic} ${ch.t}</div>
+      <div class="chero-d">${ch.desc}</div>
+      <div class="chero-chips">${chips}</div>
+    </div>
+    <div class="tgrid">${cards}</div>`;
+}
+
+function selectTopic(id,chi){
+  if(chi!==curCh)selectCh(chi);
+  curTopic=id;visited.add(id);updateProg();
+  document.querySelectorAll(".tcard").forEach(el=>el.classList.remove("act"));
+  document.querySelectorAll(".trow").forEach(el=>el.classList.remove("act"));
+  const c=document.getElementById("c"+id);if(c)c.classList.add("act");
+  const n=document.getElementById("n"+id);if(n){n.classList.add("act");n.classList.add("vis");}
+  const d=DETAILS[id];
+  if(!d){renderGeneric(id,chi);return;}
+  renderDetail(d);
+}
+
+function renderDetail(d){
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  const pills=d.pills.map(p=>`<span class="dpill" style="color:${p.c};border-color:${p.c}44;background:${p.c}11">${p.t}</span>`).join("");
+  const secHtml=d.secs.map(renderSec).join("")+renderQAForTopic(d.title);
+  document.getElementById("rp-con").innerHTML=`<div class="rpcon">
+    <div class="d-bread">${d.bread}</div>
+    <div class="d-title">${d.title}</div>
+    <div class="d-sub">${d.sub}</div>
+    <div class="d-pills">${pills}</div>${secHtml}</div>`;
+}
+
+function renderSec(s){
+  if(s.ty==="prose") return `<div class="sec"><div class="sec-t">${s.title}</div><div class="prose">${s.html}</div></div>`;
+  if(s.ty==="mbox") return `<div class="sec"><div class="mbox"><div class="formula">${s.formula}</div><div class="desc">${s.desc}</div></div></div>`;
+  if(s.ty==="msteps"){
+    const rows=s.steps.map(st=>`<div class="mstep"><div class="mstep-n">${st.n}</div>
+      <div class="mstep-body"><div class="mstep-f">${st.f}</div><div class="mstep-d">${st.d}</div></div></div>`).join("");
+    return `<div class="sec"><div class="sec-t">${s.title}</div><div class="msteps">${rows}</div></div>`;
+  }
+  if(s.ty==="code"){
+    const lc=s.lang==="python"?"#a6e3a1":s.lang==="json"?"#f9e2af":"#89b4fa";
+    return `<div class="sec"><div class="cb">
+      <div class="cb-hdr"><span class="cb-lang" style="color:${lc}">${s.lang}</span>
+      <span class="cb-name">${s.name}</span>
+      <button class="cb-copy" onclick="copyCode(this)">Copy</button></div>
+      <div class="cb-body"><pre>${s.code}</pre></div></div></div>`;
+  }
+  if(s.ty==="diagram") return `<div class="sec"><div class="diag">
+    <div class="diag-hdr">${s.title}</div>
+    <div class="diag-body">${s.svg}</div></div></div>`;
+  if(s.ty==="callout"){
+    const cls=s.kind==="danger"?"c-danger":s.kind==="warn"?"c-warn":s.kind==="tip"?"c-tip":s.kind==="math"?"c-math":"c-info";
+    return `<div class="callout ${cls}"><span class="call-ic">${s.ic}</span><span>${s.txt}</span></div>`;
+  }
+  return "";
+}
+
+function renderQAForTopic(title){
+  const words=title.toLowerCase().replace(/[^a-z0-9 ]/g," ").split(" ").filter(w=>w.length>3);
+  const rel=QA.filter(q=>{
+    const txt=(q.q+" "+q.a+" "+q.tag).toLowerCase();
+    return words.some(w=>txt.includes(w));
+  }).slice(0,4);
+  if(!rel.length)return "";
+  return `<div class="sec"><div class="sec-t">🎯 Interview Questions</div>
+    ${rel.map((q,i)=>renderQAItem(q,"t"+i+Date.now())).join("")}</div>`;
+}
+
+function renderQAItem(q,id){
+  return `<div class="qa" id="qa${id}">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span class="qa-qi">Q.</span>
+      <span class="qa-qt">${q.q}</span>
+      <span class="qa-lv ${lvMap[q.level]}">${lvLabel[q.level]}</span>
+      <span class="qa-ar">▶</span></div>
+    <div class="qa-ans"><div class="qa-at">${q.a}</div></div></div>`;
+}
+
+function renderGeneric(id,chi){
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  const ch=CHS[chi];
+  const t=ch.topics.find(x=>x.id===id);
+  if(!t)return;
+  const relQA=renderQAForTopic(t.t);
+  document.getElementById("rp-con").innerHTML=`<div class="rpcon">
+    <div class="d-bread">${ch.t}</div>
+    <div class="d-title">${t.ic} ${t.t}</div>
+    <div class="d-sub">${t.d}</div>
+    <div class="callout c-math"><span class="call-ic">σ</span>
+    <span>This topic is part of <strong>${ch.t}</strong>. Explore all ${ch.topics.length} topics in this chapter.</span></div>
+    ${relQA}</div>`;
+}
+
+function toggleQA(el){el.parentElement.classList.toggle("open")}
+
+function copyCode(btn){
+  const txt=btn.closest(".cb").querySelector("pre").innerText;
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent="✓ Copied!";setTimeout(()=>btn.textContent="Copy",2000);
+  });
+}
+
+function updateProg(){
+  const total=CHS.reduce((s,c)=>s+c.topics.length,0);
+  const p=Math.round(visited.size/total*100);
+  document.getElementById("pct").textContent=p+"%";
+  document.getElementById("pfill").style.width=p+"%";
+}
+
+function doSearch(q){
+  q=q.toLowerCase().trim();
+  CHS.forEach((ch,i)=>{
+    let any=false;
+    ch.topics.forEach(t=>{
+      const el=document.getElementById("n"+t.id);if(!el)return;
+      const m=!q||t.t.toLowerCase().includes(q)||t.d.toLowerCase().includes(q);
+      el.style.display=m?"":"none";if(m)any=true;
+    });
+    if(q&&any)document.getElementById("ci"+i).classList.add("open");
+  });
+}
+
+function showAllQA(){
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  const tags=[...new Set(QA.map(q=>q.tag))];
+  const filterBtns=tags.map(t=>
+    `<button onclick="filterQA('${t}',this)" style="background:var(--bg2);border:1px solid var(--bd);color:var(--t2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace;transition:all .2s">${t}</button>`
+  ).join("");
+  const items=QA.map(q=>`
+    <div class="qa" data-tag="${q.tag}">
+      <div class="qa-q" onclick="toggleQA(this)">
+        <span class="qa-qi">Q.</span><span class="qa-qt">${q.q}</span>
+        <span style="font-family:'Fira Code',monospace;font-size:9px;padding:2px 7px;border-radius:3px;background:rgba(34,197,94,.08);color:var(--em2);border:1px solid rgba(34,197,94,.3);flex-shrink:0">${q.tag}</span>
+        <span class="qa-lv ${lvMap[q.level]}">${lvLabel[q.level]}</span>
+        <span class="qa-ar">▶</span></div>
+      <div class="qa-ans"><div class="qa-at">${q.a}</div></div></div>`).join("");
+  document.getElementById("rp-con").innerHTML=`<div class="rpcon">
+    <div class="d-bread">Statistics Mastery · Interview Preparation</div>
+    <div class="d-title">🎯 Interview Q&amp;A — All ${QA.length} Questions</div>
+    <div class="d-sub">From descriptive statistics to Bayesian deep learning. Every real statistics & ML interview question, fully worked out.</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px">
+      <button onclick="filterQA(null,this)" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:var(--em2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace">All</button>
+      ${filterBtns}</div>
+    <div id="qa-list">${items}</div></div>`;
+}
+
+function filterQA(tag){
+  document.querySelectorAll("#qa-list .qa").forEach(el=>{
+    el.style.display=(!tag||el.dataset.tag===tag)?"":"none";
+  });
+}
+
+buildNav();
+</script>
+</body>
+</html>

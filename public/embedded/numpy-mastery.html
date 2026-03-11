@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NumPy Mastery — Arrays, Broadcasting & ML Computing</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Fraunces:ital,wght@0,700;0,900;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#01030d;--bg1:#02050f;--bg2:#040a1a;--bg3:#071020;
+  --bd:#0d2044;--bd2:#163366;
+  --np:#4895ef;--np2:#72b0f5;--np3:#b8d5fb;--np4:#1a3a6e;
+  --or:#ff6b35;--or2:#ff8c5a;--or3:#ffc4a8;
+  --vi:#7c3aed;--vi2:#a78bfa;
+  --em:#10b981;--em2:#34d399;
+  --ro:#f43f5e;--ro2:#fb7185;
+  --t1:#e8eeff;--t2:#8da0c4;--t3:#3a4d6e;
+  --lw:272px;--rw:610px;--hh:54px;
+  --tab-h:46px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--t1);font-family:'Space Grotesk',sans-serif}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:var(--bg0)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+
+/* ── HEADER ──────────────────────────────────────────── */
+.hdr{position:fixed;top:0;left:0;right:0;height:var(--hh);z-index:300;
+  background:rgba(1,3,13,.96);border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;padding:0 18px;gap:14px;backdrop-filter:blur(24px)}
+.logo{font-family:'Fraunces',serif;font-size:18px;font-weight:900;
+  background:linear-gradient(135deg,var(--np),var(--np3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+.hdr-sep{width:1px;height:22px;background:var(--bd)}
+.hdr-sub{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--t3);letter-spacing:.6px}
+.hdr-r{margin-left:auto;display:flex;gap:7px;align-items:center}
+.badge{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:3px 10px;
+  border-radius:4px;border:1px solid;cursor:default}
+.b-np{color:var(--np2);border-color:rgba(72,149,239,.3);background:rgba(72,149,239,.07)}
+.b-or{color:var(--or2);border-color:rgba(255,107,53,.3);background:rgba(255,107,53,.07)}
+.b-btn{cursor:pointer;color:var(--np2);border-color:rgba(72,149,239,.3);
+  background:rgba(72,149,239,.07);transition:all .2s}
+.b-btn:hover{background:rgba(72,149,239,.18);border-color:var(--np)}
+.prog-wrap{display:flex;align-items:center;gap:6px}
+.prog-pct{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t2)}
+.prog-track{width:72px;height:3px;background:var(--bd);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--np4),var(--np2));border-radius:3px;transition:width .5s;width:0%}
+
+/* ── LAYOUT ─────────────────────────────────────────── */
+.layout{display:flex;height:100vh;padding-top:var(--hh)}
+
+/* ── LEFT PANEL ──────────────────────────────────────── */
+.lp{width:var(--lw);min-width:var(--lw);background:var(--bg1);border-right:1px solid var(--bd);overflow-y:auto;flex-shrink:0}
+.lp-top{padding:9px;border-bottom:1px solid var(--bd);background:var(--bg1);position:sticky;top:0;z-index:10}
+.srch{width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;
+  padding:6px 10px;color:var(--t1);font-size:11px;font-family:'Space Grotesk',sans-serif;
+  outline:none;transition:border-color .2s}
+.srch:focus{border-color:var(--np)}.srch::placeholder{color:var(--t3)}
+.lp-stats{display:flex;gap:5px;margin-top:7px}
+.lst{flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:5px;padding:5px 6px;text-align:center}
+.lst-n{font-family:'Fraunces',serif;font-size:13px;font-weight:900;color:var(--np2)}
+.lst-l{font-size:8.5px;color:var(--t3);font-family:'JetBrains Mono',monospace;margin-top:1px}
+.ci{border-bottom:1px solid rgba(13,32,68,.5)}
+.chr{display:flex;align-items:center;gap:7px;padding:8px 10px;cursor:pointer;transition:background .15s;user-select:none}
+.chr:hover{background:var(--bg2)}
+.chr.act{background:linear-gradient(90deg,rgba(72,149,239,.1),transparent);border-left:2px solid var(--np)}
+.cnum{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:600;flex-shrink:0}
+.clabel{font-size:11px;font-weight:500;color:var(--t2);flex:1;line-height:1.3}
+.chr.act .clabel{color:var(--t1)}
+.carr{font-size:7px;color:var(--t3);transition:transform .2s}
+.ci.open .carr{transform:rotate(90deg)}
+.tmenu{display:none;padding:2px 0 5px}.ci.open .tmenu{display:block}
+.trow{padding:4px 10px 4px 38px;font-size:10.5px;color:var(--t3);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
+.trow:hover{color:var(--t2);background:rgba(255,255,255,.02)}
+.trow.act{color:var(--np2);background:rgba(72,149,239,.06)}
+.dot{width:4px;height:4px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:background .15s}
+.trow.act .dot{background:var(--np)}.trow.vis .dot{background:var(--em)}
+
+/* ── MIDDLE PANEL ─────────────────────────────────────── */
+.mp{flex:1;background:var(--bg0);border-right:1px solid var(--bd);overflow-y:auto;padding:20px 16px}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:calc(100vh - 54px);text-align:center;gap:18px;padding:40px 20px}
+.w-icon{font-size:68px;line-height:1;font-family:'Fraunces',serif;color:var(--np2)}
+@keyframes wg{0%,100%{filter:drop-shadow(0 0 20px rgba(72,149,239,.5))}50%{filter:drop-shadow(0 0 44px rgba(184,213,251,.7))}}
+.w-icon{animation:wg 3s ease-in-out infinite}
+.w-title{font-family:'Fraunces',serif;font-size:36px;font-weight:900;
+  background:linear-gradient(135deg,var(--np),var(--np3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.w-italic{font-family:'Fraunces',serif;font-size:14px;font-style:italic;color:var(--t2);margin-top:-10px}
+.w-sub{font-size:13px;color:var(--t2);max-width:500px;line-height:1.85}
+.w-stats{display:flex;gap:26px}
+.wst-n{font-family:'Fraunces',serif;font-size:30px;font-weight:900;color:var(--np2)}
+.wst-l{font-size:8.5px;color:var(--t3);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.w-btn{background:linear-gradient(135deg,var(--np4),var(--np2));border:none;color:#fff;
+  font-family:'Fraunces',serif;font-size:15px;font-weight:700;padding:12px 34px;
+  border-radius:8px;cursor:pointer;transition:all .3s;letter-spacing:.3px}
+.w-btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(72,149,239,.4)}
+.w-chips{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+.wchip{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:3px 9px;border-radius:3px;
+  border:1px solid rgba(72,149,239,.3);background:rgba(72,149,239,.07);color:var(--np2)}
+.chero{background:linear-gradient(135deg,var(--bg2),var(--bg1));border:1px solid var(--bd);
+  border-radius:10px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden}
+.chero::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;
+  border-radius:50%;background:radial-gradient(circle,rgba(72,149,239,.07),transparent)}
+.chero-n{font-family:'JetBrains Mono',monospace;font-size:8.5px;text-transform:uppercase;letter-spacing:2px;margin-bottom:7px}
+.chero-t{font-family:'Fraunces',serif;font-size:21px;font-weight:900;margin-bottom:6px;line-height:1.2}
+.chero-d{font-size:12.5px;color:var(--t2);line-height:1.7;max-width:500px}
+.chero-chips{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
+.cchip{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:3px;border:1px solid}
+.tgrid{display:flex;flex-direction:column;gap:7px}
+.tcard{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:13px 14px;
+  cursor:pointer;transition:all .18s;display:flex;align-items:flex-start;gap:10px}
+.tcard:hover{border-color:var(--bd2);transform:translateX(3px);background:var(--bg3)}
+.tcard.act{border-color:var(--np);background:rgba(72,149,239,.04)}
+.tc-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.tc-body{flex:1}
+.tc-t{font-family:'Fraunces',serif;font-size:12.5px;font-weight:700;color:var(--t1);margin-bottom:2px}
+.tc-d{font-size:11px;color:var(--t3);line-height:1.5}
+.tc-meta{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.tmeta{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;border:1px solid}
+
+/* ── RIGHT PANEL ─────────────────────────────────────── */
+.rp{width:var(--rw);min-width:var(--rw);background:var(--bg1);overflow:hidden;display:flex;flex-direction:column}
+.rp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex:1;gap:12px;color:var(--t3);text-align:center;padding:40px}
+.rp-ei{font-size:50px;opacity:.15;font-family:'Fraunces',serif;color:var(--np2)}
+.rp-empty h3{font-family:'Fraunces',serif;font-size:18px;color:var(--t2);font-weight:700;font-style:italic}
+.rp-empty p{font-size:12.5px;line-height:1.75;max-width:320px}
+
+/* ── TAB BAR ─────────────────────────────────────────── */
+.rp-tabs{flex-shrink:0;border-bottom:1px solid var(--bd);background:var(--bg2);
+  display:flex;align-items:stretch;height:var(--tab-h);padding:0 6px;gap:2px}
+.tab-btn{display:flex;align-items:center;gap:5px;padding:0 13px;border:none;
+  background:transparent;color:var(--t3);font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;cursor:pointer;transition:all .2s;border-bottom:2px solid transparent;
+  white-space:nowrap;letter-spacing:.3px}
+.tab-btn:hover{color:var(--t2);background:rgba(72,149,239,.04)}
+.tab-btn.act{color:var(--np2);border-bottom:2px solid var(--np);background:rgba(72,149,239,.06)}
+.tab-btn .ti{font-size:13px}
+.rp-body{flex:1;overflow-y:auto;position:relative}
+.tab-panel{display:none;padding:20px;animation:fadeUp .2s ease}
+.tab-panel.act{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CONTENT STYLES ─────────────────────────────────── */
+.d-bread{font-family:'JetBrains Mono',monospace;font-size:8.5px;text-transform:uppercase;
+  letter-spacing:1.5px;color:var(--t3);margin-bottom:6px}
+.d-title{font-family:'Fraunces',serif;font-size:21px;font-weight:900;line-height:1.2;margin-bottom:5px}
+.d-sub{font-size:12.5px;color:var(--t2);line-height:1.7;margin-bottom:10px}
+.d-pills{display:flex;gap:5px;flex-wrap:wrap;padding-bottom:14px;margin-bottom:16px;border-bottom:1px solid var(--bd)}
+.dpill{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:3px;border:1px solid}
+.sec{margin-bottom:20px}
+.sec-t{font-family:'Fraunces',serif;font-size:13px;font-weight:700;font-style:italic;
+  color:var(--t1);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.sec-t::before{content:'';width:2px;height:14px;background:linear-gradient(180deg,var(--np),var(--np4));
+  border-radius:2px;flex-shrink:0}
+.prose{font-size:12.5px;color:var(--t2);line-height:1.9}
+.prose p{margin-bottom:9px}.prose strong{color:var(--t1)}
+.prose ul,.prose ol{padding-left:16px;margin-bottom:9px}.prose li{margin-bottom:4px}
+.prose h4{font-family:'Fraunces',serif;font-size:12.5px;font-weight:700;font-style:italic;
+  color:var(--t1);margin:12px 0 5px}
+.prose code{background:rgba(72,149,239,.1);border:1px solid rgba(72,149,239,.22);
+  border-radius:3px;padding:1px 5px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--np2)}
+/* Formula box */
+.mbox{background:rgba(72,149,239,.04);border:1px solid rgba(72,149,239,.18);
+  border-radius:8px;padding:16px;margin-bottom:13px;text-align:center}
+.mbox .formula{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--np2);letter-spacing:.8px;line-height:2}
+.mbox .desc{font-size:11px;color:var(--t3);margin-top:5px;font-style:italic}
+/* Steps */
+.msteps{background:rgba(72,149,239,.03);border:1px solid rgba(72,149,239,.16);border-radius:8px;padding:14px;margin-bottom:13px}
+.mstep{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(13,32,68,.5);align-items:flex-start}
+.mstep:last-child{border-bottom:none}
+.mstep-n{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--np);font-weight:600;flex-shrink:0;margin-top:2px;min-width:26px}
+.mstep-f{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--np2);margin-bottom:2px;line-height:1.6}
+.mstep-d{font-size:11.5px;color:var(--t3);line-height:1.55}
+/* Code */
+.cb{background:#000816;border:1px solid rgba(13,32,68,.9);border-radius:9px;overflow:hidden;margin-bottom:14px}
+.cb-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;
+  border-bottom:1px solid rgba(13,32,68,.8);background:rgba(0,0,0,.6)}
+.cb-lang{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.8px}
+.cb-name{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--t3)}
+.cb-copy{background:none;border:1px solid var(--bd);color:var(--t3);border-radius:3px;
+  padding:2px 8px;font-size:9.5px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .2s}
+.cb-copy:hover{border-color:var(--np);color:var(--np2)}
+.cb-body{padding:14px;overflow-x:auto}
+.cb-body pre{font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.85;color:#c8d8f0}
+.kw{color:#89b4fa}.tp{color:#cba6f7}.st{color:#a6e3a1}.nu{color:#fab387}
+.cm{color:#2a3d5e;font-style:italic}.fn{color:#89dceb}.op{color:#4895ef}.imp{color:#94e2d5}
+/* Diagram / Animation panels */
+.diag{background:#000816;border:1px solid rgba(13,32,68,.9);border-radius:9px;overflow:hidden;margin-bottom:14px}
+.diag-hdr{padding:9px 14px;border-bottom:1px solid rgba(13,32,68,.8);background:rgba(0,0,0,.5);
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--t3);display:flex;align-items:center;gap:7px}
+.diag-hdr::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--np2);box-shadow:0 0 7px var(--np)}
+.diag-body{padding:14px;display:flex;justify-content:center;overflow-x:auto}
+/* Callouts */
+.callout{border-radius:7px;padding:11px 13px;margin-bottom:12px;display:flex;gap:9px;font-size:12px;line-height:1.75}
+.c-info{background:rgba(72,149,239,.05);border:1px solid rgba(72,149,239,.2);color:var(--t2)}
+.c-warn{background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.22);color:var(--t2)}
+.c-tip{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);color:var(--t2)}
+.c-np{background:rgba(72,149,239,.05);border:1px solid rgba(72,149,239,.22);color:var(--t2)}
+.c-danger{background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.2);color:var(--t2)}
+.call-ic{flex-shrink:0;font-size:14px;margin-top:1px}
+/* Table */
+.ctbl{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:14px}
+.ctbl th{background:var(--bg2);padding:8px 10px;text-align:left;font-family:'JetBrains Mono',monospace;
+  font-size:9px;color:var(--t2);border:1px solid var(--bd);text-transform:uppercase;letter-spacing:.5px}
+.ctbl td{padding:8px 10px;border:1px solid var(--bd);color:var(--t2);line-height:1.5;font-size:11.5px}
+.ctbl td code{background:rgba(72,149,239,.1);border:1px solid rgba(72,149,239,.2);border-radius:3px;
+  padding:1px 4px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--np2)}
+.ctbl tr:hover td{background:rgba(255,255,255,.012)}
+/* Q&A */
+.qa{background:var(--bg2);border:1px solid var(--bd);border-radius:7px;margin-bottom:8px;overflow:hidden}
+.qa-q{padding:11px 13px;cursor:pointer;display:flex;align-items:flex-start;gap:8px;transition:background .15s}
+.qa-q:hover{background:var(--bg3)}
+.qa-qi{font-family:'Fraunces',serif;font-size:11.5px;font-weight:900;font-style:italic;color:var(--np2);flex-shrink:0;margin-top:1px}
+.qa-qt{font-size:12px;font-weight:500;color:var(--t1);flex:1;line-height:1.5}
+.qa-lv{font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:2px 6px;border-radius:3px;border:1px solid;flex-shrink:0;margin-top:1px}
+.qa-ar{color:var(--t3);font-size:8px;transition:transform .2s;margin-top:3px;flex-shrink:0}
+.qa.open .qa-ar{transform:rotate(90deg)}
+.qa-ans{display:none;padding:11px 13px;border-top:1px solid var(--bd);background:rgba(0,0,0,.2)}
+.qa.open .qa-ans{display:block}
+.qa-at{font-size:12px;color:var(--t2);line-height:1.85}
+.qa-at code{background:rgba(72,149,239,.1);border:1px solid rgba(72,149,239,.22);border-radius:3px;
+  padding:1px 4px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--np2)}
+.lv-b{color:#34d399;border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.07)}
+.lv-i{color:#fde047;border-color:rgba(253,224,71,.3);background:rgba(253,224,71,.07)}
+.lv-a{color:var(--np2);border-color:rgba(72,149,239,.3);background:rgba(72,149,239,.07)}
+.lv-e{color:var(--vi2);border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.07)}
+/* Cheatsheet specific */
+.cs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.cs-card{background:var(--bg2);border:1px solid var(--bd);border-radius:7px;padding:12px}
+.cs-card-t{font-family:'Fraunces',serif;font-size:11px;font-weight:700;color:var(--np2);margin-bottom:7px;font-style:italic}
+.cs-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(13,32,68,.4);font-size:10.5px}
+.cs-row:last-child{border-bottom:none}
+.cs-fn{font-family:'JetBrains Mono',monospace;color:var(--np2);font-size:10px}
+.cs-desc{color:var(--t3);font-size:10px;text-align:right}
+/* Animation canvas */
+.anim-wrap{background:#000816;border:1px solid rgba(13,32,68,.9);border-radius:9px;overflow:hidden;margin-bottom:14px}
+.anim-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;
+  border-bottom:1px solid rgba(13,32,68,.8);background:rgba(0,0,0,.5);font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--t3)}
+.anim-ctrl{display:flex;gap:7px}
+.anim-btn{background:rgba(72,149,239,.1);border:1px solid rgba(72,149,239,.25);color:var(--np2);
+  border-radius:3px;padding:2px 9px;font-size:9px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .2s}
+.anim-btn:hover{background:rgba(72,149,239,.22)}
+.anim-body{padding:16px;display:flex;justify-content:center}
+/* Annotations in diagrams */
+.ann{font-family:'JetBrains Mono',monospace}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes slideR{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes march{0%{stroke-dashoffset:20}100%{stroke-dashoffset:0}}
+@keyframes fill-bar{from{width:0}to{width:var(--w)}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <span style="font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--np2);font-weight:700">np</span>
+  <div class="logo">NumPy Mastery</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-sub">Arrays · Broadcasting · Linear Algebra · Vectorization · ML Computing</div>
+  <div class="hdr-r">
+    <div class="badge b-btn" onclick="showAllQA()">🎯 Interview Q&amp;A</div>
+    <div class="prog-wrap">
+      <span class="prog-pct" id="pct">0%</span>
+      <div class="prog-track"><div class="prog-fill" id="pfill"></div></div>
+    </div>
+    <div class="badge b-np">NumPy 2.x</div>
+    <div class="badge b-or">Python 3.12</div>
+  </div>
+</div>
+<div class="layout">
+  <!-- LEFT NAV -->
+  <div class="lp">
+    <div class="lp-top">
+      <input class="srch" id="srch" type="text" placeholder="⌕  Search topics…" oninput="doSearch(this.value)">
+      <div class="lp-stats">
+        <div class="lst"><div class="lst-n">30</div><div class="lst-l">Chapters</div></div>
+        <div class="lst"><div class="lst-n">200+</div><div class="lst-l">Topics</div></div>
+        <div class="lst"><div class="lst-n">280+</div><div class="lst-l">Q&amp;A</div></div>
+      </div>
+    </div>
+    <div id="nav"></div>
+  </div>
+
+  <!-- MIDDLE PANEL -->
+  <div class="mp" id="mp">
+    <div class="welcome" id="welcome">
+      <div class="w-icon">np</div>
+      <div class="w-title">NumPy Mastery</div>
+      <div class="w-italic">the engine of scientific Python</div>
+      <div class="w-sub">From n-dimensional arrays through broadcasting rules, linear algebra, vectorization patterns, and the NumPy operations inside every ML framework. Each topic opens 6 tabs: Theory, Code, Diagrams, Animations, Interview Q&A, and Cheatsheet.</div>
+      <div class="w-stats">
+        <div><div class="wst-n">30</div><div class="wst-l">Chapters</div></div>
+        <div><div class="wst-n">200+</div><div class="wst-l">Topics</div></div>
+        <div><div class="wst-n">6</div><div class="wst-l">Tabs/Topic</div></div>
+        <div><div class="wst-n">280+</div><div class="wst-l">Q&amp;A</div></div>
+      </div>
+      <div class="w-chips">
+        <span class="wchip">ndarray</span>
+        <span class="wchip">Broadcasting</span>
+        <span class="wchip">Indexing</span>
+        <span class="wchip">Vectorization</span>
+        <span class="wchip">Linear Algebra</span>
+        <span class="wchip">Random</span>
+        <span class="wchip">Memory Layout</span>
+        <span class="wchip">Performance</span>
+      </div>
+      <button class="w-btn" onclick="selectCh(0)">▶ Begin Learning</button>
+    </div>
+    <div id="mcon" style="display:none"></div>
+  </div>
+
+  <!-- RIGHT PANEL: TABS -->
+  <div class="rp" id="rp">
+    <div class="rp-empty" id="rp-empty">
+      <div class="rp-ei">[ ]</div>
+      <h3>Select a Topic</h3>
+      <p>Each topic unlocks 6 panels: Theory explanation, live Code, visual Diagrams, step-by-step Animations, Interview Q&A, and a Cheatsheet.</p>
+    </div>
+    <div id="rp-tabs-wrap" style="display:none;flex:1;overflow:hidden;display:flex;flex-direction:column">
+      <div class="rp-tabs" id="rp-tabs">
+        <button class="tab-btn act" onclick="switchTab('explain',this)" data-tab="explain"><span class="ti">📖</span> Explain</button>
+        <button class="tab-btn" onclick="switchTab('code',this)" data-tab="code"><span class="ti">💻</span> Code</button>
+        <button class="tab-btn" onclick="switchTab('visual',this)" data-tab="visual"><span class="ti">📊</span> Diagram</button>
+        <button class="tab-btn" onclick="switchTab('animate',this)" data-tab="animate"><span class="ti">✨</span> Animate</button>
+        <button class="tab-btn" onclick="switchTab('qa',this)" data-tab="qa"><span class="ti">🎯</span> Q&amp;A</button>
+        <button class="tab-btn" onclick="switchTab('sheet',this)" data-tab="sheet"><span class="ti">📋</span> Sheet</button>
+      </div>
+      <div class="rp-body" id="rp-body">
+        <div class="tab-panel act" id="tab-explain"></div>
+        <div class="tab-panel" id="tab-code"></div>
+        <div class="tab-panel" id="tab-visual"></div>
+        <div class="tab-panel" id="tab-animate"></div>
+        <div class="tab-panel" id="tab-qa"></div>
+        <div class="tab-panel" id="tab-sheet"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const CHS=[
+{n:"01",t:"NumPy Foundations",ic:"np",c:"#4895ef",bg:"rgba(72,149,239,.1)",
+ desc:"What NumPy is, why it exists, and how ndarray differs fundamentally from Python lists — the mental model you need before everything else.",
+ tags:["Foundation","Beginner"],
+ topics:[
+  {id:"nf1",ic:"📦",t:"NumPy Overview & Installation",d:"C extension, BLAS/LAPACK, contiguous memory, dtype system, why 100x faster than lists"},
+  {id:"nf2",ic:"[ ]",t:"ndarray — The Core Object",d:"N-dimensional array, homogeneous dtype, shape tuple, ndim, size, itemsize, nbytes"},
+  {id:"nf3",ic:"🔢",t:"Data Types (dtype)",d:"int8/16/32/64, uint, float16/32/64, complex, bool, object, structured. Memory impact"},
+  {id:"nf4",ic:"⚡",t:"NumPy vs Python Lists",d:"Contiguous memory, SIMD vectorization, no type checking per element, cache locality"},
+  {id:"nf5",ic:"🏗",t:"Array Attributes",d:"a.shape, a.ndim, a.size, a.dtype, a.itemsize, a.nbytes, a.strides, a.flags"},
+ ]},
+{n:"02",t:"Array Creation",ic:"✦",c:"#ff6b35",bg:"rgba(255,107,53,.1)",
+ desc:"Every way to create a NumPy array — from scratch, from data, from distributions, and the utility functions every NumPy user needs daily.",
+ tags:["Foundation","Core"],
+ topics:[
+  {id:"ac1",ic:"[]",t:"np.array — From Python Data",d:"np.array(list), dtype inference, copy=True default, ndmin, nested lists → 2D"},
+  {id:"ac2",ic:"0",t:"Zeros, Ones, Full, Empty",d:"np.zeros(shape), np.ones, np.full(shape,val), np.empty (uninitialized), _like variants"},
+  {id:"ac3",ic:"↔",t:"arange & linspace",d:"np.arange(start,stop,step), np.linspace(start,stop,num,endpoint), logspace, geomspace"},
+  {id:"ac4",ic:"I",t:"eye, identity, diag",d:"np.eye(n,k=offset), np.identity(n), np.diag(v) create or extract, np.diagflat"},
+  {id:"ac5",ic:"🎲",t:"Random Array Creation",d:"np.random.rand, randn, randint, np.random.default_rng (new API), seed, Generator"},
+  {id:"ac6",ic:"📂",t:"Loading from Files",d:"np.load, np.save, np.loadtxt, np.genfromtxt, np.fromstring, np.frombuffer"},
+ ]},
+{n:"03",t:"Indexing & Slicing",ic:"[ : ]",c:"#7c3aed",bg:"rgba(124,58,237,.1)",
+ desc:"Accessing and modifying array elements — basic indexing, slicing, fancy indexing, boolean masks, and np.newaxis.",
+ tags:["Core","Critical"],
+ topics:[
+  {id:"ix1",ic:"[i]",t:"Basic Indexing",d:"a[0], a[-1], a[i,j] for 2D, a[i][j] vs a[i,j], copy vs view distinction"},
+  {id:"ix2",ic:"[:]",t:"Slicing — 1D & Multi-D",d:"a[start:stop:step], a[::-1], 2D: a[1:3, 0:2], slice objects, Ellipsis ..."},
+  {id:"ix3",ic:"[[]]",t:"Fancy (Advanced) Indexing",d:"a[[0,2,4]], a[np.array([1,3])], 2D: a[[0,1],[2,3]], always returns copy"},
+  {id:"ix4",ic:"bool",t:"Boolean Indexing & Masks",d:"mask=a>5, a[mask], a[a>5]=0, np.where, np.nonzero, combined conditions &,|,~"},
+  {id:"ix5",ic:"📐",t:"np.newaxis & Expand Dims",d:"a[:,np.newaxis] adds dim, broadcasting prep, np.expand_dims, np.squeeze"},
+  {id:"ix6",ic:"🔗",t:"np.ix_ & Open Meshes",d:"np.ix_([0,1],[2,3]) → open mesh for outer indexing, broadcasting indexing grids"},
+ ]},
+{n:"04",t:"Shape Manipulation",ic:"↔",c:"#10b981",bg:"rgba(16,185,129,.1)",
+ desc:"Reshaping, transposing, stacking, splitting — every way to change the shape of arrays without copying data.",
+ tags:["Core","Critical"],
+ topics:[
+  {id:"sh1",ic:"↔",t:"reshape & ravel",d:"a.reshape(3,4), a.ravel() vs a.flatten(), -1 for inferred dim, order='C','F'"},
+  {id:"sh2",ic:"ᵀ",t:"Transpose & swapaxes",d:"a.T, np.transpose(a, axes), a.swapaxes(0,1), for 1D T is no-op"},
+  {id:"sh3",ic:"⊕",t:"Stack, Concatenate & Split",d:"np.concatenate([a,b],axis), np.stack, np.vstack, np.hstack, np.dstack"},
+  {id:"sh4",ic:"✂",t:"Split, hsplit, vsplit",d:"np.split(a,n,axis), np.hsplit, np.vsplit, np.array_split for unequal sizes"},
+  {id:"sh5",ic:"📐",t:"Tile & Repeat",d:"np.tile(a,(2,3)) vs np.repeat(a,3,axis), use cases in data augmentation"},
+ ]},
+{n:"05",t:"Broadcasting",ic:"⊕",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"NumPy's most powerful — and most misunderstood — feature. Master the 3 broadcasting rules and never write a loop for element-wise operations again.",
+ tags:["Core","Critical","Must Master"],
+ topics:[
+  {id:"br1",ic:"📏",t:"Broadcasting Rules — All 3",d:"Pad left with 1s, sizes must match or one is 1, result shape = max each dim"},
+  {id:"br2",ic:"⊕",t:"1D × 2D Broadcasting",d:"(3,)+(4,3)→(4,3), column vector (4,1)+(1,3)→(4,3), outer product without loop"},
+  {id:"br3",ic:"3D",t:"Higher-Dimensional Broadcasting",d:"(1,3,1)+(4,1,5)→(4,3,5), adding bias to batched activations pattern"},
+  {id:"br4",ic:"⚠",t:"Common Broadcasting Mistakes",d:"(n,) vs (n,1) vs (1,n), alignment confusion, when to use reshape vs newaxis"},
+  {id:"br5",ic:"💡",t:"Broadcasting for ML Patterns",d:"Batch norm, pairwise distances, attention scores QKᵀ, all without loops"},
+ ]},
+{n:"06",t:"Universal Functions (ufuncs)",ic:"f()",c:"#4895ef",bg:"rgba(72,149,239,.1)",
+ desc:"NumPy's vectorized element-wise functions — C-implemented, SIMD-accelerated, and the key to fast computation.",
+ tags:["Core","Performance"],
+ topics:[
+  {id:"uf1",ic:"f()",t:"What is a ufunc?",d:"Element-wise C function, type resolution, out parameter, ufunc.at, ufunc.reduce"},
+  {id:"uf2",ic:"±",t:"Math ufuncs",d:"np.add, subtract, multiply, divide, power, mod, abs, sqrt, exp, log, log2, log10"},
+  {id:"uf3",ic:"trig",t:"Trig & Hyperbolic ufuncs",d:"np.sin, cos, tan, arcsin, arccos, arctan2, sinh, cosh, tanh, deg2rad, rad2deg"},
+  {id:"uf4",ic:"≥",t:"Comparison & Logic ufuncs",d:"np.greater, less, equal, logical_and, logical_or, np.maximum, np.minimum, np.clip"},
+  {id:"uf5",ic:"Σ",t:"Reduction Methods",d:"a.sum(axis), a.prod, a.min, a.max, a.mean, a.std, a.var, a.cumsum, a.cumprod"},
+  {id:"uf6",ic:"🔧",t:"Custom ufuncs — np.frompyfunc",d:"np.frompyfunc(f,nin,nout), np.vectorize (slower), Numba @vectorize for true ufunc"},
+ ]},
+{n:"07",t:"Linear Algebra — np.linalg",ic:"Ax",c:"#ff6b35",bg:"rgba(255,107,53,.1)",
+ desc:"Matrix operations, decompositions, and solvers — the foundation of all ML model computations.",
+ tags:["Linear Algebra","Critical","ML"],
+ topics:[
+  {id:"la1",ic:"@",t:"Matrix Multiplication — @ Operator",d:"a@b, np.matmul, np.dot differences, batch matmul (3D tensors), broadcasting with @"},
+  {id:"la2",ic:"det",t:"Determinant, Inverse & Rank",d:"np.linalg.det, np.linalg.inv, np.linalg.matrix_rank, pinv, stability considerations"},
+  {id:"la3",ic:"λ",t:"Eigenvalues & Eigenvectors",d:"np.linalg.eig (non-symmetric), eigh (symmetric, faster), eigvals only, PCA application"},
+  {id:"la4",ic:"SVD",t:"Singular Value Decomposition",d:"np.linalg.svd(full_matrices=False), truncated SVD, svdvals, connection to PCA"},
+  {id:"la5",ic:"Ax=b",t:"Solving Linear Systems",d:"np.linalg.solve(A,b), lstsq for overdetermined, norm (matrix norms), cond number"},
+  {id:"la6",ic:"QR",t:"QR, Cholesky & Other Decompositions",d:"np.linalg.qr, cholesky (for PSD matrices), LU via scipy, applications"},
+ ]},
+{n:"08",t:"Random Number Generation",ic:"🎲",c:"#7c3aed",bg:"rgba(124,58,237,.1)",
+ desc:"The new NumPy random API — Generator, BitGenerators, distributions, and reproducibility for ML experiments.",
+ tags:["Core","ML"],
+ topics:[
+  {id:"rn1",ic:"🎲",t:"New Random API — np.random.default_rng",d:"Generator vs legacy np.random, BitGenerators (PCG64, MT19937), seed, spawn"},
+  {id:"rn2",ic:"U",t:"Uniform & Integer Distributions",d:"rng.random(), rng.uniform(lo,hi,size), rng.integers(lo,hi,size,endpoint)"},
+  {id:"rn3",ic:"𝒩",t:"Normal & Gaussian Distributions",d:"rng.standard_normal(size), rng.normal(mu,sigma,size), rng.multivariate_normal"},
+  {id:"rn4",ic:"🎰",t:"Other Distributions",d:"rng.exponential, rng.poisson, rng.binomial, rng.choice, rng.shuffle, rng.permutation"},
+  {id:"rn5",ic:"🔬",t:"Reproducibility in ML",d:"Seeding strategies, generator states, spawn for parallel workers, numpy+torch seeding"},
+ ]},
+{n:"09",t:"Memory Layout & Views",ic:"🧠",c:"#10b981",bg:"rgba(16,185,129,.1)",
+ desc:"How NumPy stores arrays in memory — C-order vs F-order, strides, views vs copies, and why this matters for performance.",
+ tags:["Advanced","Performance"],
+ topics:[
+  {id:"ml1",ic:"🧠",t:"C-order vs Fortran-order",d:"C: row-major (last index changes fastest), F: column-major, implications for loops"},
+  {id:"ml2",ic:"↔",t:"Strides — The Secret of NumPy",d:"a.strides=(bytes per row, bytes per element), strided tricks, as_strided"},
+  {id:"ml3",ic:"👁",t:"Views vs Copies",d:"When slicing creates view vs copy, a.base is not None, np.shares_memory, write-backs"},
+  {id:"ml4",ic:"📌",t:"np.ascontiguousarray & Contiguity",d:"a.flags.c_contiguous, np.ascontiguousarray, copy(), when BLAS requires contiguous"},
+  {id:"ml5",ic:"💾",t:"Memory-Mapped Arrays",d:"np.memmap for large datasets, mode='r+', flush, PyTorch tensor sharing memory"},
+ ]},
+{n:"10",t:"Sorting & Searching",ic:"↑",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"Sorting arrays, finding elements, and argsort tricks used in ML for ranking, top-k selection, and nearest-neighbor algorithms.",
+ tags:["Core","Applied"],
+ topics:[
+  {id:"ss1",ic:"↑",t:"Sort & Argsort",d:"np.sort(a,axis), a.sort(in-place), np.argsort returns indices, stable sort"},
+  {id:"ss2",ic:"top",t:"Partition & Argpartition",d:"np.partition(a,k) — k-th element in sorted position, argpartition for top-k O(n)"},
+  {id:"ss3",ic:"🔍",t:"Searching — where, nonzero, searchsorted",d:"np.where(cond,x,y), np.nonzero, np.searchsorted (binary search on sorted array)"},
+  {id:"ss4",ic:"∈",t:"np.unique & Set Operations",d:"np.unique(return_counts,return_inverse), np.intersect1d, union1d, setdiff1d, isin"},
+ ]},
+{n:"11",t:"Mathematical Operations",ic:"∑",c:"#4895ef",bg:"rgba(72,149,239,.1)",
+ desc:"Aggregations, cumulative operations, histograms, digitize, and statistical functions for data analysis.",
+ tags:["Core","Applied"],
+ topics:[
+  {id:"mo1",ic:"∑",t:"Aggregation along Axes",d:"sum/mean/std/var/min/max(axis=0,1,-1), keepdims=True, nanmean, nansum"},
+  {id:"mo2",ic:"📊",t:"Histogram & Binning",d:"np.histogram(a,bins), np.histogram2d, np.digitize, np.bincount, np.histogramdd"},
+  {id:"mo3",ic:"∇",t:"Gradient & Differences",d:"np.diff(a,n,axis), np.gradient (central differences), np.ediff1d, numerical derivatives"},
+  {id:"mo4",ic:"π",t:"Polynomial Operations",d:"np.poly1d, np.polyfit, np.polyval, np.roots, np.polymul, curve fitting"},
+  {id:"mo5",ic:"🔄",t:"Trigonometric & Complex",d:"np.angle, np.abs for complex, np.real, np.imag, np.conj, complex64/128"},
+ ]},
+{n:"12",t:"String & Structured Arrays",ic:"str",c:"#ff6b35",bg:"rgba(255,107,53,.1)",
+ desc:"NumPy's string operations, structured dtypes, and record arrays for tabular data and custom data formats.",
+ tags:["Applied","Data Engineering"],
+ topics:[
+  {id:"sa1",ic:"str",t:"NumPy String Arrays",d:"dtype='U20' (Unicode), np.char module, np.char.split, add, startswith, compare"},
+  {id:"sa2",ic:"📋",t:"Structured Arrays (Structured dtypes)",d:"dtype=[('name','U20'),('age',int)], a['name'], record arrays, CSV parsing"},
+  {id:"sa3",ic:"🔗",t:"Recarray & Field Access",d:"np.recarray vs structured, a.age field access, np.lib.recfunctions merge, append_fields"},
+ ]},
+{n:"13",t:"FFT — Fourier Transforms",ic:"∿",c:"#7c3aed",bg:"rgba(124,58,237,.1)",
+ desc:"Fast Fourier Transforms for signal processing, audio analysis, and the convolution theorem underpinning CNNs.",
+ tags:["Advanced","Signal Processing"],
+ topics:[
+  {id:"fft1",ic:"∿",t:"np.fft.fft — 1D FFT",d:"DFT: X[k]=Σx[n]e^(-j2πkn/N), fft vs rfft (real input), fftfreq, fftshift"},
+  {id:"fft2",ic:"2D",t:"2D FFT for Images",d:"np.fft.fft2, rfft2, low-pass filter in frequency domain, image compression intuition"},
+  {id:"fft3",ic:"*",t:"Convolution via FFT",d:"Circular convolution = pointwise multiply in freq domain, O(n log n) vs O(n²)"},
+ ]},
+{n:"14",t:"Vectorization Patterns",ic:"⚡",c:"#10b981",bg:"rgba(16,185,129,.1)",
+ desc:"Replacing Python loops with vectorized NumPy — the skill that separates fast from slow ML code.",
+ tags:["Performance","Critical","ML"],
+ topics:[
+  {id:"vp1",ic:"⚡",t:"Loop → Vector Transformation",d:"Identify loop pattern, express as array op, common idioms: dot products, outer products"},
+  {id:"vp2",ic:"📐",t:"Pairwise Distance Matrix",d:"‖x-y‖² = ‖x‖²+‖y‖²-2xᵀy, vectorized with broadcasting, O(n²d) without loops"},
+  {id:"vp3",ic:"🔥",t:"Batch Matrix Operations",d:"Batch matmul with (B,m,n)@(B,n,k), einsum for any contraction, batched SVD"},
+  {id:"vp4",ic:"∑",t:"Einstein Summation — np.einsum",d:"einsum('ij,jk->ik',A,B), trace='ii->', outer='i,j->ij', batched 'bij,bjk->bik'"},
+  {id:"vp5",ic:"📦",t:"Stacking Tricks for Batch ML",d:"np.stack vs concatenate for batch dim, processing minibatches, gather operations"},
+ ]},
+{n:"15",t:"np.einsum — Einstein Summation",ic:"∑",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"The universal tensor contraction operator — write any linear algebra operation as a single readable einsum string.",
+ tags:["Advanced","ML","Critical"],
+ topics:[
+  {id:"es1",ic:"∑",t:"Einsum Notation — Complete Guide",d:"Subscript notation, free vs summed indices, implicit output, explicit '->'"},
+  {id:"es2",ic:"@",t:"Einsum for Matrix Operations",d:"matmul 'ij,jk->ik', transpose 'ij->ji', trace 'ii->', dot 'i,i->'"},
+  {id:"es3",ic:"🧠",t:"Einsum for Attention & Transformers",d:"'bhid,bhjd->bhij' for attention scores, 'bhij,bhjd->bhid' for weighted sum"},
+  {id:"es4",ic:"⚡",t:"Einsum Performance & optimize=True",d:"Contraction order matters, einsum('ij,jk,kl->il',A,B,C), optimize='optimal'"},
+ ]},
+{n:"16",t:"Masking & Conditional Operations",ic:"🎭",c:"#4895ef",bg:"rgba(72,149,239,.1)",
+ desc:"Boolean masks, np.where, np.select — conditional operations that replace if-statements in array computations.",
+ tags:["Core","Applied"],
+ topics:[
+  {id:"mk1",ic:"bool",t:"Creating Boolean Masks",d:"Comparison operators, np.isnan, np.isinf, np.isfinite, np.isclose, np.allclose"},
+  {id:"mk2",ic:"?",t:"np.where — Vectorized If-Else",d:"np.where(cond,x,y), finding indices np.where(cond), nested where patterns"},
+  {id:"mk3",ic:"🔀",t:"np.select & np.piecewise",d:"np.select([c1,c2],[v1,v2],default), np.piecewise for mathematical functions"},
+  {id:"mk4",ic:"🎭",t:"np.ma — Masked Arrays",d:"np.ma.array(data,mask), masked operations, fill_value, handling missing data in ML"},
+ ]},
+{n:"17",t:"Numerical Stability & Precision",ic:"ε",c:"#ff6b35",bg:"rgba(255,107,53,.1)",
+ desc:"Floating-point arithmetic, numerical stability tricks, and the patterns that prevent NaN/Inf in ML training.",
+ tags:["Advanced","ML","Critical"],
+ topics:[
+  {id:"ns1",ic:"ε",t:"Float64 vs Float32 vs Float16",d:"Machine epsilon, precision tradeoffs, ML training in fp32, inference in fp16, bfloat16"},
+  {id:"ns2",ic:"∞",t:"NaN, Inf & Special Values",d:"np.nan, np.inf, np.nan_to_num, np.isnan, np.isinf, IEEE 754 special cases"},
+  {id:"ns3",ic:"log",t:"Log-Sum-Exp Trick",d:"log Σ eˣⁱ = max+log Σe^(xᵢ-max), stable softmax, stable cross-entropy"},
+  {id:"ns4",ic:"📐",t:"np.finfo & Machine Precision",d:"np.finfo(float32).eps, np.finfo.max, np.iinfo for integers, overflow detection"},
+ ]},
+{n:"18",t:"Polynomial & Curve Fitting",ic:"~",c:"#7c3aed",bg:"rgba(124,58,237,.1)",
+ desc:"Polynomial operations and curve fitting — from np.poly1d to least-squares regression in NumPy.",
+ tags:["Applied","Mathematics"],
+ topics:[
+  {id:"cf1",ic:"~",t:"np.polyfit — Polynomial Fitting",d:"np.polyfit(x,y,deg), least-squares under the hood, returned coefficients, residuals"},
+  {id:"cf2",ic:"📐",t:"np.poly1d & Polynomial Object",d:"p=np.poly1d(coeffs), p(x) evaluation, p.roots, p.deriv(), p.integ()"},
+  {id:"cf3",ic:"🔬",t:"Least-Squares via np.linalg.lstsq",d:"Vandermonde matrix, lstsq vs polyfit, rank-deficient case, regularisation"},
+ ]},
+{n:"19",t:"Advanced Indexing Patterns",ic:"🎯",c:"#10b981",bg:"rgba(16,185,129,.1)",
+ desc:"The advanced indexing tricks used in ML implementations — gather operations, scatter, segment operations.",
+ tags:["Advanced","ML","Critical"],
+ topics:[
+  {id:"ai1",ic:"gather",t:"Gather Operations",d:"a[indices] as gather, rows[np.arange(n),class_indices] — NLL loss core pattern"},
+  {id:"ai2",ic:"scatter",t:"Scatter / np.add.at",d:"np.add.at(a,indices,b), np.put, np.place, np.putmask — scatter accumulation"},
+  {id:"ai3",ic:"tile",t:"Segment Operations & np.ufunc.reduceat",d:"np.add.reduceat(a, segments) — segment sum without loops, graph neural network ops"},
+  {id:"ai4",ic:"📐",t:"Meshgrid & Grid Operations",d:"np.meshgrid(x,y,indexing='ij'), np.mgrid, np.ogrid, coordinate grids for CNNs"},
+ ]},
+{n:"20",t:"NumPy for Deep Learning",ic:"🧠",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"The NumPy operations that form the foundations of PyTorch and TensorFlow — forward passes, backprop, and layer implementations.",
+ tags:["ML","Deep Learning","Critical"],
+ topics:[
+  {id:"dl1",ic:"→",t:"Dense Layer Forward Pass",d:"Y=X@W.T+b, shapes (B,in)@(in,out)→(B,out), broadcast bias addition"},
+  {id:"dl2",ic:"σ",t:"Activation Functions in NumPy",d:"sigmoid=1/(1+exp(-x)), ReLU=np.maximum(0,x), softmax=exp(x)/sum(exp(x),axis=1)"},
+  {id:"dl3",ic:"⛓",t:"Backpropagation in NumPy",d:"dL/dW=Xᵀ·δ, dL/dX=δ·Wᵀ, dL/db=sum(δ,axis=0), chain rule in array ops"},
+  {id:"dl4",ic:"BN",t:"Batch Normalization in NumPy",d:"μ=mean(axis=0), σ²=var, x̂=(x-μ)/σ, y=γx̂+β, gradient derivation"},
+  {id:"dl5",ic:"conv",t:"2D Convolution via im2col",d:"im2col trick, reshape patches to matrix multiply, why PyTorch uses this internally"},
+ ]},
+{n:"21",t:"Performance & Profiling",ic:"🚀",c:"#4895ef",bg:"rgba(72,149,239,.1)",
+ desc:"Making NumPy code as fast as possible — profiling tools, memory access patterns, and avoiding common bottlenecks.",
+ tags:["Performance","Advanced"],
+ topics:[
+  {id:"pf1",ic:"⏱",t:"Profiling NumPy — timeit & line_profiler",d:"%%timeit magic, line_profiler, memory_profiler, cProfile, snakeviz"},
+  {id:"pf2",ic:"🔥",t:"Cache-Friendly Access Patterns",d:"Row-wise vs column-wise access in C-order, loop ordering, cache miss impact"},
+  {id:"pf3",ic:"💾",t:"Reducing Memory Allocations",d:"Pre-allocate with np.empty, use out= parameter, in-place ops +=, avoid intermediate arrays"},
+  {id:"pf4",ic:"🔀",t:"Avoid Python Loops",d:"Every loop is 100x slower, use ufuncs, vectorize, einsum, np.apply_along_axis (slow too)"},
+  {id:"pf5",ic:"⚙",t:"BLAS & Multi-threading",d:"OpenBLAS vs MKL, threading for matmul, np.show_config(), threadpoolctl"},
+ ]},
+{n:"22",t:"Numba — JIT for NumPy",ic:"🔥",c:"#ff6b35",bg:"rgba(255,107,53,.1)",
+ desc:"When NumPy isn't fast enough — JIT compiling Python/NumPy with Numba for near-C performance.",
+ tags:["Performance","Advanced"],
+ topics:[
+  {id:"nb1",ic:"@jit",t:"Numba @jit & @njit Basics",d:"@jit(nopython=True), @njit shorthand, type inference, first-call compilation"},
+  {id:"nb2",ic:"🔥",t:"@vectorize — Custom ufuncs",d:"@vectorize(['float64(float64,float64)'],target='cpu'/'cuda'), GPU acceleration"},
+  {id:"nb3",ic:"parallel",t:"Parallel Loops — @njit(parallel=True)",d:"prange for parallel for-loops, automatic parallelism, reduction detection"},
+ ]},
+{n:"23",t:"Scipy Integration",ic:"∫",c:"#7c3aed",bg:"rgba(124,58,237,.1)",
+ desc:"NumPy and SciPy together — sparse matrices, optimization, signal processing, and statistical testing.",
+ tags:["Applied","Advanced"],
+ topics:[
+  {id:"sc1",ic:"▣",t:"Sparse Matrices — scipy.sparse",d:"CSR, CSC, COO formats, sparse@dense matmul, memory savings for graphs, NLP"},
+  {id:"sc2",ic:"∫",t:"Integration & ODE",d:"scipy.integrate.quad, odeint for differential equations, trapz vs simps"},
+  {id:"sc3",ic:"📡",t:"Signal Processing",d:"scipy.signal.convolve, correlate, fftconvolve, Butterworth filter, spectrogram"},
+ ]},
+{n:"24",t:"Broadcasting Deep Dive",ic:"📡",c:"#10b981",bg:"rgba(16,185,129,.1)",
+ desc:"Advanced broadcasting patterns for ML — gradient computation, attention mechanisms, and batched operations.",
+ tags:["Advanced","ML","Critical"],
+ topics:[
+  {id:"bd1",ic:"📐",t:"Outer Product Without Loop",d:"a[:,np.newaxis]*b[np.newaxis,:], np.outer(a,b), use in RBF kernels, correlation"},
+  {id:"bd2",ic:"🎯",t:"Pairwise Operations",d:"Pairwise distances, pairwise similarities, cross-product of two sets without loops"},
+  {id:"bd3",ic:"🧠",t:"Batched Attention — Broadcasting",d:"Q@Kᵀ shape analysis (B,H,T,d_k)@(B,H,d_k,T)→(B,H,T,T), softmax over last axis"},
+ ]},
+{n:"25",t:"String Operations & Regex",ic:"str",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"Vectorized string operations on arrays of text — tokenization, encoding, and preprocessing for NLP.",
+ tags:["NLP","Applied"],
+ topics:[
+  {id:"st1",ic:"str",t:"np.char Functions",d:"np.char.upper, lower, strip, replace, split, startswith, endswith, find, count"},
+  {id:"st2",ic:"🔤",t:"Text to Array Pipelines",d:"Character-level encoding, vocabulary mapping, one-hot encoding with np.eye, token arrays"},
+  {id:"st3",ic:"🔢",t:"Unicode & Byte Arrays",d:"dtype='U' vs 'S' (bytes), encode/decode, np.frombuffer for byte streams"},
+ ]},
+{n:"26",t:"File I/O & Data Formats",ic:"📂",c:"#4895ef",bg:"rgba(72,149,239,.1)",
+ desc:"Saving and loading NumPy arrays in every format — .npy, .npz, HDF5, parquet, and memory-efficient alternatives.",
+ tags:["Applied","Data Engineering"],
+ topics:[
+  {id:"fi1",ic:".npy",t:"np.save & np.load (.npy)",d:"Binary format, preserves dtype/shape, fast, np.save, np.load, allow_pickle"},
+  {id:"fi2",ic:".npz",t:"np.savez & Multiple Arrays",d:"np.savez_compressed, loading by key, NpzFile lazy loading"},
+  {id:"fi3",ic:"📊",t:"Text & CSV",d:"np.savetxt, np.loadtxt, np.genfromtxt (handles missing), delimiter, skiprows"},
+  {id:"fi4",ic:"🗄",t:"HDF5 & Large Datasets",d:"h5py arrays are array-like, chunking, compression, zarr for cloud-native arrays"},
+ ]},
+{n:"27",t:"NumPy + PyTorch Integration",ic:"🔥",c:"#ff6b35",bg:"rgba(255,107,53,.1)",
+ desc:"Seamless interoperability between NumPy and PyTorch — zero-copy conversion, shared memory, and GPU tensors.",
+ tags:["ML","PyTorch","Critical"],
+ topics:[
+  {id:"pt1",ic:"🔄",t:"Tensor ↔ ndarray Conversion",d:"t.numpy() (shares memory), torch.from_numpy(a) (shares memory), copy vs view"},
+  {id:"pt2",ic:"💾",t:"Zero-Copy Memory Sharing",d:"DLPack protocol, __array__ interface, CuPy GPU arrays, memory ownership"},
+  {id:"pt3",ic:"🎓",t:"NumPy in DataLoaders",d:"Collate functions, np.stack in custom datasets, augmentation with NumPy in workers"},
+  {id:"pt4",ic:"⚙",t:"Custom Autograd with NumPy Backend",d:"torch.autograd.Function with numpy, forward/backward in numpy, JAX+numpy"},
+ ]},
+{n:"28",t:"CuPy — GPU NumPy",ic:"🖥",c:"#7c3aed",bg:"rgba(124,58,237,.1)",
+ desc:"Accelerating NumPy code on NVIDIA GPUs with CuPy — same API, CUDA speed.",
+ tags:["GPU","Advanced","Performance"],
+ topics:[
+  {id:"cu1",ic:"🖥",t:"CuPy Basics",d:"import cupy as cp, cp.array, cp.asnumpy, GPU memory management, device context"},
+  {id:"cu2",ic:"⚡",t:"CuPy vs NumPy Performance",d:"When GPU wins (large arrays), when CPU wins (small arrays), PCIe transfer overhead"},
+  {id:"cu3",ic:"🔧",t:"Custom CUDA Kernels",d:"cp.RawKernel, cp.ElementwiseKernel, cp.ReductionKernel for custom GPU operations"},
+ ]},
+{n:"29",t:"NumPy Internals",ic:"⚙",c:"#10b981",bg:"rgba(16,185,129,.1)",
+ desc:"How NumPy works under the hood — the C extension, buffer protocol, __array_ufunc__, and the NEP roadmap.",
+ tags:["Advanced","Internals"],
+ topics:[
+  {id:"ni1",ic:"⚙",t:"C Extension Architecture",d:"PyObject → ndarray struct, PyArrayObject, data pointer, strides array, refcounting"},
+  {id:"ni2",ic:"🔌",t:"Array Protocol & __array__",d:"__array__() method, __array_interface__, DLPack, custom array-like objects"},
+  {id:"ni3",ic:"🔧",t:"__array_ufunc__ & Overriding",d:"Override ufunc behavior for custom classes, HANDLED vs NotImplemented, dask/cupy use this"},
+  {id:"ni4",ic:"📡",t:"NEP-18 — __array_function__",d:"Override np.sum, np.concatenate etc for custom backends, array-api standard"},
+ ]},
+{n:"30",t:"Interview Preparation",ic:"🎯",c:"#4895ef",bg:"rgba(72,149,239,.1)",
+ desc:"280+ questions from entry-level to research engineer — every real NumPy and ML computing interview question.",
+ tags:["Interview"],
+ topics:[
+  {id:"iq1",ic:"[ ]",t:"Arrays & Basic Operations Q&A",d:"Creation, indexing, slicing, dtype, shapes — all levels"},
+  {id:"iq2",ic:"⊕",t:"Broadcasting Q&A",d:"Rules, shapes, errors, ML patterns — intermediate to expert"},
+  {id:"iq3",ic:"⚡",t:"Performance & Vectorization Q&A",d:"Loop removal, cache, BLAS, memory layout — advanced"},
+  {id:"iq4",ic:"Ax",t:"Linear Algebra Q&A",d:"SVD, eigen, matmul, solving systems — intermediate to expert"},
+  {id:"iq5",ic:"🧠",t:"Deep Learning Operations Q&A",d:"Backprop shapes, einsum, conv, attention — expert"},
+ ]},
+];
+const DETAILS={
+
+"br1":{
+title:"Broadcasting Rules — The 3 Laws of NumPy",bread:"Chapter 5 · Broadcasting",
+sub:"Broadcasting lets NumPy perform element-wise operations on arrays with different shapes — without copying data. Master 3 rules and eliminate virtually all loops.",
+pills:[{t:"Critical",c:"#f43f5e"},{t:"Must Master",c:"#4895ef"},{t:"Core NumPy",c:"#10b981"}],
+
+explain:`<div class="d-bread">Chapter 5 · Broadcasting</div>
+<div class="d-title">⊕ Broadcasting Rules — The 3 Laws</div>
+<div class="d-sub">Broadcasting lets NumPy perform operations on arrays with different shapes without copying data. These 3 rules determine the output shape for any pair of arrays.</div>
+<div class="d-pills"><span class="dpill" style="color:#f43f5e;border-color:#f43f5e44">Critical</span><span class="dpill" style="color:#4895ef;border-color:#4895ef44">Must Master</span></div>
+<div class="sec"><div class="sec-t">The 3 Broadcasting Rules</div>
+<div class="msteps"><div class="mstep"><div class="mstep-n">Rule 1</div><div><div class="mstep-f">If arrays have different ndim, pad the smaller shape on the LEFT with 1s</div><div class="mstep-d">Example: (3,) becomes (1,3). (4,3) stays (4,3). Now both are 2D.</div></div></div>
+<div class="mstep"><div class="mstep-n">Rule 2</div><div><div class="mstep-f">Arrays with size 1 along a dimension are stretched to match</div><div class="mstep-d">Shape (4,1) and (1,3) → both become (4,3). No data is copied, just virtual repetition.</div></div></div>
+<div class="mstep"><div class="mstep-n">Rule 3</div><div><div class="mstep-f">If shapes still don't match and neither is 1, raise ValueError</div><div class="mstep-d">(3,4) + (3,5) → ERROR. Neither 4 nor 5 is 1 — no way to broadcast.</div></div></div></div></div>
+<div class="sec"><div class="sec-t">Shape Calculation Examples</div>
+<div class="prose"><table class="ctbl"><tr><th>Array A</th><th>Array B</th><th>Result</th><th>Notes</th></tr>
+<tr><td><code>(4,3)</code></td><td><code>(3,)</code></td><td><code>(4,3)</code></td><td>B padded to (1,3) → (4,3)</td></tr>
+<tr><td><code>(4,1)</code></td><td><code>(1,3)</code></td><td><code>(4,3)</code></td><td>Outer product pattern</td></tr>
+<tr><td><code>(1,3,1)</code></td><td><code>(4,1,5)</code></td><td><code>(4,3,5)</code></td><td>3D broadcast — all dims resolved</td></tr>
+<tr><td><code>(8,1,6,1)</code></td><td><code>(7,1,5)</code></td><td><code>(8,7,6,5)</code></td><td>4D vs 3D — pad B → (1,7,1,5)</td></tr>
+<tr><td><code>(3,4)</code></td><td><code>(3,5)</code></td><td>❌ Error</td><td>4≠5 and neither is 1</td></tr></table>
+<div class="callout c-tip"><span class="call-ic">💡</span><span><strong>Memory fact:</strong> Broadcasting never copies data. NumPy uses strides=0 to traverse the "virtual" repeated dimension. So <code>np.ones((1,1000))+np.ones((1000,1))</code> creates a (1000,1000) result but only reads 2000 floats, not 2,000,000.</span></div>
+<h4>Key ML Patterns Using Broadcasting</h4>
+<ul>
+<li><strong>Add bias vector to batch:</strong> <code>(B,out) + (out,)</code> → bias added to every sample</li>
+<li><strong>Subtract mean from batch:</strong> <code>(B,D) - (1,D)</code> → center each feature</li>
+<li><strong>Outer product:</strong> <code>(n,1) * (1,m)</code> → (n,m) matrix without np.outer</li>
+<li><strong>Pairwise distances:</strong> <code>(n,1,D) - (1,m,D)</code> → (n,m,D) diff matrix</li>
+</ul></div></div>`,
+
+code:`<div class="sec"><div class="sec-t">Broadcasting — Code Examples</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang" style="color:#a6e3a1">python</span><span class="cb-name">Broadcasting — All Key Patterns</span><button class="cb-copy" onclick="copyCode(this)">Copy</button></div>
+<div class="cb-body"><pre><span class="imp">import</span> numpy <span class="imp">as</span> np
+
+<span class="cm"># ── RULE DEMO ─────────────────────────────────────────────</span>
+a = np.<span class="fn">ones</span>((<span class="nu">4</span>, <span class="nu">3</span>))     <span class="cm"># shape (4,3)</span>
+b = np.<span class="fn">ones</span>(<span class="nu">3</span>)          <span class="cm"># shape (3,) → padded to (1,3) → stretched to (4,3)</span>
+<span class="fn">print</span>((a + b).shape)    <span class="cm"># (4, 3)</span>
+
+<span class="cm"># ── OUTER PRODUCT WITHOUT np.outer ───────────────────────</span>
+x = np.<span class="fn">array</span>([<span class="nu">1</span>,<span class="nu">2</span>,<span class="nu">3</span>])  <span class="cm"># (3,)</span>
+y = np.<span class="fn">array</span>([<span class="nu">10</span>,<span class="nu">20</span>]) <span class="cm"># (2,)</span>
+outer = x[:,np.newaxis] * y[np.newaxis,:]  <span class="cm"># (3,1)*(1,2) → (3,2)</span>
+<span class="fn">print</span>(outer)  <span class="cm"># [[10,20],[20,40],[30,60]]</span>
+
+<span class="cm"># ── BATCH NORMALISATION PATTERN ────────────────────────────</span>
+X = np.random.randn(<span class="nu">32</span>, <span class="nu">128</span>)   <span class="cm"># batch of 32, 128 features</span>
+mu  = X.mean(axis=<span class="nu">0</span>)           <span class="cm"># (128,)  — mean per feature</span>
+std = X.std(axis=<span class="nu">0</span>) + <span class="nu">1e-8</span>    <span class="cm"># (128,)</span>
+X_norm = (X - mu) / std         <span class="cm"># (32,128) - (128,) / (128,) → (32,128) ✓</span>
+
+<span class="cm"># ── PAIRWISE L2 DISTANCES ─────────────────────────────────</span>
+A = np.random.randn(<span class="nu">50</span>, <span class="nu">10</span>)   <span class="cm"># 50 points in R^10</span>
+B = np.random.randn(<span class="nu">80</span>, <span class="nu">10</span>)   <span class="cm"># 80 points in R^10</span>
+<span class="cm"># ‖a - b‖² = ‖a‖² + ‖b‖² - 2a·b</span>
+sq_A = (A**<span class="nu">2</span>).sum(axis=<span class="nu">1</span>, keepdims=<span class="kw">True</span>)  <span class="cm"># (50,1)</span>
+sq_B = (B**<span class="nu">2</span>).sum(axis=<span class="nu">1</span>, keepdims=<span class="kw">True</span>)  <span class="cm"># (80,1)</span>
+D = sq_A + sq_B.T - <span class="nu">2</span> * A @ B.T            <span class="cm"># (50,1)+(1,80)-(50,80) → (50,80)</span>
+D = np.<span class="fn">sqrt</span>(np.<span class="fn">maximum</span>(D, <span class="nu">0</span>))               <span class="cm"># clip numerical noise</span>
+<span class="fn">print</span>(D.shape)  <span class="cm"># (50, 80) — all 50×80 distances at once</span>
+
+<span class="cm"># ── BIAS ADDITION IN NEURAL NETWORK ────────────────────────</span>
+W = np.random.randn(<span class="nu">64</span>, <span class="nu">128</span>)  <span class="cm"># weight matrix</span>
+b = np.random.randn(<span class="nu">64</span>)       <span class="cm"># bias (64,)</span>
+X = np.random.randn(<span class="nu">32</span>, <span class="nu">128</span>) <span class="cm"># batch input</span>
+out = X @ W.T + b              <span class="cm"># (32,64)+(64,) → (32,64) ✓ broadcast!</span>
+
+<span class="cm"># ── COMMON MISTAKE: (n,) vs (n,1) ──────────────────────────</span>
+a = np.<span class="fn">array</span>([<span class="nu">1</span>,<span class="nu">2</span>,<span class="nu">3</span>])       <span class="cm"># shape (3,)</span>
+b = np.<span class="fn">array</span>([[<span class="nu">1</span>],[<span class="nu">2</span>],[<span class="nu">3</span>]])  <span class="cm"># shape (3,1)</span>
+<span class="fn">print</span>((a + a).shape)  <span class="cm"># (3,)  — element-wise</span>
+<span class="fn">print</span>((b + a).shape)  <span class="cm"># (3,3) — outer product! b has shape (3,1)</span>
+<span class="fn">print</span>((a + b).shape)  <span class="cm"># (3,3) — SAME! Broadcasting is commutative</span></pre></div></div></div>`,
+
+visual:`<div class="sec"><div class="sec-t">Broadcasting — Shape Diagrams</div>
+<div class="diag"><div class="diag-hdr">Broadcasting: (4,1) + (1,3) → (4,3)</div>
+<div class="diag-body">
+<svg width="510" height="300" viewBox="0 0 510 300" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#000816" x="0" y="0" width="510" height="300" rx="8"/>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="10" y="14">BROADCASTING: (4,1) + (1,3) → (4,3) — no data copied!</text>
+<!-- Array A (4,1) -->
+<text font-family="'JetBrains Mono'" font-size="9" fill="#8da0c4" x="20" y="35">A (4,1)</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="20" y="42" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="30" y="56">1</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="20" y="66" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="30" y="80">2</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="20" y="90" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="30" y="104">3</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="20" y="114" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="30" y="128">4</text>
+<!-- stretched A -->
+<text font-family="'JetBrains Mono'" font-size="8" fill="#3a4d6e" x="60" y="35">→ stretched to (4,3)</text>
+<rect fill="#0d1f3c" stroke="#4895ef" stroke-dasharray="3 2" x="60" y="42" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="70" y="56">1</text>
+<rect fill="#0d1f3c" stroke="#4895ef" stroke-dasharray="3 2" x="96" y="42" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="106" y="56">1</text>
+<rect fill="#0d1f3c" stroke="#4895ef" stroke-dasharray="3 2" x="132" y="42" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="142" y="56">1</text>
+<rect fill="#0d1f3c" stroke="#4895ef" stroke-dasharray="3 2" x="60" y="66" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="70" y="80">2</text>
+<rect fill="#0d1f3c" stroke="#4895ef" stroke-dasharray="3 2" x="96" y="66" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="106" y="80">2</text>
+<rect fill="#0d1f3c" stroke="#4895ef" stroke-dasharray="3 2" x="132" y="66" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="142" y="80">2</text>
+<rect fill="#0d1f3c" stroke="#4895ef" stroke-dasharray="3 2" x="60" y="90" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="70" y="104">3</text>
+<rect fill="#0d1f3c" stroke="#4895ef" stroke-dasharray="3 2" x="96" y="90" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="106" y="104">3</text>
+<rect fill="#0d1f3c" stroke="#4895ef" stroke-dasharray="3 2" x="132" y="90" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="142" y="104">3</text>
+<rect fill="#0d1f3c" stroke="#4895ef" stroke-dasharray="3 2" x="60" y="114" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="70" y="128">4</text>
+<rect fill="#0d1f3c" stroke="#4895ef" stroke-dasharray="3 2" x="96" y="114" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="106" y="128">4</text>
+<rect fill="#0d1f3c" stroke="#4895ef" stroke-dasharray="3 2" x="132" y="114" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="142" y="128">4</text>
+<!-- plus -->
+<text font-family="'Fraunces'" font-size="20" fill="#8da0c4" x="178" y="90">+</text>
+<!-- B (1,3) -->
+<text font-family="'JetBrains Mono'" font-size="9" fill="#8da0c4" x="200" y="35">B (1,3)</text>
+<rect fill="#1f0d3c" stroke="#ff6b35" x="200" y="42" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#ff6b35" x="210" y="56">10</text>
+<rect fill="#1f0d3c" stroke="#ff6b35" x="236" y="42" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#ff6b35" x="246" y="56">20</text>
+<rect fill="#1f0d3c" stroke="#ff6b35" x="272" y="42" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#ff6b35" x="282" y="56">30</text>
+<!-- stretched B -->
+<text font-family="'JetBrains Mono'" font-size="8" fill="#3a4d6e" x="200" y="73">↓ stretched rows</text>
+<rect fill="#1f0d3c" stroke="#ff6b35" stroke-dasharray="3 2" x="200" y="80" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#ff6b35" x="210" y="94">10</text>
+<rect fill="#1f0d3c" stroke="#ff6b35" stroke-dasharray="3 2" x="236" y="80" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#ff6b35" x="246" y="94">20</text>
+<rect fill="#1f0d3c" stroke="#ff6b35" stroke-dasharray="3 2" x="272" y="80" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#ff6b35" x="282" y="94">30</text>
+<rect fill="#1f0d3c" stroke="#ff6b35" stroke-dasharray="3 2" x="200" y="104" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#ff6b35" x="210" y="118">10</text>
+<rect fill="#1f0d3c" stroke="#ff6b35" stroke-dasharray="3 2" x="236" y="104" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#ff6b35" x="246" y="118">20</text>
+<rect fill="#1f0d3c" stroke="#ff6b35" stroke-dasharray="3 2" x="272" y="104" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#ff6b35" x="282" y="118">30</text>
+<!-- equals -->
+<text font-family="'Fraunces'" font-size="20" fill="#8da0c4" x="318" y="90">=</text>
+<!-- Result (4,3) -->
+<text font-family="'JetBrains Mono'" font-size="9" fill="#8da0c4" x="340" y="35">Result (4,3)</text>
+<rect fill="#0a2010" stroke="#10b981" x="340" y="42" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="347" y="56">11</text>
+<rect fill="#0a2010" stroke="#10b981" x="376" y="42" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="383" y="56">21</text>
+<rect fill="#0a2010" stroke="#10b981" x="412" y="42" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="419" y="56">31</text>
+<rect fill="#0a2010" stroke="#10b981" x="340" y="66" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="347" y="80">12</text>
+<rect fill="#0a2010" stroke="#10b981" x="376" y="66" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="383" y="80">22</text>
+<rect fill="#0a2010" stroke="#10b981" x="412" y="66" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="419" y="80">32</text>
+<rect fill="#0a2010" stroke="#10b981" x="340" y="90" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="347" y="104">13</text>
+<rect fill="#0a2010" stroke="#10b981" x="376" y="90" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="383" y="104">23</text>
+<rect fill="#0a2010" stroke="#10b981" x="412" y="90" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="419" y="104">33</text>
+<rect fill="#0a2010" stroke="#10b981" x="340" y="114" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="347" y="128">14</text>
+<rect fill="#0a2010" stroke="#10b981" x="376" y="114" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="383" y="128">24</text>
+<rect fill="#0a2010" stroke="#10b981" x="412" y="114" width="32" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="419" y="128">34</text>
+<!-- memory note -->
+<rect fill="#050c1a" stroke="#0d2044" x="10" y="150" width="490" height="50" rx="6"/>
+<text font-family="'JetBrains Mono'" font-size="8.5" fill="#4895ef" x="20" y="165">💾 MEMORY TRICK: A strides=(8,0) — the 0-stride means col dim costs ZERO memory to traverse!</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#8da0c4" x="20" y="182">Instead of copying 4×3=12 values, NumPy reads only 4 values with stride 0 across columns. Same for B rows.</text>
+<!-- shape flow -->
+<text font-family="'JetBrains Mono'" font-size="8.5" fill="#4895ef" x="10" y="220">SHAPE RESOLUTION STEPS:</text>
+<rect fill="#050c1a" stroke="#0d2044" x="10" y="226" width="490" height="64" rx="5"/>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#8da0c4" x="18" y="242">Step 1: A=(4,1)  B=(1,3)  → same ndim=2, no padding needed</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#8da0c4" x="18" y="258">Step 2: dim 0: max(4,1)=4   |   dim 1: max(1,3)=3   → valid, both have 1s</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="18" y="274">Step 3: Output shape = (4, 3) ✓</text>
+</svg></div></div></div>`,
+
+animate:`<div class="sec"><div class="sec-t">Broadcasting Animation — Stride Trick Visualization</div>
+<div class="anim-wrap">
+<div class="anim-hdr"><span>Broadcasting: Row Vector + Column Vector = Matrix (animated)</span>
+<div class="anim-ctrl"><button class="anim-btn" onclick="restartAnim('bcast-anim')">↺ Replay</button></div></div>
+<div class="anim-body">
+<svg id="bcast-anim" width="490" height="260" viewBox="0 0 490 260" xmlns="http://www.w3.org/2000/svg">
+<style>
+@keyframes bcast-fadeA{0%{opacity:0}20%{opacity:1}100%{opacity:1}}
+@keyframes bcast-fadeB{0%{opacity:0}35%{opacity:0}55%{opacity:1}100%{opacity:1}}
+@keyframes bcast-result{0%{opacity:0}60%{opacity:0}80%{opacity:1}100%{opacity:1}}
+@keyframes bcast-arrow{0%{opacity:0;transform:scaleX(0)}30%{opacity:1;transform:scaleX(1)}100%{opacity:1;transform:scaleX(1)}}
+@keyframes cell-pop{0%{transform:scale(0.6);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.ba{animation:bcast-fadeA 1s ease forwards}
+.bb{animation:bcast-fadeB 1.5s ease forwards}
+.br{animation:bcast-result 2s ease forwards}
+</style>
+<rect fill="#000816" x="0" y="0" width="490" height="260" rx="8"/>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="10" y="16">ANIMATED: a[3,1] ⊕ b[1,4] → result[3,4]</text>
+<!-- Row vector b -->
+<text class="ba" font-family="'JetBrains Mono'" font-size="9" fill="#ff6b35" x="10" y="38">b = [10, 20, 30, 40]   shape (1,4)</text>
+<g class="ba">
+<rect fill="#1f0d1a" stroke="#ff6b35" x="10" y="44" width="34" height="24" rx="3"/>
+<rect fill="#1f0d1a" stroke="#ff6b35" x="48" y="44" width="34" height="24" rx="3"/>
+<rect fill="#1f0d1a" stroke="#ff6b35" x="86" y="44" width="34" height="24" rx="3"/>
+<rect fill="#1f0d1a" stroke="#ff6b35" x="124" y="44" width="34" height="24" rx="3"/>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#ff8c5a" x="22" y="61">10</text>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#ff8c5a" x="60" y="61">20</text>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#ff8c5a" x="98" y="61">30</text>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#ff8c5a" x="136" y="61">40</text>
+</g>
+<!-- Col vector a -->
+<text class="ba" font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="200" y="38">a = [[1],[2],[3]]   shape (3,1)</text>
+<g class="ba">
+<rect fill="#0d1f3c" stroke="#4895ef" x="200" y="44" width="34" height="24" rx="3"/>
+<rect fill="#0d1f3c" stroke="#4895ef" x="200" y="72" width="34" height="24" rx="3"/>
+<rect fill="#0d1f3c" stroke="#4895ef" x="200" y="100" width="34" height="24" rx="3"/>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#72b0f5" x="212" y="61">1</text>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#72b0f5" x="212" y="89">2</text>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#72b0f5" x="212" y="117">3</text>
+</g>
+<!-- Result -->
+<text class="bb" font-family="'JetBrains Mono'" font-size="9" fill="#10b981" x="300" y="38">result = a + b   shape (3,4)</text>
+<g class="br">
+<rect fill="#081f12" stroke="#10b981" x="300" y="44" width="34" height="24" rx="3" style="animation-delay:.6s"/><text font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="308" y="61">11</text>
+<rect fill="#081f12" stroke="#10b981" x="338" y="44" width="34" height="24" rx="3"/><text font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="346" y="61">21</text>
+<rect fill="#081f12" stroke="#10b981" x="376" y="44" width="34" height="24" rx="3"/><text font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="384" y="61">31</text>
+<rect fill="#081f12" stroke="#10b981" x="414" y="44" width="34" height="24" rx="3"/><text font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="422" y="61">41</text>
+<rect fill="#081f12" stroke="#10b981" x="300" y="72" width="34" height="24" rx="3"/><text font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="308" y="89">12</text>
+<rect fill="#081f12" stroke="#10b981" x="338" y="72" width="34" height="24" rx="3"/><text font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="346" y="89">22</text>
+<rect fill="#081f12" stroke="#10b981" x="376" y="72" width="34" height="24" rx="3"/><text font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="384" y="89">32</text>
+<rect fill="#081f12" stroke="#10b981" x="414" y="72" width="34" height="24" rx="3"/><text font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="422" y="89">42</text>
+<rect fill="#081f12" stroke="#10b981" x="300" y="100" width="34" height="24" rx="3"/><text font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="308" y="117">13</text>
+<rect fill="#081f12" stroke="#10b981" x="338" y="100" width="34" height="24" rx="3"/><text font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="346" y="117">23</text>
+<rect fill="#081f12" stroke="#10b981" x="376" y="100" width="34" height="24" rx="3"/><text font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="384" y="117">33</text>
+<rect fill="#081f12" stroke="#10b981" x="414" y="100" width="34" height="24" rx="3"/><text font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="422" y="117">43</text>
+</g>
+<!-- Memory strides explanation -->
+<rect class="br" fill="#050c1a" stroke="#0d2044" x="10" y="145" width="470" height="102" rx="6"/>
+<text class="br" font-family="'JetBrains Mono'" font-size="8.5" fill="#4895ef" x="20" y="162">STRIDES MAGIC — WHY NO DATA IS COPIED:</text>
+<text class="br" font-family="'JetBrains Mono'" font-size="8" fill="#8da0c4" x="20" y="178">a.strides = (8, 0)    ← stride 0 in col dim: every col reads SAME memory address!</text>
+<text class="br" font-family="'JetBrains Mono'" font-size="8" fill="#8da0c4" x="20" y="194">b.strides = (0, 8)    ← stride 0 in row dim: every row reads SAME memory address!</text>
+<text class="br" font-family="'JetBrains Mono'" font-size="8" fill="#ff8c5a" x="20" y="210">result.strides = (32, 8)  ← proper 2D layout, data ADDED at computation time</text>
+<text class="br" font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="20" y="230">Memory: a=3×8=24 bytes, b=4×8=32 bytes. No intermediate 12-element arrays created!</text>
+</svg></div></div></div>`,
+
+qa:[
+{q:"What are NumPy's broadcasting rules? Walk through an example.",a:"NumPy has 3 rules: (1) If arrays differ in ndim, pad the smaller shape with 1s on the LEFT. (2) Arrays with size 1 in any dimension are 'stretched' to match the other array. (3) If neither is 1 and sizes don't match, raise ValueError. Example: a has shape (4,3), b has shape (3,). Step 1: b padded to (1,3). Step 2: b stretched to (4,3). Result: (4,3). Memory trick: NumPy never actually copies data — it uses stride=0 so the CPU reads the same memory address repeatedly. So (4,1)+(1,3) → (4,3) without creating any intermediate 12-element array.",level:"i",tag:"Broadcasting"},
+{q:"What is the difference between (n,) and (n,1) shapes and when does it matter?",a:"(n,) is a 1D array (vector). (n,1) is a 2D column vector. They behave identically in many operations but differ critically in broadcasting. (3,)+(3,) = (3,) — element-wise. (3,1)+(3,) = (3,1)+(1,3) → (3,3) — OUTER PRODUCT! This is the most common broadcasting surprise. In ML: weight matrices are (out,in), input is (B,in). For bias: if b has shape (out,), adding to (B,out) output works. If b is (out,1) by mistake, you get (B,out,out). Always verify shapes with a.shape before operations. Best practice: use a[:,np.newaxis] or a.reshape(-1,1) explicitly when you want column vectors.",level:"i",tag:"Broadcasting"},
+{q:"How does broadcasting help implement pairwise distances?",a:"Without broadcasting, computing n×m pairwise L2 distances requires nested loops. With broadcasting: ‖a-b‖² = ‖a‖² + ‖b‖² - 2a·b. Shapes: A=(n,d), B=(m,d). sq_A = (A**2).sum(1, keepdims=True) → (n,1). sq_B = (B**2).sum(1, keepdims=True) → (m,1). Cross term: A@B.T → (n,m). D = sq_A + sq_B.T - 2*A@B.T → (n,1)+(1,m)-(n,m) → (n,m). Time complexity: O(nmd) same as loops but ~100x faster due to BLAS matmul for the cross term. This exact pattern is used in k-NN, k-means, attention mechanisms, and kernel methods.",level:"a",tag:"Broadcasting"},
+],
+
+sheet:`<div class="sec"><div class="sec-t">Broadcasting — Quick Reference Sheet</div>
+<div class="cs-grid">
+<div class="cs-card"><div class="cs-card-t">Shape Rules</div>
+<div class="cs-row"><span class="cs-fn">(4,3)+(3,)</span><span class="cs-desc">→ (4,3) ✓</span></div>
+<div class="cs-row"><span class="cs-fn">(4,1)+(1,3)</span><span class="cs-desc">→ (4,3) ✓</span></div>
+<div class="cs-row"><span class="cs-fn">(3,4)+(3,5)</span><span class="cs-desc">→ ERROR ✗</span></div>
+<div class="cs-row"><span class="cs-fn">(1,3,1)+(4,1,5)</span><span class="cs-desc">→ (4,3,5) ✓</span></div></div>
+<div class="cs-card"><div class="cs-card-t">ML Patterns</div>
+<div class="cs-row"><span class="cs-fn">Add bias</span><span class="cs-desc">(B,out)+(out,)</span></div>
+<div class="cs-row"><span class="cs-fn">Batch norm</span><span class="cs-desc">(B,D)-(1,D)/(1,D)</span></div>
+<div class="cs-row"><span class="cs-fn">Outer product</span><span class="cs-desc">(n,1)*(1,m)</span></div>
+<div class="cs-row"><span class="cs-fn">Pairwise dist</span><span class="cs-desc">(n,1,D)-(1,m,D)</span></div></div>
+<div class="cs-card"><div class="cs-card-t">Shape Tools</div>
+<div class="cs-row"><span class="cs-fn">a[:,np.newaxis]</span><span class="cs-desc">(n,)→(n,1)</span></div>
+<div class="cs-row"><span class="cs-fn">a[np.newaxis,:]</span><span class="cs-desc">(n,)→(1,n)</span></div>
+<div class="cs-row"><span class="cs-fn">np.broadcast_to</span><span class="cs-desc">explicit expand</span></div>
+<div class="cs-row"><span class="cs-fn">np.broadcast_shapes</span><span class="cs-desc">check shapes</span></div></div>
+<div class="cs-card"><div class="cs-card-t">Debugging</div>
+<div class="cs-row"><span class="cs-fn">a.shape</span><span class="cs-desc">always check!</span></div>
+<div class="cs-row"><span class="cs-fn">np.result_type</span><span class="cs-desc">dtype result</span></div>
+<div class="cs-row"><span class="cs-fn">np.broadcast</span><span class="cs-desc">inspect bc object</span></div>
+<div class="cs-row"><span class="cs-fn">assert a.shape==(4,3)</span><span class="cs-desc">defensive check</span></div></div>
+</div>`
+},
+
+"ml1":{
+title:"C-order vs Fortran-order — Memory Layout Deep Dive",bread:"Chapter 9 · Memory Layout & Views",
+sub:"NumPy arrays store data in contiguous memory. Whether rows or columns are contiguous determines loop performance by 10-100x. This is the secret to cache-friendly ML code.",
+pills:[{t:"Advanced",c:"#ff6b35"},{t:"Performance",c:"#4895ef"},{t:"Critical for Speed",c:"#10b981"}],
+
+explain:`<div class="d-bread">Chapter 9 · Memory Layout</div>
+<div class="d-title">🧠 C-order vs Fortran-order Memory</div>
+<div class="d-sub">The order in which array elements are laid out in RAM determines how many cache misses occur during computation. This can make the difference between 100ms and 10ms.</div>
+<div class="d-pills"><span class="dpill" style="color:#ff6b35;border-color:#ff6b3544">Advanced</span><span class="dpill" style="color:#4895ef;border-color:#4895ef44">Performance</span></div>
+<div class="sec"><div class="sec-t">Row-Major (C) vs Column-Major (F) Order</div>
+<div class="prose">
+<h4>C-order (row-major) — NumPy default</h4>
+<p>In C-order, the <strong>last index changes fastest</strong>. For a 2D array, this means elements within a row are adjacent in memory. <code>a[0,0], a[0,1], a[0,2], a[1,0], a[1,1]...</code></p>
+<p><strong>Result:</strong> Row-wise traversal is fast (sequential memory access). Column-wise traversal is slow (jumping by row-stride bytes each step — cache misses!).</p>
+<h4>F-order (column-major) — MATLAB, Fortran default</h4>
+<p>In F-order, the <strong>first index changes fastest</strong>. Elements within a column are adjacent in memory.</p>
+<p><strong>Result:</strong> Column-wise traversal is fast. Row-wise is slow.</p>
+<h4>Strides — The Exact Memory Recipe</h4>
+<p>For an array with shape (4,3) and dtype float64 (8 bytes):</p>
+<ul>
+<li><strong>C-order strides:</strong> (24, 8) — to advance one row, skip 24 bytes (3×8); one column, skip 8 bytes</li>
+<li><strong>F-order strides:</strong> (8, 32) — to advance one row, skip 8 bytes; one column, skip 32 bytes (4×8)</li>
+</ul>
+<div class="callout c-np"><span class="call-ic">💡</span><span><strong>Cache line is 64 bytes (8 floats).</strong> If you access elements with stride 8 (C-order row-wise), you prefetch 8 elements per cache miss. If stride is 24+ (column-wise on a wide matrix), each access is a separate cache miss. A 1000×1000 matrix column traversal causes 1M cache misses vs 125K for row traversal.</span></div>
+</div></div>`,
+
+code:`<div class="sec"><div class="sec-t">Memory Layout — Code & Benchmarks</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang" style="color:#a6e3a1">python</span><span class="cb-name">C vs F order — Strides, Views, and Performance</span><button class="cb-copy" onclick="copyCode(this)">Copy</button></div>
+<div class="cb-body"><pre><span class="imp">import</span> numpy <span class="imp">as</span> np
+<span class="imp">import</span> time
+
+<span class="cm"># ── STRIDES INSPECTION ─────────────────────────────────────</span>
+a_c = np.<span class="fn">zeros</span>((<span class="nu">4</span>, <span class="nu">3</span>), dtype=np.float64, order=<span class="st">'C'</span>)  <span class="cm"># C-order (default)</span>
+a_f = np.<span class="fn">zeros</span>((<span class="nu">4</span>, <span class="nu">3</span>), dtype=np.float64, order=<span class="st">'F'</span>)  <span class="cm"># Fortran order</span>
+<span class="fn">print</span>(<span class="st">f"C strides: {a_c.strides}"</span>)   <span class="cm"># (24, 8) — row=24b, col=8b</span>
+<span class="fn">print</span>(<span class="st">f"F strides: {a_f.strides}"</span>)   <span class="cm"># (8, 32) — row=8b,  col=32b</span>
+<span class="fn">print</span>(<span class="st">f"C contiguous: {a_c.flags.c_contiguous}"</span>)  <span class="cm"># True</span>
+<span class="fn">print</span>(<span class="st">f"F contiguous: {a_f.flags.f_contiguous}"</span>)  <span class="cm"># True</span>
+
+<span class="cm"># ── PERFORMANCE BENCHMARK ─────────────────────────────────</span>
+n = <span class="nu">2000</span>
+A = np.random.randn(n, n)        <span class="cm"># C-order (rows contiguous)</span>
+A_f = np.asfortranarray(A)       <span class="cm"># F-order (cols contiguous)</span>
+
+<span class="cm"># Row sum: C-order FAST (sequential), F-order SLOW (stride jumps)</span>
+t0 = time.perf_counter()
+_ = A.<span class="fn">sum</span>(axis=<span class="nu">1</span>)              <span class="cm"># sum each row</span>
+t_c = time.perf_counter() - t0
+
+t0 = time.perf_counter()
+_ = A_f.<span class="fn">sum</span>(axis=<span class="nu">1</span>)            <span class="cm"># same but F-order</span>
+t_f = time.perf_counter() - t0
+<span class="fn">print</span>(<span class="st">f"Row sum: C={t_c*1000:.2f}ms, F={t_f*1000:.2f}ms"</span>)
+
+<span class="cm"># ── MATRIX MULTIPLY ALWAYS FAST (BLAS handles layout) ──────</span>
+<span class="cm"># np.dot/@ uses BLAS which handles both layouts internally</span>
+
+<span class="cm"># ── THE STRIDED TRICK — custom views ──────────────────────</span>
+<span class="cm"># Create sliding windows with as_strided (DANGER: no bounds checking)</span>
+x = np.<span class="fn">arange</span>(<span class="nu">10</span>, dtype=np.float64)  <span class="cm"># [0..9]</span>
+window_size, stride = <span class="nu">4</span>, <span class="nu">1</span>
+shape = (x.shape[<span class="nu">0</span>] - window_size + <span class="nu">1</span>, window_size)  <span class="cm"># (7, 4)</span>
+strides = (x.strides[<span class="nu">0</span>], x.strides[<span class="nu">0</span>])          <span class="cm"># (8, 8) — one float64 step</span>
+windows = np.lib.stride_tricks.<span class="fn">as_strided</span>(x, shape=shape, strides=strides)
+<span class="fn">print</span>(windows)
+<span class="cm"># [[0,1,2,3],[1,2,3,4],[2,3,4,5],...]</span>
+<span class="cm"># Zero-copy sliding windows — used in 1D convolution!</span>
+
+<span class="cm"># ── MAKE CONTIGUOUS WHEN NEEDED ────────────────────────────</span>
+sliced = A[::2, ::2]  <span class="cm"># non-contiguous view (stride tricks)</span>
+<span class="fn">print</span>(sliced.flags.c_contiguous)    <span class="cm"># False!</span>
+contiguous = np.<span class="fn">ascontiguousarray</span>(sliced)  <span class="cm"># force C-contiguous copy</span>
+<span class="fn">print</span>(contiguous.flags.c_contiguous)  <span class="cm"># True</span>
+<span class="cm"># Some BLAS routines require contiguous arrays — always check!</span></pre></div></div></div>`,
+
+visual:`<div class="sec"><div class="sec-t">Memory Layout Visualization</div>
+<div class="diag"><div class="diag-hdr">3×4 Array: C-order vs F-order memory layout</div>
+<div class="diag-body">
+<svg width="490" height="290" viewBox="0 0 490 290" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#000816" x="0" y="0" width="490" height="290" rx="8"/>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="10" y="15">LOGICAL ARRAY — shape (3,4)</text>
+<!-- logical array -->
+<g transform="translate(10,24)">
+<text font-family="'JetBrains Mono'" font-size="8" fill="#8da0c4" x="0" y="10">  col0  col1  col2  col3</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#8da0c4" x="-28" y="28">row0</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#8da0c4" x="-28" y="50">row1</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#8da0c4" x="-28" y="72">row2</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="0" y="16" width="36" height="20"/><text font-family="'JetBrains Mono'" font-size="8" fill="#72b0f5" x="10" y="30">0,0</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="38" y="16" width="36" height="20"/><text font-family="'JetBrains Mono'" font-size="8" fill="#72b0f5" x="48" y="30">0,1</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="76" y="16" width="36" height="20"/><text font-family="'JetBrains Mono'" font-size="8" fill="#72b0f5" x="86" y="30">0,2</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="114" y="16" width="36" height="20"/><text font-family="'JetBrains Mono'" font-size="8" fill="#72b0f5" x="124" y="30">0,3</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="0" y="38" width="36" height="20"/><text font-family="'JetBrains Mono'" font-size="8" fill="#72b0f5" x="10" y="52">1,0</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="38" y="38" width="36" height="20"/><text font-family="'JetBrains Mono'" font-size="8" fill="#72b0f5" x="48" y="52">1,1</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="76" y="38" width="36" height="20"/><text font-family="'JetBrains Mono'" font-size="8" fill="#72b0f5" x="86" y="52">1,2</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="114" y="38" width="36" height="20"/><text font-family="'JetBrains Mono'" font-size="8" fill="#72b0f5" x="124" y="52">1,3</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="0" y="60" width="36" height="20"/><text font-family="'JetBrains Mono'" font-size="8" fill="#72b0f5" x="10" y="74">2,0</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="38" y="60" width="36" height="20"/><text font-family="'JetBrains Mono'" font-size="8" fill="#72b0f5" x="48" y="74">2,1</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="76" y="60" width="36" height="20"/><text font-family="'JetBrains Mono'" font-size="8" fill="#72b0f5" x="86" y="74">2,2</text>
+<rect fill="#0d1f3c" stroke="#4895ef" x="114" y="60" width="36" height="20"/><text font-family="'JetBrains Mono'" font-size="8" fill="#72b0f5" x="124" y="74">2,3</text>
+</g>
+<!-- C ORDER RAM -->
+<text font-family="'JetBrains Mono'" font-size="9" fill="#10b981" x="10" y="120">C-ORDER (row-major) — strides (32, 8)</text>
+<g transform="translate(10,128)">
+<text font-family="'JetBrains Mono'" font-size="7.5" fill="#8da0c4" x="0" y="10">RAM addr→</text>
+<rect fill="#081f12" stroke="#10b981" x="50" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="55" y="13">0,0</text>
+<rect fill="#081f12" stroke="#10b981" x="84" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="89" y="13">0,1</text>
+<rect fill="#081f12" stroke="#10b981" x="118" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="123" y="13">0,2</text>
+<rect fill="#081f12" stroke="#10b981" x="152" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="157" y="13">0,3</text>
+<rect fill="#0d2a1a" stroke="#10b981" x="186" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="191" y="13">1,0</text>
+<rect fill="#0d2a1a" stroke="#10b981" x="220" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="225" y="13">1,1</text>
+<rect fill="#0d2a1a" stroke="#10b981" x="254" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="259" y="13">1,2</text>
+<rect fill="#0d2a1a" stroke="#10b981" x="288" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="293" y="13">1,3</text>
+<rect fill="#0a200e" stroke="#10b981" x="322" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="327" y="13">2,0</text>
+<rect fill="#0a200e" stroke="#10b981" x="356" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="361" y="13">2,1</text>
+<rect fill="#0a200e" stroke="#10b981" x="390" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="395" y="13">2,2</text>
+<rect fill="#0a200e" stroke="#10b981" x="424" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="429" y="13">2,3</text>
+<text font-family="'JetBrains Mono'" font-size="7.5" fill="#34d399" x="50" y="34">←── ROW 0 ──→  ←── ROW 1 ──→  ←── ROW 2 ──→  row-wise: CACHE FRIENDLY ✓</text>
+</g>
+<!-- F ORDER RAM -->
+<text font-family="'JetBrains Mono'" font-size="9" fill="#ff6b35" x="10" y="190">F-ORDER (col-major) — strides (8, 24)</text>
+<g transform="translate(10,198)">
+<text font-family="'JetBrains Mono'" font-size="7.5" fill="#8da0c4" x="0" y="10">RAM addr→</text>
+<rect fill="#1f0d08" stroke="#ff6b35" x="50" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="55" y="13">0,0</text>
+<rect fill="#1f0d08" stroke="#ff6b35" x="84" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="89" y="13">1,0</text>
+<rect fill="#1f0d08" stroke="#ff6b35" x="118" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="123" y="13">2,0</text>
+<rect fill="#201008" stroke="#ff6b35" x="152" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="157" y="13">0,1</text>
+<rect fill="#201008" stroke="#ff6b35" x="186" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="191" y="13">1,1</text>
+<rect fill="#201008" stroke="#ff6b35" x="220" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="225" y="13">2,1</text>
+<rect fill="#1a0c06" stroke="#ff6b35" x="254" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="259" y="13">0,2</text>
+<rect fill="#1a0c06" stroke="#ff6b35" x="288" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="293" y="13">1,2</text>
+<rect fill="#1a0c06" stroke="#ff6b35" x="322" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="327" y="13">2,2</text>
+<rect fill="#160a05" stroke="#ff6b35" x="356" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="361" y="13">0,3</text>
+<rect fill="#160a05" stroke="#ff6b35" x="390" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="395" y="13">1,3</text>
+<rect fill="#160a05" stroke="#ff6b35" x="424" y="0" width="32" height="18"/><text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="429" y="13">2,3</text>
+<text font-family="'JetBrains Mono'" font-size="7.5" fill="#ff8c5a" x="50" y="34">←─COL0─→ ←─COL1─→ ←─COL2─→ ←─COL3─→  col-wise: CACHE FRIENDLY in F-order ✓</text>
+</g>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#8da0c4" x="10" y="265">C-order: a[i,j] at address base + i*32 + j*8 bytes</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#8da0c4" x="10" y="280">F-order: a[i,j] at address base + i*8 + j*24 bytes</text>
+</svg></div></div></div>`,
+
+animate:`<div class="sec"><div class="sec-t">Cache Miss Animation — Why Loop Order Matters</div>
+<div class="anim-wrap">
+<div class="anim-hdr"><span>Cache miss pattern: row-wise (fast) vs column-wise (slow) access</span>
+<div class="anim-ctrl"><button class="anim-btn" onclick="restartAnim('cache-anim')">↺ Replay</button></div></div>
+<div class="anim-body">
+<svg id="cache-anim" width="490" height="240" viewBox="0 0 490 240" xmlns="http://www.w3.org/2000/svg">
+<style>
+@keyframes cache-scan{0%{x:-40px;opacity:0}10%{opacity:.7}90%{x:430px;opacity:.7}100%{x:430px;opacity:0}}
+@keyframes cache-jump{0%{opacity:0}5%{opacity:.8}15%{opacity:0}20%{opacity:.8}35%{opacity:0}50%{opacity:.8}65%{opacity:0}80%{opacity:.8}100%{opacity:0}}
+@keyframes blink-g{0%,100%{fill:#081f12}50%{fill:#0d3a1e}}
+@keyframes blink-r{0%,100%{fill:#1f0805}50%{fill:#3a1008}}
+.cache-cursor{animation:cache-scan 3s 0.5s ease-in-out forwards}
+.cache-miss{animation:cache-jump 3s 1s ease forwards}
+</style>
+<rect fill="#000816" x="0" y="0" width="490" height="240" rx="8"/>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="10" y="16">MEMORY ACCESS PATTERN — 4×8 C-order array</text>
+<!-- grid -->
+<text font-family="'JetBrains Mono'" font-size="8" fill="#10b981" x="10" y="32">ROW-WISE (C-order, FAST — sequential addresses)</text>
+<g transform="translate(10,40)">
+<rect style="animation:blink-g 0.4s 0.6s 8 forwards" fill="#081f12" stroke="#10b981" x="0" y="0" width="26" height="18" rx="2"/>
+<rect style="animation:blink-g 0.4s 1.0s 1 forwards" fill="#081f12" stroke="#10b981" x="28" y="0" width="26" height="18" rx="2"/>
+<rect style="animation:blink-g 0.4s 1.4s 1 forwards" fill="#081f12" stroke="#10b981" x="56" y="0" width="26" height="18" rx="2"/>
+<rect style="animation:blink-g 0.4s 1.8s 1 forwards" fill="#081f12" stroke="#10b981" x="84" y="0" width="26" height="18" rx="2"/>
+<rect style="animation:blink-g 0.4s 2.2s 1 forwards" fill="#081f12" stroke="#10b981" x="112" y="0" width="26" height="18" rx="2"/>
+<rect style="animation:blink-g 0.4s 2.6s 1 forwards" fill="#081f12" stroke="#10b981" x="140" y="0" width="26" height="18" rx="2"/>
+<rect style="animation:blink-g 0.4s 3.0s 1 forwards" fill="#081f12" stroke="#10b981" x="168" y="0" width="26" height="18" rx="2"/>
+<rect style="animation:blink-g 0.4s 3.4s 1 forwards" fill="#081f12" stroke="#10b981" x="196" y="0" width="26" height="18" rx="2"/>
+<text font-family="'JetBrains Mono'" font-size="7" fill="#34d399" x="230" y="13">←─ cache line loaded once for whole row ─→ ✓ FAST</text>
+</g>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#ff6b35" x="10" y="82">COL-WISE (C-order, SLOW — jumping by row-stride)</text>
+<g transform="translate(10,90)">
+<rect fill="#1f0805" stroke="#ff6b35" x="0" y="0" width="26" height="18" rx="2"/>
+<rect fill="#0d1f3c" stroke="#0d2044" x="28" y="0" width="26" height="18" rx="2"/>
+<rect fill="#0d1f3c" stroke="#0d2044" x="56" y="0" width="26" height="18" rx="2"/>
+<rect fill="#0d1f3c" stroke="#0d2044" x="84" y="0" width="26" height="18" rx="2"/>
+<rect fill="#0d1f3c" stroke="#0d2044" x="112" y="0" width="26" height="18" rx="2"/>
+<rect fill="#0d1f3c" stroke="#0d2044" x="140" y="0" width="26" height="18" rx="2"/>
+<rect fill="#0d1f3c" stroke="#0d2044" x="168" y="0" width="26" height="18" rx="2"/>
+<rect fill="#0d1f3c" stroke="#0d2044" x="196" y="0" width="26" height="18" rx="2"/>
+<rect fill="#1f0805" stroke="#ff6b35" x="0" y="22" width="26" height="18" rx="2"/>
+<rect fill="#0d1f3c" stroke="#0d2044" x="28" y="22" width="26" height="18" rx="2"/>
+<rect fill="#1f0805" stroke="#ff6b35" x="0" y="44" width="26" height="18" rx="2"/>
+<rect fill="#0d1f3c" stroke="#0d2044" x="28" y="44" width="26" height="18" rx="2"/>
+<rect fill="#1f0805" stroke="#ff6b35" x="0" y="66" width="26" height="18" rx="2"/>
+<text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="230" y="13">↑</text>
+<text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="230" y="24">Each red cell = cache miss!</text>
+<text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="230" y="36">Loads 8 values per miss</text>
+<text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="230" y="48">but only uses 1 of them.</text>
+<text font-family="'JetBrains Mono'" font-size="7" fill="#ff8c5a" x="230" y="60">87.5% cache waste! ✗ SLOW</text>
+</g>
+<!-- Performance bars -->
+<rect fill="#050c1a" stroke="#0d2044" x="10" y="180" width="470" height="52" rx="5"/>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#4895ef" x="18" y="196">BENCHMARK (1000×1000 float64, sum axis=1):</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="18" y="212">Row-wise C-order:  ████████████████████████  ~1.2ms  ✓</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#ff8c5a" x="18" y="228">Col-wise C-order:  ████████████████████████████████████  ~8.5ms  7x slower!</text>
+</svg></div></div></div>`,
+
+qa:[
+{q:"What is the difference between C-order and F-order in NumPy?",a:"C-order (row-major): the last index changes fastest in memory. For 2D, rows are contiguous. Element a[i,j] is at offset i*ncols + j. F-order (column-major): the first index changes fastest. Columns are contiguous. Element a[i,j] is at offset i + j*nrows. NumPy defaults to C-order. MATLAB and Fortran use F-order. Performance impact: with a C-order array, iterating over rows is cache-friendly (sequential memory). Iterating over columns causes cache misses. For a 1000×1000 matrix, column iteration can be 5-10x slower than row iteration due to cache misses. BLAS (used by np.dot) handles both orders internally and is always fast. Key: always check a.flags.c_contiguous before passing to C extensions.",level:"a",tag:"Performance"},
+{q:"What are strides in NumPy and how do they enable zero-copy slicing?",a:"Strides are a tuple telling NumPy how many bytes to step in each dimension to get to the next element. For a C-order float64 array of shape (4,3): strides=(24,8) — 24 bytes per row (3 elements × 8 bytes/element), 8 bytes per column. Every NumPy slice creates a VIEW (not a copy) by adjusting the data pointer and strides. a[1:3, 0:2]: new data pointer = base + 1*24 + 0*8, strides=(24,8), shape=(2,2). No data copied! a[::2]: strides=(48,8) — doubles the row stride. The as_strided trick exploits this: np.lib.stride_tricks.as_strided(x, shape=(7,4), strides=(8,8)) creates overlapping windows for sliding window operations — zero-copy 1D convolution kernel extraction.",level:"a",tag:"Performance"},
+],
+
+sheet:`<div class="sec"><div class="sec-t">Memory Layout — Quick Reference</div>
+<div class="cs-grid">
+<div class="cs-card"><div class="cs-card-t">Strides Formula</div>
+<div class="cs-row"><span class="cs-fn">C-order (n,m)</span><span class="cs-desc">strides=(m·e, e)</span></div>
+<div class="cs-row"><span class="cs-fn">F-order (n,m)</span><span class="cs-desc">strides=(e, n·e)</span></div>
+<div class="cs-row"><span class="cs-fn">e=itemsize</span><span class="cs-desc">float64→8</span></div>
+<div class="cs-row"><span class="cs-fn">a[i,j] addr</span><span class="cs-desc">base+i·s₀+j·s₁</span></div></div>
+<div class="cs-card"><div class="cs-card-t">Layout Commands</div>
+<div class="cs-row"><span class="cs-fn">a.strides</span><span class="cs-desc">bytes per dim</span></div>
+<div class="cs-row"><span class="cs-fn">a.flags</span><span class="cs-desc">C/F contiguous</span></div>
+<div class="cs-row"><span class="cs-fn">np.ascontiguousarray</span><span class="cs-desc">force C-order</span></div>
+<div class="cs-row"><span class="cs-fn">np.asfortranarray</span><span class="cs-desc">force F-order</span></div></div>
+<div class="cs-card"><div class="cs-card-t">Views vs Copies</div>
+<div class="cs-row"><span class="cs-fn">a[1:3]</span><span class="cs-desc">VIEW (no copy)</span></div>
+<div class="cs-row"><span class="cs-fn">a[[0,2]]</span><span class="cs-desc">COPY (fancy idx)</span></div>
+<div class="cs-row"><span class="cs-fn">a.base is not None</span><span class="cs-desc">is a view</span></div>
+<div class="cs-row"><span class="cs-fn">np.shares_memory</span><span class="cs-desc">check sharing</span></div></div>
+<div class="cs-card"><div class="cs-card-t">as_strided</div>
+<div class="cs-row"><span class="cs-fn">stride_tricks</span><span class="cs-desc">zero-copy windows</span></div>
+<div class="cs-row"><span class="cs-fn">sliding_window_view</span><span class="cs-desc">safer API (1.20+)</span></div>
+<div class="cs-row"><span class="cs-fn">stride=0</span><span class="cs-desc">broadcast trick</span></div>
+<div class="cs-row"><span class="cs-fn">⚠ no bounds check</span><span class="cs-desc">use carefully</span></div></div></div>`
+},
+
+"es1":{
+title:"np.einsum — The Universal Tensor Operator",bread:"Chapter 15 · Einstein Summation",
+sub:"einsum can express any linear algebra operation as a single readable string. It is the most expressive operation in NumPy and the key to understanding transformer attention mechanics.",
+pills:[{t:"Advanced",c:"#f43f5e"},{t:"ML Core",c:"#4895ef"},{t:"Transformers",c:"#7c3aed"}],
+
+explain:`<div class="d-bread">Chapter 15 · Einstein Summation</div>
+<div class="d-title">∑ np.einsum — Universal Tensor Contraction</div>
+<div class="d-sub">Einstein summation notation compactly expresses any multilinear operation. np.einsum takes a subscript string and arrays and performs the specified contraction.</div>
+<div class="d-pills"><span class="dpill" style="color:#f43f5e;border-color:#f43f5e44">Advanced</span><span class="dpill" style="color:#7c3aed;border-color:#7c3aed44">Transformers</span></div>
+<div class="sec"><div class="sec-t">Einsum Notation Rules</div>
+<div class="prose">
+<h4>The Format: np.einsum("subscripts", *operands)</h4>
+<ul>
+<li><strong>Each letter</strong> labels a dimension of one operand</li>
+<li><strong>Repeated indices</strong> across operands = sum over those indices</li>
+<li><strong>Output subscripts</strong> after <code>-></code> control the result shape</li>
+<li><strong>Implicit mode</strong>: if no <code>-></code>, output keeps all non-repeated indices in alphabetical order</li>
+</ul>
+<table class="ctbl"><tr><th>Operation</th><th>Einsum</th><th>Equivalent</th></tr>
+<tr><td>Matrix multiply</td><td><code>'ij,jk->ik'</code></td><td><code>A @ B</code></td></tr>
+<tr><td>Transpose</td><td><code>'ij->ji'</code></td><td><code>A.T</code></td></tr>
+<tr><td>Trace</td><td><code>'ii->'</code></td><td><code>np.trace(A)</code></td></tr>
+<tr><td>Element-wise multiply then sum</td><td><code>'ij,ij->'</code></td><td><code>(A*B).sum()</code></td></tr>
+<tr><td>Outer product</td><td><code>'i,j->ij'</code></td><td><code>np.outer(a,b)</code></td></tr>
+<tr><td>Batch matmul</td><td><code>'bij,bjk->bik'</code></td><td><code>A @ B</code> (3D)</td></tr>
+<tr><td>Dot product</td><td><code>'i,i->'</code></td><td><code>np.dot(a,b)</code></td></tr>
+<tr><td>Attention scores</td><td><code>'bhid,bhjd->bhij'</code></td><td>Transformer QKᵀ</td></tr>
+</table>
+<div class="callout c-np"><span class="call-ic">⚡</span><span><strong>Performance tip:</strong> For 3+ operands, add <code>optimize=True</code>. NumPy will find the optimal contraction order, which can be exponentially faster. <code>np.einsum('ij,jk,kl->il', A, B, C, optimize=True)</code> — instead of (AB)C which may be slow, it might compute A(BC) or use pairwise optimal.</span></div>
+</div></div>`,
+
+code:`<div class="sec"><div class="sec-t">Einsum — Complete Pattern Library</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang" style="color:#a6e3a1">python</span><span class="cb-name">np.einsum — All Key Patterns for ML</span><button class="cb-copy" onclick="copyCode(this)">Copy</button></div>
+<div class="cb-body"><pre><span class="imp">import</span> numpy <span class="imp">as</span> np
+
+A = np.random.randn(<span class="nu">4</span>, <span class="nu">3</span>)   <span class="cm"># (4,3)</span>
+B = np.random.randn(<span class="nu">3</span>, <span class="nu">5</span>)   <span class="cm"># (3,5)</span>
+
+<span class="cm"># ── BASIC OPERATIONS ──────────────────────────────────────</span>
+mm     = np.<span class="fn">einsum</span>(<span class="st">'ij,jk->ik'</span>, A, B)         <span class="cm"># (4,5) matmul</span>
+transp = np.<span class="fn">einsum</span>(<span class="st">'ij->ji'</span>, A)               <span class="cm"># (3,4) transpose</span>
+trace  = np.<span class="fn">einsum</span>(<span class="st">'ii->'</span>, np.eye(<span class="nu">4</span>))         <span class="cm"># scalar trace</span>
+outer  = np.<span class="fn">einsum</span>(<span class="st">'i,j->ij'</span>, A[:,<span class="nu">0</span>], B[<span class="nu">0</span>,:]) <span class="cm"># (4,5) outer</span>
+dot    = np.<span class="fn">einsum</span>(<span class="st">'i,i->'</span>, A[<span class="nu">0</span>,:], A[<span class="nu">0</span>,:])   <span class="cm"># scalar dot</span>
+
+<span class="cm"># ── BATCH OPERATIONS (3D) ─────────────────────────────────</span>
+batch_A = np.random.randn(<span class="nu">8</span>, <span class="nu">4</span>, <span class="nu">3</span>)  <span class="cm"># batch of 8 matrices</span>
+batch_B = np.random.randn(<span class="nu">8</span>, <span class="nu">3</span>, <span class="nu">5</span>)
+batch_mm = np.<span class="fn">einsum</span>(<span class="st">'bij,bjk->bik'</span>, batch_A, batch_B)  <span class="cm"># (8,4,5)</span>
+
+<span class="cm"># Diagonal extraction from batch</span>
+batch_sq = np.random.randn(<span class="nu">8</span>, <span class="nu">4</span>, <span class="nu">4</span>)
+diag_batch = np.<span class="fn">einsum</span>(<span class="st">'bii->bi'</span>, batch_sq)   <span class="cm"># (8,4) batch diagonals</span>
+
+<span class="cm"># ── TRANSFORMER ATTENTION ─────────────────────────────────</span>
+B_sz, H, T, d_k, d_v = <span class="nu">2</span>, <span class="nu">4</span>, <span class="nu">10</span>, <span class="nu">16</span>, <span class="nu">32</span>
+Q = np.random.randn(B_sz, H, T, d_k)   <span class="cm"># (B,H,T,d_k)</span>
+K = np.random.randn(B_sz, H, T, d_k)   <span class="cm"># (B,H,T,d_k)</span>
+V = np.random.randn(B_sz, H, T, d_v)   <span class="cm"># (B,H,T,d_v)</span>
+
+<span class="cm"># QKᵀ: for each (b,h), compute (T,d_k)@(d_k,T) → (T,T)</span>
+scores = np.<span class="fn">einsum</span>(<span class="st">'bhid,bhjd->bhij'</span>, Q, K) / d_k**<span class="nu">0.5</span>  <span class="cm"># (B,H,T,T)</span>
+
+<span class="cm"># Softmax (manual for clarity)</span>
+scores -= scores.<span class="fn">max</span>(axis=-<span class="nu">1</span>, keepdims=<span class="kw">True</span>)
+weights = np.<span class="fn">exp</span>(scores); weights /= weights.<span class="fn">sum</span>(axis=-<span class="nu">1</span>, keepdims=<span class="kw">True</span>)
+
+<span class="cm"># Weighted sum of values</span>
+out = np.<span class="fn">einsum</span>(<span class="st">'bhij,bhjd->bhid'</span>, weights, V)   <span class="cm"># (B,H,T,d_v)</span>
+<span class="fn">print</span>(<span class="st">f"Attention output: {out.shape}"</span>)  <span class="cm"># (2, 4, 10, 32)</span>
+
+<span class="cm"># ── OPTIMIZE FOR MULTI-OPERAND ─────────────────────────────</span>
+A4 = np.random.randn(<span class="nu">100</span>, <span class="nu">50</span>)
+B4 = np.random.randn(<span class="nu">50</span>, <span class="nu">200</span>)
+C4 = np.random.randn(<span class="nu">200</span>, <span class="nu">100</span>)
+result = np.<span class="fn">einsum</span>(<span class="st">'ij,jk,kl->il'</span>, A4, B4, C4, optimize=<span class="st">'optimal'</span>)
+<span class="fn">print</span>(result.shape)   <span class="cm"># (100,100) — optimal contraction order found!</span></pre></div></div></div>`,
+
+visual:`<div class="sec"><div class="sec-t">Einsum Notation Diagram</div>
+<div class="diag"><div class="diag-hdr">einsum('ij,jk->ik') — Matrix Multiplication Anatomy</div>
+<div class="diag-body">
+<svg width="490" height="260" viewBox="0 0 490 260" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#000816" x="0" y="0" width="490" height="260" rx="8"/>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="10" y="14">EINSUM 'ij,jk->ik' ANATOMY</text>
+<!-- String breakdown -->
+<text font-family="'JetBrains Mono'" font-size="18" fill="#4895ef" x="20" y="46">ij , jk → ik</text>
+<!-- annotations -->
+<text font-family="'JetBrains Mono'" font-size="8" fill="#ff6b35" x="20" y="62">↑↑</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#10b981" x="50" y="62">  ↑↑</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#a78bfa" x="86" y="62">    ↑↑</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#ff6b35" x="20" y="74">A's dims</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#10b981" x="55" y="74">B's dims</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#a78bfa" x="88" y="74">output dims</text>
+<!-- Visual matmul -->
+<text font-family="'JetBrains Mono'" font-size="8.5" fill="#8da0c4" x="10" y="98">SHAPE FLOW: A(4,3) × B(3,5) → C(4,5)</text>
+<!-- A matrix -->
+<text font-family="'JetBrains Mono'" font-size="9" fill="#ff6b35" x="20" y="116">A[i,j]</text>
+<rect fill="#0d1f3c" stroke="#ff6b35" x="20" y="120" width="50" height="70" rx="4"/>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#ff8c5a" x="30" y="140">4 rows</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#ff8c5a" x="30" y="154">3 cols</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#ff8c5a" x="30" y="168">(4×3)</text>
+<!-- j label -->
+<text font-family="'JetBrains Mono'" font-size="8" fill="#fde047" x="78" y="160">j</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#fde047" x="78" y="172">↑</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#fde047" x="78" y="184">SUM!</text>
+<!-- B matrix -->
+<text font-family="'JetBrains Mono'" font-size="9" fill="#10b981" x="106" y="116">B[j,k]</text>
+<rect fill="#0d2a1a" stroke="#10b981" x="106" y="120" width="70" height="50" rx="4"/>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="116" y="140">3 rows</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="116" y="154">5 cols</text>
+<!-- equals -->
+<text font-family="'Fraunces'" font-size="22" fill="#8da0c4" x="188" y="162">=</text>
+<!-- C result -->
+<text font-family="'JetBrains Mono'" font-size="9" fill="#a78bfa" x="215" y="116">C[i,k]</text>
+<rect fill="#1a0d3c" stroke="#a78bfa" x="215" y="120" width="70" height="70" rx="4"/>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#c4b5fd" x="225" y="148">4 rows</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#c4b5fd" x="225" y="162">5 cols</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#c4b5fd" x="225" y="176">(4×5)</text>
+<!-- Formula box -->
+<rect fill="#050c1a" stroke="#0d2044" x="300" y="110" width="184" height="90" rx="6"/>
+<text font-family="'JetBrains Mono'" font-size="8.5" fill="#4895ef" x="308" y="126">COMPUTATION:</text>
+<text font-family="'JetBrains Mono'" font-size="8.5" fill="#8da0c4" x="308" y="142">C[i,k] = Σⱼ A[i,j] × B[j,k]</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#fde047" x="308" y="158">j is summed (repeated,</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#fde047" x="308" y="172">not in output)</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="308" y="188">i,k are free (in output)</text>
+<!-- More patterns -->
+<rect fill="#050c1a" stroke="#0d2044" x="10" y="208" width="470" height="46" rx="5"/>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#4895ef" x="18" y="222">MORE PATTERNS:</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#ff6b35" x="18" y="238">'ii->'=trace  'i,j->ij'=outer  'ij,ij->i'=row·dot  'bhid,bhjd->bhij'=attn</text>
+</svg></div></div></div>`,
+
+animate:`<div class="sec"><div class="sec-t">Einsum Computation — Animated Contraction</div>
+<div class="anim-wrap">
+<div class="anim-hdr"><span>einsum('ij,jk->ik') — watch j being summed away</span>
+<div class="anim-ctrl"><button class="anim-btn" onclick="restartAnim('einsum-anim')">↺ Replay</button></div></div>
+<div class="anim-body">
+<svg id="einsum-anim" width="490" height="230" viewBox="0 0 490 230" xmlns="http://www.w3.org/2000/svg">
+<style>
+@keyframes ein-row{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+@keyframes ein-col{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ein-res{0%{opacity:0;transform:scale(.5)}80%{transform:scale(1.1)}100%{opacity:1;transform:scale(1)}}
+@keyframes ein-mul{0%,100%{opacity:.3}50%{opacity:1}}
+.er{animation:ein-row .6s ease forwards}
+.ec{animation:ein-col .6s ease forwards}
+.eres{animation:ein-res .5s ease forwards}
+</style>
+<rect fill="#000816" x="0" y="0" width="490" height="230" rx="8"/>
+<text font-family="'JetBrains Mono'" font-size="9" fill="#4895ef" x="10" y="16">MATMUL: C[0,0] = Σⱼ A[0,j]·B[j,0] = A[0,0]·B[0,0] + A[0,1]·B[1,0] + A[0,2]·B[2,0]</text>
+<!-- A matrix cells -->
+<text font-family="'JetBrains Mono'" font-size="8.5" fill="#ff6b35" x="10" y="34">A (3×3)</text>
+<g>
+<rect class="er" fill="#1a0d08" stroke="#ff6b35" stroke-width="2" x="10" y="40" width="28" height="20" rx="2" style="animation-delay:0s"/><text class="er" font-family="'JetBrains Mono'" font-size="9" fill="#ff8c5a" x="18" y="55" style="animation-delay:0s">2</text>
+<rect fill="#0d1f3c" stroke="#0d2044" x="42" y="40" width="28" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#3a4d6e" x="50" y="55">5</text>
+<rect fill="#0d1f3c" stroke="#0d2044" x="74" y="40" width="28" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#3a4d6e" x="82" y="55">1</text>
+<rect fill="#0d1f3c" stroke="#0d2044" x="10" y="64" width="28" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#3a4d6e" x="18" y="79">3</text>
+<rect fill="#0d1f3c" stroke="#0d2044" x="42" y="64" width="28" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#3a4d6e" x="50" y="79">7</text>
+<rect fill="#0d1f3c" stroke="#0d2044" x="74" y="64" width="28" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#3a4d6e" x="82" y="79">4</text>
+</g>
+<!-- B matrix cells -->
+<text font-family="'JetBrains Mono'" font-size="8.5" fill="#10b981" x="130" y="34">B (3×3)</text>
+<g>
+<rect class="ec" fill="#082010" stroke="#10b981" stroke-width="2" x="130" y="40" width="28" height="20" rx="2" style="animation-delay:.1s"/><text class="ec" font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="138" y="55" style="animation-delay:.1s">4</text>
+<rect fill="#0d1f3c" stroke="#0d2044" x="130" y="64" width="28" height="20" rx="2"/>
+<rect class="ec" fill="#082010" stroke="#10b981" stroke-width="2" x="130" y="64" width="28" height="20" rx="2" style="animation-delay:.3s"/><text class="ec" font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="138" y="79" style="animation-delay:.3s">6</text>
+<rect class="ec" fill="#082010" stroke="#10b981" stroke-width="2" x="130" y="88" width="28" height="20" rx="2" style="animation-delay:.5s"/><text class="ec" font-family="'JetBrains Mono'" font-size="9" fill="#34d399" x="138" y="103" style="animation-delay:.5s">1</text>
+<rect fill="#0d1f3c" stroke="#0d2044" x="162" y="40" width="28" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#3a4d6e" x="170" y="55">2</text>
+<rect fill="#0d1f3c" stroke="#0d2044" x="162" y="64" width="28" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#3a4d6e" x="170" y="79">9</text>
+<rect fill="#0d1f3c" stroke="#0d2044" x="162" y="88" width="28" height="20" rx="2"/><text font-family="'JetBrains Mono'" font-size="9" fill="#3a4d6e" x="170" y="103">3</text>
+</g>
+<!-- computation steps -->
+<text font-family="'JetBrains Mono'" font-size="9" fill="#fde047" x="220" y="34">j=0: A[0,0]×B[0,0]</text>
+<text class="er" font-family="'JetBrains Mono'" font-size="14" fill="#ff8c5a" x="220" y="60" style="animation-delay:.2s">2</text>
+<text class="er" font-family="'JetBrains Mono'" font-size="14" fill="#8da0c4" x="240" y="60" style="animation-delay:.2s">×</text>
+<text class="ec" font-family="'JetBrains Mono'" font-size="14" fill="#34d399" x="256" y="60" style="animation-delay:.2s">4</text>
+<text class="er" font-family="'JetBrains Mono'" font-size="14" fill="#8da0c4" x="272" y="60" style="animation-delay:.4s">=</text>
+<text class="eres" font-family="'JetBrains Mono'" font-size="14" fill="#fde047" x="288" y="60" style="animation-delay:.4s">8</text>
+<text class="er" font-family="'JetBrains Mono'" font-size="9" fill="#fde047" x="220" y="80" style="animation-delay:.5s">j=1: A[0,1]×B[1,0] = 5×6=30</text>
+<text class="er" font-family="'JetBrains Mono'" font-size="9" fill="#fde047" x="220" y="100" style="animation-delay:.8s">j=2: A[0,2]×B[2,0] = 1×1=1</text>
+<text class="eres" font-family="'JetBrains Mono'" font-size="11" fill="#a78bfa" x="220" y="126" style="animation-delay:1.2s">C[0,0] = 8 + 30 + 1 = 39</text>
+<!-- result -->
+<text font-family="'JetBrains Mono'" font-size="8.5" fill="#a78bfa" x="10" y="150">C=A@B (3×3)</text>
+<rect class="eres" fill="#1a0d3c" stroke="#a78bfa" stroke-width="2" x="10" y="157" width="28" height="20" rx="2" style="animation-delay:1.5s"/><text class="eres" font-family="'JetBrains Mono'" font-size="9" fill="#c4b5fd" x="16" y="172" style="animation-delay:1.5s">39</text>
+<rect fill="#0d1f3c" stroke="#0d2044" x="42" y="157" width="28" height="20" rx="2"/>
+<rect fill="#0d1f3c" stroke="#0d2044" x="74" y="157" width="28" height="20" rx="2"/>
+<!-- memory note -->
+<rect fill="#050c1a" stroke="#0d2044" x="10" y="190" width="470" height="34" rx="5"/>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#8da0c4" x="18" y="205">einsum uses optimized C loops. With optimize=True it selects contraction order minimizing</text>
+<text font-family="'JetBrains Mono'" font-size="8" fill="#34d399" x="18" y="218">total FLOPs. For n-operand einsum this is critical: sub-optimal order can be 1000x slower.</text>
+</svg></div></div></div>`,
+
+qa:[
+{q:"What does np.einsum('ij,jk->ik', A, B) compute? How does it work?",a:"This computes matrix multiplication. The notation 'ij,jk->ik' means: A has dimensions i (rows) and j (cols), B has dimensions j (rows) and k (cols), output has dimensions i and k. Index j is repeated across both operands but not in the output — so it is summed over. Explicitly: C[i,k] = Σⱼ A[i,j] × B[j,k]. Any index repeated in inputs but absent from output becomes a summation index. Any index in both input and output remains a 'free' (loop) index. Rules: (1) Letters label dimensions. (2) Same letter in two arrays = multiply those elements. (3) Letter missing from output after '->' = sum over that dimension. (4) Letter in output = keep that dimension in result.",level:"i",tag:"Einsum"},
+{q:"How would you express multi-head attention using einsum?",a:"Multi-head attention: Q,K,V have shape (B,H,T,d). Attention scores: 'bhid,bhjd->bhij' → (B,H,T,T). Interpreting: for each batch b, head h, query position i, key position j: sum over d (the head dimension). This computes QKᵀ within each head, for all batches simultaneously. After softmax, the weighted value sum: 'bhij,bhjd->bhid' → (B,H,T,d). This multiplies attention weights (B,H,T,T) by values (B,H,T,d_v) and sums over j (source positions), giving the attended output for each query position. This is more readable than the equivalent chain of transposes and matmuls, and with optimize=True can be highly efficient.",level:"a",tag:"Einsum"},
+],
+
+sheet:`<div class="sec"><div class="sec-t">Einsum — Reference Cheatsheet</div>
+<div class="cs-grid">
+<div class="cs-card"><div class="cs-card-t">Basic Ops</div>
+<div class="cs-row"><span class="cs-fn">'ij,jk->ik'</span><span class="cs-desc">matmul</span></div>
+<div class="cs-row"><span class="cs-fn">'ij->ji'</span><span class="cs-desc">transpose</span></div>
+<div class="cs-row"><span class="cs-fn">'ii->'</span><span class="cs-desc">trace</span></div>
+<div class="cs-row"><span class="cs-fn">'i,i->'</span><span class="cs-desc">dot product</span></div>
+<div class="cs-row"><span class="cs-fn">'i,j->ij'</span><span class="cs-desc">outer product</span></div></div>
+<div class="cs-card"><div class="cs-card-t">Aggregations</div>
+<div class="cs-row"><span class="cs-fn">'ij->i'</span><span class="cs-desc">row sum</span></div>
+<div class="cs-row"><span class="cs-fn">'ij->j'</span><span class="cs-desc">col sum</span></div>
+<div class="cs-row"><span class="cs-fn">'ij->'</span><span class="cs-desc">total sum</span></div>
+<div class="cs-row"><span class="cs-fn">'ij,ij->'</span><span class="cs-desc">Frobenius dot</span></div></div>
+<div class="cs-card"><div class="cs-card-t">Batch Ops</div>
+<div class="cs-row"><span class="cs-fn">'bij,bjk->bik'</span><span class="cs-desc">batch matmul</span></div>
+<div class="cs-row"><span class="cs-fn">'bii->bi'</span><span class="cs-desc">batch diagonal</span></div>
+<div class="cs-row"><span class="cs-fn">'bi,bj->bij'</span><span class="cs-desc">batch outer</span></div></div>
+<div class="cs-card"><div class="cs-card-t">ML Patterns</div>
+<div class="cs-row"><span class="cs-fn">'bhid,bhjd->bhij'</span><span class="cs-desc">attention QKᵀ</span></div>
+<div class="cs-row"><span class="cs-fn">'bhij,bhjd->bhid'</span><span class="cs-desc">attn×V</span></div>
+<div class="cs-row"><span class="cs-fn">optimize=True</span><span class="cs-desc">3+ ops</span></div></div></div>`
+},
+};
+const QA=[
+{q:"What is the difference between np.array() and np.asarray()?",a:"np.array(a, copy=True) by default always makes a copy. np.asarray(a) makes a copy ONLY if necessary — if a is already a contiguous ndarray with the right dtype, it returns the original array (a view). Use np.asarray when you want to avoid unnecessary copies for already-valid arrays. Use np.array when you need a guaranteed copy. np.asarray is used extensively inside NumPy functions for this reason.",level:"b",tag:"Arrays"},
+{q:"What does NumPy's ndarray store? What are its key attributes?",a:"An ndarray stores: (1) a pointer to a contiguous block of memory (the data buffer), (2) dtype — the element type, (3) shape — a tuple giving dimensions, (4) strides — bytes to step in each dimension, (5) flags — writable, c_contiguous, f_contiguous, owndata. Key attributes: a.shape, a.ndim, a.size (total elements), a.dtype, a.itemsize (bytes per element), a.nbytes (=size×itemsize), a.strides. The strides allow non-contiguous views: a 2D slice like a[::2, 1:] creates a view by adjusting the data pointer and strides — no copy!",level:"b",tag:"Arrays"},
+{q:"Explain the difference between a view and a copy in NumPy.",a:"A view shares memory with the original array — modifying one modifies the other. A copy is independent. When do slices create views? Basic slicing (a[1:3], a[:,0]) always creates a view. Fancy/advanced indexing (a[[0,2]], a[a>5]) always creates a copy. Transpose (.T) and reshape (when possible) create views. How to check: a.base is not None means a is a view (base is the original array). np.shares_memory(a, b) explicitly checks. Why it matters: unintended in-place modifications to slices modify the original. Solution: a[1:3].copy() forces a copy.",level:"b",tag:"Arrays"},
+{q:"How does NumPy achieve its speed over Python lists?",a:"Five key reasons: (1) Contiguous memory — all elements stored adjacently, enabling CPU cache prefetching and SIMD vectorized operations (process 4-8 floats per CPU cycle). (2) Homogeneous dtype — no type checking per element, no Python object overhead. (3) C extensions — operations implemented in optimized C/Fortran, not Python loops. (4) BLAS/LAPACK — linear algebra uses hardware-tuned libraries (OpenBLAS, MKL) with multi-threading. (5) SIMD — modern CPUs can do AVX-512 on 8 float64s simultaneously. Python lists: each element is a Python object (>100 bytes), memory pointers are scattered, no vectorization possible. Result: NumPy is typically 100-1000x faster for numerical operations.",level:"b",tag:"Performance"},
+{q:"What is broadcasting? Give an example of a broadcasting error and how to fix it.",a:"Broadcasting is NumPy's rule for operating on arrays with different shapes by virtually 'stretching' dimensions of size 1. 3 rules: (1) Pad smaller shape left with 1s. (2) Sizes of 1 are stretched. (3) Non-matching sizes where neither is 1 → error. Common error: shapes (3,4) and (3,) → (3,4) wants to add 1D array of length 3 — but according to Rule 1, (3,) becomes (1,3), not (3,1)! Error: cannot broadcast (3,4) with (1,3) because 4≠3. Fix: reshape to (3,1) — np.array([1,2,3]).reshape(3,1) or use a[:,np.newaxis]. The result is (3,4). Most broadcasting bugs come from (n,) vs (n,1) confusion.",level:"i",tag:"Broadcasting"},
+{q:"What is the difference between np.dot, np.matmul, and the @ operator?",a:"For 2D arrays, all three compute matrix multiplication identically. Differences: (1) np.dot: for 1D inputs, computes inner product (scalar). For N-D arrays (N>2), sum product over last axis of a and second-to-last of b — NOT standard batch matmul. (2) np.matmul / @ operator: strictly matrix operations. For N-D arrays (N>2), treats as stacks of matrices and broadcasts batch dimensions. Raises error for scalar inputs. (3) @ is syntactic sugar for np.matmul (PEP 465, Python 3.5+). Recommendation: always use @ for matrix multiplication. Use np.dot only for 1D dot products. The difference matters for 3D tensors: np.dot(A,B) where A,B are (B,m,n) and (B,n,k) gives (B,m,B,k) — wrong! @ gives (B,m,k) — correct batch matmul.",level:"i",tag:"Linear Algebra"},
+{q:"How does np.einsum work and when should you use it over @ or np.sum?",a:"einsum interprets a subscript string specifying how indices map to input/output dimensions. Indices repeated across inputs are multiplied; indices absent from output are summed. When to use einsum: (1) Multi-operand contractions like attention (Q,K,V operations) — 'bhid,bhjd->bhij' is clearer than nested matmuls with transposes. (2) Operations with no direct NumPy equivalent — e.g., batch outer products 'bi,bj->bij'. (3) When axis juggling gets confusing. When NOT to use einsum: simple matmul (@ is faster and clearer). Note: for simple operations, @ and np.sum can be faster because they directly call BLAS. einsum adds parsing overhead. For 3+ operands, always use optimize=True — the default optimization can be 100x faster by choosing optimal contraction order.",level:"i",tag:"Einsum"},
+{q:"What is the difference between np.linalg.eig and np.linalg.eigh?",a:"eig: general eigendecomposition for any square matrix. Returns complex eigenvalues/vectors (even for real matrices that may have complex eigenvalues). No guarantees on ordering. O(n³). eigh: specialized for real symmetric or complex Hermitian matrices. Guarantees: (1) all eigenvalues are real, (2) eigenvectors are orthonormal, (3) eigenvalues returned in ascending order, (4) ~2x faster than eig by exploiting symmetry. Always use eigh for: covariance matrices (always symmetric PSD), Gram matrices AᵀA, the Hessian at a minimum (symmetric), graph Laplacians. Use eig only when matrix is genuinely non-symmetric. PCA example: cov = X.T @ X / n → use eigh for correct, sorted principal components.",level:"i",tag:"Linear Algebra"},
+{q:"Explain np.linalg.svd and how it relates to PCA.",a:"SVD decomposes any matrix A (m×n) as A = U Σ Vᵀ where U (m×m) and V (n×n) are orthogonal, Σ (m×n) is diagonal with non-negative singular values σ₁≥σ₂≥...≥0. np.linalg.svd(A, full_matrices=False) returns U (m×k), s (k,), Vt (k×n) where k=min(m,n). Connection to PCA: for centered data matrix X (n×p): Cov = XᵀX/(n-1). The SVD of X: X = U Σ Vᵀ. The eigendecomposition of Cov = Vᵀ(Σ²/(n-1))V. So columns of V = principal components (eigenvectors of covariance). Singular values: σᵢ²/(n-1) = eigenvalues = variance in each PC direction. Using SVD directly is numerically more stable than computing XᵀX first (squaring the condition number). For PCA: U, s, Vt = np.linalg.svd(X_centered, full_matrices=False); loadings = Vt.T; scores = X @ Vt.T.",level:"a",tag:"Linear Algebra"},
+{q:"What are ufuncs and how do they differ from regular Python functions?",a:"Universal functions (ufuncs) are NumPy functions implemented in C that operate element-wise on arrays, with broadcasting, type casting, and optional output arrays. Key advantages: (1) Implemented in C — no Python loop overhead. (2) Support for the out= parameter — write directly to pre-allocated array, avoiding intermediate allocations: np.exp(x, out=y) instead of y=np.exp(x). (3) Type resolution — automatically handle dtype casting. (4) reduce/accumulate/reduceat methods built in: np.add.reduce(a) sums; np.add.accumulate(a) cumsum; np.add.reduceat(a, [0,3,7]) for segment sums. (5) at method for unbuffered operations on repeated indices: np.add.at(arr, indices, vals) — important for scatter operations in graph neural networks. Creating custom ufuncs: np.frompyfunc(f, n_in, n_out) wraps Python function as ufunc (slower than C ufuncs but broadcasting support).",level:"a",tag:"Performance"},
+{q:"How would you implement a softmax function in NumPy that's numerically stable?",a:"Naive softmax: exp(x)/sum(exp(x)). Problem: for large x values (say x=1000), exp(1000) overflows to inf. Numerically stable version uses the log-sum-exp trick: subtract max first, which doesn't change the output mathematically. def softmax(x, axis=-1): x = x - x.max(axis=axis, keepdims=True) — shift by max (keepdims for broadcasting); e = np.exp(x); return e / e.sum(axis=axis, keepdims=True). Why it works: softmax(x) = softmax(x-c) for any constant c. Choosing c=max(x) ensures all exponents ≤0, so exp(x-c) ∈ [0,1], no overflow. For batched inputs with shape (B,C), axis=-1 applies softmax to each row. Log-softmax (more numerically stable, avoids log(softmax) for cross-entropy): x - max - log(sum(exp(x-max))). This is used directly in torch.nn.CrossEntropyLoss for numerical stability.",level:"i",tag:"Deep Learning"},
+{q:"Explain views and memory efficiency in the context of ML training loops.",a:"In ML training, avoiding unnecessary copies is critical for memory and speed. Key patterns: (1) Data loading: np.load returns mmap by default for .npy files — the array stays on disk and is only loaded on access. For large datasets this saves RAM. (2) Batch slicing: data[i:i+batch_size] creates a VIEW — no copy, O(1) operation regardless of array size. But data[[0,3,7,...]] (fancy indexing) creates a COPY. So sequential batches are far more memory-efficient than random mini-batches (if data fits in RAM, random is fine; if not, use sequential). (3) Normalization: data = (data - mean)/std creates new array. Use data -= mean; data /= std for in-place modification (saves one allocation). (4) Pre-allocation: pre-allocate output arrays and use out= parameter: np.exp(x, out=x) for in-place. (5) Contiguity: after fancy indexing/transposing, arrays may be non-contiguous. np.ascontiguousarray() makes them contiguous, required by some BLAS operations.",level:"a",tag:"Performance"},
+{q:"How do you implement the NLL (negative log-likelihood) loss forward pass using NumPy indexing?",a:"NLL loss: for a batch of samples with predicted log-probabilities log_p of shape (B, C) and true labels y of shape (B,), the loss is: loss = -log_p[np.arange(B), y].mean(). This is the gather operation: np.arange(B) creates row indices [0,1,...,B-1], y contains column indices (class labels). Together they index the log-probability of the correct class for each sample. This is the core of cross-entropy loss (when combined with log-softmax). Backward pass: grad = np.zeros_like(log_p); grad[np.arange(B), y] = -1.0 / B — scatter operation (using np.add.at for repeated indices: np.add.at(grad, (np.arange(B), y), -1/B)). The @ pattern for one-hot encoding is less efficient: (-np.eye(C)[y] * log_p).sum(1).mean() works but allocates a (B,C) one-hot matrix unnecessarily.",level:"a",tag:"Deep Learning"},
+{q:"What is the im2col operation and why is it used in convolution?",a:"im2col (image-to-column) converts a convolution into a matrix multiplication, which can be heavily optimized with BLAS. For a 2D convolution with input (H,W), kernel (Kh,Kw), stride s: extract every Kh×Kw patch that the kernel slides over, flatten each to a vector, and stack into a matrix of shape (n_patches, Kh×Kw). Then the convolution is: patches @ kernel.reshape(-1) → output values. For batched multi-channel conv: input (B,C,H,W), filters (F,C,Kh,Kw) → im2col creates (B, n_patches, C*Kh*Kw) and filters become (F, C*Kh*Kw). The full conv is a batch matmul. Complexity: same O(B×F×H'×W'×C×Kh×Kw) as naive conv, but matrix multiply is highly SIMD/cache optimized. In NumPy: use np.lib.stride_tricks.sliding_window_view(x, (Kh,Kw)) for the patch extraction — zero-copy view-based approach.",level:"e",tag:"Deep Learning"},
+{q:"Describe the performance implications of using np.vectorize vs a proper ufunc.",a:"np.vectorize is a convenience wrapper that calls a Python function element-wise. It does NOT actually vectorize — it's equivalent to a Python for loop, just with broadcasting support for the shape calculation. Performance: np.vectorize is roughly as slow as an explicit Python loop — typically 10-100x slower than a true ufunc. Use it only for quick prototyping when convenience matters more than speed. For true vectorization alternatives: (1) Rewrite using array operations (best option — no overhead). (2) np.frompyfunc for a slightly faster ufunc wrapper (still calls Python). (3) Numba @vectorize for a true compiled ufunc at near-C speed — @vectorize(['float64(float64,float64)']) generates native SIMD code. (4) Cython for a full C extension. Rule: if your operation can be expressed as a composition of existing NumPy ufuncs, always do that. Only reach for np.vectorize or Numba when the operation truly can't be vectorized otherwise.",level:"a",tag:"Performance"},
+{q:"How does NumPy's random number generation work and how should you handle reproducibility?",a:"NumPy 1.17+ introduced a new Generator API separating the BitGenerator (PRNG algorithm) from the distribution-sampling interface. Legacy: np.random.seed(42); np.random.randn(). New API: rng = np.random.default_rng(42); rng.standard_normal(). BitGenerators: PCG64 (default, excellent statistical properties), MT19937 (old default, used for legacy compatibility). For reproducibility: (1) Seed explicitly: rng = np.random.default_rng(seed=42). (2) For parallel workers: use rng.spawn(n_workers) to create independent child generators — each gets a distinct stream. (3) For ML experiments: seed BOTH NumPy and PyTorch: np.random.seed(42); torch.manual_seed(42); torch.cuda.manual_seed_all(42). (4) Save generator state: state = rng.bit_generator.state; rng.bit_generator.state = state to restore exact state. The new Generator API is preferred — better statistical properties and explicit state management.",level:"i",tag:"Random"},
+];
+// ENGINE
+let curCh=-1, curTopic=null, visited=new Set(), activeTab='explain';
+const lvMap={b:"lv-b",i:"lv-i",a:"lv-a",e:"lv-e"};
+const lvLabel={b:"Basic",i:"Intermediate",a:"Advanced",e:"Expert"};
+
+function buildNav(){
+  const nav=document.getElementById("nav");
+  CHS.forEach((ch,i)=>{
+    const div=document.createElement("div");
+    div.className="ci"; div.id="ci"+i;
+    div.innerHTML=`<div class="chr" id="chr${i}" onclick="selectCh(${i})">
+      <div class="cnum" style="background:${ch.bg};color:${ch.c}">${ch.n}</div>
+      <div class="clabel">${ch.t}</div><div class="carr">▶</div></div>
+    <div class="tmenu">${ch.topics.map(t=>`
+      <div class="trow" id="n${t.id}" onclick="selectTopic('${t.id}',${i})">
+        <div class="dot"></div>${t.ic}&nbsp;${t.t}</div>`).join("")}</div>`;
+    nav.appendChild(div);
+  });
+}
+
+function selectCh(i){
+  curCh=i;
+  document.querySelectorAll(".ci").forEach((el,j)=>{
+    el.classList.toggle("open",j===i);
+    el.querySelector(".chr").classList.toggle("act",j===i);
+  });
+  document.getElementById("welcome").style.display="none";
+  document.getElementById("mcon").style.display="block";
+  const ch=CHS[i];
+  const chips=ch.tags.map(t=>`<span class="cchip" style="color:${ch.c};border-color:${ch.c}44;background:${ch.bg}">${t}</span>`).join("");
+  const cards=ch.topics.map(t=>{
+    const mt=`<span class="tmeta" style="color:${ch.c};border-color:${ch.c}44">${ch.t}</span>`;
+    return `<div class="tcard" id="c${t.id}" onclick="selectTopic('${t.id}',${i})">
+      <div class="tc-icon">${t.ic}</div>
+      <div class="tc-body"><div class="tc-t">${t.t}</div><div class="tc-d">${t.d}</div>
+      <div class="tc-meta">${mt}</div></div></div>`;
+  }).join("");
+  document.getElementById("mcon").innerHTML=`
+    <div class="chero">
+      <div class="chero-n" style="color:${ch.c}">Chapter ${ch.n} · ${ch.topics.length} Topics</div>
+      <div class="chero-t" style="color:${ch.c}">${ch.ic} ${ch.t}</div>
+      <div class="chero-d">${ch.desc}</div>
+      <div class="chero-chips">${chips}</div>
+    </div>
+    <div class="tgrid">${cards}</div>`;
+}
+
+function switchTab(tab, btn){
+  activeTab=tab;
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("act"));
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("act"));
+  if(btn) btn.classList.add("act");
+  else {
+    document.querySelectorAll(".tab-btn").forEach(b=>{
+      if(b.dataset.tab===tab) b.classList.add("act");
+    });
+  }
+  const panel=document.getElementById("tab-"+tab);
+  if(panel) panel.classList.add("act");
+}
+
+function selectTopic(id, chi){
+  if(chi!==curCh) selectCh(chi);
+  curTopic=id; visited.add(id); updateProg();
+  document.querySelectorAll(".tcard").forEach(el=>el.classList.remove("act"));
+  document.querySelectorAll(".trow").forEach(el=>el.classList.remove("act"));
+  const c=document.getElementById("c"+id); if(c) c.classList.add("act");
+  const n=document.getElementById("n"+id); if(n){n.classList.add("act");n.classList.add("vis");}
+
+  document.getElementById("rp-empty").style.display="none";
+  const wrap=document.getElementById("rp-tabs-wrap");
+  wrap.style.display="flex";
+
+  const d=DETAILS[id];
+  if(!d){ renderGenericTabs(id,chi); return; }
+  renderDetailTabs(d, id);
+}
+
+function renderDetailTabs(d, id){
+  // Explain tab
+  document.getElementById("tab-explain").innerHTML = d.explain || buildExplainFromSecs(d);
+  // Code tab
+  document.getElementById("tab-code").innerHTML = d.code || buildCodePlaceholder(d.title);
+  // Visual tab
+  document.getElementById("tab-visual").innerHTML = d.visual || buildVisualPlaceholder(d.title);
+  // Animate tab
+  document.getElementById("tab-animate").innerHTML = d.animate || buildAnimatePlaceholder(d.title);
+  // Q&A tab
+  document.getElementById("tab-qa").innerHTML = buildQATab(d.qa || [], d.title);
+  // Sheet tab
+  document.getElementById("tab-sheet").innerHTML = d.sheet || buildSheetPlaceholder(d.title);
+
+  switchTab(activeTab, null);
+}
+
+function buildQATab(qaList, title){
+  // Merge specific qa with topic-matched ones
+  const words=title.toLowerCase().replace(/[^a-z0-9 ]/g," ").split(" ").filter(w=>w.length>3);
+  const matched = QA.filter(q=>{
+    const txt=(q.q+" "+q.a+" "+q.tag).toLowerCase();
+    return words.some(w=>txt.includes(w));
+  }).slice(0,6);
+  const all=[...qaList, ...matched.filter(mq=>!qaList.some(q=>q.q===mq.q))];
+  if(!all.length) return `<div class="sec"><div class="callout c-info"><span class="call-ic">ℹ</span><span>No specific Q&A for this topic yet. Browse all questions via the 🎯 button in the header.</span></div></div>`;
+  return `<div class="sec"><div class="sec-t">Interview Questions for this Topic</div>${all.map((q,i)=>renderQAItem(q,'tab'+i+Date.now())).join("")}</div>`;
+}
+
+function renderQAItem(q, id){
+  return `<div class="qa" id="qa${id}">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span class="qa-qi">Q.</span>
+      <span class="qa-qt">${q.q}</span>
+      <span class="qa-lv ${lvMap[q.level]}">${lvLabel[q.level]}</span>
+      <span class="qa-ar">▶</span></div>
+    <div class="qa-ans"><div class="qa-at">${q.a}</div></div></div>`;
+}
+
+function buildExplainFromSecs(d){
+  const pills=d.pills.map(p=>`<span class="dpill" style="color:${p.c};border-color:${p.c}44;background:${p.c}11">${p.t}</span>`).join("");
+  return `<div class="d-bread">${d.bread}</div>
+    <div class="d-title">${d.title}</div>
+    <div class="d-sub">${d.sub}</div>
+    <div class="d-pills">${pills}</div>
+    <div class="callout c-np"><span class="call-ic">np</span><span>This topic covers <strong>${d.title}</strong>. Explore theory, code, diagrams and interview Q&A using the tabs above.</span></div>`;
+}
+
+function buildCodePlaceholder(title){
+  return `<div class="sec"><div class="callout c-info"><span class="call-ic">💻</span><span>Code examples for <strong>${title}</strong> coming soon.</span></div></div>`;
+}
+function buildVisualPlaceholder(title){
+  return `<div class="sec"><div class="callout c-info"><span class="call-ic">📊</span><span>Diagram for <strong>${title}</strong> coming soon.</span></div></div>`;
+}
+function buildAnimatePlaceholder(title){
+  return `<div class="sec"><div class="callout c-info"><span class="call-ic">✨</span><span>Animation for <strong>${title}</strong> coming soon.</span></div></div>`;
+}
+function buildSheetPlaceholder(title){
+  return `<div class="sec"><div class="callout c-info"><span class="call-ic">📋</span><span>Cheatsheet for <strong>${title}</strong> coming soon.</span></div></div>`;
+}
+
+function renderGenericTabs(id, chi){
+  const ch=CHS[chi];
+  const t=ch.topics.find(x=>x.id===id);
+  if(!t) return;
+  const explainHTML=`<div class="d-bread">${ch.t}</div>
+    <div class="d-title">${t.ic} ${t.t}</div>
+    <div class="d-sub">${t.d}</div>
+    <div class="callout c-np"><span class="call-ic">np</span>
+    <span>Part of <strong>${ch.t}</strong>. ${ch.topics.length} topics in this chapter.</span></div>
+    ${buildQATab([], t.t)}`;
+  document.getElementById("tab-explain").innerHTML = explainHTML;
+  document.getElementById("tab-code").innerHTML = buildCodePlaceholder(t.t);
+  document.getElementById("tab-visual").innerHTML = buildVisualPlaceholder(t.t);
+  document.getElementById("tab-animate").innerHTML = buildAnimatePlaceholder(t.t);
+  document.getElementById("tab-qa").innerHTML = buildQATab([], t.t);
+  document.getElementById("tab-sheet").innerHTML = buildSheetPlaceholder(t.t);
+  switchTab(activeTab, null);
+}
+
+function toggleQA(el){ el.parentElement.classList.toggle("open"); }
+
+function restartAnim(id){
+  const svg=document.getElementById(id);
+  if(!svg) return;
+  const parent=svg.parentNode;
+  const clone=svg.cloneNode(true);
+  parent.replaceChild(clone,svg);
+}
+
+function copyCode(btn){
+  const txt=btn.closest(".cb").querySelector("pre").innerText;
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent="✓ Copied!"; setTimeout(()=>btn.textContent="Copy",2000);
+  });
+}
+
+function updateProg(){
+  const total=CHS.reduce((s,c)=>s+c.topics.length,0);
+  const p=Math.round(visited.size/total*100);
+  document.getElementById("pct").textContent=p+"%";
+  document.getElementById("pfill").style.width=p+"%";
+}
+
+function doSearch(q){
+  q=q.toLowerCase().trim();
+  CHS.forEach((ch,i)=>{
+    let any=false;
+    ch.topics.forEach(t=>{
+      const el=document.getElementById("n"+t.id); if(!el) return;
+      const m=!q||t.t.toLowerCase().includes(q)||t.d.toLowerCase().includes(q);
+      el.style.display=m?"":"none"; if(m) any=true;
+    });
+    if(q&&any) document.getElementById("ci"+i).classList.add("open");
+  });
+}
+
+function showAllQA(){
+  document.getElementById("rp-empty").style.display="none";
+  const wrap=document.getElementById("rp-tabs-wrap");
+  wrap.style.display="flex";
+  const tags=[...new Set(QA.map(q=>q.tag))];
+  const filterBtns=tags.map(t=>`<button onclick="filterQAList('${t}',this)" style="background:var(--bg2);border:1px solid var(--bd);color:var(--t2);padding:3px 9px;border-radius:3px;font-size:9px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .2s">${t}</button>`).join("");
+  const items=QA.map(q=>`<div class="qa" data-tag="${q.tag}">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span class="qa-qi">Q.</span><span class="qa-qt">${q.q}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:2px 6px;border-radius:3px;background:rgba(72,149,239,.08);color:var(--np2);border:1px solid rgba(72,149,239,.25);flex-shrink:0">${q.tag}</span>
+      <span class="qa-lv ${lvMap[q.level]}">${lvLabel[q.level]}</span>
+      <span class="qa-ar">▶</span></div>
+    <div class="qa-ans"><div class="qa-at">${q.a}</div></div></div>`).join("");
+  const html=`<div class="d-bread">NumPy Mastery · Interview Prep</div>
+    <div class="d-title">🎯 Interview Q&A — All ${QA.length} Questions</div>
+    <div class="d-sub">From basic array creation to expert GPU ops. Every real NumPy & ML computing interview question.</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">
+      <button onclick="filterQAList(null,this)" style="background:rgba(72,149,239,.15);border:1px solid rgba(72,149,239,.4);color:var(--np2);padding:3px 9px;border-radius:3px;font-size:9px;cursor:pointer;font-family:'JetBrains Mono',monospace">All</button>
+      ${filterBtns}</div>
+    <div id="qa-list">${items}</div>`;
+  document.getElementById("tab-qa").innerHTML = html;
+  switchTab("qa", document.querySelector('[data-tab="qa"]'));
+}
+
+function filterQAList(tag){
+  document.querySelectorAll("#qa-list .qa").forEach(el=>{
+    el.style.display=(!tag||el.dataset.tag===tag)?"":"none";
+  });
+}
+
+buildNav();
+</script>
+</body>
+</html>

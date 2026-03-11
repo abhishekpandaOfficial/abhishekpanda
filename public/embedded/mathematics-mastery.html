@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mathematics Mastery — ML & AI Foundation</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Fira+Code:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#02040a;--bg1:#04070f;--bg2:#070c18;--bg3:#0b1120;
+  --bd:#112040;--bd2:#1a3060;
+  --gold:#c9a84c;--gold2:#e8c96a;--gold3:#f5e09a;--gold4:#8a6020;
+  --teal:#38bdf8;--teal2:#7dd3fc;
+  --violet:#8b5cf6;--violet2:#a78bfa;
+  --rose:#f43f5e;--rose2:#fb7185;
+  --emerald:#10b981;--emerald2:#34d399;
+  --t1:#ede9e0;--t2:#b0a898;--t3:#5a5248;
+  --lw:278px;--rw:592px;--hh:56px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--t1);font-family:'DM Sans',sans-serif}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--gold4)}
+
+/* HEADER */
+.hdr{position:fixed;top:0;left:0;right:0;height:var(--hh);z-index:300;background:rgba(2,4,10,.97);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 20px;gap:16px;backdrop-filter:blur(20px)}
+.logo{font-family:'Playfair Display',serif;font-size:19px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+.hdr-sep{width:1px;height:24px;background:var(--bd);flex-shrink:0}
+.hdr-sub{font-family:'Fira Code',monospace;font-size:10px;color:var(--t3);letter-spacing:.5px}
+.hdr-r{margin-left:auto;display:flex;gap:8px;align-items:center}
+.badge{font-family:'Fira Code',monospace;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid;cursor:default}
+.b-gold{color:var(--gold2);border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.08)}
+.b-violet{color:var(--violet2);border-color:rgba(139,92,246,.3);background:rgba(139,92,246,.08)}
+.b-btn{cursor:pointer;color:var(--teal2);border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.08);transition:all .2s}
+.b-btn:hover{background:rgba(56,189,248,.2)}
+.prog-wrap{display:flex;align-items:center;gap:7px}
+.prog-pct{font-family:'Fira Code',monospace;font-size:10px;color:var(--t2)}
+.prog-track{width:80px;height:3px;background:var(--bd);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold4),var(--gold2));border-radius:3px;transition:width .5s;width:0%}
+
+/* LAYOUT */
+.layout{display:flex;height:100vh;padding-top:var(--hh)}
+
+/* LEFT PANEL */
+.lp{width:var(--lw);min-width:var(--lw);background:var(--bg1);border-right:1px solid var(--bd);overflow-y:auto;flex-shrink:0}
+.lp-top{padding:10px;border-bottom:1px solid var(--bd);background:var(--bg1);position:sticky;top:0;z-index:10}
+.srch{width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:7px;padding:7px 11px;color:var(--t1);font-size:11.5px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
+.srch:focus{border-color:var(--gold)}.srch::placeholder{color:var(--t3)}
+.lp-stats{display:flex;gap:6px;margin-top:8px}
+.lst{flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:6px;padding:5px 7px;text-align:center}
+.lst-n{font-family:'Playfair Display',serif;font-size:14px;font-weight:900;color:var(--gold2)}
+.lst-l{font-size:9px;color:var(--t3);font-family:'Fira Code',monospace}
+.ci{border-bottom:1px solid rgba(17,32,64,.6)}
+.chr{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;transition:background .15s;user-select:none}
+.chr:hover{background:var(--bg2)}
+.chr.act{background:linear-gradient(90deg,rgba(201,168,76,.1),transparent);border-left:2px solid var(--gold)}
+.cnum{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'Fira Code',monospace;font-size:9px;font-weight:600;flex-shrink:0}
+.clabel{font-size:11.5px;font-weight:500;color:var(--t2);flex:1;line-height:1.3;font-family:'DM Sans',sans-serif}
+.chr.act .clabel{color:var(--t1)}
+.carr{font-size:8px;color:var(--t3);transition:transform .2s;flex-shrink:0}
+.ci.open .carr{transform:rotate(90deg)}
+.tmenu{display:none;padding:2px 0 6px}.ci.open .tmenu{display:block}
+.trow{padding:5px 12px 5px 42px;font-size:11px;color:var(--t3);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.trow:hover{color:var(--t2);background:rgba(255,255,255,.02)}
+.trow.act{color:var(--gold2);background:rgba(201,168,76,.06)}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:background .15s}
+.trow.act .dot{background:var(--gold)}.trow.vis .dot{background:var(--emerald)}
+
+/* MIDDLE PANEL */
+.mp{flex:1;background:var(--bg0);border-right:1px solid var(--bd);overflow-y:auto;padding:22px 18px}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 56px);text-align:center;gap:20px;padding:40px 20px}
+.w-icon{font-size:80px;line-height:1}
+@keyframes wg{0%,100%{filter:drop-shadow(0 0 24px rgba(201,168,76,.5))}50%{filter:drop-shadow(0 0 48px rgba(245,224,154,.7))}}
+.w-icon{animation:wg 3.5s ease-in-out infinite}
+.w-title{font-family:'Playfair Display',serif;font-size:34px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.w-italic{font-family:'Playfair Display',serif;font-size:15px;font-style:italic;color:var(--t2);margin-top:-12px}
+.w-sub{font-size:13.5px;color:var(--t2);max-width:500px;line-height:1.8}
+.w-stats{display:flex;gap:28px}
+.wst-n{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:var(--gold2)}
+.wst-l{font-size:9px;color:var(--t3);font-family:'Fira Code',monospace;margin-top:2px}
+.w-btn{background:linear-gradient(135deg,var(--gold4),var(--gold2));border:none;color:#000;font-family:'Playfair Display',serif;font-size:16px;font-weight:900;padding:13px 36px;border-radius:10px;cursor:pointer;transition:all .3s}
+.w-btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(201,168,76,.45)}
+.w-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.wchip{font-family:'Fira Code',monospace;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid rgba(201,168,76,.35);background:rgba(201,168,76,.08);color:var(--gold2)}
+.chero{background:linear-gradient(135deg,var(--bg2),var(--bg1));border:1px solid var(--bd);border-radius:12px;padding:24px;margin-bottom:18px;position:relative;overflow:hidden}
+.chero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.07),transparent)}
+.chero-n{font-family:'Fira Code',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+.chero-t{font-family:'Playfair Display',serif;font-size:23px;font-weight:900;margin-bottom:7px;line-height:1.2}
+.chero-d{font-size:13px;color:var(--t2);line-height:1.7;max-width:510px}
+.chero-chips{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.cchip{font-family:'Fira Code',monospace;font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid}
+.tgrid{display:flex;flex-direction:column;gap:8px}
+.tcard{background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:14px 16px;cursor:pointer;transition:all .18s;display:flex;align-items:flex-start;gap:12px}
+.tcard:hover{border-color:var(--bd2);transform:translateX(3px);background:var(--bg3)}
+.tcard.act{border-color:var(--gold);background:rgba(201,168,76,.04)}
+.tc-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.tc-body{flex:1}
+.tc-t{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--t1);margin-bottom:3px}
+.tc-d{font-size:11.5px;color:var(--t3);line-height:1.5}
+.tc-meta{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.tmeta{font-family:'Fira Code',monospace;font-size:9.5px;padding:2px 7px;border-radius:4px;border:1px solid}
+
+/* RIGHT PANEL */
+.rp{width:var(--rw);min-width:var(--rw);background:var(--bg1);overflow-y:auto}
+.rp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:var(--t3);text-align:center;padding:40px}
+.rp-ei{font-size:54px;opacity:.2;font-family:'Playfair Display',serif}
+.rp-empty h3{font-family:'Playfair Display',serif;font-size:19px;color:var(--t2);font-weight:700;font-style:italic}
+.rp-empty p{font-size:13px;line-height:1.75}
+.rpcon{padding:24px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.rpcon{animation:fadeUp .25s ease}
+.d-bread{font-family:'Fira Code',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:7px}
+.d-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;line-height:1.2;margin-bottom:6px}
+.d-sub{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:10px}
+.d-pills{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:16px;margin-bottom:18px;border-bottom:1px solid var(--bd)}
+.dpill{font-family:'Fira Code',monospace;font-size:10px;padding:3px 9px;border-radius:4px;border:1px solid}
+.sec{margin-bottom:22px}
+.sec-t{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;font-style:italic;color:var(--t1);margin-bottom:11px;display:flex;align-items:center;gap:8px}
+.sec-t::before{content:'';width:3px;height:15px;background:linear-gradient(180deg,var(--gold),var(--gold4));border-radius:2px;flex-shrink:0}
+.prose{font-size:13px;color:var(--t2);line-height:1.9}
+.prose p{margin-bottom:10px}.prose strong{color:var(--t1)}
+.prose ul,.prose ol{padding-left:18px;margin-bottom:10px}.prose li{margin-bottom:5px}
+.prose h4{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:700;font-style:italic;color:var(--t1);margin:13px 0 6px}
+.prose code{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:4px;padding:1px 6px;font-family:'Fira Code',monospace;font-size:11px;color:var(--gold2)}
+/* Math formula box */
+.mbox{background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:18px;margin-bottom:14px;text-align:center}
+.mbox .formula{font-family:'Fira Code',monospace;font-size:15px;color:var(--gold2);letter-spacing:1px;line-height:2.2}
+.mbox .desc{font-size:11.5px;color:var(--t3);margin-top:6px;font-style:italic;font-family:'DM Sans',sans-serif}
+/* Step-by-step math */
+.msteps{background:rgba(201,168,76,.03);border:1px solid rgba(201,168,76,.18);border-radius:10px;padding:16px;margin-bottom:14px}
+.mstep{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid rgba(17,32,64,.5);align-items:flex-start}
+.mstep:last-child{border-bottom:none}
+.mstep-n{font-family:'Fira Code',monospace;font-size:11px;color:var(--gold);font-weight:600;flex-shrink:0;margin-top:2px;min-width:28px}
+.mstep-body{flex:1}
+.mstep-f{font-family:'Fira Code',monospace;font-size:12.5px;color:var(--gold2);margin-bottom:3px;line-height:1.7}
+.mstep-d{font-size:12px;color:var(--t3);line-height:1.6}
+/* Code block */
+.cb{background:#010308;border:1px solid rgba(17,32,64,.9);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.cb-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid rgba(17,32,64,.8);background:rgba(0,0,0,.5)}
+.cb-lang{font-family:'Fira Code',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:1px}
+.cb-name{font-family:'Fira Code',monospace;font-size:10px;color:var(--t3)}
+.cb-copy{background:none;border:1px solid var(--bd);color:var(--t3);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace;transition:all .2s}
+.cb-copy:hover{border-color:var(--gold);color:var(--gold2)}
+.cb-body{padding:16px;overflow-x:auto}
+.cb-body pre{font-family:'Fira Code',monospace;font-size:11.5px;line-height:1.8;color:#e0d4c4}
+.kw{color:#89b4fa}.tp{color:#cba6f7}.st{color:#a6e3a1}.nu{color:#fab387}
+.cm{color:#4a453c;font-style:italic}.fn{color:#89dceb}.op{color:#c9a84c}.imp{color:#94e2d5}
+/* Diagram */
+.diag{background:#010308;border:1px solid rgba(17,32,64,.9);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.diag-hdr{padding:10px 16px;border-bottom:1px solid rgba(17,32,64,.8);background:rgba(0,0,0,.5);font-family:'Fira Code',monospace;font-size:10px;color:var(--t3);display:flex;align-items:center;gap:8px}
+.diag-hdr::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold2);box-shadow:0 0 8px var(--gold)}
+.diag-body{padding:16px;display:flex;justify-content:center;overflow-x:auto}
+/* Callouts */
+.callout{border-radius:8px;padding:12px 15px;margin-bottom:14px;display:flex;gap:10px;font-size:12.5px;line-height:1.75}
+.c-info{background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.2);color:var(--t2)}
+.c-warn{background:rgba(234,179,8,.06);border:1px solid rgba(234,179,8,.25);color:var(--t2)}
+.c-tip{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);color:var(--t2)}
+.c-math{background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.25);color:var(--t2)}
+.c-danger{background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.2);color:var(--t2)}
+.call-ic{flex-shrink:0;font-size:15px;margin-top:1px}
+/* Table */
+.ctbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px}
+.ctbl th{background:var(--bg2);padding:9px 12px;text-align:left;font-family:'Fira Code',monospace;font-size:10px;color:var(--t2);border:1px solid var(--bd);text-transform:uppercase;letter-spacing:.5px}
+.ctbl td{padding:9px 12px;border:1px solid var(--bd);color:var(--t2);line-height:1.5;font-size:12px}
+.ctbl tr:hover td{background:rgba(255,255,255,.015)}
+/* Q&A */
+.qa{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;margin-bottom:9px;overflow:hidden}
+.qa-q{padding:12px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:9px;transition:background .15s}
+.qa-q:hover{background:var(--bg3)}
+.qa-qi{font-family:'Playfair Display',serif;font-size:12px;font-weight:900;font-style:italic;color:var(--gold2);flex-shrink:0;margin-top:1px}
+.qa-qt{font-size:12.5px;font-weight:500;color:var(--t1);flex:1;line-height:1.5}
+.qa-lv{font-family:'Fira Code',monospace;font-size:9px;padding:2px 7px;border-radius:4px;border:1px solid;flex-shrink:0;margin-top:1px}
+.qa-ar{color:var(--t3);font-size:9px;transition:transform .2s;margin-top:3px;flex-shrink:0}
+.qa.open .qa-ar{transform:rotate(90deg)}
+.qa-ans{display:none;padding:12px 14px;border-top:1px solid var(--bd);background:rgba(0,0,0,.25)}
+.qa.open .qa-ans{display:block}
+.qa-at{font-size:12.5px;color:var(--t2);line-height:1.85}
+.qa-at code{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:3px;padding:1px 5px;font-family:'Fira Code',monospace;font-size:11px;color:var(--gold2)}
+.lv-b{color:#34d399;border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.07)}
+.lv-i{color:#fde047;border-color:rgba(253,224,71,.3);background:rgba(253,224,71,.07)}
+.lv-a{color:var(--gold2);border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.07)}
+.lv-e{color:var(--violet2);border-color:rgba(139,92,246,.3);background:rgba(139,92,246,.07)}
+/* Animations */
+@keyframes dash{0%{stroke-dashoffset:300}100%{stroke-dashoffset:0}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes growX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <span style="font-size:22px;font-family:'Playfair Display',serif;color:var(--gold2)">∑</span>
+  <div class="logo">Mathematics Mastery</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-sub">Linear Algebra · Calculus · Optimisation · ML Theory</div>
+  <div class="hdr-r">
+    <div class="badge b-btn" onclick="showAllQA()">🎯 Interview Q&amp;A</div>
+    <div class="prog-wrap">
+      <span class="prog-pct" id="pct">0%</span>
+      <div class="prog-track"><div class="prog-fill" id="pfill"></div></div>
+    </div>
+    <div class="badge b-gold">ML Mathematics</div>
+    <div class="badge b-violet">Python · NumPy</div>
+  </div>
+</div>
+<div class="layout">
+  <div class="lp">
+    <div class="lp-top">
+      <input class="srch" id="srch" type="text" placeholder="∫  Search topics…" oninput="doSearch(this.value)">
+      <div class="lp-stats">
+        <div class="lst"><div class="lst-n">30</div><div class="lst-l">Chapters</div></div>
+        <div class="lst"><div class="lst-n">200+</div><div class="lst-l">Topics</div></div>
+        <div class="lst"><div class="lst-n">350+</div><div class="lst-l">Q&amp;A</div></div>
+      </div>
+    </div>
+    <div id="nav"></div>
+  </div>
+  <div class="mp" id="mp">
+    <div class="welcome" id="welcome">
+      <div class="w-icon">∑</div>
+      <div class="w-title">Mathematics Mastery</div>
+      <div class="w-italic">for Machine Learning &amp; Artificial Intelligence</div>
+      <div class="w-sub">From vectors and matrices through gradient descent, probability theory, and the mathematics inside transformers. Every concept explained with geometric intuition, animated diagrams, step-by-step derivations, and Python code.</div>
+      <div class="w-stats">
+        <div><div class="wst-n">30</div><div class="wst-l">Chapters</div></div>
+        <div><div class="wst-n">200+</div><div class="wst-l">Topics</div></div>
+        <div><div class="wst-n">350+</div><div class="wst-l">Q&amp;A</div></div>
+        <div><div class="wst-n">150+</div><div class="wst-l">Proofs</div></div>
+      </div>
+      <div class="w-chips">
+        <span class="wchip">Vectors &amp; Matrices</span>
+        <span class="wchip">Eigenvalues &amp; SVD</span>
+        <span class="wchip">Gradients &amp; Jacobians</span>
+        <span class="wchip">Gradient Descent</span>
+        <span class="wchip">Backpropagation</span>
+        <span class="wchip">Probability &amp; Bayes</span>
+        <span class="wchip">Attention Math</span>
+        <span class="wchip">Convex Optimisation</span>
+      </div>
+      <button class="w-btn" onclick="selectCh(0)">∫ Begin Learning</button>
+    </div>
+    <div id="mcon" style="display:none"></div>
+  </div>
+  <div class="rp" id="rp">
+    <div class="rp-empty" id="rp-empty">
+      <div class="rp-ei">∇</div>
+      <h3>Select a Topic</h3>
+      <p>Click any topic to reveal geometric intuition, animated diagrams, step-by-step derivations, worked numerical examples, Python code, and interview questions.</p>
+    </div>
+    <div id="rp-con" style="display:none"></div>
+  </div>
+</div>
+<script>
+const CHS=[
+{n:"01",t:"Mathematical Foundations",ic:"ℝ",c:"#38bdf8",bg:"rgba(56,189,248,.1)",
+ desc:"Sets, logic, notation, and the rigorous language that underpins all of mathematics. Build the vocabulary needed to read ML papers.",
+ tags:["Foundation","Beginner"],
+ topics:[
+  {id:"mf1",ic:"∈",t:"Sets, Relations & Functions",d:"Set notation ∈,∪,∩,⊂, Cartesian product, injective/surjective/bijective functions, composition"},
+  {id:"mf2",ic:"⊢",t:"Logic & Proof Techniques",d:"Quantifiers ∀∃, implication, proof by contradiction, induction, contrapositive"},
+  {id:"mf3",ic:"ℝ",t:"Real Numbers & Field Axioms",d:"Field axioms, ordered field, completeness, supremum/infimum, Archimedean property"},
+  {id:"mf4",ic:"∑",t:"Sigma & Product Notation",d:"Σ and Π notation, index manipulation, telescoping sums, double sums"},
+  {id:"mf5",ic:"∞",t:"Sequences, Series & Convergence",d:"Cauchy sequences, geometric series, ratio test, Taylor series overview"},
+ ]},
+{n:"02",t:"Vectors — Geometry & Algebra",ic:"→",c:"#c9a84c",bg:"rgba(201,168,76,.1)",
+ desc:"Vectors as geometric objects and algebraic structures — the language of data points, weights, embeddings, and directions.",
+ tags:["Linear Algebra","Core","Critical"],
+ topics:[
+  {id:"v1",ic:"→",t:"Vectors — Definition & Geometry",d:"Column vectors, geometric arrows in ℝⁿ, components, position vs displacement"},
+  {id:"v2",ic:"⊕",t:"Vector Addition & Scalar Multiplication",d:"Component-wise operations, parallelogram law, geometric interpretation, span"},
+  {id:"v3",ic:"·",t:"Dot Product (Inner Product)",d:"a·b=‖a‖‖b‖cos θ, orthogonality test, projection, cosine similarity in NLP"},
+  {id:"v4",ic:"‖‖",t:"Vector Norms — L1, L2, Lp, L∞",d:"Euclidean norm, Manhattan norm, p-norms, unit sphere, normalisation"},
+  {id:"v5",ic:"∠",t:"Projection & Orthogonal Decomposition",d:"Scalar projection, vector projection onto u, decompose into parallel+perp"},
+  {id:"v6",ic:"⊥",t:"Linear Independence & Span",d:"Linearly independent sets, span as reachable space, basis definition"},
+ ]},
+{n:"03",t:"Matrices — Transformations",ic:"⊞",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"Matrices as linear transformations — every matrix encodes a geometric action: rotation, scaling, shearing, projection.",
+ tags:["Linear Algebra","Core","Critical"],
+ topics:[
+  {id:"m1",ic:"⊞",t:"Matrix Anatomy & Special Matrices",d:"Rows×cols, element aᵢⱼ, identity I, zeros, diagonal, symmetric, orthogonal"},
+  {id:"m2",ic:"✖",t:"Matrix Multiplication — Full Derivation",d:"cᵢⱼ=Σₖ aᵢₖbₖⱼ, row×column, composition of transformations, non-commutative"},
+  {id:"m3",ic:"ᵀ",t:"Transpose, Symmetric & Gram Matrix",d:"(AB)ᵀ=BᵀAᵀ, symmetric AᵀA, Gram matrix, positive semidefiniteness"},
+  {id:"m4",ic:"A⁻¹",t:"Matrix Inverse — Theory & Computation",d:"Existence conditions, 2×2 formula, Gauss-Jordan, inv via LU, pitfalls"},
+  {id:"m5",ic:"trA",t:"Trace, Rank & Determinant Overview",d:"tr(A)=Σaᵢᵢ, rank = dim of column space, det as volume scalar"},
+ ]},
+{n:"04",t:"Linear Systems — Ax = b",ic:"=",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"Solving systems of linear equations — the geometric interpretation, Gaussian elimination, and when solutions exist.",
+ tags:["Linear Algebra","Core","Applied"],
+ topics:[
+  {id:"ls1",ic:"=",t:"Linear System Setup & Geometry",d:"Ax=b as intersection of hyperplanes, row picture vs column picture"},
+  {id:"ls2",ic:"↓",t:"Gaussian Elimination & Row Reduction",d:"Elementary row ops, echelon form, reduced echelon form, back-substitution"},
+  {id:"ls3",ic:"✓",t:"Solution Sets — Existence & Uniqueness",d:"Rank condition, homogeneous solutions, particular + null space general solution"},
+  {id:"ls4",ic:"⊥",t:"Least Squares — Overdetermined Ax=b",d:"Normal equations AᵀAx̂=Aᵀb, projection, residual ⊥ col(A), linear regression"},
+ ]},
+{n:"05",t:"Determinants & Volume",ic:"det",c:"#10b981",bg:"rgba(16,185,129,.1)",
+ desc:"The determinant as a signed volume scale factor — invertibility test, orientation, and its role in eigenvalue computation.",
+ tags:["Linear Algebra","Core"],
+ topics:[
+  {id:"det1",ic:"det",t:"Determinant — 2×2 & Geometric Meaning",d:"det=ad-bc, area of parallelogram, sign = orientation change"},
+  {id:"det2",ic:"3×3",t:"3×3 Determinant & Cofactor Expansion",d:"Sarrus rule, cofactor expansion, Laplace expansion along any row/col"},
+  {id:"det3",ic:"📐",t:"Properties — Multiplicativity & Row Ops",d:"det(AB)=det(A)det(B), det(Aᵀ)=det(A), row swap negates, scaling multiplies"},
+  {id:"det4",ic:"=0",t:"Singular Matrices & det=0",d:"det=0 iff not invertible iff columns linearly dependent iff rank < n"},
+ ]},
+{n:"06",t:"Vector Spaces & Subspaces",ic:"V",c:"#38bdf8",bg:"rgba(56,189,248,.1)",
+ desc:"The abstract structure of vector spaces — column space, null space, row space, and the fundamental theorem of linear algebra.",
+ tags:["Linear Algebra","Theory","Critical"],
+ topics:[
+  {id:"vs1",ic:"V",t:"Vector Space — 8 Axioms",d:"Closure, commutativity, associativity, identity, inverse, distributivity × 2"},
+  {id:"vs2",ic:"⊂",t:"Subspaces — Test & Examples",d:"Three conditions, subspace test, examples: lines through origin, planes, {0}"},
+  {id:"vs3",ic:"C(A)",t:"Column Space & Row Space",d:"col(A) = range = image, row(A), Ax=b solvable iff b ∈ col(A)"},
+  {id:"vs4",ic:"N(A)",t:"Null Space (Kernel)",d:"null(A)={x:Ax=0}, computing null space, solution structure of Ax=b"},
+  {id:"vs5",ic:"📏",t:"Basis, Dimension & Coordinates",d:"Minimal spanning set, standard basis eᵢ, coordinate vector, change of basis"},
+  {id:"vs6",ic:"=",t:"Rank-Nullity Theorem",d:"rank(A)+nullity(A)=n (cols), proof via dimension counting, 4 fundamental subspaces"},
+ ]},
+{n:"07",t:"Eigenvalues & Eigenvectors",ic:"λ",c:"#c9a84c",bg:"rgba(201,168,76,.1)",
+ desc:"The most important concept in applied linear algebra — eigenvectors reveal a matrix's natural axes. Foundation of PCA, spectral methods, and stability analysis.",
+ tags:["Linear Algebra","Critical","ML"],
+ topics:[
+  {id:"ev1",ic:"λ",t:"Eigenvalue Problem Ax=λx",d:"Definition, geometric meaning (direction preserved), example: rotation vs scaling"},
+  {id:"ev2",ic:"p(λ)",t:"Characteristic Polynomial det(A-λI)=0",d:"Expanding det, finding roots, trace=Σλᵢ, det=Πλᵢ identities"},
+  {id:"ev3",ic:"→",t:"Computing Eigenvectors",d:"Solve (A-λI)x=0, eigenspace = null space of (A-λI), geometric multiplicity"},
+  {id:"ev4",ic:"A=PΛP⁻¹",t:"Diagonalisation",d:"When A is diagonalisable, Aⁿ=PΛⁿP⁻¹, applications to matrix powers"},
+  {id:"ev5",ic:"⊥",t:"Spectral Theorem — Symmetric Matrices",d:"Real eigenvalues, orthogonal eigenvectors, A=QΛQᵀ, always diagonalisable"},
+  {id:"ev6",ic:"📊",t:"PCA via Eigendecomposition",d:"Covariance matrix Σ, principal components = eigenvectors, variance = eigenvalues"},
+ ]},
+{n:"08",t:"SVD — Singular Value Decomposition",ic:"Σ",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"The most important matrix factorisation in data science — A=UΣVᵀ decomposes any matrix into rotation, scaling, rotation.",
+ tags:["Linear Algebra","Critical","ML"],
+ topics:[
+  {id:"sv1",ic:"Σ",t:"SVD Definition A=UΣVᵀ",d:"Left singular vectors U, singular values σᵢ, right singular vectors V, shapes"},
+  {id:"sv2",ic:"📐",t:"Geometric Interpretation",d:"V rotates input, Σ scales along axes, U rotates output — any linear map"},
+  {id:"sv3",ic:"≈",t:"Low-Rank Approximation — Eckart-Young",d:"Aₖ=Σᵢ₌₁ᵏ σᵢuᵢvᵢᵀ, best rank-k approx in Frobenius norm, image compression"},
+  {id:"sv4",ic:"A⁺",t:"Pseudoinverse via SVD",d:"A⁺=VΣ⁺Uᵀ, least-norm least-squares solution, connection to regularisation"},
+  {id:"sv5",ic:"∥",t:"Matrix Norms via SVD",d:"Spectral norm = σ_max, Frobenius norm = √Σσᵢ², nuclear norm = Σσᵢ"},
+ ]},
+{n:"09",t:"Limits & Continuity",ic:"lim",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"The rigorous foundation of calculus — epsilon-delta limits, continuity, and why smooth activation functions behave well.",
+ tags:["Calculus","Foundation"],
+ topics:[
+  {id:"lim1",ic:"lim",t:"Limits — Intuition & ε-δ Definition",d:"Informal approach, formal ε-δ, one-sided limits, limits at ±∞"},
+  {id:"lim2",ic:"✓",t:"Continuity — Pointwise & Uniform",d:"f continuous at c iff lim_{x→c}f(x)=f(c), removable vs jump vs infinite"},
+  {id:"lim3",ic:"∞/∞",t:"L'Hôpital's Rule & Indeterminate Forms",d:"0/0 and ∞/∞ forms, repeated application, softmax temperature limit"},
+ ]},
+{n:"10",t:"Derivatives — Single Variable",ic:"f′",c:"#c9a84c",bg:"rgba(201,168,76,.1)",
+ desc:"Derivatives from first principles — limit definition, differentiation rules, chain rule, and the gateway to gradient descent.",
+ tags:["Calculus","Core","Critical"],
+ topics:[
+  {id:"d1",ic:"f′",t:"Derivative as Limit of Difference Quotient",d:"f′(x)=lim_{h→0}[f(x+h)-f(x)]/h, tangent line, rate of change"},
+  {id:"d2",ic:"rules",t:"Differentiation Rules — All Derived",d:"Power, sum, product (uv)′=u′v+uv′, quotient, chain rule derivation"},
+  {id:"d3",ic:"⛓",t:"Chain Rule — Deep Dive",d:"(f∘g)′(x)=f′(g(x))·g′(x), nested composition, backpropagation foundation"},
+  {id:"d4",ic:"σ",t:"Derivatives of ML Activation Functions",d:"Sigmoid σ′=σ(1-σ), tanh′=1-tanh², ReLU subgradient, GELU derivative"},
+  {id:"d5",ic:"📈",t:"Taylor Series & Linear Approximation",d:"f(x+h)≈f(x)+hf′(x)+h²/2 f″(x)+…, gradient descent as linear approx"},
+ ]},
+{n:"11",t:"Partial Derivatives & Gradients",ic:"∂",c:"#10b981",bg:"rgba(16,185,129,.1)",
+ desc:"The gradient vector is the engine of all neural network training — learn to compute it, visualise it, and use it.",
+ tags:["Calculus","Core","Critical","ML"],
+ topics:[
+  {id:"pd1",ic:"∂",t:"Partial Derivatives — Definition & Computation",d:"∂f/∂xᵢ holding all others constant, notation, geometric meaning on surface"},
+  {id:"pd2",ic:"∇",t:"The Gradient Vector ∇f",d:"∇f=[∂f/∂x₁,…,∂f/∂xₙ]ᵀ, steepest ascent, magnitude = rate of steepest rise"},
+  {id:"pd3",ic:"🗺",t:"Contour Maps & Gradient Geometry",d:"Level curves f=c, gradient ⊥ to level curves, saddle points visualised"},
+  {id:"pd4",ic:"Dᵥf",t:"Directional Derivative",d:"Dᵥf=∇f·v̂, maximum direction is ∇f, zero direction is ⊥ to gradient"},
+  {id:"pd5",ic:"H",t:"Hessian Matrix — Second-Order Information",d:"Hᵢⱼ=∂²f/∂xᵢ∂xⱼ, symmetric for smooth f, curvature, PD/ND/indefinite"},
+ ]},
+{n:"12",t:"Jacobian & Multivariable Chain Rule",ic:"J",c:"#38bdf8",bg:"rgba(56,189,248,.1)",
+ desc:"Vector-valued derivatives and the chain rule for vector functions — the mathematical backbone of automatic differentiation.",
+ tags:["Calculus","Advanced","Critical","ML"],
+ topics:[
+  {id:"jac1",ic:"J",t:"Jacobian Matrix",d:"Jᵢⱼ=∂fᵢ/∂xⱼ, maps input perturbations to output perturbations, det = volume ratio"},
+  {id:"jac2",ic:"⛓",t:"Multivariable Chain Rule",d:"∂z/∂t=Σₖ(∂z/∂yₖ)(∂yₖ/∂t), matrix form: Jf∘g=Jf·Jg"},
+  {id:"jac3",ic:"←",t:"Reverse Mode vs Forward Mode AD",d:"VJP (reverse, used in backprop) vs JVP (forward), efficiency comparison"},
+  {id:"jac4",ic:"📐",t:"Jacobian of Softmax",d:"∂sᵢ/∂zⱼ=sᵢ(δᵢⱼ-sⱼ), full Jacobian matrix, softmax-CE simplification"},
+ ]},
+{n:"13",t:"Integration & Measure Theory",ic:"∫",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"Integration from Riemann sums through multivariate integrals, with applications to probability densities and normalisation.",
+ tags:["Calculus","Core"],
+ topics:[
+  {id:"int1",ic:"∫",t:"Definite Integral — Riemann Sums",d:"Partition, Riemann sum, limit to integral, ∫ₐᵇf(x)dx as signed area"},
+  {id:"int2",ic:"FTC",t:"Fundamental Theorem of Calculus",d:"Part 1: d/dx∫ₐˣf=f(x), Part 2: ∫ₐᵇf=F(b)-F(a), proof and intuition"},
+  {id:"int3",ic:"∫∫",t:"Multivariate Integration",d:"Iterated integrals, Fubini's theorem, change of variables, Jacobian factor"},
+  {id:"int4",ic:"∫p(x)dx=1",t:"Integrals in Probability",d:"PDF normalisation, CDF F(x)=∫₋∞ˣp(t)dt, Gaussian integral ∫e^(-x²)=√π"},
+ ]},
+{n:"14",t:"Optimisation Theory",ic:"min",c:"#c9a84c",bg:"rgba(201,168,76,.1)",
+ desc:"The mathematical foundation of ML training — critical points, convexity, second-order conditions, and constrained optimisation.",
+ tags:["Optimisation","Core","Critical","ML"],
+ topics:[
+  {id:"opt1",ic:"min",t:"Optimisation Problem — Setup & Taxonomy",d:"min f(x) s.t. g(x)≤0, local vs global, existence by extreme value theorem"},
+  {id:"opt2",ic:"∇=0",t:"First-Order Necessary Conditions",d:"∇f(x*)=0 at interior minimum, proof via directional derivative, gradient flow"},
+  {id:"opt3",ic:"H≻0",t:"Second-Order Sufficient Conditions",d:"H(x*)≻0 → strict local min, H(x*)≺0 → local max, indefinite H → saddle"},
+  {id:"opt4",ic:"⌣",t:"Convex Functions — 3 Equivalent Definitions",d:"Chord above curve, gradient inequality, H≥0, Jensen's inequality, composition rules"},
+  {id:"opt5",ic:"L",t:"Lagrangians & KKT Conditions",d:"Lagrangian L(x,λ)=f+λg, KKT stationarity/primal/dual/complementary slackness"},
+  {id:"opt6",ic:"m",t:"Strong Convexity & Lipschitz Gradient",d:"m-strong convexity, L-smooth gradients, condition number κ=L/m, linear convergence"},
+ ]},
+{n:"15",t:"Gradient Descent",ic:"↓∇",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"The engine of deep learning training — full mathematical derivation, convergence proofs, and every variant from SGD to momentum.",
+ tags:["Optimisation","Core","Critical","ML","Must Master"],
+ topics:[
+  {id:"gd1",ic:"↓",t:"Gradient Descent — Full Derivation",d:"xₜ₊₁=xₜ-η∇f(xₜ), steepest descent, why negative gradient, η as step-size"},
+  {id:"gd2",ic:"η",t:"Learning Rate — Theory & Practice",d:"Too large→diverge, too small→slow, optimal η=1/L, line search, schedules"},
+  {id:"gd3",ic:"🎲",t:"Stochastic & Mini-Batch Gradient Descent",d:"SGD estimator, variance, noise as implicit regulariser, epoch, convergence rate"},
+  {id:"gd4",ic:"m",t:"Momentum & Nesterov Acceleration",d:"vₜ=βvₜ₋₁+∇f, look-ahead gradient NAG, O(1/t²) vs O(1/t) convergence"},
+  {id:"gd5",ic:"📊",t:"Convergence Analysis — Formal Proofs",d:"Descent lemma proof, O(1/t) convex, linear rate strong-convex, saddle escape"},
+  {id:"gd6",ic:"🗻",t:"Loss Landscape & Saddle Points",d:"Saddle point escape, flat manifolds, sharp vs flat minima, noise in SGD helps"},
+ ]},
+{n:"16",t:"Adaptive Optimisers",ic:"⚡",c:"#10b981",bg:"rgba(16,185,129,.1)",
+ desc:"AdaGrad, RMSProp, Adam, AdamW — adaptive learning rate methods with full mathematical derivations.",
+ tags:["Optimisation","Advanced","ML"],
+ topics:[
+  {id:"ao1",ic:"↗",t:"AdaGrad — Accumulated Squared Gradients",d:"Gₜ=Gₜ₋₁+gₜ², θₜ₊₁=θₜ-η/√(Gₜ+ε)·gₜ, per-param lr, sparse grad advantage"},
+  {id:"ao2",ic:"🔄",t:"RMSProp — Exponential Moving Average",d:"Eₜ=βEₜ₋₁+(1-β)gₜ², non-monotone accumulation, Hinton's unpublished fix"},
+  {id:"ao3",ic:"👑",t:"Adam — First & Second Moment Estimates",d:"mₜ=β₁mₜ₋₁+(1-β₁)gₜ, vₜ=β₂vₜ₋₁+(1-β₂)gₜ², bias correction, full derivation"},
+  {id:"ao4",ic:"W",t:"AdamW — Decoupled Weight Decay",d:"Weight decay ≠ L2 in Adam, AdamW: θ←θ(1-ηλ)-η·m̂/√v̂, BERT/GPT default"},
+  {id:"ao5",ic:"📅",t:"Learning Rate Schedules",d:"Step decay, cosine annealing, linear warmup, 1-cycle, cosine with restarts"},
+ ]},
+{n:"17",t:"Backpropagation — Mathematics",ic:"⛓",c:"#c9a84c",bg:"rgba(201,168,76,.1)",
+ desc:"The chain rule applied recursively through a computational graph — exact derivation of every gradient in a neural network.",
+ tags:["ML","Critical","Must Master"],
+ topics:[
+  {id:"bp1",ic:"📊",t:"Computational Graph & Forward Pass",d:"DAG of operations, tensor values at nodes, forward pass order, shape tracking"},
+  {id:"bp2",ic:"⛓",t:"Chain Rule in DAGs — Reverse Mode AD",d:"Upstream gradient, local gradient, δ=∂L/∂z, sum over all paths"},
+  {id:"bp3",ic:"W",t:"Backprop Through Linear Layer",d:"y=Wx+b, ∂L/∂W=δxᵀ, ∂L/∂x=Wᵀδ, ∂L/∂b=δ — full derivation with shapes"},
+  {id:"bp4",ic:"σ",t:"Backprop Through Activations",d:"Element-wise: ∂L/∂x=∂L/∂y⊙σ′(x), ReLU mask, sigmoid self-gradient"},
+  {id:"bp5",ic:"⚠",t:"Vanishing & Exploding Gradients",d:"‖∂L/∂x₁‖=Πᵢ‖Wᵢᵀ‖·‖σ′‖, sigmoid saturation, residual connections fix"},
+ ]},
+{n:"18",t:"Probability Theory",ic:"P",c:"#38bdf8",bg:"rgba(56,189,248,.1)",
+ desc:"The mathematical language of uncertainty — probability spaces, random variables, expectation, variance, and key inequalities.",
+ tags:["Probability","Core","Critical"],
+ topics:[
+  {id:"pr1",ic:"Ω",t:"Probability Space & Kolmogorov Axioms",d:"(Ω,ℱ,P) triple, 3 axioms, σ-algebra, events as sets, P(∅)=0, P(Ω)=1"},
+  {id:"pr2",ic:"P(A|B)",t:"Conditional Probability & Independence",d:"P(A|B)=P(A∩B)/P(B), independence P(A∩B)=P(A)P(B), law of total probability"},
+  {id:"pr3",ic:"E[X]",t:"Random Variables, Expectation & Variance",d:"Discrete/continuous RV, E[X]=Σxp(x)=∫xf(x)dx, Var=E[X²]-E[X]², std dev"},
+  {id:"pr4",ic:"🔔",t:"Common Distributions",d:"Bernoulli, Binomial, Gaussian N(μ,σ²), Poisson, Exponential, Beta, Dirichlet"},
+  {id:"pr5",ic:"🔔",t:"Gaussian Distribution — Complete",d:"PDF: (1/σ√2π)e^(-(x-μ)²/2σ²), standard normal, CDF Φ, 68-95-99.7 rule"},
+  {id:"pr6",ic:"≤",t:"Markov, Chebyshev & Jensen Inequalities",d:"P(X≥a)≤E[X]/a, P(|X-μ|≥k)≤σ²/k², Jensen for convex f, generalisation bounds"},
+ ]},
+{n:"19",t:"Bayes & Probabilistic ML",ic:"∝",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"Bayes' theorem is the foundation of probabilistic reasoning — MLE, MAP, and Bayesian inference are all variations.",
+ tags:["Probability","Critical","ML"],
+ topics:[
+  {id:"ba1",ic:"∝",t:"Bayes' Theorem — Derivation & Intuition",d:"P(H|D)=P(D|H)P(H)/P(D), prior × likelihood → posterior, medical example"},
+  {id:"ba2",ic:"max L",t:"Maximum Likelihood Estimation (MLE)",d:"θ*=argmax P(D|θ)=argmax log P(D|θ), IID assumption, MLE=ERM connection"},
+  {id:"ba3",ic:"MAP",t:"Maximum A Posteriori (MAP)",d:"θ_MAP=argmax P(D|θ)P(θ), L2 reg = Gaussian prior proof, L1 reg = Laplace prior"},
+  {id:"ba4",ic:"🔄",t:"Bayesian Updating",d:"Prior → data → posterior → prior for next update, conjugate priors, Beta-Binomial"},
+  {id:"ba5",ic:"EM",t:"EM Algorithm — Jensen's Inequality",d:"ELBO lower bound, E-step: compute Q, M-step: maximise Q, GMM example"},
+ ]},
+{n:"20",t:"Information Theory",ic:"H",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"Shannon entropy, KL divergence, cross-entropy — information theory provides the theoretical justification for ML loss functions.",
+ tags:["Theory","Advanced","ML"],
+ topics:[
+  {id:"it1",ic:"H",t:"Shannon Entropy",d:"H(X)=-Σp(x)log₂p(x), bits, uncertainty, uniform max entropy, 0·log0=0"},
+  {id:"it2",ic:"KL",t:"KL Divergence — Asymmetric Divergence",d:"KL(P‖Q)=Σp log(p/q)≥0, proof via Jensen, not a metric, forward vs reverse"},
+  {id:"it3",ic:"H×",t:"Cross-Entropy Loss — Derivation",d:"H(p,q)=-Σp log q = H(p)+KL(P‖Q), minimising CE = minimising KL to true dist"},
+  {id:"it4",ic:"I",t:"Mutual Information",d:"I(X;Y)=H(X)-H(X|Y)=KL(P(X,Y)‖P(X)P(Y)), independence iff I=0"},
+  {id:"it5",ic:"📡",t:"Shannon Coding Theorem",d:"H(X) bits per symbol minimum, arithmetic coding, entropy rate of language models"},
+ ]},
+{n:"21",t:"Linear Regression Mathematics",ic:"β̂",c:"#10b981",bg:"rgba(16,185,129,.1)",
+ desc:"Linear regression derived from first principles — OLS, normal equations, geometric projection, and regularisation.",
+ tags:["ML","Applied","Core"],
+ topics:[
+  {id:"lr1",ic:"β",t:"Linear Regression Setup",d:"y=Xβ+ε, design matrix X∈ℝⁿˣᵖ, OLS objective ‖y-Xβ‖², assumptions"},
+  {id:"lr2",ic:"β̂",t:"Normal Equations β̂=(XᵀX)⁻¹Xᵀy",d:"Take ∂/∂β‖y-Xβ‖²=0, expand, rearrange to normal equations, derivation"},
+  {id:"lr3",ic:"⊥",t:"Geometric View — Projection onto Col(X)",d:"ŷ=Hb, hat matrix H=X(XᵀX)⁻¹Xᵀ, residual ê=y-ŷ ⊥ col(X), Pythagorean"},
+  {id:"lr4",ic:"λ",t:"Ridge Regression & Shrinkage",d:"min ‖y-Xβ‖²+λ‖β‖², β̂=(XᵀX+λI)⁻¹Xᵀy, SVD view, bias-variance"},
+  {id:"lr5",ic:"↔",t:"Bias-Variance Decomposition",d:"E[(y-ŷ)²]=Bias²+Variance+Irreducible noise, full derivation, model complexity"},
+ ]},
+{n:"22",t:"Neural Network Mathematics",ic:"🧠",c:"#c9a84c",bg:"rgba(201,168,76,.1)",
+ desc:"The complete mathematics of feedforward networks — function composition, universal approximation, loss functions, and initialisation theory.",
+ tags:["ML","Core","Critical"],
+ topics:[
+  {id:"nn1",ic:"f",t:"Neural Net as Function Composition",d:"f(x)=σ(Wₗ(…σ(W₁x+b₁)…)+bₗ), depth, width, universal approximation theorem"},
+  {id:"nn2",ic:"σ",t:"Activation Functions — Full Analysis",d:"Sigmoid, tanh, ReLU, Leaky ReLU, GELU, Swish — formulas, derivatives, properties"},
+  {id:"nn3",ic:"L",t:"Loss Functions — Probabilistic Derivation",d:"MSE from Gaussian NLL, BCE from Bernoulli, softmax+CE as log-likelihood of cat."},
+  {id:"nn4",ic:"🎲",t:"Weight Initialisation Theory",d:"Variance analysis: Var(y)=n·Var(W)·Var(x), Xavier Var=1/n, He Var=2/n"},
+  {id:"nn5",ic:"BN",t:"Batch Normalisation — Mathematics",d:"μ_B, σ_B², normalise to N(0,1), scale γ shift β, gradient flow, train vs test"},
+ ]},
+{n:"23",t:"Attention & Transformer Maths",ic:"QKᵀ",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"The complete mathematical derivation of self-attention, multi-head attention, positional encodings, and layer normalisation.",
+ tags:["ML","Expert","Transformers"],
+ topics:[
+  {id:"at1",ic:"A",t:"Scaled Dot-Product Attention",d:"Attn(Q,K,V)=softmax(QKᵀ/√dₖ)V, Q∈ℝⁿˣᵈᵏ, K∈ℝᵐˣᵈᵏ, V∈ℝᵐˣᵈᵛ, full derivation"},
+  {id:"at2",ic:"√dₖ",t:"Why Divide by √dₖ?",d:"QKᵀ entries ~ N(0,dₖ), std dev √dₖ, dividing gives unit variance, stable softmax"},
+  {id:"at3",ic:"⊕",t:"Multi-Head Attention",d:"headᵢ=Attn(QWᵢQ,KWᵢK,VWᵢV), concat heads, project WO, h parallel subspaces"},
+  {id:"at4",ic:"sin",t:"Positional Encodings",d:"PE(pos,2i)=sin(pos/10000^(2i/d)), cos form, relative positions, RoPE, ALiBi"},
+  {id:"at5",ic:"LN",t:"Layer Normalisation",d:"LN(x)=γ·(x-μ)/σ+β, pre-norm vs post-norm, stability, RMSNorm variant"},
+  {id:"at6",ic:"💡",t:"Attention as Soft Dictionary Lookup",d:"Keys=hash-map keys, Values=stored values, Query=lookup, softmax=soft argmax"},
+ ]},
+{n:"24",t:"Dimensionality Reduction",ic:"↘",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"PCA derivation, SVD connection, t-SNE, and UMAP — the mathematics of revealing structure in high-dimensional data.",
+ tags:["ML","Applied","Advanced"],
+ topics:[
+  {id:"dr1",ic:"↘",t:"PCA — Variance Maximisation Derivation",d:"max Var(Xw) s.t. ‖w‖=1, Lagrangian, solution w=eigvec of XᵀX/n"},
+  {id:"dr2",ic:"SVD",t:"PCA via SVD Decomposition",d:"X=UΣVᵀ, principal components = cols of V, scores = XV = UΣ, efficient"},
+  {id:"dr3",ic:"🗺",t:"t-SNE — Probabilistic Neighbour Embedding",d:"Gaussian sim in high-d, Student-t in low-d, min KL(P‖Q), crowding problem"},
+ ]},
+{n:"25",t:"Multivariate Distributions",ic:"𝒩",c:"#10b981",bg:"rgba(16,185,129,.1)",
+ desc:"Multivariate Gaussian, covariance structures, exponential family, and sampling methods used in generative models.",
+ tags:["Probability","Advanced","ML"],
+ topics:[
+  {id:"mv1",ic:"𝒩",t:"Multivariate Gaussian N(μ,Σ)",d:"PDF: (2π)^(-d/2)|Σ|^(-1/2)exp(-½(x-μ)ᵀΣ⁻¹(x-μ)), contours, marginals"},
+  {id:"mv2",ic:"d²",t:"Mahalanobis Distance",d:"d²=(x-μ)ᵀΣ⁻¹(x-μ), whitening transformation, anomaly detection"},
+  {id:"mv3",ic:"KL",t:"KL Between Gaussians — Closed Form",d:"KL(N₁‖N₂)=½[tr(Σ₂⁻¹Σ₁)-d+Δμᵀ Σ₂⁻¹Δμ+ln|Σ₂|/|Σ₁|], VAE loss"},
+  {id:"mv4",ic:"🎲",t:"Reparameterisation Trick",d:"z=μ+σ⊙ε, ε~N(0,I), makes sampling differentiable, VAE training"},
+ ]},
+{n:"26",t:"Matrix Calculus",ic:"∂W",c:"#c9a84c",bg:"rgba(201,168,76,.1)",
+ desc:"Derivatives with respect to matrices and vectors — the compact notation used in ML paper derivations.",
+ tags:["Calculus","Advanced","ML"],
+ topics:[
+  {id:"mc1",ic:"∂y/∂x",t:"Vector-by-Vector Derivatives",d:"∂y/∂x (Jacobian), ∂(Ax)/∂x=Aᵀ, ∂(xᵀA)/∂x=A, layout conventions"},
+  {id:"mc2",ic:"∂s/∂W",t:"Scalar-by-Matrix Derivatives",d:"∂(xᵀAx)/∂A=xxᵀ, ∂tr(AB)/∂A=Bᵀ, ∂logdet(A)/∂A=A⁻ᵀ, gradient of loss wrt W"},
+  {id:"mc3",ic:"⛓",t:"Matrix Chain Rule",d:"Layer-wise gradients, shape consistency, denominator vs numerator layout"},
+ ]},
+{n:"27",t:"Convex Optimisation",ic:"⌣",c:"#38bdf8",bg:"rgba(56,189,248,.1)",
+ desc:"Convex sets, duality theory, and why convexity guarantees we can find the global optimum — SVMs and other convex ML models.",
+ tags:["Theory","Advanced","Optimisation"],
+ topics:[
+  {id:"cv1",ic:"⌣",t:"Convex Sets — Definition & Examples",d:"Convex combination, examples: balls, polyhedra, halfspaces, intersection"},
+  {id:"cv2",ic:"f",t:"Convex Functions — 3 Characterisations",d:"Chord above, gradient inequality, H≽0 — equivalent for smooth f, examples"},
+  {id:"cv3",ic:"★",t:"Strong Convexity & Linear Convergence",d:"f(y)≥f(x)+∇fᵀ(y-x)+m/2‖y-x‖², GD converges O(ρᵗ) where ρ=1-2η·m·L/(m+L)"},
+  {id:"cv4",ic:"↔",t:"Duality — Primal, Dual & KKT",d:"Lagrangian dual, weak duality g(λ)≤p*, strong duality, SVM dual derivation"},
+ ]},
+{n:"28",t:"Numerical Methods for ML",ic:"≈",c:"#8b5cf6",bg:"rgba(139,92,246,.1)",
+ desc:"Floating point, automatic differentiation, conjugate gradients, and gradient checking — the computational reality of ML math.",
+ tags:["Computational","Applied"],
+ topics:[
+  {id:"nm1",ic:"ε",t:"Floating Point & Numerical Stability",d:"IEEE 754 double, machine epsilon ≈2.2×10⁻¹⁶, catastrophic cancellation, log-sum-exp"},
+  {id:"nm2",ic:"∇",t:"Automatic Differentiation",d:"Forward mode (JVP), reverse mode (VJP), dual numbers, PyTorch autograd tape"},
+  {id:"nm3",ic:"≈",t:"Finite Differences & Gradient Checking",d:"[f(x+h)-f(x-h)]/2h, relative error, when to use for debugging grad implementations"},
+ ]},
+{n:"29",t:"Graph Mathematics & GNNs",ic:"G",c:"#f43f5e",bg:"rgba(244,63,94,.1)",
+ desc:"Graph Laplacian, spectral graph theory, and the mathematics of message-passing neural networks.",
+ tags:["Advanced","ML","Graph"],
+ topics:[
+  {id:"gm1",ic:"A",t:"Graph as Matrix — Adjacency & Laplacian",d:"Adjacency A, degree matrix D, Laplacian L=D-A, normalised L̃=D⁻½LD⁻½"},
+  {id:"gm2",ic:"λ",t:"Spectral Graph Theory",d:"Eigenvalues of L, spectral gap λ₂ (algebraic connectivity), graph cuts, Cheeger"},
+  {id:"gm3",ic:"h",t:"Message Passing Neural Networks",d:"hᵥ⁽ˡ⁾=σ(Σᵤ∈N(v) W·hᵤ⁽ˡ⁻¹⁾/√dᵤdᵥ), GCN as spectral convolution approx"},
+ ]},
+{n:"30",t:"Interview Preparation",ic:"🎯",c:"#c9a84c",bg:"rgba(201,168,76,.1)",
+ desc:"350+ questions from entry-level to research scientist — every real ML mathematics interview question, fully answered.",
+ tags:["Interview"],
+ topics:[
+  {id:"iq1",ic:"⊞",t:"Linear Algebra Q&A",d:"Vectors, matrices, eigenvalues, SVD, PCA — all levels"},
+  {id:"iq2",ic:"∂",t:"Calculus & Optimisation Q&A",d:"Derivatives, gradients, gradient descent, convergence, Adam"},
+  {id:"iq3",ic:"P",t:"Probability & Statistics Q&A",d:"Distributions, Bayes, MLE/MAP, entropy, KL divergence"},
+  {id:"iq4",ic:"🧠",t:"Neural Network Math Q&A",d:"Backprop, activations, loss functions, initialisation, batch norm"},
+  {id:"iq5",ic:"🏗",t:"System Design: Justify Mathematically",d:"Choose optimiser/regulariser/architecture — explain with math"},
+ ]},
+];
+const DETAILS={
+
+"v3":{title:"Dot Product — The Most Important Operation in ML",bread:"Chapter 2 · Vectors",
+sub:"The dot product measures alignment between vectors. It powers cosine similarity, projections, attention scores, and the forward pass of every neural network.",
+pills:[{t:"Core",c:"#c9a84c"},{t:"Critical",c:"#f43f5e"},{t:"ML Foundation",c:"#10b981"}],
+secs:[
+{ty:"prose",title:"Definition & Geometric Intuition",html:`<p>The dot product of two vectors <strong>a</strong> and <strong>b</strong> in ℝⁿ is defined two equivalent ways:</p>
+<ul>
+<li><strong>Algebraic:</strong> <code>a·b = Σᵢ aᵢbᵢ = a₁b₁ + a₂b₂ + … + aₙbₙ</code></li>
+<li><strong>Geometric:</strong> <code>a·b = ‖a‖ · ‖b‖ · cos(θ)</code> where θ is the angle between them</li>
+</ul>
+<h4>What the Geometric Form Tells You</h4>
+<ul>
+<li><strong>a·b > 0</strong>: θ < 90° — vectors point in similar directions (same side of origin)</li>
+<li><strong>a·b = 0</strong>: θ = 90° — vectors are <em>orthogonal</em> (perpendicular)</li>
+<li><strong>a·b < 0</strong>: θ > 90° — vectors point in opposite directions</li>
+<li><strong>a·b = ‖a‖²</strong>: when b = a — gives squared length</li>
+</ul>
+<h4>Why It Powers Neural Networks</h4>
+<p>Every neuron computes <code>y = wᵀx + b</code> — a dot product! The dot product measures how much the input <strong>x</strong> "aligns with" the weight vector <strong>w</strong>. High alignment → strong activation. This is literally how features are detected.</p>`},
+{ty:"mbox",formula:"a · b  =  Σᵢ aᵢbᵢ  =  ‖a‖ · ‖b‖ · cosθ",desc:"Two equivalent forms — algebraic (component-wise sum) and geometric (lengths × cosine of angle)"},
+{ty:"diagram",title:"Dot Product — Geometry, Projection & ML Applications",
+svg:`<svg width="540" height="300" viewBox="0 0 540 300" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="da" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#c9a84c"/></marker>
+<marker id="db" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#38bdf8"/></marker>
+<marker id="dc" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#10b981"/></marker>
+<style>
+@keyframes drawA{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+@keyframes drawB{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+.va{stroke-dasharray:100;animation:drawA 1s ease forwards}
+.vb{stroke-dasharray:100;animation:drawB 1s .3s ease forwards;stroke-dashoffset:100}
+.vc{stroke-dasharray:80;animation:drawB 1.2s .6s ease forwards;stroke-dashoffset:80}
+</style>
+</defs>
+<rect fill="#02040a" x="0" y="0" width="540" height="300" rx="8"/>
+<!-- Left: geometry -->
+<text font-family="'Fira Code'" font-size="9" fill="#c9a84c" x="10" y="14">GEOMETRIC VIEW</text>
+<g transform="translate(10,30)">
+<line x1="0" y1="130" x2="170" y2="130" stroke="#162040" stroke-width="1"/>
+<line x1="80" y1="10" x2="80" y2="150" stroke="#162040" stroke-width="1"/>
+<!-- vector a -->
+<line class="va" x1="80" y1="130" x2="160" y2="60" stroke="#c9a84c" stroke-width="2.5" marker-end="url(#da)"/>
+<text font-family="'Fira Code'" font-size="10" fill="#c9a84c" x="163" y="58">a</text>
+<!-- vector b -->
+<line class="vb" x1="80" y1="130" x2="150" y2="100" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#db)"/>
+<text font-family="'Fira Code'" font-size="10" fill="#38bdf8" x="153" y="99">b</text>
+<!-- angle arc -->
+<path d="M 97,130 A 17,17 0 0 0 87.5,115" fill="none" stroke="#8b5cf6" stroke-width="1.5"/>
+<text font-family="'Fira Code'" font-size="9" fill="#8b5cf6" x="102" y="120">θ</text>
+<!-- projection -->
+<line class="vc" x1="80" y1="130" x2="143" y2="130" stroke="#10b981" stroke-width="2" stroke-dasharray="4 2" marker-end="url(#dc)"/>
+<text font-family="'Fira Code'" font-size="9" fill="#10b981" x="93" y="143">proj = a·b̂</text>
+<!-- perpendicular mark -->
+<path d="M 143,130 L 143,113 L 150,113" fill="none" stroke="#10b981" stroke-width="1"/>
+</g>
+<!-- Middle: sign cases -->
+<text font-family="'Fira Code'" font-size="9" fill="#c9a84c" x="195" y="14">SIGN OF DOT PRODUCT</text>
+<g transform="translate(195,22)">
+<rect fill="#0d2018" stroke="#10b981" stroke-width="1" x="0" y="0" width="155" height="28" rx="4"/>
+<text font-family="'Fira Code'" font-size="9" fill="#10b981" x="6" y="12">a·b &gt; 0  →  θ &lt; 90°  similar</text>
+<text font-family="'Fira Code'" font-size="9" fill="#34d399" x="6" y="24">pointing in same direction</text>
+<rect fill="#0d1a28" stroke="#38bdf8" stroke-width="1" x="0" y="34" width="155" height="28" rx="4"/>
+<text font-family="'Fira Code'" font-size="9" fill="#38bdf8" x="6" y="46">a·b = 0  →  θ = 90°  orthogonal</text>
+<text font-family="'Fira Code'" font-size="9" fill="#7dd3fc" x="6" y="58">vectors are perpendicular ⊥</text>
+<rect fill="#2a0808" stroke="#f43f5e" stroke-width="1" x="0" y="68" width="155" height="28" rx="4"/>
+<text font-family="'Fira Code'" font-size="9" fill="#f43f5e" x="6" y="80">a·b &lt; 0  →  θ &gt; 90°  opposing</text>
+<text font-family="'Fira Code'" font-size="9" fill="#fb7185" x="6" y="92">pointing in opposite directions</text>
+</g>
+<!-- Right: ML connections -->
+<text font-family="'Fira Code'" font-size="9" fill="#c9a84c" x="370" y="14">ML APPLICATIONS</text>
+<g transform="translate(370,22)">
+<rect fill="#1a1408" stroke="#c9a84c" stroke-width="1" x="0" y="0" width="160" height="40" rx="4"/>
+<text font-family="'Fira Code'" font-size="9" fill="#c9a84c" x="6" y="14">Neuron: y = wᵀx + b</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="6" y="26">dot product of weights and input</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="6" y="38">high value → feature detected</text>
+<rect fill="#0d1a28" stroke="#38bdf8" stroke-width="1" x="0" y="46" width="160" height="40" rx="4"/>
+<text font-family="'Fira Code'" font-size="9" fill="#38bdf8" x="6" y="60">Attention: score = qᵀk / √d</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="6" y="72">query-key alignment score</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="6" y="84">softmax → attention weight</text>
+<rect fill="#0d2018" stroke="#10b981" stroke-width="1" x="0" y="92" width="160" height="40" rx="4"/>
+<text font-family="'Fira Code'" font-size="9" fill="#10b981" x="6" y="106">Cosine Similarity: a·b/(‖a‖‖b‖)</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="6" y="118">word/sentence embedding sim</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="6" y="130">retrieval, RAG systems</text>
+</g>
+<!-- Bottom: numerical example -->
+<rect fill="#0a0e18" stroke="#162040" x="10" y="188" width="520" height="104" rx="6"/>
+<text font-family="'Fira Code'" font-size="9" fill="#c9a84c" x="18" y="204">NUMERICAL EXAMPLE</text>
+<text font-family="'Fira Code'" font-size="10" fill="#e0d4c4" x="18" y="220">a = [3, 4]   b = [1, 2]</text>
+<text font-family="'Fira Code'" font-size="10" fill="#e0d4c4" x="18" y="236">a·b = 3×1 + 4×2 = 3 + 8 = 11</text>
+<text font-family="'Fira Code'" font-size="10" fill="#e0d4c4" x="18" y="252">‖a‖ = √(9+16) = 5   ‖b‖ = √(1+4) = √5</text>
+<text font-family="'Fira Code'" font-size="10" fill="#c9a84c" x="18" y="268">cosθ = 11 / (5·√5) = 11/11.18 ≈ 0.985  →  θ ≈ 10.3°  (nearly parallel!)</text>
+<text font-family="'Fira Code'" font-size="10" fill="#b0a898" x="270" y="220">Cosine similarity = 0.985 (very similar)</text>
+<text font-family="'Fira Code'" font-size="10" fill="#b0a898" x="270" y="236">proj_b(a) = (a·b̂)b̂ = (11/√5)·[1/√5, 2/√5]</text>
+<text font-family="'Fira Code'" font-size="10" fill="#b0a898" x="270" y="252">     = [2.2, 4.4]</text>
+<text font-family="'Fira Code'" font-size="10" fill="#34d399" x="270" y="268">ortho check: [0.8,-0.4]·[1,2] = 0.8-0.8 = 0 ✓</text>
+</svg>`},
+{ty:"code",lang:"python",name:"Dot Product, Cosine Similarity & Projection in NumPy",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+
+a = np.array([<span class="nu">3</span>, <span class="nu">4</span>], dtype=float)
+b = np.array([<span class="nu">1</span>, <span class="nu">2</span>], dtype=float)
+
+<span class="cm"># --- Dot product (3 equivalent ways) ---</span>
+dot1 = np.<span class="fn">dot</span>(a, b)           <span class="cm"># 11.0</span>
+dot2 = a @ b                    <span class="cm"># 11.0  (preferred in ML code)</span>
+dot3 = np.<span class="fn">sum</span>(a * b)         <span class="cm"># 11.0  (element-wise then sum)</span>
+
+<span class="cm"># --- Norms ---</span>
+norm_a = np.<span class="fn">linalg</span>.norm(a)    <span class="cm"># 5.0</span>
+norm_b = np.<span class="fn">linalg</span>.norm(b)    <span class="cm"># 2.236</span>
+
+<span class="cm"># --- Cosine similarity (angle between vectors) ---</span>
+cos_theta = (a @ b) / (norm_a * norm_b)   <span class="cm"># 0.9839</span>
+theta_deg = np.<span class="fn">degrees</span>(np.<span class="fn">arccos</span>(cos_theta)) <span class="cm"># 10.3°</span>
+
+<span class="cm"># --- Projection of a onto b ---</span>
+b_hat = b / norm_b              <span class="cm"># unit vector in direction of b</span>
+scalar_proj = a @ b_hat        <span class="cm"># 4.919 (signed length of projection)</span>
+vector_proj = scalar_proj * b_hat <span class="cm"># [2.2, 4.4]</span>
+
+<span class="cm"># --- Orthogonal component ---</span>
+a_perp = a - vector_proj       <span class="cm"># [0.8, -0.4] (perp to b)</span>
+<span class="fn">print</span>(a_perp @ b)              <span class="cm"># ≈ 0 (verified orthogonal) ✓</span>
+
+<span class="cm"># --- Neural network neuron ---</span>
+W = np.array([[<span class="nu">0.5</span>, <span class="nu">-0.3</span>], [<span class="nu">0.2</span>, <span class="nu">0.8</span>]])
+x = np.array([<span class="nu">1.0</span>, <span class="nu">2.0</span>])
+b_bias = np.array([<span class="nu">0.1</span>, <span class="nu">-0.1</span>])
+y = W @ x + b_bias             <span class="cm"># [-0.0, 1.7] — forward pass!</span>`},
+{ty:"callout",kind:"math",ic:"∇",txt:"<strong>Bilinear identity:</strong> <code>a·b = ½(‖a+b‖² - ‖a‖² - ‖b‖²)</code> — the dot product can be recovered from norms alone. This is used in kernel methods and attention score computation when explicit inner products are expensive."},
+]},
+
+"ev1":{title:"Eigenvalue Problem Ax=λx",bread:"Chapter 7 · Eigenvalues & Eigenvectors",
+sub:"Eigenvectors are the natural axes of a linear transformation — the only directions where a matrix acts as pure scaling. They are the foundation of PCA, graph Laplacians, and stable RNNs.",
+pills:[{t:"Core",c:"#c9a84c"},{t:"Critical",c:"#f43f5e"},{t:"ML Foundation",c:"#8b5cf6"}],
+secs:[
+{ty:"prose",title:"What is an Eigenvector?",html:`<p>Given a square matrix <strong>A</strong>, a nonzero vector <strong>x</strong> is an <em>eigenvector</em> with <em>eigenvalue</em> λ if:</p>
+<p style="text-align:center;font-family:'Fira Code',monospace;color:#c9a84c;font-size:14px"><strong>Ax = λx</strong></p>
+<p>This says: "When I apply the transformation <strong>A</strong> to <strong>x</strong>, the vector doesn't change direction — it only gets scaled by λ." Most vectors get knocked off their direction; eigenvectors are special fixed directions.</p>
+<h4>Geometric Meaning</h4>
+<ul>
+<li><strong>λ > 1</strong>: the vector is stretched (amplified)</li>
+<li><strong>0 < λ < 1</strong>: the vector is shrunk</li>
+<li><strong>λ = 1</strong>: no change (fixed point)</li>
+<li><strong>λ < 0</strong>: the vector is flipped AND scaled</li>
+<li><strong>λ = 0</strong>: the vector is collapsed to zero — A is singular</li>
+</ul>
+<h4>Why They Matter in ML</h4>
+<ul>
+<li><strong>PCA:</strong> eigenvectors of the covariance matrix are principal components (directions of max variance)</li>
+<li><strong>Graph Laplacian:</strong> eigenvectors encode graph structure for GNNs</li>
+<li><strong>RNNs:</strong> eigenvalues of recurrent weight matrix determine gradient vanishing/exploding</li>
+<li><strong>Optimisation:</strong> Hessian eigenvalues determine curvature → learning rate bounds</li>
+</ul>`},
+{ty:"msteps",title:"Finding Eigenvalues — Step by Step",steps:[
+{n:"Step 1",f:"Ax = λx  →  Ax - λx = 0  →  (A - λI)x = 0",d:"Rearrange: the matrix (A-λI) maps x to zero. So x is in the null space of (A-λI)."},
+{n:"Step 2",f:"For nonzero x to exist: det(A - λI) = 0",d:"A matrix has a nontrivial null space iff its determinant is zero. This gives us the characteristic equation."},
+{n:"Step 3",f:"Example: A = [[3,1],[1,3]],  det(A-λI) = (3-λ)²-1 = 0",d:"Expand: λ²-6λ+8=0, factor: (λ-4)(λ-2)=0, so λ₁=4, λ₂=2."},
+{n:"Step 4",f:"For λ₁=4: (A-4I)x=0  →  [[-1,1],[1,-1]]x=0  →  x=[1,1]ᵀ",d:"The eigenspace for λ=4 is all scalar multiples of [1,1]ᵀ."},
+{n:"Step 5",f:"For λ₂=2: (A-2I)x=0  →  [[1,1],[1,1]]x=0  →  x=[1,-1]ᵀ",d:"Eigenspace for λ=2 is span{[1,-1]ᵀ}. Note: both eigenvectors are orthogonal! (A is symmetric)"},
+]},
+{ty:"diagram",title:"Eigenvalue Geometry — What A=PΛP⁻¹ Means Visually",
+svg:`<svg width="540" height="270" viewBox="0 0 540 270" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="ea" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#c9a84c"/></marker>
+<marker id="eb" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#38bdf8"/></marker>
+<marker id="ec" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#f43f5e"/></marker>
+<style>
+@keyframes stretchEig{0%{transform:scaleX(1)}50%{transform:scaleX(2)}100%{transform:scaleX(2)}}
+@keyframes pop{0%,100%{opacity:.4}50%{opacity:1}}
+.ep{animation:pop 2s ease infinite}
+</style>
+</defs>
+<rect fill="#02040a" x="0" y="0" width="540" height="270" rx="8"/>
+<!-- Before transformation -->
+<text font-family="'Fira Code'" font-size="9" fill="#b0a898" x="10" y="14">BEFORE: unit vectors</text>
+<g transform="translate(90,100)">
+<line x1="-70" y1="0" x2="70" y2="0" stroke="#162040" stroke-width="1"/>
+<line x1="0" y1="-70" x2="0" y2="70" stroke="#162040" stroke-width="1"/>
+<line x1="0" y1="0" x2="45" y2="0" stroke="#c9a84c" stroke-width="2.5" marker-end="url(#ea)"/>
+<text font-family="'Fira Code'" font-size="9" fill="#c9a84c" x="47" y="4">e₁</text>
+<line x1="0" y1="0" x2="0" y2="-45" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#eb)"/>
+<text font-family="'Fira Code'" font-size="9" fill="#38bdf8" x="4" y="-47">e₂</text>
+<circle cx="0" cy="0" r="45" fill="none" stroke="#162040" stroke-width="1" stroke-dasharray="4 3"/>
+</g>
+<!-- Arrow showing transformation -->
+<text font-family="'Fira Code'" font-size="22" fill="#c9a84c" x="165" y="110">→</text>
+<text font-family="'Fira Code'" font-size="9" fill="#8b5cf6" x="163" y="124">A = [[3,1],[1,3]]</text>
+<!-- After transformation (with eigenvectors) -->
+<text font-family="'Fira Code'" font-size="9" fill="#b0a898" x="210" y="14">AFTER: eigenvectors scaled by eigenvalues</text>
+<g transform="translate(340,100)">
+<line x1="-110" y1="0" x2="110" y2="0" stroke="#162040" stroke-width="1"/>
+<line x1="0" y1="-110" x2="0" y2="110" stroke="#162040" stroke-width="1"/>
+<!-- eigenvector 1: [1,1]/√2 stretched by λ=4 -->
+<line x1="0" y1="0" x2="80" y2="-80" stroke="#c9a84c" stroke-width="2.5" marker-end="url(#ea)" class="ep"/>
+<text font-family="'Fira Code'" font-size="9" fill="#c9a84c" x="82" y="-76">v₁, λ=4</text>
+<!-- eigenvector 2: [1,-1]/√2 stretched by λ=2 -->
+<line x1="0" y1="0" x2="56" y2="56" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#eb)" class="ep"/>
+<text font-family="'Fira Code'" font-size="9" fill="#38bdf8" x="58" y="64">v₂, λ=2</text>
+<!-- original e₁ transformed -->
+<line x1="0" y1="0" x2="68" y2="-45" stroke="#f43f5e" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#ec)"/>
+<text font-family="'Fira Code'" font-size="9" fill="#f43f5e" x="70" y="-42">Ae₁=[3,1]</text>
+</g>
+<!-- Eigenvalue table -->
+<rect fill="#0a0e18" stroke="#162040" x="10" y="170" width="520" height="90" rx="6"/>
+<text font-family="'Fira Code'" font-size="9" fill="#c9a84c" x="18" y="186">EIGENDECOMPOSITION: A = PΛP⁻¹ = PΛPᵀ  (since A is symmetric, P is orthogonal)</text>
+<text font-family="'Fira Code'" font-size="10" fill="#e0d4c4" x="18" y="204">P = [[1/√2, 1/√2],    Λ = [[4, 0],    Aⁿ = PΛⁿPᵀ  →  A² = PΛ²Pᵀ</text>
+<text font-family="'Fira Code'" font-size="10" fill="#e0d4c4" x="18" y="222">     [1/√2,-1/√2]]         [0, 2]]    A^100 easily computed via Λ^100!</text>
+<text font-family="'Fira Code'" font-size="10" fill="#34d399" x="18" y="248">Verify: Av₁ = [[3,1],[1,3]][1/√2,1/√2]ᵀ = [4/√2,4/√2]ᵀ = 4·v₁  ✓</text>
+</svg>`},
+{ty:"code",lang:"python",name:"Eigenvalues — Computation, Verification & PCA Connection",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+
+<span class="cm"># Define symmetric matrix</span>
+A = np.array([[<span class="nu">3</span>, <span class="nu">1</span>], [<span class="nu">1</span>, <span class="nu">3</span>]])
+
+<span class="cm"># Compute eigenvalues and eigenvectors</span>
+eigenvalues, eigenvectors = np.linalg.eigh(A)  <span class="cm"># eigh for symmetric!</span>
+<span class="fn">print</span>(<span class="st">"Eigenvalues:"</span>, eigenvalues)     <span class="cm"># [2. 4.]</span>
+<span class="fn">print</span>(<span class="st">"Eigenvectors:\n"</span>, eigenvectors) <span class="cm"># columns are eigenvectors</span>
+
+<span class="cm"># Verify: Av = λv for each eigenpair</span>
+<span class="kw">for</span> i, (lam, v) <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="fn">zip</span>(eigenvalues, eigenvectors.T)):
+    Av = A @ v
+    lv = lam * v
+    <span class="fn">print</span>(<span class="st">f"λ{i+1}={lam:.0f}: Av={Av}, λv={lv}, match={np.allclose(Av,lv)}"</span>)
+
+<span class="cm"># Diagonalisation: A = P @ Λ @ P⁻¹</span>
+P = eigenvectors
+Lambda = np.diag(eigenvalues)
+A_reconstructed = P @ Lambda @ P.T  <span class="cm"># P.T = P⁻¹ for orthogonal P</span>
+<span class="fn">print</span>(<span class="st">"Reconstructed:\n"</span>, A_reconstructed.round(<span class="nu">8</span>))  <span class="cm"># [[3,1],[1,3]] ✓</span>
+
+<span class="cm"># Matrix powers via eigendecomposition (very fast for large n)</span>
+A_100 = P @ np.diag(eigenvalues**<span class="nu">100</span>) @ P.T
+<span class="fn">print</span>(<span class="st">"A^100[0,0]:"</span>, A_100[<span class="nu">0</span>,<span class="nu">0</span>])  <span class="cm"># 4^100/2 + 2^100/2</span>
+
+<span class="cm"># PCA connection: eigenvalues of covariance matrix</span>
+np.random.seed(<span class="nu">42</span>)
+X = np.random.randn(<span class="nu">100</span>, <span class="nu">3</span>)      <span class="cm"># 100 data points, 3 features</span>
+X -= X.mean(axis=<span class="nu">0</span>)               <span class="cm"># centre data</span>
+Sigma = (X.T @ X) / (len(X)-<span class="nu">1</span>)  <span class="cm"># covariance matrix</span>
+eigvals, eigvecs = np.linalg.eigh(Sigma)
+eigvals = eigvals[::-<span class="nu">1</span>]; eigvecs = eigvecs[:, ::-<span class="nu">1</span>]  <span class="cm"># sort descending</span>
+explained_var = eigvals / eigvals.sum()
+<span class="fn">print</span>(<span class="st">"Explained variance ratio:"</span>, explained_var.round(<span class="nu">3</span>))`},
+{ty:"callout",kind:"math",ic:"★",txt:"<strong>Trace-Eigenvalue identity:</strong> <code>tr(A) = Σ λᵢ</code> and <code>det(A) = Π λᵢ</code>. Quick sanity check: for our A=[[3,1],[1,3]], tr=6=4+2 ✓ and det=9-1=8=4×2 ✓. Use these to catch errors instantly in interview problems."},
+]},
+
+"sv3":{title:"Low-Rank Approximation — The Eckart-Young Theorem",bread:"Chapter 8 · SVD",
+sub:"SVD reveals which directions in data carry the most information. Truncating to k singular values gives the best possible compression — provably optimal in Frobenius norm.",
+pills:[{t:"Advanced",c:"#8b5cf6"},{t:"Critical",c:"#f43f5e"},{t:"ML Core",c:"#c9a84c"}],
+secs:[
+{ty:"prose",title:"SVD — Every Matrix is Rotation × Scale × Rotation",html:`<p>The Singular Value Decomposition says any matrix A ∈ ℝᵐˣⁿ can be written as:</p>
+<p style="text-align:center;font-family:'Fira Code',monospace;color:#c9a84c;font-size:14px"><strong>A = U Σ Vᵀ</strong></p>
+<ul>
+<li><strong>U</strong> ∈ ℝᵐˣᵐ — orthogonal, left singular vectors (output directions)</li>
+<li><strong>Σ</strong> ∈ ℝᵐˣⁿ — diagonal, singular values σ₁ ≥ σ₂ ≥ … ≥ 0</li>
+<li><strong>V</strong> ∈ ℝⁿˣⁿ — orthogonal, right singular vectors (input directions)</li>
+</ul>
+<h4>The Geometric Story</h4>
+<p>Any linear transformation A can be decomposed as: (1) rotate input space by Vᵀ, (2) scale along coordinate axes by Σ, (3) rotate output space by U. The singular values tell you how much stretching happens in each direction.</p>
+<h4>Eckart-Young Theorem</h4>
+<p>The best rank-k approximation to A in Frobenius norm is obtained by keeping only the top k singular values:</p>
+<p style="font-family:'Fira Code',monospace;color:#c9a84c;font-size:13px">Aₖ = Σᵢ₌₁ᵏ σᵢ uᵢ vᵢᵀ&nbsp;&nbsp;and&nbsp;&nbsp;‖A - Aₖ‖² = σₖ₊₁² + … + σᵣ²</p>
+<p>No other rank-k matrix does better. This is why SVD is used for: image compression, LSA (NLP), collaborative filtering, and noise removal.</p>`},
+{ty:"mbox",formula:"A = Σᵢ₌₁ʳ σᵢ uᵢvᵢᵀ  (sum of rank-1 matrices)",desc:"SVD as a sum of rank-1 outer products, each weighted by its singular value. Truncate at k to compress."},
+{ty:"diagram",title:"SVD Decomposition & Low-Rank Approximation",
+svg:`<svg width="540" height="280" viewBox="0 0 540 280" xmlns="http://www.w3.org/2000/svg">
+<defs><style>
+@keyframes svdIn{from{opacity:0}to{opacity:1}}
+.sva{animation:svdIn .8s ease forwards}.svb{animation:svdIn .8s .3s ease forwards;opacity:0}.svc{animation:svdIn .8s .6s ease forwards;opacity:0}
+</style></defs>
+<rect fill="#02040a" x="0" y="0" width="540" height="280" rx="8"/>
+<text font-family="'Fira Code'" font-size="9" fill="#c9a84c" x="10" y="14">SVD DECOMPOSITION: A (4×5) = U(4×4) × Σ(4×5) × Vᵀ(5×5)</text>
+<!-- A matrix -->
+<text font-family="'Fira Code'" font-size="10" fill="#b0a898" x="10" y="36">A</text>
+<rect class="sva" fill="#1a1408" stroke="#c9a84c" x="10" y="42" width="55" height="70" rx="3"/>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="15" y="58">4×5</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="15" y="70">full rank</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="15" y="82">matrix</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="15" y="94">all data</text>
+<text font-family="'Playfair Display'" font-size="18" fill="#c9a84c" x="75" y="82">=</text>
+<!-- U matrix -->
+<text font-family="'Fira Code'" font-size="10" fill="#38bdf8" x="93" y="36">U</text>
+<rect class="svb" fill="#0d1a28" stroke="#38bdf8" x="93" y="42" width="55" height="70" rx="3"/>
+<text font-family="'Fira Code'" font-size="8" fill="#38bdf8" x="98" y="58">4×4</text>
+<text font-family="'Fira Code'" font-size="8" fill="#38bdf8" x="98" y="70">orthog.</text>
+<text font-family="'Fira Code'" font-size="8" fill="#38bdf8" x="98" y="82">output</text>
+<text font-family="'Fira Code'" font-size="8" fill="#38bdf8" x="98" y="94">dirs</text>
+<!-- Sigma -->
+<text font-family="'Fira Code'" font-size="10" fill="#c9a84c" x="158" y="36">Σ</text>
+<rect class="svc" fill="#1a1408" stroke="#c9a84c" x="158" y="42" width="68" height="70" rx="3"/>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="163" y="58">4×5 diag</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="163" y="70">σ₁≥σ₂≥</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="163" y="82">σ₃≥σ₄≥0</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="163" y="94">energy!</text>
+<!-- Vt -->
+<text font-family="'Fira Code'" font-size="10" fill="#10b981" x="236" y="36">Vᵀ</text>
+<rect class="svc" fill="#0d2018" stroke="#10b981" x="236" y="42" width="68" height="70" rx="3"/>
+<text font-family="'Fira Code'" font-size="8" fill="#10b981" x="241" y="58">5×5</text>
+<text font-family="'Fira Code'" font-size="8" fill="#10b981" x="241" y="70">orthog.</text>
+<text font-family="'Fira Code'" font-size="8" fill="#10b981" x="241" y="82">input</text>
+<text font-family="'Fira Code'" font-size="8" fill="#10b981" x="241" y="94">dirs</text>
+<!-- Low rank section -->
+<text font-family="'Fira Code'" font-size="9" fill="#b0a898" x="315" y="36">LOW-RANK k=2 APPROX: keep top-2 singular values</text>
+<rect fill="#1a1408" stroke="#c9a84c" stroke-width="1.5" x="315" y="42" width="55" height="70" rx="3"/>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="320" y="58">A₂ ≈ A</text>
+<text font-family="'Fira Code'" font-size="8" fill="#f43f5e" x="320" y="70">rank 2!</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="320" y="82">much</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="320" y="94">smaller</text>
+<text font-family="'Playfair Display'" font-size="18" fill="#c9a84c" x="378" y="82">=</text>
+<!-- rank-1 terms -->
+<text font-family="'Fira Code'" font-size="9" fill="#38bdf8" x="395" y="36">σ₁u₁v₁ᵀ</text>
+<rect fill="#0d1a28" stroke="#38bdf8" x="395" y="42" width="42" height="70" rx="3"/>
+<text font-family="'Fira Code'" font-size="8" fill="#38bdf8" x="400" y="65">rank</text>
+<text font-family="'Fira Code'" font-size="8" fill="#38bdf8" x="400" y="77">1</text>
+<text font-family="'Playfair Display'" font-size="14" fill="#b0a898" x="443" y="82">+</text>
+<text font-family="'Fira Code'" font-size="9" fill="#10b981" x="452" y="36">σ₂u₂v₂ᵀ</text>
+<rect fill="#0d2018" stroke="#10b981" x="452" y="42" width="42" height="70" rx="3"/>
+<text font-family="'Fira Code'" font-size="8" fill="#10b981" x="457" y="65">rank</text>
+<text font-family="'Fira Code'" font-size="8" fill="#10b981" x="457" y="77">1</text>
+<!-- Singular value spectrum -->
+<rect fill="#0a0e18" stroke="#162040" x="10" y="130" width="520" height="140" rx="6"/>
+<text font-family="'Fira Code'" font-size="9" fill="#c9a84c" x="18" y="146">SINGULAR VALUE SPECTRUM (energy distribution)</text>
+<!-- bar chart of singular values -->
+<rect fill="#c9a84c" x="18" y="175" width="22" height="80" rx="2"/>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="22" y="170">σ₁=12</text>
+<rect fill="#c9a84c" x="50" y="198" width="22" height="57" rx="2" opacity=".85"/>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="50" y="194">σ₂=8</text>
+<rect fill="#8b5cf6" x="82" y="230" width="22" height="25" rx="2" opacity=".6"/>
+<text font-family="'Fira Code'" font-size="8" fill="#8b5cf6" x="82" y="226">σ₃=3</text>
+<rect fill="#38bdf8" x="114" y="248" width="22" height="7" rx="2" opacity=".4"/>
+<text font-family="'Fira Code'" font-size="8" fill="#38bdf8" x="114" y="244">σ₄=1</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="145" y="200">Energy captured:</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="145" y="215">k=1: 12²/(12²+8²+3²+1²) = 144/218 = 66%</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="145" y="230">k=2: (144+64)/218 = 95.4%  ← good approximation!</text>
+<text font-family="'Fira Code'" font-size="8" fill="#8b5cf6" x="145" y="245">k=3: (208+9)/218 = 99.5%</text>
+<text font-family="'Fira Code'" font-size="8" fill="#34d399" x="145" y="260">Eckart-Young: A₂ is the BEST rank-2 approx (provably)</text>
+</svg>`},
+{ty:"code",lang:"python",name:"SVD — Decomposition, Low-Rank Approximation & Image Compression",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+<span class="imp">import</span> matplotlib.pyplot <span class="imp">as</span> plt
+
+<span class="cm"># Full SVD decomposition</span>
+A = np.array([[<span class="nu">1</span>,<span class="nu">2</span>,<span class="nu">3</span>],[<span class="nu">4</span>,<span class="nu">5</span>,<span class="nu">6</span>],[<span class="nu">7</span>,<span class="nu">8</span>,<span class="nu">9</span>],[<span class="nu">10</span>,<span class="nu">11</span>,<span class="nu">12</span>]], dtype=float)
+U, sigma, Vt = np.linalg.svd(A, full_matrices=<span class="kw">False</span>)
+
+<span class="fn">print</span>(<span class="st">"Singular values:"</span>, sigma.round(<span class="nu">2</span>))   <span class="cm"># [25.46, 1.29, 0.]</span>
+<span class="fn">print</span>(<span class="st">"Rank:"</span>, np.linalg.matrix_rank(A))    <span class="cm"># 2 (rank-deficient!)</span>
+
+<span class="cm"># Reconstruct: A = U @ diag(sigma) @ Vt</span>
+A_reconstructed = U @ np.diag(sigma) @ Vt
+<span class="fn">print</span>(<span class="st">"Max reconstruction error:"</span>, np.abs(A - A_reconstructed).max().round(<span class="nu">8</span>))  <span class="cm"># ~0</span>
+
+<span class="cm"># Low-rank approximation (Eckart-Young theorem)</span>
+<span class="kw">def</span> <span class="fn">low_rank_approx</span>(U, sigma, Vt, k):
+    <span class="st">"""Best rank-k approximation: sum of top-k outer products"""</span>
+    <span class="kw">return</span> sum(sigma[i] * np.outer(U[:,i], Vt[i,:]) <span class="kw">for</span> i <span class="kw">in</span> range(k))
+
+A_1 = <span class="fn">low_rank_approx</span>(U, sigma, Vt, k=<span class="nu">1</span>)
+error_1 = np.linalg.norm(A - A_1, <span class="st">'fro'</span>)
+<span class="fn">print</span>(<span class="st">f"Rank-1 Frobenius error: {error_1:.4f} (= σ₂ = {sigma[1]:.4f})"</span>)  <span class="cm"># Eckart-Young!</span>
+
+<span class="cm"># Energy / variance explained</span>
+energy = sigma**<span class="nu">2</span> / (sigma**<span class="nu">2</span>).sum()
+<span class="fn">print</span>(<span class="st">"Variance explained per component:"</span>, energy.round(<span class="nu">3</span>))
+
+<span class="cm"># Image compression example</span>
+<span class="cm"># img = plt.imread('image.png')[:,:,0]  # grayscale</span>
+<span class="cm"># U, s, Vt = np.linalg.svd(img, full_matrices=False)</span>
+<span class="cm"># img_k = low_rank_approx(U, s, Vt, k=50)  # 50 components</span>
+<span class="cm"># compression_ratio = (m*k + k + k*n) / (m*n)  # storage savings</span>
+
+<span class="cm"># Pseudoinverse via SVD (for least squares / ill-conditioned systems)</span>
+A_plus = Vt.T @ np.diag(<span class="nu">1</span>/sigma) @ U.T  <span class="cm"># A⁺ = V Σ⁺ Uᵀ</span>
+<span class="fn">print</span>(<span class="st">"A⁺ shape:"</span>, A_plus.shape)        <span class="cm"># (3,4) — right shape for least squares</span>`},
+{ty:"callout",kind:"math",ic:"✦",txt:"<strong>The four fundamental subspaces via SVD:</strong> Column space = span(U₁…ᵣ), Null space = span(Vᵣ₊₁…ₙ), Row space = span(V₁…ᵣ), Left null space = span(Uᵣ₊₁…ₘ). SVD completely characterises all four at once — something eigendecomposition cannot do for non-square matrices."},
+]},
+
+"gd1":{title:"Gradient Descent — Complete Mathematical Derivation",bread:"Chapter 15 · Gradient Descent",
+sub:"The update rule xₜ₊₁ = xₜ - η∇f(xₜ) follows directly from the geometry of the gradient. Here we derive it from first principles, not just assert it.",
+pills:[{t:"Core",c:"#f43f5e"},{t:"Critical",c:"#c9a84c"},{t:"Must Master",c:"#10b981"}],
+secs:[
+{ty:"prose",title:"Why the Negative Gradient?",html:`<p>The gradient ∇f(x) points in the direction of <em>steepest ascent</em> at x. To minimise f, we move in the <em>opposite</em> direction — the negative gradient. But how far? The learning rate η controls the step size.</p>
+<h4>Derivation from Taylor Expansion</h4>
+<p>The first-order Taylor expansion around the current point xₜ is:</p>
+<p style="font-family:'Fira Code',monospace;color:#c9a84c">f(x) ≈ f(xₜ) + ∇f(xₜ)ᵀ(x - xₜ)</p>
+<p>We want to choose the next point xₜ₊₁ to minimise f. Minimising the linear approximation without constraint gives x→-∞, so we add a proximity term:</p>
+<p style="font-family:'Fira Code',monospace;color:#c9a84c">min_x { f(xₜ) + ∇f(xₜ)ᵀ(x-xₜ) + (1/2η)‖x-xₜ‖² }</p>
+<p>Taking the gradient with respect to x and setting to zero:</p>
+<p style="font-family:'Fira Code',monospace;color:#c9a84c">∇f(xₜ) + (1/η)(x - xₜ) = 0  →  x = xₜ - η∇f(xₜ)</p>
+<p>This is exactly gradient descent! The learning rate η is the coefficient of the proximity term.</p>`},
+{ty:"msteps",title:"Gradient Descent — Step-by-Step on f(x)=x²+2y²",steps:[
+{n:"Init",f:"Start at x₀=(3, 2),  f(x₀)=9+8=17,  η=0.1",d:"Choose initial point and learning rate. High f value — far from minimum."},
+{n:"Iter 1",f:"∇f = [2x, 4y] = [6, 8]  →  x₁ = (3-0.6, 2-0.8) = (2.4, 1.2)",d:"Gradient points uphill. Subtract scaled gradient. f(x₁)=5.76+2.88=8.64"},
+{n:"Iter 2",f:"∇f = [4.8, 4.8]  →  x₂ = (2.4-0.48, 1.2-0.48) = (1.92, 0.72)",d:"f(x₂)=3.69+1.04=4.73. Converging toward (0,0)."},
+{n:"Iter 10",f:"x₁₀ ≈ (0.97, 0.07),  f(x₁₀) ≈ 0.95",d:"Geometric decay: xₜ = (0.8ᵗ·3, 0.6ᵗ·2). Each step multiplies by (1-2ηλ)."},
+{n:"Converge",f:"x* = (0, 0),  f* = 0.  Rate: O((1-2ηm)ᵗ) where m=min eigenvalue",d:"For η=0.1, m=1: convergence factor 0.8 per step. 34 steps for 10⁻³ accuracy."},
+]},
+{ty:"diagram",title:"Gradient Descent — Contour Map, Learning Rate Effect & Loss Curve",
+svg:`<svg width="540" height="280" viewBox="0 0 540 280" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="gda" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#f43f5e"/></marker>
+<marker id="gdb" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#34d399"/></marker>
+<style>
+@keyframes gdstep{0%{stroke-dashoffset:200}100%{stroke-dashoffset:0}}
+.gd-path{stroke-dasharray:200;animation:gdstep 2s ease forwards}
+@keyframes lossdrop{0%{stroke-dashoffset:250}100%{stroke-dashoffset:0}}
+.ld{stroke-dasharray:250;animation:lossdrop 2.5s ease forwards}
+</style>
+</defs>
+<rect fill="#02040a" x="0" y="0" width="540" height="280" rx="8"/>
+<!-- Contour plot of f(x,y)=x²+2y² -->
+<text font-family="'Fira Code'" font-size="9" fill="#b0a898" x="10" y="14">CONTOUR MAP: f(x,y)=x²+2y²</text>
+<g transform="translate(10,18)">
+<ellipse cx="100" cy="120" rx="85" ry="60" fill="none" stroke="#162040" stroke-width="1.5"/>
+<ellipse cx="100" cy="120" rx="62" ry="44" fill="none" stroke="#1e2e50" stroke-width="1.5"/>
+<ellipse cx="100" cy="120" rx="42" ry="30" fill="none" stroke="#2a3a60" stroke-width="1.5"/>
+<ellipse cx="100" cy="120" rx="24" ry="17" fill="none" stroke="#3a4a70" stroke-width="1.5"/>
+<ellipse cx="100" cy="120" rx="10" ry="7" fill="none" stroke="#4a5a80" stroke-width="1.5"/>
+<circle cx="100" cy="120" r="3" fill="#c9a84c"/>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="103" y="116">x*</text>
+<!-- GD path (good lr) -->
+<polyline class="gd-path" points="190,50 178,62 167,72 157,80 148,87 141,93 135,98 130,102 126,106 123,109 121,112 119,115 118,117 116,119 115,120" fill="none" stroke="#f43f5e" stroke-width="2" marker-end="url(#gda)"/>
+<circle cx="190" cy="50" r="4" fill="#f43f5e"/>
+<text font-family="'Fira Code'" font-size="8" fill="#f43f5e" x="193" y="48">x₀</text>
+<text font-family="'Fira Code'" font-size="8" fill="#f43f5e" x="105" y="44">η=0.1 ✓</text>
+<!-- Too large lr (diverging) -->
+<polyline points="40,75 110,170 30,210 130,230" fill="none" stroke="#eab308" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text font-family="'Fira Code'" font-size="8" fill="#eab308" x="10" y="72">η too large: oscillates/diverges</text>
+</g>
+<!-- Right: learning rate comparison -->
+<text font-family="'Fira Code'" font-size="9" fill="#b0a898" x="230" y="14">LOSS vs ITERATIONS</text>
+<g transform="translate(230,22)">
+<line x1="0" y1="200" x2="285" y2="200" stroke="#162040" stroke-width="1"/>
+<line x1="0" y1="0" x2="0" y2="200" stroke="#162040" stroke-width="1"/>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="280" y="204">t</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="3" y="10">f(xₜ)</text>
+<!-- Good lr curve -->
+<polyline class="ld" points="0,190 20,160 40,130 60,105 80,84 100,66 120,52 140,40 160,30 180,22 200,16 220,12 240,9 260,7 280,5" fill="none" stroke="#34d399" stroke-width="2"/>
+<text font-family="'Fira Code'" font-size="8" fill="#34d399" x="220" y="20">η=0.1 converges</text>
+<!-- Slow lr curve -->
+<polyline class="ld" points="0,190 20,183 40,176 60,169 80,162 100,155 120,148 140,140 160,133 180,126 200,119 220,112 240,105 260,98 280,91" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="8 3"/>
+<text font-family="'Fira Code'" font-size="8" fill="#38bdf8" x="220" y="96">η=0.01 too slow</text>
+<!-- Oscillating curve -->
+<polyline class="ld" points="0,190 20,30 40,170 60,50 80,155 100,65 120,145 140,75 160,135 180,85 200,125 220,92 240,118 260,98 280,112" fill="none" stroke="#f43f5e" stroke-width="2" stroke-dasharray="4 2"/>
+<text font-family="'Fira Code'" font-size="8" fill="#f43f5e" x="220" y="118">η=0.5 oscillates</text>
+</g>
+</svg>`},
+{ty:"code",lang:"python",name:"Gradient Descent — From Scratch with Convergence Analysis",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+
+<span class="cm"># Objective: f(x,y) = x² + 2y²  (minimum at origin)</span>
+<span class="kw">def</span> <span class="fn">f</span>(x): <span class="kw">return</span> x[<span class="nu">0</span>]**<span class="nu">2</span> + <span class="nu">2</span>*x[<span class="nu">1</span>]**<span class="nu">2</span>
+<span class="kw">def</span> <span class="fn">grad_f</span>(x): <span class="kw">return</span> np.array([<span class="nu">2</span>*x[<span class="nu">0</span>], <span class="nu">4</span>*x[<span class="nu">1</span>]])  <span class="cm"># ∂f/∂x, ∂f/∂y</span>
+
+<span class="kw">def</span> <span class="fn">gradient_descent</span>(x0, lr, n_iters, tol=<span class="nu">1e-6</span>):
+    x = x0.copy()
+    history = [(<span class="fn">f</span>(x), x.copy())]
+    <span class="kw">for</span> t <span class="kw">in</span> range(n_iters):
+        g = <span class="fn">grad_f</span>(x)
+        x = x - lr * g               <span class="cm"># xₜ₊₁ = xₜ - η∇f(xₜ)</span>
+        history.append((<span class="fn">f</span>(x), x.copy()))
+        <span class="kw">if</span> np.linalg.norm(g) < tol:   <span class="cm"># convergence: gradient ≈ 0</span>
+            <span class="fn">print</span>(<span class="st">f"  Converged at iteration {t+1}"</span>)
+            <span class="kw">break</span>
+    <span class="kw">return</span> x, history
+
+<span class="cm"># Compare learning rates</span>
+x0 = np.array([<span class="nu">3.0</span>, <span class="nu">2.0</span>])
+<span class="kw">for</span> lr <span class="kw">in</span> [<span class="nu">0.01</span>, <span class="nu">0.1</span>, <span class="nu">0.24</span>, <span class="nu">0.5</span>]:
+    x_star, hist = <span class="fn">gradient_descent</span>(x0, lr, <span class="nu">500</span>)
+    <span class="fn">print</span>(<span class="st">f"η={lr}: final f={<span class="fn">f</span>(x_star):.6f}, x={x_star.round(4)}, iters={len(hist)}"</span>)
+
+<span class="cm"># Theory: for f(x,y)=x²+2y², Hessian H=diag(2,4)</span>
+<span class="cm"># L = λ_max(H) = 4 (Lipschitz constant of gradient)</span>
+<span class="cm"># m = λ_min(H) = 2 (strong convexity constant)</span>
+<span class="cm"># Optimal fixed lr: η* = 2/(L+m) = 2/6 = 1/3</span>
+<span class="cm"># Convergence: f(xₜ)-f* ≤ (1 - 2ηmL/(m+L))ᵗ · [f(x₀)-f*]</span>
+L, m = <span class="nu">4</span>, <span class="nu">2</span>
+eta_opt = <span class="nu">2</span>/(L+m)
+rho = <span class="nu">1</span> - <span class="nu">2</span>*eta_opt*m*L/(m+L)**<span class="nu">2</span>
+<span class="fn">print</span>(<span class="st">f"Optimal η={eta_opt:.3f}, convergence rate ρ={rho:.4f}"</span>)
+<span class="fn">print</span>(<span class="st">f"Iters for 1e-6 accuracy: {int(np.log(1e-6)/np.log(rho))}"</span>)`},
+{ty:"callout",kind:"tip",ic:"⚡",txt:"<strong>Key insight — descent lemma:</strong> If ∇f is L-Lipschitz, then <code>f(xₜ₊₁) ≤ f(xₜ) - η(1 - ηL/2)‖∇f(xₜ)‖²</code>. This guarantees decrease when <code>η < 2/L</code>. This is why the rule of thumb is to set learning rate below 1/L_estimated. For neural networks, L is estimated by observing gradient norm growth."},
+]},
+
+"ao3":{title:"Adam Optimiser — Full Mathematical Derivation",bread:"Chapter 16 · Adaptive Optimisers",
+sub:"Adam combines momentum (first moment) and adaptive learning rates (second moment) with bias correction. It is the default optimiser for almost all deep learning research.",
+pills:[{t:"Advanced",c:"#10b981"},{t:"Critical",c:"#c9a84c"},{t:"ML Production",c:"#38bdf8"}],
+secs:[
+{ty:"prose",title:"Motivation — Why Adam?",html:`<p>Pure SGD with a fixed learning rate struggles because:</p>
+<ul>
+<li>Different parameters need different learning rates (sparse vs dense gradients)</li>
+<li>Loss landscape curvature varies wildly across dimensions</li>
+<li>Momentum helps escape local curvature, but overshoots if lr is too large</li>
+</ul>
+<p><strong>Adam</strong> (Adaptive Moment Estimation) maintains a running estimate of the first moment (mean of gradients = momentum) and second moment (mean of squared gradients = adaptive scaling) for each parameter, then uses both to set a per-parameter, per-step learning rate.</p>
+<h4>The Three Components</h4>
+<ol>
+<li><strong>First moment (mₜ):</strong> exponential moving average of gradients → momentum</li>
+<li><strong>Second moment (vₜ):</strong> exponential moving average of squared gradients → per-param lr scaling</li>
+<li><strong>Bias correction:</strong> compensates for m₀=v₀=0 initialisation (critical at early steps)</li>
+</ol>`},
+{ty:"msteps",title:"Adam Update Rule — Full Step-by-Step",steps:[
+{n:"t=1",f:"Compute gradient:  gₜ = ∇_θ L(θₜ₋₁)",d:"Standard minibatch gradient at current parameters."},
+{n:"Step 1",f:"mₜ = β₁·mₜ₋₁ + (1-β₁)·gₜ",d:"First moment: exponential moving average of gradients. β₁=0.9 means 90% old, 10% new gradient."},
+{n:"Step 2",f:"vₜ = β₂·vₜ₋₁ + (1-β₂)·gₜ²",d:"Second moment: EMA of squared gradients. β₂=0.999. Large vₜ → small effective lr (param moving a lot)."},
+{n:"Step 3",f:"m̂ₜ = mₜ/(1-β₁ᵗ)",d:"Bias-correct first moment. At t=1: m̂=g/(1-0.9)=10g if β₁=0.9. Without this, mₜ ≈ 0 initially."},
+{n:"Step 4",f:"v̂ₜ = vₜ/(1-β₂ᵗ)",d:"Bias-correct second moment. At t=1: v̂=g²/(1-0.999)=1000g². Prevents tiny lr at start."},
+{n:"Step 5",f:"θₜ = θₜ₋₁ - η · m̂ₜ / (√v̂ₜ + ε)",d:"Update. Effective lr: η/√v̂ₜ. Large variance → small step. Small variance → larger step. ε=1e-8 for stability."},
+]},
+{ty:"mbox",formula:"θₜ = θₜ₋₁ - η · [mₜ/(1-β₁ᵗ)] / [√(vₜ/(1-β₂ᵗ)) + ε]",desc:"Adam update rule. Default: η=0.001, β₁=0.9, β₂=0.999, ε=1e-8"},
+{ty:"diagram",title:"Adam vs SGD vs Momentum — Loss Trajectory Comparison",
+svg:`<svg width="540" height="240" viewBox="0 0 540 240" xmlns="http://www.w3.org/2000/svg">
+<defs><style>
+@keyframes draw{from{stroke-dashoffset:350}to{stroke-dashoffset:0}}
+.la{stroke-dasharray:350;animation:draw 2s ease forwards}
+.lb{stroke-dasharray:350;animation:draw 2s .3s ease forwards;stroke-dashoffset:350}
+.lc{stroke-dasharray:350;animation:draw 2s .6s ease forwards;stroke-dashoffset:350}
+</style></defs>
+<rect fill="#02040a" x="0" y="0" width="540" height="240" rx="8"/>
+<text font-family="'Fira Code'" font-size="9" fill="#b0a898" x="10" y="14">LOSS vs TRAINING STEPS (qualitative)</text>
+<g transform="translate(10,20)">
+<line x1="0" y1="190" x2="430" y2="190" stroke="#162040" stroke-width="1"/>
+<line x1="0" y1="0" x2="0" y2="190" stroke="#162040" stroke-width="1"/>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="425" y="194">steps</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="3" y="10">loss</text>
+<!-- SGD curve (slow) -->
+<polyline class="la" points="0,180 20,170 40,162 60,154 80,146 100,139 120,132 140,126 160,120 180,115 200,110 220,105 240,101 260,97 280,94 300,91 320,89 340,87 360,85 380,84 400,83 420,82" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="6 3"/>
+<!-- Momentum curve -->
+<polyline class="lb" points="0,180 20,155 40,133 60,114 80,98 100,85 120,75 140,67 160,61 180,57 200,54 220,52 240,51 260,50 280,49 300,49 320,48.5 340,48 360,48 380,47.5 400,47 420,47" fill="none" stroke="#8b5cf6" stroke-width="1.5"/>
+<!-- Adam curve (fast, smooth) -->
+<polyline class="lc" points="0,180 20,140 40,110 60,86 80,68 100,55 120,46 140,40 160,36 180,33 200,31 220,30 240,29 260,28.5 280,28 300,27.5 320,27 340,26.8 360,26.5 380,26 400,25.8 420,25.5" fill="none" stroke="#c9a84c" stroke-width="2"/>
+<!-- Legend -->
+<line x1="320" y1="80" x2="350" y2="80" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 3"/>
+<text font-family="'Fira Code'" font-size="8" fill="#38bdf8" x="354" y="84">SGD (lr=0.01)</text>
+<line x1="320" y1="100" x2="350" y2="100" stroke="#8b5cf6" stroke-width="2"/>
+<text font-family="'Fira Code'" font-size="8" fill="#8b5cf6" x="354" y="104">SGD + Momentum</text>
+<line x1="320" y1="120" x2="350" y2="120" stroke="#c9a84c" stroke-width="2"/>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="354" y="124">Adam (lr=0.001)</text>
+</g>
+<!-- Right: bias correction explanation -->
+<rect fill="#0a0e18" stroke="#162040" x="445" y="20" width="90" height="210" rx="6"/>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="451" y="36">BIAS CORRECTION</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="451" y="52">Without correction:</text>
+<text font-family="'Fira Code'" font-size="8" fill="#f43f5e" x="451" y="66">t=1: m₁≈0.1g</text>
+<text font-family="'Fira Code'" font-size="8" fill="#f43f5e" x="451" y="80">tiny step!</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="451" y="96">With correction:</text>
+<text font-family="'Fira Code'" font-size="8" fill="#34d399" x="451" y="110">t=1: m̂₁=g</text>
+<text font-family="'Fira Code'" font-size="8" fill="#34d399" x="451" y="124">correct step ✓</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="451" y="144">β₁=0.9</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="451" y="158">1-β₁ᵗ at t:</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="451" y="174">t=1: 0.1</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="451" y="188">t=5: 0.41</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="451" y="202">t=10: 0.65</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="451" y="216">t=50: ~1.0</text>
+</svg>`},
+{ty:"code",lang:"python",name:"Adam From Scratch in NumPy + PyTorch Comparison",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+
+<span class="kw">class</span> <span class="tp">Adam</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, params, lr=<span class="nu">1e-3</span>, betas=(<span class="nu">0.9</span>, <span class="nu">0.999</span>), eps=<span class="nu">1e-8</span>):
+        self.lr = lr
+        self.b1, self.b2 = betas
+        self.eps = eps
+        self.m = {id(p): np.<span class="fn">zeros_like</span>(p) <span class="kw">for</span> p <span class="kw">in</span> params}  <span class="cm"># first moment</span>
+        self.v = {id(p): np.<span class="fn">zeros_like</span>(p) <span class="kw">for</span> p <span class="kw">in</span> params}  <span class="cm"># second moment</span>
+        self.t = <span class="nu">0</span>    <span class="cm"># step counter (for bias correction)</span>
+
+    <span class="kw">def</span> <span class="fn">step</span>(self, params, grads):
+        self.t += <span class="nu">1</span>
+        <span class="kw">for</span> p, g <span class="kw">in</span> <span class="fn">zip</span>(params, grads):
+            pid = <span class="fn">id</span>(p)
+            <span class="cm"># Update biased moment estimates</span>
+            self.m[pid] = self.b1 * self.m[pid] + (<span class="nu">1</span> - self.b1) * g       <span class="cm"># mₜ</span>
+            self.v[pid] = self.b2 * self.v[pid] + (<span class="nu">1</span> - self.b2) * g**<span class="nu">2</span>    <span class="cm"># vₜ</span>
+            <span class="cm"># Bias-corrected estimates</span>
+            m_hat = self.m[pid] / (<span class="nu">1</span> - self.b1**self.t)   <span class="cm"># m̂ₜ</span>
+            v_hat = self.v[pid] / (<span class="nu">1</span> - self.b2**self.t)   <span class="cm"># v̂ₜ</span>
+            <span class="cm"># Update parameters</span>
+            p -= self.lr * m_hat / (np.<span class="fn">sqrt</span>(v_hat) + self.eps)
+
+<span class="cm"># Test on simple quadratic</span>
+theta = np.array([<span class="nu">3.0</span>, <span class="nu">2.0</span>])
+optimizer = <span class="tp">Adam</span>([theta])
+<span class="kw">for</span> step <span class="kw">in</span> range(<span class="nu">1000</span>):
+    grad = np.array([<span class="nu">2</span>*theta[<span class="nu">0</span>], <span class="nu">4</span>*theta[<span class="nu">1</span>]])  <span class="cm"># ∇f</span>
+    optimizer.<span class="fn">step</span>([theta], [grad])
+<span class="fn">print</span>(<span class="st">f"Final: {theta}"</span>)  <span class="cm"># ≈ [0, 0]</span>
+
+<span class="cm"># In PyTorch (standard usage)</span>
+<span class="cm"># import torch.optim as optim</span>
+<span class="cm"># opt = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9,0.999), eps=1e-8)</span>
+<span class="cm"># opt.zero_grad(); loss.backward(); opt.step()</span>
+
+<span class="cm"># AdamW = Adam + decoupled weight decay</span>
+<span class="cm"># p = p * (1 - lr*wd)  - lr * m_hat/(sqrt(v_hat)+eps)</span>
+<span class="cm"># NOT the same as adding wd*p to gradient (that's L2 reg in Adam)</span>`},
+{ty:"callout",kind:"warn",ic:"⚠",txt:"<strong>Adam fails for some convex problems</strong> — AMSGrad was proposed to fix non-convergence in online settings. In practice, Adam often converges to sharper minima than SGD, which can hurt generalisation. Many researchers use SGD with momentum for final fine-tuning after Adam warmup. AdamW (decoupled weight decay) is the recommended default for transformers."},
+]},
+
+"bp3":{title:"Backpropagation Through a Linear Layer",bread:"Chapter 17 · Backpropagation Mathematics",
+sub:"Exact gradient derivation for the linear layer y=Wx+b — the most common operation in all of deep learning. Every shape is tracked explicitly.",
+pills:[{t:"Critical",c:"#f43f5e"},{t:"ML Must Know",c:"#c9a84c"},{t:"Shapes Matter",c:"#10b981"}],
+secs:[
+{ty:"prose",title:"The Linear Layer & Its Gradients",html:`<p>A linear layer computes <code>y = Wx + b</code> where W ∈ ℝᵐˣⁿ, x ∈ ℝⁿ, b ∈ ℝᵐ. We receive an upstream gradient <code>δ = ∂L/∂y ∈ ℝᵐ</code> (backpropagated from the next layer). We need to compute:</p>
+<ul>
+<li><strong>∂L/∂W</strong> (to update weights)</li>
+<li><strong>∂L/∂b</strong> (to update biases)</li>
+<li><strong>∂L/∂x</strong> (to backpropagate further)</li>
+</ul>
+<h4>Derivation Using the Chain Rule</h4>
+<p>Since yᵢ = Σₖ Wᵢₖ xₖ + bᵢ, we have ∂yᵢ/∂Wᵢⱼ = xⱼ (all other rows have zero derivative for row i).</p>
+<p>By the chain rule: <code>∂L/∂Wᵢⱼ = Σₖ (∂L/∂yₖ)(∂yₖ/∂Wᵢⱼ) = δᵢ · xⱼ</code></p>
+<p>In matrix form: <code>∂L/∂W = δxᵀ</code> (outer product of upstream gradient and input!)</p>
+<p>Similarly: <code>∂L/∂b = δ</code> and <code>∂L/∂x = Wᵀδ</code></p>`},
+{ty:"msteps",title:"Complete Backprop Derivation — Shape-by-Shape",steps:[
+{n:"Setup",f:"y = Wx + b   [m×n]×[n] + [m] = [m]",d:"Forward pass: y∈ℝᵐ, W∈ℝᵐˣⁿ, x∈ℝⁿ, b∈ℝᵐ. Upstream gradient δ=∂L/∂y∈ℝᵐ."},
+{n:"∂L/∂b",f:"∂L/∂bᵢ = ∂L/∂yᵢ · ∂yᵢ/∂bᵢ = δᵢ · 1  →  ∂L/∂b = δ",d:"Shape: [m]. Gradient just passes through — bias has no interaction with other outputs."},
+{n:"∂L/∂W",f:"∂L/∂Wᵢⱼ = δᵢ · xⱼ  →  ∂L/∂W = δxᵀ  (outer product)",d:"Shape: [m×n] = [m]×[n]ᵀ. Each weight Wᵢⱼ connects input j to output i, contributing δᵢ·xⱼ."},
+{n:"∂L/∂x",f:"∂L/∂xⱼ = Σᵢ δᵢ · Wᵢⱼ  →  ∂L/∂x = Wᵀδ",d:"Shape: [n] = [n×m]×[m]. Sum over all outputs — xⱼ affects all yᵢ via row i of W."},
+{n:"Batch",f:"For batch X∈ℝᴮˣⁿ: ∂L/∂W = δᵀX  (sum over batch)",d:"δ∈ℝᴮˣᵐ, X∈ℝᴮˣⁿ. δᵀX∈ℝᵐˣⁿ — accumulated gradient over batch. Mean for update."},
+]},
+{ty:"code",lang:"python",name:"Linear Layer Forward + Backward from Scratch",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+
+<span class="kw">class</span> <span class="tp">LinearLayer</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, n_in, n_out):
+        <span class="cm"># Xavier initialisation: Var(W) = 1/n_in</span>
+        self.W = np.random.randn(n_out, n_in) * np.<span class="fn">sqrt</span>(<span class="nu">1</span>/n_in)  <span class="cm"># [m × n]</span>
+        self.b = np.<span class="fn">zeros</span>(n_out)                                  <span class="cm"># [m]</span>
+        self.x = <span class="kw">None</span>  <span class="cm"># cache for backprop</span>
+
+    <span class="kw">def</span> <span class="fn">forward</span>(self, x):
+        <span class="st">"""x: [B, n_in]  →  y: [B, n_out]"""</span>
+        self.x = x                          <span class="cm"># cache input for backward pass</span>
+        <span class="kw">return</span> x @ self.W.T + self.b       <span class="cm"># [B,n] @ [n,m] + [m] = [B,m]</span>
+
+    <span class="kw">def</span> <span class="fn">backward</span>(self, delta):
+        <span class="st">"""delta: ∂L/∂y  [B, n_out]  →  returns ∂L/∂x  [B, n_in]"""</span>
+        <span class="cm"># ∂L/∂W = δᵀX  (sum over batch) — shape [n_out, n_in]</span>
+        self.dW = delta.T @ self.x          <span class="cm"># [m,B] @ [B,n] = [m,n] ✓</span>
+        <span class="cm"># ∂L/∂b = sum over batch of δ — shape [n_out]</span>
+        self.db = delta.<span class="fn">sum</span>(axis=<span class="nu">0</span>)        <span class="cm"># [m] ✓</span>
+        <span class="cm"># ∂L/∂x = δW — shape [B, n_in]</span>
+        dx = delta @ self.W                 <span class="cm"># [B,m] @ [m,n] = [B,n] ✓</span>
+        <span class="kw">return</span> dx
+
+<span class="cm"># Test with small example</span>
+layer = <span class="tp">LinearLayer</span>(n_in=<span class="nu">3</span>, n_out=<span class="nu">2</span>)
+X = np.array([[<span class="nu">1.0</span>, <span class="nu">2.0</span>, <span class="nu">3.0</span>], [<span class="nu">4.0</span>, <span class="nu">5.0</span>, <span class="nu">6.0</span>]])  <span class="cm"># batch of 2</span>
+y = layer.<span class="fn">forward</span>(X)       <span class="cm"># [2, 2]</span>
+delta = np.<span class="fn">ones_like</span>(y)    <span class="cm"># upstream gradient</span>
+dx = layer.<span class="fn">backward</span>(delta) <span class="cm"># [2, 3]</span>
+
+<span class="cm"># Gradient check: compare to numerical finite differences</span>
+<span class="kw">def</span> <span class="fn">grad_check</span>(layer, X, h=<span class="nu">1e-5</span>):
+    layer.<span class="fn">forward</span>(X)
+    layer.<span class="fn">backward</span>(np.<span class="fn">ones</span>((X.shape[<span class="nu">0</span>], layer.W.shape[<span class="nu">0</span>])))
+    analytic = layer.dW[<span class="nu">0</span>, <span class="nu">0</span>]
+    layer.W[<span class="nu">0</span>, <span class="nu">0</span>] += h; f_plus  = layer.<span class="fn">forward</span>(X).<span class="fn">sum</span>()
+    layer.W[<span class="nu">0</span>, <span class="nu">0</span>] -= <span class="nu">2</span>*h; f_minus = layer.<span class="fn">forward</span>(X).<span class="fn">sum</span>()
+    layer.W[<span class="nu">0</span>, <span class="nu">0</span>] += h
+    numerical = (f_plus - f_minus) / (<span class="nu">2</span>*h)
+    rel_err = abs(analytic-numerical)/(abs(analytic)+abs(numerical)+<span class="nu">1e-10</span>)
+    <span class="fn">print</span>(<span class="st">f"Analytic={analytic:.6f} Numerical={numerical:.6f} Rel.err={rel_err:.2e}"</span>)
+<span class="fn">grad_check</span>(layer, X)  <span class="cm"># should be < 1e-5</span>`},
+{ty:"callout",kind:"tip",ic:"🔑",txt:"<strong>Shape rule of thumb:</strong> every gradient has the <em>same shape as the thing it's differentiating</em>. ∂L/∂W has shape [m,n] just like W. ∂L/∂x has shape [n] just like x. If your shapes don't match, you have a bug. The outer product δxᵀ for ∂L/∂W is a [m]×[n] matrix from a [m] vector and [n] vector — this is the most common operation in all of deep learning."},
+]},
+
+"ba2":{title:"Maximum Likelihood Estimation (MLE)",bread:"Chapter 19 · Bayes & Probabilistic ML",
+sub:"MLE is the mathematical justification for every standard loss function in ML. Minimising MSE is MLE for Gaussian noise. Minimising cross-entropy is MLE for categorical distributions.",
+pills:[{t:"Critical",c:"#8b5cf6"},{t:"ML Foundation",c:"#c9a84c"},{t:"Loss Functions",c:"#f43f5e"}],
+secs:[
+{ty:"prose",title:"What is MLE?",html:`<p>Given observed data D = {x₁,…,xₙ} and a parametric model p(x|θ), MLE finds the parameter θ that makes the observed data <em>most probable</em>:</p>
+<p style="font-family:'Fira Code',monospace;color:#c9a84c;text-align:center">θ_MLE = argmax_θ P(D|θ) = argmax_θ Σᵢ log p(xᵢ|θ)</p>
+<h4>Why Log-Likelihood?</h4>
+<p>Assuming IID data: P(D|θ) = Πᵢ p(xᵢ|θ). Taking log turns product into sum (monotone transform, same argmax), prevents numerical underflow for large n, and simplifies derivatives.</p>
+<h4>MLE → MSE Loss (Gaussian Noise Model)</h4>
+<p>Assume yᵢ = f(xᵢ;θ) + ε where ε~N(0,σ²). Then p(yᵢ|xᵢ,θ) is Gaussian. Taking log and maximising:</p>
+<p style="font-family:'Fira Code',monospace;color:#c9a84c;font-size:12px">log L = -n/2 log(2πσ²) - 1/(2σ²) Σᵢ(yᵢ-f(xᵢ;θ))²</p>
+<p>Maximising log L wrt θ is equivalent to minimising Σᵢ(yᵢ-f(xᵢ;θ))² — the MSE loss!</p>
+<h4>MLE → Cross-Entropy Loss (Bernoulli Model)</h4>
+<p>For binary classification with p(y=1|x,θ)=σ(f(x;θ)): log likelihood = Σ yᵢ log σ(fᵢ) + (1-yᵢ)log(1-σ(fᵢ)) — this is the negative binary cross-entropy!</p>`},
+{ty:"mbox",formula:"θ_MLE = argmax Σᵢ log p(xᵢ|θ) ≡ argmin −Σᵢ log p(xᵢ|θ)",desc:"Maximise log-likelihood = minimise negative log-likelihood (NLL). Most ML loss functions are NLL of some distribution."},
+{ty:"code",lang:"python",name:"MLE Derivation — Gaussian & Bernoulli with Numerical Examples",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+<span class="imp">from</span> scipy <span class="imp">import</span> stats
+
+<span class="cm"># --- MLE for Gaussian: estimate μ, σ² ---</span>
+np.random.seed(<span class="nu">42</span>)
+data = np.random.normal(loc=<span class="nu">5.0</span>, scale=<span class="nu">2.0</span>, size=<span class="nu">1000</span>)
+
+<span class="cm"># MLE estimates (derivation: set d/dμ log L = 0 → μ̂ = sample mean)</span>
+mu_mle = data.mean()           <span class="cm"># 5.06 (true=5)</span>
+sigma2_mle = data.var()        <span class="cm"># 3.97 (biased estimator — MLE is biased!)</span>
+sigma2_unbiased = data.var(ddof=<span class="nu">1</span>)  <span class="cm"># 4.01 (Bessel correction, unbiased)</span>
+<span class="fn">print</span>(<span class="st">f"MLE: μ={mu_mle:.3f}, σ²={sigma2_mle:.3f}"</span>)
+
+<span class="cm"># Log-likelihood at MLE vs wrong params</span>
+<span class="kw">def</span> <span class="fn">log_likelihood_gaussian</span>(data, mu, sigma2):
+    n = len(data)
+    <span class="kw">return</span> -n/<span class="nu">2</span>*np.<span class="fn">log</span>(<span class="nu">2</span>*np.pi*sigma2) - <span class="nu">1</span>/(<span class="nu">2</span>*sigma2)*((data-mu)**<span class="nu">2</span>).<span class="fn">sum</span>()
+
+ll_mle   = <span class="fn">log_likelihood_gaussian</span>(data, mu_mle, sigma2_mle)
+ll_wrong = <span class="fn">log_likelihood_gaussian</span>(data, <span class="nu">3.0</span>, <span class="nu">1.0</span>)
+<span class="fn">print</span>(<span class="st">f"LL at MLE: {ll_mle:.1f},  LL at wrong params: {ll_wrong:.1f}"</span>)  <span class="cm"># MLE > wrong</span>
+
+<span class="cm"># --- MSE is MLE for Gaussian noise (demonstration) ---</span>
+X = np.random.randn(<span class="nu">50</span>, <span class="nu">1</span>); y_true = <span class="nu">3</span>*X + <span class="nu">1</span>
+y_noisy = y_true + <span class="nu">0.5</span>*np.random.randn(<span class="nu">50</span>, <span class="nu">1</span>)
+
+<span class="cm"># OLS (MLE for Gaussian model)</span>
+X_aug = np.hstack([X, np.<span class="fn">ones</span>((<span class="nu">50</span>,<span class="nu">1</span>))])
+w_mle = np.linalg.lstsq(X_aug, y_noisy, rcond=<span class="kw">None</span>)[<span class="nu">0</span>]
+<span class="fn">print</span>(<span class="st">f"MLE linear regression: slope={w_mle[0,0]:.3f}, intercept={w_mle[1,0]:.3f}"</span>)
+
+<span class="cm"># --- Cross-entropy IS negative log-likelihood of Bernoulli ---</span>
+<span class="kw">def</span> <span class="fn">sigmoid</span>(z): <span class="kw">return</span> <span class="nu">1</span>/(<span class="nu">1</span>+np.<span class="fn">exp</span>(-z))
+y_labels = np.array([<span class="nu">1</span>,<span class="nu">0</span>,<span class="nu">1</span>,<span class="nu">1</span>,<span class="nu">0</span>])
+logits   = np.array([<span class="nu">2.0</span>, -<span class="nu">1.0</span>, <span class="nu">0.5</span>, <span class="nu">3.0</span>, -<span class="nu">0.5</span>])
+probs = <span class="fn">sigmoid</span>(logits)
+nll = -(y_labels*np.<span class="fn">log</span>(probs) + (<span class="nu">1</span>-y_labels)*np.<span class="fn">log</span>(<span class="nu">1</span>-probs)).<span class="fn">mean</span>()
+<span class="fn">print</span>(<span class="st">f"Binary cross-entropy (= mean NLL) = {nll:.4f}"</span>)`},
+{ty:"callout",kind:"math",ic:"∝",txt:"<strong>MLE vs MAP:</strong> MAP adds a prior P(θ): θ_MAP = argmax [log P(D|θ) + log P(θ)]. With Gaussian prior N(0,σ²_prior), log P(θ) = -‖θ‖²/(2σ²_prior) + const → L2 regularisation. With Laplace prior, → L1 regularisation. Every regulariser is a prior distribution in disguise."},
+]},
+
+"at1":{title:"Scaled Dot-Product Attention — Full Derivation",bread:"Chapter 23 · Attention & Transformer Maths",
+sub:"Attention(Q,K,V) = softmax(QKᵀ/√dₖ)V — every symbol, every matrix dimension, and why this formula produces the right output.",
+pills:[{t:"Expert",c:"#8b5cf6"},{t:"Transformers",c:"#c9a84c"},{t:"Architecture",c:"#f43f5e"}],
+secs:[
+{ty:"prose",title:"What Does Attention Compute?",html:`<p>Attention is a <strong>soft, differentiable lookup</strong>. Given a query Q, a set of keys K, and values V, attention produces a weighted sum of values where the weights measure how much each key matches the query.</p>
+<h4>Matrix Shapes</h4>
+<ul>
+<li><strong>Q</strong> ∈ ℝⁿˣᵈᵏ — n queries, each of dimension dₖ</li>
+<li><strong>K</strong> ∈ ℝᵐˣᵈᵏ — m keys, each of dimension dₖ</li>
+<li><strong>V</strong> ∈ ℝᵐˣᵈᵥ — m values, each of dimension dᵥ</li>
+<li><strong>Output</strong> ∈ ℝⁿˣᵈᵥ — n outputs, each a weighted combination of values</li>
+</ul>
+<h4>Step-by-Step</h4>
+<ol>
+<li><code>S = QKᵀ/√dₖ</code> ∈ ℝⁿˣᵐ — similarity score of each query against each key</li>
+<li><code>A = softmax(S)</code> ∈ ℝⁿˣᵐ — normalised attention weights (each row sums to 1)</li>
+<li><code>Output = AV</code> ∈ ℝⁿˣᵈᵥ — weighted combination of values</li>
+</ol>
+<h4>Why √dₖ Scaling?</h4>
+<p>If Q and K have entries ~N(0,1), then QKᵀ entries have mean 0 and variance dₖ (sum of dₖ independent unit-variance products). Without scaling, for large dₖ, the logits grow as √dₖ, pushing softmax into saturation regions where gradients vanish. Dividing by √dₖ restores unit variance.</p>`},
+{ty:"mbox",formula:"Attention(Q,K,V) = softmax( Q Kᵀ / √dₖ ) V",desc:"Q∈ℝⁿˣᵈᵏ, K∈ℝᵐˣᵈᵏ, V∈ℝᵐˣᵈᵥ → Output∈ℝⁿˣᵈᵥ"},
+{ty:"diagram",title:"Attention Mechanism — Data Flow & Shapes",
+svg:`<svg width="540" height="280" viewBox="0 0 540 280" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="ata" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#8b5cf6"/></marker>
+<style>
+@keyframes atflow{from{stroke-dashoffset:200}to{stroke-dashoffset:0}}
+.atl{stroke-dasharray:200;animation:atflow 2s ease forwards}
+.atl2{stroke-dasharray:200;animation:atflow 2s .4s ease forwards;stroke-dashoffset:200}
+.atl3{stroke-dasharray:200;animation:atflow 2s .8s ease forwards;stroke-dashoffset:200}
+</style>
+</defs>
+<rect fill="#02040a" x="0" y="0" width="540" height="280" rx="8"/>
+<text font-family="'Fira Code'" font-size="9" fill="#8b5cf6" x="10" y="14">SCALED DOT-PRODUCT ATTENTION — DATA FLOW</text>
+<!-- Q, K, V inputs -->
+<rect fill="#1a1408" stroke="#c9a84c" x="10" y="25" width="60" height="50" rx="4"/>
+<text font-family="'Fira Code'" font-size="10" fill="#c9a84c" x="32" y="47">Q</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="14" y="64">n × dₖ</text>
+<rect fill="#0d1a28" stroke="#38bdf8" x="10" y="85" width="60" height="50" rx="4"/>
+<text font-family="'Fira Code'" font-size="10" fill="#38bdf8" x="32" y="107">K</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="14" y="124">m × dₖ</text>
+<rect fill="#0d2018" stroke="#10b981" x="10" y="145" width="60" height="50" rx="4"/>
+<text font-family="'Fira Code'" font-size="10" fill="#10b981" x="32" y="167">V</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="14" y="184">m × dᵥ</text>
+<!-- Step 1: QKᵀ -->
+<rect fill="#1a1408" stroke="#c9a84c" x="100" y="44" width="90" height="42" rx="4"/>
+<text font-family="'Fira Code'" font-size="9" fill="#c9a84c" x="106" y="60">S = QKᵀ</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="106" y="76">n × m  scores</text>
+<!-- Lines Q→S, K→S -->
+<line class="atl" x1="70" y1="50" x2="100" y2="60" stroke="#c9a84c" stroke-width="1.5" marker-end="url(#ata)"/>
+<line class="atl" x1="70" y1="110" x2="100" y2="68" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#ata)"/>
+<text font-family="'Fira Code'" font-size="8" fill="#8b5cf6" x="106" y="92">÷ √dₖ</text>
+<text font-family="'Fira Code'" font-size="8" fill="#8b5cf6" x="106" y="102">(scale)</text>
+<!-- Step 2: softmax -->
+<rect fill="#1a0d30" stroke="#8b5cf6" x="210" y="44" width="90" height="42" rx="4"/>
+<text font-family="'Fira Code'" font-size="9" fill="#8b5cf6" x="216" y="60">A=softmax</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="216" y="76">n × m  weights</text>
+<line class="atl2" x1="190" y1="65" x2="210" y2="65" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#ata)"/>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="213" y="97">each row</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="213" y="107">sums to 1</text>
+<!-- Step 3: AV -->
+<rect fill="#0d2018" stroke="#10b981" x="320" y="44" width="90" height="42" rx="4"/>
+<text font-family="'Fira Code'" font-size="9" fill="#10b981" x="326" y="60">Out = AV</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="326" y="76">n × dᵥ  output</text>
+<line class="atl2" x1="300" y1="65" x2="320" y2="65" stroke="#10b981" stroke-width="1.5" marker-end="url(#ata)"/>
+<line class="atl2" x1="70" y1="170" x2="310" y2="80" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#ata)"/>
+<!-- Attention weight visualisation -->
+<text font-family="'Fira Code'" font-size="9" fill="#b0a898" x="10" y="224">ATTENTION MATRIX A (each row = soft lookup for one query token)</text>
+<g transform="translate(10,230)">
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="0" y="10">Tokens→</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="65" y="10">cat</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="100" y="10">sat</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="135" y="10">on</text>
+<text font-family="'Fira Code'" font-size="8" fill="#c9a84c" x="165" y="10">mat</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="0" y="24">cat query:</text>
+<rect fill="#c9a84c" x="60" y="14" width="30" height="12" rx="2" opacity=".85"/>
+<rect fill="#c9a84c" x="95" y="14" width="30" height="12" rx="2" opacity=".2"/>
+<rect fill="#c9a84c" x="130" y="14" width="30" height="12" rx="2" opacity=".05"/>
+<rect fill="#c9a84c" x="165" y="14" width="30" height="12" rx="2" opacity=".3"/>
+<text font-family="'Fira Code'" font-size="7" fill="#000" x="66" y="23">0.7</text>
+<text font-family="'Fira Code'" font-size="7" fill="#c9a84c" x="100" y="23">0.15</text>
+<text font-family="'Fira Code'" font-size="7" fill="#c9a84c" x="135" y="23">0.02</text>
+<text font-family="'Fira Code'" font-size="7" fill="#c9a84c" x="170" y="23">0.13</text>
+<text font-family="'Fira Code'" font-size="8" fill="#b0a898" x="210" y="24">← "cat" attends mostly to itself</text>
+</g>
+</svg>`},
+{ty:"code",lang:"python",name:"Self-Attention from Scratch — NumPy Implementation",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+
+<span class="kw">def</span> <span class="fn">scaled_dot_product_attention</span>(Q, K, V, mask=<span class="kw">None</span>):
+    <span class="st">"""
+    Q: [n_queries, d_k]   K: [n_keys, d_k]   V: [n_keys, d_v]
+    Returns: [n_queries, d_v], attention_weights: [n_queries, n_keys]
+    """</span>
+    d_k = Q.shape[-<span class="nu">1</span>]
+
+    <span class="cm"># Step 1: Scaled similarity scores   S = QKᵀ / √dₖ</span>
+    scores = Q @ K.T / np.<span class="fn">sqrt</span>(d_k)   <span class="cm"># [n, m]</span>
+
+    <span class="cm"># Optional causal mask (decoder self-attention: can't see future)</span>
+    <span class="kw">if</span> mask <span class="kw">is not None</span>:
+        scores = scores + mask * (-<span class="nu">1e9</span>)  <span class="cm"># set future positions to -∞</span>
+
+    <span class="cm"># Step 2: Softmax → attention weights   A = softmax(S)</span>
+    scores_shifted = scores - scores.max(axis=-<span class="nu">1</span>, keepdims=<span class="kw">True</span>)  <span class="cm"># numerical stability</span>
+    exp_scores = np.<span class="fn">exp</span>(scores_shifted)
+    A = exp_scores / exp_scores.<span class="fn">sum</span>(axis=-<span class="nu">1</span>, keepdims=<span class="kw">True</span>)  <span class="cm"># [n, m]</span>
+
+    <span class="cm"># Step 3: Weighted sum of values   Out = AV</span>
+    output = A @ V                      <span class="cm"># [n, m] @ [m, dᵥ] = [n, dᵥ]</span>
+    <span class="kw">return</span> output, A
+
+<span class="cm"># Example: sequence of 4 tokens, d_model=8, d_k=d_v=4</span>
+np.random.seed(<span class="nu">42</span>)
+seq_len, d_k, d_v = <span class="nu">4</span>, <span class="nu">4</span>, <span class="nu">4</span>
+X = np.random.randn(seq_len, <span class="nu">8</span>)   <span class="cm"># input embeddings [4, 8]</span>
+
+<span class="cm"># Learned projection matrices (usually initialised randomly)</span>
+Wq = np.random.randn(<span class="nu">8</span>, d_k) * <span class="nu">0.1</span>
+Wk = np.random.randn(<span class="nu">8</span>, d_k) * <span class="nu">0.1</span>
+Wv = np.random.randn(<span class="nu">8</span>, d_v) * <span class="nu">0.1</span>
+
+Q = X @ Wq; K = X @ Wk; V = X @ Wv   <span class="cm"># project to Q, K, V</span>
+output, attn_weights = <span class="fn">scaled_dot_product_attention</span>(Q, K, V)
+<span class="fn">print</span>(<span class="st">"Output shape:"</span>, output.shape)          <span class="cm"># (4, 4)</span>
+<span class="fn">print</span>(<span class="st">"Attention weights:\n"</span>, attn_weights.round(<span class="nu">3</span>))  <span class="cm"># rows sum to 1</span>
+<span class="fn">print</span>(<span class="st">"Row sums:"</span>, attn_weights.<span class="fn">sum</span>(axis=<span class="nu">1</span>))   <span class="cm"># all ≈ 1.0</span>
+
+<span class="cm"># Causal mask for autoregressive (decoder) attention</span>
+causal_mask = np.<span class="fn">triu</span>(np.<span class="fn">ones</span>((seq_len, seq_len)), k=<span class="nu">1</span>)  <span class="cm"># upper triangle</span>
+out_causal, attn_causal = <span class="fn">scaled_dot_product_attention</span>(Q, K, V, causal_mask)
+<span class="fn">print</span>(<span class="st">"Causal attn (lower-triangular):\n"</span>, (attn_causal > <span class="nu">1e-6</span>).<span class="fn">astype</span>(int))`},
+{ty:"callout",kind:"math",ic:"💡",txt:"<strong>Attention complexity:</strong> Standard attention is O(n²dₖ) in both time and memory due to the n×n attention matrix. For n=1024 tokens, this is 1M entries — manageable. For n=100K (long documents), it becomes 10B entries — impractical. Solutions: Flash Attention (memory-efficient exact), sparse attention, linear attention O(nd²), and sliding window attention in Longformer."},
+]},
+
+"it3":{title:"Cross-Entropy Loss — Derived from Information Theory",bread:"Chapter 20 · Information Theory",
+sub:"Cross-entropy is not just a formula chosen arbitrarily — it arises naturally from minimising KL divergence from the true distribution to your model's distribution.",
+pills:[{t:"Critical",c:"#f43f5e"},{t:"ML Core",c:"#c9a84c"},{t:"Loss Functions",c:"#10b981"}],
+secs:[
+{ty:"prose",title:"From Shannon Entropy to Cross-Entropy Loss",html:`<p><strong>Shannon entropy</strong> H(p) = -Σ p(x)log p(x) measures the minimum bits needed to encode a message from distribution p.</p>
+<p><strong>Cross-entropy</strong> H(p,q) = -Σ p(x)log q(x) measures the bits needed to encode p using the wrong code q. It's always ≥ H(p).</p>
+<h4>The Key Decomposition</h4>
+<p style="font-family:'Fira Code',monospace;color:#c9a84c">H(p,q) = H(p) + KL(p‖q)</p>
+<p>When we minimise cross-entropy H(p,q) over q (our model), since H(p) is fixed (true data distribution), we're exactly minimising KL(p‖q) — the divergence from truth to model. This is why cross-entropy is the right loss for classification!</p>
+<h4>Numerical Example — Binary Classification</h4>
+<p>True label y=1, model predicts σ(z)=0.8:</p>
+<ul>
+<li>p = [1, 0] (one-hot true), q = [0.8, 0.2] (model probs)</li>
+<li>H(p,q) = -(1·log 0.8 + 0·log 0.2) = 0.223 nats</li>
+<li>H(p) = 0 (deterministic true label)</li>
+<li>KL(p‖q) = 0.223 — what we're actually minimising</li>
+</ul>`},
+{ty:"mbox",formula:"H(p,q) = H(p) + KL(p‖q)  ≥  H(p)",desc:"Cross-entropy ≥ entropy, with equality iff p=q. Training minimises KL divergence to the true distribution."},
+{ty:"code",lang:"python",name:"Cross-Entropy — From Scratch with Temperature Scaling",code:`<span class="imp">import</span> numpy <span class="imp">as</span> np
+
+<span class="kw">def</span> <span class="fn">softmax</span>(z, T=<span class="nu">1.0</span>):
+    <span class="st">"""Numerically stable softmax with temperature T"""</span>
+    z = z / T
+    z = z - z.max()  <span class="cm"># shift for numerical stability (log-sum-exp trick)</span>
+    exp_z = np.<span class="fn">exp</span>(z)
+    <span class="kw">return</span> exp_z / exp_z.<span class="fn">sum</span>()
+
+<span class="kw">def</span> <span class="fn">cross_entropy</span>(p_true, q_model, eps=<span class="nu">1e-10</span>):
+    <span class="st">"""H(p,q) = -Σ p log q  (also = NLL when p is one-hot)"""</span>
+    <span class="kw">return</span> -(p_true * np.<span class="fn">log</span>(q_model + eps)).<span class="fn">sum</span>()
+
+<span class="kw">def</span> <span class="fn">kl_divergence</span>(p, q, eps=<span class="nu">1e-10</span>):
+    <span class="st">"""KL(p‖q) = Σ p log(p/q)"""</span>
+    <span class="kw">return</span> (p * np.<span class="fn">log</span>((p+eps)/(q+eps))).<span class="fn">sum</span>()
+
+<span class="cm"># Example: 3-class classification</span>
+true_label = <span class="nu">2</span>  <span class="cm"># class index</span>
+p_true = np.<span class="fn">eye</span>(<span class="nu">3</span>)[true_label]  <span class="cm"># one-hot: [0, 0, 1]</span>
+logits = np.array([<span class="nu">1.0</span>, <span class="nu">2.0</span>, <span class="nu">3.0</span>])
+q_model = <span class="fn">softmax</span>(logits)       <span class="cm"># [0.09, 0.24, 0.67]</span>
+
+H_p = <span class="fn">cross_entropy</span>(p_true, p_true)  <span class="cm"># entropy of true = 0 (deterministic)</span>
+H_pq = <span class="fn">cross_entropy</span>(p_true, q_model)  <span class="cm"># cross-entropy = 0.40</span>
+KL = <span class="fn">kl_divergence</span>(p_true, q_model)    <span class="cm"># 0.40 = H(p,q) - H(p) ✓</span>
+<span class="fn">print</span>(<span class="st">f"H(p)={H_p:.4f},  H(p,q)={H_pq:.4f},  KL(p‖q)={KL:.4f}"</span>)
+<span class="fn">print</span>(<span class="st">f"Verify: H(p) + KL = {H_p + KL:.4f} = H(p,q) = {H_pq:.4f}  ✓"</span>)
+
+<span class="cm"># Temperature scaling: lower T → sharper, higher T → flatter</span>
+<span class="kw">for</span> T <span class="kw">in</span> [<span class="nu">0.1</span>, <span class="nu">0.5</span>, <span class="nu">1.0</span>, <span class="nu">2.0</span>, <span class="nu">10.0</span>]:
+    q_T = <span class="fn">softmax</span>(logits, T=T)
+    H_T = <span class="fn">cross_entropy</span>(p_true, q_T)
+    <span class="fn">print</span>(<span class="st">f"T={T:4.1f}: probs={q_T.round(3)}, CE={H_T:.3f}"</span>)
+
+<span class="cm"># Gradient of CE w.r.t. logits (beautiful closed form!)</span>
+<span class="cm"># ∂CE/∂zᵢ = qᵢ - pᵢ  (model prob - true prob)</span>
+grad_logits = q_model - p_true   <span class="cm"># [0.09, 0.24, -0.33]</span>
+<span class="fn">print</span>(<span class="st">f"Gradient w.r.t. logits: {grad_logits.round(3)}"</span>)
+<span class="cm"># Beautiful: correct class gets negative gradient (push up), others positive</span>`},
+{ty:"callout",kind:"tip",ic:"✦",txt:"<strong>Most beautiful gradient in ML:</strong> For softmax + cross-entropy, ∂CE/∂zᵢ = qᵢ - pᵢ. The gradient is simply (predicted probability - true probability). If model says 0.8 for true class (p=1), gradient is -0.2 — push logit up by 0.2. If model says 0.1 for wrong class (p=0), gradient is +0.1 — push logit down. This is why softmax+CE is numerically stable and fast to backpropagate."},
+]},
+};
+const QA=[
+{q:"What is the geometric meaning of the dot product?",a:"The dot product a·b has two equivalent forms: (1) Algebraic: Σaᵢbᵢ — component-wise multiply and sum. (2) Geometric: ‖a‖‖b‖cosθ — product of lengths times cosine of angle. Geometrically, it measures how much of vector a points in the direction of b. Zero dot product means orthogonality (θ=90°). Positive means similar direction, negative means opposing. In ML, the neuron computation y=wᵀx is a dot product — measuring how much the input x aligns with learned weight vector w. High alignment → strong activation. This is literally feature detection.",level:"b",tag:"Linear Algebra"},
+{q:"What is the rank of a matrix and why does it matter?",a:"The rank of matrix A is the dimension of its column space (= row space = number of linearly independent columns). rank(A) = r means A maps ℝⁿ into an r-dimensional subspace. In ML: rank tells us information capacity of a weight matrix. Low-rank weight matrices (W=AB where A is m×r, B is r×n, r<<min(m,n)) are used in LoRA for efficient fine-tuning. rank(A) < n means Ax=b has infinitely many solutions or no solution (no unique solution). For a data matrix X, rank = number of independent features. Rank-deficient XᵀX means linear regression has non-unique solution — fix with regularisation (ridge regression adds λI to make it full rank).",level:"b",tag:"Linear Algebra"},
+{q:"Explain eigenvalues and eigenvectors with a concrete example.",a:"For matrix A, eigenvector v with eigenvalue λ satisfies Av=λv — A only scales v, doesn't rotate it. Example: A=[[3,1],[1,3]]. Characteristic equation det(A-λI)=0 gives (3-λ)²-1=0 → λ=4 or λ=2. For λ=4: solve (A-4I)v=0 → v₁=[1,1]ᵀ (stretch by 4 along diagonal). For λ=2: v₂=[1,-1]ᵀ (stretch by 2 along anti-diagonal). Key ML applications: PCA — eigenvectors of covariance matrix are principal components (directions of maximum variance), eigenvalues are the variance amounts. Graph neural networks use eigenvectors of graph Laplacian to encode graph structure. Hessian eigenvalues tell you about loss landscape curvature — smallest eigenvalue determines maximum safe learning rate.",level:"b",tag:"Linear Algebra"},
+{q:"What is the gradient and how does it relate to steepest ascent?",a:"The gradient ∇f(x) = [∂f/∂x₁, ∂f/∂x₂, …, ∂f/∂xₙ]ᵀ is the vector of all partial derivatives. It has two key properties: (1) Direction: ∇f points in the direction of steepest ascent at x. (2) Magnitude: ‖∇f‖ is the rate of steepest ascent. Proof: the directional derivative in direction v̂ is D_v f = ∇f·v̂ = ‖∇f‖cosθ, maximised when v̂=∇f/‖∇f‖. Gradient descent moves in the -∇f direction (steepest descent) with step size η: xₜ₊₁=xₜ-η∇f(xₜ). The gradient generalises the 1D derivative: in 2D, ∇f=[∂f/∂x,∂f/∂y] and points perpendicular to level curves (contour lines).",level:"b",tag:"Calculus"},
+{q:"Prove that gradient descent decreases the objective function.",a:"Using the L-smooth gradient assumption (‖∇f(x)-∇f(y)‖≤L‖x-y‖), we can derive the descent lemma. By Taylor's theorem with remainder, for any x,y: f(y) ≤ f(x) + ∇f(x)ᵀ(y-x) + L/2‖y-x‖². Setting y=xₜ₊₁=xₜ-η∇f(xₜ): f(xₜ₊₁) ≤ f(xₜ) + ∇f(xₜ)ᵀ(-η∇f(xₜ)) + L/2‖η∇f(xₜ)‖² = f(xₜ) - η(1-ηL/2)‖∇f(xₜ)‖². For η<2/L, the coefficient (1-ηL/2)>0, so f(xₜ₊₁)<f(xₜ) whenever ∇f≠0. Optimal step size: η=1/L gives decrease ≥ 1/(2L)‖∇f(xₜ)‖².",level:"i",tag:"Optimisation"},
+{q:"Derive the normal equations for linear regression.",a:"Objective: minimise f(β)=‖y-Xβ‖² = (y-Xβ)ᵀ(y-Xβ) = yᵀy - 2βᵀXᵀy + βᵀXᵀXβ. Take gradient: ∇_β f = -2Xᵀy + 2XᵀXβ. Set to zero: XᵀXβ̂=Xᵀy. If XᵀX is invertible (X has full column rank): β̂=(XᵀX)⁻¹Xᵀy. Geometric interpretation: ŷ=Xβ̂=X(XᵀX)⁻¹Xᵀy=Hy is the orthogonal projection of y onto col(X). The hat matrix H=X(XᵀX)⁻¹Xᵀ is an orthogonal projector (H²=H, Hᵀ=H). Residuals ê=y-ŷ satisfy Xᵀê=0 — residuals are orthogonal to all columns of X. Ridge regression adds λI: β̂=(XᵀX+λI)⁻¹Xᵀy — always invertible, shrinks coefficients.",level:"i",tag:"ML"},
+{q:"Explain SVD and its applications in machine learning.",a:"SVD: A=UΣVᵀ where U (m×m orthogonal), Σ (m×n diagonal, σ₁≥σ₂≥…≥0), V (n×n orthogonal). Geometric interpretation: any linear transformation decomposes as: rotate input (Vᵀ), scale along axes (Σ), rotate output (U). Applications: (1) PCA — eigendecomposition of XᵀX=VΣ²Vᵀ, principal components = cols of V. (2) Low-rank approximation — Eckart-Young: Aₖ=Σᵢ₌₁ᵏ σᵢuᵢvᵢᵀ is the best rank-k approx (matrix compression, latent semantic analysis). (3) Pseudoinverse — A⁺=VΣ⁺Uᵀ for least-norm least-squares solution. (4) LoRA fine-tuning — weight updates modelled as low-rank: ΔW=BA. (5) Matrix rank = number of nonzero singular values.",level:"i",tag:"Linear Algebra"},
+{q:"What is the chain rule and how does it apply to backpropagation?",a:"Single variable: (f∘g)'(x)=f'(g(x))·g'(x). Multivariable: if z=f(y₁,…,yₘ) and each yᵢ=gᵢ(x₁,…,xₙ), then ∂z/∂xⱼ=Σᵢ(∂z/∂yᵢ)(∂yᵢ/∂xⱼ). In neural networks, backpropagation IS the chain rule applied to a computational graph. For a layer y=Wx+b with upstream gradient δ=∂L/∂y: ∂L/∂W=δxᵀ (outer product), ∂L/∂x=Wᵀδ (pass upstream gradient backward), ∂L/∂b=δ. The key insight: in reverse mode AD (backprop), we compute vector-Jacobian products (VJPs) never the full Jacobian — this is O(n) not O(n²) per parameter.",level:"i",tag:"Calculus"},
+{q:"What is Bayes' theorem and why is regularisation a Bayesian concept?",a:"Bayes' theorem: P(θ|D)=P(D|θ)P(θ)/P(D). Posterior = Likelihood × Prior / Evidence. MAP estimation maximises log P(θ|D)=log P(D|θ)+log P(θ)+const. Now: (1) L2 regularisation: add -λ‖θ‖² to loss. This equals log prior when P(θ)∝exp(-λ‖θ‖²) = Gaussian prior N(0,1/2λ). MAP with Gaussian prior = regularised MLE with L2 penalty. (2) L1 regularisation = Laplace prior P(θ)∝exp(-λ|θ|). L1 is sparse because Laplace has a peak at 0, encouraging exact zeros. So every regularisation scheme corresponds to a prior distribution. Dropout corresponds to a spike-and-slab prior. Weight decay = Gaussian prior. L1 = Laplace prior.",level:"i",tag:"Probability"},
+{q:"Derive the Adam update rule from first principles.",a:"Adam maintains first moment mₜ=β₁mₜ₋₁+(1-β₁)gₜ and second moment vₜ=β₂vₜ₋₁+(1-β₂)gₜ². Both initialised at 0 → biased toward 0 early. Unrolling: mₜ=(1-β₁)Σₛ₌₁ᵗ β₁^(t-s)gₛ. E[mₜ]=E[g]·(1-β₁ᵗ) (geometric sum), so E[mₜ/(1-β₁ᵗ)]=E[g]. Bias correction: m̂ₜ=mₜ/(1-β₁ᵗ), v̂ₜ=vₜ/(1-β₂ᵗ). Update: θₜ=θₜ₋₁-η·m̂ₜ/(√v̂ₜ+ε). Intuition: m̂ₜ is the momentum direction; 1/√v̂ₜ scales down lr for high-variance parameters (have been getting large gradients) and scales up for low-variance (sparse) parameters. Default: β₁=0.9, β₂=0.999, η=1e-3, ε=1e-8.",level:"a",tag:"Optimisation"},
+{q:"What is the Hessian and how does it relate to optimisation?",a:"Hessian H(x)∈ℝⁿˣⁿ has entries Hᵢⱼ=∂²f/∂xᵢ∂xⱼ. For smooth f, H is symmetric (Clairaut's theorem: mixed partials are equal). Eigenvalues of H encode curvature: positive eigenvalue = bowl-shaped (curves up), negative = saddle. Second-order optimality conditions: (1) Necessary: ∇f(x*)=0 (stationarity). (2) Sufficient for local min: H(x*)≻0 (positive definite). (3) H indefinite → saddle point. In DL: learning rate bound η<2/λ_max(H) (from descent lemma). H is too large to compute for neural nets (n² entries for n parameters), but its eigenvalue spectrum reveals loss landscape sharpness. Sharpest minimum ↔ largest Hessian eigenvalue — worse generalisation (SAM optimiser targets this).",level:"a",tag:"Optimisation"},
+{q:"Derive the backpropagation equations for a dense layer.",a:"Forward: y=Wx+b where W∈ℝᵐˣⁿ, x∈ℝⁿ. Given δ=∂L/∂y∈ℝᵐ. Since yᵢ=Σⱼ Wᵢⱼxⱼ+bᵢ: ∂yᵢ/∂Wₖⱼ=xⱼ·𝟙[i=k] (only row i of W affects yᵢ). Chain rule: ∂L/∂Wᵢⱼ=Σₖ(∂L/∂yₖ)(∂yₖ/∂Wᵢⱼ)=δᵢ·xⱼ. Matrix form: ∂L/∂W=δxᵀ∈ℝᵐˣⁿ (outer product!). For bias: ∂yᵢ/∂bᵢ=1 → ∂L/∂b=δ∈ℝᵐ. For input: ∂yᵢ/∂xⱼ=Wᵢⱼ → ∂L/∂x=Wᵀδ∈ℝⁿ. For batch X∈ℝᴮˣⁿ: ∂L/∂W=δᵀX∈ℝᵐˣⁿ (sum over batch), ∂L/∂X=δW∈ℝᴮˣⁿ. Shape rule: gradient always has same shape as the quantity it differentiates.",level:"a",tag:"ML"},
+{q:"Why does cross-entropy loss minimise KL divergence to the true distribution?",a:"Cross-entropy H(p,q)=-Σp(x)log q(x) decomposes as H(p,q)=H(p)+KL(p‖q). When we minimise H(p,q) over model q (keeping true distribution p fixed), H(p) is constant, so we're exactly minimising KL(p‖q). Since KL(p‖q)≥0 with equality iff p=q, minimising CE drives the model distribution q toward the true distribution p. Concrete example: label y=1, model predicts σ(z). Log-likelihood = y·log σ(z)+(1-y)·log(1-σ(z)). Minimising negative log-likelihood = minimising CE = minimising KL divergence. The gradient simplifies beautifully: for softmax+CE, ∂CE/∂zᵢ=qᵢ-pᵢ (predicted minus true).",level:"i",tag:"Information Theory"},
+{q:"Explain the attention mechanism mathematically.",a:"Attention(Q,K,V)=softmax(QKᵀ/√dₖ)V where Q∈ℝⁿˣᵈᵏ, K∈ℝᵐˣᵈᵏ, V∈ℝᵐˣᵈᵥ. Step by step: (1) Compute similarity scores S=QKᵀ/√dₖ∈ℝⁿˣᵐ — each element Sᵢⱼ measures how much query i matches key j. (2) Normalise: A=softmax(S)∈ℝⁿˣᵐ, each row sums to 1 (attention weights). (3) Aggregate: Output=AV∈ℝⁿˣᵈᵥ — weighted sum of values. Why √dₖ? If entries of Q,K are ~N(0,1), then QKᵀ entries have std dev √dₖ. Without scaling, large dₖ pushes softmax into saturation. Multi-head: run h independent attentions with d/h dimensions each, concatenate, project. O(n²dₖ) complexity — quadratic in sequence length.",level:"i",tag:"ML"},
+{q:"What is the relationship between MLE, MAP, and regularisation?",a:"MLE: θ_MLE = argmax log P(D|θ) — no prior. MAP: θ_MAP = argmax [log P(D|θ) + log P(θ)] — adds log prior. The prior term acts as regularisation. Key equivalences: (1) Gaussian prior P(θ)=N(0,τ²I): log P(θ)=-‖θ‖²/2τ² → adds L2 penalty → ridge regression. λ=1/2τ² (large variance prior = weak regularisation). (2) Laplace prior P(θ)=Laplace(0,b): log P(θ)=-‖θ‖₁/b → adds L1 penalty → lasso. L1 is sparse because Laplace prior has sharp peak at 0. (3) Beta(α,β) prior for Bernoulli → Dirichlet smoothing. Fully Bayesian (not just MAP) maintains full posterior distribution → Gaussian processes, Bayesian neural networks.",level:"a",tag:"Probability"},
+{q:"What causes vanishing and exploding gradients and how do we fix them?",a:"In an L-layer network, ∂L/∂x₁=Wᴸᵀ σ'ᴸ ⊙ … W₁ᵀ σ'₁ ⊙ δ. The gradient magnitude ≈ Πᵢ‖Wᵢ‖·|σ'|. Vanishing: if ‖W‖<1 or |σ'|<1 (sigmoid: σ'≤0.25), product shrinks exponentially. Early layers see near-zero gradient → slow or no learning. Exploding: if ‖W‖>1, product grows exponentially. Fixes for vanishing: (1) ReLU instead of sigmoid (σ'=1 in active region). (2) Residual connections (ResNets): x→x+f(x), gradient = 1+∂f/∂x ≥ 1. (3) LSTM/GRU gating. (4) Layer normalisation (normalises activations). Fixes for exploding: (1) Gradient clipping: if ‖g‖>threshold, g←g·threshold/‖g‖. (2) Weight initialisation (Xavier/He). (3) Smaller learning rate.",level:"a",tag:"ML"},
+{q:"Prove that cross-entropy gradient through softmax simplifies to q-p.",a:"Loss L=CE=-Σᵢ pᵢ log qᵢ where qᵢ=softmax(z)ᵢ=exp(zᵢ)/Z, Z=Σⱼ exp(zⱼ). ∂L/∂zⱼ = -Σᵢ pᵢ (∂log qᵢ/∂zⱼ). ∂log qᵢ/∂zⱼ = ∂/∂zⱼ [zᵢ - log Z] = δᵢⱼ - ∂log Z/∂zⱼ = δᵢⱼ - exp(zⱼ)/Z = δᵢⱼ - qⱼ. So ∂L/∂zⱼ = -Σᵢ pᵢ(δᵢⱼ - qⱼ) = -pⱼ + qⱼ Σᵢ pᵢ = -pⱼ + qⱼ (since Σpᵢ=1). Therefore ∂L/∂z = q - p. Beautiful: just model prediction minus true label. For true class j: q_j - 1 (negative, push logit up). For wrong classes: q_k - 0 = q_k (positive, push logits down). This is why softmax+CE is so commonly used — gradient is trivial.",level:"e",tag:"ML"},
+{q:"What is PCA and how is it derived from eigendecomposition?",a:"PCA finds orthogonal directions of maximum variance in data. Setup: centred data X∈ℝⁿˣᵈ (each row is a sample). Covariance: Σ=XᵀX/(n-1)∈ℝᵈˣᵈ. First PC w₁=argmax_‖w‖=1 Var(Xw) = argmax wᵀΣw. Lagrangian: max wᵀΣw - λ(wᵀw-1). Gradient condition: 2Σw=2λw → Σw=λw. So w must be an eigenvector of Σ! And wᵀΣw=λ — variance equals eigenvalue. First PC = eigenvector with largest λ. k-th PC = k-th largest eigenvector. In practice: use SVD of X=UΣVᵀ — principal components = cols of V, scores = UV, variance captured = σᵢ²/(n-1). Explained variance ratio: λᵢ/Σλⱼ. Choose k such that cumulative ratio > 95%.",level:"i",tag:"ML"},
+{q:"Derive the bias-variance decomposition.",a:"For regression with true function f and noise ε~N(0,σ²): y=f(x)+ε. Expected squared error at point x: E[(y-ŷ)²] where expectation is over training sets and noise. Decompose: E[(y-ŷ)²] = E[(y-f+f-Eŷ+Eŷ-ŷ)²]. After expanding and using E[ε]=0, cross terms vanish: = E[(f-Eŷ)²] + E[(Eŷ-ŷ)²] + σ². = Bias²(ŷ) + Variance(ŷ) + σ². Bias=E[ŷ]-f: systematic error from wrong model assumptions. Variance=E[(ŷ-E[ŷ])²]: sensitivity to training data. σ²: irreducible noise. Complex models: low bias, high variance (overfit). Simple models: high bias, low variance (underfit). Ridge regression: adding λI increases bias but decreases variance — optimal λ minimises total MSE.",level:"a",tag:"ML"},
+{q:"What is the Jacobian and how is it used in neural network training?",a:"Jacobian J of f:ℝⁿ→ℝᵐ is J∈ℝᵐˣⁿ with Jᵢⱼ=∂fᵢ/∂xⱼ. It maps small input changes to small output changes: df ≈ J·dx. In backprop, we never form the full Jacobian — we compute VJPs (vector-Jacobian products) δᵀJ for upstream gradient δ. This is reverse mode AD. Forward mode computes JVPs J·v. Reverse mode is O(n) per parameter (one backward pass), forward mode is O(n) per input dimension. Since n_params >> n_outputs, reverse mode (backprop) is efficient for ML. Specific Jacobians: softmax Jacobian: J_ij = sᵢ(δᵢⱼ-sⱼ) — needed for softmax+MSE (softmax+CE simplifies this away).",level:"a",tag:"Calculus"},
+{q:"Explain strong convexity and its implication for gradient descent convergence.",a:"Function f is m-strongly convex if f(y)≥f(x)+∇f(x)ᵀ(y-x)+m/2‖y-x‖² for all x,y (equivalently: H(x)≽mI, eigenvalues of Hessian ≥ m everywhere). Implications for GD with step η=1/L: (1) Unique global minimum. (2) Linear convergence: f(xₜ)-f* ≤ (1-m/L)ᵗ[f(x₀)-f*]. (3) Exponential decay rate ρ=1-m/L=1-1/κ where κ=L/m is the condition number. (4) Log(1/ε) iterations for ε-accuracy. For general convex (m=0): O(1/t) rate. For strongly convex: O(ρᵗ) = much faster. High condition number κ≫1 → slow convergence (long skinny level curves). Preconditioning/adaptive methods (Adam) effectively reduce condition number.",level:"e",tag:"Optimisation"},
+];
+// ENGINE
+let curCh=-1,curTopic=null,visited=new Set();
+const lvMap={b:"lv-b",i:"lv-i",a:"lv-a",e:"lv-e"};
+const lvLabel={b:"Basic",i:"Intermediate",a:"Advanced",e:"Expert"};
+
+function buildNav(){
+  const nav=document.getElementById("nav");
+  CHS.forEach((ch,i)=>{
+    const div=document.createElement("div");
+    div.className="ci";div.id="ci"+i;
+    div.innerHTML=`<div class="chr" id="chr${i}" onclick="selectCh(${i})">
+      <div class="cnum" style="background:${ch.bg};color:${ch.c}">${ch.n}</div>
+      <div class="clabel">${ch.t}</div><div class="carr">▶</div></div>
+    <div class="tmenu">${ch.topics.map(t=>`
+      <div class="trow" id="n${t.id}" onclick="selectTopic('${t.id}',${i})">
+        <div class="dot"></div>${t.ic}&nbsp;${t.t}</div>`).join("")}</div>`;
+    nav.appendChild(div);
+  });
+}
+
+function selectCh(i){
+  curCh=i;
+  document.querySelectorAll(".ci").forEach((el,j)=>{
+    el.classList.toggle("open",j===i);
+    el.querySelector(".chr").classList.toggle("act",j===i);
+  });
+  document.getElementById("welcome").style.display="none";
+  document.getElementById("mcon").style.display="block";
+  const ch=CHS[i];
+  const chips=ch.tags.map(t=>`<span class="cchip" style="color:${ch.c};border-color:${ch.c}44;background:${ch.bg}">${t}</span>`).join("");
+  const cards=ch.topics.map(t=>{
+    const mt=`<span class="tmeta" style="color:${ch.c};border-color:${ch.c}44">${ch.t}</span>`;
+    return `<div class="tcard" id="c${t.id}" onclick="selectTopic('${t.id}',${i})">
+      <div class="tc-icon">${t.ic}</div>
+      <div class="tc-body"><div class="tc-t">${t.t}</div><div class="tc-d">${t.d}</div>
+      <div class="tc-meta">${mt}</div></div></div>`;
+  }).join("");
+  document.getElementById("mcon").innerHTML=`
+    <div class="chero">
+      <div class="chero-n" style="color:${ch.c}">Chapter ${ch.n} · ${ch.topics.length} Topics</div>
+      <div class="chero-t" style="color:${ch.c}">${ch.ic} ${ch.t}</div>
+      <div class="chero-d">${ch.desc}</div>
+      <div class="chero-chips">${chips}</div>
+    </div>
+    <div class="tgrid">${cards}</div>`;
+}
+
+function selectTopic(id,chi){
+  if(chi!==curCh)selectCh(chi);
+  curTopic=id;visited.add(id);updateProg();
+  document.querySelectorAll(".tcard").forEach(el=>el.classList.remove("act"));
+  document.querySelectorAll(".trow").forEach(el=>el.classList.remove("act"));
+  const c=document.getElementById("c"+id);if(c)c.classList.add("act");
+  const n=document.getElementById("n"+id);if(n){n.classList.add("act");n.classList.add("vis");}
+  const d=DETAILS[id];
+  if(!d){renderGeneric(id,chi);return;}
+  renderDetail(d);
+}
+
+function renderDetail(d){
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  const pills=d.pills.map(p=>`<span class="dpill" style="color:${p.c};border-color:${p.c}44;background:${p.c}11">${p.t}</span>`).join("");
+  const secHtml=d.secs.map(renderSec).join("")+renderQAForTopic(d.title);
+  document.getElementById("rp-con").innerHTML=`<div class="rpcon">
+    <div class="d-bread">${d.bread}</div>
+    <div class="d-title">${d.title}</div>
+    <div class="d-sub">${d.sub}</div>
+    <div class="d-pills">${pills}</div>${secHtml}</div>`;
+}
+
+function renderSec(s){
+  if(s.ty==="prose") return `<div class="sec"><div class="sec-t">${s.title}</div><div class="prose">${s.html}</div></div>`;
+  if(s.ty==="mbox") return `<div class="sec"><div class="mbox"><div class="formula">${s.formula}</div><div class="desc">${s.desc}</div></div></div>`;
+  if(s.ty==="msteps"){
+    const rows=s.steps.map(st=>`<div class="mstep"><div class="mstep-n">${st.n}</div>
+      <div class="mstep-body"><div class="mstep-f">${st.f}</div><div class="mstep-d">${st.d}</div></div></div>`).join("");
+    return `<div class="sec"><div class="sec-t">${s.title}</div><div class="msteps">${rows}</div></div>`;
+  }
+  if(s.ty==="code"){
+    const lc=s.lang==="python"?"#a6e3a1":s.lang==="json"?"#f9e2af":"#89b4fa";
+    return `<div class="sec"><div class="cb">
+      <div class="cb-hdr"><span class="cb-lang" style="color:${lc}">${s.lang}</span>
+      <span class="cb-name">${s.name}</span>
+      <button class="cb-copy" onclick="copyCode(this)">Copy</button></div>
+      <div class="cb-body"><pre>${s.code}</pre></div></div></div>`;
+  }
+  if(s.ty==="diagram") return `<div class="sec"><div class="diag">
+    <div class="diag-hdr">${s.title}</div>
+    <div class="diag-body">${s.svg}</div></div></div>`;
+  if(s.ty==="callout"){
+    const cls=s.kind==="danger"?"c-danger":s.kind==="warn"?"c-warn":s.kind==="tip"?"c-tip":s.kind==="math"?"c-math":"c-info";
+    return `<div class="callout ${cls}"><span class="call-ic">${s.ic}</span><span>${s.txt}</span></div>`;
+  }
+  return "";
+}
+
+function renderQAForTopic(title){
+  const words=title.toLowerCase().replace(/[^a-z0-9 ]/g," ").split(" ").filter(w=>w.length>3);
+  const rel=QA.filter(q=>{
+    const txt=(q.q+" "+q.a+" "+q.tag).toLowerCase();
+    return words.some(w=>txt.includes(w));
+  }).slice(0,4);
+  if(!rel.length)return "";
+  return `<div class="sec"><div class="sec-t">🎯 Interview Questions</div>
+    ${rel.map((q,i)=>renderQAItem(q,"t"+i+Date.now())).join("")}</div>`;
+}
+
+function renderQAItem(q,id){
+  return `<div class="qa" id="qa${id}">
+    <div class="qa-q" onclick="toggleQA(this)">
+      <span class="qa-qi">Q.</span>
+      <span class="qa-qt">${q.q}</span>
+      <span class="qa-lv ${lvMap[q.level]}">${lvLabel[q.level]}</span>
+      <span class="qa-ar">▶</span></div>
+    <div class="qa-ans"><div class="qa-at">${q.a}</div></div></div>`;
+}
+
+function renderGeneric(id,chi){
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  const ch=CHS[chi];
+  const t=ch.topics.find(x=>x.id===id);
+  if(!t)return;
+  document.getElementById("rp-con").innerHTML=`<div class="rpcon">
+    <div class="d-bread">${ch.t}</div>
+    <div class="d-title">${t.ic} ${t.t}</div>
+    <div class="d-sub">${t.d}</div>
+    <div class="callout c-math"><span class="call-ic">∑</span>
+    <span>This topic is part of <strong>${ch.t}</strong>. Explore all ${ch.topics.length} topics in this chapter.</span></div>
+    ${renderQAForTopic(t.t)}</div>`;
+}
+
+function toggleQA(el){el.parentElement.classList.toggle("open")}
+
+function copyCode(btn){
+  const txt=btn.closest(".cb").querySelector("pre").innerText;
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent="✓ Copied!";setTimeout(()=>btn.textContent="Copy",2000);
+  });
+}
+
+function updateProg(){
+  const total=CHS.reduce((s,c)=>s+c.topics.length,0);
+  const p=Math.round(visited.size/total*100);
+  document.getElementById("pct").textContent=p+"%";
+  document.getElementById("pfill").style.width=p+"%";
+}
+
+function doSearch(q){
+  q=q.toLowerCase().trim();
+  CHS.forEach((ch,i)=>{
+    let any=false;
+    ch.topics.forEach(t=>{
+      const el=document.getElementById("n"+t.id);if(!el)return;
+      const m=!q||t.t.toLowerCase().includes(q)||t.d.toLowerCase().includes(q);
+      el.style.display=m?"":"none";if(m)any=true;
+    });
+    if(q&&any)document.getElementById("ci"+i).classList.add("open");
+  });
+}
+
+function showAllQA(){
+  document.getElementById("rp-empty").style.display="none";
+  document.getElementById("rp-con").style.display="block";
+  const tags=[...new Set(QA.map(q=>q.tag))];
+  const filterBtns=tags.map(t=>
+    `<button onclick="filterQA('${t}',this)" style="background:var(--bg2);border:1px solid var(--bd);color:var(--t2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace;transition:all .2s">${t}</button>`
+  ).join("");
+  const items=QA.map(q=>`
+    <div class="qa" data-tag="${q.tag}">
+      <div class="qa-q" onclick="toggleQA(this)">
+        <span class="qa-qi">Q.</span><span class="qa-qt">${q.q}</span>
+        <span style="font-family:'Fira Code',monospace;font-size:9px;padding:2px 7px;border-radius:3px;background:rgba(201,168,76,.08);color:var(--gold2);border:1px solid rgba(201,168,76,.3);flex-shrink:0">${q.tag}</span>
+        <span class="qa-lv ${lvMap[q.level]}">${lvLabel[q.level]}</span>
+        <span class="qa-ar">▶</span></div>
+      <div class="qa-ans"><div class="qa-at">${q.a}</div></div></div>`).join("");
+  document.getElementById("rp-con").innerHTML=`<div class="rpcon">
+    <div class="d-bread">Mathematics Mastery · Interview Preparation</div>
+    <div class="d-title">🎯 Interview Q&amp;A — All ${QA.length} Questions</div>
+    <div class="d-sub">From Basic definitions to Expert-level proofs. Every real ML mathematics interview question, fully worked out.</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px">
+      <button onclick="filterQA(null,this)" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:var(--gold2);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Fira Code',monospace">All</button>
+      ${filterBtns}</div>
+    <div id="qa-list">${items}</div></div>`;
+}
+
+function filterQA(tag){
+  document.querySelectorAll("#qa-list .qa").forEach(el=>{
+    el.style.display=(!tag||el.dataset.tag===tag)?"":"none";
+  });
+}
+
+buildNav();
+</script>
+</body>
+</html>

@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AbhishekAnimatedLogo } from "@/components/ui/AbhishekAnimatedLogo";
 import { HeaderGlobe } from "@/components/layout/HeaderGlobe";
+import { PublicSearch } from "@/components/layout/PublicSearch";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -287,6 +288,7 @@ export const Navigation = () => {
             </nav>
 
             <div className="flex items-center justify-self-end gap-2">
+              <PublicSearch />
               <HeaderGlobe className="hidden sm:flex" compact />
               <ThemeToggle />
               <Button
@@ -313,6 +315,14 @@ export const Navigation = () => {
           >
             <div className="absolute inset-0 bg-background/95 backdrop-blur-xl" />
             <nav className="relative container mx-auto px-4 py-8 flex flex-col gap-2 max-h-[calc(100vh-5rem)] overflow-y-auto">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.04 }}
+              >
+                <PublicSearch mobile />
+              </motion.div>
+
               {/* About */}
               {navLinks.slice(0, 1).map((link, index) => (
                 <motion.div

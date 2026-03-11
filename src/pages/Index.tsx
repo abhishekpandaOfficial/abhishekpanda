@@ -3,11 +3,9 @@ import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
+import { HomeStackedShowcase } from "@/components/home/HomeStackedShowcase";
 
 // Lazy load below-the-fold components for faster initial render
-const FeaturedCourses = lazy(() => import("@/components/home/FeaturedCourses").then(m => ({ default: m.FeaturedCourses })));
-const FeaturedBlog = lazy(() => import("@/components/home/FeaturedBlog").then(m => ({ default: m.FeaturedBlog })));
-const TrustSection = lazy(() => import("@/components/home/TrustSection").then(m => ({ default: m.TrustSection })));
 const NewsletterSection = lazy(() => import("@/components/home/NewsletterSection").then(m => ({ default: m.NewsletterSection })));
 const NewsletterPopup = lazy(() => import("@/components/NewsletterPopup").then(m => ({ default: m.NewsletterPopup })));
 
@@ -53,38 +51,14 @@ const Index = () => {
         </motion.div>
         
         {/* Below-the-fold content loads lazily */}
-        <motion.section
+        <motion.div
           variants={sectionReveal}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-8% 0px -8% 0px" }}
+          viewport={{ once: true, margin: "-4% 0px -4% 0px" }}
         >
-          <Suspense fallback={<SectionLoader />}>
-            <FeaturedCourses />
-          </Suspense>
-        </motion.section>
-
-        <motion.section
-          variants={sectionReveal}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-8% 0px -8% 0px" }}
-        >
-          <Suspense fallback={<SectionLoader />}>
-            <FeaturedBlog />
-          </Suspense>
-        </motion.section>
-
-        <motion.section
-          variants={sectionReveal}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-8% 0px -8% 0px" }}
-        >
-          <Suspense fallback={<SectionLoader />}>
-            <TrustSection />
-          </Suspense>
-        </motion.section>
+          <HomeStackedShowcase />
+        </motion.div>
 
         <motion.section
           variants={sectionReveal}

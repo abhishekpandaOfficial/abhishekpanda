@@ -1,13 +1,16 @@
-import { useEffect } from "react";
+import { MasteryEmbedPage } from "@/components/blog/MasteryEmbedPage";
+
+const STATIC_HTML_VERSION = "2026-03-11-openowl-html-v1";
 
 export default function OpenOwlLanding() {
-  useEffect(() => {
-    window.location.replace("/openowl.html?v=20260306a");
-  }, []);
-
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <p className="text-sm text-muted-foreground">Redirecting to OpenOwl…</p>
-    </div>
+    <MasteryEmbedPage
+      title="OpenOwl"
+      embedPath="/openowl.html"
+      version={STATIC_HTML_VERSION}
+      backgroundClassName="bg-[#050b12]"
+      sectionLabel="Projects"
+      sectionHref="/projects"
+    />
   );
 }

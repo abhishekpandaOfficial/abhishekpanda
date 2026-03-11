@@ -3,7 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { HelmetProvider } from "react-helmet-async";
 
-const swResetKey = "ap-sw-reset-2026-03-04";
+const swResetKey = "ap-sw-reset-2026-03-11-openowl-cache-reset-v1";
 
 const resetLegacyServiceWorkers = async () => {
   if (!("serviceWorker" in navigator)) return;

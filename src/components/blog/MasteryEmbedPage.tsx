@@ -18,6 +18,8 @@ type MasteryEmbedPageProps = {
   embedPath: string;
   version: string;
   backgroundClassName?: string;
+  sectionLabel?: string;
+  sectionHref?: string;
 };
 
 export function MasteryEmbedPage({
@@ -25,6 +27,8 @@ export function MasteryEmbedPage({
   embedPath,
   version,
   backgroundClassName = "bg-[#080c14]",
+  sectionLabel = "Blogs",
+  sectionHref = "/blogs",
 }: MasteryEmbedPageProps) {
   const { theme } = useTheme();
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -56,7 +60,7 @@ export function MasteryEmbedPage({
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/blogs">Blogs</Link>
+                  <Link to={sectionHref}>{sectionLabel}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />

@@ -36,6 +36,9 @@ const BlogAggregator = lazy(() => import("./pages/BlogAggregator"));
 const BlogSeries = lazy(() => import("./pages/BlogSeries"));
 const AiMlBlogsHub = lazy(() => import("./pages/AiMlBlogsHub"));
 const AiMlSeries = lazy(() => import("./pages/AiMlSeries"));
+const MathematicsMastery = lazy(() => import("./pages/MathematicsMastery"));
+const StatisticsMastery = lazy(() => import("./pages/StatisticsMastery"));
+const NumpyMastery = lazy(() => import("./pages/NumpyMastery"));
 const MachineLearningCoreMastery = lazy(() => import("./pages/MachineLearningCoreMastery"));
 const ArticlesPage = lazy(() => import("./pages/Articles"));
 const CaseStudies = lazy(() => import("./pages/CaseStudies"));
@@ -182,6 +185,9 @@ const App = () => {
                 <Route path="/cheatsheets/dotnet-mastery-toc" element={<Navigate to="/cheatsheets/dotnet-mastery" replace />} />
                 <Route path="/cheatsheets/:seriesSlug" element={<BlogSeries />} />
                 <Route path="/ai-ml-blogs" element={<AiMlBlogsHub />} />
+                <Route path="/ai-ml-blogs/mathematics-mastery" element={<MathematicsMastery />} />
+                <Route path="/ai-ml-blogs/statistics-mastery" element={<StatisticsMastery />} />
+                <Route path="/ai-ml-blogs/numpy-mastery" element={<NumpyMastery />} />
                 <Route path="/ai-ml-blogs/machine-learning-core-mastery" element={<MachineLearningCoreMastery />} />
                 <Route path="/ai-ml-blogs/:seriesSlug" element={<AiMlSeries />} />
                 <Route path="/blogs/azure-mastery" element={<Navigate to="/cheatsheets/azure-mastery" replace />} />
@@ -207,6 +213,8 @@ const App = () => {
                 <Route path="/tech/:slug" element={<Navigate to="/blog/techhub" replace />} />
                 <Route path="/openowl" element={<OpenOwlLanding />} />
                 <Route path="/openowl/assistant" element={<OpenOwlAssistant />} />
+                <Route path="/openowl/dashboard" element={<Navigate to="/openowl-dashboard.html" replace />} />
+                <Route path="/openowl/blueprint" element={<Navigate to="/openowl-blueprint.html" replace />} />
                 <Route path="/openowl/setup" element={<Navigate to="/openowl-setup-guide.html" replace />} />
                 <Route path="/openowl/guide" element={<Navigate to="/openowl-setup-guide.html" replace />} />
                 <Route path="/openowl-dashboard" element={<Navigate to="/openowl-dashboard.html" replace />} />
