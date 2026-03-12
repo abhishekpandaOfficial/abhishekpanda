@@ -9,6 +9,7 @@ import { iconForKey } from "@/lib/social/iconMap";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveSocialProfiles } from "@/lib/social/resolveProfiles";
 import { OriginXAnimatedLogo } from "@/components/ui/OriginXAnimatedLogo";
+import { PrefetchLink } from "@/components/PrefetchLink";
 
 const footerLinks = {
   website: [
@@ -120,13 +121,13 @@ export const Footer = () => {
         <div className="grid grid-cols-1 items-start gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {/* Brand Section */}
           <div className="sm:col-span-2 xl:col-span-2">
-            <Link to="/" className="flex items-center gap-2 mb-4">
+            <PrefetchLink to="/" className="flex items-center gap-2 mb-4">
               <AbhishekAnimatedLogo size="md" animate />
               <span className="font-bold text-xl">
                 <span className="text-foreground">abhishek</span>
                 <span className="gradient-text">panda</span>
               </span>
-            </Link>
+            </PrefetchLink>
             <p className="text-muted-foreground mb-4 text-sm">
               Engineering ideas into reality, one clean build at a time. 
             </p>
@@ -165,12 +166,12 @@ export const Footer = () => {
               {footerLinks.website.map((link) => (
                 <li key={link.path || link.url}>
                   {"path" in link ? (
-                    <Link
+                    <PrefetchLink
                       to={link.path}
                       className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
                     >
                       {link.name}
-                    </Link>
+                    </PrefetchLink>
                   ) : (
                     <>
                       <a
@@ -200,12 +201,12 @@ export const Footer = () => {
             <ul className="space-y-2">
               {footerLinks.products.map((link) => (
                 <li key={link.path}>
-                  <Link
+                  <PrefetchLink
                     to={link.path}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
                   >
                     {link.name}
-                  </Link>
+                  </PrefetchLink>
                 </li>
               ))}
             </ul>
@@ -219,12 +220,12 @@ export const Footer = () => {
             <ul className="space-y-2">
               {footerLinks.scriptures.map((link) => (
                 <li key={link.path}>
-                  <Link
+                  <PrefetchLink
                     to={link.path}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
                   >
                     {link.name}
-                  </Link>
+                  </PrefetchLink>
                 </li>
               ))}
             </ul>

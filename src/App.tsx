@@ -91,7 +91,16 @@ const OpenOwlAdminDelivery = lazy(() => import("./pages/openowl-admin/DeliveryPa
 const OpenOwlAdminRuns = lazy(() => import("./pages/openowl-admin/RunsPage"));
 const OpenOwlAdminSettings = lazy(() => import("./pages/openowl-admin/SettingsPage"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const AnalyticsWrapper = ({ children }: { children: React.ReactNode }) => {
   useAnalytics();
@@ -112,18 +121,28 @@ const LegacyCheatsheetSeriesRedirect = () => {
 const App = () => {
   const [showIntro, setShowIntro] = useState(() => {
     if (typeof window === "undefined") return false;
-    return window.location.pathname === "/";
+    if (window.location.pathname !== "/") return false;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return false;
+
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    if (connection?.saveData) return false;
+    if (connection?.effectiveType && ["slow-2g", "2g"].includes(connection.effectiveType)) return false;
+
+    return sessionStorage.getItem("ap-home-intro-seen") !== "1";
   });
 
   useEffect(() => {
     if (!showIntro) return;
     const start = Date.now();
-    const minDuration = 1500;
+    const minDuration = 900;
 
     const complete = () => {
       const elapsed = Date.now() - start;
       const remaining = Math.max(minDuration - elapsed, 0);
-      setTimeout(() => setShowIntro(false), remaining);
+      setTimeout(() => {
+        sessionStorage.setItem("ap-home-intro-seen", "1");
+        setShowIntro(false);
+      }, remaining);
     };
 
     if (document.readyState === "complete") {

@@ -9,6 +9,7 @@ type SeoData = {
   description: string;
   keywords?: string;
   robots?: string;
+  pageType?: "WebPage" | "CollectionPage" | "AboutPage" | "ContactPage" | "ProfilePage";
 };
 
 const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
@@ -20,6 +21,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
         "Official website of Abhishek Panda featuring engineering blog posts, Stackcraft learning tracks, CHRONYX, mentorship, and LLM Galaxy insights.",
       keywords:
         "Abhishek Panda, Abhishek, AI Architect, Technical Architect, OriginX Labs, OpenOwl, Chronyx, LLM Galaxy, software architecture blog",
+      pageType: "ProfilePage",
     },
   },
   {
@@ -29,6 +31,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       description:
         "Learn about Abhishek Panda’s background, architecture experience, AI work, leadership journey, and OriginX Labs mission.",
       keywords: "about Abhishek Panda, Abhishek Panda profile, AI leader, Technical Architect India",
+      pageType: "AboutPage",
     },
   },
   {
@@ -39,6 +42,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
         "Read Abhishek Panda blog posts and Stackcraft learning tracks covering .NET, Azure, SQL, AI/ML, deep learning, NLP, Agentic AI, and Web3.",
       keywords:
         "Abhishek Panda blog, .NET blog, Azure blog, AI blog, software architecture articles, stackcraft",
+      pageType: "CollectionPage",
     },
   },
   {
@@ -48,6 +52,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       description:
         "Browse all mastery blog series and website blog cards from Abhishek Panda in one place.",
       keywords: "Abhishek Panda blogs, mastery series, engineering blog hub, blog series cards",
+      pageType: "CollectionPage",
     },
   },
   {
@@ -57,6 +62,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       description:
         "Browse all mastery blog series and website blog cards from Abhishek Panda in one place.",
       keywords: "Abhishek Panda blogs, mastery series, engineering blog hub, blog series cards",
+      pageType: "CollectionPage",
     },
   },
   {
@@ -74,6 +80,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       description:
         "Browse AI and machine learning mastery tracks across math, statistics, Python, feature engineering, ML core, NLP, and computer vision.",
       keywords: "AI blogs, machine learning blogs, data science mastery, Abhishek Panda AI ML",
+      pageType: "CollectionPage",
     },
   },
   {
@@ -91,6 +98,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       description:
         "Browse route-native articles with editorial cards, technical iconography, tags, and long-form detail pages.",
       keywords: "Abhishek Panda articles, privacy article, long-form articles, editorial dashboards",
+      pageType: "CollectionPage",
     },
   },
   {
@@ -100,6 +108,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       description:
         "Read scripture guides with symbolic cards, religion tags, and a focused long-form reading experience with progress and timing.",
       keywords: "Bhagavad Gita guide, Holy Quran guide, scriptures, spiritual reading, Abhishek Panda scriptures",
+      pageType: "CollectionPage",
     },
   },
   {
@@ -124,6 +133,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "Case Studies | Abhishek Panda",
       description:
         "Browse case-study style engineering breakdowns across .NET architecture, distributed systems, privacy, and roadmap-driven technical writing.",
+      pageType: "CollectionPage",
     },
   },
   {
@@ -148,6 +158,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "Projects | Abhishek Panda",
       description:
         "Explore live products, engineering platforms, and project-oriented learning destinations across the website.",
+      pageType: "CollectionPage",
     },
   },
   {
@@ -156,6 +167,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "Courses | Abhishek Panda",
       description:
         "Explore premium and free courses by Abhishek Panda on modern software engineering, architecture, cloud, and AI.",
+      pageType: "CollectionPage",
     },
   },
   {
@@ -244,6 +256,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "Ebooks | Abhishek Panda",
       description:
         "Explore premium and free ebooks by Abhishek Panda with browser preview, OTP gated free downloads, and Chronyx Hub reading support.",
+      pageType: "CollectionPage",
     },
   },
   {
@@ -266,6 +279,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "Mentorship | 1:1 with Abhishek Panda",
       description:
         "Book one-on-one mentorship with Abhishek Panda for architecture reviews, AI strategy, and career growth planning.",
+      pageType: "ContactPage",
     },
   },
   {
@@ -274,6 +288,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       title: "Contact Abhishek Panda",
       description:
         "Contact Abhishek Panda for collaborations, speaking, consulting, technical advisory, and strategic partnerships.",
+      pageType: "ContactPage",
     },
   },
   {
@@ -304,6 +319,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       description:
         "Explore LLM Galaxy for model discovery, categories, capabilities, comparisons, and AI model insights across open and closed ecosystems.",
       keywords: "LLM Galaxy, AI models, OpenAI, Anthropic, Gemini, model routing, LLM comparison",
+      pageType: "CollectionPage",
     },
   },
   {
@@ -345,6 +361,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       description:
         "Explore CHRONYX, the personal intelligence and productivity space by Abhishek Panda with focused tools and guided workflows.",
       keywords: "Chronyx, personal command center, productivity, Abhishek Panda",
+      pageType: "WebPage",
     },
   },
   {
@@ -354,6 +371,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       description:
         "Discover OpenOwl, the AI assistant experience by Abhishek Panda for contextual answers, model intelligence, and ecosystem guidance.",
       keywords: "OpenOwl, AbhishekPanda Assistant, AI assistant, LLM assistant, task automation",
+      pageType: "WebPage",
     },
   },
   {
@@ -405,6 +423,7 @@ const defaultSeo: SeoData = {
     "Official website of Abhishek Panda with blog posts, Stackcraft learning tracks, CHRONYX, LLM Galaxy, and engineering insights.",
   keywords:
     "Abhishek Panda, engineering, AI, cloud architecture, OpenOwl, Chronyx, Stackcraft",
+  pageType: "WebPage",
 };
 
 export function RouteSeo() {
@@ -420,8 +439,11 @@ export function RouteSeo() {
   const canonical = `${SITE_URL}${pathname === "/" ? "" : pathname}`;
   const robots = seo.robots || "index,follow";
   const keywords = seo.keywords || defaultSeo.keywords;
+  const googleBot = robots.includes("noindex")
+    ? robots
+    : `${robots},max-image-preview:large,max-snippet:-1,max-video-preview:-1`;
 
-  const schemaGraph = buildSchemaGraph(pathname, canonical, seo.title, seo.description);
+  const schemaGraph = buildSchemaGraph(pathname, canonical, seo.title, seo.description, seo.pageType || defaultSeo.pageType || "WebPage");
 
   return (
     <Helmet>
@@ -429,9 +451,16 @@ export function RouteSeo() {
       <meta name="description" content={seo.description} />
       {keywords ? <meta name="keywords" content={keywords} /> : null}
       <meta name="robots" content={robots} />
-      <meta name="googlebot" content={robots} />
-      <meta name="bingbot" content={robots} />
+      <meta name="googlebot" content={googleBot} />
+      <meta name="bingbot" content={googleBot} />
       <meta name="author" content="Abhishek Panda" />
+      <meta name="creator" content="Abhishek Panda" />
+      <meta name="publisher" content="Abhishek Panda" />
+      <meta name="application-name" content="Abhishek Panda" />
+      <meta name="apple-mobile-web-app-title" content="Abhishek Panda" />
+      <meta name="format-detection" content="telephone=no,address=no,email=no" />
+      <meta name="referrer" content="strict-origin-when-cross-origin" />
+      <meta name="theme-color" content="#0f172a" />
       <link rel="canonical" href={canonical} />
       <link rel="alternate" hrefLang="en" href={canonical} />
       <link rel="alternate" hrefLang="x-default" href={canonical} />
@@ -444,6 +473,8 @@ export function RouteSeo() {
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={DEFAULT_OG_IMAGE} />
       <meta property="og:image:alt" content="Abhishek Panda official website cover image" />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
       <meta property="og:site_name" content="Abhishek Panda" />
       <meta property="og:locale" content="en_US" />
 
@@ -453,18 +484,28 @@ export function RouteSeo() {
       <meta name="twitter:title" content={seo.title} />
       <meta name="twitter:description" content={seo.description} />
       <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
+      <meta name="twitter:image:alt" content="Abhishek Panda official website cover image" />
 
       <script type="application/ld+json">{JSON.stringify(schemaGraph)}</script>
     </Helmet>
   );
 }
 
-function buildSchemaGraph(pathname: string, canonical: string, title: string, description: string) {
+function buildSchemaGraph(pathname: string, canonical: string, title: string, description: string, pageType: SeoData["pageType"]) {
   const organization = {
     "@type": "Organization",
     "@id": "https://www.abhishekpanda.com/#organization",
     name: "Abhishek Panda",
     url: "https://www.abhishekpanda.com",
+    sameAs: [
+      "https://www.linkedin.com/in/abhishekpandaofficial/",
+      "https://github.com/abhishekpandaOfficial",
+      "https://www.youtube.com/@abhishekpanda_official",
+      "https://x.com/Panda_Abhishek8",
+    ],
+    founder: {
+      "@id": "https://www.abhishekpanda.com/#person",
+    },
     logo: {
       "@type": "ImageObject",
       url: "https://www.abhishekpanda.com/favicon.png",
@@ -477,6 +518,18 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
     name: "Abhishek Panda",
     url: "https://www.abhishekpanda.com",
     jobTitle: "Technical Architect, AI Architect",
+    description:
+      "Abhishek Panda is a technical architect and AI architect focused on modern software engineering, cloud systems, AI products, and structured technical education.",
+    knowsAbout: [
+      ".NET architecture",
+      "Azure",
+      "AI systems",
+      "machine learning",
+      "technical architecture",
+      "cloud-native engineering",
+      "distributed systems",
+      "developer education",
+    ],
     sameAs: [
       "https://www.linkedin.com/in/abhishekpandaofficial/",
       "https://github.com/abhishekpandaOfficial",
@@ -496,6 +549,7 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
     name: "Abhishek Panda",
     url: "https://www.abhishekpanda.com",
     publisher: { "@id": "https://www.abhishekpanda.com/#organization" },
+    about: { "@id": "https://www.abhishekpanda.com/#person" },
     potentialAction: {
       "@type": "SearchAction",
       target: "https://www.abhishekpanda.com/blog?query={search_term_string}",
@@ -504,13 +558,18 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
   };
 
   const webpage = {
-    "@type": "WebPage",
+    "@type": pageType,
     "@id": `${canonical}#webpage`,
     url: canonical,
     name: title,
     description,
+    inLanguage: "en-US",
     isPartOf: { "@id": "https://www.abhishekpanda.com/#website" },
     about: { "@id": "https://www.abhishekpanda.com/#person" },
+    primaryImageOfPage: {
+      "@type": "ImageObject",
+      url: DEFAULT_OG_IMAGE,
+    },
   };
 
   const breadcrumb = buildBreadcrumbSchema(pathname, canonical);
@@ -535,6 +594,17 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
       url: "https://www.abhishekpanda.com/blog",
       publisher: { "@id": "https://www.abhishekpanda.com/#person" },
       description: "Engineering blog and AI architecture insights by Abhishek Panda.",
+    });
+  }
+
+  if (pathname === "/blogs" || pathname === "/ai-ml-blogs" || pathname === "/articles" || pathname === "/scriptures") {
+    graph.push({
+      "@type": "CollectionPage",
+      name: title,
+      url: canonical,
+      description,
+      about: { "@id": "https://www.abhishekpanda.com/#person" },
+      isPartOf: { "@id": "https://www.abhishekpanda.com/#website" },
     });
   }
 

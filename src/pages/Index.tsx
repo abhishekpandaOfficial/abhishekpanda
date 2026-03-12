@@ -3,9 +3,10 @@ import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
-import { HomeStackedShowcase } from "@/components/home/HomeStackedShowcase";
+import { DeferredSection } from "@/components/performance/DeferredSection";
 
 // Lazy load below-the-fold components for faster initial render
+const HomeStackedShowcase = lazy(() => import("@/components/home/HomeStackedShowcase"));
 const NewsletterSection = lazy(() => import("@/components/home/NewsletterSection").then(m => ({ default: m.NewsletterSection })));
 const NewsletterPopup = lazy(() => import("@/components/NewsletterPopup").then(m => ({ default: m.NewsletterPopup })));
 
@@ -51,25 +52,31 @@ const Index = () => {
         </motion.div>
         
         {/* Below-the-fold content loads lazily */}
-        <motion.div
-          variants={sectionReveal}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-4% 0px -4% 0px" }}
-        >
-          <HomeStackedShowcase />
-        </motion.div>
+        <DeferredSection minHeight={720} fallback={<SectionLoader />}>
+          <motion.div
+            variants={sectionReveal}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-4% 0px -4% 0px" }}
+          >
+            <Suspense fallback={<SectionLoader />}>
+              <HomeStackedShowcase />
+            </Suspense>
+          </motion.div>
+        </DeferredSection>
 
-        <motion.section
-          variants={sectionReveal}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-8% 0px -8% 0px" }}
-        >
-          <Suspense fallback={<SectionLoader />}>
-            <NewsletterSection />
-          </Suspense>
-        </motion.section>
+        <DeferredSection minHeight={280} fallback={<SectionLoader />}>
+          <motion.section
+            variants={sectionReveal}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-8% 0px -8% 0px" }}
+          >
+            <Suspense fallback={<SectionLoader />}>
+              <NewsletterSection />
+            </Suspense>
+          </motion.section>
+        </DeferredSection>
       </motion.main>
       <Footer />
       <Suspense fallback={null}>

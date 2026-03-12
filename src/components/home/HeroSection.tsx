@@ -68,6 +68,7 @@ const nameTypographyVariants = [
   "typo-ap-7",
   "typo-ap-8",
   "typo-ap-9",
+  "typo-ap-10",
 ];
 
 const primaryCtas = [

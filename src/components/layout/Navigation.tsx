@@ -23,6 +23,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { AbhishekAnimatedLogo } from "@/components/ui/AbhishekAnimatedLogo";
 import { HeaderGlobe } from "@/components/layout/HeaderGlobe";
 import { PublicSearch } from "@/components/layout/PublicSearch";
+import { PrefetchLink } from "@/components/PrefetchLink";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -106,17 +107,17 @@ export const Navigation = () => {
         <div className="container mx-auto px-4">
           <div className="grid h-16 grid-cols-[auto_1fr_auto] items-center gap-4 md:h-[4.5rem] 2xl:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group justify-self-start">
+            <PrefetchLink to="/" className="flex items-center gap-2 group justify-self-start">
               <div className="group-hover:scale-110 transition-transform duration-300">
                 <AbhishekAnimatedLogo size="md" animate />
               </div>
-            </Link>
+            </PrefetchLink>
 
             {/* Desktop Navigation */}
             <nav className="hidden xl:flex items-center justify-center gap-0 flex-nowrap 2xl:gap-0.5">
               {/* About */}
               {navLinks.slice(0, 1).map((link) => (
-                <Link
+                <PrefetchLink
                   key={link.path}
                   to={link.path}
                   className={cn(
@@ -132,10 +133,10 @@ export const Navigation = () => {
                     <link.icon className={desktopNavIconClass} />
                     {link.name}
                   </span>
-                </Link>
+                </PrefetchLink>
               ))}
 
-              <Link
+              <PrefetchLink
                 to="/blogs"
                 className={cn(
                   desktopNavItemClass,
@@ -150,9 +151,9 @@ export const Navigation = () => {
                   <ScrollText className={desktopNavIconClass} />
                   Blogs
                 </span>
-              </Link>
+              </PrefetchLink>
 
-              <Link
+              <PrefetchLink
                 to="/ai-ml-blogs"
                 className={cn(
                   desktopNavItemClass,
@@ -167,9 +168,9 @@ export const Navigation = () => {
                   <Brain className={desktopNavIconClass} />
                   AI/ML Blogs
                 </span>
-              </Link>
+              </PrefetchLink>
 
-              <Link
+              <PrefetchLink
                 to="/articles"
                 className={cn(
                   desktopNavItemClass,
@@ -184,9 +185,9 @@ export const Navigation = () => {
                   <Newspaper className={desktopNavIconClass} />
                   Articles
                 </span>
-              </Link>
+              </PrefetchLink>
 
-              <Link
+              <PrefetchLink
                 to="/projects"
                 className={cn(
                   desktopNavItemClass,
@@ -202,11 +203,11 @@ export const Navigation = () => {
                   <FolderOpen className={desktopNavIconClass} />
                   Projects
                 </span>
-              </Link>
+              </PrefetchLink>
 
               {/* Contact */}
               {navLinks.slice(1).map((link) => (
-                <Link
+                <PrefetchLink
                   key={link.path}
                   to={link.path}
                   className={cn(
@@ -223,7 +224,7 @@ export const Navigation = () => {
                     <link.icon className={desktopNavIconClass} />
                     {link.name}
                   </span>
-                </Link>
+                </PrefetchLink>
               ))}
 
               {/* LLM Galaxy Dropdown */}
@@ -250,15 +251,14 @@ export const Navigation = () => {
                       <div className="w-[320px] p-4 bg-card/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-xl">
                         <div className="space-y-1">
                           {galaxySubLinks.map((subLink) => (
-                            <Link
+                            <PrefetchLink
                               key={subLink.path}
                               to={subLink.path}
-                              reloadDocument={subLink.reloadDocument}
                               className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
                             >
                               <subLink.icon className="w-5 h-5 text-primary" />
                               <div className="font-medium text-foreground text-sm">{subLink.name}</div>
-                            </Link>
+                            </PrefetchLink>
                           ))}
                         </div>
                       </div>
