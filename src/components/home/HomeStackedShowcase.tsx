@@ -4,13 +4,16 @@ import { ArrowRight, Brain, FolderOpen, Newspaper, ScrollText } from "lucide-rea
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import { BlogPostCard } from "@/components/blog/BlogPostCard";
-import { BlogSeriesGrid } from "@/components/blog/BlogSeriesGrid";
 import ArticleCard from "@/components/articles/ArticleCard";
+import GsapInfiniteCardSlider from "@/components/home/GsapInfiniteCardSlider";
 import { ARTICLES } from "@/content/articles";
 import { AI_ML_SERIES } from "@/lib/aiMlSeries";
+import { BLOG_SERIES, getBlogSeriesHref, matchesBlogSeries } from "@/lib/blogSeries";
 import { usePublishedPersonalBlogs } from "@/hooks/usePublishedPersonalBlogs";
 import { PROJECT_CARDS } from "@/lib/projectsCatalog";
+import { useTheme } from "@/components/ThemeProvider";
+import { cn } from "@/lib/utils";
+import { getBlogSeriesVisual } from "@/lib/blogVisuals";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,6 +34,7 @@ type PanelProps = {
   actionLabel: string;
   icon: typeof ScrollText;
   children: ReactNode;
+  hideHeader?: boolean;
 };
 
 function ProjectShowcaseCard({
@@ -102,7 +106,7 @@ function ProjectShowcaseCard({
   return <div className="rounded-[1.75rem] border border-dashed border-border/60 bg-background/70 p-6">{cardBody}</div>;
 }
 
-function ShowcasePanel({ index, kicker, title, description, actionHref, actionLabel, icon: Icon, children }: PanelProps) {
+function ShowcasePanel({ index, kicker, title, description, actionHref, actionLabel, icon: Icon, children, hideHeader = false }: PanelProps) {
   return (
     <section
       data-home-stack-panel
@@ -117,20 +121,22 @@ function ShowcasePanel({ index, kicker, title, description, actionHref, actionLa
         }}
       />
       <div className="relative">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-primary">
-              <Icon className="h-4 w-4" />
-              {kicker}
+        {!hideHeader ? (
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-primary">
+                <Icon className="h-4 w-4" />
+                {kicker}
+              </div>
+              <h2 className="mt-4 text-3xl font-black tracking-tight text-foreground md:text-4xl">{title}</h2>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">{description}</p>
             </div>
-            <h2 className="mt-4 text-3xl font-black tracking-tight text-foreground md:text-4xl">{title}</h2>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">{description}</p>
+            <Link to={actionHref} className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+              {actionLabel}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
-          <Link to={actionHref} className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
-            {actionLabel}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
+        ) : null}
         {children}
       </div>
     </section>
@@ -139,7 +145,19 @@ function ShowcasePanel({ index, kicker, title, description, actionHref, actionLa
 
 export function HomeStackedShowcase() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const { personalPosts, isLoading, getTagStyle } = usePublishedPersonalBlogs();
+  const { personalPosts } = usePublishedPersonalBlogs();
+  const { theme } = useTheme();
+
+  const blogSeriesCounts = useMemo(
+    () =>
+      new Map(
+        BLOG_SERIES.map((series) => [
+          series.slug,
+          personalPosts.filter((post) => matchesBlogSeries(series, post)).length,
+        ]),
+      ),
+    [personalPosts],
+  );
 
   const aiMlSeriesCounts = useMemo(
     () =>
@@ -210,28 +228,125 @@ export function HomeStackedShowcase() {
               index={0}
               kicker="Published Blogs"
               title="All Published Engineering Blogs"
-              description="Every currently published website blog is surfaced here as a full card, so the homepage immediately reflects the live blog inventory instead of only a small featured slice."
+              description="This landing section now starts with the major `/blogs` series cards, so the core engineering learning tracks stay visible as a continuously scrolling discovery rail."
               actionHref="/blog"
               actionLabel="Open all blogs"
               icon={ScrollText}
+              hideHeader
             >
-              {isLoading ? (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className="h-[30rem] rounded-[1.5rem] border border-border/60 bg-background/70" />
-                  ))}
+              <div className="mb-8">
+                <div className="mb-4 flex items-center justify-between gap-4">
+                  <h3 className="text-xl font-black tracking-tight text-foreground md:text-2xl">Major Blog Series Cards</h3>
+                  <Link to="/blogs" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+                    Open all blog series
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
-              ) : personalPosts.length ? (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                  {personalPosts.map((post, index) => (
-                    <BlogPostCard key={post.slug} post={post} index={index} getTagStyle={getTagStyle} />
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-[1.5rem] border border-dashed border-border/60 bg-background/70 p-8 text-center text-muted-foreground">
-                  No published blog cards are available yet.
-                </div>
-              )}
+                <GsapInfiniteCardSlider
+                  items={BLOG_SERIES}
+                  speed={42}
+                  reverse={false}
+                  itemClassName="w-[300px] md:w-[360px] xl:w-[380px]"
+                  renderItem={(series) => {
+                    const to = getBlogSeriesHref(series);
+                    const count = blogSeriesCounts.get(series.slug) ?? 0;
+                    const visual = getBlogSeriesVisual(series, theme);
+
+                    return (
+                      <Link
+                        to={to}
+                        style={{ ["--series-rgb" as string]: series.rgb }}
+                        className={cn(
+                          "group relative isolate flex h-full overflow-hidden rounded-[2rem] border bg-card/78 shadow-[0_20px_60px_rgba(15,23,42,0.08)] transition-all duration-300 backdrop-blur-sm",
+                          "hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_28px_90px_rgba(59,130,246,0.16)]",
+                          "border-border/60",
+                        )}
+                      >
+                        <div
+                          className="absolute inset-0 opacity-90"
+                          style={{
+                            background:
+                              "radial-gradient(circle at top right, rgba(var(--series-rgb), 0.28), transparent 40%), radial-gradient(circle at bottom left, rgba(var(--series-rgb), 0.18), transparent 32%), linear-gradient(140deg, rgba(var(--series-rgb), 0.08), transparent 35%, rgba(var(--series-rgb), 0.12))",
+                          }}
+                        />
+                        <div className="relative flex h-full flex-col">
+                          <div className={cn("relative aspect-[16/10] overflow-hidden", theme === "dark" ? "border-b border-white/10" : "border-b border-slate-900/10")}>
+                            <img src={visual} alt={series.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" />
+                            <div
+                              className={cn(
+                                "absolute inset-0",
+                                theme === "dark"
+                                  ? "bg-gradient-to-t from-slate-950/72 via-slate-950/18 to-transparent"
+                                  : "bg-gradient-to-t from-white/90 via-white/18 to-transparent"
+                              )}
+                            />
+                            <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
+                              <div className="flex max-w-[80%] flex-wrap gap-1.5">
+                                {series.tags.slice(0, 3).map((tag) => (
+                                  <span
+                                    key={`${series.slug}-slider-header-tag-${tag}`}
+                                    className={cn(
+                                      "inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide",
+                                      theme === "dark"
+                                        ? "border-white/60 bg-black/30 text-white dark:border-white/35 dark:bg-white/20"
+                                        : "border-slate-900/12 bg-white/82 text-slate-900 shadow-sm"
+                                    )}
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                              <ArrowRight
+                                className={cn(
+                                  "h-5 w-5 flex-shrink-0 transition-all group-hover:translate-x-1",
+                                  theme === "dark" ? "text-white/85 group-hover:text-white" : "text-slate-900/70 group-hover:text-slate-950"
+                                )}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex flex-1 flex-col p-5">
+                            <h3 className="editorial-card-title text-xl font-black text-foreground sm:text-[1.35rem]">{series.title}</h3>
+                            <p className="editorial-copy mt-2 text-sm leading-7 text-muted-foreground">{series.subtitle}</p>
+
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              {series.tags.map((tag) => (
+                                <span
+                                  key={`${series.slug}-slider-tag-${tag}`}
+                                  className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/80 px-2.5 py-1 text-[11px] font-semibold text-foreground/85"
+                                >
+                                  <span className="h-1.5 w-1.5 rounded-full bg-primary/70" />
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+
+                            <div className="mt-5 flex flex-wrap items-center gap-2">
+                              {series.logos.map((logo, logoIndex) => (
+                                <span
+                                  key={`${series.slug}-slider-logo-${logoIndex}`}
+                                  className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border/70 bg-background/95 p-2 shadow-sm"
+                                >
+                                  <img src={logo} alt="" className="h-full w-full object-contain" loading="lazy" />
+                                </span>
+                              ))}
+                            </div>
+
+                            <div className="editorial-meta mt-5 flex items-center justify-between gap-3 border-t border-border/60 pt-4 text-xs text-muted-foreground">
+                              <span>{count > 0 ? `${count} website chapter${count === 1 ? "" : "s"}` : "Mastery Series"}</span>
+                              <span className="inline-flex items-center gap-2 font-semibold text-foreground">
+                                {series.actionLabel || "Open Guide"}
+                                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  }}
+                />
+              </div>
+
             </ShowcasePanel>
           </div>
 
@@ -245,7 +360,109 @@ export function HomeStackedShowcase() {
               actionLabel="Open AI / ML hub"
               icon={Brain}
             >
-              <BlogSeriesGrid counts={aiMlSeriesCounts} seriesList={AI_ML_SERIES} />
+              <GsapInfiniteCardSlider
+                items={AI_ML_SERIES}
+                speed={42}
+                reverse={true}
+                itemClassName="w-[300px] md:w-[360px] xl:w-[380px]"
+                renderItem={(series) => {
+                  const to = getBlogSeriesHref(series);
+                  const count = aiMlSeriesCounts.get(series.slug) ?? 0;
+                  const visual = getBlogSeriesVisual(series, theme);
+
+                  return (
+                    <Link
+                      to={to}
+                      style={{ ["--series-rgb" as string]: series.rgb }}
+                      className={cn(
+                        "group relative isolate flex h-full overflow-hidden rounded-[2rem] border bg-card/78 shadow-[0_20px_60px_rgba(15,23,42,0.08)] transition-all duration-300 backdrop-blur-sm",
+                        "hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_28px_90px_rgba(59,130,246,0.16)]",
+                        "border-border/60",
+                      )}
+                    >
+                      <div
+                        className="absolute inset-0 opacity-90"
+                        style={{
+                          background:
+                            "radial-gradient(circle at top right, rgba(var(--series-rgb), 0.28), transparent 40%), radial-gradient(circle at bottom left, rgba(var(--series-rgb), 0.18), transparent 32%), linear-gradient(140deg, rgba(var(--series-rgb), 0.08), transparent 35%, rgba(var(--series-rgb), 0.12))",
+                        }}
+                      />
+                      <div className="relative flex h-full flex-col">
+                        <div className={cn("relative aspect-[16/10] overflow-hidden", theme === "dark" ? "border-b border-white/10" : "border-b border-slate-900/10")}>
+                          <img src={visual} alt={series.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" />
+                          <div
+                            className={cn(
+                              "absolute inset-0",
+                              theme === "dark"
+                                ? "bg-gradient-to-t from-slate-950/72 via-slate-950/18 to-transparent"
+                                : "bg-gradient-to-t from-white/90 via-white/18 to-transparent"
+                            )}
+                          />
+                          <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
+                            <div className="flex max-w-[80%] flex-wrap gap-1.5">
+                              {series.tags.slice(0, 3).map((tag) => (
+                                <span
+                                  key={`${series.slug}-aiml-slider-header-tag-${tag}`}
+                                  className={cn(
+                                    "inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide",
+                                    theme === "dark"
+                                      ? "border-white/60 bg-black/30 text-white dark:border-white/35 dark:bg-white/20"
+                                      : "border-slate-900/12 bg-white/82 text-slate-900 shadow-sm"
+                                  )}
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                            <ArrowRight
+                              className={cn(
+                                "h-5 w-5 flex-shrink-0 transition-all group-hover:translate-x-1",
+                                theme === "dark" ? "text-white/85 group-hover:text-white" : "text-slate-900/70 group-hover:text-slate-950"
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex flex-1 flex-col p-5">
+                          <h3 className="editorial-card-title text-xl font-black text-foreground sm:text-[1.35rem]">{series.title}</h3>
+                          <p className="editorial-copy mt-2 text-sm leading-7 text-muted-foreground">{series.subtitle}</p>
+
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {series.tags.map((tag) => (
+                              <span
+                                key={`${series.slug}-aiml-slider-tag-${tag}`}
+                                className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/80 px-2.5 py-1 text-[11px] font-semibold text-foreground/85"
+                              >
+                                <span className="h-1.5 w-1.5 rounded-full bg-primary/70" />
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+
+                          <div className="mt-5 flex flex-wrap items-center gap-2">
+                            {series.logos.map((logo, logoIndex) => (
+                              <span
+                                key={`${series.slug}-aiml-slider-logo-${logoIndex}`}
+                                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border/70 bg-background/95 p-2 shadow-sm"
+                              >
+                                <img src={logo} alt="" className="h-full w-full object-contain" loading="lazy" />
+                              </span>
+                            ))}
+                          </div>
+
+                          <div className="editorial-meta mt-5 flex items-center justify-between gap-3 border-t border-border/60 pt-4 text-xs text-muted-foreground">
+                            <span>{count > 0 ? `${count} website chapter${count === 1 ? "" : "s"}` : "Mastery Series"}</span>
+                            <span className="inline-flex items-center gap-2 font-semibold text-foreground">
+                              {series.actionLabel || "Open Guide"}
+                              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                }}
+              />
             </ShowcasePanel>
           </div>
 

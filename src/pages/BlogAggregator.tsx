@@ -4,6 +4,7 @@ import { BookOpen, Search } from "lucide-react";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { Input } from "@/components/ui/input";
+import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { BlogSeriesGrid } from "@/components/blog/BlogSeriesGrid";
 import { BLOG_SERIES, matchesBlogSeries } from "@/lib/blogSeries";
 import { usePublishedPersonalBlogs } from "@/hooks/usePublishedPersonalBlogs";
@@ -16,7 +17,7 @@ const matchesSeriesSearch = (query: string, series: (typeof BLOG_SERIES)[number]
 export default function BlogAggregator() {
   const [searchQuery, setSearchQuery] = useState("");
   const query = searchQuery.trim().toLowerCase();
-  const { personalPosts } = usePublishedPersonalBlogs();
+  const { personalPosts, isLoading, getTagStyle } = usePublishedPersonalBlogs();
 
   const seriesCounts = useMemo(
     () =>
@@ -38,6 +39,15 @@ export default function BlogAggregator() {
     () => new Map(filteredSeries.map((series) => [series.slug, seriesCounts.get(series.slug) || 0])),
     [filteredSeries, seriesCounts],
   );
+
+  const filteredPosts = useMemo(() => {
+    if (!query) return personalPosts;
+
+    return personalPosts.filter((post) => {
+      const source = `${post.title || ""} ${post.excerpt || ""} ${(post.tags || []).join(" ")}`.toLowerCase();
+      return source.includes(query);
+    });
+  }, [personalPosts, query]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -84,27 +94,60 @@ export default function BlogAggregator() {
         </section>
 
         <section className="container mx-auto px-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="editorial-kicker text-primary">Series Library</p>
-              <h2 className="editorial-title mt-2 text-3xl font-black text-foreground md:text-4xl">Explore Blog Series</h2>
-              <p className="editorial-copy mt-3 max-w-3xl text-sm text-muted-foreground">
-                Open any mastery track directly from its own responsive card with the right hero visual, logo stack, and tags.
-              </p>
-            </div>
-            <div className="rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm font-semibold text-muted-foreground">
-              {filteredSeries.length} of {BLOG_SERIES.length} series
-            </div>
-          </div>
-
-          <div className="mt-8">
-            {filteredSeries.length ? (
-              <BlogSeriesGrid counts={visibleSeriesCounts} seriesList={filteredSeries} />
-            ) : (
-              <div className="rounded-[1.75rem] border border-dashed border-border/70 bg-card/70 p-8 text-center text-muted-foreground">
-                No series cards match that search.
+          <div>
+            <div className="mb-10">
+              <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <p className="editorial-kicker text-primary">Series Cards</p>
+                  <h3 className="text-2xl font-black tracking-tight text-foreground">Major Blog Series Cards</h3>
+                  <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+                    Open a full mastery track directly from its own series card.
+                  </p>
+                </div>
+                <div className="rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm font-semibold text-muted-foreground">
+                  {filteredSeries.length} series
+                </div>
               </div>
-            )}
+
+              {filteredSeries.length ? (
+                <BlogSeriesGrid counts={visibleSeriesCounts} seriesList={filteredSeries} />
+              ) : (
+                <div className="rounded-[1.75rem] border border-dashed border-border/70 bg-card/70 p-8 text-center text-muted-foreground">
+                  No series cards match that search.
+                </div>
+              )}
+            </div>
+
+            <div>
+              <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <p className="editorial-kicker text-primary">Live Posts</p>
+                  <h3 className="text-2xl font-black tracking-tight text-foreground">Published Blog Posts</h3>
+                  <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+                    Every published engineering article is shown here as a full card, so the landing page works as both a series hub and a live writing index.
+                  </p>
+                </div>
+                <div className="rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm font-semibold text-muted-foreground">
+                  {filteredPosts.length} posts
+                </div>
+              </div>
+
+              {isLoading && personalPosts.length === 0 ? (
+                <div className="rounded-[1.75rem] border border-border/60 bg-card/80 p-8 text-center text-muted-foreground">
+                  Loading published blog cards...
+                </div>
+              ) : filteredPosts.length ? (
+                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                  {filteredPosts.map((post, index) => (
+                    <BlogPostCard key={post.slug} post={post} index={index} getTagStyle={getTagStyle} />
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-[1.75rem] border border-dashed border-border/70 bg-card/70 p-8 text-center text-muted-foreground">
+                  No published blog posts match that search.
+                </div>
+              )}
+            </div>
           </div>
         </section>
       </main>
