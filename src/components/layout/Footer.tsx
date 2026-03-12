@@ -31,6 +31,7 @@ const footerLinks = {
     { name: "Ebooks", path: "/ebooks" },
     { name: "Mentorship", path: "/mentorship" },
     { name: "Products", path: "/products" },
+    { name: "Online Editor", path: "/dsa-mastery-csharp/practice" },
     { name: "LLM Galaxy", path: "/llm-galaxy" },
     { name: "LLM Visualizer", path: "/llm-visualizer" },
     { name: "OpenOwl", path: "/openowl" },

@@ -54,6 +54,9 @@ const TechHub = lazy(() => import("./pages/TechHub"));
 const OpenOwlLanding = lazy(() => import("./pages/OpenOwlLanding"));
 const OpenOwlAssistant = lazy(() => import("./pages/OpenOwlAssistant"));
 const LLMVisualizer = lazy(() => import("./pages/llm-visualizer"));
+const DsaMasterySyllabus = lazy(() => import("./pages/DsaMasterySyllabus"));
+const DsaMasteryPractice = lazy(() => import("./pages/DsaMasteryPractice"));
+const DsaMasteryInterview = lazy(() => import("./pages/DsaMasteryInterview"));
 const CSharpMastery = lazy(() => import("./pages/CSharpMastery"));
 const LinqMastery = lazy(() => import("./pages/LinqMastery"));
 const DotnetMastery = lazy(() => import("./pages/DotnetMastery"));
@@ -192,6 +195,10 @@ const App = () => {
                 <Route path="/ai-model-comparison.html" element={<Navigate to="/llm-galaxy/model-comparison" replace />} />
                 <Route path="/blogs" element={<BlogAggregator />} />
                 <Route path="/cheatsheets" element={<Navigate to="/blogs" replace />} />
+                <Route path="/cheatsheets/dsa-mastery-csharp" element={<Navigate to="/dsa-mastery-csharp/syllabus" replace />} />
+                <Route path="/cheatsheets/dsa-mastery-csharp/practice" element={<DsaMasteryPractice />} />
+                <Route path="/cheatsheets/dsa-mastery-csharp/interview" element={<DsaMasteryInterview />} />
+                <Route path="/cheatsheets/dsa-mastery-csharp/syllabus" element={<DsaMasterySyllabus />} />
                 <Route path="/cheatsheets/azure-mastery" element={<AzureMasteryGuide />} />
                 <Route path="/cheatsheets/angular-mastery" element={<AngularMasteryGuide />} />
                 <Route path="/cheatsheets/csharp-mastery" element={<CSharpMastery />} />
@@ -209,6 +216,10 @@ const App = () => {
                 <Route path="/ai-ml-blogs/numpy-mastery" element={<NumpyMastery />} />
                 <Route path="/ai-ml-blogs/machine-learning-core-mastery" element={<MachineLearningCoreMastery />} />
                 <Route path="/ai-ml-blogs/:seriesSlug" element={<AiMlSeries />} />
+                <Route path="/blogs/dsa-mastery-csharp" element={<Navigate to="/dsa-mastery-csharp/syllabus" replace />} />
+                <Route path="/blogs/dsa-mastery-csharp/practice" element={<Navigate to="/cheatsheets/dsa-mastery-csharp/practice" replace />} />
+                <Route path="/blogs/dsa-mastery-csharp/interview" element={<Navigate to="/cheatsheets/dsa-mastery-csharp/interview" replace />} />
+                <Route path="/blogs/dsa-mastery-csharp/syllabus" element={<Navigate to="/cheatsheets/dsa-mastery-csharp/syllabus" replace />} />
                 <Route path="/blogs/azure-mastery" element={<Navigate to="/cheatsheets/azure-mastery" replace />} />
                 <Route path="/blogs/angular-mastery" element={<Navigate to="/cheatsheets/angular-mastery" replace />} />
                 <Route path="/blogs/linq-mastery" element={<Navigate to="/cheatsheets/linq-mastery" replace />} />
@@ -240,6 +251,10 @@ const App = () => {
                 <Route path="/openowl-blueprint" element={<Navigate to="/openowl-blueprint.html" replace />} />
                 <Route path="/open-owl" element={<Navigate to="/openowl" replace />} />
                 <Route path="/llm-visualizer" element={<LLMVisualizer />} />
+                <Route path="/dsa-mastery-csharp" element={<Navigate to="/dsa-mastery-csharp/syllabus" replace />} />
+                <Route path="/dsa-mastery-csharp/practice" element={<DsaMasteryPractice />} />
+                <Route path="/dsa-mastery-csharp/interview" element={<DsaMasteryInterview />} />
+                <Route path="/dsa-mastery-csharp/syllabus" element={<DsaMasterySyllabus />} />
                 <Route path="/azure-mastery" element={<Navigate to="/cheatsheets/azure-mastery" replace />} />
                 <Route path="/angular-mastery" element={<Navigate to="/cheatsheets/angular-mastery" replace />} />
                 <Route path="/csharp-mastery" element={<Navigate to="/cheatsheets/csharp-mastery" replace />} />

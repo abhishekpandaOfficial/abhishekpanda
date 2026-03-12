@@ -32,6 +32,18 @@ export type BlogSeriesToc = {
 
 export const BLOG_SERIES: BlogSeriesTrack[] = [
   {
+    slug: "dsa-mastery-csharp",
+    title: "DSA Mastery",
+    detailTitle: "DSA Mastery - C# & .NET Edition",
+    subtitle: "Data structures, algorithms, problem-solving patterns, and C#-centric interview preparation in one structured track.",
+    tags: ["DSA", "Algorithms", "C#"],
+    keywords: ["dsa", "data structures", "algorithms", "c#", ".net", "interview prep", "problem solving"],
+    logos: ["/brand-logos/stacks/csharp.svg", "/brand-logos/stacks/dotnet.svg"],
+    rgb: "34 197 94",
+    href: "/dsa-mastery-csharp/syllabus",
+    actionLabel: "Open DSA Mastery",
+  },
+  {
     slug: "csharp-mastery",
     title: "C# Mastery",
     detailTitle: "C# Mastery",
