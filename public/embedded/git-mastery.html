@@ -1,0 +1,2112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Git & GitHub Mastery — Complete Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080608;--sf:#0d0b0d;--card:#120e12;--card2:#171217;
+  --b1:#2a1a2a;--b2:#3d253d;--b3:#6e4070;
+  --r1:#f05033;--r2:#e8432b;--r3:#ff7a5c;
+  --pu:#7c3aed;--pu2:#a855f7;--pu3:#c084fc;
+  --bl:#2563eb;--bl2:#60a5fa;--bl3:#93c5fd;
+  --ye:#fbbf24;--gr:#22c55e;--pi:#ec4899;
+  --tx:#f0d8f0;--tx2:#9a7a9a;--tx3:#4a2a4a;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;--disp:'Bebas Neue',sans-serif;
+  --lw:264px;--rw:560px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:14px}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(240,80,51,.006) 3px,rgba(240,80,51,.006) 4px);pointer-events:none;z-index:9999}
+
+/* TOPBAR */
+.topbar{height:54px;background:var(--sf);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 18px;gap:12px;flex-shrink:0;position:relative;z-index:100}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--r1) 30%,var(--pu2) 70%,transparent)}
+.logo-icon{width:36px;height:36px;border-radius:8px;background:var(--card);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 16px rgba(240,80,51,.2)}
+.logo-name{font-family:var(--disp);font-size:22px;letter-spacing:5px;background:linear-gradient(135deg,var(--r1),var(--pu2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.logo-sub{font-size:8px;color:var(--tx3);font-family:var(--mono);letter-spacing:2px;margin-top:2px}
+.top-sep{flex:1}
+.t-stat{background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:3px 9px;font-size:9.5px;font-family:var(--mono);color:var(--tx3)}
+.t-stat b{color:var(--r1)}
+.t-stat b.pu{color:var(--pu2)}
+.t-badge{background:rgba(124,58,237,.08);border:1px solid var(--b2);border-radius:3px;padding:4px 11px;font-size:9px;color:var(--pu2);font-family:var(--mono);letter-spacing:1px}
+.blink{animation:bl .9s step-end infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* LEFT */
+.lp{width:var(--lw);background:var(--sf);border-right:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.lp-hdr{padding:11px 13px 9px;border-bottom:1px solid var(--b1)}
+.lp-hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.lp-hdr-row h3{font-family:var(--mono);font-size:8px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase}
+.prog-bar{background:var(--b1);border-radius:2px;height:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--r1),var(--pu2));width:0%;transition:width .5s;box-shadow:0 0 6px rgba(240,80,51,.4)}
+.prog-txt{font-size:8px;color:var(--tx3);font-family:var(--mono);margin-top:4px}
+.lnav{flex:1;overflow-y:auto;padding:3px 0}
+.lnav::-webkit-scrollbar{width:2px}
+.lnav::-webkit-scrollbar-thumb{background:var(--b2)}
+.ci{display:flex;align-items:center;gap:7px;padding:7px 12px;cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.ci:hover{background:rgba(240,80,51,.04);border-left-color:var(--b2)}
+.ci.active{background:rgba(240,80,51,.07);border-left-color:var(--r1)}
+.ci.active .cn{color:var(--r1)}
+.ci-icon{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.ci-info{flex:1;min-width:0}
+.cn{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.cm{font-size:8px;color:var(--tx3);font-family:var(--mono)}
+.lv{font-size:7px;padding:1px 5px;border-radius:2px;font-family:var(--mono);font-weight:700;flex-shrink:0;text-transform:uppercase;letter-spacing:.5px}
+
+/* MIDDLE */
+.mid{flex:1;overflow-y:auto;padding:18px;min-width:0}
+.mid::-webkit-scrollbar{width:4px}
+.mid::-webkit-scrollbar-thumb{background:var(--b2)}
+
+/* WELCOME */
+.wlc{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:65vh;text-align:center;padding:32px;animation:fu .45s ease}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.wlc-logo{font-size:68px;margin-bottom:6px;filter:drop-shadow(0 0 30px rgba(240,80,51,.4));animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{filter:drop-shadow(0 0 20px rgba(240,80,51,.3))}50%{filter:drop-shadow(0 0 40px rgba(240,80,51,.6))}}
+.wlc-title{font-family:var(--disp);font-size:46px;letter-spacing:6px;background:linear-gradient(135deg,var(--r1),var(--pu2) 60%,var(--bl2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;line-height:1}
+.wlc-sub{font-size:12px;color:var(--tx2);max-width:500px;line-height:1.75;margin-bottom:24px;font-family:var(--mono)}
+.wlc-prompt{font-family:var(--mono);font-size:13px;color:var(--r1);margin-bottom:20px}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.sc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px 18px;text-align:center;min-width:90px;transition:border-color .2s}
+.sc:hover{border-color:var(--b2)}
+.sc-n{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--r1);display:block;line-height:1;text-shadow:0 0 10px rgba(240,80,51,.3)}
+.sc-n.pu{color:var(--pu2);text-shadow:0 0 10px rgba(168,85,247,.3)}
+.sc-n.bl{color:var(--bl2);text-shadow:0 0 10px rgba(96,165,250,.3)}
+.sc-l{font-size:8px;color:var(--tx3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;display:block}
+.wlc-hint{font-size:9px;color:var(--tx3);font-family:var(--mono);margin-top:16px;letter-spacing:1px}
+
+/* FLOW DIAGRAM */
+.flow{display:flex;align-items:center;gap:0;margin:10px 0;flex-wrap:wrap;overflow-x:auto;padding:12px;background:var(--card);border:1px solid var(--b1);border-radius:6px}
+.fbox{background:var(--card2);border:1px solid var(--b1);border-radius:5px;padding:7px 11px;font-family:var(--mono);font-size:10px;white-space:nowrap;text-align:center;flex-shrink:0}
+.fbox .fb-label{font-size:8px;color:var(--tx3);margin-bottom:2px;text-transform:uppercase;letter-spacing:1px}
+.fbox .fb-name{font-weight:700}
+.farr{padding:0 6px;color:var(--tx3);font-size:14px;flex-shrink:0}
+.farr.cmd{padding:0 4px;font-family:var(--mono);font-size:9px;color:var(--r1);display:flex;flex-direction:column;align-items:center;gap:2px}
+.farr.cmd span{color:var(--tx3);font-size:8px}
+
+/* CHAPTER HEADER */
+.ch-hdr{margin-bottom:18px;animation:fu .3s ease}
+.ch-ey{font-size:8px;color:var(--r1);font-family:var(--mono);letter-spacing:3px;text-transform:uppercase;margin-bottom:5px}
+.ch-t{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--tx);line-height:1.1;margin-bottom:8px}
+.ch-d{font-size:11.5px;color:var(--tx2);line-height:1.7;max-width:640px;font-family:var(--mono)}
+.ch-chips{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:3px 8px;font-size:9px;color:var(--tx2);font-family:var(--mono)}
+.chip-dot{width:4px;height:4px;border-radius:50%}
+
+/* TOPIC GRID */
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;animation:fu .4s ease .08s both}
+.tc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--r1),var(--pu2));opacity:0;transition:opacity .2s}
+.tc:hover{border-color:var(--b2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(240,80,51,.08)}
+.tc:hover::before,.tc.active::before{opacity:1}
+.tc.active{border-color:var(--r1);background:var(--card2);box-shadow:0 0 0 1px rgba(240,80,51,.3)}
+.tc-cmd{font-family:var(--mono);font-size:14px;font-weight:800;color:var(--r1);margin-bottom:3px;text-shadow:0 0 8px rgba(240,80,51,.3)}
+.tc-cmd.pu{color:var(--pu2);text-shadow:0 0 8px rgba(168,85,247,.3)}
+.tc-title{font-size:10px;font-weight:600;color:var(--tx);margin-bottom:3px;font-family:var(--mono)}
+.tc-d{font-size:9.5px;color:var(--tx3);line-height:1.4}
+.tc-tags{display:flex;gap:3px;margin-top:7px;flex-wrap:wrap}
+.tag{font-size:7px;padding:2px 4px;border-radius:2px;font-family:var(--mono);font-weight:700;letter-spacing:.3px}
+.tag.beginner{background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.2)}
+.tag.intermediate{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)}
+.tag.advanced{background:rgba(124,58,237,.1);color:#7c3aed;border:1px solid rgba(124,58,237,.2)}
+.tag.github{background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.2)}
+.tag.essential{background:rgba(240,80,51,.1);color:var(--r1);border:1px solid rgba(240,80,51,.25)}
+.tag.danger{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
+
+/* RIGHT PANEL */
+.rp{width:var(--rw);background:var(--sf);border-left:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .25s}
+.rp.hidden{width:0;border:none;overflow:hidden}
+.rp-hdr{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.rp-hdr h3{flex:1;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--r1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xbtn{width:22px;height:22px;border-radius:3px;border:1px solid var(--b1);background:transparent;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--mono);transition:all .15s}
+.xbtn:hover{background:var(--b1);color:var(--tx)}
+.rp-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;overflow-x:auto}
+.rp-tabs::-webkit-scrollbar{height:0}
+.rt{padding:7px 13px;font-size:9.5px;color:var(--tx3);font-family:var(--mono);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;letter-spacing:.5px}
+.rt:hover{color:var(--tx)}
+.rt.active{color:var(--r1);border-bottom-color:var(--r1)}
+.rb{flex:1;overflow-y:auto;padding:14px}
+.rb::-webkit-scrollbar{width:2px}
+.rb::-webkit-scrollbar-thumb{background:var(--b2)}
+@keyframes sr{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.rb>*{animation:sr .2s ease both}
+
+/* CONTENT */
+.sec{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--r1);margin:16px 0 7px;display:flex;align-items:center;gap:7px;letter-spacing:1.5px;text-transform:uppercase}
+.sec::after{content:'';flex:1;height:1px;background:var(--b1)}
+.sec.pu{color:var(--pu2)}
+.sec.bl{color:var(--bl2)}
+.sec:first-child{margin-top:0}
+p.bd{font-size:11.5px;line-height:1.75;color:var(--tx2);margin-bottom:9px;font-family:var(--mono)}
+strong{color:var(--tx)}
+
+.callout{border-left:2px solid;padding:9px 12px;border-radius:0 4px 4px 0;margin:9px 0;font-size:10.5px;line-height:1.7;font-family:var(--mono)}
+.callout.info{border-color:var(--r1);background:rgba(240,80,51,.05);color:var(--tx2)}
+.callout.warn{border-color:var(--ye);background:rgba(251,191,36,.05);color:var(--tx2)}
+.callout.tip{border-color:var(--pu2);background:rgba(168,85,247,.05);color:var(--tx2)}
+.callout.danger{border-color:#ef4444;background:rgba(239,68,68,.05);color:var(--tx2)}
+.callout.github{border-color:var(--bl2);background:rgba(96,165,250,.05);color:var(--tx2)}
+.callout strong{display:block;font-size:7.5px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.callout.info strong{color:var(--r1)}.callout.warn strong{color:var(--ye)}.callout.tip strong{color:var(--pu2)}
+.callout.danger strong{color:#ef4444}.callout.github strong{color:var(--bl2)}
+
+/* TERMINAL */
+.tw{background:#080408;border:1px solid var(--b2);border-radius:7px;overflow:hidden;margin:10px 0;box-shadow:0 0 24px rgba(240,80,51,.06)}
+.tb{display:flex;align-items:center;gap:5px;padding:7px 11px;background:#0a060a;border-bottom:1px solid var(--b1)}
+.td{width:9px;height:9px;border-radius:50%}
+.td.r{background:#ff5f57}.td.y{background:#febc2e}.td.g{background:#28c840}
+.tt{flex:1;text-align:center;font-size:9px;color:var(--tx3);font-family:var(--mono)}
+.tr-btn{background:transparent;border:1px solid var(--b2);border-radius:3px;color:var(--r1);font-family:var(--mono);font-size:8px;padding:2px 8px;cursor:pointer;transition:all .15s;letter-spacing:1px}
+.tr-btn:hover{background:rgba(240,80,51,.1);border-color:var(--r1)}
+.tr-btn.running{color:var(--ye);border-color:var(--ye)}
+.ts{padding:12px 14px;font-family:var(--mono);font-size:11.5px;line-height:1.65;min-height:90px;max-height:420px;overflow-y:auto}
+.ts::-webkit-scrollbar{width:2px}
+.ts::-webkit-scrollbar-thumb{background:var(--b2)}
+.tl{display:block;white-space:pre-wrap;word-break:break-all}
+.tp{color:var(--r1)}.tc2{color:#fff}
+.to{color:#b89ab8}
+.to-g{color:#4ade80;font-weight:600}
+.to-r{color:#f87171}
+.to-y{color:#fcd34d}
+.to-b{color:#93c5fd}
+.to-m{color:#d8b4fe}
+.to-c{color:#67e8f9}
+.to-w{color:#fff;font-weight:600}
+.to-dim{color:#4a2a4a}
+.tcur{display:inline-block;width:7px;height:13px;background:var(--r1);margin-left:1px;animation:bl .9s step-end infinite;vertical-align:text-bottom}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:10.5px;margin:8px 0}
+.tbl th{background:var(--card2);color:var(--r1);font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:7px 9px;text-align:left;border-bottom:1px solid var(--b1)}
+.tbl td{padding:6px 9px;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.02);vertical-align:top;line-height:1.5;font-family:var(--mono);font-size:10px}
+.tbl tr:hover td{background:rgba(240,80,51,.02)}
+.tbl td:first-child{color:var(--r1);white-space:nowrap;font-weight:600}
+.tbl td.pu{color:var(--pu2)}.tbl td.bl{color:var(--bl2)}.tbl td.gr{color:var(--gr)}
+.tbl td.ye{color:var(--ye)}.tbl td.re{color:#f87171}
+
+.fl{list-style:none;margin:6px 0}
+.fl li{display:flex;align-items:flex-start;gap:7px;padding:4px 0;font-size:10.5px;color:var(--tx2);line-height:1.55;border-bottom:1px solid rgba(255,255,255,.02);font-family:var(--mono)}
+.fl li::before{content:'▸';color:var(--r1);font-size:10px;margin-top:1px;flex-shrink:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.mc{background:var(--card);border:1px solid var(--b1);border-radius:4px;padding:10px;font-family:var(--mono)}
+.mc h4{font-size:8px;font-weight:700;color:var(--r1);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.mc h4.pu{color:var(--pu2)}.mc h4.bl{color:var(--bl2)}
+.mc p{font-size:10px;color:var(--tx2);line-height:1.55}
+
+/* Q&A */
+.qa-item{border:1px solid var(--b1);border-radius:4px;margin-bottom:7px;overflow:hidden}
+.qa-item:hover{border-color:var(--b2)}
+.qa-q{padding:9px 12px;cursor:pointer;display:flex;align-items:flex-start;gap:7px;background:var(--card);transition:background .15s}
+.qa-q:hover{background:var(--card2)}
+.qa-qi{width:17px;height:17px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;font-family:var(--mono);flex-shrink:0;margin-top:1px}
+.qa-qt{flex:1;font-size:10.5px;color:var(--tx);font-weight:500;line-height:1.5;font-family:var(--mono)}
+.qa-ch{color:var(--tx3);transition:transform .3s;flex-shrink:0;font-size:9px;margin-top:3px}
+.qa-item.open .qa-ch{transform:rotate(180deg)}
+.qa-a{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.qa-item.open .qa-a{max-height:1200px}
+.qa-ab{padding:12px;font-size:10.5px;color:var(--tx2);line-height:1.8;border-top:1px solid var(--b1);background:#050305;font-family:var(--mono)}
+.qa-ab code{background:var(--card);border:1px solid var(--b1);border-radius:2px;padding:1px 4px;color:var(--r1)}
+.filter-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.fbtn{font-size:8px;padding:2px 7px;border-radius:3px;border:1px solid var(--b1);background:transparent;color:var(--tx3);cursor:pointer;font-family:var(--mono);letter-spacing:.5px;transition:all .15s}
+.fbtn:hover,.fbtn.active{border-color:var(--r1);color:var(--r1);background:rgba(240,80,51,.06)}
+
+/* BRANCH VISUALIZER */
+.branch-viz{background:#050305;border:1px solid var(--b1);border-radius:6px;padding:14px 16px;margin:10px 0;font-family:var(--mono);font-size:11px;line-height:1.9}
+.bv-line{display:block;white-space:pre}
+.bv-main{color:var(--r1)}.bv-feat{color:var(--pu2)}.bv-head{color:var(--gr);font-weight:700}
+.bv-hash{color:var(--tx3)}.bv-msg{color:var(--tx2)}.bv-tag{color:var(--ye);font-weight:700}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo-icon">🔀</div>
+  <div>
+    <div class="logo-name">GIT &amp; GITHUB MASTERY</div>
+    <div class="logo-sub">EVERY COMMAND · ANIMATED FLOW · COMPLETE REFERENCE · 2025</div>
+  </div>
+  <div class="top-sep"></div>
+  <div class="t-stat"><b>22</b> Chapters</div>
+  <div class="t-stat"><b>120+</b> Commands</div>
+  <div class="t-stat"><b>200+</b> <b class="pu">Animated</b> Demos</div>
+  <div class="t-stat"><b>100</b> Q&amp;A</div>
+  <div class="t-badge">Git <b>2.x</b> · GitHub · Actions · CLI</div>
+</div>
+<div class="layout">
+  <div class="lp">
+    <div class="lp-hdr">
+      <div class="lp-hdr-row"><h3>// Git &amp; GitHub Path</h3></div>
+      <div class="prog-bar"><div class="prog-fill" id="progBar"></div></div>
+      <div class="prog-txt" id="progTxt">0 / 23 chapters visited</div>
+    </div>
+    <nav class="lnav" id="leftNav"></nav>
+  </div>
+  <div class="mid" id="middle">
+    <div class="wlc">
+      <div class="wlc-logo">🔀</div>
+      <div class="wlc-title">GIT &amp; GITHUB MASTERY</div>
+      <div class="wlc-prompt"><span class="blink">▌</span> git commit -m "learn everything"</div>
+      <p class="wlc-sub">Every git command. Animated flow. When to use, how to use, what happens next.<br>From <code style="color:var(--r1)">git init</code> to GitHub Actions — master version control completely.</p>
+      <div class="stat-row">
+        <div class="sc"><span class="sc-n">23</span><span class="sc-l">Chapters</span></div>
+        <div class="sc"><span class="sc-n">120+</span><span class="sc-l">Commands</span></div>
+        <div class="sc"><span class="sc-n pu">200+</span><span class="sc-l">Animated</span></div>
+        <div class="sc"><span class="sc-n bl">100</span><span class="sc-l">Q&amp;A</span></div>
+        <div class="sc"><span class="sc-n" style="color:var(--gr)">∞</span><span class="sc-l">Workflows</span></div>
+      </div>
+      <div class="wlc-hint">← select chapter · watch git operations animate in real-time · click ▶ Run</div>
+    </div>
+  </div>
+  <div class="rp hidden" id="rightPanel">
+    <div class="rp-hdr">
+      <h3 id="rightTitle">$ git select-topic</h3>
+      <button class="xbtn" onclick="closeRight()">✕</button>
+    </div>
+    <div class="rp-tabs" id="rightTabs"></div>
+    <div class="rb" id="rightBody"></div>
+  </div>
+</div>
+<script>
+
+const CHAPTERS=[
+{id:'git-github-mastery',icon:'🏁',color:'#60a5fa',bg:'rgba(96,165,250,.12)',lc:'#60a5fa',level:'MASTER',
+ title:'GIT/GITHUB Mastery',sub:'local flow · PR flow · CI/CD flow',
+ desc:'One complete end-to-end blueprint covering local Git, remote GitHub collaboration, pull requests, code review, CI/CD, and release discipline.',
+ topics:[
+  {id:'mastery-overview',cmd:'Mastery Blueprint',title:'Complete Git + GitHub System',desc:'Detailed top-to-bottom map from code change to production release',tags:['essential','github'],tabs:['Overview','Data Flow Diagram','Command Path','Team Rules']},
+ ]},
+{id:'setup',icon:'⚙️',color:'#f05033',bg:'rgba(240,80,51,.12)',lc:'#f05033',level:'START',
+ title:'Setup & Init',sub:'git config · init · clone',
+ desc:'Configure your identity, initialise repositories, and clone existing projects. The foundation every Git workflow builds on.',
+ topics:[
+  {id:'config',cmd:'git config',title:'Configure Git Identity',desc:'Set name, email, editor, aliases globally and per-repo',tags:['essential'],tabs:['Demo','Global vs Local','Aliases','Examples']},
+  {id:'init',cmd:'git init',title:'Initialise Repository',desc:'Create a new local repo from scratch',tags:['essential'],tabs:['Demo','What Creates','Examples']},
+  {id:'clone',cmd:'git clone',title:'Clone a Repository',desc:'Download a remote repo with full history',tags:['essential'],tabs:['Demo','Flags','Examples']},
+ ]},
+{id:'staging',icon:'📋',color:'#f05033',bg:'rgba(240,80,51,.1)',lc:'#f05033',level:'ESSENTIAL',
+ title:'Staging & Snapshots',sub:'status · add · diff · commit',
+ desc:'The core Git workflow — inspect changes, stage what you want, and create commits. Understand the 3-area model: working tree → index → repository.',
+ topics:[
+  {id:'status',cmd:'git status',title:'Inspect Working Tree',desc:'See what is changed, staged, untracked',tags:['essential'],tabs:['Demo','Output Guide','Tips']},
+  {id:'add',cmd:'git add',title:'Stage Changes',desc:'Move changes from working tree to index (staging area)',tags:['essential'],tabs:['Demo','Flags','Partial Staging']},
+  {id:'diff',cmd:'git diff',title:'View Differences',desc:'See line-by-line changes in working tree and staged',tags:['essential'],tabs:['Demo','Staged vs Unstaged','Flags']},
+  {id:'commit',cmd:'git commit',title:'Create Snapshot',desc:'Save staged changes as a permanent commit',tags:['essential'],tabs:['Demo','Good Messages','Amend','Flags']},
+  {id:'restore',cmd:'git restore',title:'Discard / Unstage',desc:'Undo working tree changes and unstage files',tags:['essential'],tabs:['Demo','Unstage','Discard']},
+ ]},
+{id:'branching',icon:'🌿',color:'#7c3aed',bg:'rgba(124,58,237,.12)',lc:'#7c3aed',level:'ESSENTIAL',
+ title:'Branching',sub:'branch · switch · checkout',
+ desc:'Create parallel lines of development. Branches are cheap and local — use them for every feature, fix and experiment.',
+ topics:[
+  {id:'branch',cmd:'git branch',title:'Manage Branches',desc:'Create, list, rename and delete branches',tags:['essential'],tabs:['Demo','Flags','Rename & Delete']},
+  {id:'switch',cmd:'git switch',title:'Switch Branches',desc:'Move between branches safely (new preferred way)',tags:['essential'],tabs:['Demo','Create & Switch','Detached HEAD']},
+  {id:'checkout',cmd:'git checkout',title:'Checkout (Classic)',desc:'The older command — files, branches, commits',tags:['intermediate'],tabs:['Demo','vs switch','File Checkout']},
+  {id:'branch-viz',cmd:'Branch Flow',title:'Branch Visualiser',desc:'See how commits and branches relate graphically',tags:['essential'],tabs:['Demo','Diagram','When to Branch']},
+ ]},
+{id:'merging',icon:'🔀',color:'#7c3aed',bg:'rgba(124,58,237,.1)',lc:'#7c3aed',level:'ESSENTIAL',
+ title:'Merging',sub:'merge · rebase · cherry-pick',
+ desc:'Integrate divergent history. Understand fast-forward vs merge commits, conflict resolution, and when to rebase vs merge.',
+ topics:[
+  {id:'merge',cmd:'git merge',title:'Merge Branches',desc:'Combine two branches — fast-forward or merge commit',tags:['essential'],tabs:['Demo','FF vs 3-way','Conflicts','Abort']},
+  {id:'rebase',cmd:'git rebase',title:'Rebase Commits',desc:'Reapply commits on a new base — cleaner history',tags:['intermediate'],tabs:['Demo','Interactive -i','vs Merge','Rules']},
+  {id:'cherry-pick',cmd:'git cherry-pick',title:'Cherry-Pick Commits',desc:'Apply specific commits from any branch',tags:['intermediate'],tabs:['Demo','Multi-Pick','Use Cases']},
+  {id:'conflicts',cmd:'<<<<<<< HEAD',title:'Conflict Resolution',desc:'Resolve merge conflicts step by step',tags:['essential'],tabs:['Demo','Markers','Tools','Prevention']},
+ ]},
+{id:'remotes',icon:'🌐',color:'#2563eb',bg:'rgba(37,99,235,.1)',lc:'#60a5fa',level:'ESSENTIAL',
+ title:'Remote Operations',sub:'remote · fetch · pull · push',
+ desc:'Sync with remote repositories. Understand the difference between fetch, pull and push. Work with multiple remotes.',
+ topics:[
+  {id:'remote',cmd:'git remote',title:'Manage Remotes',desc:'Add, list, rename and remove remote connections',tags:['essential'],tabs:['Demo','Flags','Multiple Remotes']},
+  {id:'fetch',cmd:'git fetch',title:'Fetch from Remote',desc:'Download remote changes without merging',tags:['essential'],tabs:['Demo','vs Pull','Examples']},
+  {id:'pull',cmd:'git pull',title:'Pull Changes',desc:'Fetch + merge (or rebase) remote changes',tags:['essential'],tabs:['Demo','Rebase Flag','Conflicts']},
+  {id:'push',cmd:'git push',title:'Push to Remote',desc:'Upload local commits to remote branch',tags:['essential'],tabs:['Demo','Force Push','Flags','Tracking']},
+ ]},
+{id:'history',icon:'📜',color:'#f05033',bg:'rgba(240,80,51,.08)',lc:'#f05033',level:'ESSENTIAL',
+ title:'History & Inspection',sub:'log · show · diff · blame · reflog',
+ desc:'Navigate and understand commit history. Find who changed what and when. Recover lost commits.',
+ topics:[
+  {id:'log',cmd:'git log',title:'View Commit History',desc:'Browse, filter and format commit log',tags:['essential'],tabs:['Demo','Formatting','Filters','Graph']},
+  {id:'show',cmd:'git show',title:'Inspect a Commit',desc:'See the full diff and metadata of any commit',tags:['essential'],tabs:['Demo','Flags','Examples']},
+  {id:'blame',cmd:'git blame',title:'Line-by-Line History',desc:'Find who last changed each line of a file',tags:['intermediate'],tabs:['Demo','Flags','Tips']},
+  {id:'reflog',cmd:'git reflog',title:'Reference Log',desc:'The undo-everything safety net — every HEAD movement',tags:['advanced'],tabs:['Demo','Recovery','Examples']},
+  {id:'bisect',cmd:'git bisect',title:'Binary Search Bugs',desc:'Find which commit introduced a regression',tags:['advanced'],tabs:['Demo','Workflow','Auto Mode']},
+ ]},
+{id:'stash',icon:'🗃️',color:'#fbbf24',bg:'rgba(251,191,36,.1)',lc:'#fbbf24',level:'INTERMEDIATE',
+ title:'Stashing',sub:'stash · pop · apply · list',
+ desc:'Temporarily shelve changes to switch context. Name stashes, stash by branch, and apply selectively.',
+ topics:[
+  {id:'stash-save',cmd:'git stash',title:'Save Dirty State',desc:'Stash uncommitted changes and clean working tree',tags:['intermediate'],tabs:['Demo','Named Stash','Flags']},
+  {id:'stash-ops',cmd:'stash pop/apply',title:'Restore Stashed Work',desc:'Retrieve stashed changes back to working tree',tags:['intermediate'],tabs:['Demo','pop vs apply','List & Drop']},
+ ]},
+{id:'undoing',icon:'↩️',color:'#ef4444',bg:'rgba(239,68,68,.1)',lc:'#ef4444',level:'INTERMEDIATE',
+ title:'Undoing Changes',sub:'reset · revert · restore · clean',
+ desc:'The most critical skill — safely undoing mistakes. Know what is reversible and what is permanent.',
+ topics:[
+  {id:'reset',cmd:'git reset',title:'Reset HEAD',desc:'Move HEAD and optionally change index/working tree',tags:['essential','danger'],tabs:['Demo','soft/mixed/hard','When to Use']},
+  {id:'revert',cmd:'git revert',title:'Revert Commits',desc:'Create new commit that undoes previous commit (safe)',tags:['essential'],tabs:['Demo','vs Reset','Examples']},
+  {id:'clean',cmd:'git clean',title:'Remove Untracked',desc:'Delete untracked files and directories',tags:['intermediate'],tabs:['Demo','Flags','Dry Run']},
+  {id:'restore-file',cmd:'git restore',title:'Restore Files',desc:'Discard working tree changes per file',tags:['intermediate'],tabs:['Demo','from Commit','Examples']},
+ ]},
+{id:'tags',icon:'🏷️',color:'#fbbf24',bg:'rgba(251,191,36,.08)',lc:'#fbbf24',level:'INTERMEDIATE',
+ title:'Tags & Releases',sub:'tag · push tags · semantic versioning',
+ desc:'Mark release points with lightweight and annotated tags. Publish them to remote and follow SemVer.',
+ topics:[
+  {id:'tag-create',cmd:'git tag',title:'Create & Manage Tags',desc:'Lightweight and annotated tags for releases',tags:['intermediate'],tabs:['Demo','Annotated','List & Delete']},
+  {id:'tag-push',cmd:'push tags',title:'Publish Tags',desc:'Push individual or all tags to remote',tags:['intermediate'],tabs:['Demo','SemVer','Examples']},
+ ]},
+{id:'advanced-ops',icon:'⚡',color:'#7c3aed',bg:'rgba(124,58,237,.1)',lc:'#7c3aed',level:'ADVANCED',
+ title:'Advanced Operations',sub:'submodule · worktree · filter-branch · rerere',
+ desc:'Power features for complex workflows — manage dependencies, work on multiple branches simultaneously.',
+ topics:[
+  {id:'submodule',cmd:'git submodule',title:'Submodules',desc:'Embed other repositories as dependencies',tags:['advanced'],tabs:['Demo','Workflow','Tips']},
+  {id:'worktree',cmd:'git worktree',title:'Multiple Worktrees',desc:'Check out multiple branches simultaneously',tags:['advanced'],tabs:['Demo','Use Cases','Commands']},
+  {id:'sparse',cmd:'git sparse-checkout',title:'Sparse Checkout',desc:'Check out only parts of a large monorepo',tags:['advanced'],tabs:['Demo','Use Case','Commands']},
+ ]},
+{id:'config-ignore',icon:'📄',color:'#f05033',bg:'rgba(240,80,51,.08)',lc:'#f05033',level:'BEGINNER',
+ title:'.gitignore & Attributes',sub:'.gitignore · .gitattributes · global ignore',
+ desc:'Control what Git tracks. Configure line endings, diffs, merge strategies and large files per file type.',
+ topics:[
+  {id:'gitignore',cmd:'.gitignore',title:'Ignore Files & Dirs',desc:'Patterns to exclude from tracking',tags:['essential'],tabs:['Demo','Patterns','Templates','Tips']},
+  {id:'gitattributes',cmd:'.gitattributes',title:'File Attributes',desc:'Line endings, diff drivers, merge strategies per path',tabs:['Demo','Examples','LFS'],tags:['intermediate']},
+ ]},
+{id:'hooks',icon:'🪝',color:'#7c3aed',bg:'rgba(124,58,237,.08)',lc:'#7c3aed',level:'ADVANCED',
+ title:'Git Hooks',sub:'pre-commit · pre-push · commit-msg · husky',
+ desc:'Automate quality gates at key points in the Git lifecycle. Run linters, tests and formatters automatically.',
+ topics:[
+  {id:'hooks-local',cmd:'.git/hooks/',title:'Local Git Hooks',desc:'Scripts that run at git lifecycle events',tags:['advanced'],tabs:['Demo','Hook Types','Examples']},
+  {id:'husky',cmd:'husky',title:'Husky (Node Projects)',desc:'Modern Git hooks for JS projects',tags:['advanced'],tabs:['Demo','Setup','lint-staged']},
+ ]},
+{id:'github-basics',icon:'🐙',color:'#60a5fa',bg:'rgba(96,165,250,.1)',lc:'#60a5fa',level:'ESSENTIAL',
+ title:'GitHub Fundamentals',sub:'repos · fork · PR · issues · code review',
+ desc:'The full GitHub collaboration model — forks, pull requests, code reviews, and issue tracking.',
+ topics:[
+  {id:'gh-repo',cmd:'Repository',title:'Repositories',desc:'Creating, forking, visibility, branch protection',tags:['essential','github'],tabs:['Demo','Settings','Protection']},
+  {id:'gh-pr',cmd:'Pull Request',title:'Pull Requests',desc:'The full PR workflow — open, review, approve, merge',tags:['essential','github'],tabs:['Demo','PR Flow','Review','Best Practices']},
+  {id:'gh-fork',cmd:'Fork',title:'Fork Workflow',desc:'Contribute to projects you don\'t own',tags:['intermediate','github'],tabs:['Demo','Keep Sync','PR from Fork']},
+  {id:'gh-issues',cmd:'Issues',title:'Issues & Projects',desc:'Track bugs, features, discussions and milestones',tags:['github'],tabs:['Demo','Labels','Templates']},
+ ]},
+{id:'github-actions',icon:'🤖',color:'#60a5fa',bg:'rgba(96,165,250,.12)',lc:'#60a5fa',level:'ADVANCED',
+ title:'GitHub Actions',sub:'workflows · CI · CD · secrets · matrix',
+ desc:'Automate your entire software delivery pipeline — test on every push, build Docker images, deploy to cloud.',
+ topics:[
+  {id:'actions-basics',cmd:'workflow.yml',title:'Workflow Basics',desc:'Triggers, jobs, steps and the YAML structure',tags:['advanced','github'],tabs:['Demo','YAML Anatomy','Triggers']},
+  {id:'actions-ci',cmd:'CI Pipeline',title:'CI — Test & Build',desc:'Run tests on every push and PR automatically',tags:['advanced','github'],tabs:['Demo','Node.js CI','.NET CI','Matrix']},
+  {id:'actions-cd',cmd:'CD Pipeline',title:'CD — Deploy',desc:'Build Docker images, push to registry, deploy to cloud',tags:['advanced','github'],tabs:['Demo','Docker CD','Environments','Secrets']},
+  {id:'actions-cache',cmd:'actions/cache',title:'Caching & Artifacts',desc:'Speed up builds with dependency caching',tags:['advanced','github'],tabs:['Demo','NPM Cache','.NET Cache']},
+ ]},
+{id:'github-cli',icon:'💻',color:'#60a5fa',bg:'rgba(96,165,250,.08)',lc:'#60a5fa',level:'INTERMEDIATE',
+ title:'GitHub CLI (gh)',sub:'gh repo · gh pr · gh issue · gh workflow',
+ desc:'Do everything GitHub from the terminal. Create PRs, review code, run workflows without opening a browser.',
+ topics:[
+  {id:'gh-install',cmd:'gh auth',title:'Install & Auth',desc:'Set up GitHub CLI and authenticate',tags:['github'],tabs:['Demo','Setup','Config']},
+  {id:'gh-pr-cmd',cmd:'gh pr',title:'PR from Terminal',desc:'Create, list, review and merge PRs via CLI',tags:['intermediate','github'],tabs:['Demo','Create','Review','Merge']},
+  {id:'gh-workflow',cmd:'gh workflow',title:'Manage Workflows',desc:'Trigger, list and watch Actions from CLI',tags:['advanced','github'],tabs:['Demo','Commands','Examples']},
+ ]},
+{id:'workflows',icon:'🔄',color:'#22c55e',bg:'rgba(34,197,94,.1)',lc:'#22c55e',level:'INTERMEDIATE',
+ title:'Git Workflows',sub:'GitFlow · trunk-based · feature branch · release',
+ desc:'Choose the right workflow for your team. Compare GitFlow, trunk-based development, and feature branch workflows.',
+ topics:[
+  {id:'feature-branch',cmd:'Feature Branch',title:'Feature Branch Workflow',desc:'Branch per feature, PR to main — the standard model',tags:['essential'],tabs:['Demo','Flow Diagram','Best Practices']},
+  {id:'gitflow',cmd:'GitFlow',title:'GitFlow Workflow',desc:'Structured branches: main, develop, feature, release, hotfix',tags:['intermediate'],tabs:['Demo','Diagram','When to Use']},
+  {id:'trunk-based',cmd:'Trunk-Based',title:'Trunk Based Development',desc:'Short-lived branches, frequent integration, feature flags',tags:['advanced'],tabs:['Demo','Diagram','vs GitFlow']},
+  {id:'release-flow',cmd:'Release',title:'Release Management',desc:'Versioning, changelogs, and release branches',tabs:['Demo','SemVer','CHANGELOG'],tags:['intermediate']},
+ ]},
+{id:'rewriting',icon:'✍️',color:'#f05033',bg:'rgba(240,80,51,.08)',lc:'#f05033',level:'ADVANCED',
+ title:'Rewriting History',sub:'rebase -i · squash · fixup · filter-repo',
+ desc:'Clean up commits before pushing. Squash WIP commits, reorder, edit messages, and remove sensitive data.',
+ topics:[
+  {id:'interactive-rebase',cmd:'rebase -i',title:'Interactive Rebase',desc:'Squash, fixup, reorder and edit commits interactively',tags:['advanced'],tabs:['Demo','Commands','Workflow','Safety']},
+  {id:'squash',cmd:'squash/fixup',title:'Squash Commits',desc:'Collapse multiple commits into one clean commit',tags:['intermediate'],tabs:['Demo','fixup vs squash','Workflow']},
+  {id:'commit-amend',cmd:'commit --amend',title:'Amend Last Commit',desc:'Edit the most recent commit message or content',tags:['essential'],tabs:['Demo','Examples','Rules']},
+  {id:'filter-repo',cmd:'filter-repo',title:'Purge Files from History',desc:'Remove secrets or large files from entire history',tags:['advanced','danger'],tabs:['Demo','Workflow','Prevention']},
+ ]},
+{id:'internals',icon:'🔬',color:'#7c3aed',bg:'rgba(124,58,237,.08)',lc:'#7c3aed',level:'EXPERT',
+ title:'Git Internals',sub:'objects · blobs · trees · commits · pack files',
+ desc:'Understand how Git actually stores data — objects, refs, packfiles. Demystify what happens under the hood.',
+ topics:[
+  {id:'objects',cmd:'git cat-file',title:'Git Object Model',desc:'Blobs, trees, commits, tags — all SHA-1 addressed',tags:['advanced'],tabs:['Demo','Object Types','Hashing']},
+  {id:'refs',cmd:'git rev-parse',title:'References & HEAD',desc:'How branches, tags and HEAD work as pointers',tags:['advanced'],tabs:['Demo','Refspec','Examples']},
+  {id:'packfiles',cmd:'git gc',title:'Packfiles & Garbage Collection',desc:'How Git compresses objects and optimises storage',tabs:['Demo','Maintenance','fsck'],tags:['expert']},
+ ]},
+{id:'github-security',icon:'🔒',color:'#ef4444',bg:'rgba(239,68,68,.08)',lc:'#ef4444',level:'ADVANCED',
+ title:'Security & Secrets',sub:'GPG signing · secrets · Dependabot · CODEOWNERS',
+ desc:'Sign commits, protect secrets, enable automated dependency updates, and enforce code ownership.',
+ topics:[
+  {id:'gpg-sign',cmd:'git commit -S',title:'GPG Commit Signing',desc:'Sign commits to verify authorship cryptographically',tags:['advanced','github'],tabs:['Demo','Setup','Verification']},
+  {id:'secrets-mgmt',cmd:'secrets',title:'GitHub Secrets',desc:'Store and use API keys safely in Actions',tags:['advanced','github'],tabs:['Demo','Environments','Best Practices']},
+  {id:'dependabot',cmd:'Dependabot',title:'Dependabot',desc:'Automated dependency updates via PRs',tags:['github'],tabs:['Demo','Config','Security Alerts']},
+ ]},
+{id:'large-repos',icon:'📦',color:'#fbbf24',bg:'rgba(251,191,36,.08)',lc:'#fbbf24',level:'ADVANCED',
+ title:'Large Repos & LFS',sub:'git-lfs · shallow clone · partial clone · monorepo',
+ desc:'Strategies for working with large repositories, binary assets, and monorepo architectures.',
+ topics:[
+  {id:'lfs',cmd:'git lfs',title:'Git Large File Storage',desc:'Store binaries outside the repository',tags:['advanced'],tabs:['Demo','Setup','Commands','Tips']},
+  {id:'shallow',cmd:'--depth',title:'Shallow & Partial Clone',desc:'Clone only recent history or specific paths',tags:['advanced'],tabs:['Demo','Use Cases','Examples']},
+  {id:'monorepo',cmd:'monorepo',title:'Monorepo Strategies',desc:'Manage multiple packages in one repository',tags:['advanced'],tabs:['Demo','Tools','Structure']},
+ ]},
+{id:'tips-tricks',icon:'💡',color:'#22c55e',bg:'rgba(34,197,94,.08)',lc:'#22c55e',level:'ALL',
+ title:'Tips, Aliases & Tools',sub:'aliases · git-delta · lazygit · tig · difftool',
+ desc:'Power-user shortcuts, beautiful diffs, TUI clients, and productivity aliases that save time every day.',
+ topics:[
+  {id:'aliases',cmd:'git alias',title:'Essential Git Aliases',desc:'Shortcuts for the commands you type 50 times a day',tags:['intermediate'],tabs:['Demo','Aliases List','Setup']},
+  {id:'delta',cmd:'delta',title:'Delta — Beautiful Diffs',desc:'Syntax-highlighted, side-by-side diffs in terminal',tags:['intermediate'],tabs:['Demo','Install','Config']},
+  {id:'tools',cmd:'lazygit / tig',title:'TUI Git Clients',desc:'Interactive terminal UIs for Git operations',tags:['intermediate'],tabs:['Demo','lazygit','tig']},
+ ]},
+{id:'troubleshooting',icon:'🚑',color:'#ef4444',bg:'rgba(239,68,68,.08)',lc:'#ef4444',level:'ALL',
+ title:'Troubleshooting',sub:'detached HEAD · lost commits · corrupted repo',
+ desc:'Fix common Git disasters — detached HEAD, lost commits, wrong branch commits, and merge mistakes.',
+ topics:[
+  {id:'detached-head',cmd:'detached HEAD',title:'Fix Detached HEAD',desc:'What it is, why it happens, how to recover',tags:['intermediate'],tabs:['Demo','Recovery','Prevention']},
+  {id:'lost-commits',cmd:'reflog recover',title:'Recover Lost Commits',desc:'Get back commits after reset or bad rebase',tags:['advanced'],tabs:['Demo','Step-by-Step','Reflog']},
+  {id:'wrong-branch',cmd:'wrong branch',title:'Committed to Wrong Branch',desc:'Move commits to the correct branch',tabs:['Demo','cherry-pick fix','reset fix'],tags:['intermediate']},
+  {id:'corrupt-repo',cmd:'fsck / gc',title:'Repository Repair',desc:'Diagnose and repair a corrupted repository',tabs:['Demo','fsck','gc / prune'],tags:['expert']},
+ ]},
+{id:'interview',icon:'🎤',color:'#7c3aed',bg:'rgba(124,58,237,.12)',lc:'#7c3aed',level:'ALL',
+ title:'Interview Q&A',sub:'Beginner · Intermediate · Advanced · GitHub',
+ desc:'100 real Git & GitHub interview questions with detailed answers covering all levels.',
+ topics:[
+  {id:'iq-basics',cmd:'Q 1-25',title:'Beginner Questions',desc:'Fundamentals of version control and Git basics',tags:['beginner'],tabs:['Q&A']},
+  {id:'iq-intermediate',cmd:'Q 26-55',title:'Intermediate Questions',desc:'Branching, merging, rebasing, remotes',tags:['intermediate'],tabs:['Q&A']},
+  {id:'iq-advanced',cmd:'Q 56-80',title:'Advanced Questions',desc:'Internals, workflows, history rewriting',tags:['advanced'],tabs:['Q&A']},
+  {id:'iq-github',cmd:'Q 81-100',title:'GitHub & DevOps',desc:'Actions, PRs, security, team workflows',tabs:['Q&A'],tags:['github']},
+ ]},
+];
+
+// ═══════ TERMINAL ENGINE ═══════
+let termTimers=[];
+function clearTimers(){termTimers.forEach(clearTimeout);termTimers=[];}
+
+function mkTerm(id,title,linesKey,autoRun){
+  const html=`<div class="tw" id="tw_${id}">
+<div class="tb"><div class="td r"></div><div class="td y"></div><div class="td g"></div>
+<div class="tt">git terminal — ${title}</div>
+<button class="tr-btn" id="rb_${id}" onclick="runTerm('${id}')">▶ Run</button></div>
+<div class="ts" id="ts_${id}"><span class="tl"><span class="tp">❯</span><span class="tcur"></span></span></div>
+</div>`;
+  if(autoRun) setTimeout(()=>runTerm(id),400);
+  return html;
+}
+
+function runTerm(id){
+  const scr=document.getElementById('ts_'+id);
+  const btn=document.getElementById('rb_'+id);
+  if(!scr||!btn) return;
+  clearTimers();
+  scr.innerHTML='';
+  btn.textContent='⏳';btn.classList.add('running');
+  const lines=TERM_DATA[id]||[];
+  let delay=0;
+  lines.forEach((ln,i)=>{
+    const t=setTimeout(()=>{
+      const s=document.createElement('span');
+      s.className='tl';s.innerHTML=ln;
+      scr.appendChild(s);scr.scrollTop=scr.scrollHeight;
+      if(i===lines.length-1){btn.textContent='▶ Run';btn.classList.remove('running');}
+    },delay);
+    termTimers.push(t);
+    delay+=ln.includes('class="tp"')?340:ln.includes('─')||ln.includes('━')||ln.trim()===''?50:60;
+  });
+}
+
+// ═══════ ALL TERMINAL DATA ═══════
+const TERM_DATA = {
+
+// ── git config ──────────────────────────────────
+'config-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git config --global user.name "Abhishek Panda"</span>',
+ '<span class="tp">❯</span> <span class="tc2">git config --global user.email "abhishek@originxlabs.com"</span>',
+ '<span class="tp">❯</span> <span class="tc2">git config --global core.editor "code --wait"</span>',
+ '<span class="tp">❯</span> <span class="tc2">git config --global init.defaultBranch main</span>',
+ '<span class="tp">❯</span> <span class="tc2">git config --global pull.rebase true</span>',
+ '<span class="tp">❯</span> <span class="tc2">git config --list --global</span>',
+ '<span class="to">user.name=Abhishek Panda</span>',
+ '<span class="to">user.email=abhishek@originxlabs.com</span>',
+ '<span class="to">core.editor=code --wait</span>',
+ '<span class="to">init.defaultBranch=main</span>',
+ '<span class="to">pull.rebase=true</span>',
+ '<span class="tp">❯</span> <span class="tc2">cat ~/.gitconfig</span>',
+ '<span class="to">[user]</span>',
+ '<span class="to">    name = Abhishek Panda</span>',
+ '<span class="to">    email = abhishek@originxlabs.com</span>',
+ '<span class="to">[core]</span>',
+ '<span class="to">    editor = code --wait</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git init ────────────────────────────────────
+'init-demo':[
+ '<span class="tp">❯</span> <span class="tc2">mkdir my-project && cd my-project</span>',
+ '<span class="tp">❯</span> <span class="tc2">git init</span>',
+ '<span class="to-g">Initialized empty Git repository in /home/abhishek/my-project/.git/</span>',
+ '<span class="tp">❯</span> <span class="tc2">ls -la .git/</span>',
+ '<span class="to">total 40</span>',
+ '<span class="to">drwxr-xr-x  7 abhishek abhishek 4096 Jan 15 10:00 <span class="to-b">.</span></span>',
+ '<span class="to">-rw-r--r--  1 abhishek abhishek   23 Jan 15 10:00 HEAD</span>',
+ '<span class="to">-rw-r--r--  1 abhishek abhishek   92 Jan 15 10:00 config</span>',
+ '<span class="to">drwxr-xr-x  2 abhishek abhishek 4096 Jan 15 10:00 <span class="to-b">hooks</span></span>',
+ '<span class="to">drwxr-xr-x  2 abhishek abhishek 4096 Jan 15 10:00 <span class="to-b">info</span></span>',
+ '<span class="to">drwxr-xr-x  4 abhishek abhishek 4096 Jan 15 10:00 <span class="to-b">objects</span></span>',
+ '<span class="to">drwxr-xr-x  4 abhishek abhishek 4096 Jan 15 10:00 <span class="to-b">refs</span></span>',
+ '<span class="tp">❯</span> <span class="tc2">cat .git/HEAD</span>',
+ '<span class="to">ref: refs/heads/main</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git clone ───────────────────────────────────
+'clone-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git clone https://github.com/originxlabs/myapp.git</span>',
+ '<span class="to">Cloning into \'myapp\'...</span>',
+ '<span class="to">remote: Enumerating objects: 2842, done.</span>',
+ '<span class="to">remote: Counting objects: 100% (2842/2842), done.</span>',
+ '<span class="to">remote: Compressing objects: 100% (1204/1204), done.</span>',
+ '<span class="to">Receiving objects: 100% (2842/2842), <span class="to-y">18.4 MiB</span> | 4.2 MiB/s, done.</span>',
+ '<span class="to">Resolving deltas: 100% (1198/1198), done.</span>',
+ '<span class="tp">❯</span> <span class="tc2">cd myapp && git remote -v</span>',
+ '<span class="to">origin  https://github.com/originxlabs/myapp.git (fetch)</span>',
+ '<span class="to">origin  https://github.com/originxlabs/myapp.git (push)</span>',
+ '<span class="tp">❯</span> <span class="tc2">git clone --depth=1 https://github.com/torvalds/linux.git linux-shallow</span>',
+ '<span class="to">Cloning into \'linux-shallow\'...</span>',
+ '<span class="to">remote: Counting objects: 86423, done.</span>',
+ '<span class="to">Receiving objects: 100% (86423/86423), <span class="to-y">264 MiB</span> | 12 MiB/s, done.</span>',
+ '<span class="to-g">✓ Shallow clone — only latest snapshot, no full history</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git status ──────────────────────────────────
+'status-demo':[
+ '<span class="tp">❯</span> <span class="tc2">echo "# My App" > README.md && echo "console.log(1)" > app.js</span>',
+ '<span class="tp">❯</span> <span class="tc2">git status</span>',
+ '<span class="to">On branch <span class="to-g">main</span></span>',
+ '<span class="to">Your branch is up to date with \'origin/main\'.</span>',
+ '<span class="to"> </span>',
+ '<span class="to">Untracked files:</span>',
+ '<span class="to">  (use "git add &lt;file&gt;..." to include in what will be committed)</span>',
+ '<span class="to-r">        README.md</span>',
+ '<span class="to-r">        app.js</span>',
+ '<span class="tp">❯</span> <span class="tc2">git add README.md</span>',
+ '<span class="tp">❯</span> <span class="tc2">echo "fix bug" >> app.js</span>',
+ '<span class="tp">❯</span> <span class="tc2">git status</span>',
+ '<span class="to">On branch <span class="to-g">main</span></span>',
+ '<span class="to"> </span>',
+ '<span class="to">Changes to be committed:</span>',
+ '<span class="to">  (use "git restore --staged..." to unstage)</span>',
+ '<span class="to-g">        new file:   README.md</span>',
+ '<span class="to"> </span>',
+ '<span class="to">Changes not staged for commit:</span>',
+ '<span class="to-r">        modified:   app.js</span>',
+ '<span class="to"> </span>',
+ '<span class="to">Untracked files:</span>',
+ '<span class="to-r">        package.json</span>',
+ '<span class="tp">❯</span> <span class="tc2">git status -s</span>',
+ '<span class="to-g">A </span><span class="to"> README.md</span>',
+ '<span class="to-r"> M</span><span class="to"> app.js</span>',
+ '<span class="to-r">??</span><span class="to"> package.json</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git add ─────────────────────────────────────
+'add-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git add README.md</span>',
+ '<span class="to-dim"># stage a specific file</span>',
+ '<span class="tp">❯</span> <span class="tc2">git add src/ tests/</span>',
+ '<span class="to-dim"># stage entire directories</span>',
+ '<span class="tp">❯</span> <span class="tc2">git add *.js</span>',
+ '<span class="to-dim"># stage by glob pattern</span>',
+ '<span class="tp">❯</span> <span class="tc2">git add -A</span>',
+ '<span class="to-dim"># stage ALL changes: new, modified, deleted</span>',
+ '<span class="tp">❯</span> <span class="tc2">git add -p</span>',
+ '<span class="to-dim"># INTERACTIVE: choose hunks to stage</span>',
+ '<span class="to">diff --git a/app.js b/app.js</span>',
+ '<span class="to">@@ -1,4 +1,7 @@</span>',
+ '<span class="to"> const express = require(\'express\');</span>',
+ '<span class="to-g">+const cors = require(\'cors\');</span>',
+ '<span class="to-g">+</span>',
+ '<span class="to"> app.listen(3000);</span>',
+ '<span class="to">Stage this hunk [y,n,q,a,d,s,?]?</span> <span class="to-g">y</span>',
+ '<span class="tp">❯</span> <span class="tc2">git diff --staged</span>',
+ '<span class="to">diff --git a/app.js b/app.js</span>',
+ '<span class="to">index 3b2a1c0..8f4d2e1 100644</span>',
+ '<span class="to">--- a/app.js</span>',
+ '<span class="to">+++ b/app.js</span>',
+ '<span class="to">@@ -1,4 +1,6 @@</span>',
+ '<span class="to-g">+const cors = require(\'cors\');</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git diff ────────────────────────────────────
+'diff-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git diff</span>',
+ '<span class="to-dim"># working tree vs index (staged)</span>',
+ '<span class="to">diff --git a/src/api.js b/src/api.js</span>',
+ '<span class="to">index 7b3c4a2..9f1e8b0 100644</span>',
+ '<span class="to">--- a/src/api.js</span>',
+ '<span class="to">+++ b/src/api.js</span>',
+ '<span class="to">@@ -42,7 +42,10 @@ router.get(\'/users\', async (req, res) =&gt; {</span>',
+ '<span class="to">   const users = await db.query(\'SELECT * FROM users\');</span>',
+ '<span class="to-r">-  res.json(users);</span>',
+ '<span class="to-g">+  const sanitized = users.map(u =&gt; ({ id: u.id, name: u.name }));</span>',
+ '<span class="to-g">+  res.json({ data: sanitized, total: sanitized.length });</span>',
+ '<span class="tp">❯</span> <span class="tc2">git diff --staged</span>',
+ '<span class="to-dim"># index vs last commit (what will be committed)</span>',
+ '<span class="tp">❯</span> <span class="tc2">git diff main..feature/auth</span>',
+ '<span class="to-dim"># diff between two branches</span>',
+ '<span class="tp">❯</span> <span class="tc2">git diff HEAD~3 HEAD -- package.json</span>',
+ '<span class="to-dim"># changes to a specific file over last 3 commits</span>',
+ '<span class="tp">❯</span> <span class="tc2">git diff --stat main..feature/auth</span>',
+ '<span class="to"> src/auth/middleware.js | 48 <span class="to-g">++++++++++++++++++++++++++</span><span class="to-r">------</span></span>',
+ '<span class="to"> src/api.js             | 12 <span class="to-g">++++++</span><span class="to-r">------</span></span>',
+ '<span class="to"> 2 files changed, 42 insertions(+), 18 deletions(-)</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git commit ──────────────────────────────────
+'commit-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git add -A && git commit -m "feat: add user authentication middleware"</span>',
+ '<span class="to">[main <span class="to-y">3f8b2a1</span>] feat: add user authentication middleware</span>',
+ '<span class="to"> 3 files changed, 89 insertions(+), 4 deletions(-)</span>',
+ '<span class="to"> create mode 100644 src/auth/middleware.js</span>',
+ '<span class="tp">❯</span> <span class="tc2">git commit -m "fix: handle null user in profile route" --no-verify</span>',
+ '<span class="to">[main <span class="to-y">a1c4d2e</span>] fix: handle null user in profile route</span>',
+ '<span class="to"> 1 file changed, 5 insertions(+), 1 deletion(-)</span>',
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline -4</span>',
+ '<span class="to-y">a1c4d2e</span><span class="to"> (HEAD -&gt; main) fix: handle null user in profile route</span>',
+ '<span class="to-y">3f8b2a1</span><span class="to"> feat: add user authentication middleware</span>',
+ '<span class="to-y">8c2e1f0</span><span class="to"> chore: add eslint config</span>',
+ '<span class="to-y">2a0b3d4</span><span class="to"> init: project setup</span>',
+ '<span class="tp">❯</span> <span class="tc2">git commit --amend -m "fix: handle null user and empty profile in route"</span>',
+ '<span class="to">[main <span class="to-y">b9f3c1d</span>] fix: handle null user and empty profile in route</span>',
+ '<span class="to"> Date: Wed Jan 15 10:22:44 2025 +0530</span>',
+ '<span class="to-dim"># SHA changed — only amend commits not yet pushed!</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git branch ──────────────────────────────────
+'branch-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git branch</span>',
+ '<span class="to">* <span class="to-g">main</span></span>',
+ '<span class="to">  develop</span>',
+ '<span class="tp">❯</span> <span class="tc2">git branch -a</span>',
+ '<span class="to">* <span class="to-g">main</span></span>',
+ '<span class="to">  develop</span>',
+ '<span class="to">  <span class="to-r">remotes/origin/main</span></span>',
+ '<span class="to">  <span class="to-r">remotes/origin/develop</span></span>',
+ '<span class="to">  <span class="to-r">remotes/origin/feature/auth</span></span>',
+ '<span class="tp">❯</span> <span class="tc2">git branch feature/user-profile</span>',
+ '<span class="to-dim"># creates branch at current HEAD</span>',
+ '<span class="tp">❯</span> <span class="tc2">git branch -v</span>',
+ '<span class="to">* <span class="to-g">main</span>           b9f3c1d fix: handle null user</span>',
+ '<span class="to">  develop        8c2e1f0 chore: add eslint config</span>',
+ '<span class="to">  feature/user-profile b9f3c1d fix: handle null user</span>',
+ '<span class="tp">❯</span> <span class="tc2">git branch -m feature/user-profile feat/profile-api</span>',
+ '<span class="to-dim"># rename a branch</span>',
+ '<span class="tp">❯</span> <span class="tc2">git branch -d feat/profile-api</span>',
+ '<span class="to">Deleted branch feat/profile-api (was b9f3c1d).</span>',
+ '<span class="tp">❯</span> <span class="tc2">git branch --merged main</span>',
+ '<span class="to-dim"># show branches already merged into main</span>',
+ '<span class="to">  feature/search</span>',
+ '<span class="to">  hotfix/login-redirect</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git switch ──────────────────────────────────
+'switch-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git switch develop</span>',
+ '<span class="to">Switched to branch \'develop\'</span>',
+ '<span class="to">Your branch is up to date with \'origin/develop\'.</span>',
+ '<span class="tp">❯</span> <span class="tc2">git switch -c feature/payment-gateway</span>',
+ '<span class="to">Switched to a new branch \'feature/payment-gateway\'</span>',
+ '<span class="to-dim"># -c = create AND switch in one step</span>',
+ '<span class="tp">❯</span> <span class="tc2">git switch -c hotfix/null-pointer origin/main</span>',
+ '<span class="to">Switched to a new branch \'hotfix/null-pointer\'</span>',
+ '<span class="to">Branch \'hotfix/null-pointer\' set up to track \'origin/main\'.</span>',
+ '<span class="to-dim"># create branch from a specific remote branch</span>',
+ '<span class="tp">❯</span> <span class="tc2">git switch -</span>',
+ '<span class="to">Switched to branch \'develop\'</span>',
+ '<span class="to-dim"># switch to previous branch (like cd -)</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git merge ───────────────────────────────────
+'merge-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git switch main</span>',
+ '<span class="to">Switched to branch \'main\'</span>',
+ '<span class="tp">❯</span> <span class="tc2">git merge feature/payment-gateway</span>',
+ '<span class="to">Updating b9f3c1d..4e8a2b1</span>',
+ '<span class="to">Fast-forward</span>',
+ '<span class="to-dim"># Fast-forward: linear history, no merge commit needed</span>',
+ '<span class="to"> src/payment/gateway.js | 142 <span class="to-g">+++++++++++++++++++++++++++++++++</span></span>',
+ '<span class="to"> src/payment/stripe.js  |  48 <span class="to-g">+++++++++++</span></span>',
+ '<span class="to"> 2 files changed, 190 insertions(+)</span>',
+ '<span class="to"> create mode 100644 src/payment/gateway.js</span>',
+ '<span class="to"> create mode 100644 src/payment/stripe.js</span>',
+ '<span class="tp">❯</span> <span class="tc2">git merge --no-ff feature/new-dashboard -m "Merge feature/new-dashboard"</span>',
+ '<span class="to">Merge made by the \'ort\' strategy.</span>',
+ '<span class="to-dim"># --no-ff: always create merge commit (preserves feature history)</span>',
+ '<span class="to"> src/dashboard/index.js | 89 <span class="to-g">++++++++++++++++++</span></span>',
+ '<span class="to"> 3 files changed, 112 insertions(+), 8 deletions(-)</span>',
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline --graph -6</span>',
+ '<span class="to-g">*</span><span class="to">   9c1d3e2 (HEAD -&gt; main) Merge feature/new-dashboard</span>',
+ '<span class="to-g">|\\</span>',
+ '<span class="to-g">| *</span><span class="to"> 7a4b1c0 feat: dashboard charts component</span>',
+ '<span class="to-g">| *</span><span class="to"> 5f2a3d1 feat: dashboard layout and routing</span>',
+ '<span class="to-g">|/</span>',
+ '<span class="to-g">*</span><span class="to"> 4e8a2b1 feat: stripe payment gateway</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git conflicts ────────────────────────────────
+'conflicts-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git merge feature/config-refactor</span>',
+ '<span class="to-y">Auto-merging src/config.js</span>',
+ '<span class="to-r">CONFLICT (content): Merge conflict in src/config.js</span>',
+ '<span class="to-r">Automatic merge failed; fix conflicts and then commit the result.</span>',
+ '<span class="tp">❯</span> <span class="tc2">git status</span>',
+ '<span class="to">You have unmerged paths.</span>',
+ '<span class="to-r">        both modified:   src/config.js</span>',
+ '<span class="tp">❯</span> <span class="tc2">cat src/config.js</span>',
+ '<span class="to-r"><<<<<<< HEAD</span>',
+ '<span class="to">const PORT = process.env.PORT || 3000;</span>',
+ '<span class="to-r">=======</span>',
+ '<span class="to">const PORT = process.env.PORT || 8080;</span>',
+ '<span class="to-r">>>>>>>> feature/config-refactor</span>',
+ '<span class="to-dim"># edit file to resolve — keep correct version</span>',
+ '<span class="tp">❯</span> <span class="tc2">echo "const PORT = process.env.PORT || 3000;" > src/config.js</span>',
+ '<span class="tp">❯</span> <span class="tc2">git add src/config.js</span>',
+ '<span class="tp">❯</span> <span class="tc2">git commit -m "merge: resolve port conflict — keep env-configured default"</span>',
+ '<span class="to">[main c2f1a3b] merge: resolve port conflict — keep env-configured default</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git rebase ───────────────────────────────────
+'rebase-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline --graph -6</span>',
+ '<span class="to-g">*</span><span class="to"> 8f2c1a0 (feature/auth) feat: add JWT validation</span>',
+ '<span class="to-g">*</span><span class="to"> 3b4d2e1 feat: create auth routes</span>',
+ '<span class="to-g">|</span><span class="to"> </span><span class="to-g">*</span><span class="to"> c9e3f2a (HEAD -&gt; main) fix: rate limiting config</span>',
+ '<span class="to-g">|/</span>',
+ '<span class="to-g">*</span><span class="to"> 4a1b2c3 init: express setup</span>',
+ '<span class="tp">❯</span> <span class="tc2">git switch feature/auth && git rebase main</span>',
+ '<span class="to">Successfully rebased and updated refs/heads/feature/auth.</span>',
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline --graph -6</span>',
+ '<span class="to-g">*</span><span class="to"> 7d3a1f2 (<span class="to-g">HEAD -&gt; feature/auth</span>) feat: add JWT validation</span>',
+ '<span class="to-g">*</span><span class="to"> 2c8b4e1 feat: create auth routes</span>',
+ '<span class="to-g">*</span><span class="to"> c9e3f2a (main) fix: rate limiting config</span>',
+ '<span class="to-g">*</span><span class="to"> 4a1b2c3 init: express setup</span>',
+ '<span class="to-dim"># clean linear history — no merge commit!</span>',
+ '<span class="tp">❯</span> <span class="tc2">git rebase -i HEAD~3</span>',
+ '<span class="to-dim"># opens editor — squash/fixup/reorder last 3 commits</span>',
+ '<span class="to">pick 2c8b4e1 feat: create auth routes</span>',
+ '<span class="to">squash 7d3a1f2 feat: add JWT validation</span>',
+ '<span class="to">fixup 9a1c2d3 wip: cleanup</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git remote / fetch / pull / push ─────────────
+'remote-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git remote -v</span>',
+ '<span class="to">origin  git@github.com:originxlabs/myapp.git (fetch)</span>',
+ '<span class="to">origin  git@github.com:originxlabs/myapp.git (push)</span>',
+ '<span class="tp">❯</span> <span class="tc2">git remote add upstream https://github.com/upstream-org/myapp.git</span>',
+ '<span class="tp">❯</span> <span class="tc2">git remote -v</span>',
+ '<span class="to">origin    git@github.com:originxlabs/myapp.git (fetch)</span>',
+ '<span class="to">origin    git@github.com:originxlabs/myapp.git (push)</span>',
+ '<span class="to">upstream  https://github.com/upstream-org/myapp.git (fetch)</span>',
+ '<span class="to">upstream  https://github.com/upstream-org/myapp.git (push)</span>',
+ '<span class="tp">❯</span> <span class="tc2">git remote show origin</span>',
+ '<span class="to">* remote origin</span>',
+ '<span class="to">  Fetch URL: git@github.com:originxlabs/myapp.git</span>',
+ '<span class="to">  HEAD branch: main</span>',
+ '<span class="to">  Remote branches:</span>',
+ '<span class="to">    develop tracked</span>',
+ '<span class="to">    main    tracked</span>',
+ '<span class="to">  Local branch configured for \'git pull\':</span>',
+ '<span class="to">    main merges with remote main</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+'fetch-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git fetch origin</span>',
+ '<span class="to">remote: Enumerating objects: 18, done.</span>',
+ '<span class="to">remote: Counting objects: 100% (18/18), done.</span>',
+ '<span class="to">remote: Compressing objects: 100% (8/8), done.</span>',
+ '<span class="to">Unpacking objects: 100% (12/12), 4.82 KiB | 0 bytes/s, done.</span>',
+ '<span class="to">From github.com:originxlabs/myapp</span>',
+ '<span class="to">   b9f3c1d..c4e2f1a  <span class="to-g">main</span>       -&gt; origin/main</span>',
+ '<span class="to"> * [new branch]      <span class="to-pu">feature/search</span>  -&gt; origin/feature/search</span>',
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline origin/main -4</span>',
+ '<span class="to-y">c4e2f1a</span><span class="to"> (origin/main) feat: add Redis caching layer</span>',
+ '<span class="to-y">a8b3d2e</span><span class="to"> fix: connection pool exhaustion</span>',
+ '<span class="to-y">b9f3c1d</span><span class="to"> (HEAD -&gt; main) fix: handle null user</span>',
+ '<span class="to-dim"># local main is 2 commits behind — we can inspect before merging</span>',
+ '<span class="tp">❯</span> <span class="tc2">git diff main origin/main</span>',
+ '<span class="to-dim"># see exactly what changed remotely before merging</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+'pull-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git pull</span>',
+ '<span class="to">remote: Enumerating objects: 8, done.</span>',
+ '<span class="to">Updating b9f3c1d..c4e2f1a</span>',
+ '<span class="to">Fast-forward</span>',
+ '<span class="to"> src/cache/redis.js | 84 <span class="to-g">+++++++++++++++++++++</span></span>',
+ '<span class="to"> src/app.js         | 12 <span class="to-g">+++</span><span class="to-r">--</span></span>',
+ '<span class="to"> 2 files changed, 88 insertions(+), 8 deletions(-)</span>',
+ '<span class="tp">❯</span> <span class="tc2">git pull --rebase origin main</span>',
+ '<span class="to-dim"># fetch + rebase instead of merge — cleaner history</span>',
+ '<span class="to">Successfully rebased and updated refs/heads/main.</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+'push-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git push origin main</span>',
+ '<span class="to">Enumerating objects: 9, done.</span>',
+ '<span class="to">Counting objects: 100% (9/9), done.</span>',
+ '<span class="to">Delta compression using up to 8 threads</span>',
+ '<span class="to">Compressing objects: 100% (5/5), done.</span>',
+ '<span class="to">Writing objects: 100% (5/5), 1.84 KiB | 1.84 MiB/s, done.</span>',
+ '<span class="to">To github.com:originxlabs/myapp.git</span>',
+ '<span class="to">   c4e2f1a..<span class="to-g">d7f3b2a</span>  main -&gt; main</span>',
+ '<span class="tp">❯</span> <span class="tc2">git push -u origin feature/search</span>',
+ '<span class="to">Branch \'feature/search\' set up to track \'origin/feature/search\'.</span>',
+ '<span class="to">To github.com:originxlabs/myapp.git</span>',
+ '<span class="to"> * [new branch]      feature/search -&gt; feature/search</span>',
+ '<span class="tp">❯</span> <span class="tc2">git push --force-with-lease origin feature/auth</span>',
+ '<span class="to-dim"># safe force push — fails if remote has new commits you haven\'t seen</span>',
+ '<span class="to">To github.com:originxlabs/myapp.git</span>',
+ '<span class="to"> + 3f8b2a1...7d3a1f2 feature/auth -&gt; feature/auth (forced update)</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git log ─────────────────────────────────────
+'log-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline -8</span>',
+ '<span class="to-y">d7f3b2a</span><span class="to"> (<span class="to-g">HEAD -&gt; main</span>, <span class="to-r">origin/main</span>) feat: search with Elasticsearch</span>',
+ '<span class="to-y">c4e2f1a</span><span class="to"> feat: Redis caching layer</span>',
+ '<span class="to-y">a8b3d2e</span><span class="to"> fix: connection pool exhaustion</span>',
+ '<span class="to-y">b9f3c1d</span><span class="to"> fix: handle null user in profile route</span>',
+ '<span class="to-y">3f8b2a1</span><span class="to"> feat: user authentication middleware</span>',
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline --graph --all -10</span>',
+ '<span class="to-g">*</span><span class="to"> d7f3b2a (<span class="to-g">HEAD -&gt; main</span>) feat: search with Elasticsearch</span>',
+ '<span class="to-g">*</span><span class="to"> c4e2f1a feat: Redis caching layer</span>',
+ '<span class="to-g">|</span><span class="to"> </span><span class="to-pu">*</span><span class="to"> e1a2b3c (<span class="to-m">feature/oauth</span>) feat: Google OAuth2</span>',
+ '<span class="to-g">|</span><span class="to"> </span><span class="to-pu">*</span><span class="to"> f4b5c6d feat: OAuth2 routes</span>',
+ '<span class="to-g">|/</span>',
+ '<span class="to-g">*</span><span class="to"> a8b3d2e fix: connection pool</span>',
+ '<span class="tp">❯</span> <span class="tc2">git log --since="7 days ago" --author="Abhishek" --oneline</span>',
+ '<span class="to-y">d7f3b2a</span><span class="to"> feat: search with Elasticsearch</span>',
+ '<span class="to-y">c4e2f1a</span><span class="to"> feat: Redis caching layer</span>',
+ '<span class="tp">❯</span> <span class="tc2">git log -S "password" --oneline</span>',
+ '<span class="to-dim"># find commits that added/removed string "password"</span>',
+ '<span class="to-y">3f8b2a1</span><span class="to"> feat: user authentication middleware</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git stash ───────────────────────────────────
+'stash-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git status -s</span>',
+ '<span class="to-r"> M</span><span class="to"> src/api.js</span>',
+ '<span class="to-r"> M</span><span class="to"> src/config.js</span>',
+ '<span class="tp">❯</span> <span class="tc2">git stash push -m "WIP: rate limiting feature"</span>',
+ '<span class="to">Saved working directory and index state On main: WIP: rate limiting feature</span>',
+ '<span class="tp">❯</span> <span class="tc2">git status -s</span>',
+ '<span class="to-dim"># clean working tree — can switch branches safely</span>',
+ '<span class="tp">❯</span> <span class="tc2">git stash list</span>',
+ '<span class="to">stash@{0}: On main: WIP: rate limiting feature</span>',
+ '<span class="to">stash@{1}: On develop: WIP: payment webhook handler</span>',
+ '<span class="tp">❯</span> <span class="tc2">git stash show -p stash@{0}</span>',
+ '<span class="to-dim"># show full diff of stash</span>',
+ '<span class="tp">❯</span> <span class="tc2">git stash pop</span>',
+ '<span class="to">On branch main</span>',
+ '<span class="to">Changes not staged for commit:</span>',
+ '<span class="to-r">        modified:   src/api.js</span>',
+ '<span class="to-r">        modified:   src/config.js</span>',
+ '<span class="to">Dropped stash@{0} (abc123...)</span>',
+ '<span class="to-dim"># pop = apply + drop. Use apply to keep stash.</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git reset ───────────────────────────────────
+'reset-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline -4</span>',
+ '<span class="to-y">d7f3b2a</span><span class="to"> (HEAD -&gt; main) feat: search feature [WRONG!]</span>',
+ '<span class="to-y">c4e2f1a</span><span class="to"> feat: Redis caching</span>',
+ '<span class="to-y">a8b3d2e</span><span class="to"> fix: connection pool</span>',
+ '<span class="tp">❯</span> <span class="tc2">git reset --soft HEAD~1</span>',
+ '<span class="to-dim"># move HEAD back — keep changes STAGED</span>',
+ '<span class="to">Changes to be committed:</span>',
+ '<span class="to-g">        modified:   src/search.js</span>',
+ '<span class="tp">❯</span> <span class="tc2">git reset HEAD~1</span>',
+ '<span class="to-dim"># --mixed (default): move HEAD back — keep changes UNSTAGED</span>',
+ '<span class="to">Unstaged changes after reset:</span>',
+ '<span class="to-r">M       src/search.js</span>',
+ '<span class="tp">❯</span> <span class="tc2">git reset --hard HEAD~1</span>',
+ '<span class="to-r">HEAD is now at a8b3d2e fix: connection pool</span>',
+ '<span class="to-dim"># DANGER: changes GONE from working tree too!</span>',
+ '<span class="to-y">⚠</span><span class="to"> Only use --hard on LOCAL commits not yet pushed</span>',
+ '<span class="tp">❯</span> <span class="tc2">git reflog | head -4</span>',
+ '<span class="to-y">a8b3d2e</span><span class="to"> HEAD@{0}: reset: moving to HEAD~1</span>',
+ '<span class="to-y">d7f3b2a</span><span class="to"> HEAD@{1}: commit: feat: search feature</span>',
+ '<span class="to-dim"># d7f3b2a still in reflog — can recover!</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git revert ──────────────────────────────────
+'revert-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline -4</span>',
+ '<span class="to-y">d7f3b2a</span><span class="to"> (HEAD -&gt; main, origin/main) feat: search — causes prod errors</span>',
+ '<span class="to-y">c4e2f1a</span><span class="to"> feat: Redis caching</span>',
+ '<span class="tp">❯</span> <span class="tc2">git revert d7f3b2a</span>',
+ '<span class="to">[main <span class="to-y">e3f2a1b</span>] Revert "feat: search — causes prod errors"</span>',
+ '<span class="to"> 1 file changed, 48 deletions(-)</span>',
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline -4</span>',
+ '<span class="to-y">e3f2a1b</span><span class="to"> (<span class="to-g">HEAD -&gt; main</span>) Revert "feat: search — causes prod errors"</span>',
+ '<span class="to-y">d7f3b2a</span><span class="to"> (origin/main) feat: search — causes prod errors</span>',
+ '<span class="to-y">c4e2f1a</span><span class="to"> feat: Redis caching</span>',
+ '<span class="to-dim"># safe for shared branches — creates new undo commit</span>',
+ '<span class="tp">❯</span> <span class="tc2">git push origin main</span>',
+ '<span class="to">To github.com:originxlabs/myapp.git</span>',
+ '<span class="to">   d7f3b2a..<span class="to-g">e3f2a1b</span>  main -&gt; main</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git reflog ──────────────────────────────────
+'reflog-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git reflog --oneline -12</span>',
+ '<span class="to-y">e3f2a1b</span><span class="to"> (HEAD -&gt; main) HEAD@{0}: revert: Revert "feat: search"</span>',
+ '<span class="to-y">d7f3b2a</span><span class="to"> HEAD@{1}: commit: feat: search — causes prod errors</span>',
+ '<span class="to-y">c4e2f1a</span><span class="to"> HEAD@{2}: pull: Fast-forward</span>',
+ '<span class="to-y">b9f3c1d</span><span class="to"> HEAD@{3}: checkout: moving from feature/auth to main</span>',
+ '<span class="to-y">7d3a1f2</span><span class="to"> HEAD@{4}: rebase (finish): refs/heads/feature/auth</span>',
+ '<span class="to-y">3f8b2a1</span><span class="to"> HEAD@{5}: commit: feat: auth middleware</span>',
+ '<span class="tp">❯</span> <span class="tc2">git checkout HEAD@{4}</span>',
+ '<span class="to">HEAD is now at 7d3a1f2 rebase (finish): refs/heads/feature/auth</span>',
+ '<span class="tp">❯</span> <span class="tc2">git switch -c recovery/search-feature</span>',
+ '<span class="to">Switched to a new branch \'recovery/search-feature\'</span>',
+ '<span class="to-g">✓ Recovered "lost" work from reflog — nothing is ever truly gone!</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git cherry-pick ─────────────────────────────
+'cherry-pick-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline feature/hotfix-auth -4</span>',
+ '<span class="to-y">f1a2b3c</span><span class="to"> hotfix: fix token expiry bug</span>',
+ '<span class="to-y">e4b5c6d</span><span class="to"> hotfix: add rate limit headers</span>',
+ '<span class="to-y">d7c8e9f</span><span class="to"> refactor: cleanup auth module</span>',
+ '<span class="tp">❯</span> <span class="tc2">git switch main</span>',
+ '<span class="tp">❯</span> <span class="tc2">git cherry-pick f1a2b3c</span>',
+ '<span class="to">[main <span class="to-y">2a1b3c4</span>] hotfix: fix token expiry bug</span>',
+ '<span class="to"> Date: Wed Jan 15 14:22:44 2025 +0530</span>',
+ '<span class="to"> 1 file changed, 3 insertions(+), 1 deletion(-)</span>',
+ '<span class="tp">❯</span> <span class="tc2">git cherry-pick e4b5c6d f1a2b3c</span>',
+ '<span class="to">[main <span class="to-y">5c2d4e5</span>] hotfix: add rate limit headers</span>',
+ '<span class="to">[main <span class="to-y">6d3e5f6</span>] hotfix: fix token expiry bug</span>',
+ '<span class="to-dim"># cherry-pick multiple commits</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git tag ─────────────────────────────────────
+'tag-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git tag v1.2.0</span>',
+ '<span class="to-dim"># lightweight tag — just a pointer to commit</span>',
+ '<span class="tp">❯</span> <span class="tc2">git tag -a v2.0.0 -m "Release v2.0.0 — payment gateway & search"</span>',
+ '<span class="to-dim"># annotated tag — with message, tagger, date (recommended)</span>',
+ '<span class="tp">❯</span> <span class="tc2">git tag -l</span>',
+ '<span class="to-y">v1.0.0</span>',
+ '<span class="to-y">v1.1.0</span>',
+ '<span class="to-y">v1.2.0</span>',
+ '<span class="to-y">v2.0.0</span>',
+ '<span class="tp">❯</span> <span class="tc2">git show v2.0.0</span>',
+ '<span class="to">tag v2.0.0</span>',
+ '<span class="to">Tagger: Abhishek Panda &lt;abhishek@originxlabs.com&gt;</span>',
+ '<span class="to">Date:   Wed Jan 15 15:00:00 2025 +0530</span>',
+ '<span class="to"> </span>',
+ '<span class="to">Release v2.0.0 — payment gateway &amp; search</span>',
+ '<span class="tp">❯</span> <span class="tc2">git push origin --tags</span>',
+ '<span class="to">To github.com:originxlabs/myapp.git</span>',
+ '<span class="to"> * [new tag]         v2.0.0 -&gt; v2.0.0</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git bisect ──────────────────────────────────
+'bisect-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git bisect start</span>',
+ '<span class="tp">❯</span> <span class="tc2">git bisect bad</span>',
+ '<span class="to-dim"># current commit is broken</span>',
+ '<span class="tp">❯</span> <span class="tc2">git bisect good v1.2.0</span>',
+ '<span class="to">Bisecting: 14 revisions left to test after this (roughly 4 steps)</span>',
+ '<span class="to">[8f2c1a0] feat: add search indexing</span>',
+ '<span class="tp">❯</span> <span class="tc2">npm test && git bisect good</span>',
+ '<span class="to">Bisecting: 7 revisions left to test after this (roughly 3 steps)</span>',
+ '<span class="to">[c4e2f1a] feat: Redis caching layer</span>',
+ '<span class="tp">❯</span> <span class="tc2">npm test || git bisect bad</span>',
+ '<span class="to">Bisecting: 3 revisions left to test after this (roughly 2 steps)</span>',
+ '<span class="tp">❯</span> <span class="tc2">git bisect bad</span>',
+ '<span class="to-r">c4e2f1a is the first bad commit</span>',
+ '<span class="to">commit c4e2f1a</span>',
+ '<span class="to">Author: Abhishek Panda &lt;abhishek@originxlabs.com&gt;</span>',
+ '<span class="to">    feat: Redis caching layer</span>',
+ '<span class="tp">❯</span> <span class="tc2">git bisect reset</span>',
+ '<span class="to-g">✓ Found the bad commit in 4 steps (binary search through 28 commits)</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git blame ───────────────────────────────────
+'blame-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git blame src/auth/middleware.js -L 40,55</span>',
+ '<span class="to-y">3f8b2a1</span><span class="to"> (Abhishek 2025-01-10 09:22) 40: const verifyToken = async (req, res, next) =&gt; {</span>',
+ '<span class="to-y">3f8b2a1</span><span class="to"> (Abhishek 2025-01-10 09:22) 41:   const header = req.headers.authorization;</span>',
+ '<span class="to-y">b9f3c1d</span><span class="to"> (Priya    2025-01-12 14:30) 42:   if (!header || !header.startsWith(\'Bearer \')) {</span>',
+ '<span class="to-y">b9f3c1d</span><span class="to"> (Priya    2025-01-12 14:30) 43:     return res.status(401).json({ error: \'No token\' });</span>',
+ '<span class="to-y">b9f3c1d</span><span class="to"> (Priya    2025-01-12 14:30) 44:   }</span>',
+ '<span class="to-y">7d3a1f2</span><span class="to"> (Raj      2025-01-14 11:15) 45:   try {</span>',
+ '<span class="to-y">7d3a1f2</span><span class="to"> (Raj      2025-01-14 11:15) 46:     const decoded = jwt.verify(token, process.env.JWT_SECRET);</span>',
+ '<span class="tp">❯</span> <span class="tc2">git log --follow -p src/auth/middleware.js | head -20</span>',
+ '<span class="to-dim"># full history of a file including renames</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── interactive rebase ───────────────────────────
+'irebase-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline -5</span>',
+ '<span class="to-y">9a1c2d3</span><span class="to"> wip: cleanup comments</span>',
+ '<span class="to-y">8f2c1a0</span><span class="to"> wip: add more tests</span>',
+ '<span class="to-y">7e1b0a9</span><span class="to"> feat: implement search API</span>',
+ '<span class="to-y">6d0c9b8</span><span class="to"> feat: add search model</span>',
+ '<span class="to-y">5c9b8a7</span><span class="to"> feat: Redis caching</span>',
+ '<span class="tp">❯</span> <span class="tc2">git rebase -i HEAD~4</span>',
+ '<span class="to-dim"># editor opens with:</span>',
+ '<span class="to">pick 6d0c9b8 feat: add search model</span>',
+ '<span class="to">pick 7e1b0a9 feat: implement search API</span>',
+ '<span class="to-y">squash</span><span class="to"> 8f2c1a0 wip: add more tests</span>',
+ '<span class="to-y">fixup</span><span class="to">  9a1c2d3 wip: cleanup comments</span>',
+ '<span class="to-dim"># save → git squashes the commits:</span>',
+ '<span class="to">Successfully rebased and updated refs/heads/feature/search.</span>',
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline -3</span>',
+ '<span class="to-y">a2b3c4d</span><span class="to"> feat: implement search API (includes tests)</span>',
+ '<span class="to-y">6d0c9b8</span><span class="to"> feat: add search model</span>',
+ '<span class="to-y">5c9b8a7</span><span class="to"> feat: Redis caching</span>',
+ '<span class="to-g">✓ 4 messy commits squashed into 2 clean ones</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── GitHub CLI ──────────────────────────────────
+'gh-auth-demo':[
+ '<span class="tp">❯</span> <span class="tc2">gh auth login</span>',
+ '<span class="to">? What account do you want to log into? <span class="to-b">GitHub.com</span></span>',
+ '<span class="to">? What is your preferred protocol for Git operations? <span class="to-b">SSH</span></span>',
+ '<span class="to">? Generate a new SSH key to add to your GitHub account? <span class="to-b">Yes</span></span>',
+ '<span class="to">? How would you like to authenticate GitHub CLI? <span class="to-b">Login with a web browser</span></span>',
+ '<span class="to"> </span>',
+ '<span class="to">! First copy your one-time code: <span class="to-y">AB12-CD34</span></span>',
+ '<span class="to">Press Enter to open github.com in your browser...</span>',
+ '<span class="to-g">✓ Authentication complete.</span>',
+ '<span class="to-g">✓ Logged in as abhishek-panda</span>',
+ '<span class="tp">❯</span> <span class="tc2">gh pr create --title "feat: add search API" --body "Adds full-text search using Elasticsearch"</span>',
+ '<span class="to-g">✓ Created pull request #42 (feat: add search API)</span>',
+ '<span class="to-b">https://github.com/originxlabs/myapp/pull/42</span>',
+ '<span class="tp">❯</span> <span class="tc2">gh pr list</span>',
+ '<span class="to">  #42  feat: add search API      feature/search   OPEN</span>',
+ '<span class="to">  #38  fix: payment webhook      feature/payments  OPEN</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── GitHub Actions ──────────────────────────────
+'actions-demo':[
+ '<span class="tp">❯</span> <span class="tc2">cat .github/workflows/ci.yml</span>',
+ '<span class="to-b">name:</span><span class="to"> CI Pipeline</span>',
+ '<span class="to-b">on:</span>',
+ '<span class="to">  push: { branches: [main, develop] }</span>',
+ '<span class="to">  pull_request: { branches: [main] }</span>',
+ '<span class="to-b">jobs:</span>',
+ '<span class="to">  test:</span>',
+ '<span class="to">    runs-on: ubuntu-latest</span>',
+ '<span class="to">    steps:</span>',
+ '<span class="to">      - uses: actions/checkout@v4</span>',
+ '<span class="to">      - uses: actions/setup-node@v4</span>',
+ '<span class="to">        with: { node-version: 20, cache: npm }</span>',
+ '<span class="to">      - run: npm ci</span>',
+ '<span class="to">      - run: npm test</span>',
+ '<span class="to">      - run: npm run lint</span>',
+ '<span class="tp">❯</span> <span class="tc2">gh workflow run ci.yml</span>',
+ '<span class="to-g">✓ Created workflow_dispatch event for ci.yml at main</span>',
+ '<span class="tp">❯</span> <span class="tc2">gh run watch</span>',
+ '<span class="to">✓ test 4s  Set up job</span>',
+ '<span class="to">✓ test 8s  Checkout code</span>',
+ '<span class="to">✓ test 32s Install dependencies</span>',
+ '<span class="to-g">✓ test 84s Run tests — <span class="to-w">42 passed, 0 failed</span></span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git lfs ─────────────────────────────────────
+'lfs-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git lfs install</span>',
+ '<span class="to">Updated git hooks.</span>',
+ '<span class="to">Git LFS initialized.</span>',
+ '<span class="tp">❯</span> <span class="tc2">git lfs track "*.psd" "*.ai" "*.mp4" "*.zip"</span>',
+ '<span class="to">Tracking "*.psd"</span>',
+ '<span class="to">Tracking "*.ai"</span>',
+ '<span class="to">Tracking "*.mp4"</span>',
+ '<span class="to">Tracking "*.zip"</span>',
+ '<span class="tp">❯</span> <span class="tc2">cat .gitattributes</span>',
+ '<span class="to">*.psd filter=lfs diff=lfs merge=lfs -text</span>',
+ '<span class="to">*.mp4 filter=lfs diff=lfs merge=lfs -text</span>',
+ '<span class="tp">❯</span> <span class="tc2">git add design.psd && git commit -m "design: add mockup file"</span>',
+ '<span class="to">Uploading LFS objects: 100% (1/1), 24 MB | 0 B/s, done.</span>',
+ '<span class="to">[main f2a3b4c] design: add mockup file</span>',
+ '<span class="to"> 1 file changed, 3 insertions(+)</span>',
+ '<span class="to-dim"># 24MB stored in LFS, only 3-line pointer in git</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── hooks ────────────────────────────────────────
+'hooks-demo':[
+ '<span class="tp">❯</span> <span class="tc2">ls .git/hooks/</span>',
+ '<span class="to">pre-commit   commit-msg   pre-push   post-merge</span>',
+ '<span class="tp">❯</span> <span class="tc2">cat .git/hooks/pre-commit</span>',
+ '<span class="to">#!/bin/bash</span>',
+ '<span class="to">set -e</span>',
+ '<span class="to">echo "Running pre-commit checks..."</span>',
+ '<span class="to">npm run lint --silent && echo "✓ ESLint passed"</span>',
+ '<span class="to">npm test --silent && echo "✓ Tests passed"</span>',
+ '<span class="tp">❯</span> <span class="tc2">git commit -m "feat: add feature"</span>',
+ '<span class="to">Running pre-commit checks...</span>',
+ '<span class="to-g">✓ ESLint passed</span>',
+ '<span class="to-g">✓ Tests passed</span>',
+ '<span class="to">[main 9a2b3c4] feat: add feature</span>',
+ '<span class="tp">❯</span> <span class="tc2">npx husky init && npm install --save-dev lint-staged</span>',
+ '<span class="to">husky - Git hooks installed</span>',
+ '<span class="to-g">✓ .husky/ directory created with pre-commit hook</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── git objects internal ─────────────────────────
+'objects-demo':[
+ '<span class="tp">❯</span> <span class="tc2">echo "Hello Git" | git hash-object --stdin</span>',
+ '<span class="to-y">8ab686eafeb1f44702738c8b0f24f2567c36da6d</span>',
+ '<span class="tp">❯</span> <span class="tc2">echo "Hello Git" | git hash-object -w --stdin</span>',
+ '<span class="to-y">8ab686eafeb1f44702738c8b0f24f2567c36da6d</span>',
+ '<span class="tp">❯</span> <span class="tc2">git cat-file -p 8ab686e</span>',
+ '<span class="to">Hello Git</span>',
+ '<span class="tp">❯</span> <span class="tc2">git cat-file -t 8ab686e</span>',
+ '<span class="to">blob</span>',
+ '<span class="tp">❯</span> <span class="tc2">git cat-file -p HEAD</span>',
+ '<span class="to">tree 4b825dc642cb6eb9a060e54bf8d69288fbee4904</span>',
+ '<span class="to">parent 3f8b2a1abc...</span>',
+ '<span class="to">author Abhishek Panda &lt;abhishek@originxlabs.com&gt; 1705294200 +0530</span>',
+ '<span class="to">committer Abhishek Panda &lt;abhishek@originxlabs.com&gt; 1705294200 +0530</span>',
+ '<span class="to"> </span>',
+ '<span class="to">feat: search with Elasticsearch</span>',
+ '<span class="tp">❯</span> <span class="tc2">git cat-file -p HEAD^{tree}</span>',
+ '<span class="to">100644 blob 3b4c5d6... README.md</span>',
+ '<span class="to">040000 tree 7e8f9a0... src</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── troubleshooting ──────────────────────────────
+'detached-head-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git checkout 3f8b2a1</span>',
+ '<span class="to-y">Note: switching to \'3f8b2a1\'.</span>',
+ '<span class="to-y">You are in \'detached HEAD\' state. You can look around, make</span>',
+ '<span class="to-y">experimental changes and commit them, and you can discard any</span>',
+ '<span class="to-y">commits you make in this state without impacting any branches.</span>',
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline -2</span>',
+ '<span class="to-y">3f8b2a1</span><span class="to"> (<span class="to-r">HEAD</span>) feat: auth middleware</span>',
+ '<span class="to-y">8c2e1f0</span><span class="to"> chore: add eslint config</span>',
+ '<span class="to-dim"># HEAD is not pointing to a branch — commits here can be lost!</span>',
+ '<span class="tp">❯</span> <span class="tc2">git switch -c recovery/from-detached</span>',
+ '<span class="to-g">Switched to a new branch \'recovery/from-detached\'</span>',
+ '<span class="to-g">✓ Detached HEAD rescued — now on a real branch</span>',
+ '<span class="tp">❯</span> <span class="tc2">git switch main</span>',
+ '<span class="to">Switched to branch \'main\'</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+'wrong-branch-demo':[
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline -3</span>',
+ '<span class="to-y">d7f3b2a</span><span class="to"> (HEAD -&gt; main) feat: payment webhook [WRONG — should be on feature/]</span>',
+ '<span class="to-y">c4e2f1a</span><span class="to"> feat: Redis caching</span>',
+ '<span class="to-dim"># Option 1: cherry-pick to correct branch, reset main</span>',
+ '<span class="tp">❯</span> <span class="tc2">git switch -c feature/payment-webhook</span>',
+ '<span class="to">Switched to a new branch \'feature/payment-webhook\'</span>',
+ '<span class="tp">❯</span> <span class="tc2">git switch main && git reset --hard HEAD~1</span>',
+ '<span class="to-r">HEAD is now at c4e2f1a feat: Redis caching</span>',
+ '<span class="tp">❯</span> <span class="tc2">git log --oneline -2</span>',
+ '<span class="to-y">c4e2f1a</span><span class="to"> (<span class="to-g">HEAD -&gt; main</span>) feat: Redis caching</span>',
+ '<span class="to-g">✓ commit moved to feature/payment-webhook, main restored</span>',
+ '<span class="to">feature/payment-webhook has: d7f3b2a feat: payment webhook</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+};
+
+// ═══════ INTERVIEW Q&A ═══════
+function getIQs(tid){
+const D={
+'iq-basics':[
+{q:"What is the difference between Git and GitHub?",diff:"BASIC",
+ a:"<code>Git</code> is a distributed version control system — a command-line tool that runs locally on your machine. It tracks changes to files, manages branches, and records history. It works completely offline. <code>GitHub</code> is a cloud hosting platform for Git repositories. It adds collaboration features: pull requests, code review, issue tracking, Actions CI/CD, GitHub Pages, and team management. Other alternatives to GitHub: GitLab (self-hostable), Bitbucket (Atlassian). You can use Git without GitHub, but GitHub requires Git."},
+{q:"What are the three areas of Git and how do files move between them?",diff:"BASIC",
+ a:"(1) <code>Working Tree</code> — your actual files on disk. Edits happen here. (2) <code>Index / Staging Area</code> — a snapshot of what will go into the next commit. You explicitly decide what to stage. (3) <code>Repository (.git/)</code> — the permanent commit history. Movements: <code>git add</code> moves changes from working tree → index. <code>git commit</code> moves index → repository. <code>git checkout / restore</code> copies from repository/index → working tree. <code>git reset</code> moves HEAD and optionally changes index/working tree. Understanding these three areas explains every Git command."},
+{q:"What is the difference between git pull and git fetch?",diff:"BASIC",
+ a:"<code>git fetch</code> downloads remote changes to your local remote-tracking branches (origin/main etc.) but does NOT change your local branches or working tree. You can inspect what changed before integrating. <code>git pull</code> = fetch + merge (or fetch + rebase if configured). It immediately updates your current branch. Best practice: prefer <code>git fetch</code> then inspect with <code>git diff main origin/main</code>, then <code>git merge origin/main</code> or <code>git rebase origin/main</code>. Reduces surprises. Use <code>git pull --rebase</code> to avoid unnecessary merge commits."},
+{q:"What is HEAD in Git?",diff:"BASIC",
+ a:"<code>HEAD</code> is a pointer to the current position in the repository — normally it points to the current branch, which in turn points to the tip commit of that branch. When you commit, HEAD (via the branch) advances to the new commit. <code>Detached HEAD</code> occurs when HEAD points directly to a commit SHA instead of a branch — happens with <code>git checkout SHA</code>. In detached HEAD state, new commits are not attached to any branch and can be lost when you switch. Always run <code>git switch -c new-branch</code> to rescue work from detached HEAD. Check: <code>cat .git/HEAD</code>."},
+{q:"What is the difference between git merge and git rebase?",diff:"BASIC",
+ a:"<code>git merge</code> combines two branches by creating a new merge commit that has two parents. Preserves the full history of when branches diverged and merged. Non-destructive — existing commits unchanged. Good for public/shared branches. <code>git rebase</code> takes commits from one branch and reapplies them on top of another, creating new commits with new SHAs. Produces a linear history without merge commits — cleaner <code>git log</code>. Rewrites history — NEVER rebase pushed commits on shared branches. Golden rule: <code>git rebase</code> only for local, unpushed commits."},
+{q:"How do you undo the last commit without losing the changes?",diff:"BASIC",
+ a:"<code>git reset --soft HEAD~1</code> — moves HEAD back one commit but keeps all changes STAGED (in index). Ready to recommit after edits. <code>git reset HEAD~1</code> (--mixed is default) — moves HEAD back, keeps changes in WORKING TREE but unstages them. <code>git reset --hard HEAD~1</code> — DANGEROUS: moves HEAD back and DELETES changes from working tree and index. Lost changes can only be recovered via <code>git reflog</code>. For commits already pushed to a shared branch, use <code>git revert HEAD</code> instead — creates a new undo commit without rewriting history."},
+{q:"What is .gitignore and what patterns does it support?",diff:"BASIC",
+ a:"<code>.gitignore</code> tells Git which files/directories to NOT track. Patterns: exact filename <code>secret.key</code>, wildcard <code>*.log</code>, directory <code>node_modules/</code>, negate pattern <code>!important.log</code>, double-star <code>**/logs</code> (recursive), comment lines start with #. Important: .gitignore only works on UNTRACKED files. If a file is already tracked, use <code>git rm --cached filename</code> to stop tracking it. Global ignore (for IDE files etc): <code>git config --global core.excludesFile ~/.gitignore_global</code>. Check if file is ignored: <code>git check-ignore -v filename</code>."},
+{q:"What is git stash and when would you use it?",diff:"BASIC",
+ a:"<code>git stash</code> temporarily saves your uncommitted changes (both staged and unstaged) to a stack, giving you a clean working tree. Use cases: (1) you need to urgently switch branches for a hotfix but your current work is incomplete, (2) pulling remote changes when your working tree is dirty, (3) trying a different approach without committing WIP. Commands: <code>git stash push -m 'name'</code>, <code>git stash list</code>, <code>git stash pop</code> (apply + drop), <code>git stash apply stash@{2}</code> (apply specific, keep in list), <code>git stash drop</code>. Stash untracked files too with <code>git stash -u</code>."},
+],
+'iq-intermediate':[
+{q:"Explain the difference between git reset --soft, --mixed, and --hard.",diff:"INTERMEDIATE",
+ a:"All three move HEAD (and the branch pointer) to the specified commit. They differ in what they do to the index and working tree: <code>--soft</code>: moves HEAD only. Index and working tree unchanged. Changes appear as staged. Use: uncommit to re-stage and re-commit differently. <code>--mixed</code> (default): moves HEAD, resets index to match that commit. Working tree unchanged. Changes appear as unstaged. Use: uncommit and rethink what to stage. <code>--hard</code>: moves HEAD, resets index AND working tree to match that commit. Changes are GONE (unless in reflog). Use: undo local work completely — NEVER on pushed commits. Recovery: <code>git reflog</code> saves all SHA movements for 90 days — you can always reset --hard to a reflog SHA."},
+{q:"What is the difference between git revert and git reset?",diff:"INTERMEDIATE",
+ a:"<code>git revert SHA</code> creates a NEW commit that is the inverse of the target commit. Preserves full history — old commit still visible in log. SAFE for public/shared branches — does not rewrite history. Push to shared branches without issues. <code>git reset SHA</code> moves HEAD backward, removing commits from the branch history (though they stay in reflog temporarily). UNSAFE for public branches — rewrites history, requires force push, causes problems for teammates who already have those commits. Rule: Use revert on anything pushed/shared. Use reset only on local, private commits."},
+{q:"How do you resolve merge conflicts?",diff:"INTERMEDIATE",
+ a:"When a merge conflict occurs: (1) Run <code>git status</code> to see conflicted files — marked 'both modified'. (2) Open each conflicted file — look for conflict markers: <code><<<<<<< HEAD</code> (your changes), <code>=======</code> (divider), <code>>>>>>>> branch-name</code> (their changes). (3) Edit the file to the desired final state — delete all three marker lines. (4) <code>git add conflicted-file</code> to mark as resolved. (5) <code>git commit</code> to complete the merge. Tools: <code>git mergetool</code> opens a visual merge tool, <code>git checkout --ours file</code> to take your version entirely, <code>git checkout --theirs file</code> to take their version. Abort with <code>git merge --abort</code>."},
+{q:"What is git cherry-pick and when should you use it?",diff:"INTERMEDIATE",
+ a:"<code>git cherry-pick SHA</code> takes the changes introduced by a specific commit and applies them as a new commit on the current branch. The SHA changes because it has a different parent. Use cases: (1) backport a bugfix from main to a release branch without merging all other changes, (2) a commit was made on the wrong branch, (3) pick specific features from an experimental branch. Multiple commits: <code>git cherry-pick A..B</code> (exclusive of A) or list SHAs. Conflicts possible — resolve same way as merge conflicts. Prefer merge/rebase when you want entire branch history. Cherry-pick for surgical, selective application."},
+{q:"What does git rebase -i do and what operations are available?",diff:"INTERMEDIATE",
+ a:"<code>git rebase -i HEAD~N</code> opens an interactive rebase editor showing the last N commits. Each line represents a commit and starts with a command. Operations: <code>pick</code> — keep commit as-is, <code>reword (r)</code> — keep commit but edit message, <code>edit (e)</code> — pause rebase to amend the commit, <code>squash (s)</code> — merge with previous commit, combining messages, <code>fixup (f)</code> — merge with previous commit, discard this message, <code>drop (d)</code> — delete this commit entirely, <code>reorder</code> — just reorder the lines. Common use: squash WIP commits before pushing a PR. Safety: only interactive-rebase commits NOT yet pushed to shared branches."},
+{q:"What is a detached HEAD state and how do you recover from it?",diff:"INTERMEDIATE",
+ a:"Detached HEAD means HEAD points directly to a commit SHA instead of a branch reference. Happens when you: <code>git checkout SHA</code>, <code>git checkout tag</code>, <code>git checkout origin/main</code>. In this state, new commits will not be attached to any branch — they become unreachable once you switch away (though reflog keeps them for 90 days). Recovery options: (1) If you haven\'t committed anything: <code>git switch main</code> — just go back to a branch. (2) If you made commits you want to keep: <code>git switch -c new-branch-name</code> to create a branch at current HEAD — commits are now saved. (3) If you switched away and lost commits: find them in <code>git reflog</code>, then <code>git switch -c recovery SHA</code>."},
+{q:"How do you squash the last 3 commits into one?",diff:"INTERMEDIATE",
+ a:"Method 1 — interactive rebase: <code>git rebase -i HEAD~3</code>, change picks 2 and 3 to \'squash\' or \'fixup\', save and edit the combined message. Method 2 — soft reset: <code>git reset --soft HEAD~3</code> unstages all 3 commits\' changes as staged changes, then <code>git commit -m 'new message'</code> creates one new commit. Method 3 — merge squash (for branch): <code>git switch main</code>, <code>git merge --squash feature/branch</code>, <code>git commit -m 'squashed message'</code>. Note: squashing rewrites history (new SHA) — only squash commits NOT yet pushed to a shared branch, or use with force push on your own feature branch before opening a PR."},
+],
+'iq-advanced':[
+{q:"How does Git store data internally? Explain the object model.",diff:"ADVANCED",
+ a:"Git uses a content-addressable filesystem. Every piece of data is stored as an <code>object</code>, identified by its SHA-1 hash (40-hex-char). Four object types: <code>blob</code> — stores file content (no filename), <code>tree</code> — stores directory listing (filenames + blob/tree SHAs + permissions), <code>commit</code> — stores tree SHA + parent SHA(s) + author + message, <code>tag</code> — annotated tag object with tagger + message. Objects are content-addressed — identical content always has the same SHA. Stored compressed in .git/objects/ (loose objects) or packed into packfiles for efficiency. This is why Git is so efficient — unchanged files share the same blob object across all commits."},
+{q:"What is git reflog and why is it a safety net?",diff:"ADVANCED",
+ a:"<code>git reflog</code> records every movement of HEAD — every checkout, commit, reset, merge, rebase. Unlike regular history (which shows what is reachable from branches), reflog records ALL movements including those from refs that no longer exist. It is your ultimate safety net because: (1) even after <code>git reset --hard</code>, the old SHA appears in reflog, (2) after a bad rebase, previous branch tip is in reflog, (3) deleted branches are in reflog. Default retention: 90 days for reachable commits, 30 days for unreachable. Recovery: <code>git reflog</code> → find SHA → <code>git reset --hard SHA</code> or <code>git switch -c recovery SHA</code>."},
+{q:"What is the difference between fast-forward and non-fast-forward merges?",diff:"ADVANCED",
+ a:"A <code>fast-forward merge</code> occurs when the branch being merged is a direct descendant of the target branch — there is no divergence. Git simply moves the branch pointer forward to the other branch\'s tip. No new commit is created. Clean linear history. A <code>non-fast-forward (3-way) merge</code> occurs when both branches have diverged. Git finds the common ancestor, computes diffs from ancestor to each tip, combines them, and creates a merge commit with two parents. Advantages: --no-ff preserves context that a feature was developed separately. Disadvantages: creates a more complex graph. Configure with: <code>git merge --no-ff</code> (always create merge commit), <code>git merge --ff-only</code> (fail if not fast-forwardable)."},
+{q:"How do you purge a file from entire Git history?",diff:"ADVANCED",
+ a:"When you accidentally committed sensitive data (passwords, keys) or large binary files. Tool: <code>git filter-repo</code> (modern, recommended over filter-branch). Steps: (1) Install: <code>pip install git-filter-repo</code>. (2) Remove file from all history: <code>git filter-repo --path secret.key --invert-paths</code>. (3) Force push ALL branches: <code>git push origin --force --all && git push origin --force --tags</code>. (4) Ask all collaborators to re-clone — their local repos still have old history. (5) Rotate the compromised credentials immediately — assume they are exposed. Prevention: use <code>git-secrets</code> or <code>detect-secrets</code> pre-commit hooks to block sensitive data before it ever commits."},
+{q:"What is git bisect and how does binary search work here?",diff:"ADVANCED",
+ a:"<code>git bisect</code> performs a binary search through commit history to find which commit introduced a bug. Usage: (1) <code>git bisect start</code>, (2) <code>git bisect bad</code> — current commit is broken, (3) <code>git bisect good v1.0.0</code> — this tag/commit was working. Git checks out the middle commit. You test and tell Git <code>git bisect good</code> or <code>git bisect bad</code>. Git halves the search space. Repeats until it identifies the first bad commit. Binary search finds the bad commit in O(log n) steps — for 1000 commits, only ~10 steps. Automate with: <code>git bisect run npm test</code> — Git runs the command and marks good/bad automatically. Reset with <code>git bisect reset</code>."},
+],
+'iq-github':[
+{q:"What is the difference between a fork and a branch?",diff:"GITHUB",
+ a:"A <code>branch</code> exists within the same repository. You need write access to the repo to push branches. Branches are the standard way to develop features within your team\'s repo. A <code>fork</code> is a complete copy of a repository under your own GitHub account. You do NOT need write access to the original. Fork workflow: (1) Fork the repo on GitHub, (2) clone your fork locally, (3) add original as upstream remote, (4) make changes on a branch, (5) push to your fork, (6) open a Pull Request from your fork to the original. Use forks for: contributing to open-source projects you don\'t own, or creating independent variants of a project. Use branches for: daily team development within the same org repo."},
+{q:"Explain the full Pull Request workflow on GitHub.",diff:"GITHUB",
+ a:"Full PR workflow: (1) Create feature branch: <code>git switch -c feature/my-feature</code>. (2) Commit changes. (3) Push branch: <code>git push -u origin feature/my-feature</code>. (4) Open PR on GitHub — add title (conventional commit style), description (what/why/how), link related issues (#42), request reviewers, add labels. (5) CI/CD runs automatically. (6) Reviewers leave comments — respond with changes or discussions. (7) Push fix commits to the same branch — PR updates automatically. (8) Once approved and CI green, merge (Merge commit / Squash and merge / Rebase and merge). (9) Delete the branch. Best practices: small PRs (<400 lines), one purpose per PR, complete description, self-review before requesting reviews."},
+{q:"What are GitHub Actions and how do you structure a workflow file?",diff:"GITHUB",
+ a:"GitHub Actions is a CI/CD platform built into GitHub. Workflows are defined in <code>.github/workflows/*.yml</code>. Structure: <code>name</code> — workflow display name. <code>on</code> — triggers (push, pull_request, schedule, workflow_dispatch). <code>jobs</code> — one or more jobs that run in parallel by default (use <code>needs</code> for dependencies). Each job runs on a <code>runs-on</code> runner (ubuntu-latest, windows-latest, macos-latest). <code>steps</code> — sequential commands using <code>run</code> (shell command) or <code>uses</code> (reusable action). Key actions: <code>actions/checkout</code>, <code>actions/setup-node</code>, <code>actions/cache</code>, <code>actions/upload-artifact</code>. Secrets: <code>secrets.MY_SECRET</code>. Matrix builds: test across multiple Node/Python versions simultaneously."},
+{q:"How do you protect the main branch on GitHub?",diff:"GITHUB",
+ a:"Branch protection rules (Settings → Branches → Add rule): <code>Require a pull request before merging</code> — no direct pushes to main. <code>Require approvals</code> — N reviewers must approve. <code>Dismiss stale reviews</code> — new commits require re-approval. <code>Require review from CODEOWNERS</code> — specific files require specific reviewers (define in .github/CODEOWNERS). <code>Require status checks to pass</code> — CI must be green before merge. <code>Require branches to be up to date</code> — must be current with main. <code>Restrict who can push</code> — specific users/teams only. <code>Require signed commits</code> — GPG-signed only. <code>Include administrators</code> — rules apply to admins too. These protections prevent accidental pushes, untested code, and enforce code review culture."},
+{q:"What is Dependabot and how does it help security?",diff:"GITHUB",
+ a:"Dependabot is a GitHub service that monitors your dependencies for security vulnerabilities and outdated versions. Two main features: (1) <code>Dependabot security updates</code> — automatically opens PRs when a dependency has a known CVE (Common Vulnerabilities and Exposures). Enabled by default on public repos. (2) <code>Dependabot version updates</code> — regularly opens PRs to keep dependencies updated. Configured in <code>.github/dependabot.yml</code>: specify package-ecosystem, directory, schedule (daily/weekly/monthly), allowed/ignored packages, PR limits. Best practice: Review and merge Dependabot PRs regularly — outdated dependencies are the #1 attack surface. Combine with branch protection requiring CI to pass before merging Dependabot PRs."},
+],
+};
+return D[tid]||[];
+}
+
+// ═══════ RICH CONTENT ═══════
+function getContent(cid,tid,tab){
+  const key=`${cid}:${tid}:${tab}`;
+
+  if(tid.startsWith('iq-')){
+    const qs=getIQs(tid);
+    const dc={BASIC:'#f05033',INTERMEDIATE:'#fbbf24',ADVANCED:'#7c3aed',GITHUB:'#60a5fa',EXPERT:'#ef4444'};
+    const cid2='qc_'+tid;
+    const items=qs.map((q,i)=>`<div class="qa-item" data-diff="${q.diff}" onclick="toggleQA(this)">
+<div class="qa-q"><div class="qa-qi" style="background:${dc[q.diff]||'#f05033'}22;color:${dc[q.diff]||'#f05033'};border:1px solid ${dc[q.diff]||'#f05033'}44">Q${i+1}</div>
+<div class="qa-qt">${q.q}</div><span class="tag ${q.diff.toLowerCase()}">${q.diff}</span><span class="qa-ch">▼</span></div>
+<div class="qa-a"><div class="qa-ab">${q.a}</div></div></div>`).join('');
+    return `<div id="${cid2}"><div class="filter-row">
+<button class="fbtn active" onclick="filterQs(this,'all',document.getElementById('${cid2}'))">All</button>
+${Object.keys(dc).map(d=>`<button class="fbtn" onclick="filterQs(this,'${d}',document.getElementById('${cid2}'))">${d}</button>`).join('')}
+</div>${items}</div>`;
+  }
+
+  if(key==='git-github-mastery:mastery-overview:Overview') return `<div class="sec">Complete Mastery Overview</div>
+<p class="bd">This chapter gives you the full operational model: write code locally, stage and commit intentionally, push clean history, open PR, pass CI, review rigorously, merge safely, tag releases, and monitor post-merge health.</p>
+<div class="grid2">
+  <div class="mc"><h4>Local Git Discipline</h4><p>Small commits, clear messages, frequent <code>git status</code>, rebasing your feature branch, and conflict resolution before PR.</p></div>
+  <div class="mc"><h4 class="bl">GitHub Collaboration</h4><p>PR templates, required reviewers, branch protection, CI checks, and merge strategy consistency across the team.</p></div>
+  <div class="mc"><h4 class="pu">Quality Gates</h4><p>Pre-commit hooks, linting, tests, security scan, dependency checks, and required status checks before merge.</p></div>
+  <div class="mc"><h4>Release Governance</h4><p>Version tagging, changelog generation, deployment workflows, rollback strategy, and incident traceability via commit SHAs.</p></div>
+</div>
+<div class="callout github"><strong>Mastery Goal</strong>Every change is traceable from commit SHA to PR, review, CI run, deployment record, and production behavior.</div>`;
+
+  if(key==='git-github-mastery:mastery-overview:Data Flow Diagram') return `<div class="sec bl">Git/GitHub Data Flow</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">1</div><div class="fb-name">Working Directory</div></div><div class="farr cmd">git add<span>stage</span></div>
+  <div class="fbox"><div class="fb-label">2</div><div class="fb-name">Staging Index</div></div><div class="farr cmd">git commit<span>snapshot</span></div>
+  <div class="fbox"><div class="fb-label">3</div><div class="fb-name">Local Repository</div></div><div class="farr cmd">git push<span>sync</span></div>
+  <div class="fbox"><div class="fb-label">4</div><div class="fb-name" style="color:var(--bl2)">GitHub Branch</div></div><div class="farr cmd">open PR<span>review</span></div>
+  <div class="fbox"><div class="fb-label">5</div><div class="fb-name" style="color:var(--bl2)">Pull Request</div></div><div class="farr cmd">Actions<span>CI/CD</span></div>
+  <div class="fbox"><div class="fb-label">6</div><div class="fb-name" style="color:var(--gr)">Protected Main</div></div><div class="farr cmd">tag + deploy<span>release</span></div>
+  <div class="fbox"><div class="fb-label">7</div><div class="fb-name" style="color:var(--gr)">Runtime / Prod</div></div>
+</div>
+<div class="sec">Control Loop Diagram</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">Observe</div><div class="fb-name">Issue / Alert / Feedback</div></div><div class="farr">→</div>
+  <div class="fbox"><div class="fb-label">Plan</div><div class="fb-name">Branch + Task Scope</div></div><div class="farr">→</div>
+  <div class="fbox"><div class="fb-label">Build</div><div class="fb-name">Commit + Push + PR</div></div><div class="farr">→</div>
+  <div class="fbox"><div class="fb-label">Validate</div><div class="fb-name">Review + CI + Security</div></div><div class="farr">→</div>
+  <div class="fbox"><div class="fb-label">Ship</div><div class="fb-name">Merge + Release + Monitor</div></div>
+</div>`;
+
+  if(key==='git-github-mastery:mastery-overview:Command Path') return `<div class="sec">End-to-End Command Path</div>
+<pre style="background:#080408;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:11px;color:#b89ab8;line-height:1.9">git switch -c feature/auth-refresh
+git status
+git add -p
+git commit -m "feat(auth): refresh token handling"
+git fetch origin
+git rebase origin/main
+git push -u origin feature/auth-refresh
+gh pr create --fill
+gh pr checks --watch
+gh pr merge --squash --delete-branch
+git switch main
+git pull --ff-only
+git tag -a v1.12.0 -m "release: v1.12.0"
+git push origin v1.12.0</pre>
+<div class="callout tip"><strong>Why this works</strong>This path enforces clean history, review visibility, CI validation, and deterministic release tagging.</div>`;
+
+  if(key==='git-github-mastery:mastery-overview:Team Rules') return `<div class="sec">Team Mastery Rules</div>
+<ul class="fl">
+  <li><strong>Never commit directly to main</strong>: all work through PRs with required review.</li>
+  <li><strong>Keep PRs small</strong>: easier review, faster feedback, lower merge risk.</li>
+  <li><strong>Require green checks</strong>: unit tests, lint, type checks, security scan.</li>
+  <li><strong>Use branch naming convention</strong>: <code>feature/*</code>, <code>fix/*</code>, <code>hotfix/*</code>, <code>chore/*</code>.</li>
+  <li><strong>Protect secrets</strong>: no credentials in repo, use GitHub Secrets and environment policies.</li>
+  <li><strong>Release with tags</strong>: every deployment maps to a signed, documented tag.</li>
+  <li><strong>Audit trail first</strong>: commit SHA, PR ID, workflow run, and deploy ID must link.</li>
+</ul>
+<div class="callout danger"><strong>Critical</strong>History rewriting (<code>push --force</code>, <code>rebase -i</code>) is allowed only on personal feature branches before review.</div>`;
+
+  // ── SETUP ──────────────────────────────────────
+  if(key==='setup:config:Demo') return mkTerm('config-demo','git config — set identity',null,true)+
+    `<div class="callout tip"><strong>Check any setting</strong><code>git config --get user.name</code> — or <code>git config --list --show-origin</code> to see where each setting comes from (system, global, local).</div>`;
+
+  if(key==='setup:config:Global vs Local') return `<div class="sec">Configuration Scope</div>
+<table class="tbl"><thead><tr><th>Scope</th><th>File</th><th>Flag</th><th>Applies to</th></tr></thead><tbody>
+<tr><td>System</td><td>/etc/gitconfig</td><td>--system</td><td>All users on machine</td></tr>
+<tr><td>Global</td><td>~/.gitconfig</td><td>--global</td><td>All repos for current user</td></tr>
+<tr><td>Local</td><td>.git/config</td><td>--local</td><td>This repo only (overrides global)</td></tr>
+<tr><td>Worktree</td><td>.git/config.worktree</td><td>--worktree</td><td>This worktree only</td></tr>
+</tbody></table>
+<div class="callout info"><strong>Precedence</strong>Local overrides global overrides system. Perfect for work repos needing a different email: set personal email globally, then override with work email per repo using <code>git config user.email work@company.com</code>.</div>`;
+
+  if(key==='setup:config:Aliases') return `<div class="sec">Essential Git Aliases</div>
+<pre style="background:#080408;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:11px;color:#b89ab8;line-height:1.9">git config --global alias.<span style="color:var(--r1)">st</span>          status
+git config --global alias.<span style="color:var(--r1)">co</span>          checkout
+git config --global alias.<span style="color:var(--r1)">sw</span>          switch
+git config --global alias.<span style="color:var(--r1)">br</span>          branch
+git config --global alias.<span style="color:var(--r1)">lg</span>          "log --oneline --graph --all -20"
+git config --global alias.<span style="color:var(--r1)">last</span>        "log -1 HEAD --stat"
+git config --global alias.<span style="color:var(--r1)">unstage</span>     "restore --staged"
+git config --global alias.<span style="color:var(--r1)">undo</span>        "reset HEAD~1 --mixed"
+git config --global alias.<span style="color:var(--r1)">save</span>        "stash push -u -m"
+git config --global alias.<span style="color:var(--r1)">aliases</span>     "config --get-regexp alias"
+git config --global alias.<span style="color:var(--r1)">wip</span>         "!git add -A && git commit -m WIP"</pre>
+<div class="callout tip"><strong>Shell alias tip</strong>Add to ~/.bashrc: <code>alias g='git'</code> — then <code>g st</code>, <code>g lg</code>, <code>g co main</code> — saves a lot of typing over a career.</div>`;
+
+  if(key==='setup:init:Demo') return mkTerm('init-demo','git init — create repository',null,true)+
+    `<div class="sec">What .git/ Contains</div>
+<table class="tbl"><thead><tr><th>Path</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>HEAD</td><td>Pointer to current branch (ref: refs/heads/main)</td></tr>
+<tr><td>config</td><td>Repository-level git config (local settings)</td></tr>
+<tr><td>objects/</td><td>All git objects — blobs, trees, commits, tags</td></tr>
+<tr><td>refs/heads/</td><td>Local branch pointers (one file per branch)</td></tr>
+<tr><td>refs/remotes/</td><td>Remote-tracking branch pointers</td></tr>
+<tr><td>refs/tags/</td><td>Tag pointers</td></tr>
+<tr><td>hooks/</td><td>Sample hook scripts (need chmod +x to activate)</td></tr>
+<tr><td>COMMIT_EDITMSG</td><td>Last commit message (used by git commit --amend)</td></tr>
+<tr><td>ORIG_HEAD</td><td>Previous HEAD before merge/rebase (for recovery)</td></tr>
+</tbody></table>`;
+
+  if(key==='setup:clone:Demo') return mkTerm('clone-demo','git clone — download repository',null,true);
+  if(key==='setup:clone:Flags') return `<div class="sec">Clone Flags</div>
+<table class="tbl"><thead><tr><th>Flag</th><th>Effect</th></tr></thead><tbody>
+<tr><td>--depth=1</td><td>Shallow clone — only latest snapshot. Fastest for CI.</td></tr>
+<tr><td>--branch name</td><td>Clone and checkout specific branch/tag</td></tr>
+<tr><td>--single-branch</td><td>Only fetch one branch (saves bandwidth)</td></tr>
+<tr><td>--recurse-submodules</td><td>Clone submodules automatically</td></tr>
+<tr><td>--filter=blob:none</td><td>Partial clone — fetch blobs on demand (huge repos)</td></tr>
+<tr><td>-o upstream</td><td>Name the remote 'upstream' instead of 'origin'</td></tr>
+<tr><td>--bare</td><td>Clone without working tree (for server hosting)</td></tr>
+</tbody></table>`;
+
+  // ── STAGING ─────────────────────────────────────
+  if(key==='staging:status:Demo') return mkTerm('status-demo','git status — inspect state',null,true);
+  if(key==='staging:status:Output Guide') return `<div class="sec">Status Output Decoder</div>
+<table class="tbl"><thead><tr><th>Short Status</th><th>Long Status Meaning</th><th>State</th></tr></thead><tbody>
+<tr><td class="gr">A </td><td>new file</td><td>Staged new file</td></tr>
+<tr><td class="gr">M </td><td>modified (left col)</td><td>Staged modification</td></tr>
+<tr><td class="re"> M</td><td>modified (right col)</td><td>Unstaged modification</td></tr>
+<tr><td class="ye">MM</td><td>modified both cols</td><td>Staged + unstaged changes</td></tr>
+<tr><td class="re"> D</td><td>deleted</td><td>Unstaged deletion</td></tr>
+<tr><td class="gr">D </td><td>deleted</td><td>Staged deletion</td></tr>
+<tr><td class="re">??</td><td>untracked</td><td>New file, not staged yet</td></tr>
+<tr><td class="ye">!!</td><td>ignored</td><td>Matches .gitignore pattern</td></tr>
+</tbody></table>
+<div class="callout info"><strong>Left vs Right column</strong>In short status, left column = staging area (vs last commit), right column = working tree (vs staging area). Both modified means: you staged some changes, then made more changes on top.</div>`;
+
+  if(key==='staging:add:Demo') return mkTerm('add-demo','git add — stage changes',null,true);
+  if(key==='staging:add:Partial Staging') return `<div class="sec">Staging Parts of a File</div>
+<p class="bd"><strong>git add -p</strong> (--patch) is one of the most powerful Git features. It walks you through each "hunk" of changes and asks what to do:</p>
+<table class="tbl"><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody>
+<tr><td>y</td><td>Stage this hunk</td></tr>
+<tr><td>n</td><td>Skip this hunk (do not stage)</td></tr>
+<tr><td>s</td><td>Split into smaller hunks</td></tr>
+<tr><td>e</td><td>Manually edit this hunk</td></tr>
+<tr><td>q</td><td>Quit — stop processing hunks</td></tr>
+<tr><td>a</td><td>Stage this hunk and all remaining in file</td></tr>
+<tr><td>d</td><td>Skip this hunk and all remaining in file</td></tr>
+<tr><td>?</td><td>Help — show all options</td></tr>
+</tbody></table>
+<div class="callout tip"><strong>Why stage partially?</strong>You might have fixed two bugs in one session. Partial staging lets you commit one fix cleanly, then commit the other — giving your history semantic meaning instead of one giant WIP commit.</div>`;
+
+  if(key==='staging:diff:Demo') return mkTerm('diff-demo','git diff — view changes',null,true);
+  if(key==='staging:diff:Staged vs Unstaged') return `<div class="sec">What Each diff Command Shows</div>
+<table class="tbl"><thead><tr><th>Command</th><th>Compares</th><th>Shows</th></tr></thead><tbody>
+<tr><td>git diff</td><td>Working tree vs Index</td><td>Unstaged changes (not yet added)</td></tr>
+<tr><td>git diff --staged</td><td>Index vs HEAD commit</td><td>Staged changes (about to be committed)</td></tr>
+<tr><td>git diff HEAD</td><td>Working tree vs HEAD</td><td>All changes since last commit</td></tr>
+<tr><td>git diff branchA branchB</td><td>Two branches</td><td>All differences between branches</td></tr>
+<tr><td>git diff SHA1 SHA2</td><td>Two commits</td><td>Changes between specific commits</td></tr>
+<tr><td>git diff HEAD~3 -- file</td><td>File 3 commits ago vs now</td><td>Evolution of one file</td></tr>
+</tbody></table>`;
+
+  if(key==='staging:commit:Demo') return mkTerm('commit-demo','git commit — save snapshot',null,true);
+  if(key==='staging:commit:Good Messages') return `<div class="sec">Conventional Commits Format</div>
+<pre style="background:#080408;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:11px;color:#b89ab8;line-height:1.9">
+<span style="color:var(--r1)">&lt;type&gt;</span>(<span style="color:var(--pu2)">&lt;scope&gt;</span>): <span style="color:#fff">&lt;short summary&gt;</span>
+
+[optional body — explain WHY, not WHAT]
+
+[optional footer — BREAKING CHANGE: ..., Fixes #42]
+
+<span style="color:var(--r1)">Types:</span>
+feat     — new feature
+fix      — bug fix
+docs     — documentation only
+style    — formatting (no logic change)
+refactor — code restructuring (no feat/fix)
+test     — adding/fixing tests
+chore    — build process, tooling
+perf     — performance improvement
+ci       — CI/CD changes
+</pre>
+<div class="callout info"><strong>50/72 Rule</strong>Keep the subject line under 50 characters. Wrap body at 72 characters. Subject answers "What does this commit do?" (imperative mood: "Add" not "Added"). Body answers "Why was this change needed?"</div>`;
+
+  if(key==='staging:commit:Amend') return `<div class="sec">Amending Commits</div>
+<ul class="fl">
+<li><strong>git commit --amend -m "new message"</strong> — replace last commit message</li>
+<li><strong>git commit --amend --no-edit</strong> — add staged changes to last commit without changing message</li>
+<li><strong>git add forgotten-file && git commit --amend --no-edit</strong> — add a missed file to last commit</li>
+</ul>
+<div class="callout danger"><strong>NEVER amend pushed commits</strong>Amend creates a new commit SHA. If you already pushed, amending and force-pushing rewrites shared history — teammates get diverged state. Only amend LOCAL commits before pushing.</div>`;
+
+  // ── BRANCHING ───────────────────────────────────
+  if(key==='branching:branch:Demo') return mkTerm('branch-demo','git branch — manage branches',null,true);
+  if(key==='branching:switch:Demo') return mkTerm('switch-demo','git switch — change branches',null,true);
+  if(key==='branching:branch-viz:Diagram') return `<div class="sec">Branch Diagram — What You&#39;re Looking At</div>
+<div class="branch-viz">
+<span class="bv-line"><span class="bv-hash">a4f8b2c</span> ● <span class="bv-msg">init: express setup</span></span>
+<span class="bv-line">         │</span>
+<span class="bv-line"><span class="bv-hash">8c2e1f0</span> ● <span class="bv-msg">chore: eslint config</span></span>
+<span class="bv-line">         │</span>
+<span class="bv-line"><span class="bv-hash">3f8b2a1</span> ●  <span class="bv-msg">feat: auth middleware</span>  ◄── <span class="bv-main">main</span>, <span class="bv-feat">origin/main</span></span>
+<span class="bv-line">         │╲</span>
+<span class="bv-line">         │  ● <span class="bv-hash">5c9b8a7</span> <span class="bv-msg">feat: search model</span></span>
+<span class="bv-line">         │  │  ◄── <span class="bv-feat">feature/search</span></span>
+<span class="bv-line">         │  ● <span class="bv-hash">7e1b0a9</span> <span class="bv-msg">feat: search API</span></span>
+<span class="bv-line">         │  │</span>
+<span class="bv-line">         │  ● <span class="bv-hash">9a1c2d3</span> <span class="bv-msg">feat: search tests</span>  ◄── <span class="bv-head">HEAD</span></span>
+</div>
+<div class="callout info"><strong>Reading the graph</strong>Each ● is a commit. The vertical │ is time flowing up. Branches are just named pointers to commits. HEAD is where you currently are. Creating a branch is just adding a new pointer — almost free!</div>`;
+
+  if(key==='branching:branch-viz:When to Branch') return `<div class="sec">When to Create a Branch</div>
+<ul class="fl">
+<li><strong>Every new feature</strong> — branch from main, name: feat/feature-name or feature/feature-name</li>
+<li><strong>Every bug fix</strong> — branch from main (or release), name: fix/bug-description</li>
+<li><strong>Production hotfix</strong> — branch from the release tag, name: hotfix/critical-bug</li>
+<li><strong>Experimental work</strong> — branch from anywhere, name: exp/idea-name</li>
+<li><strong>Release preparation</strong> — branch from main, name: release/v2.0.0</li>
+</ul>
+<div class="callout tip"><strong>Branches are cheap</strong>A branch is just a 41-byte file containing a SHA. Creating/deleting branches is instant. Use them liberally — one branch per concern, no matter how small.</div>`;
+
+  // ── MERGING ─────────────────────────────────────
+  if(key==='merging:merge:Demo') return mkTerm('merge-demo','git merge — integrate branches',null,true);
+  if(key==='merging:merge:FF vs 3-way') return `<div class="sec">Fast-Forward vs 3-Way Merge</div>
+<div class="grid2">
+<div class="mc"><h4>Fast-Forward</h4>
+<div class="branch-viz" style="font-size:10px;padding:10px">
+<span class="bv-line">● main (before)</span>
+<span class="bv-line">│╲</span>
+<span class="bv-line">│  ● feat A</span>
+<span class="bv-line">│  ● feat B</span>
+<span class="bv-line">↓ git merge feature</span>
+<span class="bv-line">● <span class="bv-head">main</span> (just moves!)</span>
+</div>
+<p style="font-size:10px;color:var(--tx3);font-family:var(--mono)">No merge commit. Linear history. main just advances to tip of feature.</p>
+</div>
+<div class="mc"><h4>3-Way Merge</h4>
+<div class="branch-viz" style="font-size:10px;padding:10px">
+<span class="bv-line">● main A</span>
+<span class="bv-line">│╲</span>
+<span class="bv-line">│  ● feat 1</span>
+<span class="bv-line">● main B│</span>
+<span class="bv-line">│ ╲  ● feat 2</span>
+<span class="bv-line">│  ● <span class="bv-head">MERGE</span> commit</span>
+</div>
+<p style="font-size:10px;color:var(--tx3);font-family:var(--mono)">Both diverged. Git creates merge commit with 2 parents. Preserves feature context.</p>
+</div></div>
+<table class="tbl" style="margin-top:10px"><thead><tr><th>Strategy</th><th>When</th><th>Command</th></tr></thead><tbody>
+<tr><td>Fast-forward</td><td>No divergence, want clean history</td><td>git merge feature (default)</td></tr>
+<tr><td>No-FF merge commit</td><td>Always want merge commit for traceability</td><td>git merge --no-ff feature</td></tr>
+<tr><td>Squash merge</td><td>Combine all feature commits into one on main</td><td>git merge --squash feature</td></tr>
+<tr><td>Rebase + FF</td><td>Linear history without merge commit</td><td>git rebase main; git merge</td></tr>
+</tbody></table>`;
+
+  if(key==='merging:merge:Conflicts') return mkTerm('conflicts-demo','conflict resolution',null,true)+
+    `<div class="callout danger"><strong>Conflict markers mean:</strong><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> = your current branch changes. <code>=======</code> = divider. <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; branch</code> = incoming changes. Delete ALL three marker lines after resolving. Then git add and git commit.</div>`;
+
+  if(key==='merging:rebase:Demo') return mkTerm('rebase-demo','git rebase — rewrite history',null,true);
+  if(key==='merging:rebase:vs Merge') return `<div class="sec">Rebase vs Merge — When to Use Each</div>
+<table class="tbl"><thead><tr><th>Rebase</th><th>Merge</th></tr></thead><tbody>
+<tr><td class="gr">✓ Local feature branches before PR</td><td class="gr">✓ Integrating feature into main</td></tr>
+<tr><td class="gr">✓ Keep feature branch up to date</td><td class="gr">✓ Long-running release branches</td></tr>
+<tr><td class="gr">✓ Clean linear history (PRs)</td><td class="gr">✓ Preserving audit trail</td></tr>
+<tr><td class="re">✗ Public/shared branches</td><td class="re">✗ When you want linear history</td></tr>
+<tr><td class="re">✗ After pushing (needs force push)</td><td class="re">✗ High-frequency small PRs (noisy)</td></tr>
+</tbody></table>
+<div class="callout danger"><strong>Golden Rule of Rebasing</strong>NEVER rebase commits that exist on a public/shared branch (main, develop, or any branch others have pulled). Rebasing creates new SHAs — other developers\' history diverges. Only rebase your local, private feature branch commits.</div>`;
+
+  if(key==='merging:rebase:Interactive -i') return mkTerm('irebase-demo','git rebase -i — interactive',null,true);
+  if(key==='merging:cherry-pick:Demo') return mkTerm('cherry-pick-demo','git cherry-pick — apply commits',null,true);
+
+  // ── REMOTES ─────────────────────────────────────
+  if(key==='remotes:remote:Demo') return mkTerm('remote-demo','git remote — manage remotes',null,true);
+  if(key==='remotes:fetch:Demo') return mkTerm('fetch-demo','git fetch — download changes',null,true);
+  if(key==='remotes:fetch:vs Pull') return `<div class="sec">fetch vs pull</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">Remote</div><div class="fb-name" style="color:var(--bl2)">origin/main</div></div>
+  <div class="farr cmd">→<span>git fetch</span></div>
+  <div class="fbox"><div class="fb-label">Remote Tracking</div><div class="fb-name" style="color:var(--pu2)">origin/main local copy</div></div>
+  <div class="farr">→</div>
+  <div class="fbox"><div class="fb-label">👁️ inspect</div><div class="fb-name" style="color:var(--ye)">git diff main origin/main</div></div>
+  <div class="farr cmd">→<span>git merge</span></div>
+  <div class="fbox"><div class="fb-label">Your Branch</div><div class="fb-name" style="color:var(--r1)">main</div></div>
+</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">Remote</div><div class="fb-name" style="color:var(--bl2)">origin/main</div></div>
+  <div class="farr cmd">→<span>git pull</span><span style="color:var(--tx3)">(fetch+merge)</span></div>
+  <div class="fbox"><div class="fb-label">Your Branch</div><div class="fb-name" style="color:var(--r1)">main (updated)</div></div>
+</div>
+<div class="callout tip"><strong>Best practice</strong>Use <code>git fetch</code> + review + <code>git merge</code> for important changes. Use <code>git pull --rebase</code> for personal branches to keep history clean. Configure: <code>git config --global pull.rebase true</code></div>`;
+
+  if(key==='remotes:pull:Demo') return mkTerm('pull-demo','git pull — fetch and merge',null,true);
+  if(key==='remotes:push:Demo') return mkTerm('push-demo','git push — upload commits',null,true);
+  if(key==='remotes:push:Force Push') return `<div class="sec">Force Push — With Great Power...</div>
+<table class="tbl"><thead><tr><th>Command</th><th>Behavior</th><th>When to Use</th></tr></thead><tbody>
+<tr><td>git push --force</td><td class="re">Overwrites remote regardless</td><td class="re">Almost never — too dangerous</td></tr>
+<tr><td>git push --force-with-lease</td><td class="gr">Fails if remote has commits you haven\'t seen</td><td class="gr">After rebase/amend on feature branch</td></tr>
+<tr><td>git push --force-if-includes</td><td class="gr">Requires fetch before force push</td><td class="gr">Safest force push option</td></tr>
+</tbody></table>
+<div class="callout danger"><strong>NEVER force push to main/develop</strong>Force pushing shared branches rewrites history for everyone. It can destroy teammates\' work. Only force push your own feature branch after rebasing or interactive rebase cleanup, and only when no one else is working on that branch.</div>`;
+
+  // ── HISTORY ─────────────────────────────────────
+  if(key==='history:log:Demo') return mkTerm('log-demo','git log — browse history',null,true);
+  if(key==='history:log:Formatting') return `<div class="sec">Custom Log Formats</div>
+<ul class="fl">
+<li><strong>git log --oneline --graph --all</strong> — visual branch graph (save as alias: lg)</li>
+<li><strong>git log --format="%h %an %ar %s"</strong> — hash, author, relative time, subject</li>
+<li><strong>git log --stat</strong> — show files changed per commit</li>
+<li><strong>git log -p</strong> — show full diff of each commit (very verbose)</li>
+<li><strong>git log --follow -- src/auth.js</strong> — history of one file including renames</li>
+<li><strong>git shortlog -sn</strong> — contributions ranked by author commit count</li>
+</ul>`;
+
+  if(key==='history:log:Graph') return `<div class="sec">Branch Graph Legend</div>
+<div class="branch-viz">
+<span class="bv-line"><span class="bv-head">*</span> <span class="bv-hash">d7f3b2a</span> (<span class="bv-head">HEAD -&gt; main</span>, <span class="bv-feat">origin/main</span>) feat: search</span>
+<span class="bv-line"><span class="bv-head">*</span> <span class="bv-hash">c4e2f1a</span> feat: Redis caching</span>
+<span class="bv-line"><span class="bv-main">|</span> <span class="bv-feat">*</span> <span class="bv-hash">e1a2b3c</span> (<span class="bv-feat">feature/oauth</span>) feat: Google OAuth2</span>
+<span class="bv-line"><span class="bv-main">|</span> <span class="bv-feat">*</span> <span class="bv-hash">f4b5c6d</span> feat: OAuth2 routes</span>
+<span class="bv-line"><span class="bv-main">|/</span></span>
+<span class="bv-line"><span class="bv-main">*</span> <span class="bv-hash">a8b3d2e</span> fix: connection pool</span>
+<span class="bv-line"><span class="bv-main">*</span>   <span class="bv-hash">9c1d3e2</span> Merge feature/dashboard</span>
+<span class="bv-line"><span class="bv-main">|</span><span class="bv-tag">\</span></span>
+<span class="bv-line"><span class="bv-main">|</span> <span class="bv-tag">*</span> <span class="bv-hash">7a4b1c0</span> <span class="bv-tag">v2.0.0</span> feat: dashboard</span>
+</div>`;
+
+  if(key==='history:log:Filters') return `<div class="sec">Log Filter Reference</div>
+<table class="tbl"><thead><tr><th>Filter</th><th>Example</th></tr></thead><tbody>
+<tr><td>--author</td><td>git log --author="Abhishek"</td></tr>
+<tr><td>--since / --after</td><td>git log --since="2025-01-01"</td></tr>
+<tr><td>--until / --before</td><td>git log --until="7 days ago"</td></tr>
+<tr><td>--grep</td><td>git log --grep="payment" (search commit messages)</td></tr>
+<tr><td>-S "string"</td><td>git log -S "password" (find commits that added/removed string)</td></tr>
+<tr><td>-G "regex"</td><td>git log -G "password.*hash" (regex version of -S)</td></tr>
+<tr><td>-- file</td><td>git log -- src/auth.js (commits touching this file)</td></tr>
+<tr><td>-n N</td><td>git log -n 10 (last 10 commits only)</td></tr>
+<tr><td>branchA..branchB</td><td>git log main..feature (commits in feature not in main)</td></tr>
+</tbody></table>`;
+
+  if(key==='history:blame:Demo') return mkTerm('blame-demo','git blame — who changed what',null,true);
+  if(key==='history:reflog:Demo') return mkTerm('reflog-demo','git reflog — safety net',null,true);
+  if(key==='history:bisect:Demo') return mkTerm('bisect-demo','git bisect — find regressions',null,true);
+
+  // ── STASH ───────────────────────────────────────
+  if(key==='stash:stash-save:Demo') return mkTerm('stash-demo','git stash — shelve changes',null,true);
+  if(key==='stash:stash-ops:Demo') return `<div class="sec">Stash Operations</div>
+<table class="tbl"><thead><tr><th>Command</th><th>Action</th></tr></thead><tbody>
+<tr><td>git stash</td><td>Save tracked changes to stash stack</td></tr>
+<tr><td>git stash -u</td><td>Also stash untracked files</td></tr>
+<tr><td>git stash push -m "name"</td><td>Save with a descriptive name</td></tr>
+<tr><td>git stash list</td><td>Show all stashes</td></tr>
+<tr><td>git stash show -p</td><td>Show diff of most recent stash</td></tr>
+<tr><td>git stash pop</td><td>Apply most recent stash and delete it</td></tr>
+<tr><td>git stash apply stash@{2}</td><td>Apply specific stash, keep in list</td></tr>
+<tr><td>git stash drop stash@{0}</td><td>Delete a specific stash</td></tr>
+<tr><td>git stash clear</td><td>Delete ALL stashes</td></tr>
+<tr><td>git stash branch feature/new</td><td>Create branch from stash (cleanest recovery)</td></tr>
+</tbody></table>
+<div class="callout warn"><strong>pop vs apply</strong>Use <code>pop</code> when you want to move the stash to your working tree and remove it from the stash list. Use <code>apply</code> when you want to apply the same stash to multiple branches, or you\'re not sure if it will conflict cleanly.</div>`;
+
+  // ── UNDOING ─────────────────────────────────────
+  if(key==='undoing:reset:Demo') return mkTerm('reset-demo','git reset — move HEAD',null,true);
+  if(key==='undoing:reset:soft/mixed/hard') return `<div class="sec">Reset Mode Comparison</div>
+<table class="tbl"><thead><tr><th>Mode</th><th>HEAD</th><th>Index</th><th>Working Tree</th><th>Use When</th></tr></thead><tbody>
+<tr><td class="gr">--soft</td><td class="gr">Moved</td><td>Unchanged</td><td>Unchanged</td><td>Undo commit, keep staged. Re-commit.</td></tr>
+<tr><td class="ye">--mixed</td><td class="gr">Moved</td><td class="ye">Reset</td><td>Unchanged</td><td>Undo commit + unstage. Default.</td></tr>
+<tr><td class="re">--hard</td><td class="gr">Moved</td><td class="re">Reset</td><td class="re">Reset (LOST)</td><td>Undo everything. Nuclear option.</td></tr>
+</tbody></table>
+<div class="callout danger"><strong>hard reset loses work</strong>Changes discarded by --hard are gone from your working tree and index. They MAY be in reflog (for ~90 days). Always do a dry-run: check <code>git log --oneline</code> to verify which commits you\'re about to reset past.</div>`;
+
+  if(key==='undoing:revert:Demo') return mkTerm('revert-demo','git revert — safe undo',null,true);
+  if(key==='undoing:revert:vs Reset') return `<div class="sec">When to Revert vs Reset</div>
+<table class="tbl"><thead><tr><th>Scenario</th><th>Use</th><th>Why</th></tr></thead><tbody>
+<tr><td>Undo LOCAL commit, not pushed</td><td class="gr">git reset</td><td>No one else has seen it — safe to rewrite</td></tr>
+<tr><td>Undo PUSHED commit on shared branch</td><td class="gr">git revert</td><td>Creates new undo commit — history preserved</td></tr>
+<tr><td>Undo commit in release branch</td><td class="gr">git revert</td><td>Audit trail required, no history rewrite</td></tr>
+<tr><td>Undo last 3 WIP commits before push</td><td class="gr">git reset --soft HEAD~3</td><td>Recommit as one clean commit</td></tr>
+<tr><td>Bad rebase on feature branch (not pushed)</td><td class="gr">git reset --hard ORIG_HEAD</td><td>ORIG_HEAD set before rebase — instant recovery</td></tr>
+</tbody></table>`;
+
+  // ── TAGS ────────────────────────────────────────
+  if(key==='tags:tag-create:Demo') return mkTerm('tag-demo','git tag — mark releases',null,true);
+  if(key==='tags:tag-push:SemVer') return `<div class="sec">Semantic Versioning (SemVer)</div>
+<pre style="background:#080408;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:12px;color:#b89ab8;line-height:2">
+v<span style="color:var(--r1)">MAJOR</span>.<span style="color:var(--pu2)">MINOR</span>.<span style="color:var(--gr)">PATCH</span>[-<span style="color:var(--ye)">prerelease</span>]
+
+<span style="color:var(--r1)">MAJOR</span>  — Breaking API changes (v1.x → v2.0.0)
+<span style="color:var(--pu2)">MINOR</span>  — New backward-compatible features (v1.1 → v1.2.0)
+<span style="color:var(--gr)">PATCH</span>  — Backward-compatible bug fixes (v1.2.0 → v1.2.1)
+
+Pre-release: v2.0.0-<span style="color:var(--ye)">alpha.1</span>  v2.0.0-<span style="color:var(--ye)">beta.3</span>  v2.0.0-<span style="color:var(--ye)">rc.1</span>
+</pre>
+<ul class="fl">
+<li><strong>git tag -a v2.0.0 -m "v2.0.0 — payment & search"</strong> — annotated release tag</li>
+<li><strong>git push origin v2.0.0</strong> — push specific tag</li>
+<li><strong>git push origin --tags</strong> — push all tags</li>
+<li><strong>git tag -d v2.0.0-bad && git push origin :refs/tags/v2.0.0-bad</strong> — delete tag locally and remotely</li>
+</ul>`;
+
+  // ── GITHUB BASICS ───────────────────────────────
+  if(key==='github-basics:gh-pr:Demo') return `<div class="sec">Pull Request Flow</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">1</div><div class="fb-name" style="color:var(--r1)">feature/my-feature</div></div>
+  <div class="farr cmd">→<span>git push</span></div>
+  <div class="fbox"><div class="fb-label">2</div><div class="fb-name" style="color:var(--bl2)">Open PR on GitHub</div></div>
+  <div class="farr cmd">→<span>CI runs</span></div>
+  <div class="fbox"><div class="fb-label">3</div><div class="fb-name" style="color:var(--pu2)">Code Review</div></div>
+  <div class="farr cmd">→<span>approved</span></div>
+  <div class="fbox"><div class="fb-label">4</div><div class="fb-name" style="color:var(--gr)">Merge to main</div></div>
+</div>
+<table class="tbl"><thead><tr><th>Merge Strategy</th><th>Result</th><th>Best For</th></tr></thead><tbody>
+<tr><td>Create a merge commit</td><td>Merge commit with all PR commits</td><td>Full history, long-lived branches</td></tr>
+<tr><td>Squash and merge</td><td>One commit on main per PR</td><td>Clean main history, many WIP commits</td></tr>
+<tr><td>Rebase and merge</td><td>PR commits rebased onto main, no merge commit</td><td>Linear history enthusiasts</td></tr>
+</tbody></table>`;
+
+  if(key==='github-basics:gh-fork:Demo') return `<div class="sec">Fork Contribution Workflow</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">1. Fork</div><div class="fb-name" style="color:var(--bl2)">upstream → your fork</div></div>
+  <div class="farr cmd">→<span>git clone</span></div>
+  <div class="fbox"><div class="fb-label">2. Clone</div><div class="fb-name" style="color:var(--r1)">your fork locally</div></div>
+  <div class="farr cmd">→<span>develop</span></div>
+  <div class="fbox"><div class="fb-label">3. Branch</div><div class="fb-name" style="color:var(--pu2)">feat/my-fix</div></div>
+  <div class="farr cmd">→<span>PR</span></div>
+  <div class="fbox"><div class="fb-label">4. PR</div><div class="fb-name" style="color:var(--gr)">fork → upstream</div></div>
+</div>
+<pre style="background:#080408;padding:12px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:10.5px;color:#b89ab8;line-height:1.9">
+<span style="color:var(--r1)"># Setup after fork + clone</span>
+git remote add upstream https://github.com/original-org/repo.git
+git remote -v
+<span style="color:var(--r1)"># origin</span>    = your fork
+<span style="color:var(--pu2)"># upstream</span>  = original repo
+
+<span style="color:var(--r1)"># Sync your fork with upstream</span>
+git fetch upstream
+git switch main
+git merge upstream/main
+git push origin main
+</pre>`;
+
+  // ── GITHUB ACTIONS ──────────────────────────────
+  if(key==='github-actions:actions-basics:Demo') return mkTerm('actions-demo','GitHub Actions workflow',null,true);
+  if(key==='github-actions:actions-basics:YAML Anatomy') return `<div class="sec">Workflow YAML Structure</div>
+<pre style="background:#080408;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:10.5px;color:#b89ab8;line-height:1.9">
+<span style="color:var(--bl2)">name:</span> <span style="color:#fff">CI Pipeline</span>
+
+<span style="color:var(--bl2)">on:</span>                          <span style="color:var(--tx3)"># triggers</span>
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *'      <span style="color:var(--tx3)"># 2am daily</span>
+  workflow_dispatch:          <span style="color:var(--tx3)"># manual trigger</span>
+
+<span style="color:var(--bl2)">env:</span>                          <span style="color:var(--tx3)"># global env vars</span>
+  NODE_ENV: test
+
+<span style="color:var(--bl2)">jobs:</span>
+  <span style="color:var(--pu2)">test:</span>                       <span style="color:var(--tx3)"># job id</span>
+    runs-on: ubuntu-latest
+    needs: [lint]             <span style="color:var(--tx3)"># run after lint job</span>
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        node: [18, 20, 22]   <span style="color:var(--tx3)"># matrix: runs 3x</span>
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: <span style="color:var(--r1)">\${{matrix.node}}</span>
+          cache: npm
+      - run: npm ci
+      - run: npm test
+        env:
+          DB_URL: <span style="color:var(--r1)">\${{secrets.DATABASE_URL}}</span>
+</pre>`;
+
+  if(key==='github-actions:actions-ci:.NET CI') return `<div class="sec">.NET CI Workflow</div>
+<pre style="background:#080408;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:10.5px;color:#b89ab8;line-height:1.9">
+<span style="color:var(--bl2)">name:</span> .NET CI
+
+<span style="color:var(--bl2)">on:</span>
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+
+<span style="color:var(--bl2)">jobs:</span>
+  <span style="color:var(--pu2)">build-and-test:</span>
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+      - name: Test
+        run: dotnet test --no-build --verbosity normal --collect "XPlat Code Coverage"
+      - name: Coverage Report
+        uses: codecov/codecov-action@v4
+        with:
+          token: <span style="color:var(--r1)">\${{secrets.CODECOV_TOKEN}}</span>
+      - name: Publish
+        run: dotnet publish -c Release -o ./publish
+      - uses: actions/upload-artifact@v4
+        with:
+          name: published-app
+          path: ./publish
+</pre>`;
+
+  if(key==='github-actions:actions-cd:Docker CD') return `<div class="sec">Docker Build & Push CD Workflow</div>
+<pre style="background:#080408;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:10.5px;color:#b89ab8;line-height:1.9">
+<span style="color:var(--bl2)">name:</span> Build and Push Docker Image
+
+<span style="color:var(--bl2)">on:</span>
+  push:
+    tags: ['v*']            <span style="color:var(--tx3)"># trigger on version tags</span>
+
+<span style="color:var(--bl2)">jobs:</span>
+  <span style="color:var(--pu2)">docker:</span>
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: <span style="color:var(--r1)">\${{github.actor}}</span>
+          password: <span style="color:var(--r1)">\${{secrets.GITHUB_TOKEN}}</span>
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/<span style="color:var(--r1)">\${{github.repository}}</span>
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: <span style="color:var(--r1)">\${{steps.meta.outputs.tags}}</span>
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+</pre>`;
+
+  // ── GITHUB CLI ──────────────────────────────────
+  if(key==='github-cli:gh-install:Demo') return mkTerm('gh-auth-demo','gh — GitHub CLI',null,true);
+  if(key==='github-cli:gh-pr-cmd:Demo') return `<div class="sec">gh pr Commands</div>
+<table class="tbl"><thead><tr><th>Command</th><th>Action</th></tr></thead><tbody>
+<tr><td>gh pr create</td><td>Open interactive PR creation wizard</td></tr>
+<tr><td>gh pr create --title "..." --body "..."</td><td>Create PR with title and body</td></tr>
+<tr><td>gh pr list</td><td>List open PRs in current repo</td></tr>
+<tr><td>gh pr view 42</td><td>View PR details in terminal</td></tr>
+<tr><td>gh pr view --web</td><td>Open current branch\'s PR in browser</td></tr>
+<tr><td>gh pr checkout 42</td><td>Check out a PR branch locally</td></tr>
+<tr><td>gh pr review 42 --approve</td><td>Approve a PR from CLI</td></tr>
+<tr><td>gh pr review 42 --request-changes -b "..."</td><td>Request changes with comment</td></tr>
+<tr><td>gh pr merge 42 --squash</td><td>Merge PR with squash strategy</td></tr>
+<tr><td>gh pr close 42</td><td>Close PR without merging</td></tr>
+<tr><td>gh pr status</td><td>Show PRs relevant to you</td></tr>
+</tbody></table>`;
+
+  // ── WORKFLOWS ───────────────────────────────────
+  if(key==='workflows:feature-branch:Demo') return `<div class="sec">Feature Branch Workflow</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">Start</div><div class="fb-name" style="color:var(--gr)">git switch main → git pull</div></div>
+  <div class="farr cmd">→<span>branch</span></div>
+  <div class="fbox"><div class="fb-label">Develop</div><div class="fb-name" style="color:var(--r1)">git switch -c feat/x</div></div>
+  <div class="farr cmd">→<span>commits</span></div>
+  <div class="fbox"><div class="fb-label">Push</div><div class="fb-name" style="color:var(--pu2)">git push -u origin</div></div>
+  <div class="farr cmd">→<span>PR</span></div>
+  <div class="fbox"><div class="fb-label">Review</div><div class="fb-name" style="color:var(--bl2)">GitHub PR</div></div>
+  <div class="farr cmd">→<span>merge</span></div>
+  <div class="fbox"><div class="fb-label">Done</div><div class="fb-name" style="color:var(--gr)">merged to main</div></div>
+</div>
+<ul class="fl">
+<li><strong>Branch naming</strong>: feat/add-search, fix/null-pointer, hotfix/login-redirect, chore/update-deps</li>
+<li><strong>Keep branches short-lived</strong>: merge or delete within days, not weeks</li>
+<li><strong>Rebase before PR</strong>: <code>git fetch origin && git rebase origin/main</code> to avoid conflicts</li>
+<li><strong>Delete after merge</strong>: click "Delete branch" on GitHub after merging PR</li>
+</ul>`;
+
+  if(key==='workflows:gitflow:Diagram') return `<div class="sec">GitFlow Branch Model</div>
+<div class="branch-viz">
+<span class="bv-line"><span style="color:#fbbf24">main</span>   ●─────────────────────────────────● v1.0  ●─── v1.1</span>
+<span class="bv-line">         │                               ╲      │</span>
+<span class="bv-line"><span style="color:#7c3aed">develop</span> ●────────●────●──────────────────●──────●────</span>
+<span class="bv-line">                  │    │╲         ╲</span>
+<span class="bv-line"><span style="color:#60a5fa">feature</span>           ●────● │  ●──────●</span>
+<span class="bv-line">                         │</span>
+<span class="bv-line"><span style="color:#22c55e">release</span>                  ●──── RC1 ──● (merge to main + develop)</span>
+<span class="bv-line">         ╲                              ╲</span>
+<span class="bv-line"><span style="color:#ef4444">hotfix</span>   ●────── fix ──────────────────● (merge to main + develop)</span>
+</div>
+<table class="tbl" style="margin-top:10px"><thead><tr><th>Branch</th><th>Purpose</th><th>Merges from</th><th>Merges to</th></tr></thead><tbody>
+<tr><td class="ye">main</td><td>Production releases only</td><td>release, hotfix</td><td>—</td></tr>
+<tr><td class="pu">develop</td><td>Integration branch</td><td>feature, hotfix</td><td>release</td></tr>
+<tr><td class="bl">feature/*</td><td>New features</td><td>develop</td><td>develop</td></tr>
+<tr><td class="gr">release/*</td><td>Release preparation</td><td>develop</td><td>main + develop</td></tr>
+<tr><td class="re">hotfix/*</td><td>Emergency production fixes</td><td>main</td><td>main + develop</td></tr>
+</tbody></table>`;
+
+  // ── REWRITING ───────────────────────────────────
+  if(key==='rewriting:interactive-rebase:Demo') return mkTerm('irebase-demo','rebase -i — clean history',null,true);
+  if(key==='rewriting:commit-amend:Demo') return mkTerm('commit-demo','git commit --amend',null,true);
+
+  // ── INTERNALS ───────────────────────────────────
+  if(key==='internals:objects:Demo') return mkTerm('objects-demo','git internals — object model',null,true);
+  if(key==='internals:objects:Object Types') return `<div class="sec">Git Object Types</div>
+<table class="tbl"><thead><tr><th>Type</th><th>Contains</th><th>Inspect with</th></tr></thead><tbody>
+<tr><td>blob</td><td>File content (no filename or permissions)</td><td>git cat-file -p SHA</td></tr>
+<tr><td>tree</td><td>Directory: list of blobs + trees + filenames + permissions</td><td>git cat-file -p HEAD^{tree}</td></tr>
+<tr><td>commit</td><td>tree SHA + parent SHA(s) + author + committer + message</td><td>git cat-file -p HEAD</td></tr>
+<tr><td>tag</td><td>Target SHA + tagger + message (annotated tags only)</td><td>git cat-file -p v2.0.0</td></tr>
+</tbody></table>
+<div class="callout info"><strong>Content-addressed storage</strong>Git identifies objects by SHA-1 hash of their content. Identical content → identical SHA → stored only once. This makes Git efficient — an unchanged file shared across 1000 commits is stored once as one blob.</div>`;
+
+  // ── LFS ─────────────────────────────────────────
+  if(key==='large-repos:lfs:Demo') return mkTerm('lfs-demo','git lfs — large file storage',null,true);
+
+  // ── HOOKS ───────────────────────────────────────
+  if(key==='hooks:hooks-local:Demo') return mkTerm('hooks-demo','git hooks — automation',null,true);
+  if(key==='hooks:hooks-local:Hook Types') return `<div class="sec">Client-Side Hook Reference</div>
+<table class="tbl"><thead><tr><th>Hook</th><th>Triggers</th><th>Common Use</th></tr></thead><tbody>
+<tr><td>pre-commit</td><td>Before commit is created</td><td>Run linter, formatter, tests</td></tr>
+<tr><td>commit-msg</td><td>After commit message written</td><td>Validate conventional commit format</td></tr>
+<tr><td>prepare-commit-msg</td><td>Before message editor opens</td><td>Auto-populate branch name in message</td></tr>
+<tr><td>post-commit</td><td>After commit created</td><td>Notifications, local CI trigger</td></tr>
+<tr><td>pre-push</td><td>Before push to remote</td><td>Run full test suite</td></tr>
+<tr><td>pre-rebase</td><td>Before rebase starts</td><td>Prevent rebase of pushed commits</td></tr>
+<tr><td>post-merge</td><td>After merge completes</td><td>Install new dependencies</td></tr>
+<tr><td>post-checkout</td><td>After checkout</td><td>Switch env files, install deps</td></tr>
+</tbody></table>
+<div class="callout tip"><strong>Make hooks executable</strong><code>chmod +x .git/hooks/pre-commit</code> — hooks are disabled until executable. For team sharing, store hooks in a <code>scripts/hooks/</code> directory and use Husky or a setup script to install them.</div>`;
+
+  // ── TROUBLESHOOTING ─────────────────────────────
+  if(key==='troubleshooting:detached-head:Demo') return mkTerm('detached-head-demo','detached HEAD recovery',null,true);
+  if(key==='troubleshooting:wrong-branch:Demo') return mkTerm('wrong-branch-demo','committed to wrong branch',null,true);
+  if(key==='troubleshooting:lost-commits:Demo') return mkTerm('reflog-demo','recover lost commits via reflog',null,true);
+
+  // ── GITIGNORE ───────────────────────────────────
+  if(key==='config-ignore:gitignore:Demo') return `<div class="sec">.gitignore Patterns</div>
+<pre style="background:#080408;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:11px;color:#b89ab8;line-height:1.9">
+<span style="color:var(--tx3)"># Files</span>
+<span style="color:var(--r1)">*.log</span>                    <span style="color:var(--tx3)"># all .log files anywhere</span>
+<span style="color:var(--r1)">.env</span>                     <span style="color:var(--tx3)"># exact filename</span>
+<span style="color:var(--r1)">.env.*</span>                   <span style="color:var(--tx3)"># .env.local, .env.prod, etc</span>
+
+<span style="color:var(--tx3)"># Directories (trailing /)</span>
+<span style="color:var(--r1)">node_modules/</span>
+<span style="color:var(--r1)">dist/</span>
+<span style="color:var(--r1)">build/</span>
+<span style="color:var(--r1)">.next/</span>
+<span style="color:var(--r1)">bin/</span>
+<span style="color:var(--r1)">obj/</span>
+
+<span style="color:var(--tx3)"># Exceptions (negate with !)</span>
+<span style="color:var(--r1)">*.config</span>
+<span style="color:var(--gr)">!production.config</span>       <span style="color:var(--tx3)"># track this one config</span>
+
+<span style="color:var(--tx3)"># Double-star (recursive)</span>
+<span style="color:var(--r1)">**/coverage/</span>             <span style="color:var(--tx3)"># coverage/ in any dir</span>
+<span style="color:var(--r1)">**/__pycache__/</span>
+</pre>
+<div class="callout warn"><strong>Already tracked files</strong>If a file is already committed, adding it to .gitignore won\'t stop tracking it. Run: <code>git rm --cached filename</code> to untrack, then commit the .gitignore change.</div>`;
+
+  // ── DEFAULT ─────────────────────────────────────
+  return `<div class="sec">${tab}</div>
+<p class="bd"><strong>${tid}</strong> detail guide: understand purpose, exact command shape, data flow, risks, and team-safe usage before running it in production repositories.</p>
+<div class="sec bl">Quick Data Flow</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">Input</div><div class="fb-name">Working Tree State</div></div><div class="farr">→</div>
+  <div class="fbox"><div class="fb-label">Command</div><div class="fb-name" style="color:var(--r1)">${tab}</div></div><div class="farr">→</div>
+  <div class="fbox"><div class="fb-label">Output</div><div class="fb-name">Index / Commit / Remote Update</div></div><div class="farr">→</div>
+  <div class="fbox"><div class="fb-label">Verification</div><div class="fb-name">status / log / diff / PR checks</div></div>
+</div>
+<table class="tbl"><thead><tr><th>What to Check</th><th>Details</th></tr></thead><tbody>
+<tr><td>Goal</td><td>Know exactly what state change you want before running the command.</td></tr>
+<tr><td>Scope</td><td>Confirm whether impact is local branch, shared branch, or remote repository.</td></tr>
+<tr><td>Rollback</td><td>Have a recovery path ready (<code>reflog</code>, backup branch, or revert commit).</td></tr>
+<tr><td>Team Impact</td><td>Avoid disrupting collaborators with unsafe history rewrite on shared branches.</td></tr>
+</tbody></table>
+<div class="callout info"><strong>Run Safely</strong>Use this sequence: inspect state, run command, verify output, then push/share only after checks are green.</div>`;
+}
+
+// ═══════ RUNTIME ═══════
+let activeCh=null,activeTid=null,visited=new Set();
+
+function renderNav(){
+  document.getElementById('leftNav').innerHTML=CHAPTERS.map(ch=>`
+<div class="ci ${activeCh===ch.id?'active':''}" onclick="selChapter('${ch.id}')">
+  <div class="ci-icon" style="background:${ch.bg}">${ch.icon}</div>
+  <div class="ci-info">
+    <div class="cn">${ch.title}</div>
+    <div class="cm">${ch.topics.length} topics · ${ch.sub.split('·').length} commands</div>
+  </div>
+  <span class="lv" style="background:${ch.lc}18;color:${ch.lc};border:1px solid ${ch.lc}33">${ch.level}</span>
+</div>`).join('');
+}
+
+function selChapter(id){
+  activeCh=id;activeTid=null;visited.add(id);updateProgress();renderNav();
+  const ch=CHAPTERS.find(c=>c.id===id);
+  clearTimers();
+  document.getElementById('middle').innerHTML=`
+<div class="ch-hdr">
+  <div class="ch-ey">Chapter ${CHAPTERS.indexOf(ch)+1} of ${CHAPTERS.length}</div>
+  <div class="ch-t">${ch.icon} ${ch.title}</div>
+  <p class="ch-d">${ch.desc}</p>
+  <div class="ch-chips">
+    <div class="chip"><span class="chip-dot" style="background:${ch.lc}"></span>${ch.level}</div>
+    <div class="chip">📚 ${ch.topics.length} Topics</div>
+    <div class="chip">⌨ ${ch.sub}</div>
+  </div>
+</div>
+<div class="tg">${ch.topics.map(t=>`
+<div class="tc" onclick="selTopic('${ch.id}','${t.id}',event)">
+  <div class="tc-cmd ${t.cmd.length>12?'':''}">
+    ${t.cmd.startsWith('git ')||t.cmd.startsWith('gh ')||t.cmd.startsWith('Q ')
+      ?`<span style="opacity:.5">${t.cmd.split(' ')[0]} </span>${t.cmd.split(' ').slice(1).join(' ')}`
+      :t.cmd}
+  </div>
+  <div class="tc-title">${t.title}</div>
+  <div class="tc-d">${t.desc}</div>
+  <div class="tc-tags">${(t.tags||[]).map(tag=>`<span class="tag ${tag}">${tag}</span>`).join('')}</div>
+</div>`).join('')}
+</div>`;
+  document.getElementById('middle').scrollTo({top:0,behavior:'smooth'});
+  closeRight();
+}
+
+function selTopic(cid,tid,ev){
+  activeTid=tid;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+  ev.currentTarget.classList.add('active');
+  const ch=CHAPTERS.find(c=>c.id===cid);
+  const topic=ch?.topics.find(t=>t.id===tid);
+  if(!topic) return;
+  clearTimers();
+  const rp=document.getElementById('rightPanel');
+  rp.classList.remove('hidden');
+  document.getElementById('rightTitle').textContent='$ '+topic.cmd;
+  const tabs=topic.tabs||['Demo'];
+  document.getElementById('rightTabs').innerHTML=tabs.map((tab,i)=>
+    `<div class="rt ${i===0?'active':''}" onclick="selTab(this,'${cid}','${tid}','${tab}')">${tab}</div>`).join('');
+  document.getElementById('rightBody').scrollTo({top:0,behavior:'smooth'});
+  renderTab(cid,tid,tabs[0]);
+}
+
+function selTab(el,cid,tid,tab){
+  clearTimers();
+  document.querySelectorAll('.rt').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTab(cid,tid,tab);
+  document.getElementById('rightBody').scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderTab(cid,tid,tab){
+  document.getElementById('rightBody').innerHTML=getContent(cid,tid,tab);
+}
+
+function closeRight(){
+  clearTimers();
+  document.getElementById('rightPanel').classList.add('hidden');
+  activeTid=null;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+}
+
+function toggleQA(el){el.classList.toggle('open');}
+
+function filterQs(btn,diff,container){
+  container.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  container.querySelectorAll('.qa-item').forEach(item=>{
+    item.style.display=(diff==='all'||item.dataset.diff===diff)?'':'none';
+  });
+}
+
+function updateProgress(){
+  const pct=Math.round(visited.size/CHAPTERS.length*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`${visited.size} / ${CHAPTERS.length} chapters visited`;
+}
+
+renderNav();
+</script>
+</body>
+</html>

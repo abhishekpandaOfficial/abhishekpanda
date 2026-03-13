@@ -67,6 +67,7 @@ const BlazorMastery = lazy(() => import("./pages/BlazorMastery"));
 const EFCoreMastery = lazy(() => import("./pages/EFCoreMastery"));
 const GolangMastery = lazy(() => import("./pages/GolangMastery"));
 const LinuxMastery = lazy(() => import("./pages/LinuxMastery"));
+const GitGithubMastery = lazy(() => import("./pages/GitGithubMastery"));
 const AzureMasteryGuide = lazy(() => import("./pages/AzureMasteryGuide"));
 const AngularMasteryGuide = lazy(() => import("./pages/AngularMasteryGuide"));
 const DesignPatternsGuide = lazy(() => import("./pages/DesignPatternsGuide"));
@@ -198,6 +199,7 @@ const App = () => {
                 <Route path="/open-source-models-march-2026.html" element={<Navigate to="/llm-galaxy/open-source-models" replace />} />
                 <Route path="/ai-model-comparison.html" element={<Navigate to="/llm-galaxy/model-comparison" replace />} />
                 <Route path="/blogs" element={<Navigate to="/blog/techhub" replace />} />
+                <Route path="/techhub" element={<Navigate to="/blog/techhub" replace />} />
                 <Route path="/cheatsheets" element={<Navigate to="/blogs" replace />} />
                 <Route path="/cheatsheets/dsa-mastery-csharp" element={<Navigate to="/dsa-mastery-csharp/syllabus" replace />} />
                 <Route path="/cheatsheets/dsa-mastery-csharp/practice" element={<DsaMasteryPractice />} />
@@ -217,11 +219,17 @@ const App = () => {
                 <Route path="/cheatsheets/dotnet-mastery-toc" element={<Navigate to="/cheatsheets/dotnet-mastery" replace />} />
                 <Route path="/cheatsheets/:seriesSlug" element={<BlogSeries />} />
                 <Route path="/ai-ml-blogs" element={<AiMlBlogsHub />} />
+                <Route path="/ai-ml-hub" element={<Navigate to="/ai-ml-blogs" replace />} />
                 <Route path="/ai-ml-blogs/mathematics-mastery" element={<MathematicsMastery />} />
                 <Route path="/ai-ml-blogs/statistics-mastery" element={<StatisticsMastery />} />
                 <Route path="/ai-ml-blogs/numpy-mastery" element={<NumpyMastery />} />
                 <Route path="/ai-ml-blogs/machine-learning-core-mastery" element={<MachineLearningCoreMastery />} />
                 <Route path="/ai-ml-blogs/:seriesSlug" element={<AiMlSeries />} />
+                <Route path="/ai-ml-hub/mathematics-mastery" element={<MathematicsMastery />} />
+                <Route path="/ai-ml-hub/statistics-mastery" element={<StatisticsMastery />} />
+                <Route path="/ai-ml-hub/numpy-mastery" element={<NumpyMastery />} />
+                <Route path="/ai-ml-hub/machine-learning-core-mastery" element={<MachineLearningCoreMastery />} />
+                <Route path="/ai-ml-hub/:seriesSlug" element={<AiMlSeries />} />
                 <Route path="/blogs/dsa-mastery-csharp" element={<Navigate to="/dsa-mastery-csharp/syllabus" replace />} />
                 <Route path="/blogs/dsa-mastery-csharp/practice" element={<Navigate to="/cheatsheets/dsa-mastery-csharp/practice" replace />} />
                 <Route path="/blogs/dsa-mastery-csharp/interview" element={<Navigate to="/cheatsheets/dsa-mastery-csharp/interview" replace />} />
@@ -274,6 +282,22 @@ const App = () => {
                 <Route path="/efcore-mastery" element={<Navigate to="/cheatsheets/efcore-mastery" replace />} />
                 <Route path="/golang-mastery" element={<Navigate to="/cheatsheets/golang-mastery" replace />} />
                 <Route path="/linux-mastery" element={<Navigate to="/cheatsheets/linux-mastery" replace />} />
+                <Route path="/techhub/dsa-mastery-csharp" element={<Navigate to="/dsa-mastery-csharp/syllabus" replace />} />
+                <Route path="/techhub/csharp-mastery" element={<CSharpMastery />} />
+                <Route path="/techhub/linq-mastery" element={<LinqMastery />} />
+                <Route path="/techhub/dotnet-mastery" element={<DotnetMastery />} />
+                <Route path="/techhub/microservices-mastery" element={<MicroservicesMastery />} />
+                <Route path="/techhub/kafka-mastery" element={<KafkaMastery />} />
+                <Route path="/techhub/blazor-mastery" element={<BlazorMastery />} />
+                <Route path="/techhub/efcore-mastery" element={<EFCoreMastery />} />
+                <Route path="/techhub/golang-mastery" element={<GolangMastery />} />
+                <Route path="/techhub/linux-mastery" element={<LinuxMastery />} />
+                <Route path="/techhub/angular-mastery" element={<AngularMasteryGuide />} />
+                <Route path="/techhub/azure-mastery" element={<AzureMasteryGuide />} />
+                <Route path="/techhub/solid-principles" element={<SolidPrinciplesGuide />} />
+                <Route path="/techhub/design-patterns" element={<DesignPatternsGuide />} />
+                <Route path="/techhub/git-github-mastery" element={<GitGithubMastery />} />
+                <Route path="/techhub/:seriesSlug" element={<BlogSeries />} />
                 <Route path="/dotnet-mastery-toc" element={<Navigate to="/cheatsheets/dotnet-mastery" replace />} />
                 <Route path="/design-patterns-guide" element={<DesignPatternsGuide />} />
                 <Route path="/cheatsheets/solid-principles" element={<SolidPrinciplesGuide />} />

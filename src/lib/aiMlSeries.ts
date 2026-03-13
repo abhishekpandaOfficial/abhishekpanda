@@ -17,7 +17,7 @@ const AI_ML_SERIES_BASE: AiMlSeriesTrack[] = [
     keywords: ["mathematics", "linear algebra", "calculus", "optimization", "machine learning math"],
     logos: ["/brand-logos/stacks/python.svg", "/brand-logos/stacks/scikitlearn.svg"],
     rgb: "14 165 233",
-    href: "/ai-ml-blogs/mathematics-mastery",
+    href: "/ai-ml-hub/mathematics-mastery",
     actionLabel: "Open Mathematics Mastery",
     status: "completed",
     statusNote: "Fully launched",
@@ -35,7 +35,7 @@ const AI_ML_SERIES_BASE: AiMlSeriesTrack[] = [
     keywords: ["statistics", "probability", "hypothesis testing", "confidence intervals", "a/b testing"],
     logos: ["/brand-logos/stacks/python.svg", "/brand-logos/stacks/scikitlearn.svg"],
     rgb: "16 185 129",
-    href: "/ai-ml-blogs/statistics-mastery",
+    href: "/ai-ml-hub/statistics-mastery",
     actionLabel: "Open Statistics Mastery",
     status: "completed",
     statusNote: "Fully launched",
@@ -69,7 +69,7 @@ const AI_ML_SERIES_BASE: AiMlSeriesTrack[] = [
     keywords: ["numpy", "arrays", "broadcasting", "vectorization", "ndarray", "numerical computing"],
     logos: ["/brand-logos/stacks/python.svg"],
     rgb: "59 130 246",
-    href: "/ai-ml-blogs/numpy-mastery",
+    href: "/ai-ml-hub/numpy-mastery",
     actionLabel: "Open NumPy Mastery",
     status: "partial",
     statusNote: "Some tabs still pending",
@@ -151,7 +151,7 @@ const AI_ML_SERIES_BASE: AiMlSeriesTrack[] = [
     keywords: ["machine learning core", "supervised learning", "unsupervised learning", "reinforcement learning"],
     logos: ["/brand-logos/stacks/scikitlearn.svg", "/brand-logos/stacks/python.svg"],
     rgb: "6 182 212",
-    href: "/ai-ml-blogs/machine-learning-core-mastery",
+    href: "/ai-ml-hub/machine-learning-core-mastery",
     actionLabel: "Open ML Core Paths",
     status: "completed",
     statusNote: "Fully launched",
@@ -212,9 +212,9 @@ const AI_ML_SERIES_BASE: AiMlSeriesTrack[] = [
 
 export const AI_ML_SERIES: AiMlSeriesTrack[] = AI_ML_SERIES_BASE.map((series) => ({
   ...series,
-  href: series.href || `/ai-ml-blogs/${series.slug}`,
+  href: series.href || `/ai-ml-hub/${series.slug}`,
 }));
 
 export const AI_ML_SERIES_BY_SLUG = new Map(AI_ML_SERIES.map((series) => [series.slug, series]));
 
-export const getAiMlSeriesHref = (series: AiMlSeriesTrack) => series.href || `/ai-ml-blogs/${series.slug}`;
+export const getAiMlSeriesHref = (series: AiMlSeriesTrack) => series.href || `/ai-ml-hub/${series.slug}`;
