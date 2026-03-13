@@ -24,7 +24,7 @@ export default function AiMlSeries() {
             <h1 className="mt-3 text-3xl font-black tracking-tight text-foreground">That AI / ML mastery route does not exist.</h1>
             <p className="mt-4 text-muted-foreground">Open the AI / ML Blogs hub to browse the available learning tracks.</p>
             <Link
-              to="/ai-ml-blogs"
+              to="/ai-ml-hub"
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
             >
               Back to AI / ML Blogs
@@ -37,7 +37,7 @@ export default function AiMlSeries() {
     );
   }
 
-  if (series.href && series.href !== `/ai-ml-blogs/${series.slug}`) {
+  if (series.href && series.href !== `/ai-ml-hub/${series.slug}`) {
     return <Navigate to={getAiMlSeriesHref(series)} replace />;
   }
 
@@ -48,7 +48,7 @@ export default function AiMlSeries() {
       <Helmet>
         <title>{`${series.detailTitle || series.title} | AI / ML Blogs | Abhishek Panda`}</title>
         <meta name="description" content={series.subtitle} />
-        <link rel="canonical" href={`${SITE_URL}/ai-ml-blogs/${series.slug}`} />
+        <link rel="canonical" href={`${SITE_URL}/ai-ml-hub/${series.slug}`} />
       </Helmet>
 
       <Navigation />
@@ -56,7 +56,7 @@ export default function AiMlSeries() {
       <main className="pt-24 pb-20">
         <section className="container mx-auto px-4">
           <Link
-            to="/ai-ml-blogs"
+            to="/ai-ml-hub"
             className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/30 hover:text-primary"
           >
             <ArrowLeft className="h-4 w-4" />

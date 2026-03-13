@@ -10,7 +10,7 @@ export default function MachineLearningCoreMastery() {
       version={STATIC_HTML_VERSION}
       backgroundClassName="bg-background"
       sectionLabel="AI / ML Blogs"
-      sectionHref="/ai-ml-blogs"
+      sectionHref="/ai-ml-hub"
     />
   );
 }

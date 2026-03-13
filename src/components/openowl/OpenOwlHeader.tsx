@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 const links = [
   { label: "Home", to: "/" },
-  { label: "TechHub", to: "/blog/techhub" },
+  { label: "TechHub", to: "/techhub" },
   { label: "Projects", to: "/products" },
   { label: "OpenOwl", to: "/openowl" },
   { label: "Contact", to: "/contact" },

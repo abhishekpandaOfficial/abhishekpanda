@@ -10,7 +10,7 @@ const NumpyMastery = () => {
       version={STATIC_HTML_VERSION}
       backgroundClassName="bg-[#07162b]"
       sectionLabel="AI / ML Blogs"
-      sectionHref="/ai-ml-blogs"
+      sectionHref="/ai-ml-hub"
     />
   );
 };

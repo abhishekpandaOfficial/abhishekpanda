@@ -47,7 +47,7 @@ export default function BlogSeries() {
             <h1 className="mt-3 text-3xl font-black tracking-tight text-foreground">That mastery route does not exist.</h1>
             <p className="mt-4 text-muted-foreground">Open the Blogs hub to browse every available mastery series card.</p>
             <Link
-              to="/blogs"
+              to="/techhub"
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
             >
               Back to Blogs
@@ -109,7 +109,7 @@ export default function BlogSeries() {
       <Helmet>
         <title>{`${seriesDisplayTitle} | TOC | Abhishek Panda`}</title>
         <meta name="description" content={series.subtitle} />
-        <link rel="canonical" href={`${SITE_URL}/cheatsheets/${series.slug}`} />
+        <link rel="canonical" href={`${SITE_URL}/techhub/${series.slug}`} />
       </Helmet>
 
       <Navigation />
@@ -117,7 +117,7 @@ export default function BlogSeries() {
       <main className="pt-24 pb-20">
         <section className="container mx-auto px-4">
           <Link
-            to="/blogs"
+            to="/techhub"
             className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/30 hover:text-primary"
           >
             <ArrowLeft className="h-4 w-4" />

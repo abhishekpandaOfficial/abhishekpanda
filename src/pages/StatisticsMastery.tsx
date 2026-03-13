@@ -10,7 +10,7 @@ const StatisticsMastery = () => {
       version={STATIC_HTML_VERSION}
       backgroundClassName="bg-[#071815]"
       sectionLabel="AI / ML Blogs"
-      sectionHref="/ai-ml-blogs"
+      sectionHref="/ai-ml-hub"
     />
   );
 };

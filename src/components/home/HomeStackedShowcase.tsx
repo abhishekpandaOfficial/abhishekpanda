@@ -251,7 +251,7 @@ export function HomeStackedShowcase() {
               index={0}
               kicker="Published Blogs"
               title="All Published Engineering Blogs"
-              description="This landing section now starts with the major `/blogs` series cards, so the core engineering learning tracks stay visible as a continuously scrolling discovery rail."
+              description="This landing section now starts with the major `/techhub` series cards, so the core engineering learning tracks stay visible as a continuously scrolling discovery rail."
               actionHref="/blog"
               actionLabel="Open all blogs"
               icon={ScrollText}
@@ -260,7 +260,7 @@ export function HomeStackedShowcase() {
               <div className="mb-8">
                 <div className="mb-4 flex items-center justify-between gap-4">
                   <h3 className="text-xl font-black tracking-tight text-foreground md:text-2xl">Major Blog Series Cards</h3>
-                  <Link to="/blogs" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+                  <Link to="/techhub" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
                     Open all blog series
                     <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -379,7 +379,7 @@ export function HomeStackedShowcase() {
               kicker="AI / ML Blogs"
               title="AI / ML Mastery Cards"
               description="The AI / ML library now sits directly on the homepage with the same mastery-card treatment, so mathematics, statistics, NumPy, machine learning, NLP, and other tracks are discoverable without leaving the landing page."
-              actionHref="/ai-ml-blogs"
+              actionHref="/ai-ml-hub"
               actionLabel="Open AI / ML hub"
               icon={Brain}
             >

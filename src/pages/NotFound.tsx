@@ -6,10 +6,10 @@ import { ArrowLeft, BookOpen, FileText, FolderKanban, Home, LibraryBig } from "l
 import { Button } from "@/components/ui/button";
 
 const quickLinks = [
-  { label: "Blogs", to: "/blogs", icon: BookOpen, note: "Mastery series, cheatsheets, and topic hubs." },
+  { label: "Blogs", to: "/techhub", icon: BookOpen, note: "Mastery series and topic hubs." },
   { label: "Articles", to: "/articles", icon: FileText, note: "Long-form technical articles and explainers." },
   { label: "Projects", to: "/projects", icon: FolderKanban, note: "Hands-on builds, case studies, and implementations." },
-  { label: "Tech Hub", to: "/blog/techhub", icon: LibraryBig, note: "Browse broader engineering content by domain." },
+  { label: "Tech Hub", to: "/techhub", icon: LibraryBig, note: "Browse broader engineering content by domain." },
 ];
 
 const NotFound = () => {
@@ -53,7 +53,7 @@ const NotFound = () => {
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
-                  <Link to="/blogs">
+                  <Link to="/techhub">
                     <ArrowLeft className="h-5 w-5" />
                     Open Blogs
                   </Link>

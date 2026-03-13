@@ -9,6 +9,7 @@ type SeoData = {
   description: string;
   keywords?: string;
   robots?: string;
+  canonicalPath?: string;
   pageType?: "WebPage" | "CollectionPage" | "AboutPage" | "ContactPage" | "ProfilePage";
 };
 
@@ -46,37 +47,35 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     },
   },
   {
-    pattern: "/cheatsheets",
+    pattern: "/techhub",
     data: {
-      title: "All Blogs | Abhishek Panda",
+      title: "TechHub | Mastery Series Library | Abhishek Panda",
       description:
-        "Browse all mastery blog series and website blog cards from Abhishek Panda in one place.",
-      keywords: "Abhishek Panda blogs, mastery series, engineering blog hub, blog series cards",
+        "Explore TechHub mastery tracks for Git/GitHub, .NET, microservices, Kafka, cloud, and architecture.",
+      keywords: "techhub, mastery series, engineering blog hub, git github mastery, dotnet mastery",
       pageType: "CollectionPage",
     },
   },
   {
     pattern: "/blogs",
     data: {
-      title: "All Blogs | Abhishek Panda",
-      description:
-        "Browse all mastery blog series and website blog cards from Abhishek Panda in one place.",
-      keywords: "Abhishek Panda blogs, mastery series, engineering blog hub, blog series cards",
-      pageType: "CollectionPage",
+      title: "TechHub Redirect | Abhishek Panda",
+      description: "Legacy route redirecting to TechHub.",
+      robots: "noindex,follow",
     },
   },
   {
-    pattern: "/cheatsheets/:seriesSlug",
+    pattern: "/techhub/:seriesSlug",
     data: {
-      title: "Blog Series | Abhishek Panda",
+      title: "TechHub Series | Abhishek Panda",
       description:
         "Open a mastery series TOC with modules, chapters, topics, and related website blog posts.",
     },
   },
   {
-    pattern: "/ai-ml-blogs",
+    pattern: "/ai-ml-hub",
     data: {
-      title: "AI / ML Blogs | Abhishek Panda",
+      title: "AI/ML Hub | Mastery Series | Abhishek Panda",
       description:
         "Browse AI and machine learning mastery tracks across math, statistics, Python, feature engineering, ML core, NLP, and computer vision.",
       keywords: "AI blogs, machine learning blogs, data science mastery, Abhishek Panda AI ML",
@@ -84,11 +83,19 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     },
   },
   {
-    pattern: "/ai-ml-blogs/:seriesSlug",
+    pattern: "/ai-ml-hub/:seriesSlug",
     data: {
       title: "AI / ML Series | Abhishek Panda",
       description:
         "Open an AI / ML mastery series with starter topics, focus areas, and structured learning blocks.",
+    },
+  },
+  {
+    pattern: "/ai-ml-blogs",
+    data: {
+      title: "AI/ML Hub Redirect | Abhishek Panda",
+      description: "Legacy route redirecting to AI/ML Hub.",
+      robots: "noindex,follow",
     },
   },
   {
@@ -436,7 +443,8 @@ export function RouteSeo() {
 
   const matched = PAGE_SEO.find((entry) => matchPath({ path: entry.pattern, end: true }, pathname));
   const seo = matched?.data || defaultSeo;
-  const canonical = `${SITE_URL}${pathname === "/" ? "" : pathname}`;
+  const canonicalPath = seo.canonicalPath || pathname;
+  const canonical = `${SITE_URL}${canonicalPath === "/" ? "" : canonicalPath}`;
   const robots = seo.robots || "index,follow";
   const keywords = seo.keywords || defaultSeo.keywords;
   const googleBot = robots.includes("noindex")
@@ -587,7 +595,7 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
     });
   }
 
-  if (pathname === "/blog" || pathname === "/blogs" || pathname === "/cheatsheets") {
+  if (pathname === "/blog" || pathname === "/techhub") {
     graph.push({
       "@type": "Blog",
       name: "Abhishek Panda Blog",
@@ -597,7 +605,7 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
     });
   }
 
-  if (pathname === "/blogs" || pathname === "/ai-ml-blogs" || pathname === "/articles" || pathname === "/scriptures") {
+  if (pathname === "/techhub" || pathname === "/ai-ml-hub" || pathname === "/articles" || pathname === "/scriptures") {
     graph.push({
       "@type": "CollectionPage",
       name: title,

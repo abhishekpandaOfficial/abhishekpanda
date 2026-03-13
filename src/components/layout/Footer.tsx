@@ -17,7 +17,7 @@ const footerLinks = {
     { name: "About", path: "/about" },
     { name: "Articles", path: "/articles" },
     { name: "Blogs", path: "/blogs" },
-    { name: "AI/ML Blogs", path: "/ai-ml-blogs" },
+    { name: "AI/ML Blogs", path: "/ai-ml-hub" },
     { name: "Classified", path: "/classified" },
     { name: "Scriptures", path: "/scriptures" },
     { name: "Case Studies", path: "/case-studies" },

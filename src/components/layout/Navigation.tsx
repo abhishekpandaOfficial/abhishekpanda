@@ -64,6 +64,7 @@ export const Navigation = () => {
 
   const isGalaxyActive = location.pathname.startsWith("/llm-galaxy") || location.pathname === "/llm-visualizer";
   const isBlogActive =
+    location.pathname.startsWith("/techhub") ||
     location.pathname.startsWith("/blog/techhub") ||
     location.pathname.startsWith("/blogs") ||
     location.pathname.startsWith("/cheatsheets") ||
@@ -83,7 +84,7 @@ export const Navigation = () => {
     location.pathname === "/blogs/solid-principles" ||
     location.pathname === "/cheatsheets/solid-principles";
   const isAiMlBlogsActive =
-    location.pathname.startsWith("/ai-ml-blogs");
+    location.pathname.startsWith("/ai-ml-hub") || location.pathname.startsWith("/ai-ml-blogs");
   const isArticlesActive = location.pathname.startsWith("/articles");
   const isScripturesActive = location.pathname.startsWith("/scriptures");
   const isProjectsActive = location.pathname.startsWith("/projects");
@@ -138,7 +139,7 @@ export const Navigation = () => {
               ))}
 
               <PrefetchLink
-                to="/blog/techhub"
+                to="/techhub"
                 className={cn(
                   desktopNavItemClass,
                   isBlogActive
@@ -155,7 +156,7 @@ export const Navigation = () => {
               </PrefetchLink>
 
               <PrefetchLink
-                to="/ai-ml-blogs"
+                to="/ai-ml-hub"
                 className={cn(
                   desktopNavItemClass,
                   isAiMlBlogsActive
@@ -353,7 +354,7 @@ export const Navigation = () => {
                 transition={{ delay: 0.12 }}
               >
                 <Link
-                  to="/blog/techhub"
+                  to="/techhub"
                   className={cn(
                     mobileNavItemClass,
                     isBlogActive
@@ -372,7 +373,7 @@ export const Navigation = () => {
                 transition={{ delay: 0.127 }}
               >
                 <Link
-                  to="/ai-ml-blogs"
+                  to="/ai-ml-hub"
                   className={cn(
                     mobileNavItemClass,
                     isAiMlBlogsActive

@@ -103,7 +103,7 @@ export const PROJECT_CARDS: ProjectCard[] = [
     to: productRoute("newstack"),
     ctaLabel: "View details",
     slug: "newstack",
-    launchTo: "/blog/techhub",
+    launchTo: "/techhub",
     launchLabel: "Open TechHub Surface",
     detailTitle: "Newstack Product Overview",
     detailDescription: "Newstack is positioned as a unified updates platform that brings broader technical discovery, trend scanning, and category-level browsing into one place.",

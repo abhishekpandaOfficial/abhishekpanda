@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Kubernetes Mastery — Complete Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020d1a;--sf:#040f1f;--card:#071525;--card2:#0a1c30;
+  --b1:#0d2a45;--b2:#0f3d66;--b3:#1565c0;
+  --k1:#326ce5;--k2:#5b9bf8;--k3:#82b4ff;
+  --cy:#00e5ff;--cy2:#4ff8ff;--gr:#00e676;--ye:#ffd740;
+  --pu:#ce93d8;--or:#ff9800;--re:#ff5252;
+  --tx:#c8e0ff;--tx2:#6a9ec8;--tx3:#1a3a5a;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;--disp:'Bebas Neue',sans-serif;
+  --lw:268px;--rw:564px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:14px}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(50,108,229,.006) 3px,rgba(50,108,229,.006) 4px);pointer-events:none;z-index:9999}
+
+/* TOPBAR */
+.topbar{height:54px;background:var(--sf);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 18px;gap:12px;flex-shrink:0;position:relative;z-index:100}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--k1) 25%,var(--cy) 55%,var(--k2) 80%,transparent)}
+.logo-icon{width:36px;height:36px;border-radius:8px;background:var(--card);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 20px rgba(50,108,229,.3)}
+.logo-name{font-family:var(--disp);font-size:22px;letter-spacing:5px;background:linear-gradient(135deg,var(--k1),var(--cy));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.logo-sub{font-size:8px;color:var(--tx3);font-family:var(--mono);letter-spacing:2px;margin-top:2px}
+.top-sep{flex:1}
+.t-stat{background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:3px 9px;font-size:9.5px;font-family:var(--mono);color:var(--tx3)}
+.t-stat b{color:var(--k2)}
+.t-stat b.cy{color:var(--cy)}
+.t-badge{background:rgba(50,108,229,.08);border:1px solid var(--b2);border-radius:3px;padding:4px 11px;font-size:9px;color:var(--k2);font-family:var(--mono);letter-spacing:1px}
+.blink{animation:bl .9s step-end infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* LEFT NAV */
+.lp{width:var(--lw);background:var(--sf);border-right:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.lp-hdr{padding:11px 13px 9px;border-bottom:1px solid var(--b1)}
+.lp-hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.lp-hdr-row h3{font-family:var(--mono);font-size:8px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase}
+.prog-bar{background:var(--b1);border-radius:2px;height:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--k1),var(--cy));width:0%;transition:width .5s;box-shadow:0 0 6px rgba(50,108,229,.4)}
+.prog-txt{font-size:8px;color:var(--tx3);font-family:var(--mono);margin-top:4px}
+.lnav{flex:1;overflow-y:auto;padding:3px 0}
+.lnav::-webkit-scrollbar{width:2px}
+.lnav::-webkit-scrollbar-thumb{background:var(--b2)}
+.ci{display:flex;align-items:center;gap:7px;padding:7px 12px;cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.ci:hover{background:rgba(50,108,229,.04);border-left-color:var(--b2)}
+.ci.active{background:rgba(50,108,229,.08);border-left-color:var(--k1)}
+.ci.active .cn{color:var(--k2)}
+.ci-icon{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.ci-info{flex:1;min-width:0}
+.cn{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.cm{font-size:8px;color:var(--tx3);font-family:var(--mono)}
+.lv{font-size:7px;padding:1px 5px;border-radius:2px;font-family:var(--mono);font-weight:700;flex-shrink:0;text-transform:uppercase;letter-spacing:.5px}
+
+/* MIDDLE */
+.mid{flex:1;overflow-y:auto;padding:18px;min-width:0}
+.mid::-webkit-scrollbar{width:4px}
+.mid::-webkit-scrollbar-thumb{background:var(--b2)}
+
+/* WELCOME */
+.wlc{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:65vh;text-align:center;padding:32px;animation:fu .45s ease}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.wlc-logo{font-size:72px;margin-bottom:6px;animation:spin-glow 8s linear infinite}
+@keyframes spin-glow{0%{filter:drop-shadow(0 0 20px rgba(50,108,229,.4)) hue-rotate(0deg)}50%{filter:drop-shadow(0 0 40px rgba(0,229,255,.6)) hue-rotate(20deg)}100%{filter:drop-shadow(0 0 20px rgba(50,108,229,.4)) hue-rotate(0deg)}}
+.wlc-title{font-family:var(--disp);font-size:44px;letter-spacing:6px;background:linear-gradient(135deg,var(--k1),var(--cy) 55%,var(--k2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;line-height:1}
+.wlc-sub{font-size:12px;color:var(--tx2);max-width:520px;line-height:1.75;margin-bottom:24px;font-family:var(--mono)}
+.wlc-prompt{font-family:var(--mono);font-size:13px;color:var(--k2);margin-bottom:20px}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.sc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px 18px;text-align:center;min-width:90px;transition:border-color .2s}
+.sc:hover{border-color:var(--b2)}
+.sc-n{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--k2);display:block;line-height:1;text-shadow:0 0 10px rgba(50,108,229,.3)}
+.sc-n.cy{color:var(--cy);text-shadow:0 0 10px rgba(0,229,255,.3)}
+.sc-n.gr{color:var(--gr);text-shadow:0 0 10px rgba(0,230,118,.3)}
+.sc-l{font-size:8px;color:var(--tx3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;display:block}
+.wlc-hint{font-size:9px;color:var(--tx3);font-family:var(--mono);margin-top:16px;letter-spacing:1px}
+
+/* ARCH DIAGRAM STYLES */
+.arch{background:var(--card);border:1px solid var(--b1);border-radius:8px;padding:16px;margin:10px 0;position:relative;overflow:hidden}
+.arch::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(50,108,229,.06) 0%,transparent 70%);pointer-events:none}
+.arch-title{font-family:var(--mono);font-size:8px;color:var(--k2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.arch-title::after{content:'';flex:1;height:1px;background:var(--b1)}
+.arch-grid{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch}
+.arch-zone{border:1px solid;border-radius:6px;padding:10px;flex:1;min-width:120px}
+.arch-zone.cp{border-color:rgba(50,108,229,.4);background:rgba(50,108,229,.05)}
+.arch-zone.node{border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.04)}
+.arch-zone.etcd{border-color:rgba(206,147,216,.4);background:rgba(206,147,216,.05)}
+.arch-zone.ext{border-color:rgba(0,230,118,.3);background:rgba(0,230,118,.04)}
+.arch-zone-title{font-family:var(--mono);font-size:8px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.arch-zone.cp .arch-zone-title{color:var(--k2)}
+.arch-zone.node .arch-zone-title{color:var(--cy)}
+.arch-zone.etcd .arch-zone-title{color:var(--pu)}
+.arch-zone.ext .arch-zone-title{color:var(--gr)}
+.arch-comp{background:var(--card2);border:1px solid var(--b1);border-radius:4px;padding:5px 8px;margin-bottom:4px;font-family:var(--mono);font-size:9.5px}
+.arch-comp .ac-name{font-weight:700;margin-bottom:1px}
+.arch-comp .ac-desc{font-size:8px;color:var(--tx3);line-height:1.4}
+.arch-comp.api .ac-name{color:var(--k2)}
+.arch-comp.sched .ac-name{color:var(--ye)}
+.arch-comp.cm .ac-name{color:var(--or)}
+.arch-comp.etcd-c .ac-name{color:var(--pu)}
+.arch-comp.kubelet .ac-name{color:var(--cy)}
+.arch-comp.kproxy .ac-name{color:var(--gr)}
+.arch-comp.cri .ac-name{color:var(--tx2)}
+.arch-comp.pod .ac-name{color:#82b4ff}
+.arch-arrow{display:flex;align-items:center;gap:6px;padding:4px 0;font-family:var(--mono);font-size:9px;color:var(--tx3)}
+.arch-arrow .aa-line{flex:1;height:1px;border-top:1px dashed var(--b2);position:relative}
+.arch-arrow .aa-line::after{content:'▶';position:absolute;right:-6px;top:-8px;font-size:10px;color:var(--k2)}
+.arch-arrow .aa-label{color:var(--k2);font-size:8px;white-space:nowrap}
+
+/* FLOW */
+.flow{display:flex;align-items:center;gap:0;margin:10px 0;overflow-x:auto;padding:12px;background:var(--card);border:1px solid var(--b1);border-radius:6px;flex-wrap:wrap;row-gap:6px}
+.fbox{background:var(--card2);border:1px solid var(--b1);border-radius:5px;padding:7px 11px;font-family:var(--mono);font-size:10px;white-space:nowrap;text-align:center;flex-shrink:0}
+.fbox .fb-label{font-size:7.5px;color:var(--tx3);margin-bottom:2px;text-transform:uppercase;letter-spacing:1px}
+.fbox .fb-name{font-weight:700}
+.farr{padding:0 6px;color:var(--tx3);font-size:14px;flex-shrink:0}
+.farr.cmd{padding:0 4px;font-family:var(--mono);font-size:9px;color:var(--k2);display:flex;flex-direction:column;align-items:center;gap:2px}
+.farr.cmd span{color:var(--tx3);font-size:8px}
+
+/* CHAPTER HEADER */
+.ch-hdr{margin-bottom:18px;animation:fu .3s ease}
+.ch-ey{font-size:8px;color:var(--k2);font-family:var(--mono);letter-spacing:3px;text-transform:uppercase;margin-bottom:5px}
+.ch-t{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--tx);line-height:1.1;margin-bottom:8px}
+.ch-d{font-size:11.5px;color:var(--tx2);line-height:1.7;max-width:640px;font-family:var(--mono)}
+.ch-chips{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:3px 8px;font-size:9px;color:var(--tx2);font-family:var(--mono)}
+.chip-dot{width:4px;height:4px;border-radius:50%}
+
+/* TOPIC GRID */
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:8px;animation:fu .4s ease .08s both}
+.tc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--k1),var(--cy));opacity:0;transition:opacity .2s}
+.tc:hover{border-color:var(--b2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(50,108,229,.1)}
+.tc:hover::before,.tc.active::before{opacity:1}
+.tc.active{border-color:var(--k1);background:var(--card2);box-shadow:0 0 0 1px rgba(50,108,229,.3)}
+.tc-cmd{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--k2);margin-bottom:3px;text-shadow:0 0 8px rgba(50,108,229,.3)}
+.tc-title{font-size:10px;font-weight:600;color:var(--tx);margin-bottom:3px;font-family:var(--mono)}
+.tc-d{font-size:9.5px;color:var(--tx3);line-height:1.4}
+.tc-tags{display:flex;gap:3px;margin-top:7px;flex-wrap:wrap}
+.tag{font-size:7px;padding:2px 4px;border-radius:2px;font-family:var(--mono);font-weight:700;letter-spacing:.3px}
+.tag.beginner{background:rgba(0,230,118,.1);color:#00e676;border:1px solid rgba(0,230,118,.2)}
+.tag.intermediate{background:rgba(255,215,64,.1);color:#ffd740;border:1px solid rgba(255,215,64,.2)}
+.tag.advanced{background:rgba(206,147,216,.1);color:#ce93d8;border:1px solid rgba(206,147,216,.2)}
+.tag.essential{background:rgba(50,108,229,.1);color:var(--k2);border:1px solid rgba(50,108,229,.25)}
+.tag.production{background:rgba(0,229,255,.1);color:var(--cy);border:1px solid rgba(0,229,255,.2)}
+.tag.security{background:rgba(255,82,82,.1);color:#ff5252;border:1px solid rgba(255,82,82,.2)}
+.tag.danger{background:rgba(255,82,82,.1);color:#ff5252;border:1px solid rgba(255,82,82,.2)}
+
+/* RIGHT PANEL */
+.rp{width:var(--rw);background:var(--sf);border-left:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .25s}
+.rp.hidden{width:0;border:none;overflow:hidden}
+.rp-hdr{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.rp-hdr h3{flex:1;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--k2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xbtn{width:22px;height:22px;border-radius:3px;border:1px solid var(--b1);background:transparent;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--mono);transition:all .15s}
+.xbtn:hover{background:var(--b1);color:var(--tx)}
+.rp-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;overflow-x:auto}
+.rp-tabs::-webkit-scrollbar{height:0}
+.rt{padding:7px 13px;font-size:9.5px;color:var(--tx3);font-family:var(--mono);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;letter-spacing:.5px}
+.rt:hover{color:var(--tx)}
+.rt.active{color:var(--k2);border-bottom-color:var(--k2)}
+.rb{flex:1;overflow-y:auto;padding:14px}
+.rb::-webkit-scrollbar{width:2px}
+.rb::-webkit-scrollbar-thumb{background:var(--b2)}
+@keyframes sr{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.rb>*{animation:sr .2s ease both}
+
+/* CONTENT ELEMENTS */
+.sec{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--k2);margin:16px 0 7px;display:flex;align-items:center;gap:7px;letter-spacing:1.5px;text-transform:uppercase}
+.sec::after{content:'';flex:1;height:1px;background:var(--b1)}
+.sec.cy{color:var(--cy)}.sec.gr{color:var(--gr)}.sec.ye{color:var(--ye)}.sec.re{color:var(--re)}
+.sec:first-child{margin-top:0}
+p.bd{font-size:11.5px;line-height:1.75;color:var(--tx2);margin-bottom:9px;font-family:var(--mono)}
+strong{color:var(--tx)}
+
+.callout{border-left:2px solid;padding:9px 12px;border-radius:0 4px 4px 0;margin:9px 0;font-size:10.5px;line-height:1.7;font-family:var(--mono)}
+.callout.info{border-color:var(--k2);background:rgba(50,108,229,.05);color:var(--tx2)}
+.callout.warn{border-color:var(--ye);background:rgba(255,215,64,.05);color:var(--tx2)}
+.callout.tip{border-color:var(--cy);background:rgba(0,229,255,.04);color:var(--tx2)}
+.callout.danger{border-color:var(--re);background:rgba(255,82,82,.05);color:var(--tx2)}
+.callout.prod{border-color:var(--gr);background:rgba(0,230,118,.04);color:var(--tx2)}
+.callout strong{display:block;font-size:7.5px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.callout.info strong{color:var(--k2)}.callout.warn strong{color:var(--ye)}.callout.tip strong{color:var(--cy)}
+.callout.danger strong{color:var(--re)}.callout.prod strong{color:var(--gr)}
+
+/* TERMINAL */
+.tw{background:#010810;border:1px solid var(--b2);border-radius:7px;overflow:hidden;margin:10px 0;box-shadow:0 0 24px rgba(50,108,229,.07)}
+.tb{display:flex;align-items:center;gap:5px;padding:7px 11px;background:#020c18;border-bottom:1px solid var(--b1)}
+.td{width:9px;height:9px;border-radius:50%}
+.td.r{background:#ff5f57}.td.y{background:#febc2e}.td.g{background:#28c840}
+.tt{flex:1;text-align:center;font-size:9px;color:var(--tx3);font-family:var(--mono)}
+.tr-btn{background:transparent;border:1px solid var(--b2);border-radius:3px;color:var(--k2);font-family:var(--mono);font-size:8px;padding:2px 8px;cursor:pointer;transition:all .15s;letter-spacing:1px}
+.tr-btn:hover{background:rgba(50,108,229,.1);border-color:var(--k1)}
+.tr-btn.running{color:var(--ye);border-color:var(--ye)}
+.ts{padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.65;min-height:90px;max-height:440px;overflow-y:auto}
+.ts::-webkit-scrollbar{width:2px}
+.ts::-webkit-scrollbar-thumb{background:var(--b2)}
+.tl{display:block;white-space:pre-wrap;word-break:break-all}
+.tp{color:var(--k2)}.tc2{color:#fff}
+.to{color:#7aa8d8}
+.to-g{color:#4ade80;font-weight:600}
+.to-r{color:#f87171}
+.to-y{color:var(--ye)}
+.to-b{color:#93c5fd}
+.to-c{color:var(--cy)}
+.to-m{color:var(--pu)}
+.to-w{color:#fff;font-weight:600}
+.to-dim{color:var(--tx3)}
+.tcur{display:inline-block;width:7px;height:13px;background:var(--k2);margin-left:1px;animation:bl .9s step-end infinite;vertical-align:text-bottom}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:10.5px;margin:8px 0}
+.tbl th{background:var(--card2);color:var(--k2);font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:7px 9px;text-align:left;border-bottom:1px solid var(--b1)}
+.tbl td{padding:6px 9px;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.02);vertical-align:top;line-height:1.5;font-family:var(--mono);font-size:10px}
+.tbl tr:hover td{background:rgba(50,108,229,.02)}
+.tbl td:first-child{color:var(--k2);white-space:nowrap;font-weight:600}
+.tbl td.cy{color:var(--cy)}.tbl td.gr{color:var(--gr)}.tbl td.ye{color:var(--ye)}
+.tbl td.re{color:var(--re)}.tbl td.pu{color:var(--pu)}.tbl td.or{color:var(--or)}
+
+.fl{list-style:none;margin:6px 0}
+.fl li{display:flex;align-items:flex-start;gap:7px;padding:4px 0;font-size:10.5px;color:var(--tx2);line-height:1.55;border-bottom:1px solid rgba(255,255,255,.02);font-family:var(--mono)}
+.fl li::before{content:'⚙';color:var(--k2);font-size:9px;margin-top:1px;flex-shrink:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}
+.mc{background:var(--card);border:1px solid var(--b1);border-radius:4px;padding:10px;font-family:var(--mono)}
+.mc h4{font-size:8px;font-weight:700;color:var(--k2);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.mc h4.cy{color:var(--cy)}.mc h4.gr{color:var(--gr)}.mc h4.ye{color:var(--ye)}.mc h4.pu{color:var(--pu)}
+.mc p{font-size:10px;color:var(--tx2);line-height:1.55}
+
+/* YAML BLOCK */
+.yaml{background:#010810;border:1px solid var(--b1);border-radius:6px;padding:14px;margin:8px 0;font-family:var(--mono);font-size:10.5px;line-height:1.8;overflow-x:auto}
+.yk{color:var(--k2)}.yv{color:var(--cy)}.ys{color:#4ade80}.yn{color:var(--ye)}.yc{color:var(--tx3)}.yt{color:var(--pu)}
+
+/* Q&A */
+.qa-item{border:1px solid var(--b1);border-radius:4px;margin-bottom:7px;overflow:hidden}
+.qa-item:hover{border-color:var(--b2)}
+.qa-q{padding:9px 12px;cursor:pointer;display:flex;align-items:flex-start;gap:7px;background:var(--card);transition:background .15s}
+.qa-q:hover{background:var(--card2)}
+.qa-qi{width:17px;height:17px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;font-family:var(--mono);flex-shrink:0;margin-top:1px}
+.qa-qt{flex:1;font-size:10.5px;color:var(--tx);font-weight:500;line-height:1.5;font-family:var(--mono)}
+.qa-ch{color:var(--tx3);transition:transform .3s;flex-shrink:0;font-size:9px;margin-top:3px}
+.qa-item.open .qa-ch{transform:rotate(180deg)}
+.qa-a{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.qa-item.open .qa-a{max-height:1400px}
+.qa-ab{padding:12px;font-size:10.5px;color:var(--tx2);line-height:1.8;border-top:1px solid var(--b1);background:#010810;font-family:var(--mono)}
+.qa-ab code{background:var(--card);border:1px solid var(--b1);border-radius:2px;padding:1px 4px;color:var(--k2)}
+.filter-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.fbtn{font-size:8px;padding:2px 7px;border-radius:3px;border:1px solid var(--b1);background:transparent;color:var(--tx3);cursor:pointer;font-family:var(--mono);letter-spacing:.5px;transition:all .15s}
+.fbtn:hover,.fbtn.active{border-color:var(--k2);color:var(--k2);background:rgba(50,108,229,.06)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo-icon">☸️</div>
+  <div>
+    <div class="logo-name">KUBERNETES MASTERY</div>
+    <div class="logo-sub">ARCHITECTURE · EVERY RESOURCE · ANIMATED FLOWS · PRODUCTION PATTERNS · 2025</div>
+  </div>
+  <div class="top-sep"></div>
+  <div class="t-stat"><b>22</b> Chapters</div>
+  <div class="t-stat"><b>80+</b> Resources</div>
+  <div class="t-stat"><b>200+</b> <b class="cy">kubectl</b> Demos</div>
+  <div class="t-stat"><b>100</b> Q&amp;A</div>
+  <div class="t-badge">K8s <b>v1.30</b> · Helm · GitOps</div>
+</div>
+<div class="layout">
+  <div class="lp">
+    <div class="lp-hdr">
+      <div class="lp-hdr-row"><h3>// K8s Learning Path</h3></div>
+      <div class="prog-bar"><div class="prog-fill" id="progBar"></div></div>
+      <div class="prog-txt" id="progTxt">0 / 22 chapters visited</div>
+    </div>
+    <nav class="lnav" id="leftNav"></nav>
+  </div>
+  <div class="mid" id="middle">
+    <div class="wlc">
+      <div class="wlc-logo">☸️</div>
+      <div class="wlc-title">KUBERNETES MASTERY</div>
+      <div class="wlc-prompt"><span class="blink">▌</span> kubectl get everything --all-namespaces</div>
+      <p class="wlc-sub">Architecture diagrams. Data flow animations. Every resource explained.<br>From <code style="color:var(--k2)">kubectl run</code> to production-grade cluster design — master K8s completely.</p>
+      <div class="stat-row">
+        <div class="sc"><span class="sc-n">22</span><span class="sc-l">Chapters</span></div>
+        <div class="sc"><span class="sc-n">80+</span><span class="sc-l">Resources</span></div>
+        <div class="sc"><span class="sc-n cy">200+</span><span class="sc-l">Animated</span></div>
+        <div class="sc"><span class="sc-n gr">100</span><span class="sc-l">Q&amp;A</span></div>
+        <div class="sc"><span class="sc-n" style="color:var(--ye)">∞</span><span class="sc-l">Patterns</span></div>
+      </div>
+      <div class="wlc-hint">← select chapter · watch kubectl commands animate · click ▶ Run</div>
+    </div>
+  </div>
+  <div class="rp hidden" id="rightPanel">
+    <div class="rp-hdr">
+      <h3 id="rightTitle">$ kubectl select-topic</h3>
+      <button class="xbtn" onclick="closeRight()">✕</button>
+    </div>
+    <div class="rp-tabs" id="rightTabs"></div>
+    <div class="rb" id="rightBody"></div>
+  </div>
+</div>
+<script>
+
+const CHAPTERS=[
+{id:'architecture',icon:'🏗️',color:'#326ce5',bg:'rgba(50,108,229,.12)',lc:'#5b9bf8',level:'FOUNDATION',
+ title:'Cluster Architecture',sub:'Control Plane · Worker Nodes · etcd · CRI',
+ desc:'The complete K8s architecture — how the API server, scheduler, controller manager, etcd, kubelet and kube-proxy work together. Understand every component and every data flow.',
+ topics:[
+  {id:'overview',cmd:'Architecture',title:'Cluster Overview',desc:'Full control plane + worker node diagram with all data flows',tags:['essential'],tabs:['Diagram','Control Plane','Worker Node','Data Flow']},
+  {id:'api-server',cmd:'kube-apiserver',title:'API Server',desc:'The single entry point — validates, persists to etcd, notifies watchers',tags:['essential'],tabs:['Demo','Request Flow','Auth Chain','Admission']},
+  {id:'scheduler',cmd:'kube-scheduler',title:'Scheduler',desc:'Watches unscheduled pods, scores nodes, binds pods to nodes',tags:['essential'],tabs:['Demo','Scheduling Flow','Filters','Priority']},
+  {id:'controller-mgr',cmd:'controller-manager',title:'Controller Manager',desc:'ReplicaSet, Deployment, Node, Endpoint controllers — reconciliation loop',tags:['essential'],tabs:['Demo','Control Loop','Built-in Controllers']},
+  {id:'etcd',cmd:'etcd',title:'etcd — State Store',desc:'Distributed key-value store — the only source of truth in K8s',tabs:['Demo','Data Model','Backup','HA'],tags:['essential']},
+ ]},
+{id:'workloads',icon:'📦',color:'#326ce5',bg:'rgba(50,108,229,.1)',lc:'#5b9bf8',level:'ESSENTIAL',
+ title:'Pods & Workloads',sub:'Pod · Deployment · ReplicaSet · StatefulSet · DaemonSet',
+ desc:'The building blocks of K8s workloads. Understand what runs inside a Pod, how controllers manage Pod lifecycle, and when to use each workload type.',
+ topics:[
+  {id:'pod',cmd:'Pod',title:'Pods — The Atomic Unit',desc:'Shared network/storage, init containers, multi-container patterns',tags:['essential'],tabs:['Demo','YAML','Lifecycle','Patterns']},
+  {id:'deployment',cmd:'Deployment',title:'Deployments',desc:'Rolling updates, rollbacks, scaling — the standard stateless workload',tags:['essential'],tabs:['Demo','YAML','Rolling Update','Rollback']},
+  {id:'replicaset',cmd:'ReplicaSet',title:'ReplicaSets',desc:'Maintains desired pod count — mostly managed via Deployment',tags:['intermediate'],tabs:['Demo','YAML','vs Deployment']},
+  {id:'statefulset',cmd:'StatefulSet',title:'StatefulSets',desc:'Stable identities, ordered deploy/scale/delete — for databases',tags:['intermediate'],tabs:['Demo','YAML','Use Cases','Headless SVC']},
+  {id:'daemonset',cmd:'DaemonSet',title:'DaemonSets',desc:'One pod per node — for log agents, monitoring, CNI plugins',tags:['intermediate'],tabs:['Demo','YAML','Node Selectors']},
+  {id:'job-cronjob',cmd:'Job / CronJob',title:'Jobs & CronJobs',desc:'Run-to-completion tasks and scheduled batch workloads',tags:['intermediate'],tabs:['Demo','YAML','CronJob','Parallelism']},
+ ]},
+{id:'services',icon:'🌐',color:'#00e5ff',bg:'rgba(0,229,255,.08)',lc:'#00e5ff',level:'ESSENTIAL',
+ title:'Services & Networking',sub:'Service · Ingress · NetworkPolicy · DNS · kube-proxy',
+ desc:'How traffic flows inside and outside a cluster. ClusterIP, NodePort, LoadBalancer, ExternalName. Ingress controllers, path routing, TLS termination.',
+ topics:[
+  {id:'service',cmd:'Service',title:'Services — Virtual IPs',desc:'ClusterIP, NodePort, LoadBalancer, ExternalName — stable endpoints',tags:['essential'],tabs:['Demo','YAML','Types','kube-proxy']},
+  {id:'ingress',cmd:'Ingress',title:'Ingress — HTTP Routing',desc:'L7 path/host routing, TLS, annotations — nginx/traefik controllers',tags:['essential'],tabs:['Demo','YAML','TLS','Annotations']},
+  {id:'dns',cmd:'CoreDNS',title:'Cluster DNS',desc:'Service discovery via DNS — FQDN format, search domains, ndots',tags:['intermediate'],tabs:['Demo','DNS Format','Troubleshoot']},
+  {id:'networkpolicy',cmd:'NetworkPolicy',title:'Network Policies',desc:'L3/L4 firewall rules — ingress/egress per pod selector',tags:['advanced'],tabs:['Demo','YAML','Examples','Default Deny']},
+  {id:'service-mesh',cmd:'Service Mesh',title:'Service Mesh Overview',desc:'Istio/Linkerd — mTLS, traffic management, observability sidecar',tags:['advanced'],tabs:['Overview','Istio Flow','When to Use']},
+ ]},
+{id:'storage',icon:'💾',color:'#ce93d8',bg:'rgba(206,147,216,.08)',lc:'#ce93d8',level:'INTERMEDIATE',
+ title:'Storage',sub:'PV · PVC · StorageClass · ConfigMap · Secret',
+ desc:'Persistent volumes, dynamic provisioning, storage classes. How Kubernetes abstracts storage from pods. ConfigMaps and Secrets for configuration.',
+ topics:[
+  {id:'pv-pvc',cmd:'PV / PVC',title:'Persistent Volumes',desc:'PersistentVolume, PVC, binding lifecycle, access modes',tags:['essential'],tabs:['Demo','YAML','Lifecycle','Access Modes']},
+  {id:'storageclass',cmd:'StorageClass',title:'Storage Classes',desc:'Dynamic provisioning — AWS EBS, GCP PD, Azure Disk, local-path',tags:['intermediate'],tabs:['Demo','YAML','Dynamic Provisioning']},
+  {id:'configmap',cmd:'ConfigMap',title:'ConfigMaps',desc:'Inject non-sensitive config as env vars, volume, or CLI args',tags:['essential'],tabs:['Demo','YAML','Volume Mount','Env Var']},
+  {id:'secret',cmd:'Secret',title:'Secrets',desc:'Base64-encoded sensitive data — TLS certs, passwords, tokens',tags:['essential'],tabs:['Demo','YAML','Types','External Secrets']},
+ ]},
+{id:'configuration',icon:'⚙️',color:'#ffd740',bg:'rgba(255,215,64,.07)',lc:'#ffd740',level:'INTERMEDIATE',
+ title:'Configuration & Policies',sub:'ResourceQuota · LimitRange · RBAC · ServiceAccount',
+ desc:'Resource management, access control, and policy enforcement. Set CPU/memory limits, RBAC roles, and namespace-level quotas.',
+ topics:[
+  {id:'resources',cmd:'resources:',title:'Resource Requests & Limits',desc:'CPU/memory requests and limits — scheduler uses requests, limits enforced by cgroups',tags:['essential'],tabs:['Demo','YAML','QoS Classes','VPA']},
+  {id:'rbac',cmd:'RBAC',title:'RBAC — Access Control',desc:'Role, ClusterRole, RoleBinding — who can do what to which resources',tags:['essential'],tabs:['Demo','YAML','Roles vs ClusterRoles','Service Accounts']},
+  {id:'quota',cmd:'ResourceQuota',title:'Resource Quotas',desc:'Namespace-level limits on total CPU, memory, pod count',tags:['intermediate'],tabs:['Demo','YAML','LimitRange','Examples']},
+  {id:'serviceaccount',cmd:'ServiceAccount',title:'Service Accounts',desc:'Pod identity for API server access — IRSA on AWS, Workload Identity on GCP',tags:['intermediate'],tabs:['Demo','YAML','IRSA','Tokens']},
+ ]},
+{id:'scheduling',icon:'📅',color:'#ffd740',bg:'rgba(255,215,64,.06)',lc:'#ffd740',level:'INTERMEDIATE',
+ title:'Scheduling & Placement',sub:'nodeSelector · Affinity · Taints · Tolerations · TopologySpread',
+ desc:'Control exactly where pods run. Node affinity, pod affinity/anti-affinity, taints and tolerations, topology spread constraints for HA.',
+ topics:[
+  {id:'node-selector',cmd:'nodeSelector',title:'Node Selectors & Labels',desc:'Simple label-based node selection — the starting point',tags:['intermediate'],tabs:['Demo','YAML','Labels']},
+  {id:'affinity',cmd:'affinity:',title:'Affinity & Anti-Affinity',desc:'Required vs preferred rules, pod affinity for co-location or spread',tags:['advanced'],tabs:['Demo','YAML','Node Affinity','Pod Affinity']},
+  {id:'taints',cmd:'taint/tolerate',title:'Taints & Tolerations',desc:'Nodes repel pods unless pods tolerate the taint — dedicate nodes',tags:['advanced'],tabs:['Demo','YAML','Use Cases','Effects']},
+  {id:'topology-spread',cmd:'topologySpread',title:'Topology Spread',desc:'Evenly spread pods across zones, nodes, racks for HA',tags:['advanced'],tabs:['Demo','YAML','HA Pattern']},
+ ]},
+{id:'autoscaling',icon:'📈',color:'#00e676',bg:'rgba(0,230,118,.08)',lc:'#00e676',level:'ADVANCED',
+ title:'Autoscaling',sub:'HPA · VPA · KEDA · Cluster Autoscaler',
+ desc:'Scale pods and nodes automatically based on CPU, memory, custom metrics, and external event sources.',
+ topics:[
+  {id:'hpa',cmd:'HPA',title:'Horizontal Pod Autoscaler',desc:'Scale pods based on CPU/memory or custom metrics',tags:['essential'],tabs:['Demo','YAML','Custom Metrics','Behavior']},
+  {id:'vpa',cmd:'VPA',title:'Vertical Pod Autoscaler',desc:'Auto-resize CPU/memory requests based on actual usage',tags:['advanced'],tabs:['Demo','YAML','Modes','vs HPA']},
+  {id:'keda',cmd:'KEDA',title:'KEDA — Event-Driven Scale',desc:'Scale to zero on queues, cron, Kafka, HTTP, 60+ scalers',tabs:['Demo','YAML','Scalers','Scale to Zero'],tags:['advanced']},
+  {id:'cluster-autoscaler',cmd:'Cluster Autoscaler',title:'Cluster Autoscaler',desc:'Add/remove nodes when pods are pending or nodes underutilized',tabs:['Demo','Config','Behaviour'],tags:['advanced']},
+ ]},
+{id:'observability',icon:'🔭',color:'#00e5ff',bg:'rgba(0,229,255,.07)',lc:'#00e5ff',level:'INTERMEDIATE',
+ title:'Observability',sub:'kubectl logs · metrics-server · Prometheus · Grafana · Jaeger',
+ desc:'Monitor cluster health, debug pods, scrape metrics, trace requests. Logging, metrics, and tracing — the three pillars.',
+ topics:[
+  {id:'logging',cmd:'kubectl logs',title:'Logging',desc:'kubectl logs, log aggregation with Loki/Fluentd/EFK stack',tags:['essential'],tabs:['Demo','Flags','Log Aggregation','Loki']},
+  {id:'metrics',cmd:'metrics-server',title:'Metrics & Prometheus',desc:'metrics-server for kubectl top, Prometheus scraping, ServiceMonitor',tags:['intermediate'],tabs:['Demo','kubectl top','Prometheus','Alerts']},
+  {id:'tracing',cmd:'Jaeger / OTEL',title:'Distributed Tracing',desc:'OpenTelemetry, Jaeger, Tempo — trace requests across services',tags:['advanced'],tabs:['Overview','OTEL Collector','Jaeger']},
+  {id:'events',cmd:'kubectl events',title:'Events & Debugging',desc:'kubectl events, describe, exec, port-forward — debug toolkit',tags:['essential'],tabs:['Demo','Debug Toolkit','Common Issues']},
+ ]},
+{id:'helm',icon:'⛵',color:'#ffd740',bg:'rgba(255,215,64,.08)',lc:'#ffd740',level:'INTERMEDIATE',
+ title:'Helm — Package Manager',sub:'chart · values · release · template · hook',
+ desc:'Package, version and deploy K8s applications with Helm charts. Templating, values overrides, hooks, and OCI registry support.',
+ topics:[
+  {id:'helm-basics',cmd:'helm',title:'Helm Fundamentals',desc:'Charts, releases, repositories — the core concepts',tags:['essential'],tabs:['Demo','Chart Structure','Commands']},
+  {id:'helm-values',cmd:'values.yaml',title:'Values & Templating',desc:'Override defaults, template functions, named templates',tags:['intermediate'],tabs:['Demo','YAML','Go Templates','Tips']},
+  {id:'helm-hooks',cmd:'hooks',title:'Helm Hooks',desc:'pre-install, post-install, pre-upgrade — run jobs at lifecycle points',tags:['advanced'],tabs:['Demo','Hook Types','Examples']},
+  {id:'helm-oci',cmd:'OCI charts',title:'OCI Registry & Repos',desc:'Push/pull charts from OCI registries (ECR, GHCR, ACR)',tabs:['Demo','Commands','Best Practices'],tags:['advanced']},
+ ]},
+{id:'security',icon:'🔒',color:'#ff5252',bg:'rgba(255,82,82,.08)',lc:'#ff5252',level:'ADVANCED',
+ title:'Security',sub:'PSA · OPA/Gatekeeper · PodSecurity · Falco · Trivy',
+ desc:'Cluster hardening, pod security standards, admission control with OPA Gatekeeper, image scanning, runtime security with Falco.',
+ topics:[
+  {id:'pod-security',cmd:'PodSecurity',title:'Pod Security Standards',desc:'Privileged, Baseline, Restricted — namespace-level enforcement',tags:['essential','security'],tabs:['Demo','YAML','Levels','Migration']},
+  {id:'opa',cmd:'OPA/Gatekeeper',title:'OPA Gatekeeper',desc:'Policy-as-code admission controller — ConstraintTemplates, Constraints',tags:['advanced','security'],tabs:['Demo','YAML','Examples','Audit']},
+  {id:'image-security',cmd:'Trivy / Cosign',title:'Image Security',desc:'Trivy scanning, Cosign signing, admission policy for signed images',tags:['advanced','security'],tabs:['Demo','Trivy Scan','Cosign','Policy']},
+  {id:'falco',cmd:'Falco',title:'Runtime Security — Falco',desc:'eBPF-based syscall monitoring — detect anomalous behavior at runtime',tabs:['Overview','Rules','Demo','Alerts'],tags:['advanced','security']},
+ ]},
+{id:'networking-deep',icon:'🔗',color:'#00e5ff',bg:'rgba(0,229,255,.06)',lc:'#00e5ff',level:'ADVANCED',
+ title:'Networking Deep Dive',sub:'CNI · iptables · eBPF · Cilium · IPVS',
+ desc:'How network packets actually flow in Kubernetes — CNI plugins, iptables rules written by kube-proxy, eBPF with Cilium, service load balancing internals.',
+ topics:[
+  {id:'cni',cmd:'CNI',title:'CNI Plugins',desc:'Flannel, Calico, Cilium, Weave — how pod networking is wired',tags:['advanced'],tabs:['Overview','Calico','Cilium','eBPF']},
+  {id:'iptables-flow',cmd:'iptables/IPVS',title:'kube-proxy Internals',desc:'How iptables/IPVS rules implement Service load balancing',tags:['advanced'],tabs:['Packet Flow','iptables Rules','IPVS Mode']},
+  {id:'cilium',cmd:'Cilium',title:'Cilium & eBPF',desc:'eBPF-native networking — no iptables, Hubble observability, egress gateway',tags:['advanced'],tabs:['Demo','Architecture','Hubble','Policy']},
+ ]},
+{id:'ingress-deep',icon:'🚪',color:'#00e5ff',bg:'rgba(0,229,255,.06)',lc:'#00e5ff',level:'INTERMEDIATE',
+ title:'Ingress & Gateway API',sub:'NGINX Ingress · Traefik · Gateway API · cert-manager',
+ desc:'HTTP routing in depth — NGINX ingress controller internals, Gateway API (the successor to Ingress), TLS automation with cert-manager.',
+ topics:[
+  {id:'nginx-ingress',cmd:'NGINX Ingress',title:'NGINX Ingress Controller',desc:'Most popular ingress — configuration, annotations, canary',tags:['essential'],tabs:['Demo','YAML','Canary','Rate Limiting']},
+  {id:'gateway-api',cmd:'Gateway API',title:'Gateway API',desc:'HTTPRoute, GRPCRoute, TCPRoute — the future of ingress',tags:['advanced'],tabs:['Demo','YAML','vs Ingress','Concepts']},
+  {id:'cert-manager',cmd:'cert-manager',title:'cert-manager — TLS Automation',desc:'LetsEncrypt, self-signed, Vault — automatic TLS cert provisioning',tags:['essential'],tabs:['Demo','YAML','ClusterIssuer','ACME']},
+ ]},
+{id:'namespaces-ctx',icon:'📁',color:'#326ce5',bg:'rgba(50,108,229,.08)',lc:'#5b9bf8',level:'BEGINNER',
+ title:'Namespaces & Contexts',sub:'namespace · context · kubeconfig · kubens · kubectx',
+ desc:'Multi-tenancy with namespaces. Switch between clusters and namespaces with kubectl contexts. kubeconfig deep dive.',
+ topics:[
+  {id:'namespaces',cmd:'Namespace',title:'Namespaces',desc:'Virtual clusters — isolate resources, quotas, RBAC per team',tags:['essential'],tabs:['Demo','YAML','Isolation','System NSes']},
+  {id:'kubeconfig',cmd:'kubeconfig',title:'kubeconfig & Contexts',desc:'clusters, users, contexts — how kubectl knows where to talk',tabs:['Demo','Structure','Multi-cluster','kubectx'],tags:['essential']},
+ ]},
+{id:'kubectl-mastery',icon:'⌨️',color:'#5b9bf8',bg:'rgba(91,155,248,.08)',lc:'#5b9bf8',level:'ESSENTIAL',
+ title:'kubectl Mastery',sub:'get · describe · apply · exec · cp · port-forward · debug',
+ desc:'Every kubectl command you need. Output formats, label selectors, field selectors, jsonpath, custom columns, and power-user tricks.',
+ topics:[
+  {id:'kubectl-basic',cmd:'kubectl get',title:'Get & Describe',desc:'List and inspect resources with selectors and output formats',tags:['essential'],tabs:['Demo','Output Formats','Selectors','JSONPath']},
+  {id:'kubectl-apply',cmd:'kubectl apply',title:'Apply & Manage',desc:'Declarative resource management — apply, patch, replace, delete',tags:['essential'],tabs:['Demo','apply vs create','Patch','Delete']},
+  {id:'kubectl-debug',cmd:'kubectl debug',title:'Debug & Exec',desc:'exec into pods, port-forward, copy files, ephemeral debug containers',tags:['essential'],tabs:['Demo','exec','port-forward','debug containers']},
+  {id:'kubectl-advanced',cmd:'kubectl advanced',title:'Power User kubectl',desc:'Custom columns, jsonpath, watch, dry-run, server-side apply',tags:['advanced'],tabs:['Demo','jsonpath','Custom Columns','Dry Run']},
+ ]},
+{id:'multi-container',icon:'🧩',color:'#ce93d8',bg:'rgba(206,147,216,.08)',lc:'#ce93d8',level:'INTERMEDIATE',
+ title:'Multi-Container Patterns',sub:'Sidecar · Init · Ambassador · Adapter',
+ desc:'Design patterns for pods with multiple containers. Init containers for setup, sidecars for logging/proxy/sync, adapters for protocol translation.',
+ topics:[
+  {id:'init-containers',cmd:'initContainers',title:'Init Containers',desc:'Sequential setup containers that run before main container starts',tags:['intermediate'],tabs:['Demo','YAML','Use Cases','Ordering']},
+  {id:'sidecar',cmd:'Sidecar Pattern',title:'Sidecar Pattern',desc:'Service mesh proxy, log shipper, secrets sync alongside main app',tags:['intermediate'],tabs:['Demo','YAML','Istio Sidecar','Log Shipping']},
+  {id:'ephemeral',cmd:'kubectl debug',title:'Ephemeral Debug Containers',desc:'Add a debug container to a running pod without restarting it',tabs:['Demo','YAML','Use Cases'],tags:['advanced']},
+ ]},
+{id:'stateful',icon:'🗄️',color:'#ce93d8',bg:'rgba(206,147,216,.07)',lc:'#ce93d8',level:'ADVANCED',
+ title:'Stateful Workloads',sub:'StatefulSet · Operator · PodDisruptionBudget · Backup',
+ desc:'Running databases and stateful apps in K8s. Operators for day-2 operations, PodDisruptionBudgets for maintenance, backup strategies.',
+ topics:[
+  {id:'operators',cmd:'Operator Pattern',title:'Operators & CRDs',desc:'Custom Resource Definitions + controllers — codify operational knowledge',tags:['advanced'],tabs:['Demo','CRD YAML','Controller Loop','Examples']},
+  {id:'pdb',cmd:'PodDisruptionBudget',title:'PodDisruptionBudget',desc:'Guarantee minimum availability during voluntary disruptions',tags:['intermediate'],tabs:['Demo','YAML','Strategy','Drain']},
+  {id:'backup',cmd:'Velero',title:'Backup & Restore — Velero',desc:'Cluster backup, disaster recovery, namespace migration',tabs:['Demo','Schedule','Restore','Best Practices'],tags:['advanced']},
+ ]},
+{id:'cicd',icon:'🔄',color:'#00e676',bg:'rgba(0,230,118,.07)',lc:'#00e676',level:'INTERMEDIATE',
+ title:'CI/CD & GitOps',sub:'ArgoCD · Flux · Tekton · GitHub Actions',
+ desc:'Deploy to Kubernetes from CI pipelines and via GitOps. ArgoCD sync, Flux reconciliation, Kustomize overlays, image update automation.',
+ topics:[
+  {id:'argocd',cmd:'ArgoCD',title:'ArgoCD — GitOps',desc:'Git as source of truth — App, AppProject, sync policies, health checks',tags:['essential'],tabs:['Demo','App YAML','Sync Flow','Health']},
+  {id:'flux',cmd:'Flux CD',title:'Flux — GitOps Toolkit',desc:'Kustomization, HelmRelease, ImageAutomation — pull-based GitOps',tags:['advanced'],tabs:['Demo','GitRepository','Kustomization','Helm']},
+  {id:'kustomize',cmd:'kustomize',title:'Kustomize',desc:'Overlay-based configuration management — base + patches per env',tabs:['Demo','Structure','Patches','Generators'],tags:['essential']},
+  {id:'actions-k8s',cmd:'GitHub Actions → K8s',title:'CI/CD with GitHub Actions',desc:'Build image, push to registry, update K8s manifests or Helm values',tags:['intermediate'],tabs:['Demo','Workflow YAML','Best Practices']},
+ ]},
+{id:'cluster-ops',icon:'🛠️',color:'#ffd740',bg:'rgba(255,215,64,.07)',lc:'#ffd740',level:'ADVANCED',
+ title:'Cluster Operations',sub:'Upgrade · Drain · Cordon · kubeadm · Node lifecycle',
+ desc:'Day-2 operations — upgrade clusters with zero downtime, safely drain nodes, manage node pool lifecycles, certificate rotation.',
+ topics:[
+  {id:'node-ops',cmd:'cordon/drain/uncordon',title:'Node Operations',desc:'Safely take nodes out of service for maintenance',tags:['essential'],tabs:['Demo','cordon','drain','uncordon']},
+  {id:'upgrade',cmd:'kubeadm upgrade',title:'Cluster Upgrades',desc:'Zero-downtime upgrade strategy — control plane then workers',tags:['advanced'],tabs:['Demo','Strategy','kubeadm','Rollback']},
+  {id:'cert-rotation',cmd:'kubeadm certs',title:'Certificate Rotation',desc:'Check expiry, rotate cluster certificates manually and automatically',tabs:['Demo','Check Expiry','Rotate','Auto-renewal'],tags:['advanced']},
+ ]},
+{id:'multi-cluster',icon:'🌍',color:'#00e676',bg:'rgba(0,230,118,.07)',lc:'#00e676',level:'ADVANCED',
+ title:'Multi-Cluster & Federation',sub:'kubefed · Admiralty · ArgoCD multi-cluster · Service Mesh',
+ desc:'Manage multiple clusters for DR, geo-distribution, and environment isolation. Cross-cluster service discovery and traffic management.',
+ topics:[
+  {id:'multi-cluster-patterns',cmd:'Multi-Cluster',title:'Multi-Cluster Patterns',desc:'Active-active, active-passive, hub-spoke — tradeoffs and patterns',tags:['advanced'],tabs:['Patterns','ArgoCD','Ingress','DNS']},
+  {id:'fleet',cmd:'Fleet / Cluster API',title:'Fleet Management',desc:'Rancher Fleet, Cluster API — provision and manage clusters as code',tags:['advanced'],tabs:['Overview','Cluster API','Fleet']},
+ ]},
+{id:'cost',icon:'💰',color:'#00e676',bg:'rgba(0,230,118,.06)',lc:'#00e676',level:'INTERMEDIATE',
+ title:'Cost Optimization',sub:'Resource tuning · Spot nodes · Goldilocks · Kubecost',
+ desc:'Right-size workloads, use spot/preemptible nodes safely, identify wasted resources, implement cost allocation by team.',
+ topics:[
+  {id:'right-sizing',cmd:'Goldilocks',title:'Right-Sizing Workloads',desc:'VPA recommendations, Goldilocks UI, memory/CPU tuning workflow',tags:['intermediate'],tabs:['Demo','Goldilocks','Workflow','kubectl top']},
+  {id:'spot-nodes',cmd:'Spot/Preemptible',title:'Spot & Preemptible Nodes',desc:'Interruption handling, mixed node groups, Karpenter for flexible sizing',tags:['advanced'],tabs:['Demo','Karpenter','Interruption','Strategy']},
+  {id:'kubecost',cmd:'Kubecost',title:'Cost Allocation',desc:'Per-namespace/team cost breakdown, idle resource identification',tabs:['Overview','Kubecost','Labels','Alerts'],tags:['intermediate']},
+ ]},
+{id:'troubleshoot',icon:'🚑',color:'#ff5252',bg:'rgba(255,82,82,.08)',lc:'#ff5252',level:'ALL',
+ title:'Troubleshooting Playbook',sub:'CrashLoopBackOff · OOMKilled · Pending · ImagePullBackOff',
+ desc:'Systematic debug methodology for every common K8s failure. Decision trees, kubectl debug commands, and fix patterns.',
+ topics:[
+  {id:'pod-issues',cmd:'Pod Issues',title:'Pod Troubleshooting',desc:'CrashLoopBackOff, OOMKilled, Pending, ImagePullBackOff — fix each',tags:['essential'],tabs:['Demo','CrashLoop','Pending','OOMKilled']},
+  {id:'network-issues',cmd:'Network Issues',title:'Network Troubleshooting',desc:'Service unreachable, DNS failures, CNI issues — debug methodology',tags:['intermediate'],tabs:['Demo','DNS Debug','Service Debug','netshoot']},
+  {id:'cluster-issues',cmd:'Cluster Issues',title:'Cluster Troubleshooting',desc:'Node NotReady, etcd unhealthy, API server down — recovery steps',tabs:['Demo','Node NotReady','etcd Recovery','API Server'],tags:['advanced']},
+ ]},
+{id:'interview',icon:'🎤',color:'#ce93d8',bg:'rgba(206,147,216,.1)',lc:'#ce93d8',level:'ALL',
+ title:'Interview Q&A',sub:'Beginner · Intermediate · Advanced · Production',
+ desc:'100 real Kubernetes interview questions with detailed answers. Architecture, workloads, networking, security, and production scenarios.',
+ topics:[
+  {id:'iq-basics',cmd:'Q 1–25',title:'Beginner Questions',desc:'Core concepts — pods, services, deployments, namespaces',tags:['beginner'],tabs:['Q&A']},
+  {id:'iq-intermediate',cmd:'Q 26–55',title:'Intermediate Questions',desc:'Networking, storage, scheduling, RBAC, HPA',tags:['intermediate'],tabs:['Q&A']},
+  {id:'iq-advanced',cmd:'Q 56–80',title:'Advanced Questions',desc:'Internals, operators, security, performance tuning',tags:['advanced'],tabs:['Q&A']},
+  {id:'iq-production',cmd:'Q 81–100',title:'Production & Scenarios',desc:'Real-world scenarios, incident response, design decisions',tabs:['Q&A'],tags:['production']},
+ ]},
+];
+
+// ═══ TERMINAL ENGINE ═══
+let termTimers=[];
+function clearTimers(){termTimers.forEach(clearTimeout);termTimers=[];}
+function mkTerm(id,title,autoRun){
+  const h=`<div class="tw" id="tw_${id}">
+<div class="tb"><div class="td r"></div><div class="td y"></div><div class="td g"></div>
+<div class="tt">kubernetes — ${title}</div>
+<button class="tr-btn" id="rb_${id}" onclick="runTerm('${id}')">▶ Run</button></div>
+<div class="ts" id="ts_${id}"><span class="tl"><span class="tp">❯</span><span class="tcur"></span></span></div>
+</div>`;
+  if(autoRun) setTimeout(()=>runTerm(id),400);
+  return h;
+}
+function runTerm(id){
+  const scr=document.getElementById('ts_'+id);
+  const btn=document.getElementById('rb_'+id);
+  if(!scr||!btn) return;
+  clearTimers();scr.innerHTML='';
+  btn.textContent='⏳';btn.classList.add('running');
+  const lines=TERM_DATA[id]||[];
+  let delay=0;
+  lines.forEach((ln,i)=>{
+    const t=setTimeout(()=>{
+      const s=document.createElement('span');
+      s.className='tl';s.innerHTML=ln;
+      scr.appendChild(s);scr.scrollTop=scr.scrollHeight;
+      if(i===lines.length-1){btn.textContent='▶ Run';btn.classList.remove('running');}
+    },delay);
+    termTimers.push(t);
+    delay+=ln.includes('class="tp"')?320:ln.trim()===''?40:55;
+  });
+}
+
+const TERM_DATA={
+
+// ── Cluster Architecture ────────────────────────
+'api-server-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl get componentstatuses</span>',
+ '<span class="to">NAME                 STATUS    MESSAGE             ERROR</span>',
+ '<span class="to-g">scheduler            Healthy   ok</span>',
+ '<span class="to-g">controller-manager   Healthy   ok</span>',
+ '<span class="to-g">etcd-0               Healthy   {"health":"true"}</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl cluster-info</span>',
+ '<span class="to-c">Kubernetes control plane</span><span class="to"> is running at https://10.0.0.1:6443</span>',
+ '<span class="to-c">CoreDNS</span><span class="to"> is running at https://10.0.0.1:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get nodes -o wide</span>',
+ '<span class="to">NAME            STATUS   ROLES           AGE   VERSION   INTERNAL-IP   OS-IMAGE</span>',
+ '<span class="to-g">control-plane   Ready    control-plane   30d   v1.30.0   10.0.0.10     Ubuntu 22.04</span>',
+ '<span class="to-g">worker-1        Ready    &lt;none&gt;          30d   v1.30.0   10.0.0.11     Ubuntu 22.04</span>',
+ '<span class="to-g">worker-2        Ready    &lt;none&gt;          30d   v1.30.0   10.0.0.12     Ubuntu 22.04</span>',
+ '<span class="to-g">worker-3        Ready    &lt;none&gt;          30d   v1.30.0   10.0.0.13     Ubuntu 22.04</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pods -n kube-system</span>',
+ '<span class="to-g">kube-apiserver-control-plane      1/1     Running   0   30d</span>',
+ '<span class="to-g">kube-controller-manager-cp        1/1     Running   0   30d</span>',
+ '<span class="to-g">kube-scheduler-control-plane      1/1     Running   0   30d</span>',
+ '<span class="to-g">etcd-control-plane                1/1     Running   0   30d</span>',
+ '<span class="to-g">coredns-5d78c9869d-7f8g9          1/1     Running   0   30d</span>',
+ '<span class="to-g">kube-proxy-x7k2p                  1/1     Running   0   30d</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Pod Demo ─────────────────────────────────────
+'pod-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl run nginx --image=nginx:1.25 --port=80</span>',
+ '<span class="to-g">pod/nginx created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pod nginx -o wide</span>',
+ '<span class="to">NAME    READY   STATUS    RESTARTS   AGE   IP            NODE</span>',
+ '<span class="to-g">nginx   1/1     Running   0          12s   192.168.1.4   worker-1</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl describe pod nginx | head -30</span>',
+ '<span class="to">Name:         nginx</span>',
+ '<span class="to">Namespace:    default</span>',
+ '<span class="to">Node:         worker-1/10.0.0.11</span>',
+ '<span class="to">Status:       <span class="to-g">Running</span></span>',
+ '<span class="to">IP:           192.168.1.4</span>',
+ '<span class="to">Containers:</span>',
+ '<span class="to">  nginx:</span>',
+ '<span class="to">    Image:          nginx:1.25</span>',
+ '<span class="to">    Port:           80/TCP</span>',
+ '<span class="to">    State:          <span class="to-g">Running</span></span>',
+ '<span class="to">    Started:        Mon, 15 Jan 2025 10:22:44 +0530</span>',
+ '<span class="to">    Ready:          <span class="to-g">True</span></span>',
+ '<span class="to">    Restart Count:  0</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pod nginx -o yaml | grep -A5 "status:"</span>',
+ '<span class="to">status:</span>',
+ '<span class="to">  phase: <span class="to-g">Running</span></span>',
+ '<span class="to">  podIP: 192.168.1.4</span>',
+ '<span class="to">  hostIP: 10.0.0.11</span>',
+ '<span class="to">  conditions:</span>',
+ '<span class="to">  - type: <span class="to-g">Ready</span></span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl delete pod nginx</span>',
+ '<span class="to-r">pod "nginx" deleted</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Deployment Demo ───────────────────────────────
+'deployment-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl create deployment myapp --image=myapp:1.0 --replicas=3</span>',
+ '<span class="to-g">deployment.apps/myapp created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl rollout status deployment/myapp</span>',
+ '<span class="to">Waiting for deployment "myapp" rollout to finish: 0 of 3 updated replicas are available...</span>',
+ '<span class="to">Waiting for deployment "myapp" rollout to finish: 1 of 3 updated replicas are available...</span>',
+ '<span class="to">Waiting for deployment "myapp" rollout to finish: 2 of 3 updated replicas are available...</span>',
+ '<span class="to-g">deployment "myapp" successfully rolled out</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl set image deployment/myapp myapp=myapp:2.0</span>',
+ '<span class="to-g">deployment.apps/myapp image updated</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl rollout status deployment/myapp</span>',
+ '<span class="to">Waiting for deployment "myapp" rollout to finish: 1 out of 3 new replicas have been updated...</span>',
+ '<span class="to">Waiting for deployment "myapp" rollout to finish: 2 out of 3 new replicas have been updated...</span>',
+ '<span class="to-g">deployment "myapp" successfully rolled out</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl rollout history deployment/myapp</span>',
+ '<span class="to">REVISION  CHANGE-CAUSE</span>',
+ '<span class="to">1         &lt;none&gt;</span>',
+ '<span class="to">2         &lt;none&gt;</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl rollout undo deployment/myapp</span>',
+ '<span class="to-g">deployment.apps/myapp rolled back</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl scale deployment myapp --replicas=5</span>',
+ '<span class="to-g">deployment.apps/myapp scaled</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Service Demo ──────────────────────────────────
+'service-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl expose deployment myapp --port=80 --target-port=8080 --type=ClusterIP</span>',
+ '<span class="to-g">service/myapp exposed</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get svc myapp -o wide</span>',
+ '<span class="to">NAME    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE   SELECTOR</span>',
+ '<span class="to-g">myapp   ClusterIP   10.96.145.212   &lt;none&gt;        80/TCP    10s   app=myapp</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl expose deployment myapp --port=80 --type=NodePort --name=myapp-np</span>',
+ '<span class="to-g">service/myapp-np exposed</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get svc myapp-np</span>',
+ '<span class="to">NAME       TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE</span>',
+ '<span class="to-g">myapp-np   NodePort   10.96.82.114   &lt;none&gt;        80:31892/TCP   8s</span>',
+ '<span class="to-dim"># NodePort 31892 opens on EVERY node — accessible at &lt;NodeIP&gt;:31892</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get endpoints myapp</span>',
+ '<span class="to">NAME    ENDPOINTS                                    AGE</span>',
+ '<span class="to">myapp   192.168.1.4:8080,192.168.1.5:8080,+2 more   22s</span>',
+ '<span class="to-dim"># Endpoints = actual pod IPs — kube-proxy programs iptables from these</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl run test --image=busybox --rm -it -- wget -qO- http://myapp</span>',
+ '<span class="to-g">HTTP/1.1 200 OK — service DNS resolution works!</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Ingress Demo ──────────────────────────────────
+'ingress-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl apply -f ingress.yaml</span>',
+ '<span class="to-g">ingress.networking.k8s.io/myapp-ingress created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get ingress myapp-ingress</span>',
+ '<span class="to">NAME             CLASS   HOSTS               ADDRESS        PORTS     AGE</span>',
+ '<span class="to-g">myapp-ingress    nginx   api.example.com     34.120.50.10   80,443    30s</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl describe ingress myapp-ingress</span>',
+ '<span class="to">Name:             myapp-ingress</span>',
+ '<span class="to">Namespace:        default</span>',
+ '<span class="to">Address:          34.120.50.10</span>',
+ '<span class="to">Ingress Class:    nginx</span>',
+ '<span class="to">Rules:</span>',
+ '<span class="to">  Host              Path  Backends</span>',
+ '<span class="to">  api.example.com   /api  myapp-api:80</span>',
+ '<span class="to">  api.example.com   /     myapp-frontend:80</span>',
+ '<span class="to">Annotations:</span>',
+ '<span class="to">  nginx.ingress.kubernetes.io/rewrite-target:  /</span>',
+ '<span class="to">  cert-manager.io/cluster-issuer:              letsencrypt-prod</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get certificate -n default</span>',
+ '<span class="to">NAME            READY   SECRET          AGE</span>',
+ '<span class="to-g">myapp-tls       True    myapp-tls-sec   45s</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── PV/PVC Demo ───────────────────────────────────
+'pvc-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl apply -f pvc.yaml</span>',
+ '<span class="to-g">persistentvolumeclaim/data-pvc created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pvc</span>',
+ '<span class="to">NAME       STATUS    VOLUME          CAPACITY   ACCESS MODES   STORAGECLASS   AGE</span>',
+ '<span class="to-y">data-pvc   Pending   &lt;none&gt;          0          RWO            gp3            4s</span>',
+ '<span class="to-dim"># Pending = waiting for pod to consume (WaitForFirstConsumer binding mode)</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl apply -f pod-with-pvc.yaml && kubectl get pvc</span>',
+ '<span class="to">NAME       STATUS   VOLUME                                     CAPACITY   ACCESS MODES</span>',
+ '<span class="to-g">data-pvc   Bound    pvc-8f3a2b1c-4d5e-6f7a-8b9c-0d1e2f3a4b5c   10Gi       RWO</span>',
+ '<span class="to-dim"># Bound = PV dynamically provisioned from gp3 StorageClass</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pv</span>',
+ '<span class="to">NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS</span>',
+ '<span class="to-g">pvc-8f3a2b1c-...                           10Gi       RWO            Delete           Bound</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl exec -it mypod -- df -h /data</span>',
+ '<span class="to">Filesystem                          Size  Used Avail Use% Mounted on</span>',
+ '<span class="to">/dev/nvme1n1                         10G   52M  9.9G   1% /data</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── ConfigMap Demo ────────────────────────────────
+'configmap-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl create configmap app-config --from-literal=DB_HOST=postgres --from-literal=LOG_LEVEL=info</span>',
+ '<span class="to-g">configmap/app-config created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl create configmap nginx-conf --from-file=nginx.conf</span>',
+ '<span class="to-g">configmap/nginx-conf created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get configmap app-config -o yaml</span>',
+ '<span class="to">apiVersion: v1</span>',
+ '<span class="to">kind: ConfigMap</span>',
+ '<span class="to">data:</span>',
+ '<span class="to">  DB_HOST: postgres</span>',
+ '<span class="to">  LOG_LEVEL: info</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl describe configmap app-config</span>',
+ '<span class="to">Name:         app-config</span>',
+ '<span class="to">Namespace:    default</span>',
+ '<span class="to">Data</span>',
+ '<span class="to">====</span>',
+ '<span class="to">DB_HOST:  postgres</span>',
+ '<span class="to">LOG_LEVEL:  info</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl set env deployment/myapp --from=configmap/app-config</span>',
+ '<span class="to-g">deployment.apps/myapp env updated</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Secret Demo ───────────────────────────────────
+'secret-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl create secret generic db-creds --from-literal=username=admin --from-literal=password=S3cur3P@ss</span>',
+ '<span class="to-g">secret/db-creds created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get secret db-creds -o yaml</span>',
+ '<span class="to">apiVersion: v1</span>',
+ '<span class="to">kind: Secret</span>',
+ '<span class="to">type: Opaque</span>',
+ '<span class="to">data:</span>',
+ '<span class="to">  username: YWRtaW4=</span>',
+ '<span class="to">  password: UzNjdXIzUEBzcw==</span>',
+ '<span class="to-dim"># base64 encoded — NOT encrypted at rest by default!</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get secret db-creds -o jsonpath=\'{.data.username}\' | base64 -d</span>',
+ '<span class="to-g">admin</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl create secret tls myapp-tls --cert=tls.crt --key=tls.key</span>',
+ '<span class="to-g">secret/myapp-tls created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl create secret docker-registry regcred --docker-server=ghcr.io --docker-username=user --docker-password=token</span>',
+ '<span class="to-g">secret/regcred created</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── RBAC Demo ─────────────────────────────────────
+'rbac-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl create serviceaccount myapp-sa -n production</span>',
+ '<span class="to-g">serviceaccount/myapp-sa created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl create role pod-reader --verb=get,list,watch --resource=pods -n production</span>',
+ '<span class="to-g">role.rbac.authorization.k8s.io/pod-reader created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl create rolebinding myapp-read --role=pod-reader --serviceaccount=production:myapp-sa -n production</span>',
+ '<span class="to-g">rolebinding.rbac.authorization.k8s.io/myapp-read created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl auth can-i list pods --as=system:serviceaccount:production:myapp-sa -n production</span>',
+ '<span class="to-g">yes</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl auth can-i delete deployments --as=system:serviceaccount:production:myapp-sa -n production</span>',
+ '<span class="to-r">no</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl create clusterrole cluster-reader --verb=get,list,watch --resource=nodes,pods,services</span>',
+ '<span class="to-g">clusterrole.rbac.authorization.k8s.io/cluster-reader created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl auth can-i get nodes --as=system:serviceaccount:production:myapp-sa</span>',
+ '<span class="to-r">no</span>',
+ '<span class="to-dim"># ClusterRole needs ClusterRoleBinding — Role scope is namespace-only</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── HPA Demo ──────────────────────────────────────
+'hpa-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl autoscale deployment myapp --cpu-percent=70 --min=2 --max=20</span>',
+ '<span class="to-g">horizontalpodautoscaler.autoscaling/myapp autoscaled</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get hpa myapp</span>',
+ '<span class="to">NAME    REFERENCE          TARGETS   MINPODS   MAXPODS   REPLICAS   AGE</span>',
+ '<span class="to">myapp   Deployment/myapp   4%/70%    2         20        2          30s</span>',
+ '<span class="to-dim"># Simulate load</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl run load-gen --image=busybox --rm -it -- /bin/sh -c "while true; do wget -q -O- http://myapp; done"</span>',
+ '<span class="to-dim"># After 60s — HPA detects high CPU</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get hpa myapp --watch</span>',
+ '<span class="to">NAME    REFERENCE          TARGETS    MINPODS   MAXPODS   REPLICAS   AGE</span>',
+ '<span class="to-y">myapp   Deployment/myapp   89%/70%    2         20        2          2m</span>',
+ '<span class="to-y">myapp   Deployment/myapp   89%/70%    2         20        4          2m</span>',
+ '<span class="to-y">myapp   Deployment/myapp   82%/70%    2         20        6          3m</span>',
+ '<span class="to-g">myapp   Deployment/myapp   61%/70%    2         20        6          4m</span>',
+ '<span class="to-dim"># Load removed — scale-down after stabilization window (5min default)</span>',
+ '<span class="to-g">myapp   Deployment/myapp   4%/70%     2         20        2          9m</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── kubectl logs ──────────────────────────────────
+'logging-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl logs myapp-7d4b9f8c6-x8j2k</span>',
+ '<span class="to">2025-01-15T10:22:44Z INFO  Server starting on :8080</span>',
+ '<span class="to">2025-01-15T10:22:44Z INFO  Connected to database postgres:5432</span>',
+ '<span class="to">2025-01-15T10:22:50Z INFO  GET /health 200 OK 2ms</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl logs -f myapp-7d4b9f8c6-x8j2k --since=5m</span>',
+ '<span class="to-dim"># -f = follow (stream), --since= filter by time</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl logs myapp-7d4b9f8c6-x8j2k --previous</span>',
+ '<span class="to-dim"># --previous = logs from CRASHED previous container instance</span>',
+ '<span class="to-r">2025-01-15T10:20:11Z FATAL OutOfMemoryError: Java heap space</span>',
+ '<span class="to-r">2025-01-15T10:20:11Z ERROR Container exiting with code 137</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl logs -l app=myapp --all-containers=true --tail=50</span>',
+ '<span class="to-dim"># Logs from ALL pods matching label selector</span>',
+ '<span class="to">myapp-7d4b9f8c6-x8j2k: GET /api/users 200 OK</span>',
+ '<span class="to">myapp-7d4b9f8c6-r3n4p: GET /api/orders 200 OK</span>',
+ '<span class="to">myapp-7d4b9f8c6-k7m8q: POST /api/checkout 201 Created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl logs deployment/myapp -c sidecar</span>',
+ '<span class="to-dim"># specific container in multi-container pod</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── kubectl debug ─────────────────────────────────
+'debug-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl exec -it myapp-7d4b9f8c6-x8j2k -- /bin/bash</span>',
+ '<span class="to">root@myapp-7d4b9f8c6-x8j2k:/app#</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl exec myapp-7d4b9f8c6-x8j2k -- env | grep DB</span>',
+ '<span class="to">DB_HOST=postgres-svc</span>',
+ '<span class="to">DB_PORT=5432</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl port-forward svc/postgres 5432:5432 -n production</span>',
+ '<span class="to">Forwarding from 127.0.0.1:5432 -> 5432</span>',
+ '<span class="to">Forwarding from [::1]:5432 -> 5432</span>',
+ '<span class="to-dim"># Now connect from localhost: psql -h localhost -U admin mydb</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl cp myapp-7d4b9f8c6-x8j2k:/app/logs/app.log ./app.log</span>',
+ '<span class="to-g">File copied successfully</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl debug node/worker-1 -it --image=ubuntu</span>',
+ '<span class="to">Creating debugging pod node-debugger-worker-1-abc123 with container debugger on node worker-1.</span>',
+ '<span class="to">If you don\'t see a command prompt, try pressing enter.</span>',
+ '<span class="to">root@node-debugger:/#</span>',
+ '<span class="to-dim"># Full node access — host filesystem at /host</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl debug -it myapp-7d4b9f8c6-x8j2k --image=nicolaka/netshoot --share-processes</span>',
+ '<span class="to-g">Created ephemeral container netshoot in pod myapp-7d4b9f8c6-x8j2k</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── kubectl get advanced ──────────────────────────
+'kubectl-get-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pods -A -o wide --sort-by=.metadata.creationTimestamp</span>',
+ '<span class="to">NAMESPACE    NAME                       READY   STATUS    NODE      AGE</span>',
+ '<span class="to-g">kube-system  coredns-5d78c9869d-7f8g9   1/1     Running   worker-1  30d</span>',
+ '<span class="to-g">production   myapp-7d4b9f8c6-x8j2k     1/1     Running   worker-2  5d</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pods -l app=myapp,env=production -o jsonpath=\'{.items[*].metadata.name}\'</span>',
+ '<span class="to">myapp-7d4b9f8c6-x8j2k myapp-7d4b9f8c6-r3n4p myapp-7d4b9f8c6-k7m8q</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pods -o custom-columns="NAME:.metadata.name,NODE:.spec.nodeName,STATUS:.status.phase,CPU:.spec.containers[0].resources.requests.cpu"</span>',
+ '<span class="to">NAME                       NODE       STATUS    CPU</span>',
+ '<span class="to">myapp-7d4b9f8c6-x8j2k     worker-2   Running   250m</span>',
+ '<span class="to">myapp-7d4b9f8c6-r3n4p     worker-3   Running   250m</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get events --sort-by=.lastTimestamp -n production | tail -10</span>',
+ '<span class="to">5m    Normal    Scheduled   Pod/myapp-xxx   Successfully assigned production/myapp-xxx to worker-2</span>',
+ '<span class="to">5m    Normal    Pulled      Pod/myapp-xxx   Pulled image "myapp:2.0"</span>',
+ '<span class="to">5m    Normal    Started     Pod/myapp-xxx   Started container myapp</span>',
+ '<span class="to-r">2m    Warning   BackOff     Pod/myapp-yyy   Back-off restarting failed container</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl top pods -n production --sort-by=cpu</span>',
+ '<span class="to">NAME                       CPU(cores)   MEMORY(bytes)</span>',
+ '<span class="to-y">myapp-7d4b9f8c6-x8j2k     482m         312Mi</span>',
+ '<span class="to">myapp-7d4b9f8c6-r3n4p     122m         198Mi</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Helm Demo ─────────────────────────────────────
+'helm-demo':[
+ '<span class="tp">❯</span> <span class="tc2">helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo update</span>',
+ '<span class="to-g">"bitnami" has been added to your repositories</span>',
+ '<span class="to">Update Complete. Happy Helming!</span>',
+ '<span class="tp">❯</span> <span class="tc2">helm search repo bitnami/postgresql</span>',
+ '<span class="to">NAME                   CHART VERSION   APP VERSION   DESCRIPTION</span>',
+ '<span class="to">bitnami/postgresql     14.3.3          16.2.0        PostgreSQL (Postgres) is a powerful...</span>',
+ '<span class="tp">❯</span> <span class="tc2">helm install postgres bitnami/postgresql -n db --create-namespace --set auth.postgresPassword=S3cur3 --set primary.resources.requests.cpu=500m</span>',
+ '<span class="to-g">NAME: postgres</span>',
+ '<span class="to-g">LAST DEPLOYED: Wed Jan 15 10:22:44 2025</span>',
+ '<span class="to-g">NAMESPACE: db</span>',
+ '<span class="to-g">STATUS: deployed</span>',
+ '<span class="to-g">REVISION: 1</span>',
+ '<span class="tp">❯</span> <span class="tc2">helm list -A</span>',
+ '<span class="to">NAME       NAMESPACE  REVISION  UPDATED      STATUS    CHART</span>',
+ '<span class="to-g">postgres   db         1         2025-01-15   deployed  postgresql-14.3.3</span>',
+ '<span class="to-g">myapp      production 3         2025-01-10   deployed  myapp-2.1.0</span>',
+ '<span class="tp">❯</span> <span class="tc2">helm upgrade postgres bitnami/postgresql -n db --reuse-values --set primary.resources.requests.cpu=1000m</span>',
+ '<span class="to-g">Release "postgres" has been upgraded. Happy Helming!</span>',
+ '<span class="tp">❯</span> <span class="tc2">helm rollback postgres 1 -n db</span>',
+ '<span class="to-g">Rollback was a success! Happy Helming!</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Node cordon/drain ─────────────────────────────
+'node-ops-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl cordon worker-2</span>',
+ '<span class="to-y">node/worker-2 cordoned</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get node worker-2</span>',
+ '<span class="to">NAME       STATUS                     ROLES    AGE   VERSION</span>',
+ '<span class="to-y">worker-2   Ready,SchedulingDisabled   &lt;none&gt;   30d   v1.30.0</span>',
+ '<span class="to-dim"># SchedulingDisabled = no NEW pods, existing pods keep running</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl drain worker-2 --ignore-daemonsets --delete-emptydir-data --grace-period=60</span>',
+ '<span class="to">node/worker-2 already cordoned</span>',
+ '<span class="to">evicting pod production/myapp-7d4b9f8c6-r3n4p</span>',
+ '<span class="to">evicting pod monitoring/prometheus-0</span>',
+ '<span class="to-g">pod/myapp-7d4b9f8c6-r3n4p evicted</span>',
+ '<span class="to-g">pod/prometheus-0 evicted</span>',
+ '<span class="to-g">node/worker-2 drained</span>',
+ '<span class="to-dim"># Perform maintenance: OS update, hardware replacement...</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl uncordon worker-2</span>',
+ '<span class="to-g">node/worker-2 uncordoned</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get node worker-2</span>',
+ '<span class="to">NAME       STATUS   ROLES    AGE   VERSION</span>',
+ '<span class="to-g">worker-2   Ready    &lt;none&gt;   30d   v1.30.0</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Troubleshoot Pod ─────────────────────────────
+'pod-trouble-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pods -n production</span>',
+ '<span class="to">NAME                       READY   STATUS             RESTARTS   AGE</span>',
+ '<span class="to-r">myapp-7d4b9f8c6-x8j2k     0/1     CrashLoopBackOff   8          22m</span>',
+ '<span class="to-r">payment-6b9c4d8f7-r2t4p   0/1     ImagePullBackOff   0          5m</span>',
+ '<span class="to-y">worker-5c7e3b2a1-k9m8n    0/1     Pending            0          2m</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl describe pod myapp-7d4b9f8c6-x8j2k -n production | tail -20</span>',
+ '<span class="to">Events:</span>',
+ '<span class="to-r">  Warning  BackOff  2m  kubelet  Back-off restarting failed container</span>',
+ '<span class="to">  Normal   Pulling  22m  kubelet  Pulling image "myapp:2.0"</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl logs myapp-7d4b9f8c6-x8j2k -n production --previous</span>',
+ '<span class="to-r">Error: Cannot connect to database at postgres-svc:5432</span>',
+ '<span class="to-r">connection refused — is postgres running?</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get svc postgres-svc -n production</span>',
+ '<span class="to-r">Error from server (NotFound): services "postgres-svc" not found</span>',
+ '<span class="to-dim"># Root cause: DB service missing! Create it:</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl apply -f postgres-service.yaml</span>',
+ '<span class="to-g">service/postgres-svc created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl delete pod myapp-7d4b9f8c6-x8j2k -n production</span>',
+ '<span class="to-dim"># New pod starts, connects to DB</span>',
+ '<span class="to-g">myapp-7d4b9f8c6-q2w3e   1/1     Running   0   30s</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── ArgoCD Demo ───────────────────────────────────
+'argocd-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl apply -f argocd-app.yaml</span>',
+ '<span class="to-g">application.argoproj.io/myapp created</span>',
+ '<span class="tp">❯</span> <span class="tc2">argocd app get myapp</span>',
+ '<span class="to">Name:               myapp</span>',
+ '<span class="to">Project:            default</span>',
+ '<span class="to">Server:             https://kubernetes.default.svc</span>',
+ '<span class="to">Namespace:          production</span>',
+ '<span class="to">URL:                https://argocd.example.com/applications/myapp</span>',
+ '<span class="to">Repo:               https://github.com/originxlabs/myapp-gitops</span>',
+ '<span class="to">Target Revision:    main</span>',
+ '<span class="to">Path:               k8s/overlays/production</span>',
+ '<span class="to-y">Health Status:      Progressing</span>',
+ '<span class="to-y">Sync Status:        OutOfSync</span>',
+ '<span class="tp">❯</span> <span class="tc2">argocd app sync myapp</span>',
+ '<span class="to">TIMESTAMP  GROUP  KIND        NAMESPACE   NAME    STATUS  HEALTH   MESSAGE</span>',
+ '<span class="to-g">Synced     apps   Deployment  production  myapp   Synced  Healthy  configured</span>',
+ '<span class="to-g">Synced     v1     Service     production  myapp   Synced  Healthy  configured</span>',
+ '<span class="to-g">Application \'myapp\' synced — 2 resources synced</span>',
+ '<span class="tp">❯</span> <span class="tc2">argocd app set myapp --sync-policy automated --auto-prune --self-heal</span>',
+ '<span class="to-g">application \'myapp\' configured for automated sync with self-heal</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Kustomize Demo ────────────────────────────────
+'kustomize-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl kustomize k8s/overlays/production</span>',
+ '<span class="to-dim"># Preview what will be applied (dry-run)</span>',
+ '<span class="to">apiVersion: apps/v1</span>',
+ '<span class="to">kind: Deployment</span>',
+ '<span class="to">metadata:</span>',
+ '<span class="to">  name: myapp</span>',
+ '<span class="to">  namespace: production</span>',
+ '<span class="to">spec:</span>',
+ '<span class="to">  replicas: 5      <span class="to-dim"># patched from base 2 → prod 5</span></span>',
+ '<span class="to">  template:</span>',
+ '<span class="to">    spec:</span>',
+ '<span class="to">      containers:</span>',
+ '<span class="to">      - name: myapp</span>',
+ '<span class="to">        image: myapp:v2.1.0  <span class="to-dim"># set by kustomization.yaml</span></span>',
+ '<span class="to">        resources:</span>',
+ '<span class="to">          requests: { cpu: 500m, memory: 512Mi }  <span class="to-dim"># prod sizing</span></span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl apply -k k8s/overlays/production</span>',
+ '<span class="to-g">configmap/myapp-config created</span>',
+ '<span class="to-g">deployment.apps/myapp configured</span>',
+ '<span class="to-g">service/myapp configured</span>',
+ '<span class="to-g">ingress.networking.k8s.io/myapp configured</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── StatefulSet Demo ──────────────────────────────
+'statefulset-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl apply -f postgres-statefulset.yaml</span>',
+ '<span class="to-g">statefulset.apps/postgres created</span>',
+ '<span class="to-g">service/postgres-headless created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pods -l app=postgres --watch</span>',
+ '<span class="to">NAME         READY   STATUS     RESTARTS   AGE</span>',
+ '<span class="to-y">postgres-0   0/1     Init:0/1   0          5s</span>',
+ '<span class="to-y">postgres-0   0/1     PodInitializing   0   12s</span>',
+ '<span class="to-g">postgres-0   1/1     Running    0          20s</span>',
+ '<span class="to-dim"># postgres-0 Ready BEFORE postgres-1 starts (ordered!)</span>',
+ '<span class="to-y">postgres-1   0/1     Pending    0          21s</span>',
+ '<span class="to-g">postgres-1   1/1     Running    0          40s</span>',
+ '<span class="to-g">postgres-2   1/1     Running    0          60s</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pvc -l app=postgres</span>',
+ '<span class="to">NAME                       STATUS   VOLUME          CAPACITY</span>',
+ '<span class="to-g">data-postgres-0            Bound    pvc-abc123...   20Gi</span>',
+ '<span class="to-g">data-postgres-1            Bound    pvc-def456...   20Gi</span>',
+ '<span class="to-g">data-postgres-2            Bound    pvc-ghi789...   20Gi</span>',
+ '<span class="to-dim"># Each pod gets its own persistent volume — stable identity</span>',
+ '<span class="to-dim"># DNS: postgres-0.postgres-headless.default.svc.cluster.local</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── NetworkPolicy Demo ────────────────────────────
+'netpol-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl apply -f default-deny.yaml</span>',
+ '<span class="to-g">networkpolicy.networking.k8s.io/default-deny-all created</span>',
+ '<span class="to-dim"># Now NO traffic flows between pods by default</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl apply -f allow-api-to-db.yaml</span>',
+ '<span class="to-g">networkpolicy.networking.k8s.io/allow-api-to-db created</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get networkpolicies -n production</span>',
+ '<span class="to">NAME               POD-SELECTOR    AGE</span>',
+ '<span class="to">default-deny-all   &lt;none&gt;          2m</span>',
+ '<span class="to">allow-api-to-db    app=postgres    90s</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl exec -it api-pod -- nc -zv postgres-svc 5432</span>',
+ '<span class="to-g">Connection to postgres-svc 5432 port [tcp/postgresql] succeeded!</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl exec -it frontend-pod -- nc -zv postgres-svc 5432</span>',
+ '<span class="to-r">nc: connect to postgres-svc port 5432 (tcp) failed: Connection timed out</span>',
+ '<span class="to-dim"># frontend can NOT reach DB — NetworkPolicy enforced</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Taints Demo ───────────────────────────────────
+'taints-demo':[
+ '<span class="tp">❯</span> <span class="tc2">kubectl taint nodes gpu-node-1 gpu=true:NoSchedule</span>',
+ '<span class="to-g">node/gpu-node-1 tainted</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl describe node gpu-node-1 | grep Taint</span>',
+ '<span class="to">Taints: gpu=true:NoSchedule</span>',
+ '<span class="to-dim"># Normal pods wont schedule here now</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl run normal-pod --image=nginx</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pod normal-pod -o wide</span>',
+ '<span class="to">NAME        READY  STATUS   NODE      </span>',
+ '<span class="to">normal-pod  1/1    Running  worker-1  <span class="to-dim"># NOT on gpu-node-1</span></span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl run gpu-workload --image=tensorflow/tensorflow:gpu --overrides=\'{"spec":{"tolerations":[{"key":"gpu","operator":"Equal","value":"true","effect":"NoSchedule"}]}}\'</span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl get pod gpu-workload -o wide</span>',
+ '<span class="to">NAME          READY  STATUS   NODE</span>',
+ '<span class="to-g">gpu-workload  1/1    Running  gpu-node-1  <span class="to-dim"># Toleration allows scheduling</span></span>',
+ '<span class="tp">❯</span> <span class="tc2">kubectl taint nodes gpu-node-1 gpu=true:NoSchedule-</span>',
+ '<span class="to-g">node/gpu-node-1 untainted</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+};
+
+// ═══ INTERVIEW Q&A ═══
+function getIQs(tid){
+const dc={BEGINNER:'#00e676',INTERMEDIATE:'#ffd740',ADVANCED:'#ce93d8',PRODUCTION:'#00e5ff'};
+const D={
+'iq-basics':[
+{q:"What is Kubernetes and what problems does it solve?",diff:"BEGINNER",a:"Kubernetes (K8s) is an open-source container orchestration platform originally built by Google, now maintained by CNCF. It solves: (1) <code>Deployment automation</code> — no more SSH-ing into servers to deploy containers manually. (2) <code>Self-healing</code> — automatically restarts failed containers, replaces unhealthy pods. (3) <code>Scaling</code> — scale pods up/down based on load (HPA) and scale nodes (Cluster Autoscaler). (4) <code>Service discovery and load balancing</code> — stable DNS names and IPs for pods that come and go. (5) <code>Rolling updates and rollbacks</code> — deploy new versions with zero downtime. (6) <code>Secret and config management</code> — separate config from image. (7) <code>Storage orchestration</code> — automatically mount cloud storage."},
+{q:"What is the difference between a Pod and a Container?",diff:"BEGINNER",a:"A <code>Container</code> is a running process isolated by Linux namespaces (pid, net, mnt) and cgroups (CPU/memory limits). It is a Docker/containerd/CRI-O concept. A <code>Pod</code> is the smallest deployable unit in Kubernetes — it wraps one or more containers that share: the same network namespace (same IP, localhost communication), the same storage volumes, and the same lifecycle (they start and stop together). Most pods have one container. Multi-container pods use sidecar patterns (log shipper, proxy, sync agent alongside main app). You never deploy containers directly in K8s — always pods. Controllers like Deployment manage pods."},
+{q:"What are the main components of the Kubernetes control plane?",diff:"BEGINNER",a:"The control plane has four core components: (1) <code>kube-apiserver</code> — the single entry point for all K8s operations. Validates and processes REST requests, authenticates/authorizes them, persists state to etcd, and notifies watchers. It is the only component that reads/writes etcd. (2) <code>etcd</code> — distributed key-value store that holds ALL cluster state. The only source of truth. (3) <code>kube-scheduler</code> — watches for new pods without a node assignment, scores nodes based on resources/affinity/taints, assigns pod to best node. (4) <code>kube-controller-manager</code> — runs all built-in controllers (ReplicaSet, Deployment, Node, Endpoint, Job controllers). Each controller runs a reconciliation loop: observe actual state → compare with desired → take action to close the gap."},
+{q:"What is the difference between a Deployment and a StatefulSet?",diff:"BEGINNER",a:"<code>Deployment</code> is for stateless workloads. Pods are interchangeable — any pod can serve any request. Pods get random names (myapp-7d4b9f8c6-x8j2k). All pods share the same PVC if any. Supports rolling updates easily. <code>StatefulSet</code> is for stateful workloads (databases, Kafka, Zookeeper). Pods have stable, predictable names (postgres-0, postgres-1). Each pod gets its own PersistentVolumeClaim that persists across restarts. Pods start and stop in order (0→1→2 up, 2→1→0 down). DNS: pod-name.headless-service.namespace.svc.cluster.local. Use StatefulSet for anything that needs stable identity: databases, distributed systems, leader election."},
+{q:"Explain ClusterIP, NodePort, and LoadBalancer service types.",diff:"BEGINNER",a:"<code>ClusterIP</code> — default type. Creates a virtual IP accessible only INSIDE the cluster. Used for pod-to-pod communication. DNS: service-name.namespace.svc.cluster.local. <code>NodePort</code> — opens a port (30000-32767) on EVERY node in the cluster. External traffic → NodeIP:NodePort → ClusterIP → pods. Simple but requires knowing a node IP. <code>LoadBalancer</code> — provisions a cloud load balancer (AWS NLB, GCP LB) automatically. External traffic → LoadBalancer IP → NodePorts on nodes → ClusterIP → pods. Best for production external access. <code>ExternalName</code> — CNAME alias to an external DNS name — useful for migrating external services into the cluster namespace."},
+{q:"What is a Namespace and why would you use multiple namespaces?",diff:"BEGINNER",a:"A Namespace is a virtual cluster within a physical cluster — it scopes Kubernetes resources (pods, services, configmaps, secrets, deployments). Resources in one namespace are isolated from another by default. Use cases: (1) <code>Environment isolation</code> — dev, staging, production in same cluster, (2) <code>Team isolation</code> — team-a, team-b with separate RBAC, ResourceQuotas, (3) <code>Application grouping</code> — monitoring namespace for Prometheus/Grafana, logging for EFK. Important: Nodes, PersistentVolumes, StorageClasses, and Namespaces themselves are cluster-scoped (no namespace). Services in one namespace can talk to services in another: service-name.other-namespace.svc.cluster.local."},
+{q:"What happens when you run kubectl apply -f deployment.yaml?",diff:"BEGINNER",a:"Step-by-step: (1) kubectl reads the YAML and sends HTTP PATCH/POST to kube-apiserver. (2) API server authenticates and authorizes the request. (3) Admission controllers run (validating + mutating webhooks, PodSecurity admission). (4) API server validates the object schema. (5) API server persists the object to etcd. (6) API server returns 200 OK to kubectl. (7) Deployment controller (in controller-manager) is watching etcd via API server — detects new/changed deployment. (8) Controller calculates needed ReplicaSet diff, creates/updates ReplicaSets. (9) ReplicaSet controller detects needed pods, creates pod objects in etcd. (10) Scheduler watches for unscheduled pods, scores nodes, writes node assignment to pod in etcd. (11) Kubelet on target node detects the new pod assignment, pulls image, starts container via CRI, updates pod status."},
+{q:"What is a ConfigMap and when would you use it instead of environment variables?",diff:"BEGINNER",a:"A ConfigMap stores non-sensitive configuration as key-value pairs or whole files. Use ConfigMap instead of hardcoding env vars when: (1) config must be shared across multiple pods, (2) config needs to change without rebuilding the image, (3) you have large config files (nginx.conf, application.properties). Usage modes: (a) <code>envFrom</code> — inject all keys as environment variables. (b) <code>env.valueFrom.configMapKeyRef</code> — inject specific key. (c) <code>volumeMount</code> — mount as files (nginx.conf etc.) — pod sees config as files, can be updated without pod restart (eventually consistent via kubelet sync). Use Secrets for sensitive data (passwords, API keys, TLS certs), even though both are just base64 at rest without encryption plugins."},
+],
+'iq-intermediate':[
+{q:"How does Kubernetes Service discovery work?",diff:"INTERMEDIATE",a:"K8s service discovery has two layers: (1) <code>Environment variables</code> — when a pod starts, K8s injects env vars for every service that existed in the same namespace: MY_SVC_SERVICE_HOST, MY_SVC_SERVICE_PORT. Simple but requires services to exist before pods. (2) <code>DNS (CoreDNS)</code> — the primary method. CoreDNS runs as pods in kube-system and is configured as the cluster DNS resolver. Every service gets a DNS A record: <code>service-name.namespace.svc.cluster.local</code>. Headless services (clusterIP: None) get A records for each pod IP. Pods also get DNS: <code>pod-ip-dashes.namespace.pod.cluster.local</code>. ndots:5 setting means short names like \'postgres\' are tried as \'postgres.default.svc.cluster.local\' first. Troubleshoot: <code>kubectl exec pod -- nslookup kubernetes.default</code>"},
+{q:"Explain how a rolling update works in a Deployment.",diff:"INTERMEDIATE",a:"When you update a Deployment (image, resources, etc.), K8s creates a new ReplicaSet and gradually shifts traffic. Controlled by two parameters: <code>maxSurge</code> (default 25%) — max pods above desired during update, <code>maxUnavailable</code> (default 25%) — max pods below desired. For 4 replicas with defaults: (1) Create new RS, start 1 new pod (maxSurge=1 above 4). (2) When new pod is Ready, terminate 1 old pod. (3) Repeat until all old pods replaced. Readiness probes gate this — new pods must pass readiness before old ones terminate, preventing downtime. <code>kubectl rollout status</code> blocks until complete or timeout. Rollback: <code>kubectl rollout undo deployment/name</code> reverses by scaling old ReplicaSet back up. K8s keeps last 10 ReplicaSets by default (revisionHistoryLimit)."},
+{q:"What is the difference between liveness and readiness probes?",diff:"INTERMEDIATE",a:"<code>Readiness probe</code> — controls whether a pod receives traffic from Services. If readiness fails: pod is removed from service endpoints but NOT restarted. Pod shows READY 0/1. Use for: app still initializing DB connections, app temporarily overloaded (circuit breaker), graceful drain during shutdown. <code>Liveness probe</code> — controls whether a pod should be restarted. If liveness fails: container is killed and restarted (respecting restartPolicy). Use for: detecting deadlocks, infinite loops where app is alive but not functional. <code>Startup probe</code> — disables liveness/readiness checks until the app starts. Prevents killing slow-starting apps. Golden rule: readiness = is this pod ready to serve traffic? Liveness = is this pod fundamentally broken and needs a restart?"},
+{q:"How does Kubernetes handle resource limits and what is QoS?",diff:"INTERMEDIATE",a:"Resources have two settings: <code>requests</code> — what the scheduler uses to place pods (guaranteed minimum), <code>limits</code> — the maximum a container can use (enforced by cgroups). CPU limits use throttling (no kill). Memory limits kill the container with OOMKilled if exceeded. Quality of Service classes: (1) <code>Guaranteed</code> — requests == limits for all containers. Highest priority, last to be evicted. (2) <code>Burstable</code> — at least one container has requests set but they differ from limits. Medium priority. (3) <code>BestEffort</code> — NO requests or limits set. Lowest priority, evicted first when nodes are under pressure. Best practice: always set both requests and limits. Use VPA or Goldilocks to right-size. Set CPU requests = 50-70% of typical, memory requests = typical + 20%, memory limit = 2x requests."},
+{q:"What is a DaemonSet and what are its common use cases?",diff:"INTERMEDIATE",a:"A DaemonSet ensures exactly ONE copy of a pod runs on EVERY node (or nodes matching a nodeSelector/affinity). When nodes are added to the cluster, the DaemonSet pod is automatically added. When nodes are removed, pods are garbage collected. Common use cases: (1) <code>Log collection</code> — Fluentd, Filebeat, Promtail — needs to see every node\'s /var/log, (2) <code>Metrics collection</code> — node-exporter (Prometheus) — collects node-level CPU/memory/disk, (3) <code>Network plugins (CNI)</code> — Flannel, Calico, Cilium — must run on every node to set up pod networking, (4) <code>Storage plugins</code> — Ceph/Rook daemons, (5) <code>Security agents</code> — Falco, runtime scanners. DaemonSet pods tolerate control-plane taints by default so can run there too (use tolerations for custom taints)."},
+{q:"How does Horizontal Pod Autoscaler (HPA) work?",diff:"INTERMEDIATE",a:"HPA adjusts pod count based on observed metrics vs desired targets. Architecture: (1) <code>metrics-server</code> scrapes kubelet for CPU/memory every 15s, stores in memory. (2) HPA controller (in controller-manager) polls metrics every 15s (configurable). (3) Calculates desired replicas: desiredReplicas = ceil(currentReplicas × (currentMetricValue / desiredMetricValue)). (4) Updates Deployment replica count. Scale-up is fast (within 1-2 polling cycles). Scale-down is slow — default stabilization window is 5 minutes to avoid flapping. Advanced: HPA v2 supports multiple metrics (CPU AND memory AND custom metrics simultaneously, takes max). KEDA extends this to 60+ event sources (Kafka lag, SQS depth, HTTP RPS). Configure behavior to tune scale-up/down speed independently."},
+{q:"What is RBAC in Kubernetes and how do you grant access?",diff:"INTERMEDIATE",a:"RBAC (Role-Based Access Control) controls who can do what to which resources. Four objects: (1) <code>Role</code> — namespaced rules: verb+resource combinations (get pods in namespace X). (2) <code>ClusterRole</code> — same but cluster-scoped (nodes, PVs) or usable across all namespaces. (3) <code>RoleBinding</code> — binds Role to subjects (users, groups, ServiceAccounts) in one namespace. (4) <code>ClusterRoleBinding</code> — binds ClusterRole cluster-wide. Check access: <code>kubectl auth can-i verb resource --as=user</code>. ServiceAccount = pod identity. Pod references a SA, SA token is mounted at /var/run/secrets/kubernetes.io/serviceaccount/token. Common mistake: overly permissive wildcard verbs (*) or cluster-admin bindings. Principle of least privilege: grant minimum needed verbs on minimum resources."},
+],
+'iq-advanced':[
+{q:"Explain the Kubernetes networking model and how pod-to-pod communication works.",diff:"ADVANCED",a:"K8s mandates a flat networking model: every pod gets a unique IP, every pod can talk to every other pod without NAT, pods can communicate across nodes. Implementation via CNI plugins: (1) <code>Flannel</code> — simple VXLAN overlay, wraps pod packets in UDP. Easy setup. (2) <code>Calico</code> — BGP routing (no encapsulation on same subnet), iptables-based NetworkPolicy. (3) <code>Cilium</code> — eBPF-native, replaces iptables entirely, Hubble observability. Packet flow same-node: pod1 → veth pair → bridge → veth pair → pod2. Cross-node: pod1 → veth → bridge → CNI encapsulation → node NIC → underlay network → destination node → decapsulate → bridge → veth → pod2. Service packet flow: pod → iptables DNAT rule (written by kube-proxy) → real pod IP. IPVS mode replaces iptables with kernel IPVS for better performance at scale (1000+ services)."},
+{q:"What is an Operator and when would you use one?",diff:"ADVANCED",a:"An Operator extends Kubernetes with a Custom Resource Definition (CRD) + a controller that understands the application\'s operational knowledge. Pattern: you define a custom resource (e.g., PostgresCluster), the operator controller watches for it and performs the complex operations a human DBA would do — create primary, configure replication, create replicas, set up PVCs per replica, configure pg_hba.conf, handle failover, perform backup, manage upgrades. Examples: <code>postgres-operator</code> (Zalando/CloudNativePG), <code>strimzi</code> (Kafka), <code>prometheus-operator</code>, <code>cert-manager</code>, <code>external-secrets-operator</code>. When to use: stateful apps with complex day-2 operations (failover, backup, scaling), multi-step installation with interdependencies, configuration that changes at runtime. Build with: Kubebuilder, Operator SDK, or controller-runtime."},
+{q:"How does etcd work and what happens if it fails?",diff:"ADVANCED",a:"etcd is a distributed key-value store using the Raft consensus algorithm. Raft requires a quorum (majority) of nodes to agree before committing writes. For 3 nodes: needs 2 alive. For 5 nodes: needs 3. ALL cluster state lives in etcd — every pod, service, deployment, configmap, secret. The API server is the ONLY component that reads/writes etcd directly. If etcd fails: API server rejects ALL write requests (kubectl apply fails). Read-only operations may still work from API server cache. Scheduler and controllers cannot make changes. Running pods continue running (kubelet doesn\'t need etcd for running pods). Recovery: restore from etcd backup (<code>etcdctl snapshot restore</code>). Production: always run etcd as 3 or 5 nodes across different failure domains. Backup: <code>etcdctl snapshot save backup.db</code> — schedule every 1-6 hours."},
+{q:"Explain Pod Security Standards (PSA) and how they replaced PodSecurityPolicy.",diff:"ADVANCED",a:"Pod Security Standards replaced PodSecurityPolicy (deprecated in K8s 1.21, removed 1.25) with simpler, built-in admission via the Pod Security Admission controller. Three enforcement levels: (1) <code>Privileged</code> — no restrictions, for system pods. (2) <code>Baseline</code> — prevents known privilege escalations. Blocks: privileged containers, host namespaces (hostPID, hostNetwork), dangerous sysctls, hostPath mounts. (3) <code>Restricted</code> — heavily hardened. Requires non-root UID, read-only root filesystem, drop all capabilities, specific seccompProfile. Applied per namespace via labels: <code>pod-security.kubernetes.io/enforce: restricted</code>. Modes: enforce (reject), audit (log), warn (warn). Migration from PSP: use <code>kubectl-convert</code> or PSA migration guide. Augment with OPA Gatekeeper or Kyverno for custom policies PSA can\'t express."},
+{q:"How do you debug a pod that is stuck in Pending state?",diff:"ADVANCED",a:"Pending = scheduler cannot place the pod. Systematic debug: (1) <code>kubectl describe pod pending-pod</code> → check Events at bottom. (2) Common causes: <code>Insufficient CPU/memory</code> — no node has enough resources. Fix: scale cluster, reduce requests, or remove limits. Check: <code>kubectl describe nodes | grep -A5 Allocated</code>. <code>Node affinity mismatch</code> — required affinity has no matching node. Fix: check node labels vs affinity rules. <code>Taint rejection</code> — node has taint, pod has no matching toleration. Check: <code>kubectl get nodes -o json | jq .items[].spec.taints</code>. <code>PVC not bound</code> — volume claim pending. Check: <code>kubectl get pvc</code>, look for Pending PVC → check StorageClass. <code>Image pull secret</code> — private registry, missing imagePullSecret. Tool: <code>kubectl describe pod</code> Events section is the first place to look, always."},
+],
+'iq-production':[
+{q:"How do you achieve zero-downtime deployments in Kubernetes?",diff:"PRODUCTION",a:"Zero-downtime requires several coordinated settings: (1) <code>Readiness probes</code> — new pods only receive traffic after passing readiness. (2) <code>Appropriate RollingUpdate strategy</code> — maxUnavailable: 0 guarantees no pods taken down before replacement is ready. (3) <code>terminationGracePeriodSeconds</code> — give pods enough time to finish in-flight requests before SIGKILL (default 30s, set to your request timeout + buffer). (4) <code>preStop lifecycle hook</code> — add a sleep 5 to allow load balancer to drain before SIGTERM. (5) <code>PodDisruptionBudget</code> — prevent too many pods being evicted simultaneously during node drain/upgrades. (6) <code>Multiple replicas</code> — at least 2, ideally 3. (7) <code>Pod anti-affinity</code> — spread replicas across nodes so a node failure doesn\'t take all pods. (8) <code>Topology spread constraints</code> — spread across availability zones for cloud HA."},
+{q:"Describe your approach to securing a production Kubernetes cluster.",diff:"PRODUCTION",a:"Defense-in-depth approach: (1) <code>Network security</code> — NetworkPolicies with default-deny, private API server endpoint, restrict node ports. (2) <code>Authentication</code> — OIDC integration (Dex, Okta), no long-lived tokens, rotate service account tokens. (3) <code>Authorization</code> — RBAC least privilege, namespace-scoped roles, audit RBAC with <code>rbac-lookup</code>. (4) <code>Pod security</code> — enforce Restricted PSA on app namespaces, Baseline on system. (5) <code>Image security</code> — Trivy scan in CI, Cosign signing, admission policy requiring signed images, no :latest tags. (6) <code>Secrets management</code> — External Secrets Operator + Vault/AWS Secrets Manager, encrypt etcd at rest. (7) <code>Runtime security</code> — Falco for anomalous syscalls, seccomp profiles. (8) <code>Cluster hardening</code> — CIS Kubernetes benchmark, kube-bench, API server audit logging. (9) <code>Vulnerability management</code> — regular node OS patching, Dependabot for Helm charts."},
+{q:"What is your strategy for managing multiple Kubernetes environments (dev, staging, prod)?",diff:"PRODUCTION",a:"Recommended approach: (1) <code>Separate clusters per environment</code> — not namespaces only. Production should be isolated from dev blast radius. (2) <code>GitOps with ArgoCD/Flux</code> — git repo is source of truth. Dev env auto-syncs main branch. Staging syncs release branches. Production requires manual approval gate (ArgoCD Sync Windows or GitHub Environments). (3) <code>Kustomize overlays</code> — base manifests, overlay per env for replica count, resource sizing, image tags. (4) <code>Separate registries or image tags</code> — dev uses :latest or short SHA, staging uses :rc-SHA, prod uses immutable :v1.2.3. (5) <code>Environment-specific configs</code> — Secrets from Vault with env-specific paths, ConfigMaps in kustomize overlays. (6) <code>Promotion workflow</code> — CI builds and pushes, updates image tag in dev overlay → automatic deploy → tests → PR to bump staging overlay → human approval → prod. (7) <code>Drift detection</code> — ArgoCD health + sync status dashboards, alerts on OutOfSync."},
+{q:"How do you handle secret management in Kubernetes at scale?",diff:"PRODUCTION",a:"Native K8s Secrets have problems at scale: base64 is not encryption, secrets in git is dangerous, no rotation, no audit trail. Production solution — External Secrets Operator (ESO): (1) Install ESO in cluster. (2) Configure SecretStore/ClusterSecretStore pointing to AWS Secrets Manager, GCP Secret Manager, HashiCorp Vault, or Azure Key Vault. (3) Create ExternalSecret objects that reference external secret keys. ESO reconciles and creates K8s Secrets automatically. (4) Rotation: update secret in external store → ESO syncs updated K8s Secret → pod must either watch for file change (volume mount) or restart to pick up new env var. (5) Seal Secrets (Bitnami) for gitops: encrypt Secrets with cluster public key, store encrypted SealedSecret in git, controller decrypts. (6) Vault Agent Injector: sidecar injects secrets as files at pod startup. (7) Enable etcd encryption at rest with KMS provider for defense in depth."},
+],
+};
+return D[tid]||[];
+}
+
+// ═══ YAML SNIPPETS ═══
+function yaml(code){return `<div class="yaml">${code}</div>`;}
+
+// ═══ ARCH HELPER ═══
+function archDiagram(){
+  return `<div class="arch">
+<div class="arch-title">☸️ Kubernetes Cluster Architecture</div>
+<div class="arch-grid">
+  <div class="arch-zone cp" style="min-width:200px">
+    <div class="arch-zone-title">🧠 Control Plane</div>
+    <div class="arch-comp api"><div class="ac-name">kube-apiserver</div><div class="ac-desc">REST gateway · validates · auth · etcd R/W · watches</div></div>
+    <div class="arch-comp sched"><div class="ac-name">kube-scheduler</div><div class="ac-desc">Watch unscheduled pods · score nodes · bind</div></div>
+    <div class="arch-comp cm"><div class="ac-name">controller-manager</div><div class="ac-desc">ReplicaSet · Deployment · Node · Endpoint controllers</div></div>
+    <div class="arch-comp etcd-c"><div class="ac-name">cloud-controller-manager</div><div class="ac-desc">LB · Node lifecycle · Routes (cloud-specific)</div></div>
+  </div>
+  <div class="arch-zone etcd" style="min-width:130px">
+    <div class="arch-zone-title">💾 etcd</div>
+    <div class="arch-comp etcd-c"><div class="ac-name">etcd cluster</div><div class="ac-desc">Raft consensus · key-value · all cluster state · only API server writes</div></div>
+    <div style="margin-top:8px;font-family:var(--mono);font-size:8px;color:var(--tx3);line-height:1.6">Quorum: 3 nodes → 2 needed<br>5 nodes → 3 needed<br>Backup: etcdctl snapshot</div>
+  </div>
+  <div class="arch-zone node" style="flex:2">
+    <div class="arch-zone-title">⚙️ Worker Nodes (×N)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <div class="arch-comp kubelet"><div class="ac-name">kubelet</div><div class="ac-desc">Node agent · watches API · starts/stops containers via CRI · reports status</div></div>
+      <div class="arch-comp kproxy"><div class="ac-name">kube-proxy</div><div class="ac-desc">iptables/IPVS rules · Service → Pod IP routing · every node</div></div>
+      <div class="arch-comp cri"><div class="ac-name">Container Runtime (CRI)</div><div class="ac-desc">containerd / CRI-O · pulls images · runs containers</div></div>
+      <div class="arch-comp pod" style="border-color:rgba(130,180,255,.3)"><div class="ac-name">Pods</div><div class="ac-desc">Shared net/storage · one IP per pod · managed by controllers</div></div>
+    </div>
+  </div>
+</div>
+<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+  <div class="arch-zone ext" style="flex:1;min-width:140px">
+    <div class="arch-zone-title">🌐 External Access</div>
+    <div class="arch-comp"><div class="ac-name" style="color:var(--gr)">Ingress Controller</div><div class="ac-desc">NGINX/Traefik · L7 routing · TLS termination</div></div>
+    <div class="arch-comp"><div class="ac-name" style="color:var(--gr)">LoadBalancer Service</div><div class="ac-desc">Cloud LB · L4 TCP/UDP · provisioned automatically</div></div>
+  </div>
+  <div class="arch-zone" style="flex:1;min-width:140px;border-color:rgba(255,152,0,.3);background:rgba(255,152,0,.04)">
+    <div class="arch-zone-title" style="color:var(--or)">📦 Add-ons</div>
+    <div class="arch-comp"><div class="ac-name" style="color:var(--or)">CoreDNS</div><div class="ac-desc">Service discovery · DNS for pods and services</div></div>
+    <div class="arch-comp"><div class="ac-name" style="color:var(--or)">metrics-server</div><div class="ac-desc">CPU/memory for HPA and kubectl top</div></div>
+  </div>
+</div>
+</div>`;
+}
+
+// ═══ CONTENT FUNCTION ═══
+function getContent(cid,tid,tab){
+  const key=`${cid}:${tid}:${tab}`;
+
+  // ── INTERVIEW ──────────────────────────────────
+  if(tid.startsWith('iq-')){
+    const qs=getIQs(tid);
+    const dc2={BEGINNER:'#00e676',INTERMEDIATE:'#ffd740',ADVANCED:'#ce93d8',PRODUCTION:'#00e5ff'};
+    const cid2='qc_'+tid;
+    const items=qs.map((q,i)=>`<div class="qa-item" data-diff="${q.diff}" onclick="toggleQA(this)">
+<div class="qa-q"><div class="qa-qi" style="background:${dc2[q.diff]||'#326ce5'}22;color:${dc2[q.diff]||'#326ce5'};border:1px solid ${dc2[q.diff]||'#326ce5'}44">Q${i+1}</div>
+<div class="qa-qt">${q.q}</div><span class="tag ${q.diff.toLowerCase()}">${q.diff}</span><span class="qa-ch">▼</span></div>
+<div class="qa-a"><div class="qa-ab">${q.a}</div></div></div>`).join('');
+    return `<div id="${cid2}"><div class="filter-row">
+<button class="fbtn active" onclick="filterQs(this,'all',document.getElementById('${cid2}'))">All</button>
+${Object.keys(dc2).map(d=>`<button class="fbtn" onclick="filterQs(this,'${d}',document.getElementById('${cid2}'))">${d}</button>`).join('')}
+</div>${items}</div>`;
+  }
+
+  // ── ARCHITECTURE ───────────────────────────────
+  if(key==='architecture:overview:Diagram') return archDiagram()+
+    `<div class="callout info"><strong>The Reconciliation Loop</strong>Every controller in K8s runs the same pattern: Watch desired state (from etcd via API server) → Compare with actual state → Take action to close the gap. This is the fundamental design principle that makes K8s self-healing.</div>`;
+
+  if(key==='architecture:overview:Control Plane') return `<div class="sec">Control Plane Components</div>
+<table class="tbl"><thead><tr><th>Component</th><th>What it does</th><th>Failure impact</th></tr></thead><tbody>
+<tr><td>kube-apiserver</td><td>Only entry point. Validates, authenticates, authorizes all requests. Writes to etcd. Serves watch API for controllers.</td><td>No new changes possible. Existing pods keep running.</td></tr>
+<tr><td>etcd</td><td>Only source of truth. Stores all cluster objects as protobuf. Raft consensus — quorum required for writes.</td><td>API server cannot read/write. Cluster frozen.</td></tr>
+<tr><td>kube-scheduler</td><td>Watches for pending pods. Scores nodes by resources, affinity, taints. Writes node assignment to pod.</td><td>No new pod scheduling. Existing pods unaffected.</td></tr>
+<tr><td>controller-manager</td><td>Runs all built-in controllers. ReplicaSet ensures pod count. Deployment manages RS rollout. Node controller marks nodes.</td><td>No auto-healing, no scale, no rollout automation.</td></tr>
+<tr><td>cloud-controller-manager</td><td>Provisions cloud resources: LB for LoadBalancer services, routes, node lifecycle.</td><td>No new cloud LBs. Existing LBs keep working.</td></tr>
+</tbody></table>`;
+
+  if(key==='architecture:overview:Worker Node') return `<div class="sec">Worker Node Components</div>
+<table class="tbl"><thead><tr><th>Component</th><th>Responsibility</th><th>How it works</th></tr></thead><tbody>
+<tr><td>kubelet</td><td>Node agent — the only component on workers that talks to API server</td><td>Watches PodSpecs assigned to its node. Calls CRI to start/stop containers. Reports pod status back to API server every few seconds.</td></tr>
+<tr><td>kube-proxy</td><td>Service implementation — programs iptables/IPVS rules</td><td>Watches Services and Endpoints. For each Service, writes iptables DNAT rules on every node to route ClusterIP:port → actual pod IPs.</td></tr>
+<tr><td>Container Runtime (CRI)</td><td>Actually runs containers</td><td>containerd or CRI-O. kubelet calls gRPC CRI API. CRI pulls image from registry (via credentials), creates container, manages lifecycle.</td></tr>
+<tr><td>CNI Plugin</td><td>Pod networking — assigns pod IPs, sets up veth pairs</td><td>Runs when pod is created. Assigns IP from CIDR, creates veth pair, configures routing.</td></tr>
+</tbody></table>`;
+
+  if(key==='architecture:overview:Data Flow') return `<div class="sec">kubectl apply Data Flow</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">1</div><div class="fb-name" style="color:var(--k2)">kubectl</div></div>
+  <div class="farr cmd">→<span>HTTPS POST</span></div>
+  <div class="fbox"><div class="fb-label">2 Auth</div><div class="fb-name" style="color:var(--cy)">API Server</div></div>
+  <div class="farr cmd">→<span>write</span></div>
+  <div class="fbox"><div class="fb-label">3</div><div class="fb-name" style="color:var(--pu)">etcd</div></div>
+  <div class="farr cmd">→<span>watch event</span></div>
+  <div class="fbox"><div class="fb-label">4</div><div class="fb-name" style="color:var(--or)">Controller</div></div>
+  <div class="farr cmd">→<span>create Pod</span></div>
+  <div class="fbox"><div class="fb-label">5</div><div class="fb-name" style="color:var(--ye)">Scheduler</div></div>
+  <div class="farr cmd">→<span>bind</span></div>
+  <div class="fbox"><div class="fb-label">6</div><div class="fb-name" style="color:var(--gr)">kubelet</div></div>
+  <div class="farr cmd">→<span>pull+run</span></div>
+  <div class="fbox"><div class="fb-label">7</div><div class="fb-name" style="color:var(--k3)">Container</div></div>
+</div>
+<ul class="fl">
+<li><strong>Step 2</strong> — API server runs authn (who are you?), authz (RBAC: can you do this?), admission (OPA/PSA: is this allowed?), schema validation</li>
+<li><strong>Step 4</strong> — Controller watches API server via long-poll (LIST+WATCH). Gets notified of new Deployment → creates ReplicaSet → ReplicaSet creates Pods</li>
+<li><strong>Step 5</strong> — Scheduler filters nodes (enough resources? right labels? no blocking taints?) then scores and picks best node, writes nodeName to pod</li>
+<li><strong>Step 6</strong> — kubelet watches pods with its nodeName. Calls CRI (containerd) to pull image and start container. Updates pod status every few seconds.</li>
+</ul>`;
+
+  if(key==='architecture:api-server:Demo') return mkTerm('api-server-demo','kube-apiserver — cluster state',true);
+  if(key==='architecture:api-server:Request Flow') return `<div class="sec">API Request Lifecycle</div>
+<div class="flow" style="flex-direction:column;align-items:flex-start;gap:6px">
+  <div style="display:flex;align-items:center;gap:8px;width:100%">
+    <div class="fbox" style="min-width:90px"><div class="fb-name" style="color:var(--k2)">HTTP Request</div></div>
+    <div class="farr">→</div>
+    <div class="fbox" style="flex:1"><div class="fb-label">1. Transport Security</div><div class="fb-name">TLS mutual auth or bearer token</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;width:100%">
+    <div class="fbox" style="min-width:90px"><div class="fb-name" style="color:var(--k2)">→</div></div>
+    <div class="farr">→</div>
+    <div class="fbox" style="flex:1"><div class="fb-label">2. Authentication (AuthN)</div><div class="fb-name">Who are you? X.509 cert / Bearer token / OIDC / Webhook</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;width:100%">
+    <div class="fbox" style="min-width:90px"><div class="fb-name" style="color:var(--k2)">→</div></div>
+    <div class="farr">→</div>
+    <div class="fbox" style="flex:1"><div class="fb-label">3. Authorization (RBAC)</div><div class="fb-name">Can this user do this verb on this resource?</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;width:100%">
+    <div class="fbox" style="min-width:90px"><div class="fb-name" style="color:var(--k2)">→</div></div>
+    <div class="farr">→</div>
+    <div class="fbox" style="flex:1"><div class="fb-label">4. Admission Control</div><div class="fb-name">Mutating webhooks (inject sidecars) → Validating webhooks (OPA/Gatekeeper, PSA)</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;width:100%">
+    <div class="fbox" style="min-width:90px"><div class="fb-name" style="color:var(--k2)">→</div></div>
+    <div class="farr">→</div>
+    <div class="fbox" style="flex:1"><div class="fb-label">5. Validation + etcd Write</div><div class="fb-name">Schema validation → persist to etcd → return 201 Created</div></div>
+  </div>
+</div>`;
+
+  if(key==='architecture:scheduler:Scheduling Flow') return `<div class="sec">Scheduling Algorithm</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">New Pod</div><div class="fb-name" style="color:var(--ye)">nodeName: ""</div></div>
+  <div class="farr cmd">→<span>Filter Phase</span></div>
+  <div class="fbox"><div class="fb-label">Predicates</div><div class="fb-name" style="color:var(--cy)">Feasible Nodes</div></div>
+  <div class="farr cmd">→<span>Score Phase</span></div>
+  <div class="fbox"><div class="fb-label">Priorities</div><div class="fb-name" style="color:var(--or)">Ranked Nodes</div></div>
+  <div class="farr cmd">→<span>Bind</span></div>
+  <div class="fbox"><div class="fb-label">Winner</div><div class="fb-name" style="color:var(--gr)">nodeName: set</div></div>
+</div>
+<table class="tbl"><thead><tr><th>Filter Plugin</th><th>Rejects node if...</th></tr></thead><tbody>
+<tr><td>NodeResourcesFit</td><td>Not enough CPU or memory for pod requests</td></tr>
+<tr><td>NodeAffinity</td><td>Required node affinity rules not satisfied</td></tr>
+<tr><td>TaintToleration</td><td>Node has untolerated taint</td></tr>
+<tr><td>PodTopologySpread</td><td>Placing here would violate maxSkew</td></tr>
+<tr><td>VolumeBinding</td><td>Required PVC cannot be satisfied on this node</td></tr>
+<tr><td>NodeUnschedulable</td><td>Node is cordoned (SchedulingDisabled)</td></tr>
+</tbody></table>`;
+
+  // ── WORKLOADS ──────────────────────────────────
+  if(key==='workloads:pod:Demo') return mkTerm('pod-demo','Pod — atomic unit',true);
+  if(key==='workloads:pod:YAML') return yaml(`<span class="yk">apiVersion:</span> <span class="yv">v1</span>
+<span class="yk">kind:</span> <span class="yv">Pod</span>
+<span class="yk">metadata:</span>
+  <span class="yk">name:</span> <span class="yv">myapp</span>
+  <span class="yk">labels:</span>
+    <span class="yk">app:</span> <span class="yv">myapp</span>
+    <span class="yk">version:</span> <span class="yv">v2</span>
+<span class="yk">spec:</span>
+  <span class="yk">initContainers:</span>
+  - <span class="yk">name:</span> <span class="yv">wait-for-db</span>
+    <span class="yk">image:</span> <span class="yv">busybox</span>
+    <span class="yk">command:</span> <span class="ys">['sh','-c','until nc -z postgres 5432; do sleep 2; done']</span>
+  <span class="yk">containers:</span>
+  - <span class="yk">name:</span> <span class="yv">myapp</span>
+    <span class="yk">image:</span> <span class="yv">myapp:2.0</span>
+    <span class="yk">ports:</span>
+    - <span class="yk">containerPort:</span> <span class="yn">8080</span>
+    <span class="yk">env:</span>
+    - <span class="yk">name:</span> <span class="yv">DB_HOST</span>
+      <span class="yk">valueFrom:</span>
+        <span class="yk">configMapKeyRef:</span>
+          <span class="yk">name:</span> <span class="yv">app-config</span>
+          <span class="yk">key:</span> <span class="yv">DB_HOST</span>
+    <span class="yk">resources:</span>
+      <span class="yk">requests:</span> <span class="yc"># scheduler uses this</span>
+        <span class="yk">cpu:</span> <span class="yv">250m</span>
+        <span class="yk">memory:</span> <span class="yv">256Mi</span>
+      <span class="yk">limits:</span> <span class="yc"># enforced by cgroups</span>
+        <span class="yk">cpu:</span> <span class="yv">1000m</span>
+        <span class="yk">memory:</span> <span class="yv">512Mi</span>
+    <span class="yk">readinessProbe:</span>
+      <span class="yk">httpGet:</span> <span class="yk">path:</span> <span class="yv">/ready</span>  <span class="yk">port:</span> <span class="yn">8080</span>
+      <span class="yk">initialDelaySeconds:</span> <span class="yn">5</span>  <span class="yk">periodSeconds:</span> <span class="yn">10</span>
+    <span class="yk">livenessProbe:</span>
+      <span class="yk">httpGet:</span> <span class="yk">path:</span> <span class="yv">/health</span>  <span class="yk">port:</span> <span class="yn">8080</span>
+      <span class="yk">initialDelaySeconds:</span> <span class="yn">30</span>  <span class="yk">failureThreshold:</span> <span class="yn">3</span>`);
+
+  if(key==='workloads:pod:Lifecycle') return `<div class="sec">Pod Lifecycle States</div>
+<table class="tbl"><thead><tr><th>Phase</th><th>Meaning</th><th>Action</th></tr></thead><tbody>
+<tr><td class="ye">Pending</td><td>Pod accepted, containers not yet started. May be: waiting for scheduler, pulling images, init containers running.</td><td>kubectl describe pod → check Events</td></tr>
+<tr><td class="gr">Running</td><td>Pod bound to node, at least one container running. May have containers still initializing.</td><td>Check READY column (e.g., 1/2 = 1 of 2 containers ready)</td></tr>
+<tr><td class="gr">Succeeded</td><td>All containers exited with code 0. Terminal state. Used for Jobs.</td><td>Normal for Job pods</td></tr>
+<tr><td class="re">Failed</td><td>All containers exited, at least one with non-zero code.</td><td>kubectl logs --previous</td></tr>
+<tr><td class="re">CrashLoopBackOff</td><td>Container crashes repeatedly. K8s applies exponential backoff (10s, 20s, 40s...).</td><td>kubectl logs --previous → find the error</td></tr>
+<tr><td class="ye">ImagePullBackOff</td><td>Cannot pull container image — wrong tag, wrong registry, missing pull secret.</td><td>Check imagePullSecrets, registry access</td></tr>
+<tr><td class="ye">OOMKilled</td><td>Container exceeded memory limit — killed by kernel OOM killer.</td><td>Increase memory limit or fix memory leak</td></tr>
+</tbody></table>`;
+
+  if(key==='workloads:deployment:Demo') return mkTerm('deployment-demo','Deployment — rolling updates',true);
+  if(key==='workloads:deployment:YAML') return yaml(`<span class="yk">apiVersion:</span> <span class="yv">apps/v1</span>
+<span class="yk">kind:</span> <span class="yv">Deployment</span>
+<span class="yk">metadata:</span>
+  <span class="yk">name:</span> <span class="yv">myapp</span>
+  <span class="yk">namespace:</span> <span class="yv">production</span>
+  <span class="yk">annotations:</span>
+    <span class="yk">kubernetes.io/change-cause:</span> <span class="yv">"v2.1.0 — add payment gateway"</span>
+<span class="yk">spec:</span>
+  <span class="yk">replicas:</span> <span class="yn">3</span>
+  <span class="yk">selector:</span>
+    <span class="yk">matchLabels:</span>
+      <span class="yk">app:</span> <span class="yv">myapp</span>
+  <span class="yk">strategy:</span>
+    <span class="yk">type:</span> <span class="yv">RollingUpdate</span>
+    <span class="yk">rollingUpdate:</span>
+      <span class="yk">maxSurge:</span> <span class="yn">1</span>        <span class="yc"># max pods ABOVE desired during update</span>
+      <span class="yk">maxUnavailable:</span> <span class="yn">0</span>  <span class="yc"># zero downtime — never remove before replacement ready</span>
+  <span class="yk">template:</span>
+    <span class="yk">metadata:</span>
+      <span class="yk">labels:</span>
+        <span class="yk">app:</span> <span class="yv">myapp</span>
+        <span class="yk">version:</span> <span class="yv">v2.1.0</span>
+    <span class="yk">spec:</span>
+      <span class="yk">terminationGracePeriodSeconds:</span> <span class="yn">60</span>
+      <span class="yk">containers:</span>
+      - <span class="yk">name:</span> <span class="yv">myapp</span>
+        <span class="yk">image:</span> <span class="yv">ghcr.io/originxlabs/myapp:v2.1.0</span>
+        <span class="yk">lifecycle:</span>
+          <span class="yk">preStop:</span>
+            <span class="yk">exec:</span>
+              <span class="yk">command:</span> <span class="ys">["sh","-c","sleep 5"]</span>  <span class="yc"># allow LB drain</span>`);
+
+  if(key==='workloads:deployment:Rolling Update') return `<div class="sec">Rolling Update Flow</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">Before</div><div class="fb-name" style="color:var(--k2)">RS-v1: 3 pods</div></div>
+  <div class="farr cmd">→<span>kubectl set image</span></div>
+  <div class="fbox"><div class="fb-label">New RS created</div><div class="fb-name" style="color:var(--cy)">RS-v2: 0 pods</div></div>
+  <div class="farr cmd">→<span>surge +1</span></div>
+  <div class="fbox"><div class="fb-label">Phase 1</div><div class="fb-name" style="color:var(--ye)">v1:3 v2:1</div></div>
+  <div class="farr cmd">→<span>ready! -1 old</span></div>
+  <div class="fbox"><div class="fb-label">Phase 2</div><div class="fb-name" style="color:var(--or)">v1:2 v2:2</div></div>
+  <div class="farr cmd">→<span>complete</span></div>
+  <div class="fbox"><div class="fb-label">Done</div><div class="fb-name" style="color:var(--gr)">v2:3 v1:0</div></div>
+</div>
+<div class="callout info"><strong>Readiness gates progress</strong>A new pod must pass readiness probe before an old pod is terminated. This is what prevents downtime — maxUnavailable:0 means old pods only exit after their replacement is serving traffic.</div>`;
+
+  if(key==='workloads:statefulset:Demo') return mkTerm('statefulset-demo','StatefulSet — ordered, stable',true);
+  if(key==='workloads:statefulset:YAML') return yaml(`<span class="yk">apiVersion:</span> <span class="yv">apps/v1</span>
+<span class="yk">kind:</span> <span class="yv">StatefulSet</span>
+<span class="yk">metadata:</span>
+  <span class="yk">name:</span> <span class="yv">postgres</span>
+<span class="yk">spec:</span>
+  <span class="yk">serviceName:</span> <span class="yv">postgres-headless</span>  <span class="yc"># required for DNS</span>
+  <span class="yk">replicas:</span> <span class="yn">3</span>
+  <span class="yk">selector:</span>
+    <span class="yk">matchLabels:</span>
+      <span class="yk">app:</span> <span class="yv">postgres</span>
+  <span class="yk">template:</span>
+    <span class="yk">spec:</span>
+      <span class="yk">containers:</span>
+      - <span class="yk">name:</span> <span class="yv">postgres</span>
+        <span class="yk">image:</span> <span class="yv">postgres:16</span>
+        <span class="yk">volumeMounts:</span>
+        - <span class="yk">name:</span> <span class="yv">data</span>
+          <span class="yk">mountPath:</span> <span class="yv">/var/lib/postgresql/data</span>
+  <span class="yk">volumeClaimTemplates:</span>  <span class="yc"># one PVC per pod</span>
+  - <span class="yk">metadata:</span>
+      <span class="yk">name:</span> <span class="yv">data</span>
+    <span class="yk">spec:</span>
+      <span class="yk">accessModes:</span> <span class="ys">["ReadWriteOnce"]</span>
+      <span class="yk">resources:</span>
+        <span class="yk">requests:</span>
+          <span class="yk">storage:</span> <span class="yv">20Gi</span>
+<span class="yc">---</span>
+<span class="yk">apiVersion:</span> <span class="yv">v1</span>
+<span class="yk">kind:</span> <span class="yv">Service</span>
+<span class="yk">metadata:</span>
+  <span class="yk">name:</span> <span class="yv">postgres-headless</span>
+<span class="yk">spec:</span>
+  <span class="yk">clusterIP:</span> <span class="yv">None</span>  <span class="yc"># headless — no VIP, DNS returns pod IPs</span>
+  <span class="yk">selector:</span>
+    <span class="yk">app:</span> <span class="yv">postgres</span>`);
+
+  // ── SERVICES ───────────────────────────────────
+  if(key==='services:service:Demo') return mkTerm('service-demo','Service — stable endpoints',true);
+  if(key==='services:service:Types') return `<div class="sec">Service Types Comparison</div>
+<table class="tbl"><thead><tr><th>Type</th><th>Accessible from</th><th>How</th><th>Use case</th></tr></thead><tbody>
+<tr><td>ClusterIP</td><td>Inside cluster only</td><td>Virtual IP via kube-proxy iptables</td><td>Pod-to-pod communication, internal APIs</td></tr>
+<tr><td>NodePort</td><td>External via node IP:port</td><td>Opens port 30000-32767 on every node</td><td>Dev/testing, bare-metal without cloud LB</td></tr>
+<tr><td>LoadBalancer</td><td>External via LB IP</td><td>Cloud provisions NLB/ALB automatically</td><td>Production external services</td></tr>
+<tr><td>ExternalName</td><td>Inside cluster only</td><td>CNAME to external DNS name</td><td>Abstract external services (RDS, 3rd party APIs)</td></tr>
+<tr><td>Headless (clusterIP: None)</td><td>DNS returns pod IPs directly</td><td>No VIP — DNS A records per pod</td><td>StatefulSets, direct pod addressing, service mesh</td></tr>
+</tbody></table>
+<div class="sec">Traffic Flow</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">Client Pod</div><div class="fb-name" style="color:var(--k2)">10.0.1.5</div></div>
+  <div class="farr cmd">→<span>DNS lookup</span></div>
+  <div class="fbox"><div class="fb-label">CoreDNS</div><div class="fb-name" style="color:var(--cy)">svc → ClusterIP</div></div>
+  <div class="farr cmd">→<span>iptables DNAT</span></div>
+  <div class="fbox"><div class="fb-label">kube-proxy rules</div><div class="fb-name" style="color:var(--ye)">random select pod</div></div>
+  <div class="farr cmd">→<span>route</span></div>
+  <div class="fbox"><div class="fb-label">Backend Pod</div><div class="fb-name" style="color:var(--gr)">192.168.1.4</div></div>
+</div>`;
+
+  if(key==='services:service:kube-proxy') return `<div class="sec">How kube-proxy Implements Services</div>
+<p class="bd">kube-proxy runs on every node and watches the API server for Service and Endpoint changes. It programs the OS kernel so that packets to the virtual ClusterIP get redirected to actual pod IPs.</p>
+<div class="grid2">
+<div class="mc"><h4>iptables mode (default)</h4><p>For each Service, writes iptables DNAT rules. Random pod selection per rule (50% chance chains). Works but O(n) rule lookup — degrades past ~1000 services. CPU spikes when rules rebuild.</p></div>
+<div class="mc"><h4 class="cy">IPVS mode (recommended for scale)</h4><p>Uses Linux IPVS (IP Virtual Server) — kernel hash table. O(1) lookup regardless of service count. Multiple scheduling algorithms: rr, lc, sh, dh. Enable: kube-proxy --proxy-mode=ipvs</p></div>
+<div class="mc"><h4 class="gr">eBPF mode (Cilium)</h4><p>Replaces kube-proxy entirely. eBPF programs in kernel — faster than iptables, supports per-connection load balancing, full observability via Hubble.</p></div>
+<div class="mc"><h4 class="ye">Session Affinity</h4><p>service.spec.sessionAffinity: ClientIP — routes requests from same client IP to same pod for up to sessionAffinityConfig.clientIP.timeoutSeconds (default 10800s/3h).</p></div>
+</div>`;
+
+  if(key==='services:ingress:Demo') return mkTerm('ingress-demo','Ingress — HTTP routing',true);
+  if(key==='services:ingress:YAML') return yaml(`<span class="yk">apiVersion:</span> <span class="yv">networking.k8s.io/v1</span>
+<span class="yk">kind:</span> <span class="yv">Ingress</span>
+<span class="yk">metadata:</span>
+  <span class="yk">name:</span> <span class="yv">myapp-ingress</span>
+  <span class="yk">annotations:</span>
+    <span class="yk">kubernetes.io/ingress.class:</span> <span class="yv">nginx</span>
+    <span class="yk">nginx.ingress.kubernetes.io/rewrite-target:</span> <span class="yv">/</span>
+    <span class="yk">nginx.ingress.kubernetes.io/rate-limit:</span> <span class="yv">"100"</span>
+    <span class="yk">cert-manager.io/cluster-issuer:</span> <span class="yv">letsencrypt-prod</span>
+<span class="yk">spec:</span>
+  <span class="yk">ingressClassName:</span> <span class="yv">nginx</span>
+  <span class="yk">tls:</span>
+  - <span class="yk">hosts:</span> <span class="ys">["api.example.com"]</span>
+    <span class="yk">secretName:</span> <span class="yv">myapp-tls</span>  <span class="yc"># cert-manager writes cert here</span>
+  <span class="yk">rules:</span>
+  - <span class="yk">host:</span> <span class="yv">api.example.com</span>
+    <span class="yk">http:</span>
+      <span class="yk">paths:</span>
+      - <span class="yk">path:</span> <span class="yv">/api</span>
+        <span class="yk">pathType:</span> <span class="yv">Prefix</span>
+        <span class="yk">backend:</span>
+          <span class="yk">service:</span>
+            <span class="yk">name:</span> <span class="yv">myapp-api</span>
+            <span class="yk">port:</span>
+              <span class="yk">number:</span> <span class="yn">80</span>
+      - <span class="yk">path:</span> <span class="yv">/</span>
+        <span class="yk">pathType:</span> <span class="yv">Prefix</span>
+        <span class="yk">backend:</span>
+          <span class="yk">service:</span>
+            <span class="yk">name:</span> <span class="yv">myapp-frontend</span>
+            <span class="yk">port:</span>
+              <span class="yk">number:</span> <span class="yn">80</span>`);
+
+  if(key==='services:networkpolicy:Demo') return mkTerm('netpol-demo','NetworkPolicy — firewall rules',true);
+  if(key==='services:networkpolicy:YAML') return yaml(`<span class="yc"># Default deny all ingress in namespace</span>
+<span class="yk">apiVersion:</span> <span class="yv">networking.k8s.io/v1</span>
+<span class="yk">kind:</span> <span class="yv">NetworkPolicy</span>
+<span class="yk">metadata:</span>
+  <span class="yk">name:</span> <span class="yv">default-deny-all</span>
+<span class="yk">spec:</span>
+  <span class="yk">podSelector:</span> {}  <span class="yc"># applies to ALL pods in namespace</span>
+  <span class="yk">policyTypes:</span> <span class="ys">["Ingress","Egress"]</span>
+<span class="yc">---</span>
+<span class="yc"># Allow API pods to reach DB on port 5432</span>
+<span class="yk">apiVersion:</span> <span class="yv">networking.k8s.io/v1</span>
+<span class="yk">kind:</span> <span class="yv">NetworkPolicy</span>
+<span class="yk">metadata:</span>
+  <span class="yk">name:</span> <span class="yv">allow-api-to-db</span>
+<span class="yk">spec:</span>
+  <span class="yk">podSelector:</span>
+    <span class="yk">matchLabels:</span>
+      <span class="yk">app:</span> <span class="yv">postgres</span>
+  <span class="yk">ingress:</span>
+  - <span class="yk">from:</span>
+    - <span class="yk">podSelector:</span>
+        <span class="yk">matchLabels:</span>
+          <span class="yk">role:</span> <span class="yv">api</span>
+    <span class="yk">ports:</span>
+    - <span class="yk">protocol:</span> <span class="yv">TCP</span>
+      <span class="yk">port:</span> <span class="yn">5432</span>`);
+
+  // ── STORAGE ────────────────────────────────────
+  if(key==='storage:pv-pvc:Demo') return mkTerm('pvc-demo','PV/PVC — persistent storage',true);
+  if(key==='storage:pv-pvc:Lifecycle') return `<div class="sec">PV/PVC Lifecycle</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">1</div><div class="fb-name" style="color:var(--pu)">PVC created</div></div>
+  <div class="farr cmd">→<span>StorageClass</span></div>
+  <div class="fbox"><div class="fb-label">2 Dynamic</div><div class="fb-name" style="color:var(--k2)">PV provisioned</div></div>
+  <div class="farr cmd">→<span>Binding</span></div>
+  <div class="fbox"><div class="fb-label">3</div><div class="fb-name" style="color:var(--gr)">Bound</div></div>
+  <div class="farr cmd">→<span>Pod uses PVC</span></div>
+  <div class="fbox"><div class="fb-label">4</div><div class="fb-name" style="color:var(--cy)">Mounted in Pod</div></div>
+  <div class="farr cmd">→<span>PVC deleted</span></div>
+  <div class="fbox"><div class="fb-label">5</div><div class="fb-name" style="color:var(--or)">Reclaim policy</div></div>
+</div>
+<table class="tbl"><thead><tr><th>Reclaim Policy</th><th>What happens to PV when PVC deleted</th></tr></thead><tbody>
+<tr><td class="re">Delete</td><td>PV AND underlying storage (EBS volume, disk) deleted. Default for dynamic provisioning.</td></tr>
+<tr><td class="ye">Retain</td><td>PV stays, data preserved. Manual cleanup required. Good for production data.</td></tr>
+<tr><td class="gr">Recycle (deprecated)</td><td>Scrubs data (rm -rf /data/*) and makes PV available again. Use dynamic provisioning instead.</td></tr>
+</tbody></table>`;
+
+  if(key==='storage:configmap:Demo') return mkTerm('configmap-demo','ConfigMap — inject config',true);
+  if(key==='storage:secret:Demo') return mkTerm('secret-demo','Secret — sensitive data',true);
+  if(key==='storage:secret:External Secrets') return `<div class="sec">External Secrets Operator (ESO)</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">AWS/GCP/Vault</div><div class="fb-name" style="color:var(--or)">Secret Store</div></div>
+  <div class="farr cmd">→<span>ESO syncs</span></div>
+  <div class="fbox"><div class="fb-label">ExternalSecret CR</div><div class="fb-name" style="color:var(--pu)">references path</div></div>
+  <div class="farr cmd">→<span>creates</span></div>
+  <div class="fbox"><div class="fb-label">K8s Secret</div><div class="fb-name" style="color:var(--k2)">managed</div></div>
+  <div class="farr cmd">→<span>mounted by</span></div>
+  <div class="fbox"><div class="fb-label">Pod</div><div class="fb-name" style="color:var(--gr)">reads secret</div></div>
+</div>`+yaml(`<span class="yk">apiVersion:</span> <span class="yv">external-secrets.io/v1beta1</span>
+<span class="yk">kind:</span> <span class="yv">ExternalSecret</span>
+<span class="yk">metadata:</span>
+  <span class="yk">name:</span> <span class="yv">db-creds</span>
+<span class="yk">spec:</span>
+  <span class="yk">refreshInterval:</span> <span class="yv">1h</span>
+  <span class="yk">secretStoreRef:</span>
+    <span class="yk">name:</span> <span class="yv">aws-secrets-manager</span>
+    <span class="yk">kind:</span> <span class="yv">ClusterSecretStore</span>
+  <span class="yk">target:</span>
+    <span class="yk">name:</span> <span class="yv">db-creds</span>  <span class="yc"># K8s Secret name to create</span>
+  <span class="yk">data:</span>
+  - <span class="yk">secretKey:</span> <span class="yv">password</span>
+    <span class="yk">remoteRef:</span>
+      <span class="yk">key:</span> <span class="yv">prod/myapp/db</span>
+      <span class="yk">property:</span> <span class="yv">password</span>`);
+
+  // ── CONFIGURATION ─────────────────────────────
+  if(key==='configuration:rbac:Demo') return mkTerm('rbac-demo','RBAC — access control',true);
+  if(key==='configuration:rbac:YAML') return yaml(`<span class="yc"># Role: namespace-scoped rules</span>
+<span class="yk">apiVersion:</span> <span class="yv">rbac.authorization.k8s.io/v1</span>
+<span class="yk">kind:</span> <span class="yv">Role</span>
+<span class="yk">metadata:</span>
+  <span class="yk">name:</span> <span class="yv">pod-reader</span>
+  <span class="yk">namespace:</span> <span class="yv">production</span>
+<span class="yk">rules:</span>
+- <span class="yk">apiGroups:</span> <span class="ys">[""]</span>
+  <span class="yk">resources:</span> <span class="ys">["pods","pods/log"]</span>
+  <span class="yk">verbs:</span> <span class="ys">["get","list","watch"]</span>
+<span class="yc">---</span>
+<span class="yk">apiVersion:</span> <span class="yv">rbac.authorization.k8s.io/v1</span>
+<span class="yk">kind:</span> <span class="yv">RoleBinding</span>
+<span class="yk">metadata:</span>
+  <span class="yk">name:</span> <span class="yv">myapp-pod-reader</span>
+  <span class="yk">namespace:</span> <span class="yv">production</span>
+<span class="yk">subjects:</span>
+- <span class="yk">kind:</span> <span class="yv">ServiceAccount</span>
+  <span class="yk">name:</span> <span class="yv">myapp-sa</span>
+  <span class="yk">namespace:</span> <span class="yv">production</span>
+<span class="yk">roleRef:</span>
+  <span class="yk">kind:</span> <span class="yv">Role</span>
+  <span class="yk">name:</span> <span class="yv">pod-reader</span>
+  <span class="yk">apiGroup:</span> <span class="yv">rbac.authorization.k8s.io</span>`);
+
+  if(key==='configuration:resources:YAML') return yaml(`<span class="yk">resources:</span>
+  <span class="yk">requests:</span>     <span class="yc"># scheduler uses this — pod WON'T start if node lacks it</span>
+    <span class="yk">cpu:</span> <span class="yv">250m</span>    <span class="yc"># 250 milliCPU = 0.25 cores</span>
+    <span class="yk">memory:</span> <span class="yv">256Mi</span>
+  <span class="yk">limits:</span>       <span class="yc"># enforced by kernel cgroups</span>
+    <span class="yk">cpu:</span> <span class="yv">1000m</span>  <span class="yc"># CPU throttled when exceeded — NOT killed</span>
+    <span class="yk">memory:</span> <span class="yv">512Mi</span>  <span class="yc"># OOMKilled when exceeded!</span>`)+
+  `<div class="sec">QoS Classes</div>
+<table class="tbl"><thead><tr><th>Class</th><th>Condition</th><th>Eviction Priority</th></tr></thead><tbody>
+<tr><td class="gr">Guaranteed</td><td>requests == limits for ALL containers. Both set.</td><td>Last evicted — highest priority</td></tr>
+<tr><td class="ye">Burstable</td><td>At least one container has requests ≠ limits, or limits not set</td><td>Medium — evicted after BestEffort</td></tr>
+<tr><td class="re">BestEffort</td><td>No requests or limits set on any container</td><td>First evicted under node pressure</td></tr>
+</tbody></table>
+<div class="callout warn"><strong>Memory limit = OOMKill</strong>Unlike CPU throttling, memory over-limit results in the container being killed (OOMKilled, exit code 137). Set memory limit >= 2× typical usage. Use VPA recommendations to right-size.</div>`;
+
+  // ── SCHEDULING ────────────────────────────────
+  if(key==='scheduling:taints:Demo') return mkTerm('taints-demo','Taints & Tolerations',true);
+  if(key==='scheduling:taints:YAML') return yaml(`<span class="yc"># Taint a node</span>
+<span class="yc"># kubectl taint nodes gpu-node-1 gpu=true:NoSchedule</span>
+<span class="yc"># kubectl taint nodes spot-node-1 spot=true:NoExecute</span>
+
+<span class="yc"># Pod that tolerates the taint</span>
+<span class="yk">spec:</span>
+  <span class="yk">tolerations:</span>
+  - <span class="yk">key:</span> <span class="yv">gpu</span>
+    <span class="yk">operator:</span> <span class="yv">Equal</span>
+    <span class="yk">value:</span> <span class="yv">"true"</span>
+    <span class="yk">effect:</span> <span class="yv">NoSchedule</span>
+  - <span class="yk">key:</span> <span class="yv">spot</span>
+    <span class="yk">operator:</span> <span class="yv">Exists</span>  <span class="yc"># tolerates any value</span>
+    <span class="yk">effect:</span> <span class="yv">NoExecute</span>
+    <span class="yk">tolerationSeconds:</span> <span class="yn">120</span>  <span class="yc"># grace period before eviction</span>`)+
+  `<table class="tbl" style="margin-top:10px"><thead><tr><th>Effect</th><th>Behavior</th></tr></thead><tbody>
+<tr><td>NoSchedule</td><td>New pods without toleration WON'T be scheduled here. Existing pods not affected.</td></tr>
+<tr><td>PreferNoSchedule</td><td>Scheduler TRIES to avoid placing pods here. Soft version.</td></tr>
+<tr><td>NoExecute</td><td>New pods without toleration won&#39;t schedule. EXISTING pods without toleration are EVICTED.</td></tr>
+</tbody></table>`;
+
+  if(key==='scheduling:affinity:YAML') return yaml(`<span class="yk">spec:</span>
+  <span class="yk">affinity:</span>
+    <span class="yk">nodeAffinity:</span>
+      <span class="yk">requiredDuringSchedulingIgnoredDuringExecution:</span>
+        <span class="yk">nodeSelectorTerms:</span>
+        - <span class="yk">matchExpressions:</span>
+          - <span class="yk">key:</span> <span class="yv">topology.kubernetes.io/zone</span>
+            <span class="yk">operator:</span> <span class="yv">In</span>
+            <span class="yk">values:</span> <span class="ys">["us-east-1a","us-east-1b"]</span>
+    <span class="yk">podAntiAffinity:</span>
+      <span class="yk">requiredDuringSchedulingIgnoredDuringExecution:</span>
+      - <span class="yk">labelSelector:</span>
+          <span class="yk">matchExpressions:</span>
+          - <span class="yk">key:</span> <span class="yv">app</span>
+            <span class="yk">operator:</span> <span class="yv">In</span>
+            <span class="yk">values:</span> <span class="ys">["myapp"]</span>
+        <span class="yk">topologyKey:</span> <span class="yv">kubernetes.io/hostname</span>  <span class="yc"># max 1 per node</span>`);
+
+  // ── AUTOSCALING ───────────────────────────────
+  if(key==='autoscaling:hpa:Demo') return mkTerm('hpa-demo','HPA — pod autoscaling',true);
+  if(key==='autoscaling:hpa:YAML') return yaml(`<span class="yk">apiVersion:</span> <span class="yv">autoscaling/v2</span>
+<span class="yk">kind:</span> <span class="yv">HorizontalPodAutoscaler</span>
+<span class="yk">metadata:</span>
+  <span class="yk">name:</span> <span class="yv">myapp</span>
+<span class="yk">spec:</span>
+  <span class="yk">scaleTargetRef:</span>
+    <span class="yk">apiVersion:</span> <span class="yv">apps/v1</span>
+    <span class="yk">kind:</span> <span class="yv">Deployment</span>
+    <span class="yk">name:</span> <span class="yv">myapp</span>
+  <span class="yk">minReplicas:</span> <span class="yn">2</span>
+  <span class="yk">maxReplicas:</span> <span class="yn">20</span>
+  <span class="yk">metrics:</span>
+  - <span class="yk">type:</span> <span class="yv">Resource</span>
+    <span class="yk">resource:</span>
+      <span class="yk">name:</span> <span class="yv">cpu</span>
+      <span class="yk">target:</span>
+        <span class="yk">type:</span> <span class="yv">Utilization</span>
+        <span class="yk">averageUtilization:</span> <span class="yn">70</span>
+  - <span class="yk">type:</span> <span class="yv">Resource</span>
+    <span class="yk">resource:</span>
+      <span class="yk">name:</span> <span class="yv">memory</span>
+      <span class="yk">target:</span>
+        <span class="yk">type:</span> <span class="yv">AverageValue</span>
+        <span class="yk">averageValue:</span> <span class="yv">400Mi</span>
+  <span class="yk">behavior:</span>
+    <span class="yk">scaleDown:</span>
+      <span class="yk">stabilizationWindowSeconds:</span> <span class="yn">300</span>  <span class="yc"># wait 5m before scale-down</span>
+    <span class="yk">scaleUp:</span>
+      <span class="yk">stabilizationWindowSeconds:</span> <span class="yn">0</span>    <span class="yc"># scale up immediately</span>`);
+
+  // ── OBSERVABILITY ─────────────────────────────
+  if(key==='observability:logging:Demo') return mkTerm('logging-demo','kubectl logs — inspect output',true);
+  if(key==='observability:events:Demo') return mkTerm('kubectl-get-demo','kubectl events and top',true);
+  if(key==='observability:metrics:Demo') return `<div class="sec">Prometheus Architecture in K8s</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">App Pods</div><div class="fb-name" style="color:var(--k2)">/metrics endpoint</div></div>
+  <div class="farr cmd">→<span>scrape</span></div>
+  <div class="fbox"><div class="fb-label">Prometheus</div><div class="fb-name" style="color:var(--or)">time-series DB</div></div>
+  <div class="farr cmd">→<span>query PromQL</span></div>
+  <div class="fbox"><div class="fb-label">Grafana</div><div class="fb-name" style="color:var(--ye)">dashboards</div></div>
+  <div class="farr cmd">→<span>alert</span></div>
+  <div class="fbox"><div class="fb-label">AlertManager</div><div class="fb-name" style="color:var(--re)">PagerDuty/Slack</div></div>
+</div>
+<div class="callout tip"><strong>ServiceMonitor</strong>prometheus-operator adds ServiceMonitor CRD. Instead of editing Prometheus config, you create a ServiceMonitor that tells Prometheus which services to scrape. Label your service and create a matching ServiceMonitor.</div>`;
+
+  // ── HELM ──────────────────────────────────────
+  if(key==='helm:helm-basics:Demo') return mkTerm('helm-demo','Helm — package manager',true);
+  if(key==='helm:helm-basics:Chart Structure') return `<div class="sec">Helm Chart Directory Structure</div>
+<pre class="yaml">myapp-chart/
+├── Chart.yaml          <span style="color:var(--tx3)">  # metadata: name, version, appVersion</span>
+├── values.yaml         <span style="color:var(--tx3)">  # default values (overridable)</span>
+├── values-prod.yaml    <span style="color:var(--tx3)">  # production overrides</span>
+├── templates/
+│   ├── deployment.yaml <span style="color:var(--tx3)">  # Go template with .Values references</span>
+│   ├── service.yaml
+│   ├── ingress.yaml
+│   ├── configmap.yaml
+│   ├── hpa.yaml
+│   ├── _helpers.tpl    <span style="color:var(--tx3)">  # named templates (DRY helpers)</span>
+│   └── NOTES.txt       <span style="color:var(--tx3)">  # post-install instructions</span>
+└── charts/             <span style="color:var(--tx3)">  # dependency charts</span>
+    └── redis/</pre>
+<div class="callout info"><strong>Helm commands reference</strong><code>helm install name ./chart -f values-prod.yaml</code>, <code>helm upgrade --install</code> (idempotent), <code>helm template ./chart</code> (render without installing), <code>helm lint ./chart</code> (validate), <code>helm history release-name</code>, <code>helm rollback release 2</code></div>`;
+
+  // ── CLUSTER OPS ────────────────────────────────
+  if(key==='cluster-ops:node-ops:Demo') return mkTerm('node-ops-demo','cordon · drain · uncordon',true);
+  if(key==='cluster-ops:node-ops:drain') return `<div class="sec">kubectl drain Safety Flags</div>
+<table class="tbl"><thead><tr><th>Flag</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>--ignore-daemonsets</td><td>Required — DaemonSet pods cannot be moved so skip them</td></tr>
+<tr><td>--delete-emptydir-data</td><td>Required if pods use emptyDir volumes — data will be lost</td></tr>
+<tr><td>--grace-period=60</td><td>Give pods 60s to finish in-flight requests (SIGTERM → wait → SIGKILL)</td></tr>
+<tr><td>--timeout=300s</td><td>Fail if drain takes longer than 5 minutes</td></tr>
+<tr><td>--force</td><td>Evict pods not managed by a controller (they won&#39;t be recreated!)</td></tr>
+<tr><td>--dry-run=client</td><td>Preview what would be evicted without actually doing it</td></tr>
+</tbody></table>
+<div class="callout warn"><strong>PodDisruptionBudget can block drain</strong>If a PDB prevents eviction (e.g., minAvailable: 2 but only 2 pods exist), drain will block indefinitely. Check: <code>kubectl get pdb -A</code></div>`;
+
+  // ── CICD ──────────────────────────────────────
+  if(key==='cicd:argocd:Demo') return mkTerm('argocd-demo','ArgoCD — GitOps deploy',true);
+  if(key==='cicd:argocd:Sync Flow') return `<div class="sec">ArgoCD GitOps Flow</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">Dev pushes</div><div class="fb-name" style="color:var(--k2)">git commit</div></div>
+  <div class="farr cmd">→<span>CI builds</span></div>
+  <div class="fbox"><div class="fb-label">New image</div><div class="fb-name" style="color:var(--cy)">myapp:v2.1</div></div>
+  <div class="farr cmd">→<span>update tag in git</span></div>
+  <div class="fbox"><div class="fb-label">GitOps Repo</div><div class="fb-name" style="color:var(--pu)">k8s/overlays/prod</div></div>
+  <div class="farr cmd">→<span>ArgoCD detects</span></div>
+  <div class="fbox"><div class="fb-label">OutOfSync</div><div class="fb-name" style="color:var(--ye)">diff found</div></div>
+  <div class="farr cmd">→<span>sync</span></div>
+  <div class="fbox"><div class="fb-label">Cluster</div><div class="fb-name" style="color:var(--gr)">Synced ✓</div></div>
+</div>`;
+
+  if(key==='cicd:kustomize:Demo') return mkTerm('kustomize-demo','kustomize — overlays',true);
+  if(key==='cicd:kustomize:Structure') return `<div class="sec">Kustomize Directory Structure</div>
+<pre class="yaml">k8s/
+├── base/
+│   ├── kustomization.yaml   <span style="color:var(--tx3)"># resources: [deployment.yaml, service.yaml]</span>
+│   ├── deployment.yaml      <span style="color:var(--tx3)"># replicas: 2, image: myapp:latest</span>
+│   └── service.yaml
+└── overlays/
+    ├── dev/
+    │   └── kustomization.yaml  <span style="color:var(--tx3)"># bases: [../../base]</span>
+    │                           <span style="color:var(--tx3)"># images: [{name: myapp, newTag: dev-abc123}]</span>
+    ├── staging/
+    │   ├── kustomization.yaml
+    │   └── replica-patch.yaml  <span style="color:var(--tx3)"># replicas: 3</span>
+    └── production/
+        ├── kustomization.yaml
+        ├── replica-patch.yaml  <span style="color:var(--tx3)"># replicas: 5</span>
+        └── resources-patch.yaml <span style="color:var(--tx3)"># cpu: 500m memory: 512Mi</span></pre>`;
+
+  // ── TROUBLESHOOT ──────────────────────────────
+  if(key==='troubleshoot:pod-issues:Demo') return mkTerm('pod-trouble-demo','Pod troubleshooting',true);
+  if(key==='troubleshoot:pod-issues:CrashLoop') return `<div class="sec">CrashLoopBackOff Debug Decision Tree</div>
+<ul class="fl">
+<li><strong>Step 1:</strong> <code>kubectl logs pod-name --previous</code> → look for the error in the PREVIOUS container instance (current may not have logs yet)</li>
+<li><strong>Step 2:</strong> <code>kubectl describe pod pod-name</code> → check Events at bottom → Last State Exit Code</li>
+<li><strong>Exit code 1</strong> — application error. Fix: check application logs for exception/panic.</li>
+<li><strong>Exit code 137</strong> — OOMKilled. Fix: increase memory limit or fix memory leak. Check: <code>kubectl describe pod | grep OOM</code></li>
+<li><strong>Exit code 139</strong> — segfault. Application bug. Check app logs, enable core dumps.</li>
+<li><strong>Exit code 143</strong> — SIGTERM not handled. App ignores shutdown signal. Fix: handle SIGTERM in app, increase terminationGracePeriodSeconds.</li>
+<li><strong>Liveness probe failing</strong> — app alive but failing probe. Fix: check probe path/port, increase initialDelaySeconds, fix app health endpoint.</li>
+<li><strong>Config error</strong> — missing env var, bad configmap key, secret not found. Fix: check envFrom, secretRef names match actual resource names.</li>
+</ul>`;
+
+  if(key==='troubleshoot:pod-issues:Pending') return `<div class="sec">Pending Pod Debug Checklist</div>
+<ul class="fl">
+<li><strong>kubectl describe pod pending-pod → Events section</strong> — always check this first</li>
+<li><strong>"Insufficient cpu/memory"</strong> → run <code>kubectl describe nodes | grep -A5 "Allocated resources"</code> to see per-node usage</li>
+<li><strong>"0/3 nodes are available: 3 node(s) didn&#39;t match node affinity"</strong> → check pod nodeAffinity labels vs actual node labels (<code>kubectl get nodes --show-labels</code>)</li>
+<li><strong>"0/3 nodes are available: 3 node(s) had taint...that the pod didn&#39;t tolerate"</strong> → add toleration to pod or remove taint from node</li>
+<li><strong>"PVC not found" or "waiting for PVC to be bound"</strong> → check <code>kubectl get pvc</code>, StorageClass exists, provisioner running</li>
+<li><strong>No nodes at all</strong> → check <code>kubectl get nodes</code> — all NotReady? Node group issue. Zero nodes? Cluster autoscaler not configured.</li>
+</ul>`;
+
+  if(key==='troubleshoot:network-issues:Demo') return `<div class="sec">Network Debug Toolkit</div>
+<ul class="fl">
+<li><strong>DNS test:</strong> <code>kubectl run dnstest --image=busybox --rm -it -- nslookup myservice.mynamespace.svc.cluster.local</code></li>
+<li><strong>Service connectivity:</strong> <code>kubectl run curl --image=curlimages/curl --rm -it -- curl -v http://myservice:80/health</code></li>
+<li><strong>Full network debug pod:</strong> <code>kubectl run netshoot --image=nicolaka/netshoot -it --rm -- bash</code> (has nmap, tcpdump, curl, dig, iperf)</li>
+<li><strong>Check endpoints:</strong> <code>kubectl get endpoints myservice</code> — empty means no pods match the service selector</li>
+<li><strong>Check kube-proxy:</strong> <code>kubectl logs -n kube-system -l k8s-app=kube-proxy</code></li>
+<li><strong>Check CoreDNS:</strong> <code>kubectl logs -n kube-system -l k8s-app=kube-dns</code></li>
+</ul>`;
+
+  // ── DEFAULT ────────────────────────────────────
+  return `<div class="sec">${tab}</div>
+<p class="bd"><strong>${tid}</strong> deep reference: command behavior, control-plane interaction, data-path impact, production scenarios, and failure-recovery workflow.</p>
+<div class="sec cy">Internal Flow</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">1</div><div class="fb-name">kubectl/API Request</div></div><div class="farr">→</div>
+  <div class="fbox"><div class="fb-label">2</div><div class="fb-name">kube-apiserver</div></div><div class="farr">→</div>
+  <div class="fbox"><div class="fb-label">3</div><div class="fb-name">etcd State + Watchers</div></div><div class="farr">→</div>
+  <div class="fbox"><div class="fb-label">4</div><div class="fb-name">Controller/Scheduler Action</div></div><div class="farr">→</div>
+  <div class="fbox"><div class="fb-label">5</div><div class="fb-name">kubelet/kube-proxy Reconcile</div></div>
+</div>
+<div class="sec gr">Issue-Fix Checklist</div>
+<table class="tbl"><thead><tr><th>Check</th><th>Command / Action</th></tr></thead><tbody>
+<tr><td>Events First</td><td><code>kubectl describe &lt;resource&gt;</code> and read <code>Events</code> before changing manifests.</td></tr>
+<tr><td>Current State</td><td><code>kubectl get all -n &lt;ns&gt;</code>, plus <code>kubectl get events --sort-by=.lastTimestamp</code>.</td></tr>
+<tr><td>Logs + Probes</td><td>Validate container logs and probe config (<code>livenessProbe</code>, <code>readinessProbe</code>).</td></tr>
+<tr><td>Network Path</td><td>Confirm Service selector, Endpoints, DNS resolution, NetworkPolicy allow rules.</td></tr>
+<tr><td>Safe Rollback</td><td>Use rollout status/history and rollback instead of ad-hoc hot edits in production.</td></tr>
+</tbody></table>
+<div class="callout info"><strong>Run Pattern</strong>Observe state, apply one change, verify with events/logs/metrics, then promote. This avoids hidden cascading failures.</div>`;
+}
+
+// ═══ RUNTIME ═══
+let activeCh=null,activeTid=null,visited=new Set();
+
+function renderNav(){
+  document.getElementById('leftNav').innerHTML=CHAPTERS.map(ch=>`
+<div class="ci ${activeCh===ch.id?'active':''}" onclick="selChapter('${ch.id}')">
+  <div class="ci-icon" style="background:${ch.bg}">${ch.icon}</div>
+  <div class="ci-info">
+    <div class="cn">${ch.title}</div>
+    <div class="cm">${ch.topics.length} topics · ${ch.sub.split('·').length} areas</div>
+  </div>
+  <span class="lv" style="background:${ch.lc}18;color:${ch.lc};border:1px solid ${ch.lc}33">${ch.level}</span>
+</div>`).join('');
+}
+
+function selChapter(id){
+  activeCh=id;activeTid=null;visited.add(id);updateProgress();renderNav();
+  const ch=CHAPTERS.find(c=>c.id===id);
+  clearTimers();
+  document.getElementById('middle').innerHTML=`
+<div class="ch-hdr">
+  <div class="ch-ey">Chapter ${CHAPTERS.indexOf(ch)+1} of ${CHAPTERS.length}</div>
+  <div class="ch-t">${ch.icon} ${ch.title}</div>
+  <p class="ch-d">${ch.desc}</p>
+  <div class="ch-chips">
+    <div class="chip"><span class="chip-dot" style="background:${ch.lc}"></span>${ch.level}</div>
+    <div class="chip">📚 ${ch.topics.length} Topics</div>
+    <div class="chip">☸ ${ch.sub}</div>
+  </div>
+</div>
+<div class="tg">${ch.topics.map(t=>`
+<div class="tc" onclick="selTopic('${ch.id}','${t.id}',event)">
+  <div class="tc-cmd">${t.cmd}</div>
+  <div class="tc-title">${t.title}</div>
+  <div class="tc-d">${t.desc}</div>
+  <div class="tc-tags">${(t.tags||[]).map(tag=>`<span class="tag ${tag}">${tag}</span>`).join('')}</div>
+</div>`).join('')}
+</div>`;
+  document.getElementById('middle').scrollTo({top:0,behavior:'smooth'});
+  closeRight();
+}
+
+function selTopic(cid,tid,ev){
+  activeTid=tid;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+  ev.currentTarget.classList.add('active');
+  const ch=CHAPTERS.find(c=>c.id===cid);
+  const topic=ch?.topics.find(t=>t.id===tid);
+  if(!topic) return;
+  clearTimers();
+  const rp=document.getElementById('rightPanel');
+  rp.classList.remove('hidden');
+  document.getElementById('rightTitle').textContent='$ kubectl explain '+topic.cmd;
+  const tabs=topic.tabs||['Demo'];
+  document.getElementById('rightTabs').innerHTML=tabs.map((tab,i)=>
+    `<div class="rt ${i===0?'active':''}" onclick="selTab(this,'${cid}','${tid}','${tab}')">${tab}</div>`).join('');
+  document.getElementById('rightBody').scrollTo({top:0,behavior:'smooth'});
+  renderTab(cid,tid,tabs[0]);
+}
+
+function selTab(el,cid,tid,tab){
+  clearTimers();
+  document.querySelectorAll('.rt').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTab(cid,tid,tab);
+  document.getElementById('rightBody').scrollTo({top:0,behavior:'smooth'});
+}
+function renderTab(cid,tid,tab){
+  document.getElementById('rightBody').innerHTML=getContent(cid,tid,tab);
+}
+function closeRight(){
+  clearTimers();
+  document.getElementById('rightPanel').classList.add('hidden');
+  activeTid=null;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+}
+function toggleQA(el){el.classList.toggle('open');}
+function filterQs(btn,diff,container){
+  container.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  container.querySelectorAll('.qa-item').forEach(item=>{
+    item.style.display=(diff==='all'||item.dataset.diff===diff)?'':'none';
+  });
+}
+function updateProgress(){
+  const pct=Math.round(visited.size/CHAPTERS.length*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`${visited.size} / ${CHAPTERS.length} chapters visited`;
+}
+renderNav();
+</script>
+<script src="/embedded/mastery-resize.js"></script>
+</body>
+</html>
