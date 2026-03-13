@@ -12,6 +12,7 @@ const routeImporters: Array<[pattern: RegExp, () => Promise<unknown>]> = [
   [/^\/ebooks(\/|$)/, () => import("@/pages/Ebooks")],
   [/^\/mentorship$/, () => import("@/pages/Mentorship")],
   [/^\/products$/, () => import("@/pages/Products")],
+  [/^\/products\/[^/]+$/, () => import("@/pages/ProductDetail")],
   [/^\/contact$/, () => import("@/pages/Contact")],
   [/^\/llm-galaxy(\/|$)/, () => import("@/pages/LLMGalaxy")],
   [/^\/openowl$/, () => import("@/pages/OpenOwlLanding")],
@@ -39,4 +40,3 @@ export const prefetchRoute = (to: string) => {
   prefetchedRoutes.add(pathname);
   void match[1]();
 };
-

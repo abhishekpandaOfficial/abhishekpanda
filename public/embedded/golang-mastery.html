@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Go Mastery — Zero to Production</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030b10;--surface:#050f18;--card:#091522;--card2:#0d1e30;
+  --border:#0f2236;--border2:#1a3a55;
+  --g1:#00d4ff;--g2:#0099cc;--g3:#00ffe0;
+  --acc2:#ff6b35;--acc3:#ffd166;--acc4:#a78bfa;--acc5:#ff6b9d;
+  --go:#00add8;
+  --text:#cceeff;--text2:#6aabcc;--text3:#2a5a7a;
+  --mono:'Fira Code',monospace;--sans:'DM Sans',sans-serif;--display:'Bebas Neue',sans-serif;
+  --lw:260px;--rw:540px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:14px;flex-shrink:0;z-index:100}
+.logo-wrap{display:flex;align-items:center;gap:11px}
+.logo-badge{width:38px;height:38px;background:linear-gradient(135deg,var(--go),var(--g3));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;color:#030b10;flex-shrink:0;box-shadow:0 0 18px rgba(0,212,255,.3)}
+.logo-text{font-family:var(--display);font-size:22px;letter-spacing:3px;color:var(--g1);text-shadow:0 0 28px rgba(0,212,255,.4);line-height:1}
+.logo-sub{font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:3px;text-transform:uppercase;margin-top:2px}
+.top-sep{flex:1}
+.top-pill{background:rgba(0,212,255,.06);border:1px solid var(--border2);border-radius:20px;padding:4px 14px;font-size:11px;color:var(--text2);font-family:var(--mono);display:flex;gap:8px}
+.top-pill span{color:var(--g1)}
+.top-counts{display:flex;gap:9px}
+.count-chip{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:10px;font-family:var(--mono);color:var(--text3)}
+.count-chip b{color:var(--g1)}
+.layout{display:flex;flex:1;overflow:hidden}
+.left-panel{width:var(--lw);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.left-hdr{padding:14px 14px 10px;border-bottom:1px solid var(--border)}
+.left-hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.left-hdr-top h3{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase}
+.prog-outer{background:var(--border);border-radius:3px;height:3px;overflow:hidden}
+.prog-inner{height:100%;background:linear-gradient(90deg,var(--go),var(--g3));border-radius:3px;width:0%;transition:width .5s ease;box-shadow:0 0 8px rgba(0,212,255,.6)}
+.prog-text{font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:5px}
+.left-nav{flex:1;overflow-y:auto;padding:6px 0}
+.left-nav::-webkit-scrollbar{width:3px}
+.left-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.ch-item{display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;border-left:2px solid transparent;transition:all .2s}
+.ch-item:hover{background:rgba(0,212,255,.04);border-left-color:var(--border2)}
+.ch-item.active{background:rgba(0,212,255,.08);border-left-color:var(--g1)}
+.ch-item.active .ch-name{color:var(--g1)}
+.ch-icon-wrap{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:transform .2s}
+.ch-item:hover .ch-icon-wrap{transform:scale(1.1)}
+.ch-info{flex:1;min-width:0}
+.ch-name{font-size:11.5px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .2s}
+.ch-meta{font-size:9.5px;color:var(--text3);font-family:var(--mono)}
+.lv-badge{font-size:8px;padding:2px 6px;border-radius:8px;font-family:var(--mono);font-weight:700;flex-shrink:0;text-transform:uppercase}
+.middle{flex:1;overflow-y:auto;padding:22px;min-width:0}
+.middle::-webkit-scrollbar{width:5px}
+.middle::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:62vh;text-align:center;padding:40px;animation:fadeUp .5s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.welcome-glyph{font-size:80px;margin-bottom:20px;animation:glow 3s ease-in-out infinite;line-height:1}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 16px rgba(0,212,255,.3))}50%{filter:drop-shadow(0 0 44px rgba(0,212,255,.75))}}
+.welcome-title{font-family:var(--display);font-size:52px;letter-spacing:5px;color:var(--g1);text-shadow:0 0 40px rgba(0,212,255,.5);margin-bottom:8px;line-height:1}
+.welcome-sub{font-size:14px;color:var(--text2);max-width:520px;line-height:1.7;margin-bottom:28px}
+.stat-grid{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 22px;text-align:center;min-width:90px;transition:border-color .2s}
+.stat-card:hover{border-color:var(--g2)}
+.stat-num{font-family:var(--display);font-size:28px;letter-spacing:2px;color:var(--g1);display:block;line-height:1}
+.stat-lbl{font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-top:5px;display:block}
+.welcome-hint{font-size:11px;color:var(--text3);font-family:var(--mono);letter-spacing:1px;margin-top:22px}
+.ch-header{margin-bottom:24px;animation:fadeUp .35s ease}
+.ch-eyebrow{font-size:9px;color:var(--g1);font-family:var(--mono);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px}
+.ch-big-title{font-family:var(--display);font-size:30px;letter-spacing:2px;color:var(--text);line-height:1.1;margin-bottom:10px}
+.ch-desc{font-size:13px;color:var(--text2);line-height:1.7;max-width:640px}
+.ch-chips{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--text2);font-family:var(--mono)}
+.chip-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.topics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:11px;animation:fadeUp .4s ease .1s both}
+.t-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:15px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden}
+.t-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--go),var(--g3));transform:scaleX(0);transition:transform .22s;transform-origin:left}
+.t-card:hover{border-color:var(--g2);transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,212,255,.08)}
+.t-card:hover::after,.t-card.active::after{transform:scaleX(1)}
+.t-card.active{border-color:var(--g1);background:var(--card2);box-shadow:0 0 0 1px var(--g1),0 8px 24px rgba(0,212,255,.12)}
+.t-icon{font-size:22px;margin-bottom:9px;display:block;line-height:1}
+.t-title{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:5px;font-family:var(--mono)}
+.t-desc{font-size:11px;color:var(--text3);line-height:1.5}
+.t-tags{display:flex;gap:4px;margin-top:9px;flex-wrap:wrap}
+.tag{font-size:8.5px;padding:2px 6px;border-radius:4px;font-family:var(--mono);font-weight:600;letter-spacing:.5px}
+.tag.beginner{background:rgba(0,212,255,.12);color:var(--g1);border:1px solid rgba(0,212,255,.25)}
+.tag.intermediate{background:rgba(255,209,102,.12);color:#ffd166;border:1px solid rgba(255,209,102,.25)}
+.tag.advanced{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.25)}
+.tag.expert{background:rgba(255,107,53,.12);color:#ff6b35;border:1px solid rgba(255,107,53,.25)}
+.tag.production{background:rgba(255,107,157,.12);color:#ff6b9d;border:1px solid rgba(255,107,157,.25)}
+.right-panel{width:var(--rw);background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:width .3s ease}
+.right-panel.hidden{width:0;border:none;overflow:hidden}
+.right-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.right-hdr h3{flex:1;font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.close-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;flex-shrink:0}
+.close-btn:hover{background:var(--border);color:var(--text)}
+.right-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.right-tabs::-webkit-scrollbar{height:0}
+.r-tab{padding:9px 15px;font-size:10.5px;color:var(--text3);font-family:var(--mono);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;letter-spacing:.5px}
+.r-tab:hover{color:var(--text)}
+.r-tab.active{color:var(--g1);border-bottom-color:var(--g1)}
+.right-body{flex:1;overflow-y:auto;padding:18px}
+.right-body::-webkit-scrollbar{width:3px}
+.right-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+@keyframes slideRight{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
+.right-body>*{animation:slideRight .28s ease both}
+.sec{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec:first-child{margin-top:0}
+p.bd{font-size:12.5px;line-height:1.75;color:var(--text2);margin-bottom:11px}
+strong{color:var(--text)}
+em{color:var(--g1);font-style:normal;font-family:var(--mono);font-size:11px}
+.callout{border-left:3px solid;padding:11px 14px;border-radius:0 7px 7px 0;margin:12px 0;font-size:12px;line-height:1.65}
+.callout.info{border-color:var(--go);background:rgba(0,173,216,.06);color:var(--text2)}
+.callout.warn{border-color:var(--acc3);background:rgba(255,209,102,.05);color:var(--text2)}
+.callout.tip{border-color:var(--g3);background:rgba(0,255,224,.05);color:var(--text2)}
+.callout.danger{border-color:var(--acc5);background:rgba(255,107,157,.05);color:var(--text2)}
+.callout.perf{border-color:var(--acc4);background:rgba(167,139,250,.05);color:var(--text2)}
+.callout strong{display:block;margin-bottom:4px;font-family:var(--mono);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase}
+.callout.info strong{color:var(--go)}.callout.warn strong{color:var(--acc3)}.callout.tip strong{color:var(--g3)}.callout.danger strong{color:var(--acc5)}.callout.perf strong{color:var(--acc4)}
+.cb{background:#010810;border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden}
+.cb-hdr{display:flex;align-items:center;justify-content:space-between;padding:7px 13px;background:var(--card);border-bottom:1px solid var(--border)}
+.cb-lang{font-size:9.5px;color:var(--g1);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase}
+.cp-btn{font-size:9.5px;color:var(--text3);background:transparent;border:1px solid var(--border);border-radius:4px;padding:2px 8px;cursor:pointer;font-family:var(--mono);transition:all .2s}
+.cp-btn:hover{color:var(--text);border-color:var(--border2)}
+.cb-body{padding:14px;overflow-x:auto;font-family:var(--mono);font-size:11.5px;line-height:1.85;color:#9fcfe8;white-space:pre}
+.cb-body::-webkit-scrollbar{height:3px}
+.cb-body::-webkit-scrollbar-thumb{background:var(--border2)}
+.kw{color:#00d4ff}.ty{color:#7ecfff}.fn{color:#b3d9ff}.str{color:#85c98a}
+.num{color:#f0c060}.cm{color:#2a5870;font-style:italic}.pk{color:#00add8}
+.bi{color:#4dd0e1}.dc{color:#ffaa70}.op{color:#7abfb8}
+.tbl{width:100%;border-collapse:collapse;font-size:11.5px;margin:12px 0}
+.tbl th{background:var(--card2);color:var(--g1);font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;padding:9px 11px;text-align:left;border-bottom:1px solid var(--border)}
+.tbl td{padding:8px 11px;color:var(--text2);border-bottom:1px solid rgba(255,255,255,.03);vertical-align:top;line-height:1.55}
+.tbl tr:hover td{background:rgba(0,212,255,.02)}
+.fl{list-style:none;margin:8px 0}
+.fl li{display:flex;align-items:flex-start;gap:9px;padding:5px 0;font-size:12px;color:var(--text2);line-height:1.5;border-bottom:1px solid rgba(255,255,255,.025)}
+.fl li::before{content:'▸';color:var(--g1);font-size:10px;margin-top:3px;flex-shrink:0}
+.dw{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin:12px 0;overflow:auto}
+.dt{font-family:var(--mono);font-size:9.5px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;text-align:center}
+.qa-item{border:1px solid var(--border);border-radius:8px;margin-bottom:9px;overflow:hidden;transition:border-color .2s}
+.qa-item:hover{border-color:var(--border2)}
+.qa-q{padding:11px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:9px;background:var(--card);transition:background .2s}
+.qa-q:hover{background:var(--card2)}
+.qa-qicon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:var(--mono);flex-shrink:0;margin-top:1px}
+.qa-qtext{flex:1;font-size:12px;color:var(--text);font-weight:500;line-height:1.5}
+.qa-chev{color:var(--text3);transition:transform .3s;flex-shrink:0;font-size:11px;margin-top:3px}
+.qa-item.open .qa-chev{transform:rotate(180deg)}
+.qa-ans{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.qa-item.open .qa-ans{max-height:1500px}
+.qa-ans-body{padding:14px;font-size:12px;color:var(--text2);line-height:1.8;border-top:1px solid var(--border);background:#010810}
+.qa-ans-body code{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:var(--mono);font-size:10.5px;color:var(--g1)}
+.filter-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}
+.fbtn{font-size:9.5px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;font-family:var(--mono);letter-spacing:.5px;transition:all .2s}
+.fbtn:hover,.fbtn.active{border-color:var(--g1);color:var(--g1);background:rgba(0,212,255,.07)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.mini-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px}
+.mini-card h4{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--g1);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.mini-card p{font-size:11px;color:var(--text2);line-height:1.55}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo-wrap">
+    <div class="logo-badge">Go</div>
+    <div>
+      <div class="logo-text">GO MASTERY</div>
+      <div class="logo-sub">Zero to Production · 2025</div>
+    </div>
+  </div>
+  <div class="top-sep"></div>
+  <div class="top-counts">
+    <div class="count-chip"><b>22</b> Chapters</div>
+    <div class="count-chip"><b>130+</b> Topics</div>
+    <div class="count-chip"><b>300+</b> Code Examples</div>
+    <div class="count-chip"><b>100</b> Q&amp;A</div>
+  </div>
+  <div class="top-pill">Go <span>1.23</span> · Production <span>Ready</span></div>
+</div>
+<div class="layout">
+  <div class="left-panel">
+    <div class="left-hdr">
+      <div class="left-hdr-top"><h3>Go Learning Path</h3></div>
+      <div class="prog-outer"><div class="prog-inner" id="progBar"></div></div>
+      <div class="prog-text" id="progTxt">0 / 22 chapters visited</div>
+    </div>
+    <nav class="left-nav" id="leftNav"></nav>
+  </div>
+  <div class="middle" id="middle">
+    <div class="welcome">
+      <div class="welcome-glyph">🐹</div>
+      <div class="welcome-title">GO MASTERY</div>
+      <p class="welcome-sub">The most comprehensive Go guide — from absolute zero to deploying production-grade microservices. Every concept, pattern, diagram, and real-world scenario a Gopher needs.</p>
+      <div class="stat-grid">
+        <div class="stat-card"><span class="stat-num">22</span><span class="stat-lbl">Chapters</span></div>
+        <div class="stat-card"><span class="stat-num">130+</span><span class="stat-lbl">Topics</span></div>
+        <div class="stat-card"><span class="stat-num">300+</span><span class="stat-lbl">Examples</span></div>
+        <div class="stat-card"><span class="stat-num">100</span><span class="stat-lbl">Q&amp;A</span></div>
+        <div class="stat-card"><span class="stat-num">∞</span><span class="stat-lbl">Patterns</span></div>
+      </div>
+      <div class="welcome-hint">← Select a chapter to start mastering Go</div>
+    </div>
+  </div>
+  <div class="right-panel hidden" id="rightPanel">
+    <div class="right-hdr">
+      <h3 id="rightTitle">Topic Details</h3>
+      <button class="close-btn" onclick="closeRight()">✕</button>
+    </div>
+    <div class="right-tabs" id="rightTabs"></div>
+    <div class="right-body" id="rightBody"></div>
+  </div>
+</div>
+<script>
+const CHAPTERS=[
+{id:'basics',icon:'🐹',color:'#00d4ff',bg:'rgba(0,212,255,.1)',lc:'#00d4ff',level:'BEGINNER',
+ title:'Go Fundamentals',sub:'Variables · Types · Zero Values · Packages · Toolchain',
+ desc:'Start from zero. Understand Go&#39;s philosophy, toolchain, static type system, zero values, and why Go is designed for simplicity, speed, and production reliability at scale.',
+ topics:[
+  {id:'why-go',icon:'💡',title:'Why Go?',desc:'Philosophy, design goals, origin story, Go vs Java/Python/Rust',tags:['beginner'],tabs:['Philosophy','Go vs Others','When to Use Go','Timeline']},
+  {id:'toolchain',icon:'🔧',title:'Go Toolchain',desc:'go run/build/test/mod/vet/fmt — the complete development loop',tags:['beginner'],tabs:['Commands','Project Layout','go.mod Basics','Code']},
+  {id:'variables',icon:'📦',title:'Variables & Declarations',desc:'var, :=, multiple assignment, blank identifier, zero values',tags:['beginner'],tabs:['All Forms','Zero Values','Pitfalls','Code']},
+  {id:'types',icon:'🔢',title:'Built-in Type System',desc:'int, float64, string, bool, byte, rune, named types, type aliases',tags:['beginner'],tabs:['Numeric Types','Strings & Runes','Named Types','Code']},
+  {id:'constants',icon:'🔒',title:'Constants & iota',desc:'const, untyped constants, iota for enums, bitmask patterns',tags:['beginner'],tabs:['const Rules','iota Patterns','Real Examples','Code']},
+  {id:'init-scope',icon:'🔭',title:'Scope, Packages & init()',desc:'Block scope, package scope, exported names, init() order',tags:['beginner'],tabs:['Scope Rules','Exported Names','init() Order','Code']},
+]},
+{id:'control',icon:'🔀',color:'#a78bfa',bg:'rgba(167,139,250,.1)',lc:'#a78bfa',level:'BEGINNER',
+ title:'Control Flow',sub:'if · for · switch · defer · panic · recover · goto',
+ desc:'Go has one loop construct but covers every pattern. Master all control flow including defer LIFO execution, the panic/recover mechanism, and labeled breaks for nested loops.',
+ topics:[
+  {id:'if-else',icon:'❓',title:'if / else',desc:'No parentheses, init statement, short-circuit evaluation',tags:['beginner'],tabs:['Syntax','Init Statement','Short-Circuit','Code']},
+  {id:'for-all',icon:'🔁',title:'for — Every Pattern',desc:'C-style, while-style, infinite, range, range-over-int (1.22+)',tags:['beginner'],tabs:['All Patterns','range Deep Dive','Go 1.22+ Changes','Code']},
+  {id:'switch-stmt',icon:'🔀',title:'switch Statement',desc:'Expression switch, type switch, fallthrough, multiple cases',tags:['beginner'],tabs:['Expression Switch','Type Switch','Patterns','Code']},
+  {id:'defer-panic',icon:'⏮️',title:'defer · panic · recover',desc:'LIFO order, arg capture, named return modification, recover patterns',tags:['intermediate'],tabs:['defer Rules','panic & recover','Real Use Cases','Code']},
+  {id:'labels',icon:'🏷️',title:'Labels & goto',desc:'Labeled break/continue for nested loops, goto (rare but valid)',tags:['beginner'],tabs:['Labeled Loops','goto','Code']},
+]},
+{id:'functions',icon:'⚡',color:'#ffd166',bg:'rgba(255,209,102,.1)',lc:'#ffd166',level:'BEGINNER',
+ title:'Functions & Closures',sub:'Multiple Returns · Variadic · First-Class · Closures · Generics',
+ desc:'Functions are first-class citizens. Master multiple returns, the (T, error) pattern, variadic args, closures with factory patterns, and Go generics with type constraints.',
+ topics:[
+  {id:'func-decl',icon:'⚡',title:'Function Declaration',desc:'Params, multiple returns, named returns, variadic, blank identifier',tags:['beginner'],tabs:['Signatures','Named Returns','Variadic','Code']},
+  {id:'error-pattern',icon:'🚦',title:'(T, error) Pattern',desc:'Go&#39;s error return idiom, early return, guard clauses',tags:['beginner'],tabs:['The Pattern','Early Return','Guard Clauses','Code']},
+  {id:'closures',icon:'🔮',title:'Closures',desc:'Variable capture, factory pattern, memoization, loop closure gotcha',tags:['intermediate'],tabs:['How Closures Work','Factories','Loop Gotcha Fix','Code']},
+  {id:'func-types',icon:'🎯',title:'First-Class Functions',desc:'Func types, passing functions, returning functions, callbacks',tags:['intermediate'],tabs:['Func as Values','Callbacks','Code']},
+  {id:'generics',icon:'🧬',title:'Generics (Go 1.18+)',desc:'Type params, constraints, comparable, ~T union types, when to use',tags:['intermediate'],tabs:['Type Parameters','Constraints','Real Examples','Code']},
+]},
+{id:'collections',icon:'📚',color:'#00ffe0',bg:'rgba(0,255,224,.1)',lc:'#00ffe0',level:'BEGINNER',
+ title:'Arrays, Slices & Maps',sub:'Slice Header Internals · append · copy · Map Gotchas · Sets',
+ desc:'Go&#39;s collection types have critically different semantics. Master slice headers (ptr/len/cap), append growth, backing array sharing traps, and safe map concurrent access.',
+ topics:[
+  {id:'arrays',icon:'📏',title:'Arrays',desc:'Fixed-size, value semantics, comparison, multidimensional',tags:['beginner'],tabs:['Basics','Value Semantics','vs Slice','Code']},
+  {id:'slices-deep',icon:'🔪',title:'Slices — Deep Dive',desc:'Header internals, append growth factor, sub-slice sharing, three-index',tags:['intermediate'],tabs:['Slice Header','append Internals','Sharing Gotchas','Code']},
+  {id:'maps',icon:'🗺️',title:'Maps',desc:'Hash map semantics, make, delete, nil map panic, iteration order',tags:['intermediate'],tabs:['Operations','Nil Map Trap','Iteration Order','Code']},
+  {id:'patterns-coll',icon:'🔄',title:'Collection Patterns',desc:'Filter, deduplicate, group-by, invert, set operations, chunk',tags:['intermediate'],tabs:['Filter & Map','Set Pattern','Group-by & Invert','Code']},
+  {id:'iteration',icon:'🔁',title:'Iteration & range',desc:'range semantics, loop variable reuse, Go 1.22 fix, range channels',tags:['beginner'],tabs:['range Semantics','Variable Capture','Go 1.22+','Code']},
+]},
+{id:'structs',icon:'🏛️',color:'#ff6b35',bg:'rgba(255,107,53,.1)',lc:'#ff6b35',level:'BEGINNER',
+ title:'Structs & Methods',sub:'Receivers · Embedding · Struct Tags · Constructor Patterns',
+ desc:'Go&#39;s answer to OOP — structs with methods. Master value vs pointer receivers, struct embedding for composition, JSON/DB tags, and functional options for production APIs.',
+ topics:[
+  {id:'struct-def',icon:'🏛️',title:'Struct Declaration',desc:'Fields, anonymous structs, nested, struct literals, comparison',tags:['beginner'],tabs:['Declaration','Initialization','Anonymous Structs','Code']},
+  {id:'receivers',icon:'⚙️',title:'Value vs Pointer Receivers',desc:'When to use each, method sets, auto-addressing, mutex rule',tags:['intermediate'],tabs:['Decision Guide','Method Sets','Common Mistakes','Code']},
+  {id:'embedding',icon:'🪆',title:'Struct Embedding',desc:'Composition over inheritance, promoted methods, field conflicts',tags:['intermediate'],tabs:['How It Works','Promoted Methods','Override','Code']},
+  {id:'struct-tags',icon:'🏷️',title:'Struct Tags',desc:'json, db, validate, form tags — reflection-based metadata',tags:['intermediate'],tabs:['JSON Tags','DB & Validate','Custom Tags','Code']},
+  {id:'constructors',icon:'🔨',title:'Constructor Patterns',desc:'NewXxx(), functional options, builder, option struct patterns',tags:['intermediate'],tabs:['NewXxx()','Functional Options','Real Production Code','Code']},
+]},
+{id:'interfaces',icon:'🎭',color:'#00ffe0',bg:'rgba(0,255,224,.1)',lc:'#00ffe0',level:'INTERMEDIATE',
+ title:'Interfaces & Polymorphism',sub:'Implicit · Duck Typing · Type Assertion · Composition · Nil Trap',
+ desc:'Go&#39;s implicit interfaces are its most powerful design. No "implements" keyword — if you have the methods you satisfy the interface. Master composition, type assertions, and the famous nil interface trap.',
+ topics:[
+  {id:'iface-how',icon:'🎭',title:'How Interfaces Work',desc:'Implicit satisfaction, duck typing, interface values (type, value)',tags:['intermediate'],tabs:['Implicit Satisfaction','Interface Values','Diagram','Code']},
+  {id:'iface-compose',icon:'🧩',title:'Interface Composition',desc:'Embedding interfaces, small interface principle, io.ReadWriter',tags:['intermediate'],tabs:['Composing','Small Interface Rule','Standard Library','Code']},
+  {id:'type-assert',icon:'🔍',title:'Type Assertions & Switches',desc:'x.(T), comma-ok form, type switch, any/interface{}',tags:['intermediate'],tabs:['Type Assertions','Type Switch','any vs interface{}','Code']},
+  {id:'std-ifaces',icon:'📚',title:'Standard Library Interfaces',desc:'io.Reader/Writer, fmt.Stringer, error, sort.Interface, http.Handler',tags:['intermediate'],tabs:['io Package','fmt.Stringer','sort.Interface','Code']},
+  {id:'nil-iface',icon:'⚠️',title:'Nil Interface Trap',desc:'nil *T ≠ nil interface — the classic Go gotcha with fix',tags:['advanced'],tabs:['The Bug','Why It Happens','Prevention','Code']},
+]},
+{id:'errors',icon:'🚨',color:'#ff6b9d',bg:'rgba(255,107,157,.1)',lc:'#ff6b9d',level:'INTERMEDIATE',
+ title:'Error Handling',sub:'error Interface · Wrapping · Sentinel · Custom Types · Multi-Error',
+ desc:'Go&#39;s explicit error returns are a superpower. No hidden exceptions. Master error wrapping with %w, errors.Is/As chain inspection, custom error types, and Go 1.20 multi-errors.',
+ topics:[
+  {id:'error-iface',icon:'🚨',title:'error Interface',desc:'error interface, nil checks, early return, idiomatic patterns',tags:['beginner'],tabs:['error Interface','Nil Check Pattern','Idioms','Code']},
+  {id:'error-wrap',icon:'🎁',title:'Wrapping & Unwrapping',desc:'fmt.Errorf %w, errors.Is, errors.As, the error chain',tags:['intermediate'],tabs:['fmt.Errorf %w','errors.Is','errors.As','Code']},
+  {id:'custom-err',icon:'🔨',title:'Custom Error Types',desc:'Implementing error, PathError style, error codes, rich context',tags:['intermediate'],tabs:['Custom Struct','With Status Codes','Code']},
+  {id:'sentinel-err',icon:'🚩',title:'Sentinel Errors',desc:'var ErrNotFound, io.EOF, sql.ErrNoRows — when and how',tags:['intermediate'],tabs:['Pattern','Package-Level Vars','Code']},
+  {id:'multierr',icon:'⛓️',title:'Multi-Error (Go 1.20+)',desc:'errors.Join, combined errors, validation error lists',tags:['intermediate'],tabs:['errors.Join','Validation Lists','Code']},
+]},
+{id:'pointers',icon:'👉',color:'#ffd166',bg:'rgba(255,209,102,.1)',lc:'#ffd166',level:'INTERMEDIATE',
+ title:'Pointers & Memory Model',sub:'& and * · Heap vs Stack · Escape Analysis · GC · unsafe',
+ desc:'Go manages memory automatically but understanding heap vs stack, escape analysis, and GC behavior is critical for writing fast, low-latency services.',
+ topics:[
+  {id:'ptr-basics',icon:'👉',title:'Pointer Basics',desc:'& address-of, * dereference, nil pointers, no pointer arithmetic',tags:['beginner'],tabs:['Basics','nil Pointers','When to Use','Code']},
+  {id:'heap-stack',icon:'🏗️',title:'Heap vs Stack & Escape Analysis',desc:'Goroutine stacks, escape rules, -gcflags -m, what causes heap alloc',tags:['advanced'],tabs:['Stack vs Heap','Escape Analysis','gcflags Demo','Code']},
+  {id:'gc-go',icon:'♻️',title:'Garbage Collector',desc:'Tri-color mark-sweep, GOGC, GOMEMLIMIT, STW pauses, tuning',tags:['advanced'],tabs:['How GC Works','GOGC & GOMEMLIMIT','Reducing Pressure','Code']},
+  {id:'unsafe-pkg',icon:'⚠️',title:'unsafe Package',desc:'unsafe.Pointer, Sizeof, Alignof, Offsetof — when valid to use',tags:['expert'],tabs:['unsafe.Pointer Rules','Valid Patterns','Struct Alignment','Code']},
+]},
+{id:'goroutines',icon:'🔀',color:'#00d4ff',bg:'rgba(0,212,255,.1)',lc:'#00d4ff',level:'INTERMEDIATE',
+ title:'Goroutines & Channels',sub:'M:N Scheduler · CSP · Buffered · select · Pipelines · Leaks',
+ desc:'Goroutines start at 2KB and run millions strong. Channels are typed, goroutine-safe pipes. Together they implement Go&#39;s CSP concurrency model — the most elegant in any language.',
+ topics:[
+  {id:'goroutine-model',icon:'🔀',title:'Goroutine Model',desc:'go keyword, M:N scheduler, P/M/G, stack growth, GOMAXPROCS',tags:['intermediate'],tabs:['go Keyword','M:N Scheduler','Stack Growth','Code']},
+  {id:'channels',icon:'📡',title:'Channels — Complete Guide',desc:'make(chan T), directions, nil/open/closed behavior, closing rules',tags:['intermediate'],tabs:['Semantics','Behavior Table','Direction Types','Code']},
+  {id:'buffered-ch',icon:'📬',title:'Buffered Channels & Semaphore',desc:'make(chan T, n), buffering semantics, semaphore pattern',tags:['intermediate'],tabs:['Buffered vs Unbuffered','Semaphore Pattern','Code']},
+  {id:'select-go',icon:'🎛️',title:'select Statement',desc:'Multi-channel wait, timeout, default, priority select, fan-in',tags:['intermediate'],tabs:['select Basics','Timeout & Cancel','Fan-in','Code']},
+  {id:'pipelines',icon:'🏭',title:'Pipeline Pattern',desc:'Generator, stage, fan-out, fan-in — concurrent data processing',tags:['advanced'],tabs:['Generator','Pipeline','Fan-Out/Fan-In','Code']},
+  {id:'goroutine-leaks',icon:'💧',title:'Goroutine Leaks',desc:'What causes leaks, detection with goleak, prevention patterns',tags:['intermediate'],tabs:['Common Causes','Detection','Prevention','Code']},
+]},
+{id:'concurrency',icon:'⚙️',color:'#a78bfa',bg:'rgba(167,139,250,.1)',lc:'#a78bfa',level:'ADVANCED',
+ title:'Concurrency Patterns',sub:'sync · atomic · errgroup · context · Worker Pool · Race Detector',
+ desc:'Beyond basic channels: sync primitives for shared state, atomic operations, errgroup for parallel work with error propagation, context cancellation, and the race detector.',
+ topics:[
+  {id:'sync-prims',icon:'🔐',title:'sync Package',desc:'Mutex, RWMutex, WaitGroup, Once, Cond, Pool, Map — all explained',tags:['intermediate'],tabs:['Mutex & RWMutex','WaitGroup','sync.Once','sync.Pool','Code']},
+  {id:'atomic-ops',icon:'⚛️',title:'sync/atomic',desc:'atomic.Int64, Bool, Pointer, Value, compare-and-swap, lock-free',tags:['advanced'],tabs:['Atomic Types','CAS Pattern','Lock-Free Counter','Code']},
+  {id:'errgroup',icon:'🤝',title:'errgroup',desc:'errgroup.WithContext, SetLimit, parallel tasks with error handling',tags:['advanced'],tabs:['errgroup Basics','SetLimit','Real Example','Code']},
+  {id:'context-go',icon:'🎯',title:'context Package',desc:'WithCancel, WithTimeout, WithDeadline, WithValue, propagation rules',tags:['intermediate'],tabs:['Context Tree','WithTimeout','WithValue','Code']},
+  {id:'worker-pool',icon:'🏗️',title:'Worker Pool',desc:'Fixed goroutine pool, job/result channels, errgroup pool pattern',tags:['advanced'],tabs:['Channel Pool','errgroup Pool','Code']},
+  {id:'race-det',icon:'🔍',title:'Race Detector & Prevention',desc:'-race flag, common data races, sync.Map vs mutex, atomic fixes',tags:['advanced'],tabs:['go -race','Common Races','Fix Patterns','Code']},
+]},
+{id:'stdlib',icon:'📚',color:'#00ffe0',bg:'rgba(0,255,224,.1)',lc:'#00ffe0',level:'INTERMEDIATE',
+ title:'Standard Library Mastery',sub:'fmt · io · strings · os · time · encoding/json · net/http',
+ desc:'Go&#39;s standard library is world-class. Master the critical packages: I/O primitives, JSON encoding, string manipulation, file operations, time handling, and net/http client.',
+ topics:[
+  {id:'fmt-io',icon:'🖨️',title:'fmt & io',desc:'Printf verbs, Fprintf, io.Reader/Writer, io.Copy, bufio scanner',tags:['beginner'],tabs:['fmt Verbs','io Primitives','bufio','Code']},
+  {id:'strings-bytes',icon:'📝',title:'strings & bytes',desc:'strings.Builder, strings.Cut, bytes.Buffer, unicode/utf8 handling',tags:['beginner'],tabs:['strings Functions','strings.Builder','bytes.Buffer','Code']},
+  {id:'os-filepath',icon:'💾',title:'os & path/filepath',desc:'File I/O, directory ops, env vars, args, signals, filepath.Walk',tags:['beginner'],tabs:['File I/O','Directory Operations','Signals','Code']},
+  {id:'json',icon:'🔧',title:'encoding/json',desc:'Marshal, Unmarshal, struct tags, custom codecs, streaming decoder',tags:['intermediate'],tabs:['Marshal & Tags','Unmarshal','Custom Codecs','Streaming','Code']},
+  {id:'time-go',icon:'⏰',title:'time Package',desc:'Time, Duration, Timer, Ticker, Parse/Format, timezone pitfalls',tags:['beginner'],tabs:['Time & Duration','Timer & Ticker','Parse & Format','Code']},
+  {id:'net-http-client',icon:'🌐',title:'net/http Client',desc:'http.Client, custom Transport, timeouts, TLS, retries',tags:['intermediate'],tabs:['http.Client','Timeouts & TLS','Retries','Code']},
+]},
+{id:'http-api',icon:'🌐',color:'#00d4ff',bg:'rgba(0,212,255,.1)',lc:'#00d4ff',level:'INTERMEDIATE',
+ title:'HTTP APIs & Routers',sub:'net/http · chi · gin · Middleware · Validation · Graceful Shutdown',
+ desc:'Build production HTTP APIs — from bare net/http to chi and gin routers, middleware chains, request binding/validation, structured JSON responses, and graceful shutdown.',
+ topics:[
+  {id:'http-server',icon:'🖥️',title:'net/http Server',desc:'ServeMux, Handler interface, HandlerFunc, http.Server configuration',tags:['intermediate'],tabs:['Handler Pattern','ServeMux','Server Config','Code']},
+  {id:'chi',icon:'🛤️',title:'chi Router',desc:'Route groups, URL params, nested routers, middleware, test utils',tags:['intermediate'],tabs:['chi Basics','Route Groups','Middleware','Code']},
+  {id:'gin',icon:'🍸',title:'Gin Framework',desc:'gin.Engine, ShouldBind, validation, gin.Context, error handling',tags:['intermediate'],tabs:['Gin Setup','Binding & Validation','Error Handling','Code']},
+  {id:'middleware-go',icon:'🔗',title:'Middleware Patterns',desc:'Logging, auth JWT, CORS, rate limiting, request ID, recovery',tags:['intermediate'],tabs:['Writing Middleware','JWT Auth','Rate Limiting','Code']},
+  {id:'rest-design',icon:'🎯',title:'REST Handler Patterns',desc:'Handler struct with DI, CRUD, pagination, API versioning, OpenAPI',tags:['intermediate'],tabs:['Handler Struct','CRUD Patterns','Pagination','Code']},
+  {id:'graceful',icon:'🛑',title:'Graceful Shutdown',desc:'SIGTERM, http.Server.Shutdown, connection draining, k8s termination',tags:['production'],tabs:['Signal Handling','Shutdown Code','Kubernetes','Code']},
+]},
+{id:'databases',icon:'🗄️',color:'#ffd166',bg:'rgba(255,209,102,.1)',lc:'#ffd166',level:'INTERMEDIATE',
+ title:'Databases in Go',sub:'database/sql · pgx · GORM · Transactions · Migrations · sqlc',
+ desc:'Connect Go to databases idiomatically. Raw database/sql for control, pgx for PostgreSQL performance, GORM for rapid development, and sqlc for type-safe SQL codegen.',
+ topics:[
+  {id:'db-sql',icon:'🗄️',title:'database/sql',desc:'sql.DB pool, QueryRowContext, Scan patterns, pool configuration',tags:['intermediate'],tabs:['sql.DB Setup','Connection Pool','Query Patterns','Code']},
+  {id:'pgx',icon:'🐘',title:'pgx — PostgreSQL',desc:'pgxpool, batch ops, COPY, LISTEN/NOTIFY, pgx vs lib/pq',tags:['intermediate'],tabs:['pgxpool','Batch Operations','LISTEN/NOTIFY','Code']},
+  {id:'gorm',icon:'🔮',title:'GORM ORM',desc:'Models, CRUD, associations, hooks, preloading, scopes, raw SQL',tags:['intermediate'],tabs:['GORM Setup','CRUD & Associations','Hooks & Scopes','Code']},
+  {id:'transactions',icon:'💳',title:'Transactions',desc:'sql.Tx, deferred rollback pattern, isolation levels, GORM tx',tags:['intermediate'],tabs:['sql.Tx','Deferred Rollback','Isolation Levels','Code']},
+  {id:'migrations-db',icon:'🔄',title:'Migrations',desc:'golang-migrate, goose, Atlas — schema versioning in production',tags:['intermediate'],tabs:['golang-migrate','goose','CI Integration','Code']},
+  {id:'sqlc',icon:'⚡',title:'sqlc — Type-Safe SQL',desc:'sqlc codegen, query.sql, no reflection, compile-time safety',tags:['advanced'],tabs:['sqlc Setup','Writing Queries','Generated Code','Code']},
+]},
+{id:'testing',icon:'🧪',color:'#00ffe0',bg:'rgba(0,255,224,.1)',lc:'#00ffe0',level:'INTERMEDIATE',
+ title:'Testing in Go',sub:'Table Tests · Benchmarks · Mocks · Fuzz · HTTP · testcontainers',
+ desc:'Go testing is built-in and powerful. Master table-driven tests, sub-tests, benchmarks with profiling, mocking interfaces, fuzzing, HTTP handler tests, and real DB integration.',
+ topics:[
+  {id:'test-pkg',icon:'🧪',title:'testing Package',desc:'TestXxx, t.Run, t.Fatal/Error, t.Helper, -run/-count/-v flags',tags:['beginner'],tabs:['Structure','t.Run Subtests','Test Helpers','Code']},
+  {id:'table-tests',icon:'📋',title:'Table-Driven Tests',desc:'[]struct pattern, map[string]struct, parallel, golden files',tags:['intermediate'],tabs:['Table Pattern','Parallel Subtests','Golden Files','Code']},
+  {id:'mocks',icon:'🎭',title:'Mocking',desc:'Interface mocking, testify/mock, gomock, mockery codegen',tags:['intermediate'],tabs:['Interface Mocks','testify/mock','gomock','Code']},
+  {id:'benchmarks-test',icon:'⚡',title:'Benchmarks',desc:'BenchmarkXxx, b.N, ResetTimer, ReportAllocs, pprof from bench',tags:['intermediate'],tabs:['Writing Benchmarks','AllocsPerOp','Running & Comparing','Code']},
+  {id:'fuzz-test',icon:'🎲',title:'Fuzzing (Go 1.18+)',desc:'FuzzXxx, corpus entries, go test -fuzz, finding edge cases',tags:['advanced'],tabs:['Fuzz Basics','Corpus','Real Finds','Code']},
+  {id:'testcontainers',icon:'🐳',title:'testcontainers-go',desc:'Real PostgreSQL/Redis in tests, TestMain, container lifecycle',tags:['advanced'],tabs:['Setup','Database Tests','Code']},
+]},
+{id:'grpc',icon:'🔌',color:'#a78bfa',bg:'rgba(167,139,250,.1)',lc:'#a78bfa',level:'ADVANCED',
+ title:'gRPC & Protocol Buffers',sub:'proto3 · Server · Client · Streaming · Interceptors · Buf',
+ desc:'Build high-performance binary microservice APIs with gRPC. Proto3 schema design, server/client streaming, interceptor chains, health checks, and the modern buf toolchain.',
+ topics:[
+  {id:'proto3',icon:'📜',title:'proto3 Schema Design',desc:'Messages, scalar types, oneof, repeated, enums, services, imports',tags:['intermediate'],tabs:['Syntax','Types & Rules','Service Definition','Code']},
+  {id:'grpc-server',icon:'🖥️',title:'gRPC Server',desc:'Implement service interface, register, reflection, TLS, health',tags:['intermediate'],tabs:['Server Setup','Service Impl','Health Check','Code']},
+  {id:'grpc-client',icon:'📱',title:'gRPC Client',desc:'grpc.NewClient, dial options, TLS, keepalive, load balancing',tags:['intermediate'],tabs:['Client Setup','Dial Options','Code']},
+  {id:'streaming',icon:'🌊',title:'Streaming RPC',desc:'Server streaming, client streaming, bidirectional streaming',tags:['advanced'],tabs:['Server Stream','Client Stream','Bidi Stream','Code']},
+  {id:'interceptors',icon:'🔗',title:'Interceptors',desc:'UnaryInterceptor, StreamInterceptor, grpc-middleware chain',tags:['advanced'],tabs:['Unary','Stream','Chaining','Code']},
+  {id:'buf-tool',icon:'🛠️',title:'Buf Toolchain',desc:'buf.yaml, buf lint, buf generate, buf breaking — modern proto workflow',tags:['production'],tabs:['buf Setup','Linting','Generate','Code']},
+]},
+{id:'modules',icon:'📦',color:'#ffd166',bg:'rgba(255,209,102,.1)',lc:'#ffd166',level:'BEGINNER',
+ title:'Packages & Modules',sub:'go.mod · Versioning · Workspace · Vendor · Build Tags · go:embed',
+ desc:'Go&#39;s module system is the foundation. go.mod anatomy, semantic versioning, multi-module workspaces for monorepos, vendoring for reproducible CI, and conditional compilation.',
+ topics:[
+  {id:'go-mod',icon:'📦',title:'go.mod & Dependency Management',desc:'Module path, require, replace, exclude, go get, tidy, verify',tags:['beginner'],tabs:['go.mod Anatomy','go Commands','Versioning','Code']},
+  {id:'workspace',icon:'🗂️',title:'Multi-Module Workspace',desc:'go work init, go.work, local development monorepo patterns',tags:['intermediate'],tabs:['go.work File','Local Dev Flow','Code']},
+  {id:'build-tags',icon:'🏷️',title:'Build Tags',desc:'//go:build, OS/arch conditions, custom tags, file naming',tags:['intermediate'],tabs:['Tag Syntax','Platform Tags','Custom Tags','Code']},
+  {id:'embed',icon:'📁',title:'go:embed',desc:'Embed files, embed.FS, single-binary web apps, template embedding',tags:['intermediate'],tabs:['Single File','embed.FS','Code']},
+]},
+{id:'patterns',icon:'🏗️',color:'#ff6b9d',bg:'rgba(255,107,157,.1)',lc:'#ff6b9d',level:'ADVANCED',
+ title:'Production Design Patterns',sub:'Clean Arch · Repository · DI · Config · CLI · Background Jobs',
+ desc:'Patterns used in real production Go services — clean architecture with dependency inversion, repository pattern, DI with wire, 12-factor config, cobra CLI, and background job processing.',
+ topics:[
+  {id:'clean-arch',icon:'🏛️',title:'Clean Architecture',desc:'Layers, dependency rule, domain model, ports & adapters in Go',tags:['advanced'],tabs:['Layer Structure','Dependency Rule','Directory Layout','Code']},
+  {id:'repo-pattern',icon:'🗄️',title:'Repository Pattern',desc:'Data access abstraction, interface, in-memory mock, integration test',tags:['advanced'],tabs:['Interface Design','SQL Implementation','Testing','Code']},
+  {id:'di-go',icon:'🔌',title:'Dependency Injection',desc:'Constructor injection, wire codegen, manual DI, uber/fx',tags:['advanced'],tabs:['Constructor DI','wire Codegen','Code']},
+  {id:'config-go',icon:'⚙️',title:'Configuration Management',desc:'envconfig, viper, 12-factor, validation, secrets management',tags:['production'],tabs:['envconfig','viper','Secrets','Code']},
+  {id:'cli-cobra',icon:'💻',title:'CLI with cobra',desc:'Commands, flags, persistent flags, tab completion, cobra-cli',tags:['intermediate'],tabs:['cobra Setup','Commands','Flags','Code']},
+  {id:'bg-jobs',icon:'⏰',title:'Background Jobs',desc:'gocron (simple), asynq (Redis), river (Postgres), job lifecycle',tags:['production'],tabs:['gocron','asynq','river (Postgres)','Code']},
+]},
+{id:'observability',icon:'🔭',color:'#00d4ff',bg:'rgba(0,212,255,.1)',lc:'#00d4ff',level:'PRODUCTION',
+ title:'Observability',sub:'log/slog · zerolog · OpenTelemetry · Prometheus · pprof',
+ desc:'Production services must be observable. Master structured logging with slog/zerolog, distributed tracing with OpenTelemetry, Prometheus metrics, and Go pprof profiling.',
+ topics:[
+  {id:'logging-go',icon:'📋',title:'Structured Logging',desc:'log/slog (Go 1.21+), zerolog, context-aware logging, log levels',tags:['production'],tabs:['log/slog','zerolog','Context Logging','Best Practices','Code']},
+  {id:'tracing-go',icon:'🔬',title:'Distributed Tracing',desc:'OpenTelemetry Go SDK, spans, attributes, propagation, OTLP export',tags:['production'],tabs:['OTel Setup','Creating Spans','Propagation','Code']},
+  {id:'metrics-go',icon:'📊',title:'Prometheus Metrics',desc:'Counter, Gauge, Histogram, Summary, labels, promhttp handler',tags:['production'],tabs:['Metric Types','Registration','Grafana Dashboards','Code']},
+  {id:'pprof-go',icon:'🔬',title:'pprof Profiling',desc:'CPU, heap, goroutine profiles, flamegraph, benchmarked profiling',tags:['advanced'],tabs:['Enabling pprof','CPU & Heap','Flamegraphs','Code']},
+  {id:'health-go',icon:'❤️',title:'Health & Readiness',desc:'/health, /ready, /metrics endpoints, k8s probe integration',tags:['production'],tabs:['Health Handler','Readiness Check','Code']},
+]},
+{id:'docker',icon:'🐳',color:'#0ea5e9',bg:'rgba(14,165,233,.1)',lc:'#0ea5e9',level:'PRODUCTION',
+ title:'Docker & Containerization',sub:'Multi-Stage · Distroless · Signals · BuildKit · compose',
+ desc:'Package Go apps into tiny, secure production containers. Multi-stage builds for minimal images, distroless base, correct PID 1 signal handling, and BuildKit cache optimizations.',
+ topics:[
+  {id:'dockerfile-go',icon:'🐳',title:'Multi-Stage Dockerfile',desc:'Builder → distroless, CGO_ENABLED=0, static binary, scratch image',tags:['production'],tabs:['Multi-Stage Build','Distroless vs Scratch','Optimizations','Code']},
+  {id:'compose-go',icon:'🎼',title:'docker compose',desc:'Services, networks, volumes, healthchecks, env, profiles',tags:['intermediate'],tabs:['compose.yaml','Healthchecks','Networking','Code']},
+  {id:'container-signals',icon:'📡',title:'Signals & PID 1',desc:'SIGTERM propagation, PID 1 problem, tini, exec form CMD',tags:['production'],tabs:['PID 1 Problem','tini Solution','exec Form CMD','Code']},
+  {id:'buildkit',icon:'🚀',title:'BuildKit Optimizations',desc:'Cache mounts, parallel stages, .dockerignore, image size analysis',tags:['production'],tabs:['Cache Mounts','.dockerignore','Size Analysis','Code']},
+]},
+{id:'kubernetes',icon:'☸️',color:'#326ce5',bg:'rgba(50,108,229,.1)',lc:'#326ce5',level:'PRODUCTION',
+ title:'Kubernetes Deployment',sub:'Deployment · HPA · ConfigMap · Secrets · Probes · Helm',
+ desc:'Deploy Go services to Kubernetes production-ready. Proper resource requests/limits, liveness/readiness probes, ConfigMaps, Secrets, HPA autoscaling, PDB, and Helm charts.',
+ topics:[
+  {id:'k8s-deploy',icon:'☸️',title:'Deployment & Service',desc:'Deployment YAML, Service, rolling update, annotations',tags:['production'],tabs:['Deployment','Service','Rolling Update','Code']},
+  {id:'k8s-probes',icon:'❤️',title:'Probes & Lifecycle',desc:'Liveness, readiness, startup probes, preStop hook, termination',tags:['production'],tabs:['Probe Types','preStop Hook','Termination Flow','Code']},
+  {id:'k8s-config',icon:'⚙️',title:'ConfigMap & Secrets',desc:'Env injection, volume mounts, external-secrets operator',tags:['production'],tabs:['ConfigMap','Secrets','External Secrets','Code']},
+  {id:'k8s-scale',icon:'📈',title:'HPA & Resources',desc:'Resource requests/limits, HPA CPU/custom metrics, PodDisruptionBudget',tags:['production'],tabs:['Resource Requests','HPA Config','PDB','Code']},
+  {id:'helm-go',icon:'⛵',title:'Helm Charts',desc:'Chart structure, values.yaml, Go templates, NOTES, hooks',tags:['production'],tabs:['Chart Structure','templates/','values.yaml','Code']},
+]},
+{id:'microservices',icon:'🏢',color:'#a78bfa',bg:'rgba(167,139,250,.1)',lc:'#a78bfa',level:'PRODUCTION',
+ title:'Microservices & Cloud Native',sub:'Event-Driven · NATS · Kafka · Saga · Rate Limiting · Service Mesh',
+ desc:'Build cloud-native Go microservices with event-driven architecture, distributed patterns (saga, outbox, circuit breaker), API gateways, and service mesh integration.',
+ topics:[
+  {id:'nats',icon:'📡',title:'NATS & NATS JetStream',desc:'Pub/sub, request-reply, JetStream persistence, consumer groups',tags:['advanced'],tabs:['NATS Basics','JetStream','Consumer Groups','Code']},
+  {id:'kafka-go',icon:'🔁',title:'Kafka with Go',desc:'confluent-kafka-go, producers, consumers, consumer groups, offsets',tags:['advanced'],tabs:['Producer','Consumer','Consumer Group','Code']},
+  {id:'dist-patterns',icon:'🏗️',title:'Distributed Patterns',desc:'Saga, outbox pattern, circuit breaker, idempotency, distributed locks',tags:['expert'],tabs:['Saga','Outbox','Circuit Breaker','Code']},
+  {id:'rate-limiting-dist',icon:'🚦',title:'Distributed Rate Limiting',desc:'In-process limiter, Redis token bucket, sliding window, middleware',tags:['advanced'],tabs:['In-Process','Redis Rate Limit','Middleware','Code']},
+]},
+{id:'interview',icon:'🎤',color:'#ff6b9d',bg:'rgba(255,107,157,.1)',lc:'#ff6b9d',level:'ALL LEVELS',
+ title:'100 Interview Questions',sub:'Beginner → Expert · Concurrency · Production · System Design',
+ desc:'100 carefully crafted Go interview questions with complete answers — from junior-level syntax to staff-engineer system design. Used at top tech companies.',
+ topics:[
+  {id:'iq-basics',icon:'🔤',title:'Go Basics (Q 1–25)',desc:'Types, zero values, interfaces, closures, defer, goroutines, channels',tags:['beginner'],tabs:['Questions']},
+  {id:'iq-concurrency',icon:'⚙️',title:'Concurrency (Q 26–55)',desc:'Goroutines, channels, select, sync, races, patterns, errgroup',tags:['intermediate'],tabs:['Questions']},
+  {id:'iq-advanced',icon:'🧠',title:'Advanced Go (Q 56–80)',desc:'Memory, GC, escape analysis, generics, reflection, unsafe, profiling',tags:['advanced'],tabs:['Questions']},
+  {id:'iq-production',icon:'🚀',title:'Production & Design (Q 81–100)',desc:'HTTP, databases, testing, deployment, microservices, system design',tags:['production'],tabs:['Questions']},
+]},
+];
+
+// ═══════════════════ INTERVIEW Q&A ═══════════════════
+function getIQs(tid){
+const D={
+'iq-basics':[
+{q:"What is Go and why was it created at Google?",diff:"BASIC",a:"Go was created at Google in 2009 by Robert Griesemer, Rob Pike, and Ken Thompson to solve real engineering problems: slow C++ compilation, Java complexity, poor concurrency in existing languages. Design goals: compile in seconds, built-in concurrency (goroutines + channels), garbage collected, statically typed, simple enough to read at first glance. Go deliberately omits: inheritance, exceptions, generics (until 1.18), operator overloading. Philosophy: one obvious way to do things. Today Go powers Docker, Kubernetes, Prometheus, CockroachDB, Cloudflare, and thousands of high-traffic services."},
+{q:"Explain Go&#39;s zero values and why they matter for API design.",diff:"BASIC",a:"Every type in Go is initialized to its zero value when declared without explicit initialization. Zero values: int/float → 0, string → '' (empty), bool → false, pointer → nil, slice → nil (append works!), map → nil (reads ok; writes PANIC), channel → nil (blocks forever), interface → nil, struct → each field's zero value. Why they matter: (1) No uninitialized memory bugs — guaranteed initialization; (2) API design — sync.Mutex{} is unlocked, bytes.Buffer{} is empty, sync.WaitGroup{} is at zero — usable without a New() call; (3) nil slice vs empty slice — both have len=0, but nil slice JSON-encodes to null, empty slice to []; (4) Nil map reads return zero value safely (m['key'] returns 0 not panic), but writes panic — always make() before writing."},
+{q:"What is the difference between var x int and x := 0?",diff:"BASIC",a:"var x int: explicit declaration, works at package and function level, type is explicit, x initialized to zero value (0). x := 0: short variable declaration, only valid inside functions, type inferred from right-hand side. Rules for :=: at least one new variable must be on the left (can redeclare existing vars if at least one is new), shadows outer scope variables. When to use var: package-level vars, when you want explicit zero value, when type inference might be wrong (var x float64 = 0). When to use :=: inside functions for brevity (idiomatic Go). Common bug: x := 0 in a goroutine creates new variable and shadows outer x — use = for assignment."},
+{q:"What is a goroutine and how does it differ from an OS thread?",diff:"BASIC",a:"A goroutine is a lightweight concurrent unit managed by the Go runtime. Differences: Stack — goroutines start at ~2KB (grows dynamically up to 1GB default); OS threads have fixed 1–8MB stacks. Scheduling — Go uses M:N scheduling: M goroutines on N OS threads (N=GOMAXPROCS=NumCPU). Cost — goroutine spawn ~300ns, 2KB; OS thread spawn ~1ms, 1MB — you can have millions of goroutines. The Go scheduler is cooperative + preemptive (Go 1.14+ via signals). When a goroutine blocks on I/O or channel, the runtime parks it and runs another on that OS thread — this is why a simple goroutine-per-request model handles massive concurrency."},
+{q:"Buffered vs unbuffered channels — what's the semantic difference?",diff:"BASIC",a:"Unbuffered channel (make(chan T)): send blocks until receiver is ready AND receive blocks until sender is ready. It's a synchronization point — completing a send guarantees the value has been received. Use for: goroutine rendezvous, signaling done. Buffered channel (make(chan T, n)): send only blocks when buffer is full; receive only blocks when buffer is empty. Sending only guarantees the value is in the buffer, not that it&#39;s been received. Use for: absorbing bursts, semaphore pattern make(chan struct{}, N), decoupling producer/consumer speeds. Rule: start unbuffered for explicit synchronization; add buffer only when you&#39;ve measured it helps or the pattern requires it."},
+{q:"How does Go&#39;s implicit interface satisfaction work?",diff:"BASIC",a:"A type satisfies an interface by having all the required methods — no 'implements' keyword needed. This is structural (duck) typing. Advantages: (1) Retroactive implementation — make an existing type satisfy a new interface without modifying it; (2) Small interfaces — io.Reader has 1 method, io.Writer has 1 method; (3) Decoupled packages — packages don&#39;t import each other's interfaces. Interface value internals: holds (type pointer, data pointer). nil interface has both as nil. Nil pointer stored in interface: type pointer is set, value pointer is nil — interface is NOT nil (famous trap). Compile-time check: var _ io.Reader = (*MyType)(nil) fails if *MyType doesn&#39;t implement io.Reader. Design rule: accept interfaces, return concrete types."},
+{q:"Explain defer — execution order and argument evaluation.",diff:"BASIC",a:"defer schedules a function call to run after the surrounding function returns, regardless of normal return or panic. Key rules: (1) LIFO — multiple defers run in reverse order of registration; (2) Arguments evaluated immediately at defer call site, not at execution time — defer fmt.Println(x) captures x's current value; (3) Closures capture by reference — defer func(){ fmt.Println(x) }() prints x's final value; (4) Deferred functions can read and modify named return values — used for error wrapping pattern. Common uses: defer f.Close(), defer mu.Unlock(), defer span.End(). Pitfall: defer in a loop accumulates until function returns, not per iteration — extract inner logic to named function. Performance: ~25ns overhead after Go 1.14 stack-based optimization."},
+{q:"Why does Go return errors as values instead of using exceptions?",diff:"BASIC",a:"Go returns errors as the last return value: (T, error). Callers must check explicitly. No try/catch. Rationale: (1) Failure is visible — every potential error is in the control flow, not hidden in stack unwinding; (2) Errors are values — can be inspected, wrapped, compared, typed, stored; (3) No runtime overhead of exception mechanisms; (4) Simpler control flow — no invisible exit points. Error wrapping (Go 1.13+): fmt.Errorf('reading config: %w', err) adds context. errors.Is(err, target) checks anywhere in chain. errors.As(err, &target) extracts typed error. Go 1.20: errors.Join(e1, e2) creates multi-error. Rule: wrap errors at each layer boundary with context describing what you were doing."},
+{q:"What are iota patterns for enums and bitmasks?",diff:"BASIC",a:"iota is a predeclared identifier that starts at 0 and increments by 1 for each ConstSpec in a const block. It resets to 0 in each new const block. Basic enum: const (Sun = iota; Mon; Tue) → 0,1,2. Skip 0: const (_ = iota; First; Second) → 1,2. Bitmask: const (Read = 1<<iota; Write; Execute) → 1,2,4 — combine with OR: perm := Read|Write. Byte sizes: const (_ = iota; KB = 1<<(10*iota); MB; GB; TB). Custom expression: const (A = iota*2+1) — each constant applies same expression with current iota. String method: combine with [N]string array indexed by iota constant for fmt.Stringer. iota makes adding new enum values maintenance-free — insert in the middle without renumbering others."},
+{q:"Value semantics vs reference semantics in Go — which types have which?",diff:"INTERMEDIATE",a:"Value semantics: assignment copies the data. Modifications to the copy don&#39;t affect the original. Types: all basic types (int, float64, bool, string), arrays, structs. Reference semantics: variable holds a reference (pointer/header) to shared data. Types: slices (header is a value, but points to shared backing array), maps (pointer to hash table), channels (pointer to channel state), pointers, functions, interfaces. String: immutable, value semantics for assignment, but bytes shared until modified. Slice gotcha: passing slice to function passes the header by value — function can modify elements (backing array is shared) but cannot change len/cap visible to caller. To communicate growth, return the slice or pass *[]T. Copying a sync.Mutex is always wrong (go vet catches this) — mutexes must be passed by pointer."},
+{q:"Explain nil map vs empty map and the nil map panic.",diff:"INTERMEDIATE",a:"nil map: var m map[string]int — m is nil, zero value. Reading is safe: m['key'] returns 0 (zero value of int), no panic. Writing panics: m['key'] = 1 → panic: assignment to entry in nil map. Why: nil map has no backing hash table; Go can safely return zero value for reads but cannot auto-allocate on write. Empty map: m := make(map[string]int) or m := map[string]int{} — initialized, zero elements, safe to write. Detection: m == nil is true only for nil map. Fix: always make() before writing. JSON marshaling: nil map encodes to null; empty map encodes to {}. Common bug: returning nil map from a function when caller will write to it — return make(map[string]int) or at minimum check and initialize in caller."},
+{q:"How does Go&#39;s for-range work with different types?",diff:"BASIC",a:"Slice/Array: for i, v := range s — i is int index, v is copy of element. Maps: for k, v := range m — k is key, v is value copy, iteration ORDER IS RANDOM (guaranteed by spec). Strings: for i, r := range s — i is byte offset, r is rune (Unicode code point, int32) — properly handles multi-byte UTF-8. s[i] gives raw byte. Channel: for v := range ch — receives until channel closed. Integer (Go 1.22+): for i := range 5 — iterates 0..4. Omit value: for k := range m. Omit both: for range 5. Variable reuse bug (pre-1.22): loop variables i and v reused each iteration — closures capturing them see final value. Fix: i := i inside loop or Go 1.22+. range over function iterator: Go 1.23 range-over-func for custom iterators."},
+{q:"What are named return values and when should you use them?",diff:"INTERMEDIATE",a:"Named return values declare variables in the function signature: func Stats(s []int) (min, max, mean float64). They're initialized to zero. Bare return returns current values. Advantages: (1) Self-documenting — names clarify what's being returned when multiple values have the same type; (2) Deferred mutation — defer func() { if err != nil { err = fmt.Errorf('wrapping: %w', err) } }() modifies named err; (3) Reduces repetition in short functions. Disadvantages: bare return in long functions is confusing — reader must scroll to signature. Shadowing risk: inner var err shadows named return. Common production pattern: func (r *Repo) Get(id int) (user *User, err error) { defer func() { if err != nil { err = fmt.Errorf('repo.Get %d: %w', id, err) } }(); ... }. Rule: use when function is ≤20 lines or when defer needs to modify return values."},
+{q:"Explain Go&#39;s memory model — happens-before relationships.",diff:"ADVANCED",a:"The Go memory model specifies when writes in one goroutine are guaranteed to be visible to reads in another. Without synchronization, the compiler and CPU can reorder operations — goroutine A writing x=1 may not be visible to goroutine B reading x. Happens-before guarantees: Channel send happens-before the corresponding receive completes (unbuffered: receive completion HB before send completion). close(ch) HB before receive returning zero value. sync.Mutex.Unlock() HB before subsequent Lock(). sync.WaitGroup.Done() HB before Wait() returns. Atomic operations (sync/atomic) with appropriate ordering. go statement HB before goroutine function starts. Package init() completion HB before main(). Practical rule: ALWAYS use channels, mutexes, or atomics to communicate between goroutines — never rely on 'it works without synchronization' — the race detector may miss it, and optimized builds will break it."},
+{q:"What are common goroutine leak patterns and how do you prevent them?",diff:"INTERMEDIATE",a:"A goroutine leak is a goroutine that blocks forever and can never be GC'd. Common causes: (1) Receiving from a channel nobody will send to or close; (2) Sending to an unbuffered channel nobody will receive; (3) WaitGroup whose Done() is never called (panic before done); (4) HTTP requests leaking because context isn&#39;t passed. Detection: runtime.NumGoroutine() in metrics — watch for monotonic growth. go test with uber-go/goleak: defer goleak.VerifyNone(t). pprof goroutine profile at /debug/pprof/goroutine. Prevention: every goroutine must have an exit path. Pattern: select { case result <- v: case <-ctx.Done(): return }. errgroup.WithContext cancels context when any goroutine finishes. Rule: never start a goroutine without knowing exactly how and when it will stop."},
+],
+'iq-concurrency':[
+{q:"What is a data race and how do you detect and fix one?",diff:"INTERMEDIATE",a:"A data race: two goroutines access the same memory, at least one is a write, no synchronization between them. Result is undefined behavior — can cause silent corruption, crashes, or appear to work until production. Example: i++ is read-modify-write, not atomic. Detection: go test -race or go run -race — adds 5-10x overhead, instruments memory accesses, reports goroutine stacks for conflicting accesses. The race detector is accurate (no false positives) but not exhaustive. Fix options: (1) sync.Mutex — wrap all accesses; (2) sync/atomic — for single primitives: atomic.AddInt64(&n, 1); (3) channels — transfer ownership instead of sharing; (4) sync.Map for concurrent map; (5) goroutine-local data — no sharing at all. Always run go test -race in CI."},
+{q:"Explain how to implement a worker pool in Go.",diff:"INTERMEDIATE",a:"Pattern 1 — Channel pool: jobs := make(chan Job, 100); for i := 0; i < workers; i++ { go func() { for job := range jobs { results <- process(job) } }() }; for _, j := range input { jobs <- j }; close(jobs). Pattern 2 — errgroup (modern): g, ctx := errgroup.WithContext(ctx); g.SetLimit(workers); for _, item := range input { item := item; g.Go(func() error { result, err := process(ctx, item); if err != nil { return err }; mu.Lock(); results = append(results, result); mu.Unlock(); return nil }) }; if err := g.Wait(); err != nil { return err }. Pattern 3 — semaphore: sem := make(chan struct{}, N); for each item: sem <- struct{}{}; go func() { defer func() { <-sem }(); process(item) }(). Choose: errgroup for error propagation, channel pool for result collection, semaphore for limiting goroutine count."},
+{q:"How does the select statement handle multiple ready channels?",diff:"INTERMEDIATE",a:"When multiple select cases are simultaneously ready, Go selects one uniformly at random. This is a deliberate design decision to prevent starvation — no implicit priority. Implication: you cannot guarantee ordering. Problem — expecting done channel to be checked first: select { case v := <-work: process(v); case <-done: return } — if both ready, 50% chance of processing more work. Fix — priority select (two-level): select { case <-done: return; default: }; then: select { case v := <-work: process(v); case <-done: return }. Default case: select with default is non-blocking — if no channel ready, default runs immediately. Use for try-send, try-receive, polling. time.After creates new timer per call (goroutine leak in loops) — use time.NewTimer + defer t.Stop() + t.Reset()."},
+{q:"How does context.Context propagate cancellation through a call tree?",diff:"INTERMEDIATE",a:"context.Context forms a tree of parent-child relationships. Cancelling a parent cancels all children immediately. Creating: ctx, cancel := context.WithCancel(parent); ctx, cancel := context.WithTimeout(parent, 5*time.Second); ctx, cancel := context.WithDeadline(parent, deadline). ALWAYS defer cancel() — even if parent cancels, calling cancel() frees resources immediately. Check cancellation: select { case <-ctx.Done(): return ctx.Err(); default: /* continue */ }. Or in blocking call: use ctx-aware versions: db.QueryContext(ctx, ...), http.NewRequestWithContext(ctx, ...). HTTP handler: r.Context() is cancelled when client disconnects — pass it through to DB calls and HTTP calls to cancel expensive work automatically. WithValue: for request-scoped data (request-ID, auth claims) — use unexported key type to avoid collisions. Never store cancelable work without passing context down the call stack."},
+{q:"What is sync.Pool and when should you use it?",diff:"ADVANCED",a:"sync.Pool is a thread-safe pool of temporary reusable objects. Get() retrieves or calls New(). Put() returns. Items can be evicted by GC at any time — not for persistent storage. Usage: var bufPool = sync.Pool{ New: func() any { return new(bytes.Buffer) } }; func handler(w http.ResponseWriter, r *http.Request) { buf := bufPool.Get().(*bytes.Buffer); buf.Reset(); defer bufPool.Put(buf); // use buf }. Critical rules: ALWAYS Reset() before use — pooled objects may have stale data. Never pool objects with goroutine references. Don't pool tiny objects (malloc overhead < pool overhead). When to use: you&#39;ve profiled and found significant allocation in a hot path. Object creation is expensive (>1KB or involves syscalls). Object lifetime is short. Examples: fmt package uses Pool for formatting state; encoding/json uses it for encoders. sync.Pool is used in production HTTP servers to eliminate per-request buffer allocation."},
+{q:"Explain the fan-out/fan-in concurrency pattern.",diff:"ADVANCED",a:"Fan-out distributes work from one source to multiple workers. Fan-in merges multiple results into one output. Fan-out: func fanOut(in <-chan Work, n int) []<-chan Result { outs := make([]<-chan Result, n); for i := 0; i < n; i++ { ch := make(chan Result); outs[i] = ch; go worker(in, ch) }; return outs }. All workers read from the same 'in' channel — Go&#39;s channel scheduling distributes work naturally. Fan-in (merge): func merge(cs ...<-chan int) <-chan int { var wg sync.WaitGroup; out := make(chan int); wg.Add(len(cs)); for _, c := range cs { c := c; go func() { defer wg.Done(); for v := range c { out <- v } }() }; go func() { wg.Wait(); close(out) }(); return out }. With cancellation: each goroutine selects on ctx.Done(). Modern approach: use errgroup.WithContext with SetLimit for bounded parallelism with error propagation."},
+{q:"How does the Go runtime scheduler work (M:N, P, work stealing)?",diff:"ADVANCED",a:"Go uses M:N cooperative+preemptive scheduling: M goroutines on N OS threads, N=GOMAXPROCS. Three entities: G (goroutine) — execution unit with stack. M (machine) — OS thread. P (processor) — scheduling context, one per GOMAXPROCS, holds local run queue. Scheduling: each P has local run queue (256 goroutines max). Goroutine runs on M which is attached to P. Work stealing: idle P steals half of a busy P's queue. Global run queue as overflow. Blocking syscall: P detaches from M, finds/creates another M to run other goroutines. When syscall completes, goroutine tries to find idle P or goes to global queue. Preemption (1.14+): long-running goroutines preempted via async signal (SIGURG) at safe points — no more starvation from tight CPU loops. Network I/O: handled by netpoller (epoll/kqueue/IOCP) — goroutine parked, not blocking an OS thread."},
+{q:"What are common mutex patterns and deadlock prevention?",diff:"INTERMEDIATE",a:"Mutex rules: (1) Always use defer mu.Unlock() — guarantees unlock even on panic; (2) Never copy a mutex — pass by pointer or embed in struct; (3) Never hold a lock while calling external code (risk of deadlock); (4) Acquire locks in consistent order across goroutines — prevents A→B + B→A deadlock. RWMutex: RLock allows concurrent readers, Lock excludes all. Use when reads outnumber writes >80%. Deadlock patterns: Lock then Lock again in same goroutine. A locks mu1 then mu2; B locks mu2 then mu1. WaitGroup.Wait() when Done() is never called. Receiving from channel nobody will close. Detection: 'all goroutines are asleep - deadlock!' from runtime (when ALL goroutines deadlock). Partial deadlock: pprof goroutine dump at /debug/pprof/goroutine?debug=2. Prevention: context with timeout for all channel operations, consistent lock ordering, avoid nested locks."},
+{q:"How do atomic operations work and when to use them over mutexes?",diff:"ADVANCED",a:"sync/atomic provides lock-free atomic operations on primitive types. Go 1.19+: typed atomics — atomic.Int64, atomic.Bool, atomic.Pointer[T], atomic.Value. Operations: Load, Store, Add (for int), Swap, CompareAndSwap. CAS pattern: if atomic.CompareAndSwapInt64(&v, old, new) { /* won the race */ } — foundation of lock-free data structures. When to use atomics: single primitive values (counters, flags, once), hot paths where mutex overhead is measurable. When NOT: complex invariants spanning multiple values (use mutex), large structs (use sync.RWMutex). atomic.Value: stores any comparable value atomically — use for read-heavy config objects: var cfg atomic.Value; cfg.Store(newConfig); current := cfg.Load().(*Config). Memory ordering: Go atomics are sequentially consistent — no need to specify memory ordering like C/C++. Benchmark: atomic add is ~10x faster than mutex lock+add+unlock."},
+],
+'iq-advanced':[
+{q:"How do Go generics work and what are the constraints system?",diff:"ADVANCED",a:"Generics (Go 1.18+) add type parameters: func Map[T, U any](s []T, f func(T) U) []U { ... }. Type constraints are interfaces. Built-in: any (no restriction), comparable (supports ==, !=, usable as map key). Tilde operator: type Number interface { ~int | ~float64 } — any type whose underlying type is int or float64 (includes named types like type Celsius float64). Type inference: compiler usually infers type params from args — Map(slice, func(x int) string{...}) infers T=int, U=string. Methods cannot have their own type parameters (only types and functions). Standard library generics: slices package (slices.Sort, slices.Contains, slices.Map), maps package, cmp package. When to use: utility functions replacing code duplication, type-safe containers (Stack[T], Queue[T]). When NOT: when an interface works for polymorphism, premature abstraction. Avoid any constraint — be as specific as possible."},
+{q:"Explain Go&#39;s garbage collector in detail.",diff:"ADVANCED",a:"Go uses concurrent tri-color mark-and-sweep GC. Phases: (1) Mark setup (~0.5ms STW): enable write barrier — tracks pointer writes during concurrent phase. (2) Concurrent mark: GC goroutines run alongside app. Objects start white. Roots (stack, globals) go gray (in queue). Processed objects go black. Write barrier ensures new pointers are grayed. (3) Mark termination (~0.5ms STW): drain remaining gray objects, disable write barrier. (4) Concurrent sweep: reclaim white objects lazily as allocations occur. Properties: non-generational (all objects treated equally), non-compacting (objects don&#39;t move — enables fast raw pointer speed). Target: <1ms STW. GOGC=100 (default): GC when heap doubles since last GC. GOGC=off disables GC. GOMEMLIMIT (1.19+): soft memory cap — GC runs more aggressively to stay under limit. Reduce GC pressure: sync.Pool, preallocate slices, avoid interface boxing in hot paths, use value types."},
+{q:"What is escape analysis and how does it affect performance?",diff:"ADVANCED",a:"Escape analysis: compiler determines whether a variable can live on the stack (fast, GC-free) or must be allocated on the heap (GC pressure). Escape to heap when: address taken and stored beyond function lifetime, stored in heap-allocated object, too large for stack, size unknown at compile time, assigned to interface (requires boxing). View decisions: go build -gcflags='-m' or -gcflags='-m -m'. Examples of escaping: return &T{} — T escapes, pointer outlives function. fmt.Println(x) — x escapes, interface conversion. bytes.Buffer b; b.WriteString('x') — may stay on stack if b doesn&#39;t escape! Common patterns to avoid allocation: pass pointer to preallocated result instead of returning; use sync.Pool for frequently allocated objects; avoid fmt.Sprintf in hot paths (use strings.Builder); avoid []interface{} in hot paths. Benchmark with -benchmem: look for 0 allocs/op in hot paths."},
+{q:"How does reflection work in Go and when should you use it?",diff:"ADVANCED",a:"reflect package inspects types and values at runtime. Key types: reflect.Type (type metadata), reflect.Value (holds value+type). reflect.TypeOf(x) → reflect.Type. reflect.ValueOf(x) → reflect.Value. Kind(): Struct, Slice, Map, Func, Ptr, Int, String... Struct introspection: t.NumField(), t.Field(i).Name, t.Field(i).Tag.Get('json'). Setting values: must be addressable — reflect.ValueOf(&x).Elem().Set(newVal). Calling methods: v.MethodByName('M').Call(args). Creating: reflect.New(t), reflect.MakeSlice, reflect.MakeChan. Performance: 10-100x slower than direct code — avoid in hot paths. Used by: encoding/json, database/sql Scan(), GORM, testing (reflect.DeepEqual), dependency injection. Generics have replaced many reflection use cases for type-safe utility functions. When to use: serialization libraries, ORM field mapping, test utilities, plugin systems."},
+{q:"Explain the nil interface trap in detail.",diff:"ADVANCED",a:"The bug: func getError() error { var p *MyError = nil; return p } — the returned error is NOT nil even though p is nil. Why: interface value = (type pointer, data pointer). When you assign a *MyError to error interface, the type pointer is set to *MyError, data pointer is nil. The interface value is not nil — it has a type. Checking: err == nil returns FALSE. Calling err.Error() works (method dispatch through interface) but may panic if implementation dereferences nil pointer. Fix 1: return nil directly instead of typed nil — func getError() error { return nil }. Fix 2: check typed nil before returning — if p == nil { return nil }; return p. Compiler-catching pattern: var _ error = (*MyError)(nil) — fails if *MyError doesn&#39;t implement error. Rule: never return a typed nil as an interface value. This also applies to: returning a nil *sql.Rows as io.Reader, nil *http.Client as http.RoundTripper, etc."},
+{q:"How does unsafe.Pointer work and what are valid patterns?",diff:"EXPERT",a:"unsafe.Pointer converts between pointer types, bypassing Go&#39;s type system. Valid conversion patterns (from docs): (1) Convert *T1 to *T2 if both have same underlying memory layout — must pin between conversion and use; (2) Convert Pointer to uintptr for arithmetic using unsafe.Add; (3) Convert between unsafe.Pointer and uintptr only within a single expression — storing uintptr breaks GC (GC doesn&#39;t track uintptr as pointer). Operations: unsafe.Sizeof(T{}) — size in bytes. unsafe.Alignof(T{}) — alignment. unsafe.Offsetof(T.Field) — field offset. Valid use: zero-copy []byte to string: s := unsafe.String(&b[0], len(b)) (Go 1.20+). Struct field access via offset arithmetic. Atomic operations on struct fields. Never: store uintptr across statements (GC may move memory — though Go&#39;s GC doesn&#39;t compact, unsafe code must still assume it could). Rule: 99% of application code should never use unsafe. Profile first, use sync.Pool second, unsafe last."},
+{q:"What are Go build constraints and how do you use them?",diff:"INTERMEDIATE",a:"Build constraints conditionally include files. Syntax (Go 1.17+): //go:build expr on first line (before package). Old syntax: // +build expr (still supported, generated by gofmt). Expressions: OS: linux, windows, darwin, freebsd. Arch: amd64, arm64, 386, arm. AND: linux && amd64. OR: linux || darwin. NOT: !cgo. Go version: go1.21. Custom tag: integration (enable with go test -tags integration). File naming convention (auto): foo_linux.go, foo_windows.go, foo_linux_amd64.go, foo_test.go (test only). Examples: //go:build !race — exclude from -race builds. //go:build ignore — never compiled (useful for standalone scripts, documentation programs). Multiple patterns on one line: //go:build linux && (amd64 || arm64). Must be followed by blank line then package declaration. Tools: go list -tags foo will verify tag combinations."},
+{q:"How do you profile a Go application to find bottlenecks?",diff:"ADVANCED",a:"Built-in profiling via net/http/pprof. Enable: import _ 'net/http/pprof'; go http.ListenAndServe(':6060', nil). Profile types: cpu (what's consuming CPU), heap (allocations and live objects), goroutine (all goroutine stacks), block (goroutine blocking on sync), mutex (mutex contention), trace (full runtime trace). Collect profiles: go tool pprof http://localhost:6060/debug/pprof/profile?seconds=30 — CPU 30-second sample. Interactive CLI: top (hottest functions), list funcName (annotated source), web (SVG call graph). Flamegraph: go tool pprof -http=:8080 profile.pb.gz — opens browser with interactive flamegraph. Benchmark profiling: go test -bench=BenchmarkFoo -cpuprofile cpu.out -memprofile mem.out -benchmem. Then: go tool pprof cpu.out. Allocation count: pprof -alloc_objects mem.out. Continuous profiling: pyroscope, parca — always-on low-overhead profiling in production. Process: measure → identify → fix → measure again."},
+],
+'iq-production':[
+{q:"How do you structure a large production Go service?",diff:"PRODUCTION",a:"Recommended layout: cmd/ — main packages (cmd/api/main.go, cmd/worker/main.go), each thin — wire deps and call Run(). internal/ — private code (compiler enforces no external import). internal/domain/ — business entities, no external imports. internal/service/ — business logic, depends on domain + interfaces. internal/repository/ — data access layer, implements repo interfaces. internal/handler/ — HTTP/gRPC handlers, call services. internal/middleware/ — cross-cutting concerns. pkg/ — public shared code (optional). api/ — proto files, OpenAPI specs. configs/ — config templates. scripts/ — build, migration scripts. Principles: main.go < 50 lines; all dependencies injected via constructors; interfaces for DB, cache, queue — enable mocking; no global state; 12-factor config via env vars. Tools: wire or uber/fx for DI at scale. Project grows organically — start flat (internal/{handler, service, repo}) and split by domain when needed."},
+{q:"How do you implement production-grade graceful shutdown?",diff:"PRODUCTION",a:"func main() { srv := &http.Server{Addr: ':8080', Handler: mux, ReadTimeout: 10*time.Second, WriteTimeout: 30*time.Second, IdleTimeout: 120*time.Second}; errCh := make(chan error, 1); go func() { if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) { errCh <- err } }(); quit := make(chan os.Signal, 1); signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM); select { case err := <-errCh: log.Fatal(err); case <-quit: }; ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second); defer cancel(); if err := srv.Shutdown(ctx); err != nil { log.Fatal(err) } }. Kubernetes flow: pod receives SIGTERM → preStop hook sleeps 5s (allows LB to stop routing) → app handles SIGTERM → shutdown with 25s timeout → k8s sends SIGKILL at terminationGracePeriodSeconds. Mark health endpoint unhealthy first so k8s removes pod from endpoints before shutdown. Cleanup order: stop accepting → drain requests → close DB connections → flush logs/traces → exit."},
+{q:"What are best practices for database connection pool configuration?",diff:"PRODUCTION",a:"sql.DB is a connection pool. Settings: db.SetMaxOpenConns(25) — max concurrent DB connections. Too low → queuing and latency. Too high → overwhelm DB. db.SetMaxIdleConns(25) — keep idle connections open to avoid reconnection overhead. Should equal MaxOpenConns. db.SetConnMaxLifetime(5*time.Minute) — close connections after age (handles AWS RDS failover, firewall timeouts). db.SetConnMaxIdleTime(2*time.Minute) — close idle connections not used for this long. Typical: MaxOpen=25, MaxIdle=25, Lifetime=5m for PostgreSQL. Capacity planning: 10 app replicas × 25 connections = 250 DB connections. PostgreSQL default max_connections=100. Use PgBouncer (connection pooler) for >200 connections. Monitor: db.Stats() — OpenConnections, InUse, Idle, WaitCount, WaitDuration. Alert when WaitDuration > 0 (means all connections busy, queries queuing). pgx pool: pgxpool.Config{MaxConns: 25, MinConns: 5, MaxConnLifetime: 5*time.Minute}."},
+{q:"How do you implement the three pillars of observability in a Go service?",diff:"PRODUCTION",a:"Logging (log/slog): logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})). Context-aware: logger := baseLogger.With('service','api','version',version). Per-request: logger.With('request_id', reqID, 'user_id', uid). Metrics (Prometheus): httpReqs := prometheus.NewCounterVec(prometheus.CounterOpts{Name:'http_requests_total',...},[]string{'method','path','status'}); prometheus.MustRegister(httpReqs); http.Handle('/metrics', promhttp.Handler()). Histogram for latency with buckets: .005,.01,.025,.05,.1,.25,.5,1,2.5,5. Tracing (OpenTelemetry): tp := tracesdk.NewTracerProvider(tracesdk.WithBatcher(otlpExporter)); otel.SetTracerProvider(tp); wrap mux with otelhttp.NewHandler(mux,'server'). In handlers: ctx, span := tracer.Start(r.Context(), 'handler.Users'); defer span.End(); span.SetAttributes(attribute.String('user.id', uid)). Correlation: inject trace_id and span_id into every log entry using slog handler that reads from context span."},
+{q:"Explain the repository pattern and how to test it properly.",diff:"PRODUCTION",a:"Repository abstracts data access: type UserRepository interface { FindByID(ctx context.Context, id int64) (*User, error); Create(ctx context.Context, params CreateParams) (*User, error); Update(ctx context.Context, u *User) error; Delete(ctx context.Context, id int64) error }. Implementations: PostgresUserRepository (real DB), InMemoryUserRepository (tests). Service depends on interface: type UserService struct { repo UserRepository; logger *slog.Logger }. Unit test service: mock := &MockUserRepo{FindByIDFn: func(ctx context.Context, id int64) (*User, error) { return &User{ID: id}, nil }}; svc := NewUserService(mock). Integration test repo: use testcontainers-go to spin up real PostgreSQL, run migrations via golang-migrate, then test real SQL. Table-driven test all CRUD operations. Testing transaction behavior: test that rollback works on error by injecting error mid-transaction. Transaction repository: WithTx(tx *sql.Tx) UserRepository returns a new instance using the transaction — enables service-layer transactions without exposing sql.Tx to service layer."},
+{q:"How do you handle configuration and secrets in a production Go service?",diff:"PRODUCTION",a:"12-factor principle: config from environment variables. Config struct: type Config struct { Port int \`env:'PORT,required'\`; DBURL string \`env:'DATABASE_URL,required'\`; LogLevel string \`env:'LOG_LEVEL' envDefault:'info'\`; JWTSecret string \`env:'JWT_SECRET,required'\` }. Library envconfig: envconfig.Process('', &cfg) — parses env vars, validates required fields, converts types. Secrets: never in env vars in k8s manifests — use k8s Secrets (base64 encoded, encrypted at rest with etcd encryption). Better: external-secrets operator syncs from AWS Secrets Manager / GCP Secret Manager / HashiCorp Vault into k8s Secrets automatically. Config validation: validate at startup, fail fast — don&#39;t discover missing config at 3am. Feature flags: launchdarkly/flagsmith for runtime toggles. Viper: supports file + env + flags + etcd/consul + hot reload — overkill for most services but valuable for complex config hierarchies. Never: config files committed to git containing secrets, global config vars, parsing config deep in business logic."},
+{q:"How do you design a rate limiter in Go for production?",diff:"PRODUCTION",a:"In-process rate limiter using golang.org/x/time/rate: limiter := rate.NewLimiter(rate.Every(time.Second/10), 5) — 10 req/sec, burst 5. limiter.Wait(ctx) — blocks or ctx cancelled. limiter.Allow() — non-blocking. Per-user limiter map: type LimiterStore struct { mu sync.Mutex; m map[string]*rate.Limiter; r rate.Limit; b int }; GetLimiter(userID string) — get or create. GC stale entries with last-access time. Distributed (Redis) — sliding window: use Redis Lua script for atomicity: GET count for window; if >= limit RETURN 0; INCR; EXPIRE window; RETURN 1. Token bucket with Redis: INCR + EXPIRE for fixed window; sorted set (ZADD + ZCOUNT + ZREMRANGEBYSCORE) for sliding window. go-redis/redis_rate implements Redis token bucket. HTTP middleware: func RateLimit(store *LimiterStore) func(http.Handler) http.Handler — extract user ID from JWT, check limiter, return 429 with Retry-After header. Metrics: count rate-limited requests — alert if spike (may indicate abuse or misconfiguration)."},
+{q:"What testing strategies do you use for a microservice?",diff:"PRODUCTION",a:"Testing pyramid for Go microservices: (1) Unit tests (70%): test service layer with mocked interfaces. No DB, no network. Fast (<1s total). Cover all business logic branches. Use table-driven tests. (2) Integration tests (20%): test repository layer against real DB using testcontainers. Test HTTP handlers with httptest.NewRecorder. Cover API contract. Run in CI with -tags integration. (3) E2E/smoke tests (10%): test deployed service with real dependencies. Verify critical user journeys. Run in staging. Additional: Contract tests — consumer-driven contract testing with Pact for microservice API compatibility. Benchmark tests — BenchmarkXxx for performance-sensitive paths, run in CI to catch regressions. Fuzz tests — FuzzXxx for parsers, decoders, any function taking user input. Load tests — k6, vegeta for capacity planning. Test structure: TestMain for shared setup (DB migration, test server). defer goleak.VerifyNone(t) in each test to catch goroutine leaks. Use t.Cleanup() instead of defer for test cleanup."},
+],
+};
+return D[tid]||[];
+}
+
+// ═══════════════════ RICH CONTENT ═══════════════════
+function getContent(cid, tid, tab) {
+  const key = cid+':'+tid+':'+tab;
+
+  // ─── INTERVIEW Q&A ────────────────────────────────────
+  if(tid.startsWith('iq-')) {
+    const qs = getIQs(tid);
+    const diffs = ['all','BASIC','INTERMEDIATE','ADVANCED','PRODUCTION','EXPERT'];
+    const colors = {BASIC:'#00d4ff',INTERMEDIATE:'#ffd166',ADVANCED:'#a78bfa',PRODUCTION:'#ff6b9d',EXPERT:'#ff6b35'};
+    const contId = 'qc_'+tid;
+    const items = qs.map((q,i)=>`
+<div class="qa-item" data-diff="${q.diff}" onclick="toggleQA(this)">
+  <div class="qa-q">
+    <div class="qa-qicon" style="background:${colors[q.diff]||'#00d4ff'}22;color:${colors[q.diff]||'#00d4ff'};border:1px solid ${colors[q.diff]||'#00d4ff'}44">Q${i+1}</div>
+    <div class="qa-qtext">${q.q}</div>
+    <span class="tag" style="background:${colors[q.diff]||'#00d4ff'}18;color:${colors[q.diff]||'#00d4ff'};border:1px solid ${colors[q.diff]||'#00d4ff'}33;flex-shrink:0">${q.diff}</span>
+    <span class="qa-chev">▼</span>
+  </div>
+  <div class="qa-ans"><div class="qa-ans-body">${q.a}</div></div>
+</div>`).join('');
+    return `<div id="${contId}">
+<div class="filter-row">
+  ${diffs.map(d=>`<button class="fbtn ${d==='all'?'active':''}" onclick="filterQs(this,'${d}',document.getElementById('${contId}'))">${d==='all'?'All':d}</button>`).join('')}
+</div>${items}</div>`;
+  }
+
+  // ─── WHY GO ───────────────────────────────────────────
+  if(key==='basics:why-go:Philosophy') return `
+<div class="sec">🐹 Go&#39;s Core Philosophy</div>
+<p class="bd">Go was built on a radical idea: <strong>simplicity is a feature</strong>. In a world of increasingly complex languages, Go chose to be smaller, not larger.</p>
+<div class="grid2">
+  <div class="mini-card"><h4>Less is More</h4><p>No classes, no inheritance, no operator overloading, no exceptions. Every omission is deliberate — fewer concepts to learn means fewer ways to write confusing code.</p></div>
+  <div class="mini-card"><h4>Readable by Default</h4><p>Any Go developer can read any Go codebase. gofmt enforces one style. One way to format, one way to import, one way to loop.</p></div>
+  <div class="mini-card"><h4>Fast Compilation</h4><p>Go was designed to compile millions of lines in seconds. The C++ builds that took 45 minutes at Google motivated this requirement explicitly.</p></div>
+  <div class="mini-card"><h4>Production First</h4><p>Built-in race detector, pprof profiler, expvar, net/http server — everything you need for production is in the stdlib.</p></div>
+</div>
+<div class="callout info"><strong>Origin Story</strong>Robert Griesemer, Rob Pike, and Ken Thompson started Go in 2007 while waiting for a 45-minute C++ build at Google. The Go spec was written before a single line of the compiler.</div>
+<div class="callout tip"><strong>Rob Pike&#39;s Rule</strong>"Simplicity is complicated. It's much easier to add features than to leave them out." Every Go proposal that adds complexity must clear a very high bar.</div>`;
+
+  if(key==='basics:why-go:Go vs Others') return `
+<div class="sec">Go vs Other Languages</div>
+<table class="tbl"><thead><tr><th>Feature</th><th>Go</th><th>Java</th><th>Python</th><th>Rust</th></tr></thead><tbody>
+<tr><td>Compilation</td><td>Seconds</td><td>Slow (JVM startup)</td><td>Interpreted</td><td>Very slow</td></tr>
+<tr><td>Memory</td><td>GC (low pause)</td><td>GC (higher pause)</td><td>GC (reference counting)</td><td>Manual (safe)</td></tr>
+<tr><td>Concurrency</td><td>Goroutines + channels</td><td>Threads + synchronized</td><td>GIL limits true parallelism</td><td>async/await + threads</td></tr>
+<tr><td>Learning Curve</td><td>Low (25 keywords)</td><td>High</td><td>Very low</td><td>Very high</td></tr>
+<tr><td>Performance</td><td>Near C</td><td>Good after JIT warmup</td><td>Slow (10-100x slower)</td><td>C-level</td></tr>
+<tr><td>Deployment</td><td>Single binary</td><td>JVM required</td><td>Runtime required</td><td>Single binary</td></tr>
+<tr><td>Best For</td><td>APIs, CLIs, infra, cloud</td><td>Enterprise, Android</td><td>Scripts, ML, data</td><td>Systems, WebAssembly</td></tr>
+</tbody></table>
+<div class="callout info"><strong>Sweet Spot</strong>Go wins at: high-throughput HTTP APIs, CLI tools, distributed systems, cloud infrastructure (Docker, k8s, Terraform are all Go). If you need Python's ML libraries or Rust's zero-cost abstractions, use those. Go covers everything in between.</div>`;
+
+  if(key==='basics:why-go:When to Use Go') return `
+<div class="sec">When Go Shines</div>
+<ul class="fl">
+  <li><strong>HTTP microservices & APIs</strong> — net/http is production-ready. gin/chi/echo add routing. Handles 50k+ req/sec on a single server easily.</li>
+  <li><strong>CLI tools</strong> — Single binary, no runtime. cobra+viper = professional CLI in hours. kubectl, terraform, gh are all Go CLIs.</li>
+  <li><strong>Cloud infrastructure</strong> — Docker, Kubernetes, Terraform, Prometheus, etcd, Consul, Vault — the entire cloud-native ecosystem is Go.</li>
+  <li><strong>High-concurrency servers</strong> — WebSocket servers, chat apps, real-time data pipelines. Goroutines handle millions of connections with ease.</li>
+  <li><strong>gRPC microservices</strong> — First-class gRPC support. Go gRPC server handles enormous throughput with minimal memory.</li>
+  <li><strong>Data pipelines</strong> — Fan-out/fan-in goroutine patterns for ETL, log processing, stream processing.</li>
+</ul>
+<div class="callout warn"><strong>When Not Go</strong>GUI apps (no native UI framework), ML/data science (Python ecosystem dominates), systems programming requiring zero GC pauses (Rust), scripting quick one-liners (Python/Bash).</div>`;
+
+  // ─── TOOLCHAIN ────────────────────────────────────────
+  if(key==='basics:toolchain:Commands') return `
+<div class="sec">Essential go Commands</div>
+<table class="tbl"><thead><tr><th>Command</th><th>Usage</th><th>Notes</th></tr></thead><tbody>
+<tr><td><em>go run .</em></td><td>Compile & run current package</td><td>For development only, not production</td></tr>
+<tr><td><em>go build .</em></td><td>Compile to binary</td><td>go build -o myapp .</td></tr>
+<tr><td><em>go build ./...</em></td><td>Build all packages recursively</td><td>Good for CI check</td></tr>
+<tr><td><em>go test ./...</em></td><td>Run all tests</td><td>-race -cover -v -count=1</td></tr>
+<tr><td><em>go mod tidy</em></td><td>Add missing / remove unused deps</td><td>Always run after adding imports</td></tr>
+<tr><td><em>go get pkg@v1.2.3</em></td><td>Add/upgrade dependency</td><td>go get ./... to upgrade all</td></tr>
+<tr><td><em>go vet ./...</em></td><td>Static analysis</td><td>Run before every commit</td></tr>
+<tr><td><em>go fmt ./...</em></td><td>Format all Go files</td><td>Use goimports instead (auto-adds imports)</td></tr>
+<tr><td><em>go tool pprof</em></td><td>Profile analysis</td><td>CPU, heap, goroutine profiles</td></tr>
+<tr><td><em>go generate ./...</em></td><td>Run go:generate directives</td><td>For code generation (mockery, sqlc, stringer)</td></tr>
+</tbody></table>
+<div class="callout tip"><strong>Makefile Pattern</strong>Wrap common commands in a Makefile: make build, make test, make lint. Keeps CI and developer commands identical.</div>`;
+
+  if(key==='basics:toolchain:Project Layout') return `
+<div class="sec">Standard Project Structure</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">project layout</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Single microservice / API service layout</span>
+myservice/
+├── cmd/
+│   ├── api/
+│   │   └── main.go          <span class="cm">// Wire deps, start server (~30 lines)</span>
+│   └── worker/
+│       └── main.go          <span class="cm">// Background job worker</span>
+├── internal/                <span class="cm">// Private — no external imports allowed</span>
+│   ├── domain/              <span class="cm">// Core business entities (pure Go, no dependencies)</span>
+│   │   └── user.go
+│   ├── service/             <span class="cm">// Business logic (depends on domain + interfaces)</span>
+│   │   └── user_service.go
+│   ├── repository/          <span class="cm">// Data access (implements repo interfaces)</span>
+│   │   ├── user_postgres.go
+│   │   └── user_inmem.go    <span class="cm">// For testing</span>
+│   ├── handler/             <span class="cm">// HTTP or gRPC handlers</span>
+│   │   └── user_handler.go
+│   └── middleware/
+│       └── auth.go
+├── pkg/                     <span class="cm">// Public library code (only if external consumers exist)</span>
+├── api/                     <span class="cm">// Proto files, OpenAPI specs</span>
+├── configs/                 <span class="cm">// Config file templates</span>
+├── migrations/              <span class="cm">// SQL migration files</span>
+├── scripts/                 <span class="cm">// Build, deploy, seed scripts</span>
+├── go.mod
+├── go.sum
+├── Dockerfile
+├── docker-compose.yaml
+└── Makefile</div></div>`;
+
+  if(key==='basics:toolchain:Code') return `
+<div class="sec">First Go Program</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// main.go — every executable Go program has package main</span>
+<span class="kw">package</span> main
+
+<span class="kw">import</span> (
+    <span class="str">"fmt"</span>
+    <span class="str">"os"</span>
+    <span class="str">"time"</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// All top-level declarations visible in this package</span>
+    name := <span class="fn">greet</span>(<span class="str">"Gopher"</span>)
+    fmt.<span class="fn">Println</span>(name)
+
+    <span class="cm">// Multiple return values</span>
+    result, err := <span class="fn">divide</span>(<span class="num">10.0</span>, <span class="num">3.0</span>)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        fmt.<span class="fn">Fprintln</span>(os.Stderr, err)
+        os.<span class="fn">Exit</span>(<span class="num">1</span>)
+    }
+    fmt.<span class="fn">Printf</span>(<span class="str">"10 / 3 = %.4f\n"</span>, result)
+
+    <span class="cm">// Goroutine — concurrent execution</span>
+    done := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">struct</span>{})
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        fmt.<span class="fn">Println</span>(<span class="str">"running concurrently!"</span>)
+        <span class="fn">close</span>(done)
+    }()
+    &lt;-done <span class="cm">// wait for goroutine</span>
+}
+
+<span class="kw">func</span> <span class="fn">greet</span>(name <span class="ty">string</span>) <span class="ty">string</span> {
+    <span class="kw">return</span> fmt.<span class="fn">Sprintf</span>(<span class="str">"Hello, %s! Time: %s"</span>, name, time.Now().<span class="fn">Format</span>(<span class="str">"15:04:05"</span>))
+}
+
+<span class="kw">func</span> <span class="fn">divide</span>(a, b <span class="ty">float64</span>) (<span class="ty">float64</span>, <span class="ty">error</span>) {
+    <span class="kw">if</span> b == <span class="num">0</span> {
+        <span class="kw">return</span> <span class="num">0</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"cannot divide by zero"</span>)
+    }
+    <span class="kw">return</span> a / b, <span class="kw">nil</span>
+}</div></div>`;
+
+  // ─── VARIABLES ────────────────────────────────────────
+  if(key==='basics:variables:All Forms') return `
+<div class="sec">All Variable Declaration Forms</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="kw">package</span> main
+
+<span class="cm">// Package-level: must use var (no :=)</span>
+<span class="kw">var</span> globalCounter <span class="ty">int</span>          <span class="cm">// zero value: 0</span>
+<span class="kw">var</span> appName = <span class="str">"myapp"</span>         <span class="cm">// type inferred: string</span>
+
+<span class="kw">var</span> (
+    host = <span class="str">"localhost"</span>
+    port = <span class="num">8080</span>
+    debug <span class="ty">bool</span>               <span class="cm">// zero value: false</span>
+)
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    <span class="cm">// 1. Short declaration (most common inside functions)</span>
+    name := <span class="str">"Alice"</span>            <span class="cm">// type inferred: string</span>
+    age  := <span class="num">30</span>                 <span class="cm">// type inferred: int</span>
+
+    <span class="cm">// 2. Explicit type (when you need specific type)</span>
+    <span class="kw">var</span> score <span class="ty">float64</span> = <span class="num">9.5</span>   <span class="cm">// NOT float32</span>
+    <span class="kw">var</span> count <span class="ty">int64</span>            <span class="cm">// zero value: 0</span>
+
+    <span class="cm">// 3. Multiple assignment</span>
+    a, b := <span class="num">1</span>, <span class="num">2</span>
+    a, b = b, a               <span class="cm">// swap — no temp var needed!</span>
+
+    <span class="cm">// 4. Blank identifier — discard unwanted values</span>
+    result, _ := <span class="fn">riskyOp</span>()   <span class="cm">// ignoring error (usually bad)</span>
+
+    <span class="cm">// 5. Redeclaration (at least one new var on left)</span>
+    result, err := <span class="fn">nextOp</span>()  <span class="cm">// result redeclared, err is new</span>
+    <span class="kw">if</span> err != <span class="kw">nil</span> { <span class="kw">return</span> }
+
+    _ = name; _ = age; _ = score; _ = count; _ = result; _ = a; _ = b
+}</span></div></div>`;
+
+  if(key==='basics:variables:Zero Values') return `
+<div class="sec">Zero Values — Every Type</div>
+<table class="tbl"><thead><tr><th>Type</th><th>Zero Value</th><th>Notes</th></tr></thead><tbody>
+<tr><td>bool</td><td>false</td><td>—</td></tr>
+<tr><td>int, int8, int16, int32, int64</td><td>0</td><td>Platform-sized int</td></tr>
+<tr><td>uint, uint8, uint16, uint32, uint64</td><td>0</td><td>uint8 = byte</td></tr>
+<tr><td>float32, float64</td><td>0.0</td><td>—</td></tr>
+<tr><td>complex64, complex128</td><td>0+0i</td><td>—</td></tr>
+<tr><td>string</td><td>""</td><td>Empty string, len=0</td></tr>
+<tr><td>[]T (slice)</td><td>nil</td><td>len=0, cap=0, append works!</td></tr>
+<tr><td>map[K]V</td><td>nil</td><td>reads ok, WRITES PANIC</td></tr>
+<tr><td>chan T</td><td>nil</td><td>send/receive block forever</td></tr>
+<tr><td>*T (pointer)</td><td>nil</td><td>deref panics</td></tr>
+<tr><td>interface</td><td>nil</td><td>(type,value) both nil</td></tr>
+<tr><td>func</td><td>nil</td><td>calling nil func panics</td></tr>
+<tr><td>struct</td><td>each field zeroed</td><td>sync.Mutex{} is unlocked!</td></tr>
+</tbody></table>
+<div class="callout tip"><strong>Design Insight</strong>Go&#39;s zero values enable "make the zero value useful" — sync.Mutex needs no initialization, bytes.Buffer works out of the box, sync.WaitGroup starts at zero. Design your structs so the zero value is valid and useful.</div>`;
+
+  // ─── TYPES ───────────────────────────────────────────
+  if(key==='basics:types:Numeric Types') return `
+<div class="sec">Numeric Types & Conversions</div>
+<table class="tbl"><thead><tr><th>Type</th><th>Size</th><th>Range</th><th>Use For</th></tr></thead><tbody>
+<tr><td>int8</td><td>1 byte</td><td>-128 to 127</td><td>Small counters</td></tr>
+<tr><td>int16</td><td>2 bytes</td><td>-32768 to 32767</td><td>—</td></tr>
+<tr><td>int32 (rune)</td><td>4 bytes</td><td>±2.1 billion</td><td>Unicode code points</td></tr>
+<tr><td>int64</td><td>8 bytes</td><td>±9.2 quintillion</td><td>Timestamps, IDs</td></tr>
+<tr><td>int</td><td>4 or 8 bytes</td><td>Platform-dependent</td><td>Most general use</td></tr>
+<tr><td>uint8 (byte)</td><td>1 byte</td><td>0 to 255</td><td>Binary data, bytes</td></tr>
+<tr><td>uint64</td><td>8 bytes</td><td>0 to 18.4 × 10^18</td><td>Bitfields, sizes</td></tr>
+<tr><td>float32</td><td>4 bytes</td><td>±3.4 × 10^38</td><td>GPU/graphics</td></tr>
+<tr><td>float64</td><td>8 bytes</td><td>±1.8 × 10^308</td><td>Default for decimals</td></tr>
+</tbody></table>
+<div class="callout warn"><strong>No Implicit Conversion</strong>Go has NO implicit numeric conversion. var x int = 5; var y float64 = x // COMPILE ERROR. Must explicit: float64(x). This prevents entire classes of bugs (C's integer promotion rules, Python's int/float confusion).</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// All conversions must be explicit</span>
+<span class="kw">var</span> i <span class="ty">int</span> = <span class="num">42</span>
+<span class="kw">var</span> f <span class="ty">float64</span> = <span class="ty">float64</span>(i)   <span class="cm">// explicit</span>
+<span class="kw">var</span> u <span class="ty">uint</span> = <span class="ty">uint</span>(f)          <span class="cm">// explicit (truncates decimal)</span>
+
+<span class="cm">// Named types require explicit conversion too</span>
+<span class="kw">type</span> <span class="ty">Celsius</span> <span class="ty">float64</span>
+<span class="kw">type</span> <span class="ty">Fahrenheit</span> <span class="ty">float64</span>
+
+<span class="kw">var</span> c <span class="ty">Celsius</span> = <span class="num">100</span>
+<span class="cm">// var f2 Fahrenheit = c  // COMPILE ERROR — different types!</span>
+<span class="kw">var</span> f2 <span class="ty">Fahrenheit</span> = <span class="ty">Fahrenheit</span>(c * <span class="num">9</span>/<span class="num">5</span> + <span class="num">32</span>)</div></div>`;
+
+  if(key==='basics:types:Strings & Runes') return `
+<div class="sec">Strings, bytes, and runes</div>
+<p class="bd">A <strong>string</strong> in Go is an immutable sequence of bytes (not characters). A <strong>rune</strong> is an int32 representing a Unicode code point. Go uses UTF-8 encoding internally.</p>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body">s := <span class="str">"Hello, 世界"</span>
+fmt.<span class="fn">Println</span>(<span class="fn">len</span>(s))          <span class="cm">// 13 bytes (not 9 chars — Chinese chars are 3 bytes each)</span>
+fmt.<span class="fn">Println</span>(<span class="fn">len</span>([]<span class="ty">rune</span>(s)))  <span class="cm">// 9 runes (actual characters)</span>
+
+<span class="cm">// Byte indexing</span>
+fmt.<span class="fn">Println</span>(s[<span class="num">0</span>])           <span class="cm">// 72 (byte value of 'H', NOT a character)</span>
+
+<span class="cm">// Correct Unicode iteration: range decodes UTF-8</span>
+<span class="kw">for</span> i, r := <span class="kw">range</span> s {
+    fmt.<span class="fn">Printf</span>(<span class="str">"%d: %c (%d)\n"</span>, i, r, r)
+    <span class="cm">// i is BYTE position, r is rune</span>
+}
+
+<span class="cm">// Rune literals</span>
+<span class="kw">var</span> r <span class="ty">rune</span> = <span class="str">'A'</span>    <span class="cm">// 65</span>
+r2 := <span class="str">'世'</span>          <span class="cm">// 19990</span>
+
+<span class="cm">// string ↔ []byte (makes a copy)</span>
+b := []<span class="ty">byte</span>(s)     <span class="cm">// encode to bytes</span>
+s2 := <span class="ty">string</span>(b)    <span class="cm">// decode from bytes</span>
+
+<span class="cm">// strings package for text ops</span>
+<span class="kw">import</span> <span class="str">"strings"</span>
+strings.<span class="fn">HasPrefix</span>(s, <span class="str">"Hello"</span>)    <span class="cm">// true</span>
+strings.<span class="fn">ToUpper</span>(s)               <span class="cm">// "HELLO, 世界"</span>
+parts := strings.<span class="fn">Split</span>(s, <span class="str">","</span>) <span class="cm">// ["Hello", " 世界"]</span>
+joined := strings.<span class="fn">Join</span>(parts, <span class="str">"-"</span>)</div></div>`;
+
+  // ─── CONSTANTS ─────────────────────────────────────────
+  if(key==='basics:constants:iota Patterns') return `
+<div class="sec">iota — The Enum Superpower</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Basic enum — iota starts at 0</span>
+<span class="kw">type</span> <span class="ty">Direction</span> <span class="ty">int</span>
+<span class="kw">const</span> (
+    North <span class="ty">Direction</span> = <span class="kw">iota</span> <span class="cm">// 0</span>
+    South                    <span class="cm">// 1</span>
+    East                     <span class="cm">// 2</span>
+    West                     <span class="cm">// 3</span>
+)
+
+<span class="cm">// Skip zero value (often means "unset")</span>
+<span class="kw">type</span> <span class="ty">Status</span> <span class="ty">int</span>
+<span class="kw">const</span> (
+    _ <span class="ty">Status</span> = <span class="kw">iota</span>   <span class="cm">// 0 — unset/unknown (blank identifier skips)</span>
+    Pending             <span class="cm">// 1</span>
+    Active              <span class="cm">// 2</span>
+    Inactive            <span class="cm">// 3</span>
+)
+
+<span class="cm">// Bitmask flags — 1-bit shift per const</span>
+<span class="kw">type</span> <span class="ty">Permission</span> <span class="ty">uint</span>
+<span class="kw">const</span> (
+    Read    <span class="ty">Permission</span> = <span class="num">1</span> &lt;&lt; <span class="kw">iota</span> <span class="cm">// 1 (001)</span>
+    Write                            <span class="cm">// 2 (010)</span>
+    Execute                          <span class="cm">// 4 (100)</span>
+)
+<span class="cm">// Usage: perm := Read | Write  → 3 (011)</span>
+<span class="cm">// Check: if perm & Read != 0 { // has read permission }</span>
+
+<span class="cm">// Byte sizes</span>
+<span class="kw">const</span> (
+    _           = <span class="kw">iota</span>
+    KB <span class="ty">int64</span> = <span class="num">1</span> &lt;&lt; (<span class="num">10</span> * <span class="kw">iota</span>) <span class="cm">// 1024</span>
+    MB                              <span class="cm">// 1048576</span>
+    GB                              <span class="cm">// 1073741824</span>
+    TB                              <span class="cm">// 1099511627776</span>
+)
+
+<span class="cm">// String method for readable output</span>
+<span class="kw">func</span> (d <span class="ty">Direction</span>) <span class="fn">String</span>() <span class="ty">string</span> {
+    <span class="kw">return</span> [...]<span class="ty">string</span>{<span class="str">"North"</span>, <span class="str">"South"</span>, <span class="str">"East"</span>, <span class="str">"West"</span>}[d]
+}</div></div>`;
+
+  // ─── GOROUTINES ────────────────────────────────────────
+  if(key==='goroutines:channels:Semantics') return `
+<div class="sec">Channel Semantics</div>
+<p class="bd">Channels are typed conduits for goroutine communication. They enforce the CSP (Communicating Sequential Processes) model: <strong>share memory by communicating, not communicate by sharing memory</strong>.</p>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Creating channels</span>
+ch1 := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)       <span class="cm">// unbuffered</span>
+ch2 := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>, <span class="num">10</span>)   <span class="cm">// buffered, capacity 10</span>
+
+<span class="cm">// Direction-typed channels — enforces single direction</span>
+<span class="kw">var</span> send <span class="kw">chan</span>&lt;- <span class="ty">int</span> = ch1   <span class="cm">// send-only</span>
+<span class="kw">var</span> recv &lt;-<span class="kw">chan</span> <span class="ty">int</span> = ch1   <span class="cm">// receive-only</span>
+
+<span class="cm">// Operations</span>
+ch2 &lt;- <span class="num">42</span>               <span class="cm">// send (blocks if full)</span>
+v  := &lt;-ch2             <span class="cm">// receive (blocks if empty)</span>
+v2, ok := &lt;-ch2         <span class="cm">// receive with ok: false if closed & empty</span>
+<span class="fn">close</span>(ch2)              <span class="cm">// signal no more values</span>
+
+<span class="cm">// range over channel — receives until close</span>
+<span class="kw">for</span> v := <span class="kw">range</span> ch1 {
+    fmt.<span class="fn">Println</span>(v)
+}</div></div>
+<div class="sec">Behavior Table</div>
+<table class="tbl"><thead><tr><th>Operation</th><th>nil channel</th><th>Open channel</th><th>Closed channel</th></tr></thead><tbody>
+<tr><td>Send (ch &lt;- v)</td><td>Blocks forever</td><td>Sends or blocks</td><td>PANIC</td></tr>
+<tr><td>Receive (&lt;-ch)</td><td>Blocks forever</td><td>Receives or blocks</td><td>Returns zero value, ok=false</td></tr>
+<tr><td>Close</td><td>PANIC</td><td>Closes successfully</td><td>PANIC</td></tr>
+</tbody></table>
+<div class="callout danger"><strong>Channel Rules</strong>Only the sender should close a channel, never the receiver. Closing from multiple goroutines panics. Use sync.Once or a dedicated "close coordinator" goroutine when multiple producers finish.</div>`;
+
+  if(key==='goroutines:goroutine-model:go Keyword') return `
+<div class="sec">Starting Goroutines</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// go keyword — starts a goroutine</span>
+<span class="kw">go</span> <span class="fn">someFunction</span>()
+
+<span class="cm">// Most common: anonymous goroutine</span>
+<span class="kw">go</span> <span class="kw">func</span>() {
+    fmt.<span class="fn">Println</span>(<span class="str">"running concurrently"</span>)
+}()
+
+<span class="cm">// Goroutines share the same address space</span>
+<span class="cm">// but communication via channels is preferred over shared memory</span>
+
+<span class="cm">// Wait for goroutine to finish — three ways:</span>
+
+<span class="cm">// 1. Channel signal</span>
+done := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">struct</span>{})
+<span class="kw">go</span> <span class="kw">func</span>() {
+    <span class="fn">doWork</span>()
+    <span class="fn">close</span>(done)
+}()
+&lt;-done
+
+<span class="cm">// 2. sync.WaitGroup (for multiple goroutines)</span>
+<span class="kw">var</span> wg sync.WaitGroup
+<span class="kw">for</span> i := <span class="num">0</span>; i &lt; <span class="num">5</span>; i++ {
+    wg.<span class="fn">Add</span>(<span class="num">1</span>)
+    <span class="kw">go</span> <span class="kw">func</span>(id <span class="ty">int</span>) {
+        <span class="kw">defer</span> wg.<span class="fn">Done</span>()
+        fmt.<span class="fn">Printf</span>(<span class="str">"worker %d done\n"</span>, id)
+    }(i)
+}
+wg.<span class="fn">Wait</span>()
+
+<span class="cm">// 3. errgroup (goroutines + error propagation)</span>
+g, ctx := errgroup.<span class="fn">WithContext</span>(context.<span class="fn">Background</span>())
+g.<span class="fn">Go</span>(<span class="kw">func</span>() <span class="ty">error</span> {
+    <span class="kw">return</span> <span class="fn">fetchData</span>(ctx)
+})
+<span class="kw">if</span> err := g.<span class="fn">Wait</span>(); err != <span class="kw">nil</span> {
+    <span class="kw">return</span> err
+}</div></div>`;
+
+  if(key==='goroutines:select-go:select Basics') return `
+<div class="sec">select Statement</div>
+<p class="bd">select waits on multiple channel operations. When multiple are ready, one is chosen at <strong>random</strong>. Think of it as a switch statement for channels.</p>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Basic select</span>
+<span class="kw">select</span> {
+<span class="kw">case</span> v := &lt;-ch1:
+    fmt.<span class="fn">Println</span>(<span class="str">"received from ch1:"</span>, v)
+<span class="kw">case</span> ch2 &lt;- x:
+    fmt.<span class="fn">Println</span>(<span class="str">"sent to ch2"</span>)
+<span class="kw">case</span> &lt;-time.<span class="fn">After</span>(<span class="num">5</span> * time.Second):
+    fmt.<span class="fn">Println</span>(<span class="str">"timeout!"</span>)
+<span class="kw">default</span>:
+    fmt.<span class="fn">Println</span>(<span class="str">"no channel ready — non-blocking"</span>)
+}
+
+<span class="cm">// Cancellable worker loop</span>
+<span class="kw">func</span> <span class="fn">worker</span>(ctx context.Context, jobs &lt;-<span class="kw">chan</span> <span class="ty">Job</span>, results <span class="kw">chan</span>&lt;- <span class="ty">Result</span>) {
+    <span class="kw">for</span> {
+        <span class="kw">select</span> {
+        <span class="kw">case</span> &lt;-ctx.<span class="fn">Done</span>():
+            <span class="kw">return</span>          <span class="cm">// context cancelled — exit</span>
+        <span class="kw">case</span> job, ok := &lt;-jobs:
+            <span class="kw">if</span> !ok { <span class="kw">return</span> }  <span class="cm">// channel closed</span>
+            results &lt;- <span class="fn">process</span>(job)
+        }
+    }
+}
+
+<span class="cm">// Priority select — check done channel first</span>
+<span class="kw">func</span> <span class="fn">priorityWorker</span>(done, work &lt;-<span class="kw">chan</span> <span class="ty">int</span>) {
+    <span class="kw">for</span> {
+        <span class="kw">select</span> {
+        <span class="kw">case</span> &lt;-done:
+            <span class="kw">return</span>  <span class="cm">// always check done first</span>
+        <span class="kw">default</span>:
+        }
+        <span class="kw">select</span> {
+        <span class="kw">case</span> &lt;-done:
+            <span class="kw">return</span>
+        <span class="kw">case</span> v := &lt;-work:
+            <span class="fn">process</span>(v)
+        }
+    }
+}</div></div>`;
+
+  // ─── CONCURRENCY ──────────────────────────────────────
+  if(key==='concurrency:sync-prims:Mutex & RWMutex') return `
+<div class="sec">sync.Mutex & sync.RWMutex</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Safe counter with Mutex</span>
+<span class="kw">type</span> <span class="ty">SafeCounter</span> <span class="kw">struct</span> {
+    mu    sync.Mutex
+    count <span class="ty">int</span>
+}
+
+<span class="kw">func</span> (c *<span class="ty">SafeCounter</span>) <span class="fn">Inc</span>() {
+    c.mu.<span class="fn">Lock</span>()
+    <span class="kw">defer</span> c.mu.<span class="fn">Unlock</span>()  <span class="cm">// ALWAYS defer — unlock even on panic</span>
+    c.count++
+}
+
+<span class="kw">func</span> (c *<span class="ty">SafeCounter</span>) <span class="fn">Value</span>() <span class="ty">int</span> {
+    c.mu.<span class="fn">Lock</span>()
+    <span class="kw">defer</span> c.mu.<span class="fn">Unlock</span>()
+    <span class="kw">return</span> c.count
+}
+
+<span class="cm">// Read-heavy cache: use RWMutex</span>
+<span class="kw">type</span> <span class="ty">Cache</span> <span class="kw">struct</span> {
+    mu    sync.RWMutex
+    store <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>
+}
+
+<span class="kw">func</span> (c *<span class="ty">Cache</span>) <span class="fn">Get</span>(key <span class="ty">string</span>) (<span class="ty">string</span>, <span class="ty">bool</span>) {
+    c.mu.<span class="fn">RLock</span>()               <span class="cm">// multiple readers allowed simultaneously</span>
+    <span class="kw">defer</span> c.mu.<span class="fn">RUnlock</span>()
+    v, ok := c.store[key]
+    <span class="kw">return</span> v, ok
+}
+
+<span class="kw">func</span> (c *<span class="ty">Cache</span>) <span class="fn">Set</span>(key, val <span class="ty">string</span>) {
+    c.mu.<span class="fn">Lock</span>()                <span class="cm">// exclusive write — blocks all readers</span>
+    <span class="kw">defer</span> c.mu.<span class="fn">Unlock</span>()
+    c.store[key] = val
+}</div></div>
+<div class="callout perf"><strong>Mutex vs RWMutex</strong>Use RWMutex when reads heavily outnumber writes (cache, config). For high write contention, Mutex is faster due to lower overhead. Never copy a Mutex — always embed in struct or use pointer.</div>`;
+
+  if(key==='concurrency:sync-prims:sync.Once') return `
+<div class="sec">sync.Once — One-Time Initialization</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Singleton pattern — safe for concurrent calls</span>
+<span class="kw">type</span> <span class="ty">DB</span> <span class="kw">struct</span> { pool *sql.DB }
+<span class="kw">var</span> (
+    instance *<span class="ty">DB</span>
+    once     sync.Once
+)
+
+<span class="kw">func</span> <span class="fn">GetDB</span>() *<span class="ty">DB</span> {
+    once.<span class="fn">Do</span>(<span class="kw">func</span>() {
+        db, err := sql.<span class="fn">Open</span>(<span class="str">"postgres"</span>, os.<span class="fn">Getenv</span>(<span class="str">"DATABASE_URL"</span>))
+        <span class="kw">if</span> err != <span class="kw">nil</span> { <span class="fn">panic</span>(err) }
+        instance = &<span class="ty">DB</span>{pool: db}
+    })
+    <span class="kw">return</span> instance
+}
+
+<span class="cm">// Modern Go: OnceValue (Go 1.21) — stores the result</span>
+<span class="kw">var</span> getConfig = sync.<span class="fn">OnceValue</span>(<span class="kw">func</span>() *<span class="ty">Config</span> {
+    cfg, err := <span class="fn">loadConfig</span>()
+    <span class="kw">if</span> err != <span class="kw">nil</span> { <span class="fn">panic</span>(err) }
+    <span class="kw">return</span> cfg
+})
+
+<span class="cm">// Usage: cfg := getConfig() — only loads once, cached forever</span></div></div>`;
+
+  if(key==='concurrency:errgroup:errgroup Basics') return `
+<div class="sec">errgroup — Goroutines + Error Propagation</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="kw">import</span> <span class="str">"golang.org/x/sync/errgroup"</span>
+
+<span class="cm">// Fetch 3 URLs concurrently — fail fast on any error</span>
+<span class="kw">func</span> <span class="fn">fetchAll</span>(ctx context.Context, urls []<span class="ty">string</span>) ([][]<span class="ty">byte</span>, <span class="ty">error</span>) {
+    g, ctx := errgroup.<span class="fn">WithContext</span>(ctx)
+    results := <span class="fn">make</span>([][]<span class="ty">byte</span>, <span class="fn">len</span>(urls))
+
+    <span class="kw">for</span> i, url := <span class="kw">range</span> urls {
+        i, url := i, url  <span class="cm">// capture for closure (pre-Go 1.22)</span>
+        g.<span class="fn">Go</span>(<span class="kw">func</span>() <span class="ty">error</span> {
+            body, err := <span class="fn">fetch</span>(ctx, url)
+            <span class="kw">if</span> err != <span class="kw">nil</span> {
+                <span class="kw">return</span> fmt.<span class="fn">Errorf</span>(<span class="str">"fetch %s: %w"</span>, url, err)
+            }
+            results[i] = body  <span class="cm">// safe — each goroutine writes different index</span>
+            <span class="kw">return</span> <span class="kw">nil</span>
+        })
+    }
+
+    <span class="kw">if</span> err := g.<span class="fn">Wait</span>(); err != <span class="kw">nil</span> {
+        <span class="kw">return</span> <span class="kw">nil</span>, err  <span class="cm">// first non-nil error from any goroutine</span>
+    }
+    <span class="kw">return</span> results, <span class="kw">nil</span>
+}
+
+<span class="cm">// Limit concurrency with SetLimit</span>
+g.<span class="fn">SetLimit</span>(<span class="num">10</span>)  <span class="cm">// max 10 goroutines at once — g.Go blocks until slot free</span>
+
+<span class="cm">// Context is automatically cancelled when first error occurs</span>
+<span class="cm">// — other goroutines should check ctx.Done() and return early</span></div></div>`;
+
+  if(key==='concurrency:context-go:Context Tree') return `
+<div class="sec">Context Propagation Tree</div>
+<div class="dw"><div class="dt">context cancellation tree</div>
+<svg width="440" height="200" viewBox="0 0 440 200">
+  <rect x="160" y="10" width="120" height="34" rx="6" fill="#091522" stroke="#0f2236"/>
+  <text x="220" y="32" text-anchor="middle" fill="#00d4ff" font-family="Fira Code" font-size="11">Background()</text>
+  <line x1="220" y1="44" x2="100" y2="78" stroke="#0f2236" stroke-width="1.5"/>
+  <line x1="220" y1="44" x2="220" y2="78" stroke="#0f2236" stroke-width="1.5"/>
+  <line x1="220" y1="44" x2="340" y2="78" stroke="#0f2236" stroke-width="1.5"/>
+  <rect x="40" y="78" width="120" height="34" rx="6" fill="#091522" stroke="#ffd166"/>
+  <text x="100" y="100" text-anchor="middle" fill="#ffd166" font-family="Fira Code" font-size="10">WithTimeout(5s)</text>
+  <rect x="160" y="78" width="120" height="34" rx="6" fill="#091522" stroke="#a78bfa"/>
+  <text x="220" y="100" text-anchor="middle" fill="#a78bfa" font-family="Fira Code" font-size="10">WithCancel()</text>
+  <rect x="280" y="78" width="120" height="34" rx="6" fill="#091522" stroke="#00ffe0"/>
+  <text x="340" y="100" text-anchor="middle" fill="#00ffe0" font-family="Fira Code" font-size="10">WithValue(key,v)</text>
+  <line x1="100" y1="112" x2="100" y2="146" stroke="#ff6b9d" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <rect x="40" y="146" width="120" height="34" rx="6" fill="#1a0a10" stroke="#ff6b9d"/>
+  <text x="100" y="162" text-anchor="middle" fill="#ff6b9d" font-family="Fira Code" font-size="10">child — cancelled</text>
+  <text x="100" y="175" text-anchor="middle" fill="#ff6b9d" font-family="Fira Code" font-size="9">when parent times out</text>
+</svg></div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// HTTP handler with context propagation</span>
+<span class="kw">func</span> (h *<span class="ty">Handler</span>) <span class="fn">GetUser</span>(w http.ResponseWriter, r *http.Request) {
+    ctx := r.<span class="fn">Context</span>()  <span class="cm">// cancelled when client disconnects!</span>
+
+    <span class="cm">// Timeout for downstream call</span>
+    dbCtx, cancel := context.<span class="fn">WithTimeout</span>(ctx, <span class="num">3</span>*time.Second)
+    <span class="kw">defer</span> <span class="fn">cancel</span>()  <span class="cm">// ALWAYS defer cancel</span>
+
+    user, err := h.repo.<span class="fn">FindUser</span>(dbCtx, <span class="fn">userID</span>(r))
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        <span class="kw">if</span> errors.<span class="fn">Is</span>(err, context.DeadlineExceeded) {
+            <span class="fn">writeError</span>(w, http.StatusGatewayTimeout, <span class="str">"db timeout"</span>)
+        } <span class="kw">else</span> {
+            <span class="fn">writeError</span>(w, http.StatusInternalServerError, err.<span class="fn">Error</span>())
+        }
+        <span class="kw">return</span>
+    }
+    <span class="fn">writeJSON</span>(w, user)
+}</div></div>`;
+
+  // ─── ERRORS ──────────────────────────────────────────
+  if(key==='errors:error-wrap:fmt.Errorf %w') return `
+<div class="sec">Error Wrapping with %w</div>
+<p class="bd">fmt.Errorf("context: %w", err) wraps an error, preserving the original while adding context. This builds an error chain that callers can inspect.</p>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Service layer — wraps at each boundary</span>
+<span class="kw">func</span> (s *<span class="ty">UserService</span>) <span class="fn">GetProfile</span>(ctx context.Context, id <span class="ty">int64</span>) (*<span class="ty">Profile</span>, <span class="ty">error</span>) {
+    user, err := s.repo.<span class="fn">FindByID</span>(ctx, id)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        <span class="kw">return</span> <span class="kw">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"UserService.GetProfile id=%d: %w"</span>, id, err)
+    }
+    <span class="kw">return</span> &<span class="ty">Profile</span>{Name: user.Name}, <span class="kw">nil</span>
+}
+
+<span class="cm">// Sentinel error for specific cases</span>
+<span class="kw">var</span> ErrNotFound = errors.<span class="fn">New</span>(<span class="str">"not found"</span>)
+
+<span class="cm">// Repository wraps DB error with sentinel</span>
+<span class="kw">func</span> (r *<span class="ty">Repo</span>) <span class="fn">FindByID</span>(ctx context.Context, id <span class="ty">int64</span>) (*<span class="ty">User</span>, <span class="ty">error</span>) {
+    <span class="kw">var</span> u <span class="ty">User</span>
+    err := r.db.<span class="fn">QueryRowContext</span>(ctx, <span class="str">"SELECT * FROM users WHERE id=$1"</span>, id).<span class="fn">Scan</span>(&u)
+    <span class="kw">if</span> errors.<span class="fn">Is</span>(err, sql.ErrNoRows) {
+        <span class="kw">return</span> <span class="kw">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"user %d: %w"</span>, id, ErrNotFound) <span class="cm">// wrap sentinel</span>
+    }
+    <span class="kw">return</span> &u, err
+}
+
+<span class="cm">// HTTP handler — inspect error chain</span>
+user, err := svc.<span class="fn">GetProfile</span>(ctx, id)
+<span class="kw">if</span> errors.<span class="fn">Is</span>(err, ErrNotFound) {    <span class="cm">// checks entire chain</span>
+    <span class="fn">http.Error</span>(w, <span class="str">"user not found"</span>, http.StatusNotFound)
+    <span class="kw">return</span>
+}
+
+<span class="cm">// errors.As — extract typed error anywhere in chain</span>
+<span class="kw">var</span> valErr *<span class="ty">ValidationError</span>
+<span class="kw">if</span> errors.<span class="fn">As</span>(err, &valErr) {
+    <span class="fn">writeJSON</span>(w, valErr.<span class="fn">Fields</span>(), http.StatusBadRequest)
+}</div></div>`;
+
+  // ─── HTTP API ─────────────────────────────────────────
+  if(key==='http-api:chi:chi Basics') return `
+<div class="sec">chi Router Setup</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="kw">import</span> <span class="str">"github.com/go-chi/chi/v5"</span>
+
+<span class="kw">func</span> <span class="fn">NewRouter</span>(h *<span class="ty">Handlers</span>) http.Handler {
+    r := chi.<span class="fn">NewRouter</span>()
+
+    <span class="cm">// Global middleware</span>
+    r.<span class="fn">Use</span>(middleware.RequestID)
+    r.<span class="fn">Use</span>(middleware.Logger)
+    r.<span class="fn">Use</span>(middleware.Recoverer)
+    r.<span class="fn">Use</span>(middleware.<span class="fn">Timeout</span>(<span class="num">60</span> * time.Second))
+
+    <span class="cm">// API group with auth middleware</span>
+    r.<span class="fn">Route</span>(<span class="str">"/api/v1"</span>, <span class="kw">func</span>(r chi.Router) {
+        r.<span class="fn">Use</span>(h.authMiddleware)
+
+        r.<span class="fn">Route</span>(<span class="str">"/users"</span>, <span class="kw">func</span>(r chi.Router) {
+            r.<span class="fn">Get</span>(<span class="str">"/"</span>, h.ListUsers)
+            r.<span class="fn">Post</span>(<span class="str">"/"</span>, h.CreateUser)
+            r.<span class="fn">Route</span>(<span class="str">"/{userID}"</span>, <span class="kw">func</span>(r chi.Router) {
+                r.<span class="fn">Get</span>(<span class="str">"/"</span>, h.GetUser)
+                r.<span class="fn">Put</span>(<span class="str">"/"</span>, h.UpdateUser)
+                r.<span class="fn">Delete</span>(<span class="str">"/"</span>, h.DeleteUser)
+            })
+        })
+
+        r.<span class="fn">Route</span>(<span class="str">"/orders"</span>, <span class="kw">func</span>(r chi.Router) {
+            r.<span class="fn">Get</span>(<span class="str">"/"</span>, h.ListOrders)
+            r.<span class="fn">Post</span>(<span class="str">"/"</span>, h.CreateOrder)
+        })
+    })
+
+    <span class="cm">// Public routes</span>
+    r.<span class="fn">Get</span>(<span class="str">"/health"</span>, h.Health)
+    r.<span class="fn">Get</span>(<span class="str">"/metrics"</span>, promhttp.Handler().<span class="fn">ServeHTTP</span>)
+
+    <span class="kw">return</span> r
+}
+
+<span class="cm">// Extract URL param</span>
+<span class="kw">func</span> (h *<span class="ty">Handlers</span>) <span class="fn">GetUser</span>(w http.ResponseWriter, r *http.Request) {
+    userID := chi.<span class="fn">URLParam</span>(r, <span class="str">"userID"</span>)
+    <span class="cm">// ...</span>
+}</div></div>`;
+
+  if(key==='http-api:graceful:Shutdown Code') return `
+<div class="sec">Production Graceful Shutdown</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="kw">func</span> <span class="fn">main</span>() {
+    cfg := <span class="fn">loadConfig</span>()
+    db  := <span class="fn">initDB</span>(cfg)
+    svc := service.<span class="fn">New</span>(db)
+    h   := handler.<span class="fn">New</span>(svc)
+
+    srv := &http.Server{
+        Addr:         cfg.Port,
+        Handler:      <span class="fn">NewRouter</span>(h),
+        ReadTimeout:  <span class="num">10</span> * time.Second,
+        WriteTimeout: <span class="num">30</span> * time.Second,
+        IdleTimeout:  <span class="num">120</span> * time.Second,
+    }
+
+    <span class="cm">// Start server in background</span>
+    serverErr := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">error</span>, <span class="num">1</span>)
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        log.<span class="fn">Printf</span>(<span class="str">"listening on %s"</span>, cfg.Port)
+        <span class="kw">if</span> err := srv.<span class="fn">ListenAndServe</span>(); !errors.<span class="fn">Is</span>(err, http.ErrServerClosed) {
+            serverErr &lt;- err
+        }
+    }()
+
+    <span class="cm">// Wait for signal or server error</span>
+    quit := <span class="fn">make</span>(<span class="kw">chan</span> os.Signal, <span class="num">1</span>)
+    signal.<span class="fn">Notify</span>(quit, syscall.SIGINT, syscall.SIGTERM)
+
+    <span class="kw">select</span> {
+    <span class="kw">case</span> err := &lt;-serverErr:
+        log.<span class="fn">Fatalf</span>(<span class="str">"server error: %v"</span>, err)
+    <span class="kw">case</span> sig := &lt;-quit:
+        log.<span class="fn">Printf</span>(<span class="str">"received signal: %v"</span>, sig)
+    }
+
+    <span class="cm">// Graceful shutdown: stop accepting, drain requests</span>
+    shutdownCtx, cancel := context.<span class="fn">WithTimeout</span>(context.<span class="fn">Background</span>(), <span class="num">30</span>*time.Second)
+    <span class="kw">defer</span> <span class="fn">cancel</span>()
+
+    <span class="kw">if</span> err := srv.<span class="fn">Shutdown</span>(shutdownCtx); err != <span class="kw">nil</span> {
+        log.<span class="fn">Printf</span>(<span class="str">"shutdown error: %v"</span>, err)
+    }
+
+    <span class="cm">// Cleanup: close DB pool, flush traces, etc.</span>
+    db.<span class="fn">Close</span>()
+    log.<span class="fn">Println</span>(<span class="str">"server exited cleanly"</span>)
+}</div></div>`;
+
+  // ─── DATABASES ────────────────────────────────────────
+  if(key==='databases:db-sql:Query Patterns') return `
+<div class="sec">database/sql Query Patterns</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Single row query</span>
+<span class="kw">func</span> (r *<span class="ty">UserRepo</span>) <span class="fn">FindByID</span>(ctx context.Context, id <span class="ty">int64</span>) (*<span class="ty">User</span>, <span class="ty">error</span>) {
+    <span class="kw">const</span> q = <span class="str">&#96;SELECT id, name, email, created_at FROM users WHERE id = $1&#96;</span>
+    <span class="kw">var</span> u <span class="ty">User</span>
+    err := r.db.<span class="fn">QueryRowContext</span>(ctx, q, id).<span class="fn">Scan</span>(&u.ID, &u.Name, &u.Email, &u.CreatedAt)
+    <span class="kw">if</span> errors.<span class="fn">Is</span>(err, sql.ErrNoRows) {
+        <span class="kw">return</span> <span class="kw">nil</span>, ErrNotFound
+    }
+    <span class="kw">return</span> &u, err
+}
+
+<span class="cm">// Multiple rows</span>
+<span class="kw">func</span> (r *<span class="ty">UserRepo</span>) <span class="fn">List</span>(ctx context.Context, limit, offset <span class="ty">int</span>) ([]*<span class="ty">User</span>, <span class="ty">error</span>) {
+    <span class="kw">const</span> q = <span class="str">&#96;SELECT id, name, email FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2&#96;</span>
+    rows, err := r.db.<span class="fn">QueryContext</span>(ctx, q, limit, offset)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        <span class="kw">return</span> <span class="kw">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"query users: %w"</span>, err)
+    }
+    <span class="kw">defer</span> rows.<span class="fn">Close</span>()   <span class="cm">// ALWAYS close rows</span>
+
+    <span class="kw">var</span> users []*<span class="ty">User</span>
+    <span class="kw">for</span> rows.<span class="fn">Next</span>() {
+        <span class="kw">var</span> u <span class="ty">User</span>
+        <span class="kw">if</span> err := rows.<span class="fn">Scan</span>(&u.ID, &u.Name, &u.Email); err != <span class="kw">nil</span> {
+            <span class="kw">return</span> <span class="kw">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"scan user: %w"</span>, err)
+        }
+        users = <span class="fn">append</span>(users, &u)
+    }
+    <span class="kw">return</span> users, rows.<span class="fn">Err</span>()  <span class="cm">// check iteration error</span>
+}
+
+<span class="cm">// Deferred rollback pattern for transactions</span>
+<span class="kw">func</span> (r *<span class="ty">UserRepo</span>) <span class="fn">CreateWithAudit</span>(ctx context.Context, u *<span class="ty">User</span>) <span class="ty">error</span> {
+    tx, err := r.db.<span class="fn">BeginTx</span>(ctx, <span class="kw">nil</span>)
+    <span class="kw">if</span> err != <span class="kw">nil</span> { <span class="kw">return</span> err }
+    <span class="kw">defer</span> tx.<span class="fn">Rollback</span>()  <span class="cm">// no-op if committed</span>
+
+    <span class="kw">if</span> _, err := tx.<span class="fn">ExecContext</span>(ctx, <span class="str">"INSERT INTO users..."</span>, u.Name); err != <span class="kw">nil</span> {
+        <span class="kw">return</span> err
+    }
+    <span class="kw">if</span> _, err := tx.<span class="fn">ExecContext</span>(ctx, <span class="str">"INSERT INTO audit_log..."</span>, u.ID); err != <span class="kw">nil</span> {
+        <span class="kw">return</span> err
+    }
+    <span class="kw">return</span> tx.<span class="fn">Commit</span>()
+}</div></div>`;
+
+  // ─── TESTING ──────────────────────────────────────────
+  if(key==='testing:table-tests:Table Pattern') return `
+<div class="sec">Table-Driven Tests</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="kw">func</span> <span class="fn">TestDivide</span>(t *testing.T) {
+    <span class="kw">type</span> <span class="ty">args</span> <span class="kw">struct</span> { a, b <span class="ty">float64</span> }
+    tests := []<span class="kw">struct</span> {
+        name    <span class="ty">string</span>
+        args    <span class="ty">args</span>
+        want    <span class="ty">float64</span>
+        wantErr <span class="ty">bool</span>
+    }{
+        {name: <span class="str">"positive"</span>,    args: <span class="ty">args</span>{<span class="num">10</span>, <span class="num">2</span>},  want: <span class="num">5.0</span>,  wantErr: <span class="kw">false</span>},
+        {name: <span class="str">"negative"</span>,    args: <span class="ty">args</span>{-<span class="num">6</span>, <span class="num">2</span>},  want: -<span class="num">3.0</span>, wantErr: <span class="kw">false</span>},
+        {name: <span class="str">"zero divisor"</span>, args: <span class="ty">args</span>{<span class="num">5</span>, <span class="num">0</span>},  want: <span class="num">0</span>,    wantErr: <span class="kw">true</span>},
+        {name: <span class="str">"both zero"</span>,   args: <span class="ty">args</span>{<span class="num">0</span>, <span class="num">0</span>},  want: <span class="num">0</span>,    wantErr: <span class="kw">true</span>},
+    }
+
+    <span class="kw">for</span> _, tt := <span class="kw">range</span> tests {
+        t.<span class="fn">Run</span>(tt.name, <span class="kw">func</span>(t *testing.T) {
+            t.<span class="fn">Parallel</span>()   <span class="cm">// run subtests in parallel</span>
+            got, err := <span class="fn">Divide</span>(tt.args.a, tt.args.b)
+            <span class="kw">if</span> (err != <span class="kw">nil</span>) != tt.wantErr {
+                t.<span class="fn">Errorf</span>(<span class="str">"Divide() error = %v, wantErr %v"</span>, err, tt.wantErr)
+                <span class="kw">return</span>
+            }
+            <span class="kw">if</span> got != tt.want {
+                t.<span class="fn">Errorf</span>(<span class="str">"Divide() = %v, want %v"</span>, got, tt.want)
+            }
+        })
+    }
+}
+
+<span class="cm">// Using testify for nicer assertions</span>
+<span class="kw">import</span> <span class="str">"github.com/stretchr/testify/assert"</span>
+
+<span class="kw">func</span> <span class="fn">TestUserService_Create</span>(t *testing.T) {
+    t.<span class="fn">Parallel</span>()
+    mockRepo := &<span class="ty">MockUserRepo</span>{}
+    svc := <span class="fn">NewUserService</span>(mockRepo)
+
+    user, err := svc.<span class="fn">Create</span>(context.<span class="fn">Background</span>(), <span class="fn">CreateParams</span>{Name: <span class="str">"Alice"</span>})
+    assert.<span class="fn">NoError</span>(t, err)
+    assert.<span class="fn">Equal</span>(t, <span class="str">"Alice"</span>, user.Name)
+    assert.<span class="fn">NotZero</span>(t, user.ID)
+}</div></div>`;
+
+  if(key==='testing:benchmarks-test:Writing Benchmarks') return `
+<div class="sec">Writing Effective Benchmarks</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// BenchmarkXxx runs b.N iterations — N auto-scaled by testing framework</span>
+<span class="kw">func</span> <span class="fn">BenchmarkJSONMarshal</span>(b *testing.B) {
+    user := <span class="ty">User</span>{ID: <span class="num">1</span>, Name: <span class="str">"Alice"</span>, Email: <span class="str">"alice@example.com"</span>}
+    b.<span class="fn">ResetTimer</span>()   <span class="cm">// exclude setup from measurement</span>
+    b.<span class="fn">ReportAllocs</span>() <span class="cm">// report allocations per op</span>
+
+    <span class="kw">for</span> i := <span class="num">0</span>; i &lt; b.N; i++ {
+        _, err := json.<span class="fn">Marshal</span>(user)
+        <span class="kw">if</span> err != <span class="kw">nil</span> {
+            b.<span class="fn">Fatal</span>(err)
+        }
+    }
+}
+
+<span class="cm">// Sub-benchmarks for comparing implementations</span>
+<span class="kw">func</span> <span class="fn">BenchmarkStringConcat</span>(b *testing.B) {
+    b.<span class="fn">Run</span>(<span class="str">"plus"</span>, <span class="kw">func</span>(b *testing.B) {
+        <span class="kw">var</span> s <span class="ty">string</span>
+        <span class="kw">for</span> i := <span class="num">0</span>; i &lt; b.N; i++ {
+            s = s + <span class="str">"x"</span>     <span class="cm">// O(n²) allocations</span>
+        }
+        _ = s
+    })
+    b.<span class="fn">Run</span>(<span class="str">"builder"</span>, <span class="kw">func</span>(b *testing.B) {
+        <span class="kw">var</span> sb strings.Builder
+        <span class="kw">for</span> i := <span class="num">0</span>; i &lt; b.N; i++ {
+            sb.<span class="fn">WriteString</span>(<span class="str">"x"</span>)   <span class="cm">// amortized O(1)</span>
+        }
+        _ = sb.<span class="fn">String</span>()
+    })
+}
+
+<span class="cm">// Run: go test -bench=. -benchmem -benchtime=5s ./...</span>
+<span class="cm">// Compare: go test -bench=. | tee new.txt; benchcmp old.txt new.txt</span>
+<span class="cm">// Output example:</span>
+<span class="cm">// BenchmarkJSONMarshal-8   3000000   450 ns/op   128 B/op   2 allocs/op</span></div></div>`;
+
+  // ─── DOCKER ──────────────────────────────────────────
+  if(key==='docker:dockerfile-go:Multi-Stage Build') return `
+<div class="sec">Production Multi-Stage Dockerfile</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">dockerfile</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm"># syntax=docker/dockerfile:1.6</span>
+<span class="cm">####################################</span>
+<span class="cm"># Stage 1: Build</span>
+<span class="cm">####################################</span>
+<span class="kw">FROM</span> golang:<span class="num">1.23</span>-alpine <span class="kw">AS</span> builder
+
+<span class="cm"># Install CA certs (needed if making HTTPS calls)</span>
+<span class="kw">RUN</span> apk add --no-cache ca-certificates tzdata
+
+<span class="kw">WORKDIR</span> /build
+
+<span class="cm"># Download dependencies first (layer cached until go.mod changes)</span>
+<span class="kw">COPY</span> go.mod go.sum ./
+<span class="kw">RUN</span> --mount=type=cache,target=/root/go/pkg/mod \
+    go mod download
+
+<span class="cm"># Copy source and build</span>
+<span class="kw">COPY</span> . .
+<span class="kw">RUN</span> --mount=type=cache,target=/root/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=<span class="num">0</span> GOOS=linux GOARCH=amd64 \
+    go build \
+      -ldflags=<span class="str">"-s -w -X main.version=\${VERSION}"</span> \
+      -trimpath \
+      -o /app/server ./cmd/api
+
+<span class="cm">####################################</span>
+<span class="cm"># Stage 2: Runtime (distroless)</span>
+<span class="cm">####################################</span>
+<span class="kw">FROM</span> gcr.io/distroless/static-debian12:nonroot <span class="kw">AS</span> production
+
+<span class="kw">COPY</span> --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+<span class="kw">COPY</span> --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+<span class="kw">COPY</span> --from=builder /app/server /server
+
+<span class="cm"># Run as non-root (security best practice)</span>
+<span class="kw">USER</span> nonroot:nonroot
+
+<span class="cm"># Expose port (documentation only)</span>
+<span class="kw">EXPOSE</span> <span class="num">8080</span>
+
+<span class="cm"># exec form: signals go directly to process (not shell)</span>
+<span class="kw">ENTRYPOINT</span> [<span class="str">"/server"</span>]</div></div>
+<div class="callout tip"><strong>Result</strong>~8-12MB final image vs ~800MB with golang:1.23. CGO_ENABLED=0 creates a static binary. -ldflags="-s -w" strips debug symbols (-s) and DWARF tables (-w). -trimpath removes build machine paths for reproducibility.</div>`;
+
+  // ─── KUBERNETES ──────────────────────────────────────
+  if(key==='kubernetes:k8s-deploy:Deployment') return `
+<div class="sec">Production Kubernetes Deployment</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">yaml</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-service
+  namespace: production
+  labels:
+    app: api-service
+    version: v1.2.3
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0        <span class="cm"># zero-downtime</span>
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: api-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      terminationGracePeriodSeconds: 60  <span class="cm"># must be > shutdown timeout</span>
+      containers:
+      - name: api
+        image: ghcr.io/myorg/api-service:v1.2.3
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: ":8080"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: database-url
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 2
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh","-c","sleep 5"]  <span class="cm"># wait for LB to stop routing</span></div></div>`;
+
+  // ─── OBSERVABILITY ────────────────────────────────────
+  if(key==='observability:logging-go:log/slog') return `
+<div class="sec">log/slog — Go 1.21+ Structured Logging</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="kw">import</span> <span class="str">"log/slog"</span>
+
+<span class="cm">// Setup JSON logger (production)</span>
+logger := slog.<span class="fn">New</span>(slog.<span class="fn">NewJSONHandler</span>(os.Stdout, &slog.HandlerOptions{
+    Level: slog.LevelInfo,
+    <span class="cm">// ReplaceAttr: customize attribute names/values</span>
+}))
+slog.<span class="fn">SetDefault</span>(logger)  <span class="cm">// replaces log package's default</span>
+
+<span class="cm">// Basic usage</span>
+slog.<span class="fn">Info</span>(<span class="str">"server started"</span>, <span class="str">"port"</span>, <span class="num">8080</span>, <span class="str">"version"</span>, <span class="str">"v1.2.3"</span>)
+slog.<span class="fn">Error</span>(<span class="str">"request failed"</span>, <span class="str">"error"</span>, err, <span class="str">"user_id"</span>, userID)
+
+<span class="cm">// Logger with persistent fields (e.g., per-service)</span>
+serviceLog := logger.<span class="fn">With</span>(<span class="str">"service"</span>, <span class="str">"user-api"</span>, <span class="str">"env"</span>, <span class="str">"prod"</span>)
+
+<span class="cm">// Per-request logger via middleware</span>
+<span class="kw">func</span> <span class="fn">LoggingMiddleware</span>(log *slog.Logger) <span class="kw">func</span>(http.Handler) http.Handler {
+    <span class="kw">return</span> <span class="kw">func</span>(next http.Handler) http.Handler {
+        <span class="kw">return</span> http.<span class="fn">HandlerFunc</span>(<span class="kw">func</span>(w http.ResponseWriter, r *http.Request) {
+            reqID := middleware.<span class="fn">GetReqID</span>(r.<span class="fn">Context</span>())
+            reqLog := log.<span class="fn">With</span>(<span class="str">"request_id"</span>, reqID, <span class="str">"method"</span>, r.Method, <span class="str">"path"</span>, r.URL.Path)
+            ctx := context.<span class="fn">WithValue</span>(r.<span class="fn">Context</span>(), logKey{}, reqLog)
+            start := time.<span class="fn">Now</span>()
+            ww := <span class="fn">NewResponseWriter</span>(w)
+            next.<span class="fn">ServeHTTP</span>(ww, r.<span class="fn">WithContext</span>(ctx))
+            reqLog.<span class="fn">Info</span>(<span class="str">"request completed"</span>,
+                <span class="str">"status"</span>, ww.status,
+                <span class="str">"duration_ms"</span>, time.<span class="fn">Since</span>(start).<span class="fn">Milliseconds</span>())
+        })
+    }
+}</div></div>`;
+
+  if(key==='observability:metrics-go:Metric Types') return `
+<div class="sec">Prometheus Metric Types</div>
+<table class="tbl"><thead><tr><th>Type</th><th>Use For</th><th>Example</th></tr></thead><tbody>
+<tr><td>Counter</td><td>Monotonically increasing values. Never decreases.</td><td>http_requests_total, errors_total, bytes_written_total</td></tr>
+<tr><td>Gauge</td><td>Values that go up and down</td><td>goroutines_count, cache_size_bytes, queue_depth</td></tr>
+<tr><td>Histogram</td><td>Distribution of values — percentiles (p50, p95, p99)</td><td>http_request_duration_seconds, db_query_duration_seconds</td></tr>
+<tr><td>Summary</td><td>Pre-computed quantiles (less flexible than Histogram)</td><td>Legacy — prefer Histogram in new code</td></tr>
+</tbody></table>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Define metrics at package level</span>
+<span class="kw">var</span> (
+    httpRequestsTotal = prometheus.<span class="fn">NewCounterVec</span>(
+        prometheus.CounterOpts{
+            Name: <span class="str">"http_requests_total"</span>,
+            Help: <span class="str">"Total HTTP requests by method, path, and status."</span>,
+        },
+        []<span class="ty">string</span>{<span class="str">"method"</span>, <span class="str">"path"</span>, <span class="str">"status"</span>},
+    )
+
+    httpDuration = prometheus.<span class="fn">NewHistogramVec</span>(
+        prometheus.HistogramOpts{
+            Name:    <span class="str">"http_request_duration_seconds"</span>,
+            Help:    <span class="str">"HTTP request latency."</span>,
+            Buckets: []<span class="ty">float64</span>{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5},
+        },
+        []<span class="ty">string</span>{<span class="str">"method"</span>, <span class="str">"path"</span>},
+    )
+)
+
+<span class="kw">func</span> <span class="fn">init</span>() {
+    prometheus.<span class="fn">MustRegister</span>(httpRequestsTotal, httpDuration)
+}
+
+<span class="cm">// Use in middleware</span>
+start := time.<span class="fn">Now</span>()
+<span class="cm">// ... handle request ...</span>
+httpDuration.<span class="fn">WithLabelValues</span>(r.Method, r.URL.Path).<span class="fn">Observe</span>(time.<span class="fn">Since</span>(start).<span class="fn">Seconds</span>())
+httpRequestsTotal.<span class="fn">WithLabelValues</span>(r.Method, r.URL.Path, fmt.<span class="fn">Sprintf</span>(<span class="str">"%d"</span>, status)).<span class="fn">Inc</span>()</div></div>`;
+
+  // ─── GRPC ─────────────────────────────────────────────
+  if(key==='grpc:proto3:Syntax') return `
+<div class="sec">proto3 Schema Syntax</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">protobuf</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// user.proto</span>
+syntax = <span class="str">"proto3"</span>;
+
+package user.v1;
+
+option go_package = <span class="str">"github.com/myorg/api/gen/user/v1;userv1"</span>;
+
+<span class="kw">import</span> <span class="str">"google/protobuf/timestamp.proto"</span>;
+
+<span class="cm">// Message definition</span>
+message <span class="ty">User</span> {
+  int64  id         = 1;
+  string name       = 2;  <span class="cm">// field number is permanent — never reuse</span>
+  string email      = 3;
+  UserStatus status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  repeated string tags = 6;         <span class="cm">// repeated = slice in Go</span>
+  oneof contact {                   <span class="cm">// only one can be set</span>
+    string phone = 7;
+    string slack = 8;
+  }
+}
+
+<span class="cm">// Enum</span>
+enum <span class="ty">UserStatus</span> {
+  USER_STATUS_UNSPECIFIED = 0;  <span class="cm">// proto3 requires 0 as first value</span>
+  USER_STATUS_ACTIVE      = 1;
+  USER_STATUS_INACTIVE    = 2;
+}
+
+<span class="cm">// Service definition</span>
+service <span class="ty">UserService</span> {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc ListUsers(ListUsersRequest) returns (stream User);  <span class="cm">// server streaming</span>
+  rpc CreateUser(CreateUserRequest) returns (User);
+}
+
+message <span class="ty">GetUserRequest</span>  { int64 user_id = 1; }
+message <span class="ty">GetUserResponse</span> { User user = 1; }
+message <span class="ty">ListUsersRequest</span> { int32 page_size = 1; string page_token = 2; }
+message <span class="ty">CreateUserRequest</span> { string name = 1; string email = 2; }</div></div>`;
+
+  if(key==='grpc:grpc-server:Server Setup') return `
+<div class="sec">gRPC Server Implementation</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="kw">import</span> (
+    <span class="str">"google.golang.org/grpc"</span>
+    <span class="str">"google.golang.org/grpc/health/grpc_health_v1"</span>
+    <span class="str">"google.golang.org/grpc/reflection"</span>
+)
+
+<span class="cm">// Implement the generated interface</span>
+<span class="kw">type</span> <span class="ty">UserServer</span> <span class="kw">struct</span> {
+    userv1.UnimplementedUserServiceServer  <span class="cm">// embed for forward compatibility</span>
+    svc *<span class="ty">UserService</span>
+}
+
+<span class="kw">func</span> (s *<span class="ty">UserServer</span>) <span class="fn">GetUser</span>(ctx context.Context, req *userv1.GetUserRequest) (*userv1.GetUserResponse, <span class="ty">error</span>) {
+    <span class="kw">if</span> req.UserId == <span class="num">0</span> {
+        <span class="kw">return</span> <span class="kw">nil</span>, status.<span class="fn">Error</span>(codes.InvalidArgument, <span class="str">"user_id required"</span>)
+    }
+    user, err := s.svc.<span class="fn">GetUser</span>(ctx, req.UserId)
+    <span class="kw">if</span> err != <span class="kw">nil</span> {
+        <span class="kw">if</span> errors.<span class="fn">Is</span>(err, ErrNotFound) {
+            <span class="kw">return</span> <span class="kw">nil</span>, status.<span class="fn">Error</span>(codes.NotFound, <span class="str">"user not found"</span>)
+        }
+        <span class="kw">return</span> <span class="kw">nil</span>, status.<span class="fn">Errorf</span>(codes.Internal, <span class="str">"internal: %v"</span>, err)
+    }
+    <span class="kw">return</span> &userv1.GetUserResponse{User: <span class="fn">toProto</span>(user)}, <span class="kw">nil</span>
+}
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    lis, err := net.<span class="fn">Listen</span>(<span class="str">"tcp"</span>, <span class="str">":50051"</span>)
+    <span class="kw">if</span> err != <span class="kw">nil</span> { log.<span class="fn">Fatal</span>(err) }
+
+    srv := grpc.<span class="fn">NewServer</span>(
+        grpc.<span class="fn">ChainUnaryInterceptor</span>(
+            otelgrpc.UnaryServerInterceptor(),
+            <span class="fn">authInterceptor</span>(),
+            grpcLogging.UnaryServerInterceptor(logger),
+        ),
+    )
+    userv1.<span class="fn">RegisterUserServiceServer</span>(srv, &<span class="ty">UserServer</span>{svc: userSvc})
+    grpc_health_v1.<span class="fn">RegisterHealthServer</span>(srv, health.<span class="fn">NewServer</span>())
+    reflection.<span class="fn">Register</span>(srv)  <span class="cm">// enables grpcurl without knowing proto</span>
+
+    log.<span class="fn">Println</span>(<span class="str">"gRPC server on :50051"</span>)
+    <span class="kw">if</span> err := srv.<span class="fn">Serve</span>(lis); err != <span class="kw">nil</span> { log.<span class="fn">Fatal</span>(err) }
+}</div></div>`;
+
+  // ─── PATTERNS ─────────────────────────────────────────
+  if(key==='patterns:clean-arch:Layer Structure') return `
+<div class="sec">Clean Architecture in Go</div>
+<div class="dw"><div class="dt">dependency flow — all arrows point inward</div>
+<svg width="420" height="220" viewBox="0 0 420 220">
+  <ellipse cx="210" cy="110" rx="195" ry="95" fill="none" stroke="#0f2236" stroke-width="1.5"/>
+  <ellipse cx="210" cy="110" rx="145" ry="65" fill="none" stroke="#1a3a55" stroke-width="1.5"/>
+  <ellipse cx="210" cy="110" rx="95" ry="38" fill="none" stroke="#0099cc" stroke-width="1.5"/>
+  <ellipse cx="210" cy="110" rx="50" ry="20" fill="rgba(0,173,216,.1)" stroke="#00d4ff" stroke-width="2"/>
+  <text x="210" y="114" text-anchor="middle" fill="#00d4ff" font-family="Fira Code" font-size="10" font-weight="700">Domain</text>
+  <text x="210" y="75" text-anchor="middle" fill="#6aabcc" font-family="Fira Code" font-size="9">Use Cases / Service</text>
+  <text x="210" y="55" text-anchor="middle" fill="#2a5a7a" font-family="Fira Code" font-size="9">Interface Adapters (Repo, Handler)</text>
+  <text x="210" y="30" text-anchor="middle" fill="#1a3a55" font-family="Fira Code" font-size="9">Frameworks & Drivers (HTTP, DB, gRPC)</text>
+  <text x="70" y="160" fill="#ffd166" font-family="Fira Code" font-size="9">Dependency Rule:</text>
+  <text x="70" y="172" fill="#6aabcc" font-family="Fira Code" font-size="9">Source code deps only</text>
+  <text x="70" y="184" fill="#6aabcc" font-family="Fira Code" font-size="9">point inward →</text>
+</svg></div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// domain/user.go — NO imports from outer layers</span>
+<span class="kw">type</span> <span class="ty">User</span> <span class="kw">struct</span> {
+    ID        <span class="ty">int64</span>
+    Name      <span class="ty">string</span>
+    Email     <span class="ty">string</span>
+    CreatedAt time.Time
+}
+
+<span class="cm">// service/user.go — depends on domain + interfaces</span>
+<span class="kw">type</span> <span class="ty">UserRepository</span> <span class="kw">interface</span> {      <span class="cm">// interface defined here in service layer</span>
+    <span class="fn">FindByID</span>(ctx context.Context, id <span class="ty">int64</span>) (*domain.User, <span class="ty">error</span>)
+    <span class="fn">Create</span>(ctx context.Context, u *domain.User) <span class="ty">error</span>
+}
+
+<span class="kw">type</span> <span class="ty">UserService</span> <span class="kw">struct</span> { repo <span class="ty">UserRepository</span> }
+
+<span class="cm">// repository/postgres_user.go — depends on service interface, domain</span>
+<span class="kw">type</span> <span class="ty">PostgresUserRepo</span> <span class="kw">struct</span> { db *pgxpool.Pool }
+
+<span class="cm">// Satisfies service.UserRepository interface IMPLICITLY</span>
+<span class="kw">func</span> (r *<span class="ty">PostgresUserRepo</span>) <span class="fn">FindByID</span>(ctx context.Context, id <span class="ty">int64</span>) (*domain.User, <span class="ty">error</span>) { ... }
+<span class="kw">func</span> (r *<span class="ty">PostgresUserRepo</span>) <span class="fn">Create</span>(ctx context.Context, u *domain.User) <span class="ty">error</span> { ... }
+
+<span class="cm">// handler/user.go — depends on service</span>
+<span class="kw">type</span> <span class="ty">UserHandler</span> <span class="kw">struct</span> { svc *service.UserService }</div></div>`;
+
+  if(key==='patterns:config-go:envconfig') return `
+<div class="sec">12-Factor Configuration with envconfig</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="kw">import</span> <span class="str">"github.com/kelseyhightower/envconfig"</span>
+
+<span class="kw">type</span> <span class="ty">Config</span> <span class="kw">struct</span> {
+    <span class="cm">// Server</span>
+    Port         <span class="ty">string</span>        <span class="dc">&#96;envconfig:"PORT"          default:":8080"&#96;</span>
+    ReadTimeout  time.Duration  <span class="dc">&#96;envconfig:"READ_TIMEOUT"  default:"10s"&#96;</span>
+    WriteTimeout time.Duration  <span class="dc">&#96;envconfig:"WRITE_TIMEOUT" default:"30s"&#96;</span>
+
+    <span class="cm">// Database</span>
+    DatabaseURL     <span class="ty">string</span> <span class="dc">&#96;envconfig:"DATABASE_URL"      required:"true"&#96;</span>
+    DBMaxConns      <span class="ty">int</span>    <span class="dc">&#96;envconfig:"DB_MAX_CONNS"      default:"25"&#96;</span>
+    DBMaxIdleConns  <span class="ty">int</span>    <span class="dc">&#96;envconfig:"DB_MAX_IDLE_CONNS" default:"25"&#96;</span>
+
+    <span class="cm">// Auth</span>
+    JWTSecret   <span class="ty">string</span> <span class="dc">&#96;envconfig:"JWT_SECRET"    required:"true"&#96;</span>
+    JWTExpiry   time.Duration <span class="dc">&#96;envconfig:"JWT_EXPIRY" default:"24h"&#96;</span>
+
+    <span class="cm">// Observability</span>
+    LogLevel    <span class="ty">string</span> <span class="dc">&#96;envconfig:"LOG_LEVEL"     default:"info"&#96;</span>
+    OTELEndpt   <span class="ty">string</span> <span class="dc">&#96;envconfig:"OTEL_ENDPOINT"&#96;</span>
+
+    <span class="cm">// Feature flags</span>
+    EnableNewFlow <span class="ty">bool</span> <span class="dc">&#96;envconfig:"ENABLE_NEW_FLOW" default:"false"&#96;</span>
+}
+
+<span class="kw">func</span> <span class="fn">Load</span>() (*<span class="ty">Config</span>, <span class="ty">error</span>) {
+    <span class="kw">var</span> cfg <span class="ty">Config</span>
+    <span class="kw">if</span> err := envconfig.<span class="fn">Process</span>(<span class="str">""</span>, &cfg); err != <span class="kw">nil</span> {
+        <span class="kw">return</span> <span class="kw">nil</span>, fmt.<span class="fn">Errorf</span>(<span class="str">"loading config: %w"</span>, err)
+    }
+    <span class="kw">return</span> &cfg, <span class="kw">nil</span>
+}
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    cfg, err := <span class="fn">Load</span>()
+    <span class="kw">if</span> err != <span class="kw">nil</span> { log.<span class="fn">Fatal</span>(err) }  <span class="cm">// fail fast on startup</span>
+    <span class="cm">// envconfig.Usage("", &cfg) prints all env vars with descriptions</span>
+}</div></div>`;
+
+  // ─── SLICES DEEP DIVE ─────────────────────────────────
+  if(key==='collections:slices-deep:Slice Header') return `
+<div class="sec">Slice Header Internals</div>
+<p class="bd">A slice is not an array — it&#39;s a <strong>header</strong> describing a window into an underlying array. This is the most important thing to understand about Go slices.</p>
+<div class="dw"><div class="dt">slice header structure in memory</div>
+<svg width="400" height="150" viewBox="0 0 400 150">
+  <rect x="10" y="20" width="110" height="80" rx="6" fill="#091522" stroke="#00d4ff" stroke-width="1.5"/>
+  <text x="65" y="12" text-anchor="middle" fill="#00d4ff" font-family="Fira Code" font-size="10">Slice Header</text>
+  <text x="65" y="48" text-anchor="middle" fill="#6aabcc" font-family="Fira Code" font-size="10">ptr ──────►</text>
+  <text x="65" y="68" text-anchor="middle" fill="#6aabcc" font-family="Fira Code" font-size="10">len = 3</text>
+  <text x="65" y="88" text-anchor="middle" fill="#6aabcc" font-family="Fira Code" font-size="10">cap = 5</text>
+  <rect x="180" y="20" width="200" height="40" rx="4" fill="#030b10" stroke="#0f2236"/>
+  <text x="185" y="38" fill="#00d4ff" font-family="Fira Code" font-size="10">Backing Array: [1][2][3][_][_]</text>
+  <text x="180" y="68" fill="#6aabcc" font-family="Fira Code" font-size="9">used (len=3) ──┘    unused (cap=5)</text>
+  <text x="180" y="82" fill="#2a5a7a" font-family="Fira Code" font-size="9">append uses these free slots first</text>
+  <line x1="120" y1="45" x2="178" y2="40" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arr)"/>
+  <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#00d4ff"/></marker></defs>
+</svg></div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body">s := []<span class="ty">int</span>{<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>}
+sub := s[<span class="num">1</span>:<span class="num">3</span>]   <span class="cm">// {2,3} — shares same backing array!</span>
+
+fmt.<span class="fn">Println</span>(<span class="fn">len</span>(sub), <span class="fn">cap</span>(sub)) <span class="cm">// 2, 4 (cap from start of sub to end of backing array)</span>
+sub[<span class="num">0</span>] = <span class="num">99</span>                      <span class="cm">// MUTATES s[1]! Both point to same memory</span>
+
+<span class="cm">// Safe copy to break sharing</span>
+safeCopy := <span class="fn">make</span>([]<span class="ty">int</span>, <span class="fn">len</span>(sub))
+<span class="fn">copy</span>(safeCopy, sub)
+
+<span class="cm">// Three-index slice: s[low:high:max] — limits capacity</span>
+limited := s[<span class="num">0</span>:<span class="num">3</span>:<span class="num">3</span>]  <span class="cm">// len=3, cap=3 — append WON'T affect s</span>
+
+<span class="cm">// append growth — doubles when cap exceeded (up to 256, then ~1.25x)</span>
+var growing []<span class="ty">int</span>
+<span class="kw">for</span> i := <span class="num">0</span>; i &lt; <span class="num">10</span>; i++ {
+    old := <span class="fn">cap</span>(growing)
+    growing = <span class="fn">append</span>(growing, i)
+    <span class="kw">if</span> <span class="fn">cap</span>(growing) != old {
+        fmt.<span class="fn">Printf</span>(<span class="str">"cap grew: %d → %d\n"</span>, old, <span class="fn">cap</span>(growing))
+    }
+}
+
+<span class="cm">// Preallocate when size is known — zero allocations during append</span>
+items := <span class="fn">make</span>([]<span class="ty">Item</span>, <span class="num">0</span>, <span class="num">1000</span>)</div></div>`;
+
+  // ─── INTERFACES ───────────────────────────────────────
+  if(key==='interfaces:iface-how:Diagram') return `
+<div class="sec">How Interface Values Work Internally</div>
+<div class="dw"><div class="dt">interface = (type descriptor pointer, data pointer)</div>
+<svg width="400" height="180" viewBox="0 0 400 180">
+  <rect x="10" y="40" width="130" height="60" rx="6" fill="#091522" stroke="#00ffe0" stroke-width="1.5"/>
+  <text x="75" y="30" text-anchor="middle" fill="#00ffe0" font-family="Fira Code" font-size="10">interface value</text>
+  <text x="75" y="65" text-anchor="middle" fill="#6aabcc" font-family="Fira Code" font-size="10">type ptr ──────►</text>
+  <text x="75" y="85" text-anchor="middle" fill="#6aabcc" font-family="Fira Code" font-size="10">data ptr ──────►</text>
+  <rect x="200" y="20" width="140" height="36" rx="4" fill="#091522" stroke="#ffd166"/>
+  <text x="270" y="38" text-anchor="middle" fill="#ffd166" font-family="Fira Code" font-size="10">itab: *MyStruct</text>
+  <text x="270" y="50" text-anchor="middle" fill="#2a5a7a" font-family="Fira Code" font-size="9">method dispatch table</text>
+  <rect x="200" y="70" width="140" height="36" rx="4" fill="#091522" stroke="#a78bfa"/>
+  <text x="270" y="88" text-anchor="middle" fill="#a78bfa" font-family="Fira Code" font-size="10">actual data value</text>
+  <text x="270" y="100" text-anchor="middle" fill="#2a5a7a" font-family="Fira Code" font-size="9">or pointer to heap</text>
+  <line x1="140" y1="63" x2="198" y2="40" stroke="#ffd166" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="140" y1="83" x2="198" y2="88" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3 2"/>
+  <rect x="10" y="130" width="380" height="40" rx="6" fill="#1a0a10" stroke="#ff6b9d"/>
+  <text x="200" y="148" text-anchor="middle" fill="#ff6b9d" font-family="Fira Code" font-size="10">nil interface: BOTH pointers nil — == nil is true</text>
+  <text x="200" y="162" text-anchor="middle" fill="#ff6b9d" font-family="Fira Code" font-size="9">nil *T in interface: type ptr set, data nil — == nil is FALSE (the trap!)</text>
+</svg></div>`;
+
+  // ─── STRUCTS: FUNCTIONAL OPTIONS ──────────────────────
+  if(key==='structs:constructors:Functional Options') return `
+<div class="sec">Functional Options Pattern</div>
+<p class="bd">The most extensible Go API design pattern — add options without breaking existing callers.</p>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Internal config struct</span>
+<span class="kw">type</span> <span class="ty">ServerConfig</span> <span class="kw">struct</span> {
+    host         <span class="ty">string</span>
+    port         <span class="ty">int</span>
+    timeout      time.Duration
+    maxConns     <span class="ty">int</span>
+    tlsEnabled   <span class="ty">bool</span>
+}
+
+<span class="cm">// Option function type</span>
+<span class="kw">type</span> <span class="ty">Option</span> <span class="kw">func</span>(*<span class="ty">ServerConfig</span>)
+
+<span class="cm">// Option constructors — each returns an Option</span>
+<span class="kw">func</span> <span class="fn">WithHost</span>(host <span class="ty">string</span>) <span class="ty">Option</span> {
+    <span class="kw">return</span> <span class="kw">func</span>(c *<span class="ty">ServerConfig</span>) { c.host = host }
+}
+<span class="kw">func</span> <span class="fn">WithPort</span>(port <span class="ty">int</span>) <span class="ty">Option</span> {
+    <span class="kw">return</span> <span class="kw">func</span>(c *<span class="ty">ServerConfig</span>) { c.port = port }
+}
+<span class="kw">func</span> <span class="fn">WithTimeout</span>(d time.Duration) <span class="ty">Option</span> {
+    <span class="kw">return</span> <span class="kw">func</span>(c *<span class="ty">ServerConfig</span>) { c.timeout = d }
+}
+<span class="kw">func</span> <span class="fn">WithTLS</span>() <span class="ty">Option</span> {
+    <span class="kw">return</span> <span class="kw">func</span>(c *<span class="ty">ServerConfig</span>) { c.tlsEnabled = <span class="kw">true</span> }
+}
+
+<span class="cm">// Constructor applies options over defaults</span>
+<span class="kw">func</span> <span class="fn">NewServer</span>(opts ...<span class="ty">Option</span>) *<span class="ty">Server</span> {
+    cfg := &<span class="ty">ServerConfig</span>{  <span class="cm">// sensible defaults</span>
+        host:    <span class="str">"0.0.0.0"</span>,
+        port:    <span class="num">8080</span>,
+        timeout: <span class="num">30</span> * time.Second,
+        maxConns: <span class="num">100</span>,
+    }
+    <span class="kw">for</span> _, opt := <span class="kw">range</span> opts {
+        <span class="fn">opt</span>(cfg)
+    }
+    <span class="kw">return</span> &<span class="ty">Server</span>{cfg: cfg}
+}
+
+<span class="cm">// Call site — zero knowledge of internals, infinitely extensible</span>
+srv := <span class="fn">NewServer</span>(
+    <span class="fn">WithPort</span>(<span class="num">9090</span>),
+    <span class="fn">WithTLS</span>(),
+    <span class="fn">WithTimeout</span>(<span class="num">60</span> * time.Second),
+)</div></div>`;
+
+  // ─── JSON ─────────────────────────────────────────────
+  if(key==='stdlib:json:Marshal & Tags') return `
+<div class="sec">JSON Encoding & Struct Tags</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="kw">type</span> <span class="ty">User</span> <span class="kw">struct</span> {
+    ID        <span class="ty">int64</span>     <span class="dc">&#96;json:"id"&#96;</span>
+    Name      <span class="ty">string</span>    <span class="dc">&#96;json:"name"&#96;</span>
+    Email     <span class="ty">string</span>    <span class="dc">&#96;json:"email"&#96;</span>
+    Password  <span class="ty">string</span>    <span class="dc">&#96;json:"-"&#96;</span>               <span class="cm">// always omit</span>
+    Age       <span class="ty">int</span>       <span class="dc">&#96;json:"age,omitempty"&#96;</span>   <span class="cm">// omit if zero</span>
+    Tags      []<span class="ty">string</span>  <span class="dc">&#96;json:"tags,omitempty"&#96;</span>  <span class="cm">// omit if nil/empty</span>
+    CreatedAt time.Time  <span class="dc">&#96;json:"created_at"&#96;</span>
+    internal  <span class="ty">string</span>                             <span class="cm">// unexported: always omitted</span>
+}
+
+<span class="cm">// Encoding</span>
+user := <span class="ty">User</span>{ID: <span class="num">1</span>, Name: <span class="str">"Alice"</span>, Email: <span class="str">"a@example.com"</span>}
+data, err := json.<span class="fn">Marshal</span>(user)         <span class="cm">// → {"id":1,"name":"Alice",...}</span>
+data, err  = json.<span class="fn">MarshalIndent</span>(user, <span class="str">""</span>, <span class="str">"  "</span>)  <span class="cm">// pretty print</span>
+
+<span class="cm">// Decoding</span>
+<span class="kw">var</span> decoded <span class="ty">User</span>
+err = json.<span class="fn">Unmarshal</span>(data, &decoded)   <span class="cm">// must pass pointer</span>
+
+<span class="cm">// Streaming decoder for large responses</span>
+decoder := json.<span class="fn">NewDecoder</span>(r.Body)
+decoder.DisallowUnknownFields()         <span class="cm">// reject unexpected fields</span>
+<span class="kw">var</span> req <span class="ty">CreateUserRequest</span>
+<span class="kw">if</span> err := decoder.<span class="fn">Decode</span>(&req); err != <span class="kw">nil</span> {
+    <span class="fn">http.Error</span>(w, err.<span class="fn">Error</span>(), http.StatusBadRequest)
+    <span class="kw">return</span>
+}
+<span class="kw">if</span> decoder.<span class="fn">More</span>() {
+    <span class="fn">http.Error</span>(w, <span class="str">"body must be single JSON object"</span>, http.StatusBadRequest)
+    <span class="kw">return</span>
+}</div></div>`;
+
+  // ─── MEMORY / PERFORMANCE ────────────────────────────
+  if(key==='memory:gc-go:How GC Works') return `
+<div class="sec">Go Garbage Collector</div>
+<div class="dw"><div class="dt">tri-color concurrent mark-and-sweep</div>
+<svg width="400" height="140" viewBox="0 0 400 140">
+  <circle cx="60" cy="70" r="30" fill="rgba(255,255,255,.05)" stroke="#2a5a7a" stroke-width="1.5"/>
+  <text x="60" y="65" text-anchor="middle" fill="#6aabcc" font-family="Fira Code" font-size="9">WHITE</text>
+  <text x="60" y="78" text-anchor="middle" fill="#2a5a7a" font-family="Fira Code" font-size="8">unmarked</text>
+  <text x="60" y="110" text-anchor="middle" fill="#ff6b9d" font-family="Fira Code" font-size="8">→ freed</text>
+  <circle cx="200" cy="70" r="30" fill="rgba(167,139,250,.08)" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="200" y="65" text-anchor="middle" fill="#a78bfa" font-family="Fira Code" font-size="9">GRAY</text>
+  <text x="200" y="78" text-anchor="middle" fill="#6aabcc" font-family="Fira Code" font-size="8">in queue</text>
+  <circle cx="340" cy="70" r="30" fill="rgba(0,212,255,.08)" stroke="#00d4ff" stroke-width="1.5"/>
+  <text x="340" y="65" text-anchor="middle" fill="#00d4ff" font-family="Fira Code" font-size="9">BLACK</text>
+  <text x="340" y="78" text-anchor="middle" fill="#6aabcc" font-family="Fira Code" font-size="8">reachable</text>
+  <text x="340" y="110" text-anchor="middle" fill="#00d4ff" font-family="Fira Code" font-size="8">→ survives</text>
+  <path d="M92 65 L168 65" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrc)"/>
+  <path d="M232 65 L308 65" stroke="#00d4ff" stroke-width="1.5" marker-end="url(#arrc)"/>
+  <defs><marker id="arrc" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#a78bfa"/></marker></defs>
+  <text x="130" y="58" text-anchor="middle" fill="#a78bfa" font-family="Fira Code" font-size="8">process</text>
+  <text x="270" y="58" text-anchor="middle" fill="#a78bfa" font-family="Fira Code" font-size="8">process</text>
+</svg></div>
+<table class="tbl"><thead><tr><th>Phase</th><th>STW?</th><th>Duration</th><th>What Happens</th></tr></thead><tbody>
+<tr><td>Mark Setup</td><td>Yes</td><td>~0.5ms</td><td>Enable write barrier</td></tr>
+<tr><td>Concurrent Mark</td><td>No</td><td>ms–100ms</td><td>Scan goroutine stacks, global vars, trace pointers</td></tr>
+<tr><td>Mark Termination</td><td>Yes</td><td>~0.5ms</td><td>Drain queue, disable write barrier</td></tr>
+<tr><td>Concurrent Sweep</td><td>No</td><td>Lazy</td><td>Reclaim white objects as allocations happen</td></tr>
+</tbody></table>
+<div class="callout perf"><strong>Tuning GOGC & GOMEMLIMIT</strong>GOGC=100 (default): GC when heap doubles. GOGC=200: less frequent GC but higher memory use. GOMEMLIMIT=512MiB (Go 1.19+): GC runs more aggressively to stay under limit. In containers: set GOMEMLIMIT to ~80% of container memory limit. Use GOGC=off + GOMEMLIMIT for steady throughput without GC spikes.</div>`;
+
+  // ─── CLOSURES ─────────────────────────────────────────
+  if(key==='functions:closures:How Closures Work') return `
+<div class="sec">Closures — Capturing Variables</div>
+<p class="bd">A closure is a function that captures variables from its enclosing scope. The function and its captured variables form a single unit.</p>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Counter factory — each call returns independent counter</span>
+<span class="kw">func</span> <span class="fn">MakeCounter</span>() <span class="kw">func</span>() <span class="ty">int</span> {
+    count := <span class="num">0</span>           <span class="cm">// captured by reference in closure</span>
+    <span class="kw">return</span> <span class="kw">func</span>() <span class="ty">int</span> {
+        count++           <span class="cm">// modifies captured count</span>
+        <span class="kw">return</span> count
+    }
+}
+a, b := <span class="fn">MakeCounter</span>(), <span class="fn">MakeCounter</span>()
+a()  <span class="cm">// 1</span>
+a()  <span class="cm">// 2</span>
+b()  <span class="cm">// 1 — independent count</span>
+
+<span class="cm">// Loop closure GOTCHA (pre-Go 1.22)</span>
+<span class="kw">var</span> funcs []<span class="kw">func</span>()
+<span class="kw">for</span> i := <span class="num">0</span>; i &lt; <span class="num">3</span>; i++ {
+    <span class="cm">// BUG: all funcs print 3 — capture the same i</span>
+    funcs = <span class="fn">append</span>(funcs, <span class="kw">func</span>() { fmt.<span class="fn">Println</span>(i) })
+}
+
+<span class="cm">// FIX 1: Shadow with new variable</span>
+<span class="kw">for</span> i := <span class="num">0</span>; i &lt; <span class="num">3</span>; i++ {
+    i := i  <span class="cm">// new i per iteration</span>
+    funcs = <span class="fn">append</span>(funcs, <span class="kw">func</span>() { fmt.<span class="fn">Println</span>(i) })
+}
+
+<span class="cm">// FIX 2: Pass as argument</span>
+<span class="kw">for</span> i := <span class="num">0</span>; i &lt; <span class="num">3</span>; i++ {
+    funcs = <span class="fn">append</span>(funcs, <span class="kw">func</span>(n <span class="ty">int</span>) <span class="kw">func</span>() {
+        <span class="kw">return</span> <span class="kw">func</span>() { fmt.<span class="fn">Println</span>(n) }
+    }(i))
+}
+
+<span class="cm">// Go 1.22+: loop variables are per-iteration — FIX built-in</span></div></div>`;
+
+  // ─── GENERICS ─────────────────────────────────────────
+  if(key==='functions:generics:Type Parameters') return `
+<div class="sec">Generics — Type Parameters</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Generic function</span>
+<span class="kw">func</span> <span class="fn">Map</span>[T, U <span class="ty">any</span>](s []T, f <span class="kw">func</span>(T) U) []U {
+    result := <span class="fn">make</span>([]U, <span class="fn">len</span>(s))
+    <span class="kw">for</span> i, v := <span class="kw">range</span> s {
+        result[i] = <span class="fn">f</span>(v)
+    }
+    <span class="kw">return</span> result
+}
+names := <span class="fn">Map</span>(users, <span class="kw">func</span>(u <span class="ty">User</span>) <span class="ty">string</span> { <span class="kw">return</span> u.Name })
+
+<span class="kw">func</span> <span class="fn">Filter</span>[T <span class="ty">any</span>](s []T, pred <span class="kw">func</span>(T) <span class="ty">bool</span>) []T {
+    <span class="kw">var</span> out []T
+    <span class="kw">for</span> _, v := <span class="kw">range</span> s {
+        <span class="kw">if</span> <span class="fn">pred</span>(v) { out = <span class="fn">append</span>(out, v) }
+    }
+    <span class="kw">return</span> out
+}
+
+<span class="cm">// Type constraints</span>
+<span class="kw">type</span> <span class="ty">Number</span> <span class="kw">interface</span> {
+    ~<span class="ty">int</span> | ~<span class="ty">int32</span> | ~<span class="ty">int64</span> | ~<span class="ty">float32</span> | ~<span class="ty">float64</span>
+}
+
+<span class="kw">func</span> <span class="fn">Sum</span>[T <span class="ty">Number</span>](s []T) T {
+    <span class="kw">var</span> total T
+    <span class="kw">for</span> _, v := <span class="kw">range</span> s {
+        total += v
+    }
+    <span class="kw">return</span> total
+}
+
+<span class="cm">// Generic Stack type</span>
+<span class="kw">type</span> <span class="ty">Stack</span>[T <span class="ty">any</span>] <span class="kw">struct</span> { items []T }
+
+<span class="kw">func</span> (s *<span class="ty">Stack</span>[T]) <span class="fn">Push</span>(v T) { s.items = <span class="fn">append</span>(s.items, v) }
+<span class="kw">func</span> (s *<span class="ty">Stack</span>[T]) <span class="fn">Pop</span>() (T, <span class="ty">bool</span>) {
+    <span class="kw">var</span> zero T
+    <span class="kw">if</span> <span class="fn">len</span>(s.items) == <span class="num">0</span> { <span class="kw">return</span> zero, <span class="kw">false</span> }
+    v := s.items[<span class="fn">len</span>(s.items)-<span class="num">1</span>]
+    s.items = s.items[:<span class="fn">len</span>(s.items)-<span class="num">1</span>]
+    <span class="kw">return</span> v, <span class="kw">true</span>
+}
+
+<span class="cm">// Usage — type-safe, no interface{} needed</span>
+var intStack <span class="ty">Stack</span>[<span class="ty">int</span>]
+intStack.<span class="fn">Push</span>(<span class="num">42</span>)
+v, ok := intStack.<span class="fn">Pop</span>()  <span class="cm">// v is int, not any</span></div></div>`;
+
+  // ─── PIPELINES ────────────────────────────────────────
+  if(key==='goroutines:pipelines:Generator') return `
+<div class="sec">Generator → Pipeline Pattern</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Generator: produces values into a channel</span>
+<span class="kw">func</span> <span class="fn">generate</span>(ctx context.Context, nums ...<span class="ty">int</span>) &lt;-<span class="kw">chan</span> <span class="ty">int</span> {
+    out := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        <span class="kw">defer</span> <span class="fn">close</span>(out)
+        <span class="kw">for</span> _, n := <span class="kw">range</span> nums {
+            <span class="kw">select</span> {
+            <span class="kw">case</span> out &lt;- n:
+            <span class="kw">case</span> &lt;-ctx.<span class="fn">Done</span>(): <span class="kw">return</span>
+            }
+        }
+    }()
+    <span class="kw">return</span> out
+}
+
+<span class="cm">// Pipeline stage: transform each value</span>
+<span class="kw">func</span> <span class="fn">square</span>(ctx context.Context, in &lt;-<span class="kw">chan</span> <span class="ty">int</span>) &lt;-<span class="kw">chan</span> <span class="ty">int</span> {
+    out := <span class="fn">make</span>(<span class="kw">chan</span> <span class="ty">int</span>)
+    <span class="kw">go</span> <span class="kw">func</span>() {
+        <span class="kw">defer</span> <span class="fn">close</span>(out)
+        <span class="kw">for</span> n := <span class="kw">range</span> in {
+            <span class="kw">select</span> {
+            <span class="kw">case</span> out &lt;- n * n:
+            <span class="kw">case</span> &lt;-ctx.<span class="fn">Done</span>(): <span class="kw">return</span>
+            }
+        }
+    }()
+    <span class="kw">return</span> out
+}
+
+<span class="cm">// Usage: chain stages</span>
+ctx, cancel := context.<span class="fn">WithCancel</span>(context.<span class="fn">Background</span>())
+<span class="kw">defer</span> <span class="fn">cancel</span>()
+
+nums    := <span class="fn">generate</span>(ctx, <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>)
+squares := <span class="fn">square</span>(ctx, nums)  <span class="cm">// 1, 4, 9, 16, 25</span>
+
+<span class="kw">for</span> v := <span class="kw">range</span> squares {
+    fmt.<span class="fn">Println</span>(v)
+}</div></div>`;
+
+  // ─── DEFAULT FALLBACK ─────────────────────────────────
+  return `
+<div class="sec">${tab}</div>
+<p class="bd">Comprehensive content for <strong>${tid}</strong> — ${tab}.</p>
+<div class="callout tip"><strong>Tip</strong>Select any tab above to explore different aspects of this topic. Every topic includes diagrams, code examples, best practices, and production patterns.</div>
+<div class="cb"><div class="cb-hdr"><span class="cb-lang">go</span><button class="cp-btn" onclick="cp(this)">Copy</button></div><div class="cb-body"><span class="cm">// Go example for ${tid}</span>
+<span class="kw">package</span> main
+
+<span class="kw">import</span> <span class="str">"fmt"</span>
+
+<span class="kw">func</span> <span class="fn">main</span>() {
+    fmt.<span class="fn">Println</span>(<span class="str">"Mastering Go — one concept at a time"</span>)
+}</div></div>`;
+}
+
+// ═══════════════════ RUNTIME ENGINE ═══════════════════
+let activeCh=null, activeTopic=null, visited=new Set();
+
+function renderNav(){
+  document.getElementById('leftNav').innerHTML=CHAPTERS.map(ch=>`
+<div class="ch-item ${activeCh===ch.id?'active':''}" onclick="selChapter('${ch.id}')">
+  <div class="ch-icon-wrap" style="background:${ch.bg}">${ch.icon}</div>
+  <div class="ch-info">
+    <div class="ch-name">${ch.title}</div>
+    <div class="ch-meta">${ch.topics.length} topics · ${ch.sub.split(' · ').length} areas</div>
+  </div>
+  <span class="lv-badge" style="background:${ch.lc}18;color:${ch.lc};border:1px solid ${ch.lc}33">${ch.level}</span>
+</div>`).join('');
+}
+
+function selChapter(id){
+  activeCh=id; activeTopic=null; visited.add(id); updateProgress(); renderNav();
+  const ch=CHAPTERS.find(c=>c.id===id);
+  document.getElementById('middle').innerHTML=`
+<div class="ch-header">
+  <div class="ch-eyebrow">Chapter ${CHAPTERS.indexOf(ch)+1} of ${CHAPTERS.length}</div>
+  <div class="ch-big-title">${ch.icon} ${ch.title}</div>
+  <p class="ch-desc">${ch.desc}</p>
+  <div class="ch-chips">
+    <div class="chip"><span class="chip-dot" style="background:${ch.lc}"></span>${ch.level}</div>
+    <div class="chip">📚 ${ch.topics.length} Topics</div>
+    <div class="chip">🔧 ${ch.sub}</div>
+  </div>
+</div>
+<div class="topics-grid">${ch.topics.map(t=>`
+<div class="t-card ${activeTopic===t.id?'active':''}" onclick="selTopic('${ch.id}','${t.id}')">
+  <span class="t-icon">${t.icon}</span>
+  <div class="t-title">${t.title}</div>
+  <div class="t-desc">${t.desc}</div>
+  <div class="t-tags">${(t.tags||[]).map(tag=>`<span class="tag ${tag}">${tag}</span>`).join('')}</div>
+</div>`).join('')}
+</div>`;
+  closeRight();
+}
+
+function selTopic(cid,tid){
+  activeTopic=tid;
+  document.querySelectorAll('.t-card').forEach(c=>c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  const ch=CHAPTERS.find(c=>c.id===cid);
+  const topic=ch?.topics.find(t=>t.id===tid);
+  if(!topic) return;
+  const rp=document.getElementById('rightPanel');
+  rp.classList.remove('hidden');
+  document.getElementById('rightTitle').textContent=topic.title;
+  const tabs=topic.tabs||['Overview'];
+  document.getElementById('rightTabs').innerHTML=tabs.map((tab,i)=>`
+<div class="r-tab ${i===0?'active':''}" onclick="selTab(this,'${cid}','${tid}','${tab}')">${tab}</div>`).join('');
+  renderTab(cid,tid,tabs[0]);
+}
+
+function selTab(el,cid,tid,tab){
+  document.querySelectorAll('.r-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTab(cid,tid,tab);
+}
+
+function renderTab(cid,tid,tab){
+  document.getElementById('rightBody').innerHTML=getContent(cid,tid,tab);
+}
+
+function closeRight(){
+  document.getElementById('rightPanel').classList.add('hidden');
+  activeTopic=null;
+  document.querySelectorAll('.t-card').forEach(c=>c.classList.remove('active'));
+}
+
+function toggleQA(el){ el.classList.toggle('open'); }
+
+function filterQs(btn,diff,container){
+  container.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  container.querySelectorAll('.qa-item').forEach(item=>{
+    item.style.display=(diff==='all'||item.dataset.diff===diff)?'':'none';
+  });
+}
+
+function cp(btn){
+  const text=btn.closest('.cb').querySelector('.cb-body').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!'; btn.style.color='#00d4ff';
+    setTimeout(()=>{ btn.textContent='Copy'; btn.style.color=''; },2000);
+  });
+}
+
+function updateProgress(){
+  const pct=Math.round(visited.size/CHAPTERS.length*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`${visited.size} / ${CHAPTERS.length} chapters visited`;
+}
+
+renderNav();
+</script>
+</body>
+</html>

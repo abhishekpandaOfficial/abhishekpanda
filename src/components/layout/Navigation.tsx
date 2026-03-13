@@ -64,6 +64,7 @@ export const Navigation = () => {
 
   const isGalaxyActive = location.pathname.startsWith("/llm-galaxy") || location.pathname === "/llm-visualizer";
   const isBlogActive =
+    location.pathname.startsWith("/blog/techhub") ||
     location.pathname.startsWith("/blogs") ||
     location.pathname.startsWith("/cheatsheets") ||
     location.pathname.startsWith("/tech") ||
@@ -137,7 +138,7 @@ export const Navigation = () => {
               ))}
 
               <PrefetchLink
-                to="/blogs"
+                to="/blog/techhub"
                 className={cn(
                   desktopNavItemClass,
                   isBlogActive
@@ -149,7 +150,7 @@ export const Navigation = () => {
                 <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                 <span className="relative flex items-center gap-2">
                   <ScrollText className={desktopNavIconClass} />
-                  Blogs
+                  TechHub
                 </span>
               </PrefetchLink>
 
@@ -166,7 +167,7 @@ export const Navigation = () => {
                 <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
                 <span className="relative flex items-center gap-2">
                   <Brain className={desktopNavIconClass} />
-                  AI/ML Blogs
+                  AI/ML Hub
                 </span>
               </PrefetchLink>
 
@@ -352,7 +353,7 @@ export const Navigation = () => {
                 transition={{ delay: 0.12 }}
               >
                 <Link
-                  to="/blogs"
+                  to="/blog/techhub"
                   className={cn(
                     mobileNavItemClass,
                     isBlogActive
@@ -361,7 +362,7 @@ export const Navigation = () => {
                   )}
                 >
                   <ScrollText className={mobileNavIconClass} />
-                  Blogs
+                  TechHub
                 </Link>
               </motion.div>
 

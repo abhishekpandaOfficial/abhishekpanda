@@ -37,9 +37,22 @@ export function ThemeProvider({
   storageKey = "abhishekpanda-theme",
   ...props
 }: ThemeProviderProps) {
+  const resetKey = "abhishekpanda-theme-reset-2026-03-12-light";
   const [theme, setTheme] = useState<Theme>(() =>
     resolveInitialTheme(localStorage.getItem(storageKey), defaultTheme),
   );
+
+  useEffect(() => {
+    try {
+      if (defaultTheme !== "light") return;
+      if (localStorage.getItem(resetKey) === "done") return;
+      localStorage.setItem(storageKey, "light");
+      localStorage.setItem(resetKey, "done");
+      setTheme("light");
+    } catch {
+      return;
+    }
+  }, [defaultTheme, storageKey]);
 
   useEffect(() => {
     const root = window.document.documentElement;

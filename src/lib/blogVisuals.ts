@@ -86,6 +86,8 @@ const SERIES_PALETTES: Record<string, VisualPalette> = {
   "microservices-mastery": { from: "#081a20", via: "#0369a1", to: "#0f766e", accent: "#67e8f9", soft: "#cffafe", line: "rgba(207,250,254,0.24)" },
   "kafka-mastery": { from: "#181127", via: "#6d28d9", to: "#111827", accent: "#c084fc", soft: "#f3e8ff", line: "rgba(243,232,255,0.24)" },
   "blazor-mastery": { from: "#120d24", via: "#7c3aed", to: "#1d4ed8", accent: "#c4b5fd", soft: "#ede9fe", line: "rgba(237,233,254,0.24)" },
+  "golang-mastery": { from: "#04131b", via: "#007d9c", to: "#0f766e", accent: "#7de3ff", soft: "#d6f7ff", line: "rgba(214,247,255,0.24)" },
+  "linux-mastery": { from: "#061107", via: "#166534", to: "#0a4f1d", accent: "#86efac", soft: "#dcfce7", line: "rgba(220,252,231,0.24)" },
   "devops-mastery": { from: "#0c1726", via: "#1d4ed8", to: "#155e75", accent: "#7dd3fc", soft: "#e0f2fe", line: "rgba(224,242,254,0.24)" },
   "ai-ml-mastery": { from: "#0b1120", via: "#6d28d9", to: "#0f766e", accent: "#c084fc", soft: "#ddd6fe", line: "rgba(221,214,254,0.24)" },
   "databases-mastery": { from: "#082f49", via: "#0f766e", to: "#164e63", accent: "#22d3ee", soft: "#a5f3fc", line: "rgba(165,243,252,0.24)" },
@@ -225,6 +227,23 @@ const getSeriesPattern = (series: BlogSeriesTrack, palette: VisualPalette) => {
         <circle cx="790" cy="242" r="14" fill="${accent}" />
         <path d="M756 392c56-42 118-64 186-64s130 22 186 64" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round"/>
         <text x="886" y="454" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="800">Blazor</text>`;
+    case "golang-mastery":
+      return `<circle cx="790" cy="154" r="18" fill="${accent}" />
+        <circle cx="886" cy="118" r="18" fill="${accent}" />
+        <circle cx="982" cy="154" r="18" fill="${accent}" />
+        <circle cx="838" cy="262" r="18" fill="rgba(255,255,255,.08)" stroke="${line}" />
+        <circle cx="934" cy="262" r="18" fill="rgba(255,255,255,.08)" stroke="${line}" />
+        <path d="M808 154h60M904 118l60 36M808 154l30 96M964 154l-30 96M856 262h60" fill="none" stroke="${line}" stroke-width="8" stroke-linecap="round"/>
+        <text x="886" y="370" text-anchor="middle" fill="${soft}" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="800">go</text>
+        <text x="886" y="424" text-anchor="middle" fill="${accent}" font-family="JetBrains Mono, monospace" font-size="24" font-weight="700">goroutines · channels · services</text>`;
+    case "linux-mastery":
+      return `<rect x="742" y="102" width="288" height="252" rx="28" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <path d="M782 150h208M782 196h158M782 242h190M782 288h126" stroke="${line}" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="760" cy="150" r="14" fill="${accent}" />
+        <circle cx="760" cy="196" r="14" fill="${accent}" />
+        <circle cx="760" cy="242" r="14" fill="${accent}" />
+        <circle cx="760" cy="288" r="14" fill="${accent}" />
+        <text x="886" y="430" text-anchor="middle" fill="${soft}" font-family="JetBrains Mono, monospace" font-size="34" font-weight="700">$ sudo mastery</text>`;
     case "devops-mastery":
       return `<path d="M754 182c0-44 34-80 78-80 28 0 52 12 68 32 16-20 40-32 68-32 44 0 78 36 78 80s-34 80-78 80c-28 0-52-12-68-32-16 20-40 32-68 32-44 0-78-36-78-80Z" fill="none" stroke="${accent}" stroke-width="14"/>
         <rect x="748" y="352" width="84" height="46" rx="14" fill="rgba(255,255,255,.07)" stroke="${line}" />

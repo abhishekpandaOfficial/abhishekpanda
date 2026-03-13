@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Linux Mastery — Zero to SysAdmin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050a05;--sf:#080e08;--card:#0a140a;--card2:#0e1a0e;
+  --b1:#172817;--b2:#224422;--b3:#2e6a2e;
+  --g1:#00ff41;--g2:#00cc33;--g3:#39ff85;--g4:#7fff8a;
+  --a2:#ff9f0a;--a3:#ffd60a;--a4:#bf5af2;--a5:#ff375f;--a6:#0a84ff;
+  --tx:#b8f0b8;--tx2:#5a8a5a;--tx3:#2a4a2a;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;--disp:'Bebas Neue',sans-serif;
+  --lw:260px;--rw:560px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,65,.008) 3px,rgba(0,255,65,.008) 4px);pointer-events:none;z-index:9998}
+
+/* TOPBAR */
+.topbar{height:52px;background:var(--sf);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;position:relative;z-index:100}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g1) 40%,var(--g3) 60%,transparent);opacity:.6}
+.logo-mark{width:34px;height:34px;background:var(--card);border:1px solid var(--b3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:800;color:var(--g1);box-shadow:0 0 16px rgba(0,255,65,.2)}
+.logo-name{font-family:var(--disp);font-size:21px;letter-spacing:5px;color:var(--g1);text-shadow:0 0 20px rgba(0,255,65,.45);line-height:1}
+.logo-sub{font-size:8px;color:var(--tx3);font-family:var(--mono);letter-spacing:2px;margin-top:1px}
+.top-sep{flex:1}
+.t-stat{background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:3px 9px;font-size:10px;font-family:var(--mono);color:var(--tx3)}
+.t-stat b{color:var(--g1)}
+.t-badge{background:rgba(0,255,65,.07);border:1px solid var(--b2);border-radius:3px;padding:4px 10px;font-size:9px;color:var(--g2);font-family:var(--mono);letter-spacing:1px}
+.blink{animation:bl .85s step-end infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* LEFT */
+.lp{width:var(--lw);background:var(--sf);border-right:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.lp-hdr{padding:11px 13px 9px;border-bottom:1px solid var(--b1)}
+.lp-hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.lp-hdr-row h3{font-family:var(--mono);font-size:8px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase}
+.prog-bar{background:var(--b1);border-radius:2px;height:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--g2),var(--g1));width:0%;transition:width .5s;box-shadow:0 0 6px rgba(0,255,65,.4)}
+.prog-txt{font-size:8px;color:var(--tx3);font-family:var(--mono);margin-top:4px}
+.lnav{flex:1;overflow-y:auto;padding:3px 0}
+.lnav::-webkit-scrollbar{width:2px}
+.lnav::-webkit-scrollbar-thumb{background:var(--b2)}
+.ci{display:flex;align-items:center;gap:7px;padding:7px 12px;cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.ci:hover{background:rgba(0,255,65,.03);border-left-color:var(--b2)}
+.ci.active{background:rgba(0,255,65,.06);border-left-color:var(--g1)}
+.ci.active .cn{color:var(--g1)}
+.ci-icon{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.ci-info{flex:1;min-width:0}
+.cn{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.cm{font-size:8px;color:var(--tx3);font-family:var(--mono)}
+.lv{font-size:7px;padding:1px 5px;border-radius:2px;font-family:var(--mono);font-weight:700;flex-shrink:0;text-transform:uppercase;letter-spacing:.5px}
+
+/* MIDDLE */
+.mid{flex:1;overflow-y:auto;padding:18px;min-width:0}
+.mid::-webkit-scrollbar{width:4px}
+.mid::-webkit-scrollbar-thumb{background:var(--b2)}
+
+/* WELCOME */
+.wlc{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:65vh;text-align:center;padding:32px;animation:fu .45s ease}
+@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.wlc-ascii{font-family:var(--mono);font-size:10px;color:var(--g1);line-height:1.3;margin-bottom:14px;text-shadow:0 0 12px rgba(0,255,65,.35);animation:glow 3s ease-in-out infinite}
+@keyframes glow{0%,100%{text-shadow:0 0 8px rgba(0,255,65,.25)}50%{text-shadow:0 0 24px rgba(0,255,65,.65)}}
+.wlc-title{font-family:var(--disp);font-size:48px;letter-spacing:6px;color:var(--g1);text-shadow:0 0 40px rgba(0,255,65,.4);margin-bottom:6px;line-height:1}
+.wlc-sub{font-size:12px;color:var(--tx2);max-width:480px;line-height:1.75;margin-bottom:24px;font-family:var(--mono)}
+.wlc-prompt{font-family:var(--mono);font-size:13px;color:var(--g1);margin-bottom:20px}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.sc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px 16px;text-align:center;min-width:80px;transition:border-color .2s}
+.sc:hover{border-color:var(--b3)}
+.sc-n{font-family:var(--disp);font-size:24px;letter-spacing:2px;color:var(--g1);display:block;line-height:1;text-shadow:0 0 8px rgba(0,255,65,.3)}
+.sc-l{font-size:8px;color:var(--tx3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;display:block}
+.wlc-hint{font-size:9px;color:var(--tx3);font-family:var(--mono);margin-top:16px;letter-spacing:1px}
+
+/* CHAPTER HEADER */
+.ch-hdr{margin-bottom:20px;animation:fu .3s ease}
+.ch-ey{font-size:8px;color:var(--g1);font-family:var(--mono);letter-spacing:3px;text-transform:uppercase;margin-bottom:5px}
+.ch-t{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--tx);line-height:1.1;margin-bottom:8px}
+.ch-d{font-size:11.5px;color:var(--tx2);line-height:1.7;max-width:600px;font-family:var(--mono)}
+.ch-chips{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:3px 8px;font-size:9px;color:var(--tx2);font-family:var(--mono)}
+.chip-dot{width:4px;height:4px;border-radius:50%}
+
+/* TOPIC GRID */
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;animation:fu .4s ease .08s both}
+.tc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g1),transparent);opacity:0;transition:opacity .2s}
+.tc:hover{border-color:var(--b2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,255,65,.07)}
+.tc:hover::before,.tc.active::before{opacity:1}
+.tc.active{border-color:var(--g1);background:var(--card2);box-shadow:0 0 0 1px rgba(0,255,65,.3)}
+.tc-cmd{font-family:var(--mono);font-size:14px;font-weight:800;color:var(--g1);margin-bottom:3px;text-shadow:0 0 8px rgba(0,255,65,.3)}
+.tc-title{font-size:10px;font-weight:600;color:var(--tx);margin-bottom:3px;font-family:var(--mono)}
+.tc-d{font-size:9.5px;color:var(--tx3);line-height:1.4}
+.tc-tags{display:flex;gap:3px;margin-top:7px;flex-wrap:wrap}
+.tag{font-size:7px;padding:2px 4px;border-radius:2px;font-family:var(--mono);font-weight:700;letter-spacing:.3px}
+.tag.beginner{background:rgba(0,255,65,.1);color:var(--g1);border:1px solid rgba(0,255,65,.2)}
+.tag.intermediate{background:rgba(255,159,10,.1);color:#ff9f0a;border:1px solid rgba(255,159,10,.2)}
+.tag.advanced{background:rgba(191,90,242,.1);color:#bf5af2;border:1px solid rgba(191,90,242,.2)}
+.tag.sysadmin{background:rgba(255,214,10,.1);color:#ffd60a;border:1px solid rgba(255,214,10,.2)}
+.tag.expert{background:rgba(255,55,95,.1);color:#ff375f;border:1px solid rgba(255,55,95,.2)}
+
+/* RIGHT PANEL */
+.rp{width:var(--rw);background:var(--sf);border-left:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .25s}
+.rp.hidden{width:0;border:none;overflow:hidden}
+.rp-hdr{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.rp-hdr h3{flex:1;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--g1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xbtn{width:22px;height:22px;border-radius:3px;border:1px solid var(--b1);background:transparent;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--mono);transition:all .15s}
+.xbtn:hover{background:var(--b1);color:var(--tx)}
+.rp-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;overflow-x:auto}
+.rp-tabs::-webkit-scrollbar{height:0}
+.rt{padding:7px 12px;font-size:9.5px;color:var(--tx3);font-family:var(--mono);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;letter-spacing:.5px}
+.rt:hover{color:var(--tx)}
+.rt.active{color:var(--g1);border-bottom-color:var(--g1)}
+.rb{flex:1;overflow-y:auto;padding:14px}
+.rb::-webkit-scrollbar{width:2px}
+.rb::-webkit-scrollbar-thumb{background:var(--b2)}
+@keyframes sr{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.rb>*{animation:sr .2s ease both}
+
+/* CONTENT ELEMENTS */
+.sec{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--g1);margin:16px 0 7px;display:flex;align-items:center;gap:7px;letter-spacing:1.5px;text-transform:uppercase}
+.sec::after{content:'';flex:1;height:1px;background:var(--b1)}
+.sec:first-child{margin-top:0}
+p.bd{font-size:11.5px;line-height:1.75;color:var(--tx2);margin-bottom:9px;font-family:var(--mono)}
+strong{color:var(--tx)}
+
+.callout{border-left:2px solid;padding:9px 12px;border-radius:0 4px 4px 0;margin:9px 0;font-size:10.5px;line-height:1.7;font-family:var(--mono)}
+.callout.info{border-color:var(--g1);background:rgba(0,255,65,.04);color:var(--tx2)}
+.callout.warn{border-color:var(--a2);background:rgba(255,159,10,.05);color:var(--tx2)}
+.callout.tip{border-color:var(--a3);background:rgba(255,214,10,.04);color:var(--tx2)}
+.callout.danger{border-color:var(--a5);background:rgba(255,55,95,.05);color:var(--tx2)}
+.callout.note{border-color:var(--a4);background:rgba(191,90,242,.05);color:var(--tx2)}
+.callout strong{display:block;font-size:7.5px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.callout.info strong{color:var(--g1)}.callout.warn strong{color:var(--a2)}.callout.tip strong{color:var(--a3)}.callout.danger strong{color:var(--a5)}.callout.note strong{color:var(--a4)}
+
+/* TERMINAL */
+.tw{background:#020602;border:1px solid var(--b2);border-radius:7px;overflow:hidden;margin:10px 0;box-shadow:0 0 24px rgba(0,255,65,.05),inset 0 0 40px rgba(0,255,65,.01)}
+.tb{display:flex;align-items:center;gap:5px;padding:7px 11px;background:#030803;border-bottom:1px solid var(--b1)}
+.td{width:9px;height:9px;border-radius:50%}
+.td.r{background:#ff5f57}.td.y{background:#febc2e}.td.g{background:#28c840}
+.tt{flex:1;text-align:center;font-size:9px;color:var(--tx3);font-family:var(--mono)}
+.tr-btn{background:transparent;border:1px solid var(--b2);border-radius:3px;color:var(--g2);font-family:var(--mono);font-size:8px;padding:2px 8px;cursor:pointer;transition:all .15s;letter-spacing:1px}
+.tr-btn:hover{background:rgba(0,255,65,.07);border-color:var(--g1);color:var(--g1)}
+.tr-btn.running{color:var(--a3);border-color:var(--a3)}
+.ts{padding:12px 14px;font-family:var(--mono);font-size:11.5px;line-height:1.65;min-height:90px;max-height:380px;overflow-y:auto;position:relative}
+.ts::-webkit-scrollbar{width:2px}
+.ts::-webkit-scrollbar-thumb{background:var(--b2)}
+.tl{display:block;white-space:pre-wrap;word-break:break-all;margin:0}
+.tp{color:var(--g1)}.tc2{color:#ffffff}.to{color:#7dcb7d}.to-b{color:var(--g1);font-weight:700}
+.to-y{color:#ffd60a}.to-r{color:#ff375f}.to-c{color:#4fc3f7}.to-m{color:#ce93d8}.to-w{color:#fff}
+.tcur{display:inline-block;width:7px;height:13px;background:var(--g1);margin-left:1px;animation:bl .9s step-end infinite;vertical-align:text-bottom}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:10.5px;margin:8px 0}
+.tbl th{background:var(--card2);color:var(--g1);font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:7px 9px;text-align:left;border-bottom:1px solid var(--b1)}
+.tbl td{padding:6px 9px;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.02);vertical-align:top;line-height:1.5;font-family:var(--mono);font-size:10px}
+.tbl tr:hover td{background:rgba(0,255,65,.02)}
+.tbl td:first-child{color:var(--g1);white-space:nowrap;font-weight:600}
+
+/* FLAGS */
+.fw{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.fp{background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:4px 8px;font-family:var(--mono);font-size:10px}
+.fp .fn{color:var(--g1);font-weight:700}.fp .fd{color:var(--tx2);margin-left:5px;font-size:9px}
+
+/* Q&A */
+.qa-item{border:1px solid var(--b1);border-radius:4px;margin-bottom:7px;overflow:hidden}
+.qa-item:hover{border-color:var(--b2)}
+.qa-q{padding:9px 12px;cursor:pointer;display:flex;align-items:flex-start;gap:7px;background:var(--card);transition:background .15s}
+.qa-q:hover{background:var(--card2)}
+.qa-qi{width:17px;height:17px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;font-family:var(--mono);flex-shrink:0;margin-top:1px}
+.qa-qt{flex:1;font-size:10.5px;color:var(--tx);font-weight:500;line-height:1.5;font-family:var(--mono)}
+.qa-ch{color:var(--tx3);transition:transform .3s;flex-shrink:0;font-size:9px;margin-top:3px}
+.qa-item.open .qa-ch{transform:rotate(180deg)}
+.qa-a{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.qa-item.open .qa-a{max-height:1200px}
+.qa-ab{padding:12px;font-size:10.5px;color:var(--tx2);line-height:1.8;border-top:1px solid var(--b1);background:#030603;font-family:var(--mono)}
+.qa-ab code{background:var(--card);border:1px solid var(--b1);border-radius:2px;padding:1px 4px;color:var(--g1)}
+.filter-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.fbtn{font-size:8px;padding:2px 7px;border-radius:3px;border:1px solid var(--b1);background:transparent;color:var(--tx3);cursor:pointer;font-family:var(--mono);letter-spacing:.5px;transition:all .15s}
+.fbtn:hover,.fbtn.active{border-color:var(--g1);color:var(--g1);background:rgba(0,255,65,.05)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.mc{background:var(--card);border:1px solid var(--b1);border-radius:4px;padding:10px;font-family:var(--mono)}
+.mc h4{font-size:8px;font-weight:700;color:var(--g1);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.mc p{font-size:10px;color:var(--tx2);line-height:1.55}
+.fl{list-style:none;margin:6px 0}
+.fl li{display:flex;align-items:flex-start;gap:7px;padding:4px 0;font-size:10.5px;color:var(--tx2);line-height:1.5;border-bottom:1px solid rgba(255,255,255,.02);font-family:var(--mono)}
+.fl li::before{content:'$';color:var(--g1);font-size:9px;margin-top:2px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo-mark">$_</div>
+  <div>
+    <div class="logo-name">LINUX MASTERY</div>
+    <div class="logo-sub">ZERO TO SYSADMIN · ANIMATED TERMINALS · 2025</div>
+  </div>
+  <div class="top-sep"></div>
+  <div class="t-stat"><b>22</b> Chapters</div>
+  <div class="t-stat"><b>150+</b> Commands</div>
+  <div class="t-stat"><b>200+</b> Animated Demos</div>
+  <div class="t-stat"><b>100</b> Q&amp;A</div>
+  <div class="t-badge">Kernel <b>6.x</b> &nbsp;·&nbsp; Bash <b>5.x</b></div>
+</div>
+<div class="layout">
+  <div class="lp">
+    <div class="lp-hdr">
+      <div class="lp-hdr-row"><h3>// LINUX PATH</h3></div>
+      <div class="prog-bar"><div class="prog-fill" id="progBar"></div></div>
+      <div class="prog-txt" id="progTxt">0 / 22 chapters visited</div>
+    </div>
+    <nav class="lnav" id="leftNav"></nav>
+  </div>
+  <div class="mid" id="middle">
+    <div class="wlc">
+      <div class="wlc-ascii">██╗     ██╗███╗   ██╗██╗   ██╗██╗  ██╗
+██║     ██║████╗  ██║██║   ██║╚██╗██╔╝
+██║     ██║██╔██╗ ██║██║   ██║ ╚███╔╝
+██║     ██║██║╚██╗██║██║   ██║ ██╔██╗
+███████╗██║██║ ╚████║╚██████╔╝██╔╝ ██╗
+╚══════╝╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝</div>
+      <div class="wlc-title">LINUX MASTERY</div>
+      <div class="wlc-prompt"><span class="blink">█</span> root@master:~#&nbsp;</div>
+      <p class="wlc-sub">Every command animated. Real output. Zero to SysAdmin.<br>Click any chapter — watch commands execute live in the terminal.</p>
+      <div class="stat-row">
+        <div class="sc"><span class="sc-n">22</span><span class="sc-l">Chapters</span></div>
+        <div class="sc"><span class="sc-n">150+</span><span class="sc-l">Commands</span></div>
+        <div class="sc"><span class="sc-n">200+</span><span class="sc-l">Animated</span></div>
+        <div class="sc"><span class="sc-n">100</span><span class="sc-l">Q&amp;A</span></div>
+        <div class="sc"><span class="sc-n">∞</span><span class="sc-l">Patterns</span></div>
+      </div>
+      <div class="wlc-hint">← select chapter · watch commands run · click Run ▶ on any terminal</div>
+    </div>
+  </div>
+  <div class="rp hidden" id="rightPanel">
+    <div class="rp-hdr">
+      <h3 id="rightTitle">$ select a topic</h3>
+      <button class="xbtn" onclick="closeRight()">✕</button>
+    </div>
+    <div class="rp-tabs" id="rightTabs"></div>
+    <div class="rb" id="rightBody"></div>
+  </div>
+</div>
+<script>
+
+const CHAPTERS=[
+{id:'navigation',icon:'📁',color:'#00ff41',bg:'rgba(0,255,65,.12)',lc:'#00ff41',level:'BEGINNER',
+ title:'File Navigation',sub:'ls · cd · pwd · find · tree',
+ desc:'Master moving through the Linux filesystem. Understand directory structure, listing files, and finding anything on disk.',
+ topics:[
+  {id:'ls',cmd:'ls',title:'List Directory Contents',desc:'List files with styles, permissions, sizes',tags:['beginner'],
+   tabs:['Demo','Flags','Examples','Tips']},
+  {id:'cd',cmd:'cd',title:'Change Directory',desc:'Navigate the filesystem efficiently',tags:['beginner'],
+   tabs:['Demo','Shortcuts','Examples']},
+  {id:'pwd',cmd:'pwd',title:'Print Working Directory',desc:'Know exactly where you are',tags:['beginner'],
+   tabs:['Demo','Usage']},
+  {id:'find',cmd:'find',title:'Find Files & Dirs',desc:'Locate anything by name, type, size, time',tags:['intermediate'],
+   tabs:['Demo','Expressions','Examples','Tips']},
+  {id:'tree',cmd:'tree',title:'Directory Tree',desc:'Visualise hierarchy at a glance',tags:['beginner'],
+   tabs:['Demo','Flags','Examples']},
+ ]},
+{id:'fileops',icon:'✏️',color:'#00cc33',bg:'rgba(0,204,51,.12)',lc:'#00cc33',level:'BEGINNER',
+ title:'File Operations',sub:'cp · mv · rm · mkdir · touch · ln',
+ desc:'Create, copy, move, delete and link files like a pro. Learn destructive vs non-destructive patterns.',
+ topics:[
+  {id:'cp',cmd:'cp',title:'Copy Files & Dirs',desc:'Duplicate with options: recursive, preserve attrs',tags:['beginner'],tabs:['Demo','Flags','Examples']},
+  {id:'mv',cmd:'mv',title:'Move / Rename',desc:'Move and rename files and directories',tags:['beginner'],tabs:['Demo','Examples','Tips']},
+  {id:'rm',cmd:'rm',title:'Remove Files',desc:'Delete files and directories safely',tags:['beginner'],tabs:['Demo','Flags','Safety']},
+  {id:'mkdir',cmd:'mkdir',title:'Create Directories',desc:'Make dirs, nested dirs in one shot',tags:['beginner'],tabs:['Demo','Examples']},
+  {id:'touch',cmd:'touch',title:'Create / Update Files',desc:'Create empty files, update timestamps',tags:['beginner'],tabs:['Demo','Usage']},
+  {id:'ln',cmd:'ln',title:'Hard & Soft Links',desc:'Create hard links and symbolic links',tags:['intermediate'],tabs:['Demo','Hard vs Soft','Examples']},
+ ]},
+{id:'viewing',icon:'👁️',color:'#39ff85',bg:'rgba(57,255,133,.1)',lc:'#39ff85',level:'BEGINNER',
+ title:'Viewing Content',sub:'cat · less · head · tail · grep · wc',
+ desc:'Read, search and slice through file content. Essential for log analysis and data inspection.',
+ topics:[
+  {id:'cat',cmd:'cat',title:'Concatenate & Print',desc:'Display file content, merge files',tags:['beginner'],tabs:['Demo','Flags','Examples']},
+  {id:'less',cmd:'less',title:'Page Through Files',desc:'Navigate large files interactively',tags:['beginner'],tabs:['Demo','Keys','Tips']},
+  {id:'head',cmd:'head',title:'First N Lines',desc:'Preview file beginnings',tags:['beginner'],tabs:['Demo','Examples']},
+  {id:'tail',cmd:'tail',title:'Last N Lines & Follow',desc:'Monitor live log files with -f',tags:['beginner'],tabs:['Demo','Live Follow','Examples']},
+  {id:'grep',cmd:'grep',title:'Search Text Patterns',desc:'Filter lines with regex, recursive search',tags:['intermediate'],tabs:['Demo','Flags','Regex','Examples']},
+  {id:'wc',cmd:'wc',title:'Word / Line Count',desc:'Count lines, words, bytes in files',tags:['beginner'],tabs:['Demo','Flags','Examples']},
+ ]},
+{id:'permissions',icon:'🔐',color:'#ff9f0a',bg:'rgba(255,159,10,.1)',lc:'#ff9f0a',level:'INTERMEDIATE',
+ title:'Permissions & Ownership',sub:'chmod · chown · umask · ACL',
+ desc:'Control who can read, write and execute. Understand octal notation, ACLs and the setuid/setgid bits.',
+ topics:[
+  {id:'chmod',cmd:'chmod',title:'Change Mode',desc:'Set rwx permissions with octal and symbolic',tags:['intermediate'],tabs:['Demo','Octal Table','Symbolic','SUID/SGID']},
+  {id:'chown',cmd:'chown',title:'Change Owner',desc:'Transfer file ownership to user:group',tags:['intermediate'],tabs:['Demo','Examples','Tips']},
+  {id:'umask',cmd:'umask',title:'Default Permission Mask',desc:'Control default permissions for new files',tags:['intermediate'],tabs:['Demo','How It Works','Examples']},
+  {id:'acl',cmd:'getfacl',title:'Access Control Lists',desc:'Fine-grained per-user permissions beyond rwx',tags:['advanced'],tabs:['Demo','setfacl','Examples']},
+ ]},
+{id:'processes',icon:'⚙️',color:'#bf5af2',bg:'rgba(191,90,242,.1)',lc:'#bf5af2',level:'INTERMEDIATE',
+ title:'Process Management',sub:'ps · top · kill · jobs · bg · fg · nice',
+ desc:'Monitor, control and prioritise processes. Understand PIDs, signals, job control and process trees.',
+ topics:[
+  {id:'ps',cmd:'ps',title:'List Processes',desc:'Snapshot of running processes',tags:['intermediate'],tabs:['Demo','Flags','Examples']},
+  {id:'top',cmd:'top / htop',title:'Live Process Monitor',desc:'Real-time CPU/RAM dashboard',tags:['intermediate'],tabs:['Demo','Keys','htop']},
+  {id:'kill',cmd:'kill',title:'Send Signals',desc:'Terminate, restart, or pause processes',tags:['intermediate'],tabs:['Demo','Signals','Examples']},
+  {id:'jobs',cmd:'jobs · bg · fg',title:'Job Control',desc:'Manage foreground and background jobs',tags:['intermediate'],tabs:['Demo','Workflow','Examples']},
+  {id:'nice',cmd:'nice · renice',title:'Process Priority',desc:'Adjust CPU scheduling priority',tags:['advanced'],tabs:['Demo','Scale','Examples']},
+ ]},
+{id:'users',icon:'👤',color:'#ffd60a',bg:'rgba(255,214,10,.1)',lc:'#ffd60a',level:'INTERMEDIATE',
+ title:'Users & Groups',sub:'useradd · usermod · passwd · sudo · su · who',
+ desc:'Create and manage users and groups. Control access with sudo. Understand the /etc/passwd and shadow file.',
+ topics:[
+  {id:'useradd',cmd:'useradd',title:'Create Users',desc:'Add new system and normal users',tags:['intermediate'],tabs:['Demo','Flags','Examples']},
+  {id:'usermod',cmd:'usermod',title:'Modify Users',desc:'Change shell, groups, home dir',tags:['intermediate'],tabs:['Demo','Flags','Examples']},
+  {id:'passwd',cmd:'passwd',title:'Set Passwords',desc:'Change passwords, lock/unlock accounts',tags:['intermediate'],tabs:['Demo','Flags','/etc/shadow']},
+  {id:'sudo',cmd:'sudo · su',title:'Privilege Escalation',desc:'Run commands as root, switch users',tags:['intermediate'],tabs:['Demo','sudoers','Security']},
+  {id:'who',cmd:'who · w · id',title:'User Info & Sessions',desc:'See who is logged in and their identity',tags:['beginner'],tabs:['Demo','Examples']},
+ ]},
+{id:'networking',icon:'🌐',color:'#0a84ff',bg:'rgba(10,132,255,.1)',lc:'#0a84ff',level:'INTERMEDIATE',
+ title:'Networking',sub:'ip · ss · ping · curl · wget · ssh · nmap',
+ desc:'Configure interfaces, test connectivity, analyse ports and transfer data across networks.',
+ topics:[
+  {id:'ip',cmd:'ip',title:'Interface & Routing',desc:'Configure IP addresses and routes',tags:['intermediate'],tabs:['Demo','Subcommands','Examples']},
+  {id:'ss',cmd:'ss · netstat',title:'Socket Statistics',desc:'View open ports and connections',tags:['intermediate'],tabs:['Demo','Flags','Examples']},
+  {id:'ping',cmd:'ping',title:'Test Connectivity',desc:'ICMP echo — reachability and latency',tags:['beginner'],tabs:['Demo','Flags','Examples']},
+  {id:'curl',cmd:'curl',title:'HTTP Requests',desc:'Transfer data with URL — APIs, downloads',tags:['intermediate'],tabs:['Demo','Flags','Examples']},
+  {id:'ssh',cmd:'ssh',title:'Secure Shell',desc:'Remote login, port forwarding, tunnels',tags:['intermediate'],tabs:['Demo','Config','Tunnels','Keys']},
+  {id:'nmap',cmd:'nmap',title:'Network Scanner',desc:'Port scanning and service detection',tags:['advanced'],tabs:['Demo','Scan Types','Examples']},
+ ]},
+{id:'disk',icon:'💾',color:'#ff375f',bg:'rgba(255,55,95,.1)',lc:'#ff375f',level:'INTERMEDIATE',
+ title:'Disk & Storage',sub:'df · du · mount · fdisk · lsblk · dd',
+ desc:'Inspect disk space, manage partitions, mount filesystems and clone drives.',
+ topics:[
+  {id:'df',cmd:'df',title:'Disk Free Space',desc:'Filesystem usage at a glance',tags:['beginner'],tabs:['Demo','Flags','Examples']},
+  {id:'du',cmd:'du',title:'Disk Usage by Dir',desc:'Find what is consuming space',tags:['intermediate'],tabs:['Demo','Flags','Examples']},
+  {id:'lsblk',cmd:'lsblk',title:'List Block Devices',desc:'See disks, partitions, mount points',tags:['intermediate'],tabs:['Demo','Examples']},
+  {id:'mount',cmd:'mount',title:'Mount Filesystems',desc:'Attach filesystems, persistent mounts',tags:['intermediate'],tabs:['Demo','/etc/fstab','Examples']},
+  {id:'dd',cmd:'dd',title:'Disk Duplication',desc:'Low-level copy, ISO writing, backup',tags:['advanced'],tabs:['Demo','Use Cases','Safety']},
+ ]},
+{id:'text-processing',icon:'📝',color:'#39ff85',bg:'rgba(57,255,133,.1)',lc:'#39ff85',level:'INTERMEDIATE',
+ title:'Text Processing',sub:'awk · sed · cut · sort · uniq · tr · xargs',
+ desc:'Transform, filter and reshape text streams. The power tools of the shell pipeline.',
+ topics:[
+  {id:'awk',cmd:'awk',title:'AWK — Column Processor',desc:'Pattern-action language for structured text',tags:['intermediate'],tabs:['Demo','Syntax','Examples','One-liners']},
+  {id:'sed',cmd:'sed',title:'Stream Editor',desc:'In-place substitution and line operations',tags:['intermediate'],tabs:['Demo','Syntax','Examples']},
+  {id:'cut',cmd:'cut',title:'Extract Fields',desc:'Cut columns by delimiter or byte offset',tags:['beginner'],tabs:['Demo','Flags','Examples']},
+  {id:'sort',cmd:'sort',title:'Sort Lines',desc:'Alpha, numeric, reverse, unique sort',tags:['beginner'],tabs:['Demo','Flags','Examples']},
+  {id:'uniq',cmd:'uniq',title:'Remove Duplicates',desc:'Deduplicate consecutive identical lines',tags:['beginner'],tabs:['Demo','Flags','Pipeline']},
+  {id:'xargs',cmd:'xargs',title:'Build Command Lines',desc:'Pass stdin as arguments to commands',tags:['intermediate'],tabs:['Demo','Flags','Examples']},
+ ]},
+{id:'bash-scripting',icon:'🖊️',color:'#00ff41',bg:'rgba(0,255,65,.1)',lc:'#00ff41',level:'INTERMEDIATE',
+ title:'Bash Scripting',sub:'variables · loops · conditionals · functions · arrays',
+ desc:'Automate everything. Write production-grade bash scripts with proper error handling.',
+ topics:[
+  {id:'vars',cmd:'$VAR',title:'Variables & Env',desc:'Local, exported and special variables',tags:['beginner'],tabs:['Demo','Special Vars','Examples']},
+  {id:'loops',cmd:'for/while',title:'Loops',desc:'for, while, until — iterate over everything',tags:['intermediate'],tabs:['Demo','Patterns','Examples']},
+  {id:'conditionals',cmd:'if/case',title:'Conditionals',desc:'if/else, case, test expressions, [[  ]]',tags:['intermediate'],tabs:['Demo','Test Ops','Examples']},
+  {id:'functions',cmd:'function',title:'Functions',desc:'Define reusable blocks, return values',tags:['intermediate'],tabs:['Demo','Examples']},
+  {id:'arrays',cmd:'array',title:'Arrays & Maps',desc:'Indexed arrays and associative arrays',tags:['intermediate'],tabs:['Demo','Assoc Arrays','Examples']},
+  {id:'error-handling',cmd:'set -e',title:'Error Handling',desc:'set -euo pipefail, traps, exit codes',tags:['advanced'],tabs:['Demo','Best Practices']},
+ ]},
+{id:'redirection',icon:'🔀',color:'#4fc3f7',bg:'rgba(79,195,247,.1)',lc:'#4fc3f7',level:'BEGINNER',
+ title:'I/O Redirection & Pipes',sub:'| · > · >> · < · 2> · tee · here-doc',
+ desc:'Chain commands, redirect stdin/stdout/stderr, build powerful one-liner pipelines.',
+ topics:[
+  {id:'pipes',cmd:'|',title:'Pipes — Chain Commands',desc:'Connect output of one cmd to input of next',tags:['beginner'],tabs:['Demo','Pipeline Patterns','Examples']},
+  {id:'redirect',cmd:'> >> <',title:'File Redirection',desc:'Redirect stdout, stderr, append, read from file',tags:['beginner'],tabs:['Demo','FD Table','Examples']},
+  {id:'tee',cmd:'tee',title:'Tee — Split Output',desc:'Write to file AND stdout simultaneously',tags:['intermediate'],tabs:['Demo','Flags','Examples']},
+  {id:'heredoc',cmd:'<<EOF',title:'Here Documents',desc:'Multi-line stdin for scripts',tags:['intermediate'],tabs:['Demo','Patterns','Examples']},
+ ]},
+{id:'package-mgmt',icon:'📦',color:'#ff9f0a',bg:'rgba(255,159,10,.1)',lc:'#ff9f0a',level:'INTERMEDIATE',
+ title:'Package Management',sub:'apt · dnf · pacman · snap · pip · make',
+ desc:'Install, update and remove software on any Linux distribution.',
+ topics:[
+  {id:'apt',cmd:'apt',title:'APT — Debian/Ubuntu',desc:'Install, update, remove packages on deb-based distros',tags:['beginner'],tabs:['Demo','Commands','Examples']},
+  {id:'dnf',cmd:'dnf · yum',title:'DNF/YUM — RHEL/Fedora',desc:'RPM-based package management',tags:['beginner'],tabs:['Demo','Commands','Examples']},
+  {id:'pacman',cmd:'pacman',title:'Pacman — Arch Linux',desc:'Arch Linux package manager',tags:['beginner'],tabs:['Demo','Commands','Examples']},
+  {id:'snap',cmd:'snap · flatpak',title:'Universal Packages',desc:'Sandboxed universal package formats',tags:['intermediate'],tabs:['Demo','Comparison','Examples']},
+  {id:'make',cmd:'make',title:'Build from Source',desc:'Configure → make → make install workflow',tags:['advanced'],tabs:['Demo','Workflow','Tips']},
+ ]},
+{id:'systemd',icon:'🔧',color:'#bf5af2',bg:'rgba(191,90,242,.1)',lc:'#bf5af2',level:'ADVANCED',
+ title:'Systemd & Services',sub:'systemctl · journalctl · units · timers',
+ desc:'Manage system services, boot targets, logging and scheduled jobs with systemd.',
+ topics:[
+  {id:'systemctl',cmd:'systemctl',title:'Service Control',desc:'start, stop, enable, disable, status',tags:['intermediate'],tabs:['Demo','Commands','Unit Files','Examples']},
+  {id:'journalctl',cmd:'journalctl',title:'System Journal',desc:'Query and filter systemd logs',tags:['intermediate'],tabs:['Demo','Filters','Examples']},
+  {id:'units',cmd:'.service',title:'Unit Files',desc:'Write custom service unit files',tags:['advanced'],tabs:['Demo','Anatomy','Examples']},
+  {id:'timers',cmd:'.timer',title:'Systemd Timers',desc:'Cron replacement with calendar events',tags:['advanced'],tabs:['Demo','Syntax','Examples']},
+ ]},
+{id:'cron',icon:'⏰',color:'#ffd60a',bg:'rgba(255,214,10,.1)',lc:'#ffd60a',level:'INTERMEDIATE',
+ title:'Scheduling & Cron',sub:'crontab · at · watch · sleep',
+ desc:'Schedule commands, one-time jobs, and periodic monitoring tasks.',
+ topics:[
+  {id:'crontab',cmd:'crontab',title:'Cron Jobs',desc:'Recurring scheduled tasks with 5-field syntax',tags:['intermediate'],tabs:['Demo','Syntax','Examples','Tips']},
+  {id:'at',cmd:'at',title:'One-time Scheduling',desc:'Run a command once at a specific time',tags:['intermediate'],tabs:['Demo','Examples']},
+  {id:'watch',cmd:'watch',title:'Repeat Command',desc:'Execute command periodically, show output',tags:['beginner'],tabs:['Demo','Flags','Examples']},
+ ]},
+{id:'archives',icon:'🗜️',color:'#39ff85',bg:'rgba(57,255,133,.1)',lc:'#39ff85',level:'BEGINNER',
+ title:'Archives & Compression',sub:'tar · gzip · zip · rsync',
+ desc:'Pack, compress, and synchronise files and directories efficiently.',
+ topics:[
+  {id:'tar',cmd:'tar',title:'Tape Archive',desc:'Bundle dirs into tarballs, extract, list',tags:['beginner'],tabs:['Demo','Flags','Recipes']},
+  {id:'gzip',cmd:'gzip · bzip2 · xz',title:'Compression Tools',desc:'Compress individual files with various algorithms',tags:['beginner'],tabs:['Demo','Comparison','Examples']},
+  {id:'zip',cmd:'zip · unzip',title:'ZIP Archives',desc:'Windows-compatible archive format',tags:['beginner'],tabs:['Demo','Examples']},
+  {id:'rsync',cmd:'rsync',title:'Remote Sync',desc:'Efficient incremental file sync and backup',tags:['intermediate'],tabs:['Demo','Flags','Backup Recipe']},
+ ]},
+{id:'env-shell',icon:'🐚',color:'#00ff41',bg:'rgba(0,255,65,.1)',lc:'#00ff41',level:'INTERMEDIATE',
+ title:'Shell & Environment',sub:'export · alias · PATH · .bashrc · history',
+ desc:'Customise your shell experience, manage environment variables and shell history.',
+ topics:[
+  {id:'export',cmd:'export',title:'Environment Variables',desc:'Set, inspect and export env vars',tags:['beginner'],tabs:['Demo','Common Vars','Examples']},
+  {id:'alias',cmd:'alias',title:'Command Aliases',desc:'Create shortcuts for long commands',tags:['beginner'],tabs:['Demo','Examples','Persistent']},
+  {id:'path',cmd:'$PATH',title:'PATH Variable',desc:'How the shell finds commands',tags:['intermediate'],tabs:['Demo','Modify PATH','Examples']},
+  {id:'history',cmd:'history',title:'Shell History',desc:'Search, replay and manage command history',tags:['beginner'],tabs:['Demo','Search','Config']},
+  {id:'bashrc',cmd:'.bashrc',title:'Shell Config Files',desc:'.bashrc vs .bash_profile vs .profile',tags:['intermediate'],tabs:['Demo','Order','Examples']},
+ ]},
+{id:'monitoring',icon:'📊',color:'#0a84ff',bg:'rgba(10,132,255,.1)',lc:'#0a84ff',level:'ADVANCED',
+ title:'System Monitoring',sub:'vmstat · iostat · sar · lsof · strace · dmesg',
+ desc:'Deep system performance analysis — CPU, memory, I/O, open files, and kernel messages.',
+ topics:[
+  {id:'vmstat',cmd:'vmstat',title:'Virtual Memory Stats',desc:'CPU, memory, I/O snapshot + interval',tags:['advanced'],tabs:['Demo','Output Fields','Examples']},
+  {id:'iostat',cmd:'iostat',title:'I/O Statistics',desc:'Disk throughput and CPU utilisation',tags:['advanced'],tabs:['Demo','Flags','Examples']},
+  {id:'lsof',cmd:'lsof',title:'List Open Files',desc:'Every open file descriptor on the system',tags:['advanced'],tabs:['Demo','Filters','Examples']},
+  {id:'strace',cmd:'strace',title:'System Call Tracer',desc:'See every syscall a process makes',tags:['expert'],tabs:['Demo','Flags','Examples']},
+  {id:'dmesg',cmd:'dmesg',title:'Kernel Messages',desc:'Boot log, driver errors, hardware events',tags:['intermediate'],tabs:['Demo','Filters','Examples']},
+ ]},
+{id:'security',icon:'🛡️',color:'#ff375f',bg:'rgba(255,55,95,.1)',lc:'#ff375f',level:'ADVANCED',
+ title:'Security & Firewall',sub:'iptables · ufw · fail2ban · auditd · ssh-keygen',
+ desc:'Harden your system with firewalls, intrusion detection, audit logging and key-based auth.',
+ topics:[
+  {id:'ufw',cmd:'ufw',title:'Uncomplicated Firewall',desc:'Simple front-end to iptables',tags:['intermediate'],tabs:['Demo','Commands','Examples']},
+  {id:'iptables',cmd:'iptables',title:'Packet Filtering',desc:'The Linux firewall engine',tags:['advanced'],tabs:['Demo','Chains','Examples']},
+  {id:'sshkeygen',cmd:'ssh-keygen',title:'SSH Key Management',desc:'Generate, deploy and manage SSH keys',tags:['intermediate'],tabs:['Demo','Key Types','Examples']},
+  {id:'fail2ban',cmd:'fail2ban',title:'Intrusion Prevention',desc:'Ban repeated failed auth attempts',tags:['advanced'],tabs:['Demo','Config','Examples']},
+ ]},
+{id:'containers',icon:'🐳',color:'#4fc3f7',bg:'rgba(79,195,247,.1)',lc:'#4fc3f7',level:'ADVANCED',
+ title:'Containers & Docker',sub:'docker · docker-compose · namespaces · cgroups',
+ desc:'Run isolated workloads with containers. Understand the Linux primitives underneath Docker.',
+ topics:[
+  {id:'docker-basics',cmd:'docker',title:'Docker Basics',desc:'run, ps, images, exec, logs, stop',tags:['intermediate'],tabs:['Demo','Commands','Examples']},
+  {id:'dockerfile',cmd:'Dockerfile',title:'Build Images',desc:'Write and build Docker images',tags:['intermediate'],tabs:['Demo','Instructions','Examples']},
+  {id:'compose',cmd:'docker-compose',title:'Docker Compose',desc:'Multi-container apps with YAML',tags:['intermediate'],tabs:['Demo','YAML','Examples']},
+  {id:'namespaces',cmd:'namespaces',title:'Linux Namespaces',desc:'The isolation primitive under containers',tags:['expert'],tabs:['Demo','Types','Examples']},
+ ]},
+{id:'kernel',icon:'⚡',color:'#ffd60a',bg:'rgba(255,214,10,.1)',lc:'#ffd60a',level:'EXPERT',
+ title:'Kernel & Boot',sub:'uname · sysctl · lsmod · grub · initramfs',
+ desc:'Understand the Linux kernel, boot process, kernel parameters and module management.',
+ topics:[
+  {id:'uname',cmd:'uname',title:'Kernel Info',desc:'Kernel version, arch, hostname details',tags:['beginner'],tabs:['Demo','Flags','Examples']},
+  {id:'sysctl',cmd:'sysctl',title:'Kernel Parameters',desc:'Tune kernel settings at runtime',tags:['advanced'],tabs:['Demo','Common Params','Examples']},
+  {id:'lsmod',cmd:'lsmod · modprobe',title:'Kernel Modules',desc:'Load, unload and list kernel modules',tags:['advanced'],tabs:['Demo','Commands','Examples']},
+  {id:'grub',cmd:'grub',title:'Bootloader',desc:'GRUB config, kernel parameters, rescue boot',tags:['expert'],tabs:['Demo','Config','Recovery']},
+ ]},
+{id:'perf-tuning',icon:'🚀',color:'#00ff41',bg:'rgba(0,255,65,.1)',lc:'#00ff41',level:'EXPERT',
+ title:'Performance Tuning',sub:'perf · tuned · ulimit · swapon · cpupower',
+ desc:'Profile, benchmark and tune a Linux system for maximum throughput and minimum latency.',
+ topics:[
+  {id:'perf',cmd:'perf',title:'Perf Profiler',desc:'CPU performance counters, flame graphs',tags:['expert'],tabs:['Demo','Subcommands','Examples']},
+  {id:'ulimit',cmd:'ulimit',title:'Resource Limits',desc:'Per-process limits on open files, memory',tags:['advanced'],tabs:['Demo','Flags','/etc/limits.conf']},
+  {id:'tuned',cmd:'tuned',title:'System Profiles',desc:'Apply pre-built performance profiles',tags:['advanced'],tabs:['Demo','Profiles','Examples']},
+  {id:'swap',cmd:'swapon · swapoff',title:'Swap Management',desc:'Create, enable and tune swap space',tags:['intermediate'],tabs:['Demo','tuning','Examples']},
+ ]},
+{id:'interview',icon:'🎤',color:'#bf5af2',bg:'rgba(191,90,242,.12)',lc:'#bf5af2',level:'ALL',
+ title:'Interview Q&A',sub:'Beginner · Intermediate · Advanced · SysAdmin',
+ desc:'100 real Linux interview questions with detailed answers. From basic commands to kernel internals.',
+ topics:[
+  {id:'iq-basics',cmd:'Q 1-25',title:'Beginner Questions',desc:'Fundamentals every Linux user must know',tags:['beginner'],tabs:['Q&A']},
+  {id:'iq-intermediate',cmd:'Q 26-55',title:'Intermediate Questions',desc:'Scripting, permissions, processes, networking',tags:['intermediate'],tabs:['Q&A']},
+  {id:'iq-advanced',cmd:'Q 56-80',title:'Advanced Questions',desc:'Internals, performance, security, containers',tabs:['Q&A'],tags:['advanced']},
+  {id:'iq-sysadmin',cmd:'Q 81-100',title:'SysAdmin Questions',desc:'Production incidents, tuning, architecture',tabs:['Q&A'],tags:['sysadmin']},
+ ]},
+];
+
+// ═══════════════ TERMINAL ANIMATION ENGINE ═══════════════
+let termTimers = [];
+function clearTimers(){ termTimers.forEach(clearTimeout); termTimers=[]; }
+
+function mkTerm(id, title, lines, autoRun){
+  const html = `<div class="tw" id="tw_${id}">
+<div class="tb">
+  <div class="td r"></div><div class="td y"></div><div class="td g"></div>
+  <div class="tt">root@linux:~# — ${title}</div>
+  <button class="tr-btn" id="rb_${id}" onclick="runTerm('${id}')">▶ Run</button>
+</div>
+<div class="ts" id="ts_${id}"><span class="tl"><span class="tp">root@linux:~#</span><span class="tcur"></span></span></div>
+</div>`;
+  if(autoRun) setTimeout(()=>runTerm(id), 400);
+  return html;
+}
+
+function runTerm(id){
+  const scr = document.getElementById('ts_'+id);
+  const btn = document.getElementById('rb_'+id);
+  if(!scr||!btn) return;
+  clearTimers();
+  scr.innerHTML = '';
+  btn.textContent = '⏳';
+  btn.classList.add('running');
+  const lines = TERM_DATA[id]||[];
+  let delay = 0;
+  lines.forEach((ln, i)=>{
+    const t = setTimeout(()=>{
+      const s = document.createElement('span');
+      s.className = 'tl';
+      s.innerHTML = ln;
+      scr.appendChild(s);
+      scr.scrollTop = scr.scrollHeight;
+      if(i===lines.length-1){
+        btn.textContent = '▶ Run';
+        btn.classList.remove('running');
+      }
+    }, delay);
+    termTimers.push(t);
+    delay += ln.startsWith('<span class="tp">') ? 320 : ln.includes('---') ? 60 : 55;
+  });
+}
+
+// ═══════════════ ALL TERMINAL DATA ═══════════════
+const TERM_DATA = {
+
+// ── ls ──────────────────────────────────────────
+'ls-basic':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ls</span>',
+ '<span class="to">Desktop  Documents  Downloads  Music  Pictures  Videos</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ls -l</span>',
+ '<span class="to">total 48</span>',
+ '<span class="to-b">drwxr-xr-x</span> <span class="to"> 2 root root 4096 Jan 15 09:22 </span><span class="to-c">Desktop</span>',
+ '<span class="to-b">drwxr-xr-x</span> <span class="to"> 3 root root 4096 Jan 15 09:44 </span><span class="to-c">Documents</span>',
+ '<span class="to-b">drwxr-xr-x</span> <span class="to"> 2 root root 4096 Jan 14 18:30 </span><span class="to-c">Downloads</span>',
+ '<span class="to">-rw-r--r--</span><span class="to">  1 root root  182 Jan 15 10:01 notes.txt</span>',
+ '<span class="to">-rwxr-xr-x</span><span class="to">  1 root root 8192 Jan 14 22:15 </span><span class="to-b">script.sh</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ls -la --color=auto</span>',
+ '<span class="to">total 64</span>',
+ '<span class="to-b">drwx------</span><span class="to"> 8 root root 4096 Jan 15 10:01 </span><span class="to-c">.</span>',
+ '<span class="to-b">drwxr-xr-x</span><span class="to"> 4 root root 4096 Jan 10 14:22 </span><span class="to-c">..</span>',
+ '<span class="to">-rw-------</span><span class="to"> 1 root root 2048 Jan 15 09:58 </span><span class="to-m">.bash_history</span>',
+ '<span class="to">-rw-r--r--</span><span class="to"> 1 root root  220 Jan 10 14:22 </span><span class="to-m">.bash_logout</span>',
+ '<span class="to">-rw-r--r--</span><span class="to"> 1 root root 3526 Jan 10 14:22 </span><span class="to-m">.bashrc</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+'ls-adv':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ls -lh /var/log/</span>',
+ '<span class="to">total 128M</span>',
+ '<span class="to">-rw-r--r-- 1 syslog adm  </span><span class="to-y">45M</span><span class="to"> Jan 15 10:04 syslog</span>',
+ '<span class="to">-rw-r--r-- 1 syslog adm  </span><span class="to-y">12M</span><span class="to"> Jan 15 00:00 syslog.1</span>',
+ '<span class="to">-rw-r----- 1 root   adm  </span><span class="to-y">8.2M</span><span class="to"> Jan 15 08:30 auth.log</span>',
+ '<span class="to">-rw-r--r-- 1 root   root </span><span class="to-y">1.1M</span><span class="to"> Jan 15 10:04 dpkg.log</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ls -lt | head -5</span>',
+ '<span class="to">total 64</span>',
+ '<span class="to">-rw-r--r-- 1 root root  450 Jan 15 10:04 latest.txt</span>',
+ '<span class="to">-rw-r--r-- 1 root root 1024 Jan 15 09:58 config.json</span>',
+ '<span class="to">drwxr-xr-x 2 root root 4096 Jan 15 09:22 Desktop</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── cd ──────────────────────────────────────────
+'cd-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">pwd</span>',
+ '<span class="to">/root</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">cd /var/log</span>',
+ '<span class="tp">root@linux:/var/log#</span> <span class="tc2">pwd</span>',
+ '<span class="to">/var/log</span>',
+ '<span class="tp">root@linux:/var/log#</span> <span class="tc2">cd ..</span>',
+ '<span class="tp">root@linux:/var#</span> <span class="tc2">cd ~</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">cd -</span>',
+ '<span class="to">/var</span>',
+ '<span class="tp">root@linux:/var#</span> <span class="tc2">cd /etc/nginx</span>',
+ '<span class="tp">root@linux:/etc/nginx#</span> <span class="tc2">ls</span>',
+ '<span class="to">conf.d  mime.types  nginx.conf  sites-available  sites-enabled</span>',
+ '<span class="tp">root@linux:/etc/nginx#</span> <span class="tcur"></span>',
+],
+
+// ── find ────────────────────────────────────────
+'find-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">find /var/log -name "*.log" -type f</span>',
+ '<span class="to">/var/log/auth.log</span>',
+ '<span class="to">/var/log/syslog</span>',
+ '<span class="to">/var/log/dpkg.log</span>',
+ '<span class="to">/var/log/nginx/access.log</span>',
+ '<span class="to">/var/log/nginx/error.log</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">find /home -size +10M -type f 2>/dev/null</span>',
+ '<span class="to">/home/alice/Videos/demo.mp4</span>',
+ '<span class="to">/home/alice/backup.tar.gz</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">find /tmp -mtime -1 -exec ls -lh {} \;</span>',
+ '<span class="to">-rw------- 1 root root 4.0K Jan 15 09:44 /tmp/tmpXYZ123</span>',
+ '<span class="to">-rw-r--r-- 1 root root  512 Jan 15 10:01 /tmp/session_abc</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">find / -perm -4000 -type f 2>/dev/null</span>',
+ '<span class="to-y">/usr/bin/passwd</span>',
+ '<span class="to-y">/usr/bin/sudo</span>',
+ '<span class="to-y">/usr/bin/su</span>',
+ '<span class="to-y">/bin/mount</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── grep ────────────────────────────────────────
+'grep-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">grep "error" /var/log/syslog | head -5</span>',
+ '<span class="to">Jan 15 09:22:14 linux kernel: </span><span class="to-r">[error]</span><span class="to"> usb disconnect port 3</span>',
+ '<span class="to">Jan 15 09:44:02 linux nginx: </span><span class="to-r">[error]</span><span class="to"> connect() failed (111)</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">grep -rn "TODO" /var/www/ --include="*.php"</span>',
+ '<span class="to-c">/var/www/html/index.php</span><span class="to">:14:  </span><span class="to-y">// TODO</span><span class="to">: add validation</span>',
+ '<span class="to-c">/var/www/html/api.php</span><span class="to">:87:  </span><span class="to-y">// TODO</span><span class="to">: handle edge case</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">grep -c "Failed password" /var/log/auth.log</span>',
+ '<span class="to-r">4821</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">grep -E "^(root|admin)" /etc/passwd</span>',
+ '<span class="to-b">root</span><span class="to">:x:0:0:root:/root:/bin/bash</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ps aux | grep nginx | grep -v grep</span>',
+ '<span class="to">www-data  1234  0.0  0.2  15364  4096 ?  S  09:22  0:00 nginx: worker</span>',
+ '<span class="to">www-data  1235  0.0  0.2  15364  4096 ?  S  09:22  0:00 nginx: worker</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── chmod ───────────────────────────────────────
+'chmod-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ls -l script.sh</span>',
+ '<span class="to">-rw-r--r-- 1 root root 256 Jan 15 10:00 script.sh</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">chmod +x script.sh</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ls -l script.sh</span>',
+ '<span class="to">-rw</span><span class="to-b">x</span><span class="to">r-x</span><span class="to-b">r-x</span><span class="to"> 1 root root 256 Jan 15 10:00 </span><span class="to-b">script.sh</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">chmod 644 config.txt</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">stat -c "%a %n" config.txt</span>',
+ '<span class="to">644 config.txt</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">chmod u=rwx,g=rx,o= secret.sh</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ls -l secret.sh</span>',
+ '<span class="to">-rwxr-x--- 1 root root 512 Jan 15 10:01 secret.sh</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">chmod 4755 /usr/local/bin/myapp</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ls -l /usr/local/bin/myapp</span>',
+ '<span class="to-y">-rwsr-xr-x</span><span class="to"> 1 root root 16384 Jan 15 10:02 /usr/local/bin/myapp</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── ps / top ────────────────────────────────────
+'ps-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ps aux | head -10</span>',
+ '<span class="to-b">USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND</span>',
+ '<span class="to">root           1  0.0  0.1 169536  9216 ?        Ss   Jan14   0:02 /sbin/init</span>',
+ '<span class="to">root           2  0.0  0.0      0     0 ?        S    Jan14   0:00 [kthreadd]</span>',
+ '<span class="to">root         512  0.0  0.2  28160 18432 ?        Ss   Jan14   0:00 /lib/systemd/systemd-journald</span>',
+ '<span class="to">nginx        892  0.0  0.1  10240  8192 ?        Ss   09:22   0:00 nginx: master</span>',
+ '<span class="to">www-data     893  0.0  0.2  15364  9344 ?        S    09:22   0:00 nginx: worker</span>',
+ '<span class="to">postgres    1024  0.1  2.1 345600 172032 ?       Ss   09:22   0:12 postgres: main</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ps -ef --forest | grep nginx</span>',
+ '<span class="to">root      892    1  0 09:22 ?  nginx: master process /usr/sbin/nginx</span>',
+ '<span class="to">www-data  893  892  0 09:22 ?   \\_ nginx: worker process</span>',
+ '<span class="to">www-data  894  892  0 09:22 ?   \\_ nginx: worker process</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">pgrep -la nginx</span>',
+ '<span class="to">892 nginx: master process /usr/sbin/nginx -g daemon off;</span>',
+ '<span class="to">893 nginx: worker process</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── top ─────────────────────────────────────────
+'top-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">top -bn1 | head -20</span>',
+ '<span class="to-b">top - 10:04:22 up 1 day, 14:32,  2 users,  load average: 0.42, 0.38, 0.35</span>',
+ '<span class="to">Tasks: </span><span class="to-b">142</span><span class="to"> total,   1 running, 141 sleeping,   0 stopped,   0 zombie</span>',
+ '<span class="to">%Cpu(s): </span><span class="to-y"> 4.2</span><span class="to"> us,  1.1 sy,  0.0 ni, </span><span class="to-b">93.9</span><span class="to"> id,  0.5 wa,  0.0 hi,  0.3 si</span>',
+ '<span class="to">MiB Mem :  </span><span class="to-b">7876.5</span><span class="to"> total,  </span><span class="to-c">2140.2</span><span class="to"> free,  </span><span class="to-y">3812.4</span><span class="to"> used,  1923.9 buff/cache</span>',
+ '<span class="to">MiB Swap:  2048.0 total,  2048.0 free,     0.0 used.  3724.8 avail Mem</span>',
+ '<span class="to"> </span>',
+ '<span class="to-b">    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND</span>',
+ '<span class="to-y">   1024 postgres  20   0  345600 172032  12288 S   8.2   2.1   0:12.45 postgres</span>',
+ '<span class="to">    892 root      20   0   10240   8192   4096 S   0.8   0.1   0:00.92 nginx</span>',
+ '<span class="to">   2048 node     20   0  512000  98304  24576 S   4.1   1.2   0:08.22 node</span>',
+ '<span class="to">      1 root      20   0  169536   9216   6144 S   0.0   0.1   0:02.14 systemd</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── kill ────────────────────────────────────────
+'kill-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">pgrep -a sleep</span>',
+ '<span class="to">9842 sleep 3600</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">kill -15 9842</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">pgrep sleep</span>',
+ '<span class="to-y">[no output — process terminated]</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">sleep 3600 &</span>',
+ '<span class="to">[1] 9901</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">kill -9 9901</span>',
+ '<span class="to">[1]+  Killed                  sleep 3600</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">kill -l | head -4</span>',
+ '<span class="to"> 1) SIGHUP   2) SIGINT   3) SIGQUIT  4) SIGILL   5) SIGTRAP</span>',
+ '<span class="to"> 6) SIGABRT  7) SIGBUS   8) SIGFPE   9) </span><span class="to-r">SIGKILL</span><span class="to"> 10) SIGUSR1</span>',
+ '<span class="to">11) SIGSEGV 12) SIGUSR2 13) SIGPIPE 14) SIGALRM 15) </span><span class="to-b">SIGTERM</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">pkill -RELOAD nginx</span>',
+ '<span class="to-c">nginx gracefully reloading config...</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── networking ──────────────────────────────────
+'ip-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ip addr show</span>',
+ '<span class="to">1: </span><span class="to-b">lo</span><span class="to">: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN</span>',
+ '<span class="to">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span>',
+ '<span class="to">    inet </span><span class="to-c">127.0.0.1/8</span><span class="to"> scope host lo</span>',
+ '<span class="to">2: </span><span class="to-b">eth0</span><span class="to">: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP</span>',
+ '<span class="to">    link/ether </span><span class="to-m">52:54:00:ab:cd:ef</span><span class="to"> brd ff:ff:ff:ff:ff:ff</span>',
+ '<span class="to">    inet </span><span class="to-c">192.168.1.100/24</span><span class="to"> brd 192.168.1.255 scope global dynamic eth0</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ip route show</span>',
+ '<span class="to">default via </span><span class="to-y">192.168.1.1</span><span class="to"> dev eth0 proto dhcp src 192.168.1.100 metric 100</span>',
+ '<span class="to">192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.100</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ip -s link show eth0</span>',
+ '<span class="to">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500</span>',
+ '<span class="to">    RX: bytes  packets  errors  dropped  missed  mcast</span>',
+ '<span class="to">    </span><span class="to-b">2481234    18924     0       0        0       0</span>',
+ '<span class="to">    TX: bytes  packets  errors  dropped  carrier collisions</span>',
+ '<span class="to">    </span><span class="to-b">1024512    12441     0       0        0       0</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'ss-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ss -tlnp</span>',
+ '<span class="to-b">State   Recv-Q Send-Q  Local Address:Port    Peer Address:Port  Process</span>',
+ '<span class="to">LISTEN  0      128     </span><span class="to-c">0.0.0.0:22</span><span class="to">           0.0.0.0:*          users:((sshd,1044,3))</span>',
+ '<span class="to">LISTEN  0      128     </span><span class="to-c">0.0.0.0:80</span><span class="to">           0.0.0.0:*          users:((nginx,892,6))</span>',
+ '<span class="to">LISTEN  0      128     </span><span class="to-c">0.0.0.0:443</span><span class="to">          0.0.0.0:*          users:((nginx,892,7))</span>',
+ '<span class="to">LISTEN  0      128     </span><span class="to-c">127.0.0.1:5432</span><span class="to">       0.0.0.0:*          users:((postgres,1024,5))</span>',
+ '<span class="to">LISTEN  0      128     </span><span class="to-c">0.0.0.0:3000</span><span class="to">         0.0.0.0:*          users:((node,2048,18))</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ss -s</span>',
+ '<span class="to">Total: 284</span>',
+ '<span class="to">TCP:   24 (estab 18, closed 2, orphaned 0, timewait 2)</span>',
+ '<span class="to">UDP:   8</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'ping-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ping -c 4 google.com</span>',
+ '<span class="to">PING google.com (142.250.80.46) 56(84) bytes of data.</span>',
+ '<span class="to">64 bytes from 142.250.80.46: icmp_seq=1 ttl=55 time=</span><span class="to-b">14.2 ms</span>',
+ '<span class="to">64 bytes from 142.250.80.46: icmp_seq=2 ttl=55 time=</span><span class="to-b">13.8 ms</span>',
+ '<span class="to">64 bytes from 142.250.80.46: icmp_seq=3 ttl=55 time=</span><span class="to-b">14.5 ms</span>',
+ '<span class="to">64 bytes from 142.250.80.46: icmp_seq=4 ttl=55 time=</span><span class="to-b">13.9 ms</span>',
+ '<span class="to"> </span>',
+ '<span class="to">--- google.com ping statistics ---</span>',
+ '<span class="to">4 packets transmitted, 4 received, </span><span class="to-b">0% packet loss</span><span class="to">, time 3004ms</span>',
+ '<span class="to">rtt min/avg/max/mdev = 13.8/14.1/14.5/0.3 ms</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'curl-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">curl -I https://example.com</span>',
+ '<span class="to">HTTP/2 </span><span class="to-b">200</span>',
+ '<span class="to">content-type: text/html; charset=UTF-8</span>',
+ '<span class="to">x-cache: HIT</span>',
+ '<span class="to">age: 544</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">curl -s https://api.github.com/users/torvalds | python3 -m json.tool | head -10</span>',
+ '<span class="to">{</span>',
+ '<span class="to">    "login": </span><span class="to-b">"torvalds"</span><span class="to">,</span>',
+ '<span class="to">    "name": </span><span class="to-b">"Linus Torvalds"</span><span class="to">,</span>',
+ '<span class="to">    "public_repos": </span><span class="to-c">8</span><span class="to">,</span>',
+ '<span class="to">    "followers": </span><span class="to-c">231844</span>',
+ '<span class="to">}</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">curl -X POST https://httpbin.org/post -H "Content-Type: application/json" -d \'{"key":"val"}\'</span>',
+ '<span class="to">{ "json": { "key": "val" }, "url": "https://httpbin.org/post" }</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'ssh-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ssh-keygen -t ed25519 -C "admin@myserver.com"</span>',
+ '<span class="to">Generating public/private ed25519 key pair.</span>',
+ '<span class="to">Enter file in which to save the key (/root/.ssh/id_ed25519): </span>',
+ '<span class="to">Enter passphrase (empty for no passphrase): </span>',
+ '<span class="to">Your identification has been saved in /root/.ssh/id_ed25519</span>',
+ '<span class="to">Your public key has been saved in /root/.ssh/id_ed25519.pub</span>',
+ '<span class="to">The key fingerprint is:</span>',
+ '<span class="to">SHA256:</span><span class="to-b">4xV7kN2mP9qR1sT3uW5yZ8aB6cD0eF2gH4iJ6kL8mN admin@myserver.com</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ssh-copy-id -i ~/.ssh/id_ed25519.pub user@192.168.1.50</span>',
+ '<span class="to">Number of key(s) added: 1</span>',
+ '<span class="to-b">Now try logging into the machine with: ssh user@192.168.1.50</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ssh -L 8080:localhost:80 user@192.168.1.50</span>',
+ '<span class="to-c">tunnel: localhost:8080 → 192.168.1.50:80 active</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── disk ────────────────────────────────────────
+'df-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">df -h</span>',
+ '<span class="to-b">Filesystem      Size  Used Avail Use% Mounted on</span>',
+ '<span class="to">/dev/sda1        50G   </span><span class="to-y">28G</span><span class="to">   20G  </span><span class="to-y">58%</span><span class="to"> /</span>',
+ '<span class="to">/dev/sda2       200G   </span><span class="to-b">82G</span><span class="to">  107G  </span><span class="to-b">43%</span><span class="to"> /home</span>',
+ '<span class="to">tmpfs            3.9G  1.2M  3.9G   1% /run</span>',
+ '<span class="to">tmpfs            7.8G  124M  7.7G   2% /dev/shm</span>',
+ '<span class="to">/dev/sdb1       1.8T  900G  819G  </span><span class="to-b">52%</span><span class="to"> /data</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">df -h --output=source,size,used,avail,pcent,target | column -t</span>',
+ '<span class="to">Filesystem     Size  Used  Avail  Use%  Mounted on</span>',
+ '<span class="to">/dev/sda1       50G   28G    20G   58%  /</span>',
+ '<span class="to">/dev/sda2      200G   82G   107G   43%  /home</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'du-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">du -sh /var/*</span>',
+ '<span class="to-y">128M</span><span class="to">   /var/cache</span>',
+ '<span class="to-b">1.2G</span><span class="to">   /var/lib</span>',
+ '<span class="to">4.0K</span><span class="to">   /var/local</span>',
+ '<span class="to-y">45M</span><span class="to">    /var/log</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">du -ah /var/log | sort -rh | head -8</span>',
+ '<span class="to-b">45M</span><span class="to">    /var/log</span>',
+ '<span class="to-y">22M</span><span class="to">    /var/log/syslog</span>',
+ '<span class="to-y">12M</span><span class="to">    /var/log/syslog.1</span>',
+ '<span class="to"> 8M</span><span class="to">    /var/log/auth.log</span>',
+ '<span class="to"> 2M</span><span class="to">    /var/log/dpkg.log</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ncdu /var/log</span>',
+ '<span class="to-c"> --- /var/log -----------------------------------------------</span>',
+ '<span class="to">   22.4 MiB [########         ]  syslog</span>',
+ '<span class="to">   12.1 MiB [#####            ]  syslog.1</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'lsblk-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">lsblk</span>',
+ '<span class="to-b">NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS</span>',
+ '<span class="to">sda      8:0    0    50G  0 disk</span>',
+ '<span class="to">├─sda1   8:1    0     1M  0 part</span>',
+ '<span class="to">├─sda2   8:2    0  49.9G  0 part </span><span class="to-c">/</span>',
+ '<span class="to">sdb      8:16   0   1.8T  0 disk</span>',
+ '<span class="to">└─sdb1   8:17   0   1.8T  0 part </span><span class="to-c">/data</span>',
+ '<span class="to">sr0     11:0    1  1024M  0 rom</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT,UUID | column -t</span>',
+ '<span class="to">NAME   SIZE   FSTYPE  MOUNTPOINT  UUID</span>',
+ '<span class="to">sda    50G</span>',
+ '<span class="to">sda2   49.9G  ext4    /           a1b2c3d4-e5f6-7890-ab12-cd34ef567890</span>',
+ '<span class="to">sdb    1.8T</span>',
+ '<span class="to">sdb1   1.8T   xfs     /data       deadbeef-cafe-babe-face-feedfacecafe</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── awk / sed ───────────────────────────────────
+'awk-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">cat /etc/passwd | awk -F: \'{print $1, $3, $7}\' | head -5</span>',
+ '<span class="to">root 0 /bin/bash</span>',
+ '<span class="to">daemon 1 /usr/sbin/nologin</span>',
+ '<span class="to">bin 2 /usr/sbin/nologin</span>',
+ '<span class="to">sys 3 /usr/sbin/nologin</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ps aux | awk \'NR>1 {sum+=$3} END {printf "Total CPU: %.1f%%\\n", sum}\'</span>',
+ '<span class="to-b">Total CPU: 12.4%</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">df -h | awk \'NR>1 && $5+0 > 50 {print "HIGH:", $5, $6}\'</span>',
+ '<span class="to-y">HIGH: 58% /</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">awk \'BEGIN{OFS="\\t"} /error/{count++} END{print "Errors:", count}\' /var/log/syslog</span>',
+ '<span class="to-r">Errors:&nbsp;&nbsp;42</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'sed-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">echo "Hello World" | sed \'s/World/Linux/\'</span>',
+ '<span class="to">Hello </span><span class="to-b">Linux</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">sed -i \'s/127.0.0.1/0.0.0.0/g\' /etc/myapp.conf</span>',
+ '<span class="to-c">[in-place replacement done — no output]</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">sed -n \'5,10p\' /etc/nginx/nginx.conf</span>',
+ '<span class="to">    worker_processes auto;</span>',
+ '<span class="to">    error_log /var/log/nginx/error.log;</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">sed \'/^#/d; /^$/d\' /etc/ssh/sshd_config | head -8</span>',
+ '<span class="to">Include /etc/ssh/sshd_config.d/*.conf</span>',
+ '<span class="to">Port 22</span>',
+ '<span class="to">PasswordAuthentication no</span>',
+ '<span class="to">PubkeyAuthentication yes</span>',
+ '<span class="to">AuthorizedKeysFile .ssh/authorized_keys</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── systemd ─────────────────────────────────────
+'systemctl-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">systemctl status nginx</span>',
+ '<span class="to">● nginx.service - A high performance web server</span>',
+ '<span class="to">     Loaded: loaded (/lib/systemd/system/nginx.service; </span><span class="to-b">enabled</span><span class="to">; vendor preset: enabled)</span>',
+ '<span class="to">     Active: </span><span class="to-b">active (running)</span><span class="to"> since Tue 2025-01-14 09:22:11 UTC; 24h ago</span>',
+ '<span class="to">    Process: 891 ExecStartPre=/usr/sbin/nginx -t (code=exited, status=0/SUCCESS)</span>',
+ '<span class="to">   Main PID: 892 (nginx)</span>',
+ '<span class="to">      Tasks: 3 (limit: 9492)</span>',
+ '<span class="to">     Memory: 8.2M</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">systemctl restart nginx</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">systemctl is-active nginx</span>',
+ '<span class="to-b">active</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">systemctl list-units --type=service --state=running | head -10</span>',
+ '<span class="to-b">UNIT                     LOAD   ACTIVE SUB     DESCRIPTION</span>',
+ '<span class="to">nginx.service            loaded active running A high performance web server</span>',
+ '<span class="to">postgresql.service       loaded active running PostgreSQL RDBMS</span>',
+ '<span class="to">ssh.service              loaded active running OpenBSD Secure Shell server</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'journalctl-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">journalctl -u nginx --since "1 hour ago" --no-pager | tail -8</span>',
+ '<span class="to">Jan 15 09:22:11 linux nginx[892]: nginx: configuration file /etc/nginx/nginx.conf test is successful</span>',
+ '<span class="to">Jan 15 09:22:11 linux systemd[1]: Started A high performance web server</span>',
+ '<span class="to">Jan 15 10:01:33 linux nginx[892]: 10.0.0.5 "GET /api/health HTTP/1.1" 200</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">journalctl -p err -b | tail -5</span>',
+ '<span class="to-r">Jan 15 09:19:44 linux kernel: Out of memory: Kill process 4821 (java) score 782</span>',
+ '<span class="to-r">Jan 15 09:19:44 linux kernel: Killed process 4821 (java) total-vm:2097152kB</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">journalctl --disk-usage</span>',
+ '<span class="to">Archived and active journals take up </span><span class="to-y">128.0M</span><span class="to"> in the filesystem.</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── tar ─────────────────────────────────────────
+'tar-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">tar -czvf backup.tar.gz /etc/nginx/ /var/www/</span>',
+ '<span class="to">etc/nginx/</span>',
+ '<span class="to">etc/nginx/nginx.conf</span>',
+ '<span class="to">etc/nginx/sites-available/default</span>',
+ '<span class="to">var/www/html/index.html</span>',
+ '<span class="to">var/www/html/api/</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ls -lh backup.tar.gz</span>',
+ '<span class="to">-rw-r--r-- 1 root root </span><span class="to-b">2.4M</span><span class="to"> Jan 15 10:05 backup.tar.gz</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">tar -tzvf backup.tar.gz | head -5</span>',
+ '<span class="to">drwxr-xr-x root/root   0 2025-01-15 09:22 etc/nginx/</span>',
+ '<span class="to">-rw-r--r-- root/root 2812 2025-01-14 16:00 etc/nginx/nginx.conf</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">tar -xzvf backup.tar.gz -C /tmp/restore/</span>',
+ '<span class="to">etc/nginx/</span>',
+ '<span class="to">etc/nginx/nginx.conf</span>',
+ '<span class="to-b">restore complete!</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── rsync ───────────────────────────────────────
+'rsync-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">rsync -avzP /var/www/ user@backup-server:/backups/www/</span>',
+ '<span class="to">sending incremental file list</span>',
+ '<span class="to">html/</span>',
+ '<span class="to">html/index.html</span>',
+ '<span class="to">    </span><span class="to-b">48,291 100%</span><span class="to">  124.52kB/s    0:00:00 (xfr#1, to-chk=22/45)</span>',
+ '<span class="to">html/app.js</span>',
+ '<span class="to">   </span><span class="to-b">124,800 100%</span><span class="to">  185.24kB/s    0:00:01 (xfr#2, to-chk=21/45)</span>',
+ '<span class="to"> </span>',
+ '<span class="to">sent 156,820 bytes  received 1,812 bytes  </span><span class="to-b">63,452.80 bytes/sec</span>',
+ '<span class="to">total size is 512,400  speedup is 3.22</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── bash scripting ──────────────────────────────
+'vars-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">NAME="Alice"</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">echo "Hello, $NAME!"</span>',
+ '<span class="to">Hello, Alice!</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">echo "Hostname: $HOSTNAME | User: $USER | PID: $$"</span>',
+ '<span class="to">Hostname: linux | User: root | PID: </span><span class="to-b">10042</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">VERSION=$(cat /etc/os-release | grep VERSION_ID | cut -d= -f2)</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">echo "Ubuntu $VERSION"</span>',
+ '<span class="to">Ubuntu "22.04"</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">export DB_HOST=localhost</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">env | grep DB_HOST</span>',
+ '<span class="to">DB_HOST=localhost</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">readonly MAX_RETRIES=3</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">echo "\${#NAME} chars, \${NAME^^} uppercase, \${NAME:0:3} slice"</span>',
+ '<span class="to">5 chars, ALICE uppercase, Ali slice</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'loops-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">for i in 1 2 3 4 5; do echo "Item $i"; done</span>',
+ '<span class="to">Item 1</span>',
+ '<span class="to">Item 2</span>',
+ '<span class="to">Item 3</span>',
+ '<span class="to">Item 4</span>',
+ '<span class="to">Item 5</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">for f in /etc/*.conf; do echo "$f: $(wc -l < $f) lines"; done | head -5</span>',
+ '<span class="to">/etc/adduser.conf: 55 lines</span>',
+ '<span class="to">/etc/ca-certificates.conf: 134 lines</span>',
+ '<span class="to">/etc/debconf.conf: 16 lines</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">count=0; while [ $count -lt 3 ]; do echo "count=$count"; ((count++)); done</span>',
+ '<span class="to">count=0</span>',
+ '<span class="to">count=1</span>',
+ '<span class="to">count=2</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'conditionals-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">[ -f /etc/nginx/nginx.conf ] && echo "EXISTS" || echo "MISSING"</span>',
+ '<span class="to-b">EXISTS</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">if systemctl is-active nginx &>/dev/null; then echo "nginx UP"; else echo "nginx DOWN"; fi</span>',
+ '<span class="to-b">nginx UP</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">FREE=$(df / | awk \'NR==2{print $4}\'); [ $FREE -gt 1000000 ] && echo "Disk OK" || echo "DISK LOW!"</span>',
+ '<span class="to-b">Disk OK</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">case $OSTYPE in linux*) echo "Linux";; darwin*) echo "macOS";; *) echo "Other";; esac</span>',
+ '<span class="to">Linux</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'error-handling-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">cat deploy.sh</span>',
+ '<span class="to">#!/bin/bash</span>',
+ '<span class="to-b">set -euo pipefail</span>',
+ '<span class="to">IFS=$\'\\n\\t\'</span>',
+ '<span class="to"> </span>',
+ '<span class="to">cleanup() { echo "Cleanup on EXIT"; rm -f /tmp/lock; }</span>',
+ '<span class="to">trap cleanup EXIT</span>',
+ '<span class="to">trap \'echo "Error on line $LINENO"; exit 1\' ERR</span>',
+ '<span class="to"> </span>',
+ '<span class="to">deploy() { local env="\${1:?env required}"; echo "Deploying to $env..."; }</span>',
+ '<span class="to">deploy production</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">bash deploy.sh</span>',
+ '<span class="to-b">Deploying to production...</span>',
+ '<span class="to">Cleanup on EXIT</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── monitoring ──────────────────────────────────
+'vmstat-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">vmstat 1 5</span>',
+ '<span class="to-b">procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----</span>',
+ '<span class="to-b"> r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st</span>',
+ '<span class="to"> 2  0      0 2140288 124928 1892352    0    0     2    18  512  984  4  1 94  1  0</span>',
+ '<span class="to"> 1  0      0 2139904 124928 1892352    0    0     0    24  498  942  3  1 95  1  0</span>',
+ '<span class="to"> 0  0      0 2140160 124928 1892352    0    0     0    12  488  921  2  1 96  1  0</span>',
+ '<span class="to"> 1  1      0 2139648 124928 1892352    0    0     0   128  524 1012  5  2 91  2  0</span>',
+ '<span class="to"> 0  0      0 2140416 124928 1892352    0    0     0    16  494  934  3  1 95  1  0</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'lsof-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">lsof -i :80 -i :443</span>',
+ '<span class="to-b">COMMAND  PID     USER   FD   TYPE DEVICE SIZE/OFF NODE NAME</span>',
+ '<span class="to">nginx    892     root    6u  IPv4  24312      0t0  TCP *:http (LISTEN)</span>',
+ '<span class="to">nginx    892     root    7u  IPv4  24313      0t0  TCP *:https (LISTEN)</span>',
+ '<span class="to">nginx    893  www-data   6u  IPv4  24312      0t0  TCP *:http (LISTEN)</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">lsof -p 1024 | wc -l</span>',
+ '<span class="to">328</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">lsof -u www-data | grep REG | awk \'{print $NF}\' | sort -u | head -5</span>',
+ '<span class="to">/lib/x86_64-linux-gnu/libc.so.6</span>',
+ '<span class="to">/usr/sbin/nginx</span>',
+ '<span class="to">/var/log/nginx/access.log</span>',
+ '<span class="to">/var/log/nginx/error.log</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'strace-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">strace -c ls /tmp 2>&1 | tail -15</span>',
+ '<span class="to">% time     seconds  usecs/call     calls    errors syscall</span>',
+ '<span class="to">------ ----------- ----------- --------- --------- ----------------</span>',
+ '<span class="to"> 33.21    0.000142          14        10           mmap</span>',
+ '<span class="to"> 18.69    0.000080           8        10           openat</span>',
+ '<span class="to"> 14.02    0.000060          30         2           getdents64</span>',
+ '<span class="to">  9.58    0.000041          41         1           execve</span>',
+ '<span class="to">  8.18    0.000035           4         9           read</span>',
+ '<span class="to-b">100.00    0.000428                    82        3 total</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">strace -e trace=network curl -s http://example.com 2>&1 | head -5</span>',
+ '<span class="to">socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP) = 3</span>',
+ '<span class="to">connect(3, {sa_family=AF_INET, sin_port=htons(80), sin_addr=inet_addr("93.184.216.34")}, 16) = 0</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── security ────────────────────────────────────
+'ufw-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ufw status verbose</span>',
+ '<span class="to">Status: </span><span class="to-b">active</span>',
+ '<span class="to">Logging: on (low)</span>',
+ '<span class="to">Default: </span><span class="to-r">deny</span><span class="to"> (incoming), </span><span class="to-b">allow</span><span class="to"> (outgoing), disabled (routed)</span>',
+ '<span class="to-b">To                         Action      From</span>',
+ '<span class="to">22/tcp                     ALLOW IN    Anywhere</span>',
+ '<span class="to">80/tcp                     ALLOW IN    Anywhere</span>',
+ '<span class="to">443/tcp                    ALLOW IN    Anywhere</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ufw allow from 10.0.0.0/8 to any port 5432 comment \'postgres internal\'</span>',
+ '<span class="to-b">Rule added</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ufw deny 23/tcp</span>',
+ '<span class="to-b">Rule added</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ufw reject 8080 comment \'block alt-http\'</span>',
+ '<span class="to-b">Rule added</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── docker ──────────────────────────────────────
+'docker-basics-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">docker run -d --name webserver -p 8080:80 nginx:alpine</span>',
+ '<span class="to-c">Unable to find image nginx:alpine locally</span>',
+ '<span class="to">alpine: Pulling from library/nginx</span>',
+ '<span class="to">c926b61bad3b: Pull complete</span>',
+ '<span class="to">Digest: sha256:4a85273d1e403fbf676960c0ad41b673c7b034204a48cb32779fbb2c18e3839d</span>',
+ '<span class="to-b">Status: Downloaded newer image for nginx:alpine</span>',
+ '<span class="to">6f3b2a91c5d8e9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">docker ps</span>',
+ '<span class="to-b">CONTAINER ID  IMAGE         COMMAND             CREATED  STATUS  PORTS              NAMES</span>',
+ '<span class="to">6f3b2a91c5d8  nginx:alpine  "/docker-entrypt..."  3s ago   Up 2s   0.0.0.0:8080->80/tcp  webserver</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">docker exec -it webserver sh -c "nginx -v"</span>',
+ '<span class="to">nginx version: nginx/1.25.4</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">docker stats webserver --no-stream</span>',
+ '<span class="to-b">CONTAINER  CPU %  MEM USAGE / LIMIT  MEM %  NET I/O      BLOCK I/O</span>',
+ '<span class="to">webserver  0.00%  4.2MiB / 7.8GiB   0.05%  648B / 0B    8.19kB / 0B</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── kernel ──────────────────────────────────────
+'uname-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">uname -a</span>',
+ '<span class="to">Linux </span><span class="to-b">master</span><span class="to"> </span><span class="to-c">6.5.0-44-generic</span><span class="to"> #44~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue Jun 18 14:36:16 UTC 2024 </span><span class="to-b">x86_64</span><span class="to"> x86_64 x86_64 GNU/Linux</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">uname -r</span>',
+ '<span class="to-c">6.5.0-44-generic</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">cat /proc/version</span>',
+ '<span class="to">Linux version 6.5.0-44-generic (buildd@lcy02-amd64-019) (gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0, GNU ld (GNU Binutils for Ubuntu) 2.38) #44~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">cat /proc/cpuinfo | grep "model name" | head -1</span>',
+ '<span class="to">model name : </span><span class="to-b">Intel(R) Core(TM) i7-12700K CPU @ 3.60GHz</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">cat /proc/meminfo | head -5</span>',
+ '<span class="to">MemTotal:        8067836 kB</span>',
+ '<span class="to">MemFree:         2189324 kB</span>',
+ '<span class="to">MemAvailable:    3812488 kB</span>',
+ '<span class="to">Buffers:          127076 kB</span>',
+ '<span class="to">Cached:          1941884 kB</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'sysctl-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">sysctl vm.swappiness</span>',
+ '<span class="to">vm.swappiness = </span><span class="to-y">60</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">sysctl -w vm.swappiness=10</span>',
+ '<span class="to">vm.swappiness = </span><span class="to-b">10</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">sysctl net.core.somaxconn net.ipv4.tcp_max_syn_backlog</span>',
+ '<span class="to">net.core.somaxconn = </span><span class="to-b">4096</span>',
+ '<span class="to">net.ipv4.tcp_max_syn_backlog = </span><span class="to-b">4096</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">sysctl -w net.ipv4.ip_forward=1</span>',
+ '<span class="to">net.ipv4.ip_forward = </span><span class="to-b">1</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">echo "net.ipv4.ip_forward=1" >> /etc/sysctl.d/99-custom.conf</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">sysctl --system</span>',
+ '<span class="to">* Applying /etc/sysctl.d/99-custom.conf ...</span>',
+ '<span class="to">net.ipv4.ip_forward = </span><span class="to-b">1</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── pipes & redirect ────────────────────────────
+'pipes-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">cat /var/log/auth.log | grep "Failed" | awk \'{print $11}\' | sort | uniq -c | sort -rn | head -5</span>',
+ '<span class="to-r">   4821</span><span class="to"> 185.220.101.14</span>',
+ '<span class="to-r">   1204</span><span class="to"> 45.143.201.97</span>',
+ '<span class="to-y">    892</span><span class="to"> 194.165.16.11</span>',
+ '<span class="to-y">    441</span><span class="to"> 89.248.167.131</span>',
+ '<span class="to">    218</span><span class="to"> 23.106.160.188</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ps aux | sort -k3 -rn | head -5 | awk \'{printf "%-20s %s%%\\n", $11, $3}\'</span>',
+ '<span class="to">postgres&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8.2%</span>',
+ '<span class="to">node&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.1%</span>',
+ '<span class="to">nginx&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.8%</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">find /var/log -name "*.log" -exec wc -l {} + | sort -rn | head -5</span>',
+ '<span class="to"> 524820 total</span>',
+ '<span class="to"> 284412 /var/log/syslog</span>',
+ '<span class="to">  82144 /var/log/auth.log</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'redirect-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">echo "server_name example.com;" > /tmp/test.conf</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">echo "listen 443 ssl;" >> /tmp/test.conf</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">cat /tmp/test.conf</span>',
+ '<span class="to">server_name example.com;</span>',
+ '<span class="to">listen 443 ssl;</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ls /nonexistent 2>/dev/null && echo "ok" || echo "failed (suppressed)"</span>',
+ '<span class="to">failed (suppressed)</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ls /etc/ /nonexistent > /tmp/out.txt 2>/tmp/err.txt; echo "out:$(wc -l < /tmp/out.txt) err:$(wc -l < /tmp/err.txt)"</span>',
+ '<span class="to">out:47 err:1</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">command_with_output 2>&1 | tee /var/log/myapp.log | grep ERROR</span>',
+ '<span class="to-c">[all output goes to log, errors shown here]</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── package mgmt ────────────────────────────────
+'apt-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">apt update</span>',
+ '<span class="to">Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease</span>',
+ '<span class="to">Get:2 http://security.ubuntu.com/ubuntu jammy-security InRelease [110 kB]</span>',
+ '<span class="to-b">Reading package lists... Done</span>',
+ '<span class="to">Building dependency tree... Done</span>',
+ '<span class="to">4 packages can be upgraded.</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">apt install -y htop ncdu</span>',
+ '<span class="to">Reading package lists... Done</span>',
+ '<span class="to">The following NEW packages will be installed: htop ncdu</span>',
+ '<span class="to">0 upgraded, 2 newly installed.</span>',
+ '<span class="to-b">Setting up htop (3.2.2-1build1) ...</span>',
+ '<span class="to-b">Setting up ncdu (1.17-1) ...</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">apt list --installed 2>/dev/null | grep -E "htop|ncdu"</span>',
+ '<span class="to">htop/jammy,now 3.2.2-1build1 amd64 </span><span class="to-b">[installed]</span>',
+ '<span class="to">ncdu/jammy,now 1.17-1 amd64 </span><span class="to-b">[installed]</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+// ── perf ────────────────────────────────────────
+'perf-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">perf stat ls /usr/bin 2>&1 | tail -15</span>',
+ '<span class="to"> </span>',
+ '<span class="to"> Performance counter stats for \'ls /usr/bin\':</span>',
+ '<span class="to"> </span>',
+ '<span class="to">          2,184,432      cycles                    #    2.184 GHz</span>',
+ '<span class="to">          1,891,022      instructions              #    0.87  insn per cycle</span>',
+ '<span class="to">            448,234      branch-instructions</span>',
+ '<span class="to">              8,124      branch-misses             #    1.81% of all branches</span>',
+ '<span class="to"> </span>',
+ '<span class="to">       0.001082142 seconds time elapsed</span>',
+ '<span class="to">       0.001022000 seconds user</span>',
+ '<span class="to">       0.000000000 seconds sys</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">perf top -g 2>/dev/null | head -10</span>',
+ '<span class="to-b">Samples: 12K of event \'cycles:u\'</span>',
+ '<span class="to">  28.40%  postgres   [.] ExecHashJoin</span>',
+ '<span class="to">   9.12%  node       [.] v8::internal::Heap::CollectGarbage</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+'ulimit-demo':[
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ulimit -a</span>',
+ '<span class="to">core file size          (blocks, -c) 0</span>',
+ '<span class="to">data seg size           (kbytes, -d) unlimited</span>',
+ '<span class="to">scheduling priority             (-e) 0</span>',
+ '<span class="to">file size               (blocks, -f) unlimited</span>',
+ '<span class="to">open files                      (-n) </span><span class="to-y">1024</span>',
+ '<span class="to">max user processes              (-u) </span><span class="to-y">63480</span>',
+ '<span class="to">virtual memory          (kbytes, -v) unlimited</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ulimit -n 65536</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">ulimit -n</span>',
+ '<span class="to-b">65536</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tc2">cat /proc/1024/limits | grep "open files"</span>',
+ '<span class="to">Max open files            </span><span class="to-b">65536</span><span class="to">              65536              files</span>',
+ '<span class="tp">root@linux:~#</span> <span class="tcur"></span>',
+],
+
+};
+
+// ═══════════════ INTERVIEW Q&A ═══════════════
+function getIQs(tid){
+const D={
+'iq-basics':[
+{q:"What is the difference between absolute and relative paths?",diff:"BASIC",
+ a:"An <code>absolute path</code> starts from the root / and describes the full location: /home/alice/docs. A <code>relative path</code> starts from the current directory: ./docs or ../docs. Special dirs: . is current dir, .. is parent dir, ~ expands to your home dir. <code>cd -</code> goes to the previous directory. Always use absolute paths in cron jobs and scripts to avoid ambiguity."},
+{q:"What does ls -la show and what does each column mean?",diff:"BASIC",
+ a:"<code>ls -la</code> lists all files including hidden (starting with .) in long format. Columns: (1) permissions rwxrwxrwx for owner/group/other, (2) hard link count, (3) owner username, (4) group name, (5) file size in bytes, (6) last modification date, (7) filename. The first character shows type: - file, d directory, l symlink, c char device, b block device, p pipe, s socket."},
+{q:"How do you find which process is using a specific port?",diff:"BASIC",
+ a:"Multiple ways: <code>ss -tlnp | grep :80</code> — fastest, shows process name and PID. <code>lsof -i :80</code> — shows full details. <code>fuser 80/tcp</code> — prints just the PID. <code>netstat -tlnp | grep :80</code> — older but widely available. Then use <code>ps -p PID -o comm=</code> to get the process name, or kill -0 PID to check if it exists."},
+{q:"What is stdin, stdout and stderr? How do you redirect them?",diff:"BASIC",
+ a:"Three standard streams every process has: stdin (fd 0) — input, stdout (fd 1) — normal output, stderr (fd 2) — error output. Redirection: <code>cmd > file</code> redirect stdout, <code>cmd 2> file</code> redirect stderr, <code>cmd &> file</code> redirect both, <code>cmd >> file</code> append stdout. Pipe: <code>cmd1 | cmd2</code> connects cmd1 stdout to cmd2 stdin. Discard: <code>cmd 2>/dev/null</code>. Combine: <code>cmd 2>&1 | tee logfile</code> sends both streams to pipe and file simultaneously."},
+{q:"What is the difference between hard links and symbolic links?",diff:"BASIC",
+ a:"A <code>hard link</code> is another directory entry pointing to the same inode (same file data). Deleting the original leaves the hard link working. Cannot cross filesystems. Cannot link to directories. Create with <code>ln source link</code>. A <code>symbolic (soft) link</code> is a special file containing a path. Can cross filesystems, can link to dirs. Breaks if target is deleted (dangling symlink). Create with <code>ln -s target link</code>. Check with <code>ls -la</code> — symlinks show ->. <code>ls -li</code> shows inode numbers — hard links share the same inode."},
+{q:"How do you check disk space and find large files?",diff:"BASIC",
+ a:"<code>df -h</code> shows filesystem-level usage (human readable). <code>du -sh /path/*</code> shows directory sizes. Find largest dirs: <code>du -ah / | sort -rh | head -20</code>. Find large files: <code>find / -type f -size +100M 2>/dev/null | xargs ls -lh | sort -k5 -rh | head</code>. Interactive explorer: <code>ncdu /</code> (install first). Check inode usage: <code>df -i</code> — sometimes disks run out of inodes before space. Quick top-10: <code>du -h --max-depth=1 / | sort -rh | head</code>."},
+{q:"What are the main Linux filesystem directories and their purposes?",diff:"BASIC",
+ a:"FHS (Filesystem Hierarchy Standard): /bin — essential user binaries (ls, cat), /sbin — system binaries (fsck, init), /etc — configuration files, /home — user home dirs, /root — root home, /var — variable data (logs, spool, lock), /tmp — temp files (cleared on boot), /usr — user programs (secondary hierarchy), /lib — shared libraries for /bin and /sbin, /proc — virtual FS for kernel/process info, /sys — virtual FS for device/driver info, /dev — device files, /mnt and /media — mount points, /opt — optional packages, /boot — kernel and bootloader files."},
+{q:"How do you search for text inside files recursively?",diff:"BASIC",
+ a:"<code>grep -r 'pattern' /path/</code> — recursive search. <code>grep -rn</code> shows line numbers. <code>grep -rl</code> shows only filenames. <code>grep -ri</code> case-insensitive. <code>grep -rI</code> skips binary files. Filter by extension: <code>grep -r --include='*.conf' 'pattern' /etc/</code>. Modern alternatives: <code>ag 'pattern'</code> (silversearcher, faster), <code>rg 'pattern'</code> (ripgrep, fastest). Count matches: <code>grep -rc 'pattern' dir/</code>. Context: <code>grep -A 3 -B 3 'pattern' file</code> shows 3 lines after and before each match."},
+],
+'iq-intermediate':[
+{q:"Explain Linux file permissions and how chmod works with octal notation.",diff:"INTERMEDIATE",
+ a:"Permissions apply to three classes: owner (u), group (g), others (o). Three permission bits per class: r=4 (read), w=2 (write), x=1 (execute). Octal adds these: 7=rwx, 6=rw-, 5=r-x, 4=r--, 0=---. <code>chmod 755 file</code> sets owner=rwx(7), group=r-x(5), others=r-x(5). <code>chmod 600 .ssh/id_rsa</code> — owner read/write only (private key). <code>chmod 644 file</code> — owner read/write, group/others read. Symbolic: <code>chmod u+x,g-w,o= file</code>. Special bits: 4000=SUID (run as owner), 2000=SGID (run as group, or new files inherit group in dirs), 1000=sticky (only owner can delete in shared dirs like /tmp)."},
+{q:"How does sudo work and how do you configure sudoers safely?",diff:"INTERMEDIATE",
+ a:"sudo allows permitted users to run commands as root (or another user). Config: /etc/sudoers — NEVER edit directly, use <code>visudo</code> (syntax checks before saving). Format: <code>user host=(runas) commands</code>. Common entries: <code>alice ALL=(ALL:ALL) ALL</code> — full sudo. <code>alice ALL=(ALL) NOPASSWD: /bin/systemctl restart nginx</code> — passwordless specific command. <code>%wheel ALL=(ALL) ALL</code> — group wheel gets sudo. <code>sudo -l</code> lists what you can run. Drop files in /etc/sudoers.d/ to avoid editing main file. Log all sudo: check /var/log/auth.log. Security: use NOPASSWD sparingly, restrict to specific commands."},
+{q:"What are Linux signals and how do you use kill correctly?",diff:"INTERMEDIATE",
+ a:"Signals are asynchronous notifications to processes. Key signals: SIGHUP(1) — reload config (nginx, sshd respond to this), SIGINT(2) — Ctrl+C interrupt, SIGQUIT(3) — Ctrl+\\ core dump, SIGKILL(9) — CANNOT be caught or ignored, instant death, SIGTERM(15) — graceful termination (default for kill), SIGUSR1/2(10,12) — user-defined, SIGSTOP(19) — pause (uncatchable), SIGCONT(18) — resume. Usage: <code>kill PID</code> sends SIGTERM, <code>kill -9 PID</code> force kill, <code>kill -HUP PID</code> reload, <code>pkill -f 'pattern'</code> kill by name/pattern, <code>killall nginx</code>. Always try SIGTERM first and wait, then SIGKILL as last resort."},
+{q:"How do you schedule tasks with cron and what is crontab syntax?",diff:"INTERMEDIATE",
+ a:"Crontab 5-field format: <code>min hour dom month dow command</code>. Fields: minute (0-59), hour (0-23), day of month (1-31), month (1-12), day of week (0-7, 0 and 7 = Sunday). Special: * = every, */5 = every 5, 1-5 = range, 1,3,5 = list. Examples: <code>0 2 * * * /backup.sh</code> — 2am daily. <code>*/15 * * * * /check.sh</code> — every 15 min. <code>0 9 * * 1-5 /report.sh</code> — 9am weekdays. <code>crontab -e</code> edit, <code>crontab -l</code> list, <code>crontab -r</code> remove all. System cron: /etc/cron.d/, /etc/cron.daily/, /etc/cron.hourly/. Redirect output: <code>* * * * * /script.sh >> /var/log/myjob.log 2>&1</code>. Prefer systemd timers for better logging and dependencies."},
+{q:"How do you troubleshoot a slow Linux system?",diff:"INTERMEDIATE",
+ a:"Systematic approach: (1) Check load: <code>uptime</code> — load avg > number of CPUs means overloaded. (2) CPU: <code>top</code> or <code>htop</code> — check %us (user), %sy (kernel), %wa (I/O wait). (3) Memory: <code>free -h</code> — check available memory (not free). Swap usage indicates memory pressure. (4) I/O: <code>iostat -xz 1</code> — %util near 100% means disk bottleneck. <code>iotop</code> shows which process is doing I/O. (5) Network: <code>sar -n DEV 1</code> or <code>nload eth0</code>. (6) Processes: <code>ps aux --sort=-%cpu | head</code>, <code>ps aux --sort=-%mem | head</code>. (7) Kernel: <code>dmesg -T | tail -50</code> for OOM killer, hardware errors. (8) Open files: <code>lsof | wc -l</code>. (9) Profile specific process: <code>strace -p PID</code> or <code>perf top</code>."},
+{q:"What is the difference between a process and a thread in Linux?",diff:"INTERMEDIATE",
+ a:"A <code>process</code> is an independent execution unit with its own virtual address space, file descriptors, and resources. Created with fork(). Processes communicate via IPC (pipes, sockets, shared memory). A <code>thread</code> shares the same address space, file descriptors, and most resources as its parent process. Created with clone() or pthread_create(). Threads communicate via shared memory (requires synchronization — mutexes, semaphores). In Linux, both are represented as tasks (task_struct in kernel). <code>ps aux</code> shows processes. <code>ps -eLf</code> shows threads (LWP column). <code>ls /proc/PID/task/</code> shows all threads. Thread count: <code>cat /proc/PID/status | grep Threads</code>."},
+{q:"How do you monitor network traffic and diagnose connectivity issues?",diff:"INTERMEDIATE",
+ a:"Layer by layer: (1) Physical/link: <code>ethtool eth0</code> — link speed, duplex. (2) IP: <code>ping 8.8.8.8</code> — basic reachability, <code>traceroute 8.8.8.8</code> — path. (3) DNS: <code>dig google.com</code>, <code>nslookup google.com</code>, <code>host google.com</code>. Check /etc/resolv.conf. (4) Port: <code>nc -zv host port</code> — TCP connect test. <code>telnet host port</code>. (5) Capture traffic: <code>tcpdump -i eth0 port 80 -n</code>, <code>tcpdump -w capture.pcap</code>. (6) Bandwidth: <code>iftop -i eth0</code>, <code>nload</code>, <code>sar -n DEV 1</code>. (7) Socket states: <code>ss -s</code> — summary. Large TIME_WAIT count = connection churn. (8) Firewall: <code>iptables -L -n -v</code>, <code>ufw status</code>."},
+],
+'iq-advanced':[
+{q:"Explain Linux namespaces and cgroups — the foundation of containers.",diff:"ADVANCED",
+ a:"<code>Namespaces</code> provide isolation — each namespace type gives a process its own view of a resource: PID (process IDs), Network (interfaces, routes, ports), Mount (filesystem views), UTS (hostname, domainname), IPC (message queues, semaphores), User (UID/GID mapping), Cgroup (cgroup hierarchy view), Time (clock offsets). <code>Cgroups v2</code> (Control Groups) limit and measure resource usage: CPU, memory, I/O, network. Docker = namespaces (isolation) + cgroups (limits) + union filesystems (layers). Check: <code>ls /proc/PID/ns/</code> — each file is a namespace. <code>nsenter -t PID -n</code> — enter a process network namespace. <code>unshare --pid --fork bash</code> — create new PID namespace."},
+{q:"How does the Linux boot process work from power-on to login prompt?",diff:"ADVANCED",
+ a:"(1) BIOS/UEFI — hardware init, finds bootable device, loads bootloader. (2) GRUB2 — loads kernel image (vmlinuz) and initramfs into RAM. (3) Kernel init — decompresses itself, initialises hardware (CPU, memory, devices), mounts initramfs as temp root. (4) initramfs — contains minimal tools to mount real root filesystem (handles LVM, LUKS, RAID). (5) systemd (PID 1) — first real process, reads unit files, starts default.target. (6) systemd targets — multi-user.target for servers, graphical.target for desktops. Deps resolved, services started in parallel. (7) getty — spawns login prompt. Check: <code>systemd-analyze blame</code> — per-unit boot time. <code>systemd-analyze critical-chain</code> — longest boot path. <code>journalctl -b</code> — this boot log."},
+{q:"What is the OOM killer and how do you control it?",diff:"ADVANCED",
+ a:"When Linux runs out of memory it invokes the OOM (Out Of Memory) killer to free memory by killing a process. It calculates an <code>oom_score</code> (0-1000) based on memory usage, process age, and oom_adj. Higher score = more likely to be killed. Check: <code>cat /proc/PID/oom_score</code>. Check if OOM killed: <code>dmesg | grep -i 'killed process'</code> or <code>journalctl -k | grep OOM</code>. Control: <code>echo -17 > /proc/PID/oom_adj</code> (legacy, never kill), <code>echo -1000 > /proc/PID/oom_score_adj</code> (new, -1000 = never kill, +1000 = kill first). Protect critical processes: add <code>OOMScoreAdjust=-1000</code> to systemd unit file. Prevention: set memory limits with cgroups or Docker --memory=. Monitor: set up alerting when MemAvailable drops below threshold."},
+{q:"How do you tune Linux for high-throughput networking?",diff:"ADVANCED",
+ a:"Key sysctl tunings (add to /etc/sysctl.d/99-net.conf): <code>net.core.somaxconn=65535</code> — listen backlog. <code>net.core.netdev_max_backlog=5000</code> — NIC queue. <code>net.ipv4.tcp_max_syn_backlog=65535</code> — SYN queue. <code>net.ipv4.tcp_fin_timeout=15</code> — faster FIN_WAIT2 cleanup. <code>net.ipv4.tcp_tw_reuse=1</code> — reuse TIME_WAIT sockets. <code>net.ipv4.ip_local_port_range=1024 65535</code> — more ephemeral ports. <code>net.core.rmem_max=16777216</code>, <code>net.core.wmem_max=16777216</code> — socket buffers. <code>net.ipv4.tcp_congestion_control=bbr</code> — BBR congestion control (better throughput). NIC tuning: <code>ethtool -G eth0 rx 4096 tx 4096</code> — ring buffers. <code>ethtool -K eth0 gro on gso on tso on</code> — offloading."},
+{q:"Explain inode exhaustion and how to diagnose/fix it.",diff:"ADVANCED",
+ a:"Every file/directory needs an inode (metadata: permissions, timestamps, pointers to data blocks). Filesystems have a fixed inode count set at creation time. A filesystem can be 100% full on inodes while having free disk space — causing 'No space left on device' errors. Diagnose: <code>df -i</code> — shows inode usage per filesystem. <code>df -ih</code> — human readable. Find dirs with many small files: <code>for d in /var/*; do echo $(find $d -maxdepth 1 | wc -l) $d; done | sort -rn | head</code>. Typical culprits: mail spools, cache dirs, small log fragments, PHP session files. Fix: delete old files. Increase inodes: only option is reformat with <code>mkfs.ext4 -N large_number</code>. Prevention: use XFS (inodes allocated dynamically), set up inode monitoring alerts."},
+],
+'iq-sysadmin':[
+{q:"A web server is returning 502 errors. Walk through your troubleshooting.",diff:"SYSADMIN",
+ a:"502 Bad Gateway = nginx/HAProxy cannot connect to backend. Systematic: (1) <code>systemctl status nginx</code> — is nginx running? (2) <code>systemctl status myapp</code> — is the backend running? (3) <code>journalctl -u nginx --since '5 min ago'</code> — error details. (4) <code>cat /var/log/nginx/error.log | tail -50</code> — connection refused? timeout? (5) <code>ss -tlnp | grep 3000</code> — is the backend listening on expected port? (6) <code>curl -v http://localhost:3000/health</code> — can nginx host reach backend directly? (7) <code>telnet localhost 3000</code> — TCP reachability. (8) Check firewall: <code>ufw status</code> or <code>iptables -L</code>. (9) Check upstream config in nginx: <code>grep -n upstream /etc/nginx/nginx.conf</code>. (10) Check backend logs for crash/panic. (11) <code>top</code> — is backend using 100% CPU or OOM killed?"},
+{q:"How do you set up log rotation and what happens to open file handles?",diff:"SYSADMIN",
+ a:"logrotate handles log rotation on most Linux systems. Config: /etc/logrotate.conf and /etc/logrotate.d/myapp. Sample config: <code>daily; rotate 30; compress; delaycompress; missingok; notifempty; postrotate; systemctl reload nginx; endscript</code>. Key options: daily/weekly/monthly, size 100M (trigger by size), compress (gzip old logs), delaycompress (don&#39;t compress most recent, allows apps to finish writing), copytruncate (copy then truncate — for apps that can&#39;t reopen log), create 0640 www-data adm (new file permissions). File handle problem: when a log is renamed/deleted, the process still writes to the old inode via its open fd. Solutions: (1) send SIGHUP to reload (nginx, rsyslog), (2) use copytruncate (lower performance, brief data loss risk), (3) use USR1 signal (if app supports it). Test: <code>logrotate -d /etc/logrotate.d/myapp</code> (dry run)."},
+{q:"How do you harden an SSH server for production?",diff:"SYSADMIN",
+ a:"Edit /etc/ssh/sshd_config: <code>PasswordAuthentication no</code> — keys only. <code>PubkeyAuthentication yes</code>. <code>PermitRootLogin no</code> (or prohibit-password). <code>AllowUsers alice bob deploy</code> — allowlist. <code>Port 2222</code> — non-standard (minor obscurity). <code>MaxAuthTries 3</code>. <code>LoginGraceTime 30</code>. <code>ClientAliveInterval 300; ClientAliveCountMax 2</code> — disconnect idle. <code>Protocol 2</code>. <code>X11Forwarding no</code>. <code>AllowTcpForwarding no</code> (unless needed). Strong ciphers: <code>Ciphers aes256-gcm@openssh.com,chacha20-poly1305@openssh.com</code>. Additional: install fail2ban, use AllowGroups ssh-users, deploy 2FA with PAM, use ssh-audit to check config quality, set up centralized SSH certificate authority for large fleets."},
+{q:"Describe how you would set up a zero-downtime deployment on Linux.",diff:"SYSADMIN",
+ a:"Strategy depends on architecture. For a single server: (1) Blue-green with nginx upstream: run new app on port 3001 while old runs on 3000, test new, switch nginx upstream, old becomes standby. (2) Graceful reload: deploy new code, send SIGUSR2 (if supported) or use systemd&#39;s ExecStartPost with socket activation. For load-balanced clusters: rolling deploy with health checks. Steps: pull new code, run migrations (backward-compatible!), build, stop old, start new, wait for health check, proceed to next instance. Use HAProxy/nginx with max-fails and fail_timeout. Systemd socket activation: systemd holds the socket, passes it to new process — zero connection drop. Kubernetes: RollingUpdate strategy with readinessProbe — new pod must pass readiness before old pod is killed. Key: always run database migrations before app deploy, ensure backward compatibility (never drop columns immediately)."},
+{q:"How do you recover a Linux system that won&#39;t boot?",diff:"SYSADMIN",
+ a:"Boot recovery paths: (1) GRUB rescue: if GRUB fails, boot from USB, mount root: <code>mount /dev/sda2 /mnt; mount --bind /dev /mnt/dev; mount --bind /proc /mnt/proc; mount --bind /sys /mnt/sys; chroot /mnt</code>. Fix GRUB: <code>grub-install /dev/sda; update-grub</code>. (2) Filesystem corruption: boot live USB, run <code>fsck -y /dev/sda2</code>. (3) Wrong /etc/fstab: boot to recovery/single-user mode, mount rw: <code>mount -o remount,rw /</code>, fix fstab, reboot. (4) Kernel panic: boot previous kernel from GRUB menu (keep 2-3 kernels). (5) Failed systemd unit: boot with systemd.unit=emergency.target kernel param, disable failing unit. (6) Corrupted MBR: <code>dd if=/dev/zero of=/dev/sda bs=446 count=1</code> then reinstall GRUB. Always: test changes in staging, take snapshots before kernel updates."},
+],
+};
+return D[tid]||[];
+}
+
+// ═══════════════ RICH CONTENT ═══════════════
+function getContent(cid, tid, tab){
+  const key = `${cid}:${tid}:${tab}`;
+
+  // Interview Q&A
+  if(tid.startsWith('iq-')){
+    const qs = getIQs(tid);
+    const diffs = {BASIC:'#00ff41',INTERMEDIATE:'#ff9f0a',ADVANCED:'#bf5af2',SYSADMIN:'#ffd60a',EXPERT:'#ff375f'};
+    const cid2 = 'qc_'+tid;
+    const items = qs.map((q,i)=>`<div class="qa-item" data-diff="${q.diff}" onclick="toggleQA(this)">
+<div class="qa-q"><div class="qa-qi" style="background:${diffs[q.diff]||'#00ff41'}22;color:${diffs[q.diff]||'#00ff41'};border:1px solid ${diffs[q.diff]||'#00ff41'}44">Q${i+1}</div>
+<div class="qa-qt">${q.q}</div><span class="tag ${q.diff.toLowerCase()}" style="flex-shrink:0">${q.diff}</span><span class="qa-ch">▼</span></div>
+<div class="qa-a"><div class="qa-ab">${q.a}</div></div></div>`).join('');
+    return `<div id="${cid2}"><div class="filter-row">
+<button class="fbtn active" onclick="filterQs(this,'all',document.getElementById('${cid2}'))">All</button>
+${Object.keys(diffs).map(d=>`<button class="fbtn" onclick="filterQs(this,'${d}',document.getElementById('${cid2}'))">${d}</button>`).join('')}
+</div>${items}</div>`;
+  }
+
+  // ── navigation ──────────────────────────────
+  if(key==='navigation:ls:Demo') return mkTerm('ls-basic','ls — list directory',TERM_DATA['ls-basic'],true)+
+    `<div class="callout tip"><strong>PRO TIP</strong>Alias <code>ls='ls --color=auto -F'</code> in .bashrc — colors and type indicators (/ for dir, * for executable, @ for symlink) always visible.</div>`;
+  if(key==='navigation:ls:Flags') return `<div class="sec">Key Flags</div>
+<table class="tbl"><thead><tr><th>Flag</th><th>Meaning</th><th>Example</th></tr></thead><tbody>
+<tr><td>-l</td><td>Long format — permissions, owner, size, date</td><td>ls -l</td></tr>
+<tr><td>-a</td><td>Show all including hidden (. prefix)</td><td>ls -la</td></tr>
+<tr><td>-h</td><td>Human-readable sizes (K, M, G)</td><td>ls -lh</td></tr>
+<tr><td>-t</td><td>Sort by modification time (newest first)</td><td>ls -lt</td></tr>
+<tr><td>-r</td><td>Reverse sort order</td><td>ls -ltr</td></tr>
+<tr><td>-S</td><td>Sort by file size (largest first)</td><td>ls -lS</td></tr>
+<tr><td>-R</td><td>Recursive — list subdirectories</td><td>ls -R /etc</td></tr>
+<tr><td>-d</td><td>List directory itself, not contents</td><td>ls -ld /etc</td></tr>
+<tr><td>-i</td><td>Show inode numbers</td><td>ls -li</td></tr>
+<tr><td>--color</td><td>Colorize output by type</td><td>ls --color=auto</td></tr>
+</tbody></table>`+mkTerm('ls-adv','ls advanced usage',TERM_DATA['ls-adv'],false);
+
+  if(key==='navigation:ls:Examples') return `<div class="sec">Common Recipes</div>
+<ul class="fl"><li><strong>ls -lhtr</strong> — long format, human sizes, sorted by time ascending (oldest first — great for finding stale files)</li>
+<li><strong>ls -lS /var/log | head</strong> — find the largest log files</li>
+<li><strong>ls -d */</strong> — list only directories in current dir</li>
+<li><strong>ls -1</strong> — one file per line (for scripting)</li>
+<li><strong>ls *.log</strong> — glob pattern matching</li>
+<li><strong>ls -la | awk &#39;$1~/^-.*x/{print $NF}&#39;</strong> — show only executable files</li></ul>
+<div class="callout info"><strong>EZA — modern ls</strong><code>eza</code> (formerly exa) is a modern ls replacement with git integration, icons, better color theming, and tree view built in: <code>eza -la --git --icons</code></div>`;
+
+  if(key==='navigation:cd:Demo') return mkTerm('cd-demo','cd — change directory',TERM_DATA['cd-demo'],true)+
+    `<div class="sec">Directory Shortcuts</div>
+<table class="tbl"><thead><tr><th>Shortcut</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>cd ~</td><td>Go to home directory</td></tr><tr><td>cd -</td><td>Go to previous directory</td></tr>
+<tr><td>cd ..</td><td>Go up one level</td></tr><tr><td>cd ../..</td><td>Go up two levels</td></tr>
+<tr><td>cd /</td><td>Go to root</td></tr><tr><td>pushd /path</td><td>Push to dir stack, go there</td></tr>
+<tr><td>popd</td><td>Return to previous dir from stack</td></tr></tbody></table>`;
+
+  if(key==='navigation:find:Demo') return mkTerm('find-demo','find — locate files',TERM_DATA['find-demo'],true);
+  if(key==='navigation:find:Expressions') return `<div class="sec">find Expressions</div>
+<table class="tbl"><thead><tr><th>Expression</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>-name "*.log"</td><td>Match filename pattern (case-sensitive)</td></tr>
+<tr><td>-iname "*.LOG"</td><td>Case-insensitive filename match</td></tr>
+<tr><td>-type f</td><td>Regular files only</td></tr>
+<tr><td>-type d</td><td>Directories only</td></tr>
+<tr><td>-type l</td><td>Symbolic links only</td></tr>
+<tr><td>-size +10M</td><td>Files larger than 10 MB</td></tr>
+<tr><td>-mtime -1</td><td>Modified in last 24 hours</td></tr>
+<tr><td>-mtime +30</td><td>Modified more than 30 days ago</td></tr>
+<tr><td>-perm -4000</td><td>SUID bit set (security audit)</td></tr>
+<tr><td>-user alice</td><td>Owned by user alice</td></tr>
+<tr><td>-exec CMD {} \;</td><td>Run CMD on each result</td></tr>
+<tr><td>-exec CMD {} +</td><td>Pass all results to CMD (faster)</td></tr>
+<tr><td>-maxdepth 2</td><td>Search at most 2 levels deep</td></tr>
+<tr><td>! -name "*.bak"</td><td>NOT matching — exclude pattern</td></tr>
+</tbody></table>`;
+
+  if(key==='navigation:find:Examples') return `<div class="sec">Production find Recipes</div>
+<ul class="fl">
+<li><strong>find /tmp -mtime +7 -delete</strong> — delete files older than 7 days in /tmp</li>
+<li><strong>find / -perm -4000 -type f 2>/dev/null</strong> — security audit: find all SUID binaries</li>
+<li><strong>find /home -name ".bash_history" -exec wc -l {} +</strong> — count history lines for all users</li>
+<li><strong>find /var/log -name "*.gz" -delete</strong> — clean compressed old logs</li>
+<li><strong>find . -name "*.py" | xargs grep -l "import os"</strong> — find Python files using os module</li>
+<li><strong>find /etc -newer /etc/passwd</strong> — files modified after passwd (forensics)</li></ul>`;
+
+  if(key==='navigation:grep:Demo') return mkTerm('grep-demo','grep — search text',TERM_DATA['grep-demo'],true);
+  if(key==='navigation:grep:Flags') return `<div class="sec">grep Flags</div>
+<table class="tbl"><thead><tr><th>Flag</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>-r</td><td>Recursive — search directories</td></tr><tr><td>-i</td><td>Case insensitive</td></tr>
+<tr><td>-n</td><td>Show line numbers</td></tr><tr><td>-l</td><td>Show only filenames (not matching lines)</td></tr>
+<tr><td>-c</td><td>Count matching lines per file</td></tr><tr><td>-v</td><td>Invert — show non-matching lines</td></tr>
+<tr><td>-E</td><td>Extended regex (egrep equivalent)</td></tr><tr><td>-F</td><td>Fixed string, no regex (faster)</td></tr>
+<tr><td>-A N</td><td>N lines after match</td></tr><tr><td>-B N</td><td>N lines before match</td></tr>
+<tr><td>-C N</td><td>N lines context (before + after)</td></tr>
+<tr><td>--include</td><td>Filter files: --include="*.conf"</td></tr>
+<tr><td>-o</td><td>Print only matching part</td></tr><tr><td>-q</td><td>Quiet — exit code only (scripting)</td></tr>
+</tbody></table>`;
+
+  // ── permissions ─────────────────────────────
+  if(key==='permissions:chmod:Demo') return mkTerm('chmod-demo','chmod — set permissions',TERM_DATA['chmod-demo'],true);
+  if(key==='permissions:chmod:Octal Table') return `<div class="sec">Octal Permission Reference</div>
+<table class="tbl"><thead><tr><th>Octal</th><th>Binary</th><th>Permissions</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>7</td><td>111</td><td>rwx</td><td>Read, Write, Execute</td></tr>
+<tr><td>6</td><td>110</td><td>rw-</td><td>Read, Write</td></tr>
+<tr><td>5</td><td>101</td><td>r-x</td><td>Read, Execute</td></tr>
+<tr><td>4</td><td>100</td><td>r--</td><td>Read only</td></tr>
+<tr><td>3</td><td>011</td><td>-wx</td><td>Write, Execute (rare)</td></tr>
+<tr><td>2</td><td>010</td><td>-w-</td><td>Write only (rare)</td></tr>
+<tr><td>1</td><td>001</td><td>--x</td><td>Execute only</td></tr>
+<tr><td>0</td><td>000</td><td>---</td><td>No permissions</td></tr>
+</tbody></table>
+<div class="sec">Common Permission Combos</div>
+<table class="tbl"><thead><tr><th>Mode</th><th>Usage</th></tr></thead><tbody>
+<tr><td>755</td><td>Directories, public executables (rwxr-xr-x)</td></tr>
+<tr><td>644</td><td>Regular files, config files (rw-r--r--)</td></tr>
+<tr><td>600</td><td>Private keys, secrets (rw-------)</td></tr>
+<tr><td>700</td><td>Private scripts, directories (rwx------)</td></tr>
+<tr><td>775</td><td>Shared group directories (rwxrwxr-x)</td></tr>
+<tr><td>664</td><td>Group-writable files (rw-rw-r--)</td></tr>
+<tr><td>4755</td><td>SUID + 755 — run as file owner (passwd)</td></tr>
+<tr><td>1777</td><td>Sticky + 777 — /tmp pattern</td></tr>
+</tbody></table>`;
+
+  // ── processes ───────────────────────────────
+  if(key==='processes:ps:Demo') return mkTerm('ps-demo','ps — process snapshot',TERM_DATA['ps-demo'],true);
+  if(key==='processes:top:Demo') return mkTerm('top-demo','top — live monitor',TERM_DATA['top-demo'],true)+
+    `<div class="callout tip"><strong>htop</strong>Install htop for a much better interactive experience: color-coded CPU/mem bars, mouse support, tree view, search, and kill directly from the UI: <code>apt install htop</code> then just run <code>htop</code>.</div>`;
+  if(key==='processes:kill:Demo') return mkTerm('kill-demo','kill — send signals',TERM_DATA['kill-demo'],true);
+  if(key==='processes:kill:Signals') return `<div class="sec">Linux Signals Reference</div>
+<table class="tbl"><thead><tr><th>Signal</th><th>Num</th><th>Catchable</th><th>Use</th></tr></thead><tbody>
+<tr><td>SIGHUP</td><td>1</td><td>Yes</td><td>Reload config — nginx, sshd, rsyslog respond to this</td></tr>
+<tr><td>SIGINT</td><td>2</td><td>Yes</td><td>Ctrl+C — interrupt (gentle stop)</td></tr>
+<tr><td>SIGQUIT</td><td>3</td><td>Yes</td><td>Ctrl+\ — quit with core dump</td></tr>
+<tr><td>SIGKILL</td><td>9</td><td>NO</td><td>Force kill — uncatchable, no cleanup</td></tr>
+<tr><td>SIGTERM</td><td>15</td><td>Yes</td><td>Default kill — graceful shutdown</td></tr>
+<tr><td>SIGUSR1</td><td>10</td><td>Yes</td><td>App-defined (nginx: reopen log files)</td></tr>
+<tr><td>SIGUSR2</td><td>12</td><td>Yes</td><td>App-defined (graceful upgrade)</td></tr>
+<tr><td>SIGSTOP</td><td>19</td><td>NO</td><td>Pause process — uncatchable</td></tr>
+<tr><td>SIGCONT</td><td>18</td><td>Yes</td><td>Resume paused process</td></tr>
+<tr><td>SIGCHLD</td><td>17</td><td>Yes</td><td>Child process state changed</td></tr>
+</tbody></table>
+<div class="callout danger"><strong>SIGKILL is a last resort</strong>SIGKILL cannot be caught — the process has no chance to close files, flush buffers, or release locks. Always try SIGTERM first: <code>kill PID</code>, wait 5s, then <code>kill -9 PID</code> if needed.</div>`;
+
+  // ── networking ──────────────────────────────
+  if(key==='networking:ip:Demo') return mkTerm('ip-demo','ip — interface config',TERM_DATA['ip-demo'],true);
+  if(key==='networking:ip:Subcommands') return `<div class="sec">ip Subcommands</div>
+<table class="tbl"><thead><tr><th>Command</th><th>Action</th></tr></thead><tbody>
+<tr><td>ip addr show</td><td>Show all IP addresses</td></tr>
+<tr><td>ip addr add 10.0.0.1/24 dev eth0</td><td>Add IP to interface</td></tr>
+<tr><td>ip addr del 10.0.0.1/24 dev eth0</td><td>Remove IP</td></tr>
+<tr><td>ip link show</td><td>Show interfaces and state</td></tr>
+<tr><td>ip link set eth0 up/down</td><td>Bring interface up or down</td></tr>
+<tr><td>ip route show</td><td>Show routing table</td></tr>
+<tr><td>ip route add default via 192.168.1.1</td><td>Add default gateway</td></tr>
+<tr><td>ip route add 10.0.0.0/8 via 192.168.1.254</td><td>Add static route</td></tr>
+<tr><td>ip neigh show</td><td>ARP table</td></tr>
+<tr><td>ip -s link show eth0</td><td>Interface statistics (TX/RX)</td></tr>
+</tbody></table>`;
+
+  if(key==='networking:ss:Demo') return mkTerm('ss-demo','ss — socket stats',TERM_DATA['ss-demo'],true);
+  if(key==='networking:ping:Demo') return mkTerm('ping-demo','ping — test reachability',TERM_DATA['ping-demo'],true);
+  if(key==='networking:curl:Demo') return mkTerm('curl-demo','curl — HTTP requests',TERM_DATA['curl-demo'],true);
+  if(key==='networking:curl:Flags') return `<div class="sec">curl Flags</div>
+<table class="tbl"><thead><tr><th>Flag</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>-I</td><td>HEAD request — headers only</td></tr>
+<tr><td>-s</td><td>Silent — no progress bar</td></tr>
+<tr><td>-o file</td><td>Save output to file</td></tr>
+<tr><td>-O</td><td>Save with remote filename</td></tr>
+<tr><td>-L</td><td>Follow redirects</td></tr>
+<tr><td>-v</td><td>Verbose — show headers, TLS handshake</td></tr>
+<tr><td>-X POST</td><td>Set HTTP method</td></tr>
+<tr><td>-H "Key: Val"</td><td>Add header</td></tr>
+<tr><td>-d &#39;data&#39;</td><td>Send request body</td></tr>
+<tr><td>-u user:pass</td><td>Basic auth</td></tr>
+<tr><td>-k</td><td>Skip TLS certificate verification</td></tr>
+<tr><td>-w "%{http_code}"</td><td>Print specific info (status code)</td></tr>
+<tr><td>--retry 3</td><td>Retry on failure</td></tr>
+<tr><td>-m 30</td><td>Max time 30 seconds</td></tr>
+</tbody></table>`;
+
+  if(key==='networking:ssh:Demo') return mkTerm('ssh-demo','ssh — secure shell',TERM_DATA['ssh-demo'],true);
+  if(key==='networking:ssh:Tunnels') return `<div class="sec">SSH Tunnelling</div>
+<ul class="fl">
+<li><strong>ssh -L 8080:localhost:80 user@server</strong> — Local forward: localhost:8080 → server:80</li>
+<li><strong>ssh -R 9090:localhost:3000 user@server</strong> — Remote forward: server:9090 → your:3000</li>
+<li><strong>ssh -D 1080 user@server</strong> — SOCKS5 proxy on localhost:1080</li>
+<li><strong>ssh -N -f -L 5432:db-internal:5432 bastion</strong> — Background tunnel to internal DB via bastion</li>
+<li><strong>ssh -J bastion user@internal-server</strong> — Jump host (ProxyJump)</li>
+</ul>
+<div class="callout tip"><strong>~/.ssh/config</strong>Create aliases in ~/.ssh/config for frequent connections: Host myserver / HostName 192.168.1.50 / User deploy / Port 2222 / IdentityFile ~/.ssh/deploy_key. Then just <code>ssh myserver</code>.</div>`;
+
+  // ── disk ─────────────────────────────────────
+  if(key==='disk:df:Demo') return mkTerm('df-demo','df — disk free',TERM_DATA['df-demo'],true);
+  if(key==='disk:du:Demo') return mkTerm('du-demo','du — disk usage',TERM_DATA['du-demo'],true);
+  if(key==='disk:lsblk:Demo') return mkTerm('lsblk-demo','lsblk — block devices',TERM_DATA['lsblk-demo'],true);
+
+  // ── text processing ─────────────────────────
+  if(key==='text-processing:awk:Demo') return mkTerm('awk-demo','awk — column processor',TERM_DATA['awk-demo'],true);
+  if(key==='text-processing:awk:One-liners') return `<div class="sec">Essential awk One-liners</div>
+<ul class="fl">
+<li><strong>awk &#39;NR%2==0&#39; file</strong> — print even-numbered lines</li>
+<li><strong>awk &#39;length>80&#39; file</strong> — lines longer than 80 chars</li>
+<li><strong>awk &#39;!seen[$0]++&#39; file</strong> — remove duplicate lines (preserves order)</li>
+<li><strong>awk &#39;{sum+=$1} END{print sum}&#39; file</strong> — sum first column</li>
+<li><strong>awk -F: &#39;$3>=1000{print $1}&#39; /etc/passwd</strong> — list regular users (UID >= 1000)</li>
+<li><strong>awk &#39;BEGIN{print "start"} /error/{count++} END{print count,"errors"}&#39;</strong> — count and report</li>
+<li><strong>ps aux | awk &#39;NR>1{sum+=$3} END{printf "CPU: %.1f%%\\n",sum}&#39;</strong> — total CPU usage</li>
+</ul>`;
+
+  if(key==='text-processing:sed:Demo') return mkTerm('sed-demo','sed — stream editor',TERM_DATA['sed-demo'],true);
+  if(key==='text-processing:sed:Examples') return `<div class="sec">sed Recipes</div>
+<ul class="fl">
+<li><strong>sed &#39;s/old/new/g&#39; file</strong> — replace all occurrences</li>
+<li><strong>sed -i.bak &#39;s/foo/bar/g&#39; file</strong> — in-place with backup</li>
+<li><strong>sed &#39;/^#/d&#39; file</strong> — delete comment lines</li>
+<li><strong>sed &#39;/^$/d&#39; file</strong> — delete blank lines</li>
+<li><strong>sed -n &#39;10,20p&#39; file</strong> — print only lines 10-20</li>
+<li><strong>sed &#39;1i\#!/bin/bash&#39; file</strong> — insert shebang at line 1</li>
+<li><strong>sed &#39;\$d&#39; file</strong> — delete last line</li>
+<li><strong>sed &#39;s/\s\+/ /g&#39; file</strong> — collapse multiple spaces</li>
+</ul>`;
+
+  // ── bash scripting ──────────────────────────
+  if(key==='bash-scripting:vars:Demo') return mkTerm('vars-demo','Variables & env',TERM_DATA['vars-demo'],true);
+  if(key==='bash-scripting:vars:Special Vars') return `<div class="sec">Bash Special Variables</div>
+<table class="tbl"><thead><tr><th>Variable</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>$0</td><td>Script name</td></tr><tr><td>$1 .. $9</td><td>Positional arguments</td></tr>
+<tr><td>$@</td><td>All arguments as separate words</td></tr><tr><td>$*</td><td>All arguments as one word</td></tr>
+<tr><td>$#</td><td>Number of arguments</td></tr><tr><td>$?</td><td>Exit code of last command</td></tr>
+<tr><td>$$</td><td>PID of current shell/script</td></tr><tr><td>$!</td><td>PID of last background process</td></tr>
+<tr><td>$HOME</td><td>User home directory</td></tr><tr><td>$PATH</td><td>Command search path</td></tr>
+<tr><td>$USER</td><td>Current username</td></tr><tr><td>$HOSTNAME</td><td>Machine hostname</td></tr>
+<tr><td>$RANDOM</td><td>Random integer 0-32767</td></tr><tr><td>$LINENO</td><td>Current line number in script</td></tr>
+<tr><td>$SECONDS</td><td>Seconds since shell started</td></tr>
+</tbody></table>`;
+
+  if(key==='bash-scripting:loops:Demo') return mkTerm('loops-demo','for & while loops',TERM_DATA['loops-demo'],true);
+  if(key==='bash-scripting:conditionals:Demo') return mkTerm('conditionals-demo','if/case conditionals',TERM_DATA['conditionals-demo'],true);
+  if(key==='bash-scripting:conditionals:Test Ops') return `<div class="sec">Test Operators [[ ... ]]</div>
+<div class="grid2">
+<div class="mc"><h4>File Tests</h4>
+<table class="tbl"><tbody>
+<tr><td>-f file</td><td>Regular file exists</td></tr>
+<tr><td>-d dir</td><td>Directory exists</td></tr>
+<tr><td>-e path</td><td>Path exists (any type)</td></tr>
+<tr><td>-r file</td><td>File is readable</td></tr>
+<tr><td>-w file</td><td>File is writable</td></tr>
+<tr><td>-x file</td><td>File is executable</td></tr>
+<tr><td>-s file</td><td>File is non-empty</td></tr>
+<tr><td>-L link</td><td>Is a symbolic link</td></tr>
+</tbody></table></div>
+<div class="mc"><h4>String & Number Tests</h4>
+<table class="tbl"><tbody>
+<tr><td>-z "$s"</td><td>String is empty</td></tr>
+<tr><td>-n "$s"</td><td>String is non-empty</td></tr>
+<tr><td>"$a" == "$b"</td><td>Strings equal</td></tr>
+<tr><td>"$a" != "$b"</td><td>Strings not equal</td></tr>
+<tr><td>$a -eq $b</td><td>Numbers equal</td></tr>
+<tr><td>$a -lt $b</td><td>Less than</td></tr>
+<tr><td>$a -gt $b</td><td>Greater than</td></tr>
+<tr><td>$a -le $b</td><td>Less or equal</td></tr>
+</tbody></table></div></div>`;
+
+  if(key==='bash-scripting:error-handling:Demo') return mkTerm('error-handling-demo','set -euo pipefail',TERM_DATA['error-handling-demo'],true);
+  if(key==='bash-scripting:error-handling:Best Practices') return `<div class="sec">Production Bash Best Practices</div>
+<ul class="fl">
+<li><strong>set -e</strong> — exit immediately on error (errexit)</li>
+<li><strong>set -u</strong> — treat unset variables as errors (nounset)</li>
+<li><strong>set -o pipefail</strong> — pipe fails if any command fails (not just last)</li>
+<li><strong>trap &#39;cleanup&#39; EXIT</strong> — always run cleanup on exit (even errors)</li>
+<li><strong>local var=value</strong> — use local in functions to avoid global pollution</li>
+<li><strong>\${var:?error msg}</strong> — fail with message if var is empty/unset</li>
+<li><strong>Shebang: #!/usr/bin/env bash</strong> — portable, finds bash in PATH</li>
+<li><strong>Quote all variables: "$var"</strong> — prevents word splitting and glob expansion</li>
+<li><strong>Use [[]] over []</strong> — safer string comparisons, no word splitting</li>
+</ul>
+<div class="callout tip"><strong>shellcheck</strong>Run <code>shellcheck script.sh</code> on all bash scripts — catches common bugs, bad practices, and portability issues before they hit production.</div>`;
+
+  // ── redirection ─────────────────────────────
+  if(key==='redirection:pipes:Demo') return mkTerm('pipes-demo','pipes — chain commands',TERM_DATA['pipes-demo'],true);
+  if(key==='redirection:redirect:Demo') return mkTerm('redirect-demo','redirection > >> 2>',TERM_DATA['redirect-demo'],true);
+  if(key==='redirection:redirect:FD Table') return `<div class="sec">File Descriptor Reference</div>
+<table class="tbl"><thead><tr><th>FD</th><th>Name</th><th>Default</th><th>Redirect</th></tr></thead><tbody>
+<tr><td>0</td><td>stdin</td><td>keyboard</td><td>cmd < file</td></tr>
+<tr><td>1</td><td>stdout</td><td>terminal</td><td>cmd > file or cmd 1> file</td></tr>
+<tr><td>2</td><td>stderr</td><td>terminal</td><td>cmd 2> file</td></tr>
+</tbody></table>
+<div class="sec">Common Patterns</div>
+<table class="tbl"><thead><tr><th>Pattern</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>cmd > file</td><td>stdout to file (overwrite)</td></tr>
+<tr><td>cmd >> file</td><td>stdout to file (append)</td></tr>
+<tr><td>cmd 2> file</td><td>stderr to file</td></tr>
+<tr><td>cmd &> file</td><td>stdout + stderr to file</td></tr>
+<tr><td>cmd 2>&1</td><td>stderr → stdout (then pipe both)</td></tr>
+<tr><td>cmd > /dev/null 2>&1</td><td>Discard ALL output</td></tr>
+<tr><td>cmd < file</td><td>file to stdin</td></tr>
+<tr><td>cmd1 | tee file | cmd2</td><td>save to file AND pass to cmd2</td></tr>
+</tbody></table>`;
+
+  // ── package management ──────────────────────
+  if(key==='package-mgmt:apt:Demo') return mkTerm('apt-demo','apt — package manager',TERM_DATA['apt-demo'],true);
+  if(key==='package-mgmt:apt:Commands') return `<div class="sec">APT Command Reference</div>
+<table class="tbl"><thead><tr><th>Command</th><th>Action</th></tr></thead><tbody>
+<tr><td>apt update</td><td>Refresh package index from repos</td></tr>
+<tr><td>apt upgrade</td><td>Upgrade all installed packages</td></tr>
+<tr><td>apt full-upgrade</td><td>Upgrade + remove obsolete packages</td></tr>
+<tr><td>apt install pkg</td><td>Install a package</td></tr>
+<tr><td>apt install -y pkg</td><td>Install without confirmation prompt</td></tr>
+<tr><td>apt remove pkg</td><td>Remove package (keep config)</td></tr>
+<tr><td>apt purge pkg</td><td>Remove package + config files</td></tr>
+<tr><td>apt autoremove</td><td>Remove unused dependencies</td></tr>
+<tr><td>apt search keyword</td><td>Search available packages</td></tr>
+<tr><td>apt show pkg</td><td>Show package details</td></tr>
+<tr><td>apt list --installed</td><td>List installed packages</td></tr>
+<tr><td>dpkg -l | grep pkg</td><td>Check if package installed</td></tr>
+<tr><td>dpkg -L pkg</td><td>List files installed by package</td></tr>
+<tr><td>dpkg -S /usr/bin/ls</td><td>Which package owns a file</td></tr>
+</tbody></table>`;
+
+  // ── systemd ─────────────────────────────────
+  if(key==='systemd:systemctl:Demo') return mkTerm('systemctl-demo','systemctl — service control',TERM_DATA['systemctl-demo'],true);
+  if(key==='systemd:systemctl:Commands') return `<div class="sec">systemctl Commands</div>
+<table class="tbl"><thead><tr><th>Command</th><th>Action</th></tr></thead><tbody>
+<tr><td>systemctl start nginx</td><td>Start a service now</td></tr>
+<tr><td>systemctl stop nginx</td><td>Stop a service now</td></tr>
+<tr><td>systemctl restart nginx</td><td>Stop then start</td></tr>
+<tr><td>systemctl reload nginx</td><td>Reload config (no downtime)</td></tr>
+<tr><td>systemctl enable nginx</td><td>Start on boot</td></tr>
+<tr><td>systemctl disable nginx</td><td>Don&#39;t start on boot</td></tr>
+<tr><td>systemctl status nginx</td><td>Show status, recent logs</td></tr>
+<tr><td>systemctl is-active nginx</td><td>active/inactive (for scripts)</td></tr>
+<tr><td>systemctl list-units --failed</td><td>Show failed units</td></tr>
+<tr><td>systemctl daemon-reload</td><td>Reload unit file changes</td></tr>
+<tr><td>systemctl mask nginx</td><td>Prevent starting completely</td></tr>
+<tr><td>systemctl list-timers</td><td>Show all systemd timers</td></tr>
+</tbody></table>`;
+
+  if(key==='systemd:systemctl:Unit Files') return `<div class="sec">Custom Service Unit File</div>
+<div class="callout info"><strong>Create file at</strong>/etc/systemd/system/myapp.service — then run <code>systemctl daemon-reload && systemctl enable --now myapp</code></div>
+<pre style="background:#020602;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:11px;color:#7dcb7d;overflow-x:auto;line-height:1.7">[Unit]
+<span style="color:#ffd60a">Description</span>=My Application Server
+<span style="color:#ffd60a">After</span>=network.target postgresql.service
+<span style="color:#ffd60a">Requires</span>=postgresql.service
+
+[Service]
+<span style="color:#ffd60a">Type</span>=simple
+<span style="color:#ffd60a">User</span>=myapp
+<span style="color:#ffd60a">Group</span>=myapp
+<span style="color:#ffd60a">WorkingDirectory</span>=/opt/myapp
+<span style="color:#ffd60a">EnvironmentFile</span>=/etc/myapp/env
+<span style="color:#ffd60a">ExecStart</span>=/usr/bin/node /opt/myapp/server.js
+<span style="color:#ffd60a">ExecReload</span>=/bin/kill -HUP \$MAINPID
+<span style="color:#ffd60a">Restart</span>=always
+<span style="color:#ffd60a">RestartSec</span>=5s
+<span style="color:#ffd60a">StandardOutput</span>=journal
+<span style="color:#ffd60a">StandardError</span>=journal
+<span style="color:#00ff41">OOMScoreAdjust</span>=-900
+<span style="color:#00ff41">LimitNOFILE</span>=65535
+
+[Install]
+<span style="color:#ffd60a">WantedBy</span>=multi-user.target</pre>`;
+
+  if(key==='systemd:journalctl:Demo') return mkTerm('journalctl-demo','journalctl — query logs',TERM_DATA['journalctl-demo'],true);
+  if(key==='systemd:journalctl:Filters') return `<div class="sec">journalctl Filter Examples</div>
+<ul class="fl">
+<li><strong>journalctl -u nginx</strong> — logs for nginx unit only</li>
+<li><strong>journalctl -f</strong> — follow (like tail -f) live log stream</li>
+<li><strong>journalctl -b</strong> — current boot log</li>
+<li><strong>journalctl -b -1</strong> — previous boot log</li>
+<li><strong>journalctl -p err</strong> — error priority and above</li>
+<li><strong>journalctl --since "2025-01-15 09:00" --until "2025-01-15 10:00"</strong> — time range</li>
+<li><strong>journalctl -u nginx --since "1 hour ago"</strong> — relative time</li>
+<li><strong>journalctl _PID=1024</strong> — logs for specific PID</li>
+<li><strong>journalctl --disk-usage</strong> — show journal disk usage</li>
+<li><strong>journalctl --vacuum-size=500M</strong> — clean old journal to 500MB</li>
+</ul>`;
+
+  // ── archives ─────────────────────────────────
+  if(key==='archives:tar:Demo') return mkTerm('tar-demo','tar — archive & extract',TERM_DATA['tar-demo'],true);
+  if(key==='archives:tar:Flags') return `<div class="sec">tar Flag Reference</div>
+<div class="grid2"><div class="mc"><h4>Create</h4>
+<table class="tbl"><tbody>
+<tr><td>-c</td><td>Create archive</td></tr><tr><td>-z</td><td>Compress with gzip (.gz)</td></tr>
+<tr><td>-j</td><td>Compress with bzip2 (.bz2)</td></tr><tr><td>-J</td><td>Compress with xz (.xz)</td></tr>
+<tr><td>-v</td><td>Verbose (list files)</td></tr><tr><td>-f file</td><td>Archive filename</td></tr>
+<tr><td>--exclude</td><td>Exclude pattern</td></tr>
+</tbody></table></div>
+<div class="mc"><h4>Extract</h4>
+<table class="tbl"><tbody>
+<tr><td>-x</td><td>Extract archive</td></tr><tr><td>-C dir</td><td>Extract to directory</td></tr>
+<tr><td>-t</td><td>List contents (no extract)</td></tr><tr><td>--strip 1</td><td>Strip leading path component</td></tr>
+<tr><td>-p</td><td>Preserve permissions</td></tr>
+</tbody></table></div></div>
+<div class="sec">Quick Recipes</div>
+<ul class="fl">
+<li><strong>tar -czvf backup.tar.gz /etc/ /var/www/</strong> — create compressed backup</li>
+<li><strong>tar -xzvf backup.tar.gz -C /restore/</strong> — extract to specific dir</li>
+<li><strong>tar -tzvf archive.tar.gz | grep filename</strong> — search inside archive</li>
+<li><strong>tar -czvf - /data | ssh user@backup "cat > /backups/data.tar.gz"</strong> — stream to remote</li>
+</ul>`;
+
+  if(key==='archives:rsync:Demo') return mkTerm('rsync-demo','rsync — sync & backup',TERM_DATA['rsync-demo'],true);
+  if(key==='archives:rsync:Backup Recipe') return `<div class="sec">rsync Backup Recipes</div>
+<ul class="fl">
+<li><strong>rsync -avz src/ dest/</strong> — archive mode + verbose + compressed (local)</li>
+<li><strong>rsync -avzP /local/ user@remote:/backup/</strong> — push to remote with progress</li>
+<li><strong>rsync -avz --delete /src/ /dst/</strong> — mirror (delete files not in src)</li>
+<li><strong>rsync -avz --exclude=&#39;*.log&#39; --exclude=&#39;node_modules/&#39; /app/ /backup/</strong> — with exclusions</li>
+<li><strong>rsync -avz -e "ssh -p 2222" /src/ user@host:/dst/</strong> — custom SSH port</li>
+<li><strong>rsync --dry-run -avz /src/ /dst/</strong> — preview what would change</li>
+</ul>
+<div class="callout tip"><strong>Incremental Backups</strong>Use --link-dest to create efficient incremental backups: <code>rsync -avz --link-dest=/backup/yesterday/ /data/ /backup/today/</code> — unchanged files are hard-linked, not copied. Multiple snapshots at near-zero extra disk space.</div>`;
+
+  // ── monitoring ──────────────────────────────
+  if(key==='monitoring:vmstat:Demo') return mkTerm('vmstat-demo','vmstat — memory & CPU',TERM_DATA['vmstat-demo'],true);
+  if(key==='monitoring:vmstat:Output Fields') return `<div class="sec">vmstat Output Field Guide</div>
+<table class="tbl"><thead><tr><th>Field</th><th>Section</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>r</td><td>procs</td><td>Runnable processes (running + waiting for CPU)</td></tr>
+<tr><td>b</td><td>procs</td><td>Processes blocked (waiting for I/O)</td></tr>
+<tr><td>swpd</td><td>memory</td><td>Swap used (KB)</td></tr>
+<tr><td>free</td><td>memory</td><td>Free RAM (KB)</td></tr>
+<tr><td>buff</td><td>memory</td><td>Buffer cache (KB)</td></tr>
+<tr><td>cache</td><td>memory</td><td>Page cache (KB)</td></tr>
+<tr><td>si</td><td>swap</td><td>Swap in from disk (KB/s)</td></tr>
+<tr><td>so</td><td>swap</td><td>Swap out to disk (KB/s) — BAD if non-zero</td></tr>
+<tr><td>bi</td><td>io</td><td>Blocks read from disk (blocks/s)</td></tr>
+<tr><td>bo</td><td>io</td><td>Blocks written to disk (blocks/s)</td></tr>
+<tr><td>us</td><td>cpu</td><td>User CPU %</td></tr>
+<tr><td>sy</td><td>cpu</td><td>System (kernel) CPU %</td></tr>
+<tr><td>id</td><td>cpu</td><td>Idle CPU %</td></tr>
+<tr><td>wa</td><td>cpu</td><td>I/O wait % — HIGH means disk bottleneck</td></tr>
+</tbody></table>`;
+
+  if(key==='monitoring:lsof:Demo') return mkTerm('lsof-demo','lsof — open files',TERM_DATA['lsof-demo'],true);
+  if(key==='monitoring:strace:Demo') return mkTerm('strace-demo','strace — syscall tracer',TERM_DATA['strace-demo'],true);
+
+  // ── security ────────────────────────────────
+  if(key==='security:ufw:Demo') return mkTerm('ufw-demo','ufw — firewall',TERM_DATA['ufw-demo'],true);
+
+  // ── containers ──────────────────────────────
+  if(key==='containers:docker-basics:Demo') return mkTerm('docker-basics-demo','docker — run containers',TERM_DATA['docker-basics-demo'],true);
+  if(key==='containers:docker-basics:Commands') return `<div class="sec">Essential Docker Commands</div>
+<table class="tbl"><thead><tr><th>Command</th><th>Action</th></tr></thead><tbody>
+<tr><td>docker run -d -p 8080:80 nginx</td><td>Run container in background, map port</td></tr>
+<tr><td>docker ps</td><td>List running containers</td></tr>
+<tr><td>docker ps -a</td><td>List ALL containers (incl. stopped)</td></tr>
+<tr><td>docker exec -it CONTAINER bash</td><td>Interactive shell in running container</td></tr>
+<tr><td>docker logs -f CONTAINER</td><td>Follow container logs</td></tr>
+<tr><td>docker stop CONTAINER</td><td>Graceful stop (SIGTERM)</td></tr>
+<tr><td>docker rm CONTAINER</td><td>Remove stopped container</td></tr>
+<tr><td>docker images</td><td>List local images</td></tr>
+<tr><td>docker pull nginx:alpine</td><td>Download image from registry</td></tr>
+<tr><td>docker build -t myapp:1.0 .</td><td>Build image from Dockerfile</td></tr>
+<tr><td>docker stats</td><td>Live CPU/RAM per container</td></tr>
+<tr><td>docker system prune</td><td>Remove unused containers/images/volumes</td></tr>
+<tr><td>docker inspect CONTAINER</td><td>Full container metadata (JSON)</td></tr>
+</tbody></table>`;
+
+  // ── kernel ───────────────────────────────────
+  if(key==='kernel:uname:Demo') return mkTerm('uname-demo','uname & kernel info',TERM_DATA['uname-demo'],true);
+  if(key==='kernel:sysctl:Demo') return mkTerm('sysctl-demo','sysctl — kernel params',TERM_DATA['sysctl-demo'],true);
+  if(key==='kernel:sysctl:Common Params') return `<div class="sec">Important sysctl Parameters</div>
+<table class="tbl"><thead><tr><th>Parameter</th><th>Default</th><th>Tuning Goal</th></tr></thead><tbody>
+<tr><td>vm.swappiness</td><td>60</td><td>Set to 10 for servers (prefer RAM over swap)</td></tr>
+<tr><td>net.core.somaxconn</td><td>4096</td><td>Increase to 65535 for high-traffic servers</td></tr>
+<tr><td>net.ipv4.tcp_tw_reuse</td><td>0</td><td>Set to 1 — reuse TIME_WAIT sockets</td></tr>
+<tr><td>net.ipv4.ip_local_port_range</td><td>32768-60999</td><td>1024 65535 for more ephemeral ports</td></tr>
+<tr><td>net.ipv4.ip_forward</td><td>0</td><td>Set to 1 for routers/containers</td></tr>
+<tr><td>vm.overcommit_memory</td><td>0</td><td>Set to 1 for Redis (disable OOM on alloc)</td></tr>
+<tr><td>fs.file-max</td><td>varies</td><td>Increase max open files system-wide</td></tr>
+<tr><td>kernel.panic</td><td>0</td><td>Set to 10 — reboot after 10s on kernel panic</td></tr>
+</tbody></table>
+<div class="callout info"><strong>Persist Changes</strong>sysctl -w changes are lost on reboot. Add to /etc/sysctl.d/99-custom.conf then run <code>sysctl --system</code> to apply immediately and on every boot.</div>`;
+
+  // ── perf tuning ─────────────────────────────
+  if(key==='perf-tuning:perf:Demo') return mkTerm('perf-demo','perf — profiler',TERM_DATA['perf-demo'],true);
+  if(key==='perf-tuning:ulimit:Demo') return mkTerm('ulimit-demo','ulimit — resource limits',TERM_DATA['ulimit-demo'],true);
+
+  // ── cron ─────────────────────────────────────
+  if(key==='cron:crontab:Demo') return `<div class="sec">Crontab Syntax</div>
+<pre style="background:#020602;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:12px;color:#7dcb7d;line-height:2">
+<span style="color:#4fc3f7"># ┌─ minute    (0-59)</span>
+<span style="color:#4fc3f7"># │  ┌─ hour      (0-23)</span>
+<span style="color:#4fc3f7"># │  │  ┌─ day-of-month (1-31)</span>
+<span style="color:#4fc3f7"># │  │  │  ┌─ month  (1-12)</span>
+<span style="color:#4fc3f7"># │  │  │  │  ┌─ day-of-week (0-7, 0&7=Sun)</span>
+<span style="color:#4fc3f7"># │  │  │  │  │</span>
+  <span style="color:#00ff41">*  *  *  *  *</span>  <span style="color:#ffd60a">command</span>
+
+<span style="color:#5a8a5a">  0  2  *  *  *</span>  <span style="color:#ffd60a">/backup.sh</span>          <span style="color:#4fc3f7"># 2am daily</span>
+<span style="color:#5a8a5a">*/15  *  *  *  *</span>  <span style="color:#ffd60a">/check_disk.sh</span>      <span style="color:#4fc3f7"># every 15 min</span>
+<span style="color:#5a8a5a">  0  9  *  *  1-5</span>  <span style="color:#ffd60a">/report.sh</span>          <span style="color:#4fc3f7"># 9am weekdays</span>
+<span style="color:#5a8a5a">  0  0  1  *  *</span>   <span style="color:#ffd60a">/monthly.sh</span>         <span style="color:#4fc3f7"># midnight 1st of month</span>
+<span style="color:#5a8a5a">@reboot</span>                              <span style="color:#ffd60a">/on-boot.sh</span>         <span style="color:#4fc3f7"># run once at boot</span>
+<span style="color:#5a8a5a">@daily</span>                               <span style="color:#ffd60a">/daily.sh</span>           <span style="color:#4fc3f7"># same as 0 0 * * *</span>
+</pre>
+<div class="callout warn"><strong>Always redirect cron output</strong>Add <code>>> /var/log/myjob.log 2>&1</code> to every cron command. Without it, failures are silently swallowed (or emailed to root which nobody reads).</div>`;
+
+  // ── users ────────────────────────────────────
+  if(key==='users:useradd:Demo') return `<div class="sec">Creating Users</div>
+<pre style="background:#020602;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:11px;color:#7dcb7d;line-height:1.9">
+<span class="tp">root@linux:~# </span>useradd -m -s /bin/bash -G sudo,docker alice
+<span class="tp">root@linux:~# </span>passwd alice
+New password:
+Retype new password:
+<span style="color:#00ff41">passwd: password updated successfully</span>
+<span class="tp">root@linux:~# </span>id alice
+uid=1001(alice) gid=1001(alice) groups=1001(alice),27(sudo),998(docker)
+<span class="tp">root@linux:~# </span>useradd -r -s /sbin/nologin -d /var/lib/myapp myapp
+<span style="color:#4fc3f7"># system account — no shell, no home login</span>
+<span class="tp">root@linux:~# </span>chage -l alice
+Last password change: Jan 15, 2025
+Password expires: never
+<span class="tp">root@linux:~# </span>chage -M 90 -W 14 alice
+<span style="color:#4fc3f7"># expire password in 90 days, warn 14 days before</span>
+</pre>
+<table class="tbl"><thead><tr><th>Flag</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>-m</td><td>Create home directory</td></tr>
+<tr><td>-s /bin/bash</td><td>Set login shell</td></tr>
+<tr><td>-G group,group</td><td>Add to supplementary groups</td></tr>
+<tr><td>-r</td><td>Create system account (UID < 1000)</td></tr>
+<tr><td>-d /path</td><td>Custom home directory</td></tr>
+<tr><td>-u 1500</td><td>Specific UID</td></tr>
+</tbody></table>`;
+
+  // ── environment ──────────────────────────────
+  if(key==='env-shell:export:Demo') return `<div class="sec">Environment Variables</div>
+<pre style="background:#020602;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:11px;color:#7dcb7d;line-height:1.9">
+<span class="tp">root@linux:~# </span>export DB_HOST=localhost DB_PORT=5432
+<span class="tp">root@linux:~# </span>printenv DB_HOST
+<span style="color:#00ff41">localhost</span>
+<span class="tp">root@linux:~# </span>env | grep DB_
+<span style="color:#00ff41">DB_HOST=localhost
+DB_PORT=5432</span>
+<span class="tp">root@linux:~# </span>unset DB_PORT
+<span class="tp">root@linux:~# </span>DB_HOST=remotedb ./myapp
+<span style="color:#4fc3f7"># set var only for this command, not exported to shell</span>
+<span class="tp">root@linux:~# </span>env -i HOME=/home/alice PATH=/usr/bin bash
+<span style="color:#4fc3f7"># clean environment — only specified vars</span>
+</pre>`;
+
+  if(key==='env-shell:alias:Demo') return `<div class="sec">Aliases & Functions</div>
+<pre style="background:#020602;padding:14px;border-radius:5px;border:1px solid var(--b1);font-family:var(--mono);font-size:11px;color:#7dcb7d;line-height:1.9">
+<span class="tp">root@linux:~# </span>alias ll='ls -alh --color=auto'
+<span class="tp">root@linux:~# </span>alias gs='git status'
+<span class="tp">root@linux:~# </span>alias tailf='tail -f'
+<span class="tp">root@linux:~# </span>alias k='kubectl'
+<span class="tp">root@linux:~# </span>alias ..='cd ..'
+<span class="tp">root@linux:~# </span>alias ...='cd ../..'
+<span class="tp">root@linux:~# </span>alias please='sudo !!'
+<span class="tp">root@linux:~# </span>alias serve='python3 -m http.server 8080'
+<span style="color:#4fc3f7">
+# Add to ~/.bashrc to make permanent
+# alias myalias='...'
+# Functions for complex logic:
+</span>
+mkcd() { mkdir -p "$1" && cd "$1"; }
+</pre>`;
+
+  if(key==='env-shell:history:Demo') return `<div class="sec">History Magic</div>
+<table class="tbl"><thead><tr><th>Shortcut</th><th>Action</th></tr></thead><tbody>
+<tr><td>Ctrl+R</td><td>Reverse search history (type to filter)</td></tr>
+<tr><td>!!</td><td>Repeat last command</td></tr>
+<tr><td>!nginx</td><td>Repeat last command starting with nginx</td></tr>
+<tr><td>!42</td><td>Run command number 42 from history</td></tr>
+<tr><td>history | grep docker</td><td>Search history for docker commands</td></tr>
+<tr><td>Ctrl+P / Ctrl+N</td><td>Previous / Next history entry</td></tr>
+<tr><td>Alt+.</td><td>Insert last argument of previous command</td></tr>
+<tr><td>sudo !!</td><td>Rerun last command with sudo</td></tr>
+</tbody></table>
+<div class="callout tip"><strong>Larger History</strong>Add to .bashrc: HISTSIZE=50000 HISTFILESIZE=100000 HISTCONTROL=ignoredups:erasedups — keeps 50k commands, removes duplicates.</div>`;
+
+  // ── default ──────────────────────────────────
+  return `<div class="sec">${tab}</div>
+<p class="bd">Select a tab above to explore <strong>${tid}</strong> — including animated terminal demos, flags reference, examples, and production tips.</p>
+<div class="callout info"><strong>Click ▶ Run</strong>Every terminal in this guide is interactive — click the green Run button to watch the command execute with animated, colour-coded output exactly as it appears in a real Linux shell.</div>`;
+}
+
+// ═══════════════ RUNTIME ═══════════════
+let activeCh=null, activeTid=null, visited=new Set();
+
+function renderNav(){
+  document.getElementById('leftNav').innerHTML=CHAPTERS.map(ch=>`
+<div class="ci ${activeCh===ch.id?'active':''}" onclick="selChapter('${ch.id}')">
+  <div class="ci-icon" style="background:${ch.bg}">${ch.icon}</div>
+  <div class="ci-info">
+    <div class="cn">${ch.title}</div>
+    <div class="cm">${ch.topics.length} topics</div>
+  </div>
+  <span class="lv" style="background:${ch.lc}18;color:${ch.lc};border:1px solid ${ch.lc}33">${ch.level}</span>
+</div>`).join('');
+}
+
+function selChapter(id){
+  activeCh=id; activeTid=null; visited.add(id); updateProgress(); renderNav();
+  const ch=CHAPTERS.find(c=>c.id===id);
+  clearTimers();
+  document.getElementById('middle').innerHTML=`
+<div class="ch-hdr">
+  <div class="ch-ey">Chapter ${CHAPTERS.indexOf(ch)+1} of ${CHAPTERS.length}</div>
+  <div class="ch-t">${ch.icon} ${ch.title}</div>
+  <p class="ch-d">${ch.desc}</p>
+  <div class="ch-chips">
+    <div class="chip"><span class="chip-dot" style="background:${ch.lc}"></span>${ch.level}</div>
+    <div class="chip">📚 ${ch.topics.length} Topics</div>
+    <div class="chip">⌨ ${ch.sub}</div>
+  </div>
+</div>
+<div class="tg">${ch.topics.map(t=>`
+<div class="tc ${activeTid===t.id?'active':''}" onclick="selTopic('${ch.id}','${t.id}',event)">
+  <div class="tc-cmd">${t.cmd}</div>
+  <div class="tc-title">${t.title}</div>
+  <div class="tc-d">${t.desc}</div>
+  <div class="tc-tags">${(t.tags||[]).map(tag=>`<span class="tag ${tag}">${tag}</span>`).join('')}</div>
+</div>`).join('')}
+</div>`;
+  closeRight();
+}
+
+function selTopic(cid,tid,ev){
+  activeTid=tid;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+  ev.currentTarget.classList.add('active');
+  const ch=CHAPTERS.find(c=>c.id===cid);
+  const topic=ch?.topics.find(t=>t.id===tid);
+  if(!topic) return;
+  clearTimers();
+  const rp=document.getElementById('rightPanel');
+  rp.classList.remove('hidden');
+  document.getElementById('rightTitle').textContent='$ '+topic.cmd;
+  const tabs=topic.tabs||['Demo'];
+  document.getElementById('rightTabs').innerHTML=tabs.map((tab,i)=>
+    `<div class="rt ${i===0?'active':''}" onclick="selTab(this,'${cid}','${tid}','${tab}')">${tab}</div>`).join('');
+  renderTab(cid,tid,tabs[0]);
+}
+
+function selTab(el,cid,tid,tab){
+  clearTimers();
+  document.querySelectorAll('.rt').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTab(cid,tid,tab);
+}
+
+function renderTab(cid,tid,tab){
+  document.getElementById('rightBody').innerHTML=getContent(cid,tid,tab);
+}
+
+function closeRight(){
+  clearTimers();
+  document.getElementById('rightPanel').classList.add('hidden');
+  activeTid=null;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+}
+
+function toggleQA(el){ el.classList.toggle('open'); }
+
+function filterQs(btn,diff,container){
+  container.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  container.querySelectorAll('.qa-item').forEach(item=>{
+    item.style.display=(diff==='all'||item.dataset.diff===diff)?'':'none';
+  });
+}
+
+function updateProgress(){
+  const pct=Math.round(visited.size/CHAPTERS.length*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`${visited.size} / ${CHAPTERS.length} chapters visited`;
+}
+
+renderNav();
+</script>
+</body>
+</html>

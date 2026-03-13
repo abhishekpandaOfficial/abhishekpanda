@@ -18,6 +18,7 @@ const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Courses = lazy(() => import("./pages/Courses"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const Products = lazy(() => import("./pages/Products"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Mentorship = lazy(() => import("./pages/Mentorship"));
 const Contact = lazy(() => import("./pages/Contact"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -64,6 +65,8 @@ const MicroservicesMastery = lazy(() => import("./pages/MicroservicesMastery"));
 const KafkaMastery = lazy(() => import("./pages/KafkaMastery"));
 const BlazorMastery = lazy(() => import("./pages/BlazorMastery"));
 const EFCoreMastery = lazy(() => import("./pages/EFCoreMastery"));
+const GolangMastery = lazy(() => import("./pages/GolangMastery"));
+const LinuxMastery = lazy(() => import("./pages/LinuxMastery"));
 const AzureMasteryGuide = lazy(() => import("./pages/AzureMasteryGuide"));
 const AngularMasteryGuide = lazy(() => import("./pages/AngularMasteryGuide"));
 const DesignPatternsGuide = lazy(() => import("./pages/DesignPatternsGuide"));
@@ -180,6 +183,7 @@ const App = () => {
                 <Route path="/ebooks/:slug" element={<EbookDetail />} />
                 <Route path="/ebooks/:slug/read" element={<EbookReader />} />
                 <Route path="/products" element={<Products />} />
+                <Route path="/products/:productSlug" element={<ProductDetail />} />
                 <Route path="/mentorship" element={<Mentorship />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -193,7 +197,7 @@ const App = () => {
                 <Route path="/ai-closed_models_2026.html" element={<Navigate to="/llm-galaxy/closed-source-models" replace />} />
                 <Route path="/open-source-models-march-2026.html" element={<Navigate to="/llm-galaxy/open-source-models" replace />} />
                 <Route path="/ai-model-comparison.html" element={<Navigate to="/llm-galaxy/model-comparison" replace />} />
-                <Route path="/blogs" element={<BlogAggregator />} />
+                <Route path="/blogs" element={<Navigate to="/blog/techhub" replace />} />
                 <Route path="/cheatsheets" element={<Navigate to="/blogs" replace />} />
                 <Route path="/cheatsheets/dsa-mastery-csharp" element={<Navigate to="/dsa-mastery-csharp/syllabus" replace />} />
                 <Route path="/cheatsheets/dsa-mastery-csharp/practice" element={<DsaMasteryPractice />} />
@@ -208,6 +212,8 @@ const App = () => {
                 <Route path="/cheatsheets/kafka-mastery" element={<KafkaMastery />} />
                 <Route path="/cheatsheets/blazor-mastery" element={<BlazorMastery />} />
                 <Route path="/cheatsheets/efcore-mastery" element={<EFCoreMastery />} />
+                <Route path="/cheatsheets/golang-mastery" element={<GolangMastery />} />
+                <Route path="/cheatsheets/linux-mastery" element={<LinuxMastery />} />
                 <Route path="/cheatsheets/dotnet-mastery-toc" element={<Navigate to="/cheatsheets/dotnet-mastery" replace />} />
                 <Route path="/cheatsheets/:seriesSlug" element={<BlogSeries />} />
                 <Route path="/ai-ml-blogs" element={<AiMlBlogsHub />} />
@@ -227,8 +233,10 @@ const App = () => {
                 <Route path="/blogs/microservices-mastery" element={<Navigate to="/cheatsheets/microservices-mastery" replace />} />
                 <Route path="/blogs/kafka-mastery" element={<Navigate to="/cheatsheets/kafka-mastery" replace />} />
                 <Route path="/blogs/blazor-mastery" element={<Navigate to="/cheatsheets/blazor-mastery" replace />} />
+                <Route path="/blogs/golang-mastery" element={<Navigate to="/cheatsheets/golang-mastery" replace />} />
+                <Route path="/blogs/linux-mastery" element={<Navigate to="/cheatsheets/linux-mastery" replace />} />
                 <Route path="/blogs/:seriesSlug" element={<LegacyCheatsheetSeriesRedirect />} />
-                <Route path="/blog/techhub" element={<TechHub />} />
+                <Route path="/blog/techhub" element={<BlogAggregator />} />
                 <Route path="/articles" element={<Suspense fallback={<RouteLoader />}><ArticlesPage /></Suspense>} />
                 <Route path="/articles/:slug" element={<Suspense fallback={<RouteLoader />}><ArticlesPage /></Suspense>} />
                 <Route path="/scriptures" element={<Suspense fallback={<RouteLoader />}><Scriptures /></Suspense>} />
@@ -264,6 +272,8 @@ const App = () => {
                 <Route path="/kafka-mastery" element={<Navigate to="/cheatsheets/kafka-mastery" replace />} />
                 <Route path="/blazor-mastery" element={<Navigate to="/cheatsheets/blazor-mastery" replace />} />
                 <Route path="/efcore-mastery" element={<Navigate to="/cheatsheets/efcore-mastery" replace />} />
+                <Route path="/golang-mastery" element={<Navigate to="/cheatsheets/golang-mastery" replace />} />
+                <Route path="/linux-mastery" element={<Navigate to="/cheatsheets/linux-mastery" replace />} />
                 <Route path="/dotnet-mastery-toc" element={<Navigate to="/cheatsheets/dotnet-mastery" replace />} />
                 <Route path="/design-patterns-guide" element={<DesignPatternsGuide />} />
                 <Route path="/cheatsheets/solid-principles" element={<SolidPrinciplesGuide />} />

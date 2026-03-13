@@ -57,7 +57,7 @@ export default function AiMlBlogsHub() {
             >
               <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
                 <Brain className="h-4 w-4" />
-                AI / ML Blogs Hub
+                AI / ML Hub
               </div>
               <h1 className="editorial-title mt-6 text-4xl font-black md:text-5xl lg:text-6xl">
                 Explore Every <span className="gradient-text">AI / ML Mastery Series</span>
