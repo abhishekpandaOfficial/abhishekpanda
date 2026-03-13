@@ -16,6 +16,32 @@ type BlogSeriesGridProps = {
 
 export function BlogSeriesGrid({ counts, selectedSlug, seriesList = BLOG_SERIES }: BlogSeriesGridProps) {
   const { theme } = useTheme();
+  const statusMeta = {
+    completed: {
+      dot: "bg-emerald-500",
+      chip:
+        theme === "dark"
+          ? "border-emerald-400/35 bg-emerald-500/12 text-emerald-200"
+          : "border-emerald-500/25 bg-emerald-50 text-emerald-700",
+      label: "Completed",
+    },
+    partial: {
+      dot: "bg-amber-500",
+      chip:
+        theme === "dark"
+          ? "border-amber-400/35 bg-amber-500/12 text-amber-200"
+          : "border-amber-500/25 bg-amber-50 text-amber-700",
+      label: "In Progress",
+    },
+    pending: {
+      dot: "bg-rose-500",
+      chip:
+        theme === "dark"
+          ? "border-rose-400/35 bg-rose-500/12 text-rose-200"
+          : "border-rose-500/25 bg-rose-50 text-rose-700",
+      label: "Pending",
+    },
+  } as const;
 
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5 lg:grid-cols-[repeat(auto-fit,minmax(320px,1fr))] lg:gap-6">
@@ -24,6 +50,7 @@ export function BlogSeriesGrid({ counts, selectedSlug, seriesList = BLOG_SERIES 
         const count = counts.get(series.slug) ?? 0;
         const isSelected = selectedSlug === series.slug;
         const visual = getBlogSeriesVisual(series, theme);
+        const status = statusMeta[series.status || "pending"];
 
         return (
           <MotionLink
@@ -77,12 +104,18 @@ export function BlogSeriesGrid({ counts, selectedSlug, seriesList = BLOG_SERIES 
                       </span>
                     ))}
                   </div>
-                  <ArrowRight
-                    className={cn(
-                      "h-5 w-5 flex-shrink-0 transition-all group-hover:translate-x-1",
-                      theme === "dark" ? "text-white/85 group-hover:text-white" : "text-slate-900/70 group-hover:text-slate-950"
-                    )}
-                  />
+                  <div className="flex items-center gap-2">
+                    <span className={cn("inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide", status.chip)} title={series.statusNote || status.label}>
+                      <span className={cn("h-2.5 w-2.5 rounded-full", status.dot)} />
+                      {status.label}
+                    </span>
+                    <ArrowRight
+                      className={cn(
+                        "h-5 w-5 flex-shrink-0 transition-all group-hover:translate-x-1",
+                        theme === "dark" ? "text-white/85 group-hover:text-white" : "text-slate-900/70 group-hover:text-slate-950"
+                      )}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -111,6 +144,11 @@ export function BlogSeriesGrid({ counts, selectedSlug, seriesList = BLOG_SERIES 
                       <img src={logo} alt="" className="h-full w-full object-contain" loading="lazy" />
                     </span>
                   ))}
+                </div>
+
+                <div className="mt-4 inline-flex w-fit items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-1.5 text-[11px] font-semibold text-muted-foreground">
+                  <span className={cn("h-2.5 w-2.5 rounded-full", status.dot)} />
+                  {series.statusNote || status.label}
                 </div>
 
                 <div className="editorial-meta mt-5 flex items-center justify-between gap-3 border-t border-border/60 pt-4 text-xs text-muted-foreground">

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Footer } from "@/components/layout/Footer";
 import { Navigation } from "@/components/layout/Navigation";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export type ResourceHubMetric = {
   label: string;
@@ -118,6 +119,7 @@ export function ResourceHubPage({
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {cards.map((card) => {
                 const Icon = card.icon;
+                const isStackCraft = card.title === "StackCraft";
                 const cardKey = `${card.to || card.title}-${card.title}`;
                 const tagPalette = [
                   "border-sky-300/40 bg-sky-500/10 text-sky-700 dark:text-sky-300",
@@ -142,7 +144,14 @@ export function ResourceHubPage({
                         </div>
                         <h3 className="mt-4 text-2xl font-black tracking-tight text-foreground">{card.title}</h3>
                       </div>
-                      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-background/90 p-2 text-primary">
+                      <div
+                        className={cn(
+                          "flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border p-2 text-primary",
+                          isStackCraft
+                            ? "border-sky-400/30 bg-gradient-to-br from-sky-500/18 via-blue-500/10 to-cyan-400/16 shadow-[0_18px_34px_rgba(59,109,240,0.18)]"
+                            : "border-border/60 bg-background/90",
+                        )}
+                      >
                         {card.logoSrc ? (
                           <img
                             src={card.logoSrc}
@@ -183,7 +192,12 @@ export function ResourceHubPage({
                     <Link
                       key={cardKey}
                       to={card.to}
-                      className="group rounded-[1.75rem] border border-border/60 bg-card/80 p-6 transition hover:border-primary/30 hover:bg-card"
+                      className={cn(
+                        "group rounded-[1.75rem] border p-6 transition",
+                        isStackCraft
+                          ? "border-sky-400/20 bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.16),transparent_32%),linear-gradient(160deg,rgba(10,18,34,0.96),rgba(14,27,48,0.9))] hover:border-sky-300/40 hover:shadow-[0_30px_68px_rgba(59,109,240,0.14)]"
+                          : "border-border/60 bg-card/80 hover:border-primary/30 hover:bg-card",
+                      )}
                     >
                       {cardContent}
                     </Link>

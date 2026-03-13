@@ -50,12 +50,20 @@ function ProjectShowcaseCard({
   logoAlt,
   icon: Icon,
 }: (typeof PROJECT_CARDS)[number]) {
+  const isStackCraft = title === "StackCraft";
   const cardBody = (
     <>
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-primary">
+            <span
+              className={cn(
+                "rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]",
+                isStackCraft
+                  ? "border-sky-400/30 bg-sky-500/12 text-sky-300"
+                  : "border-primary/20 bg-primary/10 text-primary",
+              )}
+            >
               {eyebrow || "Project"}
             </span>
             {statusLabel ? (
@@ -66,7 +74,14 @@ function ProjectShowcaseCard({
           </div>
           <h3 className="mt-4 text-2xl font-black tracking-tight text-foreground">{title}</h3>
         </div>
-        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-background/95 p-2 text-primary">
+        <div
+          className={cn(
+            "flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border p-2 text-primary",
+            isStackCraft
+              ? "border-sky-400/30 bg-gradient-to-br from-sky-500/20 via-blue-500/12 to-cyan-400/18 shadow-[0_18px_34px_rgba(59,109,240,0.20)]"
+              : "border-border/60 bg-background/95",
+          )}
+        >
           {logoSrc ? (
             <img src={logoSrc} alt={logoAlt || `${title} logo`} className="h-8 w-8 object-contain" loading="lazy" />
           ) : (
@@ -97,7 +112,15 @@ function ProjectShowcaseCard({
 
   if (to && !disabled) {
     return (
-      <Link to={to} className="group rounded-[1.75rem] border border-border/60 bg-background/85 p-6 transition hover:border-primary/30 hover:bg-background">
+      <Link
+        to={to}
+        className={cn(
+          "group rounded-[1.75rem] border p-6 transition",
+          isStackCraft
+            ? "border-sky-400/20 bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.18),transparent_32%),linear-gradient(160deg,rgba(8,17,31,0.98),rgba(12,26,46,0.94))] hover:border-sky-300/40 hover:bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.22),transparent_34%),linear-gradient(160deg,rgba(8,17,31,1),rgba(12,26,46,0.98))] hover:shadow-[0_28px_70px_rgba(59,109,240,0.16)]"
+            : "border-border/60 bg-background/85 hover:border-primary/30 hover:bg-background",
+        )}
+      >
         {cardBody}
       </Link>
     );

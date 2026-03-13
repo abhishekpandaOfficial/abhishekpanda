@@ -210,13 +210,13 @@ html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--t
 .detail-empty-icon{font-size:48px;opacity:.35}
 .detail-empty h3{font-family:var(--font-display);font-size:18px;color:var(--text-secondary)}
 .detail-empty p{font-size:13px;line-height:1.6}
-.detail-content{padding:24px}
+.detail-content{padding:24px;min-width:0}
 .detail-header{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
 .detail-breadcrumb{font-size:10px;color:var(--text-muted);font-family:var(--font-code);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
 .detail-title{font-family:var(--font-display);font-size:24px;font-weight:800;line-height:1.15;margin-bottom:6px}
 .detail-subtitle{font-size:13px;color:var(--text-secondary);line-height:1.6}
 .detail-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.section{margin-bottom:24px}
+.section{margin-bottom:24px;min-width:0}
 .section-title{
   font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:12px;display:flex;align-items:center;gap:8px;
 }
@@ -243,7 +243,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--t
 }
 .code-copy:hover{border-color:var(--ang-red);color:var(--ang-red)}
 .code-body{padding:16px;overflow-x:auto}
-.code-body pre{font-family:var(--font-code);font-size:11.5px;line-height:1.75;color:#d8e3f5}
+.code-body pre{font-family:var(--font-code);font-size:11.5px;line-height:1.75;color:#d8e3f5;min-width:max-content}
 .kw{color:#ff6b9d}
 .type,.cls{color:#7dd3fc}
 .str{color:#a7f3d0}
@@ -252,7 +252,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--t
 .fn{color:#c4b5fd}
 .prop{color:#fda4af}
 .dec{color:#fde68a}
-.diagram-body{padding:16px;display:flex;justify-content:center;overflow-x:auto}
+.diagram-body{padding:16px;display:flex;justify-content:center;overflow-x:auto;overflow-y:hidden}
+.diagram-body svg{display:block;width:min(100%,520px);max-width:100%;height:auto;flex-shrink:0}
 .callout{
   border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;font-size:12.5px;line-height:1.65;
 }
@@ -262,7 +263,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--t
 .callout-danger{background:rgba(221,0,49,.08);border:1px solid rgba(221,0,49,.24);color:var(--text-secondary)}
 .callout-icon{flex-shrink:0;font-size:15px}
 .table-body{padding:0;overflow-x:auto}
-.comp-table{width:100%;border-collapse:collapse;font-size:12px}
+.comp-table{width:100%;min-width:520px;border-collapse:collapse;font-size:12px}
 .comp-table th{background:var(--bg-card);padding:10px 12px;text-align:left;font-size:10px;color:var(--text-muted);font-family:var(--font-code);text-transform:uppercase;letter-spacing:.5px;border:1px solid var(--border)}
 .comp-table td{padding:10px 12px;border:1px solid var(--border);color:var(--text-secondary);vertical-align:top;line-height:1.55}
 .steps-body{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
@@ -294,16 +295,55 @@ html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--t
   background:linear-gradient(135deg,rgba(221,0,49,.2),rgba(0,216,255,.24));
   box-shadow:0 10px 24px rgba(0,216,255,.12);
 }
+.qa-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}
+.qa-summary-card{
+  background:linear-gradient(135deg,var(--bg-card),rgba(22,28,38,.72));border:1px solid var(--border);border-radius:12px;
+  padding:14px;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.qa-summary-card:hover,.qa-summary-card.active{transform:translateY(-1px);border-color:var(--border-bright);box-shadow:0 14px 28px rgba(0,0,0,.18)}
+.qa-summary-label{font-size:10px;font-family:var(--font-code);text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px}
+.qa-summary-count{font-family:var(--font-display);font-size:26px;font-weight:800;line-height:1}
+.qa-summary-note{font-size:11px;color:var(--text-secondary);margin-top:8px;line-height:1.5}
+.qa-meta-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0 10px}
+.qa-kind,.qa-tag-chip{
+  font-size:9px;padding:2px 7px;border-radius:999px;font-family:var(--font-code);border:1px solid var(--border);color:var(--text-muted);
+}
+.qa-kind{background:rgba(255,255,255,.03)}
+.qa-tag-chip{background:rgba(0,216,255,.06);color:var(--ang-blue);border-color:rgba(0,216,255,.22)}
+.qa-answer-section{margin-top:12px}
+.qa-answer-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-family:var(--font-code);color:var(--text-muted);margin-bottom:6px}
+.qa-answer-example{font-size:12px;color:var(--text-secondary);line-height:1.7}
+.qa-answer-code{margin-top:12px}
 @media (max-width: 1180px){
   html,body{overflow:auto}
   .layout{height:auto;min-height:100vh;display:block}
   .left-panel,.right-panel{width:100%;min-width:0;border-right:none;border-left:none}
   .left-panel{border-bottom:1px solid var(--border)}
   .middle-panel{border-right:none;border-bottom:1px solid var(--border)}
+  .middle-panel,.right-panel{padding-inline:0}
+}
+@media (max-width: 900px){
+  .header{height:auto;align-items:flex-start;flex-wrap:wrap;padding:12px 16px;gap:8px}
+  .header-subtitle{border-left:none;padding-left:0;width:100%}
+  .header-right{margin-left:0;width:100%;justify-content:space-between}
+  .layout{padding-top:88px}
+  .detail-content{padding:20px 16px}
+  .middle-panel{padding:20px 16px}
+  .chapter-hero{padding:20px}
+  .chapter-hero-title,.detail-title{font-size:22px}
 }
 @media (max-width: 640px){
   .welcome-actions{width:min(100%,420px);padding:10px}
   .start-btn{flex-basis:100%;width:100%}
+  .qa-summary-grid{grid-template-columns:1fr}
+  .chapter-hero-title,.detail-title{font-size:20px}
+  .detail-content{padding:16px 12px}
+  .middle-panel{padding:16px 12px}
+  .diagram-body,.code-body{padding:12px}
+  .code-header,.diagram-header,.table-header,.steps-header{padding:10px 12px;gap:8px;flex-wrap:wrap}
+  .comp-table{min-width:420px}
+  .step-item{padding:10px;gap:10px}
+  .qa-question,.qa-answer{padding:12px}
 }
 </style>
 </head>
@@ -383,7 +423,7 @@ const chapters = [
     desc:"Understand component composition, lifecycle, inputs, outputs, signals, and view encapsulation.",
     tags:["Core","UI","Signals"],
     topics:[
-      {id:"component-lifecycle",title:"Lifecycle & Render Timing",icon:"⏱️",desc:"constructor, ngOnInit, afterRender, destroy paths.",tags:["Core","Lifecycle"]},
+      {id:"component-lifecycle",title:"Lifecycle & Render Timing",icon:"⏱️",desc:"constructor, checks, afterNextRender/afterEveryRender, destroy paths.",tags:["Core","Lifecycle"]},
       {id:"inputs-outputs",title:"Inputs, Outputs & Model Inputs",icon:"🔁",desc:"Data contracts between parent and child components.",tags:["Core","Communication"]},
       {id:"signals-inputs",title:"Signals in Components",icon:"✨",desc:"signal, computed, effect, signal inputs, zoneless-friendly UI.",tags:["Angular 17+","Important"]},
       {id:"view-encapsulation",title:"Templates, Styles & Encapsulation",icon:"🎨",desc:"Emulated, ShadowDom, None and style scoping.",tags:["UI","Architecture"]}
@@ -631,36 +671,81 @@ const topicDetails = {
   "component-lifecycle": {
     title:"Lifecycle & Render Timing",
     breadcrumb:"Chapter 2 · Components",
-    subtitle:"Lifecycle is less about memorizing hooks and more about knowing when data, DOM, and children are actually stable.",
+    subtitle:"Angular 21 lifecycle is about knowing the exact order of input changes, checks, content/view hooks, render callbacks, and cleanup.",
     badges:[{text:"Lifecycle",color:"#dd0031"},{text:"Core",color:"#00d8ff"},{text:"Rendering",color:"#00c853"}],
     sections:[
       {type:"diagram", title:"Component Lifecycle Sequence", svg:`
-        <svg width="520" height="280" viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg">
+        <svg width="520" height="468" viewBox="0 0 520 468" xmlns="http://www.w3.org/2000/svg">
           <defs><style>
             .node{fill:#161c26;stroke:#364960;stroke-width:1.3;rx:8}
             .t{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#e8edf5;text-anchor:middle}
             .s{font-family:'JetBrains Mono',monospace;font-size:8px;fill:#9aa7bb;text-anchor:middle}
+            .label{font-family:'JetBrains Mono',monospace;font-size:8px;fill:#00d8ff;text-transform:uppercase;letter-spacing:1px}
+            .tiny{font-family:'JetBrains Mono',monospace;font-size:7px;fill:#9aa7bb;text-anchor:middle}
             .line{stroke:#dd0031;stroke-width:1.5;fill:none;stroke-dasharray:4 3}
           </style></defs>
-          <rect class="node" x="190" y="10" width="140" height="34"/><text class="t" x="260" y="31">constructor</text>
-          <rect class="node" x="190" y="58" width="140" height="34"/><text class="t" x="260" y="79">input binding</text>
-          <rect class="node" x="190" y="106" width="140" height="34"/><text class="t" x="260" y="127">ngOnInit</text>
-          <rect class="node" x="190" y="154" width="140" height="34"/><text class="t" x="260" y="175">render / checks</text>
-          <rect class="node" x="190" y="202" width="140" height="34"/><text class="t" x="260" y="223">afterRender / effects</text>
-          <rect class="node" x="190" y="250" width="140" height="24"/><text class="s" x="260" y="266">destroy / cleanup</text>
-          <path class="line" d="M260 44 L260 58"/><path class="line" d="M260 92 L260 106"/><path class="line" d="M260 140 L260 154"/><path class="line" d="M260 188 L260 202"/><path class="line" d="M260 236 L260 250"/>
+          <text class="label" x="42" y="28">Initialization</text>
+          <rect class="node" x="170" y="10" width="180" height="30"/><text class="t" x="260" y="29">constructor</text>
+          <rect class="node" x="170" y="48" width="180" height="30"/><text class="t" x="260" y="67">ngOnChanges</text>
+          <text class="s" x="260" y="88">first change runs before ngOnInit</text>
+          <rect class="node" x="170" y="98" width="180" height="30"/><text class="t" x="260" y="117">ngOnInit</text>
+          <rect class="node" x="170" y="136" width="180" height="30"/><text class="t" x="260" y="155">ngDoCheck</text>
+          <rect class="node" x="170" y="174" width="180" height="30"/><text class="t" x="260" y="193">ngAfterContentInit</text>
+          <rect class="node" x="170" y="212" width="180" height="30"/><text class="t" x="260" y="231">ngAfterViewInit</text>
+          <rect class="node" x="170" y="250" width="180" height="30"/><text class="t" x="260" y="269">ngAfterContentChecked</text>
+          <rect class="node" x="170" y="288" width="180" height="30"/><text class="t" x="260" y="307">ngAfterViewChecked</text>
+          <rect class="node" x="170" y="326" width="180" height="30"/><text class="t" x="260" y="345">afterNextRender / afterEveryRender</text>
+          <text class="s" x="260" y="366">render callbacks fire after DOM render</text>
+          <text class="label" x="260" y="390">Subsequent Updates</text>
+          <rect class="node" x="140" y="400" width="240" height="34"/>
+          <text class="tiny" x="260" y="414">ngOnChanges → ngDoCheck</text>
+          <text class="tiny" x="260" y="425">ngAfterContentChecked → ngAfterViewChecked → afterEveryRender</text>
+          <text class="label" x="260" y="452">Destruction</text>
+          <rect class="node" x="170" y="458" width="180" height="10" opacity="0"/>
+          <rect class="node" x="170" y="432" width="180" height="26"/><text class="s" x="260" y="449">ngOnDestroy / DestroyRef.onDestroy</text>
+          <path class="line" d="M260 40 L260 48"/><path class="line" d="M260 78 L260 98"/><path class="line" d="M260 128 L260 136"/><path class="line" d="M260 166 L260 174"/><path class="line" d="M260 204 L260 212"/><path class="line" d="M260 242 L260 250"/><path class="line" d="M260 280 L260 288"/><path class="line" d="M260 318 L260 326"/><path class="line" d="M260 356 L260 400"/><path class="line" d="M260 434 L260 432"/>
         </svg>
       `},
-      {type:"code", title:"Lifecycle with modern cleanup", lang:"typescript", code:`<span class="kw">import</span> { <span class="fn">Component</span>, <span class="fn">DestroyRef</span>, <span class="fn">inject</span>, <span class="fn">signal</span>, <span class="fn">effect</span> } <span class="kw">from</span> <span class="str">'@angular/core'</span>;
+      {type:"table", title:"Angular 21 Lifecycle Order", columns:["Phase","Order","Notes"], rows:[
+        ["Initialization","constructor → ngOnChanges → ngOnInit → ngDoCheck → ngAfterContentInit → ngAfterViewInit → ngAfterContentChecked → ngAfterViewChecked → afterNextRender → afterEveryRender","The first ngOnChanges runs before ngOnInit. Render callbacks run after Angular finishes rendering to the DOM."],
+        ["Subsequent updates","ngOnChanges → ngDoCheck → ngAfterContentChecked → ngAfterViewChecked → afterEveryRender","afterNextRender is one-time; afterEveryRender continues after each render cycle."],
+        ["Destruction","ngOnDestroy or DestroyRef.onDestroy","Use DestroyRef to keep setup and cleanup close together."]
+      ]},
+      {type:"code", title:"Lifecycle with Angular 21 render callbacks", lang:"typescript", code:`<span class="kw">import</span> {
+  <span class="fn">Component</span>,
+  <span class="fn">DestroyRef</span>,
+  <span class="fn">afterEveryRender</span>,
+  <span class="fn">afterNextRender</span>,
+  <span class="fn">effect</span>,
+  <span class="fn">inject</span>,
+  <span class="type">OnChanges</span>,
+  <span class="type">OnInit</span>,
+  <span class="type">SimpleChanges</span>,
+  <span class="fn">signal</span>
+} <span class="kw">from</span> <span class="str">'@angular/core'</span>;
 
 <span class="dec">@Component</span>({
   selector: <span class="str">'app-orders'</span>,
   standalone: <span class="kw">true</span>,
   template: <span class="str">'&lt;h2&gt;{{ title() }}&lt;/h2&gt;'</span>
 })
-<span class="kw">export class</span> <span class="type">OrdersComponent</span> {
+<span class="kw">export class</span> <span class="type">OrdersComponent</span> <span class="kw">implements</span> <span class="type">OnChanges</span>, <span class="type">OnInit</span> {
   <span class="kw">private</span> destroyRef = <span class="fn">inject</span>(DestroyRef);
   title = <span class="fn">signal</span>(<span class="str">'Orders'</span>);
+
+  <span class="fn">constructor</span>() {
+    <span class="fn">afterNextRender</span>(() => {
+      <span class="type">console</span>.<span class="fn">log</span>(<span class="str">'DOM is rendered once after init'</span>);
+    });
+
+    <span class="fn">afterEveryRender</span>(() => {
+      <span class="type">console</span>.<span class="fn">log</span>(<span class="str">'Runs after every render pass'</span>);
+    });
+  }
+
+  <span class="fn">ngOnChanges</span>(changes: <span class="type">SimpleChanges</span>) {
+    <span class="type">console</span>.<span class="fn">log</span>(<span class="str">'Inputs changed'</span>, changes);
+  }
 
   <span class="fn">ngOnInit</span>() {
     <span class="kw">const</span> timer = <span class="fn">setInterval</span>(() => {}, <span class="num">1000</span>);
@@ -671,7 +756,9 @@ const topicDetails = {
     <span class="type">console</span>.<span class="fn">log</span>(<span class="kw">this</span>.title());
   });
 }`},
-      {type:"callout", kind:"warn", icon:"⚠️", text:"Do not put network calls or subscription setup in the constructor. Constructor is for dependency wiring; initialization logic belongs after inputs and runtime state are available."}
+      {type:"callout", kind:"warn", icon:"⚠️", text:"The old simplified sequence in this guide was missing Angular 21 hooks like <code>ngOnChanges</code>, <code>ngDoCheck</code>, <code>ngAfterContentChecked</code>, <code>ngAfterViewChecked</code>, and the correct render callback names <code>afterNextRender</code> / <code>afterEveryRender</code>."},
+      {type:"callout", kind:"info", icon:"🧠", text:"Angular's official lifecycle guide also notes that render callbacks are application-wide, must be registered in an injection context such as the constructor, and do not run during SSR or build-time pre-rendering."},
+      {type:"callout", kind:"warn", icon:"⚠️", text:"Do not put network calls or subscription setup in the constructor. Constructor is for dependency wiring and render callback registration; initialization logic belongs after inputs and runtime state are available."}
     ]
   },
   "signals-inputs": {
@@ -1084,20 +1171,144 @@ const topicDetails = {
   }
 };
 
-const interviewQuestions = [
-  {tag:"architecture", level:"Basic", q:"What makes Angular different from React or Vue at the architectural level?", a:"Angular is a full platform rather than a minimal view layer. It ships opinionated solutions for DI, routing, forms, HTTP, rendering, and testing. That makes team conventions stronger, especially in large enterprise apps."},
-  {tag:"components", level:"Basic", q:"When should logic live in a component versus a service?", a:"Rendering logic and simple local UI state belong in components. Side effects, API orchestration, caching, and shared business workflows belong in services so components stay thin and testable."},
-  {tag:"signals", level:"Intermediate", q:"When should you use Signals instead of RxJS?", a:"Use signals for synchronous local or feature state and computed UI values. Use RxJS for asynchronous streams, cancellation, concurrency, retries, websocket/event pipelines, and complex reactive orchestration."},
-  {tag:"router", level:"Intermediate", q:"What is the difference between canMatch and canActivate?", a:"canMatch decides whether a route should match at all, often preventing feature loading. canActivate runs later and decides whether navigation may enter an already matched route."},
-  {tag:"rxjs", level:"Intermediate", q:"Why is switchMap the common choice for type-ahead search?", a:"Because only the latest user intent should win. switchMap cancels the previous in-flight observable when a new term arrives, preventing stale results from overwriting fresh ones."},
-  {tag:"state", level:"Advanced", q:"When is NgRx worth the cost?", a:"NgRx pays off when many features coordinate around shared state, transitions are complex, effects are non-trivial, and predictability or auditability matters more than minimal boilerplate."},
-  {tag:"http", level:"Advanced", q:"What belongs in an interceptor and what does not?", a:"Cross-cutting concerns belong there: auth headers, tracing, normalized error translation, retries, and metrics. Business rules and screen-specific workflow branching do not."},
-  {tag:"performance", level:"Advanced", q:"Why does OnPush require immutability discipline?", a:"Because OnPush mainly reacts to input reference changes and explicit signals/marks. If you mutate nested data in place, Angular may not see a new reference and the UI can become stale or unpredictable."},
-  {tag:"ssr", level:"Advanced", q:"What problems break Angular hydration?", a:"Browser-only code during SSR, mismatched HTML between server and client, duplicate fetches that change content shape, and imperative DOM mutations before hydration completes."},
-  {tag:"security", level:"Advanced", q:"Can route guards replace backend authorization?", a:"No. Guards are frontend UX controls only. Real security must be enforced by backend authorization and token validation."},
-  {tag:"angular21", level:"Intermediate", q:"What is the significance of zoneless change detection in Angular 21?", a:"It reduces the framework's reliance on Zone.js and global async patching. Angular can update more precisely through reactive reads and explicit signals, improving runtime efficiency and mental clarity."},
-  {tag:"testing", level:"Basic", q:"What should most Angular tests assert?", a:"They should assert behavior at the appropriate boundary: services for logic/orchestration, components for rendered state and interactions, and E2E tests for critical integrated user flows."}
-];
+function slugify(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function getInterviewPrimaryTag(topic, chapter) {
+  const firstTopicTag = (topic.tags && topic.tags[0]) || chapter.title;
+  return slugify(firstTopicTag);
+}
+
+function getInterviewTags(topic, chapter) {
+  return [chapter.title, topic.title, ...(topic.tags || [])].slice(0, 5);
+}
+
+function getInterviewLens(chapter, topic) {
+  const base = getAngularLens(chapter);
+  return {
+    focus: base.focus,
+    implementation: base.implementation,
+    guardrail: base.guardrail,
+    code: base.code,
+    scenario: `A feature team is introducing <strong>${topic.title}</strong> inside <strong>${chapter.title}</strong> and needs the implementation to survive growth, debugging, SSR, and Angular 21 upgrade pressure.`,
+    optimization: `The optimization conversation for ${topic.title} usually starts by measuring render cost, provider scope, and dependency flow before reaching for heavier abstractions.`,
+    fix: `When ${topic.title} misbehaves, inspect state ownership, template reads, route boundaries, and whether the feature is mixing old Angular patterns with Angular 21-first primitives.`,
+    compare: `${topic.title} should be chosen because it fits ${base.focus}, not because it is the newest API in the docs.`,
+  };
+}
+
+function makeInterviewQuestion(chapter, topic, idx, level, kind, question, answer, example, code) {
+  return {
+    id: `${topic.id}-${idx}`,
+    chapter: chapter.title,
+    topic: topic.title,
+    tag: getInterviewPrimaryTag(topic, chapter),
+    tags: getInterviewTags(topic, chapter),
+    level,
+    kind,
+    q: question,
+    a: answer,
+    example,
+    code
+  };
+}
+
+function buildAngularInterviewQuestions() {
+  const questions = [];
+
+  chapters.forEach((chapter) => {
+    chapter.topics.forEach((topic) => {
+      const lens = getInterviewLens(chapter, topic);
+      const desc = topic.desc.toLowerCase();
+
+      questions.push(
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          1,
+          'Beginner',
+          'Direct',
+          `What is ${topic.title} in Angular, and when do you typically use it?`,
+          `${topic.title} is Angular's answer for ${desc}. In practice, teams use it when they need a clear way to handle ${lens.focus} without inventing custom patterns first. The healthy starting point in Angular 21 is to keep the implementation explicit, standalone-friendly, and easy to observe in tests and DevTools.`,
+          `Example: a team building a ${chapter.title.toLowerCase()} feature would start with ${topic.title} as the default solution before introducing custom wrappers.`,
+          lens.code
+        ),
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          2,
+          'Beginner',
+          'Indirect',
+          `How would you explain the role of ${topic.title} to a JavaScript developer who is new to Angular?`,
+          `I would explain ${topic.title} as part of Angular's bigger platform contract. Instead of hand-wiring everything, Angular gives you a structured way to handle ${desc}. That reduces team inconsistency and makes the feature easier to reason about as the app grows.`,
+          `Example: if a teammate already understands components and events, I would connect ${topic.title} to where it fits in the screen lifecycle and dependency flow.`,
+          lens.code
+        ),
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          3,
+          'Intermediate',
+          'Logical',
+          `Why would a team choose ${topic.title} over an ad-hoc custom pattern in a real Angular 21 application?`,
+          `Because ${topic.title} aligns with Angular's built-in runtime model. The team gets predictable behavior, easier onboarding, and fewer one-off conventions. The decision becomes stronger when the feature has to work with routing, SSR, testing, and Angular 21's move toward explicit reactivity.`,
+          `Example: teams usually regret custom plumbing once multiple pages need the same behavior and the app starts layering guards, forms, API calls, and performance constraints on top.`,
+          lens.code
+        ),
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          4,
+          'Intermediate',
+          'Issue Fix',
+          `A screen using ${topic.title} is behaving unexpectedly. What would you inspect first?`,
+          `First inspect ownership and boundaries: who owns the state, where the side effect starts, and whether the component tree is reading the latest source of truth. Then verify the Angular-specific edge: stale bindings, provider placement, route timing, hydration mismatch, or a mix of signal-era code with older imperative assumptions.`,
+          `Example: if the bug appears only after navigation or refresh, I would inspect route timing, SSR boundaries, and whether the feature depends on browser-only behavior too early.`,
+          lens.code
+        ),
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          5,
+          'Advanced',
+          'Scenario',
+          `You are designing a production feature around ${topic.title}. What architecture choice matters most?`,
+          `The most important choice is usually boundary clarity. ${lens.implementation} Once the boundary is right, implementation details stay local and the feature remains easier to test, cache, lazy-load, or refactor. Advanced Angular work is usually less about syntax and more about deciding where responsibility should live.`,
+          lens.scenario,
+          lens.code
+        ),
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          6,
+          'Advanced',
+          'Optimization',
+          `How do you optimize ${topic.title} without making the codebase harder to maintain?`,
+          `${lens.optimization} In Angular 21, optimization should reinforce explicit reactivity and simpler feature boundaries. Prefer small measurable wins such as reducing redundant template work, deferring non-critical UI, narrowing provider scope, and keeping derived state close to where it is consumed.`,
+          `Example: optimize the hot path first, then validate in Angular DevTools, browser performance tools, and integration tests before committing to a more complex abstraction.`,
+          lens.code
+        ),
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          7,
+          'Architect',
+          'Architecture',
+          `What is the architectural risk of getting ${topic.title} wrong in a large Angular 21 codebase?`,
+          `The risk is not just a local bug. A weak ${topic.title} strategy spreads accidental complexity across the app: unstable APIs between features, poor SSR behavior, inconsistent testing, hidden state coupling, and upgrade friction. Architects should define a narrow default pattern, document the exceptions, and keep the framework's direction visible to the team.`,
+          `Example: when multiple squads solve ${topic.title} differently, the app becomes harder to migrate, profile, and reason about under load or during incidents.`,
+          lens.code
+        )
+      );
+    });
+  });
+
+  return questions;
+}
+
+const interviewQuestions = buildAngularInterviewQuestions();
+let qaFilterState = { tag:'', level:'' };
 
 let currentChapter = -1;
 let currentTopic = null;
@@ -1278,28 +1489,63 @@ function renderSection(section) {
 function renderInterviewSection(topicTitle) {
   const relevant = interviewQuestions.filter((q) => {
     const keys = topicTitle.toLowerCase().split(/\s+/);
-    return keys.some((key) => q.q.toLowerCase().includes(key) || q.a.toLowerCase().includes(key) || q.tag.toLowerCase().includes(key));
+    return keys.some((key) =>
+      q.q.toLowerCase().includes(key) ||
+      q.a.toLowerCase().includes(key) ||
+      q.tag.toLowerCase().includes(key) ||
+      q.topic.toLowerCase().includes(key) ||
+      q.chapter.toLowerCase().includes(key)
+    );
   }).slice(0, 4);
 
   if (!relevant.length) return '';
 
-  const levelColors = { Basic:'#00c853', Intermediate:'#f59e0b', Advanced:'#dd0031', Expert:'#7c3aed' };
   return `
     <div class="section">
       <div class="section-title">Interview Questions</div>
-      ${relevant.map((q) => {
-        const levelColor = levelColors[q.level] || '#9aa7bb';
-        return `
-          <div class="qa-item">
-            <div class="qa-question" onclick="toggleQA(this)">
-              <span class="qa-q-icon">Q</span>
-              <span class="qa-q-text">${q.q}</span>
-              <span class="qa-level" style="background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44">${q.level}</span>
-              <span class="qa-arrow">▶</span>
+      ${relevant.map(renderQAItem).join('')}
+    </div>`;
+}
+
+const qaLevelColors = { Beginner:'#00c853', Intermediate:'#00d8ff', Advanced:'#f59e0b', Architect:'#dd0031' };
+
+function renderQAItem(q) {
+  const levelColor = qaLevelColors[q.level] || '#9aa7bb';
+  const tagChips = (q.tags || []).slice(0, 4).map((tag) =>
+    `<span class="qa-tag-chip">${tag}</span>`
+  ).join('');
+
+  return `
+    <div class="qa-item" data-tag="${q.tag}" data-level="${q.level}">
+      <div class="qa-question" onclick="toggleQA(this)">
+        <span class="qa-q-icon">Q</span>
+        <span class="qa-q-text">${q.q}</span>
+        <span class="qa-level" style="background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44">${q.level}</span>
+        <span class="qa-arrow">▶</span>
+      </div>
+      <div class="qa-answer">
+        <div class="qa-meta-row">
+          <span class="qa-kind">${q.kind}</span>
+          <span class="qa-kind">${q.chapter}</span>
+          <span class="qa-kind">${q.topic}</span>
+          ${tagChips}
+        </div>
+        <div class="qa-answer-text">${q.a}</div>
+        <div class="qa-answer-section">
+          <div class="qa-answer-title">Example</div>
+          <div class="qa-answer-example">${q.example}</div>
+        </div>
+        <div class="qa-answer-code">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">ts</span>
+              <span class="code-title">${q.topic} interview snippet</span>
+              <button class="code-copy" onclick="copyCode(this)">Copy</button>
             </div>
-            <div class="qa-answer"><div class="qa-answer-text">${q.a}</div></div>
-          </div>`;
-      }).join('')}
+            <div class="code-body"><pre>${q.code}</pre></div>
+          </div>
+        </div>
+      </div>
     </div>`;
 }
 
@@ -1307,69 +1553,261 @@ function showAllInterviewQuestions() {
   document.getElementById('detailEmpty').style.display = 'none';
   document.getElementById('detailContent').style.display = 'block';
 
-  const levelColors = { Basic:'#00c853', Intermediate:'#f59e0b', Advanced:'#dd0031', Expert:'#7c3aed' };
+  qaFilterState = { tag:'', level:'' };
   const tags = [...new Set(interviewQuestions.map((q) => q.tag))];
-  const filterBtns = tags.map((tag) =>
-    `<button class="qa-filter-btn" onclick='filterQA(${JSON.stringify(tag)}, this)'>${tag}</button>`
-  ).join('');
-
-  const qHTML = interviewQuestions.map((q) => {
-    const levelColor = levelColors[q.level] || '#9aa7bb';
+  const summaries = Object.entries(qaLevelColors).map(([level, color]) => {
+    const count = interviewQuestions.filter((q) => q.level === level).length;
     return `
-      <div class="qa-item" data-tag="${q.tag}">
-        <div class="qa-question" onclick="toggleQA(this)">
-          <span class="qa-q-icon">Q</span>
-          <span class="qa-q-text">${q.q}</span>
-          <span class="qa-level" style="background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44">${q.level}</span>
-          <span class="qa-arrow">▶</span>
-        </div>
-        <div class="qa-answer"><div class="qa-answer-text">${q.a}</div></div>
+      <div class="qa-summary-card" data-level-card="${level}" onclick="setQALevelFilter('${level}', this)" style="border-color:${color}33">
+        <div class="qa-summary-label">${level}</div>
+        <div class="qa-summary-count" style="color:${color}">${count}</div>
+        <div class="qa-summary-note">${level === 'Beginner' ? 'Direct foundations and clear definitions.' : level === 'Intermediate' ? 'Indirect reasoning, tradeoffs, and debugging flow.' : level === 'Advanced' ? 'Scenario, optimization, and production behavior.' : 'Architecture, boundaries, and system design decisions.'}</div>
       </div>`;
   }).join('');
+  const filterBtns = tags.map((tag) =>
+    `<button class="qa-filter-btn" data-tag-filter="${tag}" onclick='setQATagFilter(${JSON.stringify(tag)}, this)'>${tag}</button>`
+  ).join('');
 
   document.getElementById('detailContent').innerHTML = `
     <div class="detail-content">
       <div class="detail-header">
         <div class="detail-breadcrumb">Angular Mastery · Interview Prep</div>
         <div class="detail-title">🎯 Interview Questions &amp; Answers</div>
-        <div class="detail-subtitle">${interviewQuestions.length} curated Angular questions covering fundamentals, architecture, state, performance, SSR, and modern Angular 21 practices.</div>
+        <div class="detail-subtitle">${interviewQuestions.length}+ Angular interview questions covering direct, indirect, scenario, logical, issue-fix, optimization, and architecture topics across Angular 21.</div>
       </div>
+      <div class="qa-summary-grid">${summaries}</div>
       <div class="qa-filter-bar">
-        <button class="qa-filter-btn active" onclick="filterQA('', this)">All Topics</button>
+        <button class="qa-filter-btn active" data-tag-filter="" onclick="setQATagFilter('', this)">All Tags</button>
         ${filterBtns}
       </div>
-      <div id="qaList">${qHTML}</div>
+      <div id="qaList">${interviewQuestions.map(renderQAItem).join('')}</div>
     </div>`;
 }
 
-function filterQA(tag, btn) {
-  document.querySelectorAll('.qa-filter-btn').forEach((item) => item.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+function applyQAFilters() {
   document.querySelectorAll('#qaList .qa-item').forEach((item) => {
-    item.style.display = (!tag || item.dataset.tag === tag) ? '' : 'none';
+    const matchTag = !qaFilterState.tag || item.dataset.tag === qaFilterState.tag;
+    const matchLevel = !qaFilterState.level || item.dataset.level === qaFilterState.level;
+    item.style.display = (matchTag && matchLevel) ? '' : 'none';
   });
 }
 
-function renderGenericDetail(topicId, chapterIdx) {
+function setQATagFilter(tag, btn) {
+  qaFilterState.tag = tag || '';
+  document.querySelectorAll('.qa-filter-btn').forEach((item) => item.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  applyQAFilters();
+}
+
+function setQALevelFilter(level, card) {
+  qaFilterState.level = qaFilterState.level === level ? '' : level;
+  document.querySelectorAll('.qa-summary-card').forEach((item) => item.classList.remove('active'));
+  if (qaFilterState.level && card) card.classList.add('active');
+  applyQAFilters();
+}
+
+function getAngularLens(chapter) {
+  const title = chapter.title.toLowerCase();
+  if (title.includes('foundations')) {
+    return {
+      focus:'platform architecture, workspace flow, and modern standalone bootstrap',
+      implementation:'Start from the standalone app shape, keep providers explicit, and understand how the CLI, compiler, and runtime cooperate before adding advanced abstractions.',
+      guardrail:'Avoid carrying pre-standalone mental models forward unless you truly need them for migration work.',
+      code:`import { bootstrapApplication } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
+
+bootstrapApplication(AppComponent, {
+  providers: [provideRouter(routes)]
+});`
+    };
+  }
+  if (title.includes('components') || title.includes('templates')) {
+    return {
+      focus:'component contracts, render flow, and template clarity',
+      implementation:'Model data flow first, then keep templates declarative and push derived state into signals, computed values, or focused view-model helpers.',
+      guardrail:'Do not let templates accumulate business logic, repeated lookups, or unstable bindings that rerun on every render.',
+      code:`readonly user = signal<User | null>(null);
+readonly displayName = computed(() => this.user()?.name ?? 'Anonymous');`
+    };
+  }
+  if (title.includes('dependency injection') || title.includes('routing')) {
+    return {
+      focus:'application boundaries, provider placement, and route composition',
+      implementation:'Keep services and route trees aligned with feature boundaries so each screen loads only what it needs and owns a clear dependency surface.',
+      guardrail:'Do not register everything at root by default; provider scope is part of your architecture, not a convenience switch.',
+      code:`export const routes: Routes = [
+  {
+    path: 'admin',
+    loadComponent: () => import('./admin.page').then(m => m.AdminPage)
+  }
+];`
+    };
+  }
+  if (title.includes('rxjs') || title.includes('state')) {
+    return {
+      focus:'reactive flow, derivation, cleanup, and state ownership',
+      implementation:'Use RxJS for async streams and integration edges, use signals for synchronous UI derivation, and keep each state container responsible for one slice of truth.',
+      guardrail:'Avoid mixing Subjects, signals, and store selectors in the same component without a clear ownership rule.',
+      code:`readonly query = signal('');
+readonly results$ = toObservable(this.query).pipe(
+  debounceTime(250),
+  switchMap(q => this.api.search(q))
+);`
+    };
+  }
+  if (title.includes('performance') || title.includes('ssr')) {
+    return {
+      focus:'render precision, delivery cost, hydration, and bundle discipline',
+      implementation:'Measure first, then reduce DOM churn, defer non-critical UI, split feature bundles, and choose hydration strategies intentionally.',
+      guardrail:'Do not optimize blindly; solve the actual bottleneck: CPU work, hydration cost, network payload, or rerender churn.',
+      code:`@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class DashboardCard { }`
+    };
+  }
+  if (title.includes('apis') || title.includes('testing')) {
+    return {
+      focus:'backend contracts, verification loops, and maintainable delivery',
+      implementation:'Keep client contracts typed, centralize transport concerns, and test behavior at the service, component, and user-flow layers.',
+      guardrail:'Do not let generated clients, auth flows, or test fixtures drift away from the real API and deployment shape.',
+      code:`this.http.get<UserDto[]>('/api/users', {
+  context: withInterceptorsFromDi()
+});`
+    };
+  }
+  return {
+    focus:'modern Angular 21 patterns and framework evolution',
+    implementation:'Lean into the Angular 21 direction: clearer reactivity, better tooling, and less hidden runtime behavior.',
+    guardrail:'Treat new APIs as opportunities to simplify architecture, not as extra layers to stack on top of older patterns.',
+    code:`readonly form = form({
+  email: field(''),
+  password: field('')
+});`
+  };
+}
+
+function getAngularBuildSteps(chapter, topic, lens) {
+  return [
+    `Frame ${topic.title} inside the wider ${chapter.title} architecture so the responsibility is explicit.`,
+    `Implement the smallest production-real slice using Angular 21-friendly primitives and explicit provider or render choices.`,
+    `Check runtime behavior with Angular DevTools, tests, or profiling before abstracting further.`,
+    `Review the main guardrail for this topic: ${lens.guardrail}`
+  ];
+}
+
+function renderAngularGenericDetail(topicId, chapterIdx) {
   const chapter = chapters[chapterIdx];
   const topic = chapter.topics.find((item) => item.id === topicId);
   if (!topic) return;
+
+  const lens = getAngularLens(chapter);
+  const chapterBadges = (chapter.tags || []).map((tag) =>
+    `<span class="dbadge" style="background:${chapter.bg};color:${chapter.color};border-color:${chapter.color}44">${tag}</span>`
+  ).join('');
+  const topicBadges = (topic.tags || []).map((tag) =>
+    `<span class="dbadge" style="background:${chapter.color}18;color:${chapter.color};border-color:${chapter.color}44">${tag}</span>`
+  ).join('');
+  const steps = getAngularBuildSteps(chapter, topic, lens).map((step) => `<li>${step}</li>`).join('');
+  const related = chapter.topics
+    .filter((item) => item.id !== topic.id)
+    .slice(0, 3)
+    .map((item) => `<li><strong>${item.title}</strong> — ${item.desc}</li>`)
+    .join('');
 
   document.getElementById('detailEmpty').style.display = 'none';
   document.getElementById('detailContent').style.display = 'block';
   document.getElementById('detailContent').innerHTML = `
     <div class="detail-content">
       <div class="detail-header">
-        <div class="detail-breadcrumb">${chapter.title}</div>
+        <div class="detail-breadcrumb">Chapter ${chapter.num} · ${chapter.title}</div>
         <div class="detail-title">${topic.icon} ${topic.title}</div>
         <div class="detail-subtitle">${topic.desc}</div>
+        <div class="detail-badges">${chapterBadges}${topicBadges}</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Why This Topic Matters</div>
+        <div class="prose">
+          <p><strong>${topic.title}</strong> sits inside <strong>${chapter.title}</strong>, which in Angular 21 is mainly about ${lens.focus}.</p>
+          <p>${lens.implementation}</p>
+        </div>
       </div>
       <div class="callout callout-info">
-        <span class="callout-icon">📚</span>
-        <span>This topic is wired into the same tri-pane Angular mastery structure. Rich code, diagrams, and deep commentary can be expanded here just like the detailed topics already implemented.</span>
+        <span class="callout-icon">✨</span>
+        <span><strong>Angular 21 lens:</strong> prefer explicit reactivity, standalone-first composition, and tooling that keeps runtime behavior observable.</span>
+      </div>
+      <div class="callout callout-warn">
+        <span class="callout-icon">🛡️</span>
+        <span><strong>Guardrail:</strong> ${lens.guardrail}</span>
+      </div>
+      <div class="section">
+        <div class="table-wrap">
+          <div class="table-header">Field Guide</div>
+          <div class="table-body">
+            <table class="comp-table">
+              <thead><tr><th>Area</th><th>Guidance</th></tr></thead>
+              <tbody>
+                <tr><td>Chapter</td><td>${chapter.title}</td></tr>
+                <tr><td>Topic intent</td><td>${topic.desc}</td></tr>
+                <tr><td>Primary focus</td><td>${lens.focus}</td></tr>
+                <tr><td>Recommended approach</td><td>${lens.implementation}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Suggested Build Sequence</div>
+        <div class="prose"><ol>${steps}</ol></div>
+      </div>
+      <div class="section">
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">ts</span>
+            <span class="code-title">${topic.title} starter pattern</span>
+            <button class="code-copy" onclick="copyCode(this)">Copy</button>
+          </div>
+          <div class="code-body"><pre>${lens.code}</pre></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="steps-box">
+          <div class="steps-header">Production Scenario</div>
+          <div class="steps-body">
+            <div class="step-item">
+              <div class="step-num">1</div>
+              <div class="step-copy">
+                <h4>Delivery context</h4>
+                <p>A team is shipping <strong>${topic.title}</strong> inside a larger <strong>${chapter.title}</strong> initiative and needs it to stay maintainable across upgrades, testing, and performance reviews.</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">2</div>
+              <div class="step-copy">
+                <h4>Recommended move</h4>
+                <p>Start with a thin vertical slice, confirm the runtime behavior end to end, and only then extract reusable helpers, stores, directives, or route-level abstractions.</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">3</div>
+              <div class="step-copy">
+                <h4>Review point</h4>
+                <p>Before calling the topic complete, verify that the solution still behaves well under Angular 21 defaults around signals, zoneless direction, SSR, and current tooling choices.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Explore Next In This Chapter</div>
+        <div class="prose"><ul>${related}</ul></div>
       </div>
       ${renderInterviewSection(topic.title)}
     </div>`;
+}
+
+function renderGenericDetail(topicId, chapterIdx) {
+  renderAngularGenericDetail(topicId, chapterIdx);
 }
 
 function toggleQA(el) {

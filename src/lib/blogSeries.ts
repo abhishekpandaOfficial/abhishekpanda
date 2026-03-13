@@ -9,6 +9,8 @@ export type BlogSeriesTrack = {
   rgb: string;
   href?: string;
   actionLabel?: string;
+  status?: "completed" | "partial" | "pending";
+  statusNote?: string;
 };
 
 export type BlogSeriesChapter = {
@@ -42,6 +44,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "34 197 94",
     href: "/dsa-mastery-csharp/syllabus",
     actionLabel: "Open DSA Mastery",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "csharp-mastery",
@@ -54,6 +58,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "99 102 241",
     href: "/csharp-mastery",
     actionLabel: "Open C# Mastery",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "linq-mastery",
@@ -66,6 +72,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "16 185 129",
     href: "/linq-mastery",
     actionLabel: "Open LINQ Mastery",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "dotnet-mastery",
@@ -78,6 +86,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "14 165 233",
     href: "/dotnet-mastery",
     actionLabel: "Open .NET Core Internals Mastery",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "efcore-mastery",
@@ -90,6 +100,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "16 185 129",
     href: "/efcore-mastery",
     actionLabel: "Open EF Core Mastery",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "solid-principles",
@@ -101,6 +113,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "56 189 248",
     href: "/cheatsheets/solid-principles",
     actionLabel: "Open Guide",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "design-patterns",
@@ -112,6 +126,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "251 146 60",
     href: "/design-patterns-guide",
     actionLabel: "Open Guide",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "microservices-mastery",
@@ -124,6 +140,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "14 165 233",
     href: "/microservices-mastery",
     actionLabel: "Open Microservices Mastery",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "kafka-mastery",
@@ -136,6 +154,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "168 85 247",
     href: "/kafka-mastery",
     actionLabel: "Open Kafka Mastery",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "blazor-mastery",
@@ -148,6 +168,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "124 58 237",
     href: "/blazor-mastery",
     actionLabel: "Open Blazor Mastery",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "golang-mastery",
@@ -160,6 +182,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "0 173 216",
     href: "/golang-mastery",
     actionLabel: "Open Go Mastery",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "linux-mastery",
@@ -172,6 +196,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "34 197 94",
     href: "/linux-mastery",
     actionLabel: "Open Linux Mastery",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "devops-mastery",
@@ -181,6 +207,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     keywords: ["devops", "ci/cd", "docker", "terraform", "jenkins", "kubernetes", "platform engineering"],
     logos: ["/brand-logos/stacks/docker.svg", "/brand-logos/stacks/terraform.svg"],
     rgb: "59 130 246",
+    status: "pending",
+    statusNote: "Route not launched",
   },
   {
     slug: "databases-mastery",
@@ -190,6 +218,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     keywords: ["database", "sql", "postgresql", "mongodb", "redis", "data modeling", "indexing"],
     logos: ["/brand-logos/stacks/postgresql.svg", "/brand-logos/stacks/mongodb.svg"],
     rgb: "8 145 178",
+    status: "pending",
+    statusNote: "Route not launched",
   },
   {
     slug: "agile-mastery",
@@ -199,6 +229,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     keywords: ["agile", "scrum", "kanban", "delivery", "retrospective", "backlog", "team velocity"],
     logos: ["/brand-logos/stacks/git.svg", "/brand-logos/stacks/github.svg"],
     rgb: "234 179 8",
+    status: "pending",
+    statusNote: "Route not launched",
   },
   {
     slug: "angular-mastery",
@@ -211,6 +243,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "239 68 68",
     href: "/angular-mastery",
     actionLabel: "Open Angular Mastery",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "next-js-mastery",
@@ -220,6 +254,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     keywords: ["next.js", "nextjs", "react", "ssr", "server components", "app router"],
     logos: ["/brand-logos/stacks/nextjs.svg", "/brand-logos/stacks/react.svg"],
     rgb: "71 85 105",
+    status: "pending",
+    statusNote: "Route not launched",
   },
   {
     slug: "blockchain-mastery",
@@ -229,6 +265,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     keywords: ["blockchain", "smart contract", "ethereum", "bitcoin", "web3", "ledger"],
     logos: ["/brand-logos/stacks/bitcoin.svg", "/brand-logos/stacks/ethereum.svg"],
     rgb: "148 163 184",
+    status: "pending",
+    statusNote: "Route not launched",
   },
   {
     slug: "azure-mastery",
@@ -241,6 +279,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     rgb: "59 130 246",
     href: "/azure-mastery",
     actionLabel: "Open Azure Mastery",
+    status: "completed",
+    statusNote: "Fully launched",
   },
   {
     slug: "aws-mastery",
@@ -250,6 +290,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     keywords: ["aws", "amazon web services", "lambda", "ecs", "eks", "cloud"],
     logos: ["/brand-logos/stacks/aws.svg", "/brand-logos/stacks/docker.svg"],
     rgb: "249 115 22",
+    status: "pending",
+    statusNote: "Route not launched",
   },
   {
     slug: "gcp-mastery",
@@ -259,6 +301,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     keywords: ["gcp", "google cloud", "gke", "bigquery", "cloud run", "cloud architecture"],
     logos: ["/brand-logos/stacks/gcp.svg", "/brand-logos/stacks/kubernetes.svg"],
     rgb: "34 197 94",
+    status: "pending",
+    statusNote: "Route not launched",
   },
   {
     slug: "blockchain-zero-to-hero",
@@ -268,6 +312,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     keywords: ["blockchain", "web3", "wallet", "token", "smart contract", "ethereum", "bitcoin"],
     logos: ["/brand-logos/stacks/bitcoin.svg", "/brand-logos/stacks/ethereum.svg"],
     rgb: "217 119 6",
+    status: "pending",
+    statusNote: "Route not launched",
   },
   {
     slug: "web3-series",
@@ -277,6 +323,8 @@ export const BLOG_SERIES: BlogSeriesTrack[] = [
     keywords: ["web3", "dapp", "wallet", "smart contract", "ethereum", "decentralized"],
     logos: ["/brand-logos/stacks/ethereum.svg", "/brand-logos/stacks/bitcoin.svg"],
     rgb: "96 165 250",
+    status: "pending",
+    statusNote: "Route not launched",
   },
 ];
 

@@ -40,6 +40,7 @@ export default function ProductDetail() {
   }
 
   const Icon = product.icon;
+  const isStackCraft = product.slug === "stackcraft";
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,11 +56,11 @@ export default function ProductDetail() {
             Back to Projects
           </Link>
 
-          <div className="mt-6 overflow-hidden rounded-[2rem] border border-border/60 bg-gradient-to-br from-card via-card to-primary/10 p-8 md:p-10">
+          <div className={`mt-6 overflow-hidden rounded-[2rem] border p-8 md:p-10 ${isStackCraft ? "border-sky-400/20 bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.20),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(34,211,238,0.10),transparent_26%),linear-gradient(160deg,rgba(8,17,31,0.98),rgba(14,26,46,0.92))]" : "border-border/60 bg-gradient-to-br from-card via-card to-primary/10"}`}>
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_360px] xl:items-start">
               <div className="max-w-4xl">
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-primary">
+                  <div className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.2em] ${isStackCraft ? "border-sky-400/25 bg-sky-500/10 text-sky-300" : "border-primary/25 bg-primary/10 text-primary"}`}>
                     {product.eyebrow || "Product"}
                   </div>
                   {product.statusLabel ? (
@@ -105,9 +106,9 @@ export default function ProductDetail() {
                 </div>
               </div>
 
-              <div className="rounded-[1.75rem] border border-border/60 bg-background/80 p-6">
+              <div className={`rounded-[1.75rem] border p-6 ${isStackCraft ? "border-sky-400/20 bg-[linear-gradient(180deg,rgba(14,27,48,0.94),rgba(8,17,31,0.88))]" : "border-border/60 bg-background/80"}`}>
                 <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-card/90 p-3 text-primary">
+                  <div className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border p-3 text-primary ${isStackCraft ? "border-sky-400/30 bg-gradient-to-br from-sky-500/18 via-blue-500/12 to-cyan-400/18 shadow-[0_18px_40px_rgba(59,109,240,0.18)]" : "border-border/60 bg-card/90"}`}>
                     {product.logoSrc ? (
                       <img src={product.logoSrc} alt={product.logoAlt || `${product.title} logo`} className="h-8 w-8 object-contain" loading="lazy" />
                     ) : (

@@ -170,6 +170,7 @@ html,body{height:100%;overflow:hidden;background:var(--b0);color:var(--t1);font-
 .cb-copy:hover{border-color:var(--p1);color:var(--p3)}
 .cb-body{padding:14px;overflow-x:auto}
 .cb-body pre{font-family:'Fira Code',monospace;font-size:11.5px;line-height:1.75;color:#cdd6f4}
+.cb-body pre{min-width:max-content}
 .kw{color:#89b4fa}.tp{color:#cba6f7}.st{color:#a6e3a1}.nu{color:#fab387}
 .cm{color:#585b70;font-style:italic}.fn{color:#89dceb}.pr{color:#f38ba8}
 .at{color:#f9e2af}.ra{color:#94e2d5}.dir{color:#89b4fa}.ev{color:#cba6f7}
@@ -178,6 +179,7 @@ html,body{height:100%;overflow:hidden;background:var(--b0);color:var(--t1);font-
 .diag-hdr{padding:9px 14px;border-bottom:1px solid rgba(29,46,74,.8);background:rgba(0,0,0,.4);font-family:'Fira Code',monospace;font-size:10px;color:var(--t3);display:flex;align-items:center;gap:8px}
 .diag-hdr::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--p2);box-shadow:0 0 6px var(--p2)}
 .diag-body{padding:14px;display:flex;justify-content:center;overflow-x:auto}
+.diag-body svg,.diag-body img{display:block;width:min(100%,560px);max-width:100%;height:auto;flex-shrink:0}
 .callout{border-radius:8px;padding:11px 13px;margin-bottom:13px;display:flex;gap:9px;font-size:12.5px;line-height:1.65}
 .c-info{background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.2);color:var(--t2)}
 .c-warn{background:rgba(234,179,8,.05);border:1px solid rgba(234,179,8,.2);color:var(--t2)}
@@ -186,6 +188,7 @@ html,body{height:100%;overflow:hidden;background:var(--b0);color:var(--t1);font-
 .c-blazor{background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.25);color:var(--t2)}
 .call-ic{flex-shrink:0;font-size:14px;margin-top:1px}
 .ctbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
+.ctbl{min-width:520px}
 .ctbl th{background:var(--b2);padding:8px 11px;text-align:left;font-family:'Fira Code',monospace;font-size:10px;color:var(--t2);border:1px solid var(--bd);text-transform:uppercase;letter-spacing:.5px}
 .ctbl td{padding:8px 11px;border:1px solid var(--bd);color:var(--t2);line-height:1.5}
 .ctbl tr:hover td{background:rgba(255,255,255,.01)}
@@ -213,6 +216,7 @@ html,body{height:100%;overflow:hidden;background:var(--b0);color:var(--t1);font-
 @media (max-width:640px){
   .welcome-actions{width:min(100%,420px);padding:10px}
   .w-btn{flex-basis:100%;width:100%}
+  .ctbl{min-width:420px}
 }
 </style>
 </head>
@@ -1387,21 +1391,156 @@ function renderQAItem(q,id){
   </div>`;
 }
 
-function renderGeneric(id,chi){
+function getBlazorLens(ch){
+  const title=ch.t.toLowerCase();
+  if(title.includes("web dev")) return {
+    focus:"browser request and rendering fundamentals",
+    mindset:"Understand the transport and browser platform before reasoning about Blazor abstractions.",
+    implementation:"Trace the request, response, DOM update, and event loop before you choose Server, WASM, or Hybrid.",
+    safety:"Verify CORS, caching, and transport behavior first so you do not blame Blazor for browser-level constraints.",
+    snippet:`// Browser platform checklist
+const foundation = new[]{
+  "HTTP semantics",
+  "DOM lifecycle",
+  "WebSocket viability",
+  "SPA navigation model"
+};`
+  };
+  if(title.includes("security") || title.includes("auth")) return {
+    focus:"identity, trust boundaries, and browser-safe state",
+    mindset:"Treat every render mode as a separate trust model with different exposure and token risks.",
+    implementation:"Keep secrets on the server, prefer cookies or a BFF flow, and validate identity on reconnects and API calls.",
+    safety:"Do not store secrets in WASM payloads or trust client-side authorization checks as enforcement.",
+    snippet:`builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+
+app.UseAuthentication();
+app.UseAuthorization();`
+  };
+  if(title.includes("performance") || title.includes("production")) return {
+    focus:"render cost, latency, memory pressure, and delivery path",
+    mindset:"Optimize the user-perceived bottleneck first: startup, diffing, payload size, or server circuit memory.",
+    implementation:"Profile before tuning. Then apply virtualization, lazy loading, render control, and deployment-level caching.",
+    safety:"Avoid premature optimization that increases complexity without a measured bottleneck.",
+    snippet:`if (!ReferenceEquals(previousModel, currentModel))
+{
+    shouldRender = true;
+}`
+  };
+  if(title.includes("architecture") || title.includes("microservices") || title.includes("enterprise")) return {
+    focus:"system boundaries, orchestration, and long-term maintainability",
+    mindset:"Choose boundaries that keep UI concerns separate from application and infrastructure policies.",
+    implementation:"Model services, contracts, and feature slices first, then align components, handlers, and deployment units around them.",
+    safety:"Do not let UI composition leak direct infrastructure access into every component.",
+    snippet:`public record LoadDashboardQuery(Guid TenantId)
+    : IRequest<DashboardVm>;`
+  };
+  if(title.includes("testing") || title.includes("observability")) return {
+    focus:"feedback loops, diagnostics, and operational confidence",
+    mindset:"Design components so state, side effects, and external dependencies are observable and testable.",
+    implementation:"Test component behavior in bUnit, validate flows in Playwright, and emit logs and traces around user-critical paths.",
+    safety:"Treat flaky UI tests and missing telemetry as delivery risks, not optional polish.",
+    snippet:`ctx.Services.AddSingleton<IClock>(new FakeClock(now));
+var cut = ctx.RenderComponent<Dashboard>();`
+  };
+  if(title.includes("hybrid") || title.includes("pwa") || title.includes("wasm")) return {
+    focus:"client runtime capabilities, offline behavior, and device integration",
+    mindset:"Assume variable connectivity and constrained device resources when the app lives closer to the client.",
+    implementation:"Plan for payload size, native bridge boundaries, local persistence, and sync recovery paths.",
+    safety:"Design clear offline and update behavior so users never act on stale assumptions.",
+    snippet:`await JS.InvokeVoidAsync("navigator.serviceWorker.register", "/service-worker.js");`
+  };
+  return {
+    focus:"component design, render flow, and framework mechanics",
+    mindset:"Move from a small, explicit component contract toward richer composition only after the state flow is stable.",
+    implementation:"Define inputs, outputs, and lifecycle expectations before wiring DI, JS interop, or shared state.",
+    safety:"Keep UI state minimal and side effects deliberate so rerenders stay predictable.",
+    snippet:`@code {
+  [Parameter] public string Title { get; set; } = "";
+  [Parameter] public EventCallback<string> TitleChanged { get; set; }
+}`
+  };
+}
+
+function getBlazorUseCase(ch,t){
+  const chapter=ch.t;
+  const topic=t.t;
+  return `Use ${topic} when you are building a ${chapter.toLowerCase()} capability and need a pattern that can survive production constraints like auth, latency, observability, and ongoing feature growth.`;
+}
+
+function getBlazorChecklist(ch,t,lens){
+  return [
+    `Anchor the topic in the active render mode and hosting assumptions for ${ch.t}.`,
+    `Implement the smallest working path for ${t.t} before adding abstraction layers.`,
+    `Validate the user-visible behavior with diagnostics, logging, or a focused component test.`,
+    `Review the main risk for this area: ${lens.safety}`
+  ];
+}
+
+function renderBlazorGeneric(id,chi){
   document.getElementById("rp-empty").style.display="none";
   document.getElementById("rp-con").style.display="block";
   const ch=CHS[chi];
   const t=ch.topics.find(x=>x.id===id);
   if(!t)return;
+  const lens=getBlazorLens(ch);
+  const chapterTags=(ch.tags||[]).map(tag=>`<span class="dpill" style="color:${ch.c};border-color:${ch.c}44;background:${ch.bg}">${tag}</span>`).join("");
+  const topicTags=(t.tags||[]).map(tag=>`<span class="dpill" style="color:${ch.c};border-color:${ch.c}44;background:${ch.c}11">${tag}</span>`).join("");
+  const checklist=getBlazorChecklist(ch,t,lens).map(item=>`<li>${item}</li>`).join("");
+  const related=ch.topics.filter(x=>x.id!==id).slice(0,3).map(x=>`<li>${x.ic} <strong>${x.t}</strong> — ${x.d}</li>`).join("");
   document.getElementById("rp-con").innerHTML=`<div class="rpcon">
-    <div class="d-bread">${ch.t}</div>
+    <div class="d-bread">Chapter ${ch.n} · ${ch.t}</div>
     <div class="d-title">${t.ic} ${t.t}</div>
     <div class="d-sub">${t.d}</div>
+    <div class="d-pills">${chapterTags}${topicTags}</div>
+    <div class="sec">
+      <div class="sec-t">Why This Topic Matters</div>
+      <div class="prose">
+        <p>${getBlazorUseCase(ch,t)}</p>
+        <p><strong>Blazor lens:</strong> This chapter is primarily about ${lens.focus}. ${lens.mindset}</p>
+      </div>
+    </div>
     <div class="callout c-blazor"><span class="call-ic">🔥</span>
-      <span>This topic is part of <strong>${ch.t}</strong>. Explore all ${ch.topics.length} topics using the cards in the middle panel.</span>
+      <span><strong>Implementation flow:</strong> ${lens.implementation}</span>
+    </div>
+    <div class="callout c-warn"><span class="call-ic">🛡️</span>
+      <span><strong>Guardrail:</strong> ${lens.safety}</span>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Field Guide</div>
+      <table class="ctbl">
+        <thead><tr><th>Area</th><th>Guidance</th></tr></thead>
+        <tbody>
+          <tr><td>Chapter</td><td>${ch.t}</td></tr>
+          <tr><td>Topic intent</td><td>${t.d}</td></tr>
+          <tr><td>Primary focus</td><td>${lens.focus}</td></tr>
+          <tr><td>Recommended approach</td><td>${lens.implementation}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="sec">
+      <div class="sec-t">Suggested Build Sequence</div>
+      <div class="prose"><ol>${checklist}</ol></div>
+    </div>
+    <div class="sec"><div class="cb">
+      <div class="cb-hdr">
+        <span class="cb-lang" style="color:#89dceb">csharp</span>
+        <span class="cb-name">${t.t} - starter pattern</span>
+        <button class="cb-copy" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="cb-body"><pre>${lens.snippet}</pre></div>
+    </div></div>
+    <div class="scenario"><div class="scen-t">🏢 Production Scenario</div><div class="scen-b"><strong>Scenario:</strong> A team is implementing <code>${t.t}</code> inside a larger <strong>${ch.t}</strong> initiative. They need a solution that is easy to evolve, observable in production, and compatible with the chosen Blazor render mode.<br><br><strong>Recommended move:</strong> Start with a thin vertical slice, validate the behavior end to end, then extract reusable abstractions only after the component contract and operational behavior are proven.</div></div>
+    <div class="sec">
+      <div class="sec-t">Explore Next In This Chapter</div>
+      <div class="prose"><ul>${related}</ul></div>
     </div>
     ${renderQAForTopic(t.t)}
   </div>`;
+}
+
+function renderGeneric(id,chi){
+  renderBlazorGeneric(id,chi);
 }
 
 function toggleQA(el){el.parentElement.classList.toggle("open")}

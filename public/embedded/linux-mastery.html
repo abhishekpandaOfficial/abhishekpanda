@@ -70,6 +70,10 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .wlc-title{font-family:var(--disp);font-size:48px;letter-spacing:6px;color:var(--g1);text-shadow:0 0 40px rgba(0,255,65,.4);margin-bottom:6px;line-height:1}
 .wlc-sub{font-size:12px;color:var(--tx2);max-width:480px;line-height:1.75;margin-bottom:24px;font-family:var(--mono)}
 .wlc-prompt{font-family:var(--mono);font-size:13px;color:var(--g1);margin-bottom:20px}
+.wlc-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px}
+.wbtn{background:var(--card);border:1px solid var(--b2);border-radius:5px;padding:10px 14px;color:var(--tx);font-family:var(--mono);font-size:10px;letter-spacing:1px;cursor:pointer;transition:all .18s}
+.wbtn:hover{border-color:var(--g1);color:var(--g1);box-shadow:0 0 18px rgba(0,255,65,.08)}
+.wbtn.primary{background:rgba(0,255,65,.08);color:var(--g1)}
 .stat-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .sc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px 16px;text-align:center;min-width:80px;transition:border-color .2s}
 .sc:hover{border-color:var(--b3)}
@@ -198,7 +202,7 @@ strong{color:var(--tx)}
   <div class="logo-mark">$_</div>
   <div>
     <div class="logo-name">LINUX MASTERY</div>
-    <div class="logo-sub">ZERO TO SYSADMIN · ANIMATED TERMINALS · 2025</div>
+    <div class="logo-sub">ZERO TO SYSADMIN · ANIMATED TERMINALS · 2026</div>
   </div>
   <div class="top-sep"></div>
   <div class="t-stat"><b>22</b> Chapters</div>
@@ -233,6 +237,10 @@ strong{color:var(--tx)}
         <div class="sc"><span class="sc-n">200+</span><span class="sc-l">Animated</span></div>
         <div class="sc"><span class="sc-n">100</span><span class="sc-l">Q&amp;A</span></div>
         <div class="sc"><span class="sc-n">∞</span><span class="sc-l">Patterns</span></div>
+      </div>
+      <div class="wlc-actions">
+        <button class="wbtn primary" onclick="goStart()">Start Linux Path</button>
+        <button class="wbtn" onclick="resumeLast()">Resume Last Topic</button>
       </div>
       <div class="wlc-hint">← select chapter · watch commands run · click Run ▶ on any terminal</div>
     </div>
@@ -1271,6 +1279,154 @@ const D={
 return D[tid]||[];
 }
 
+function getChapter(cid){ return CHAPTERS.find(c=>c.id===cid); }
+function getTopic(cid, tid){ const ch=getChapter(cid); return ch?.topics.find(t=>t.id===tid) || null; }
+function esc(v){ return String(v||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
+function demoId(cid, tid){ return `auto-${cid}-${tid}`.replace(/[^a-z0-9-]/gi,'-'); }
+
+function getChapterLens(cid){
+  const guides = {
+    navigation: { lens:'move precisely through the filesystem without losing context', signal:'wrong path, hidden files, recursive sprawl', safety:'confirm the target path before changing anything' },
+    fileops: { lens:'change files deliberately and keep rollback paths nearby', signal:'renames, deletes, overwrite risk, recursive copies', safety:'preview the target and prefer copies before destructive edits' },
+    viewing: { lens:'inspect text quickly without corrupting or mutating it', signal:'large logs, noisy output, hidden patterns', safety:'page or filter output instead of dumping everything blindly' },
+    permissions: { lens:'apply least privilege while preserving operability', signal:'permission denied, wrong owner, unsafe world access', safety:'change the narrowest permission set that solves the problem' },
+    processes: { lens:'understand runtime behavior before killing or reprioritizing anything', signal:'high CPU, stuck jobs, runaway processes', safety:'inspect first, terminate second, force-kill last' },
+    users: { lens:'manage identity, groups, and privilege boundaries cleanly', signal:'wrong shell, wrong groups, uncontrolled sudo', safety:'audit account scope and expiration before granting access' },
+    networking: { lens:'trace packets, ports, and remote access as a system', signal:'timeouts, DNS drift, closed ports, routing mistakes', safety:'confirm host, port, and direction before testing or changing routes' },
+    disk: { lens:'measure storage usage before mounting, copying, or writing raw blocks', signal:'full disks, wrong mount points, risky low-level writes', safety:'verify device names twice before writing to block devices' },
+    'text-processing': { lens:'transform data predictably in pipelines', signal:'field parsing mistakes, regex mismatch, accidental truncation', safety:'test text transforms on sample input before batch use' },
+    'bash-scripting': { lens:'turn shell knowledge into safe automation', signal:'quoting bugs, unset vars, hidden non-zero exits', safety:'treat scripts as production code with strict modes and validation' },
+    redirection: { lens:'control stdin, stdout, and stderr intentionally', signal:'lost errors, overwritten files, noisy logs', safety:'know exactly which file descriptor you are redirecting' },
+    'package-mgmt': { lens:'change system software in a reversible, auditable way', signal:'stale indexes, broken dependencies, version drift', safety:'refresh metadata and understand removal impact before upgrading' },
+    systemd: { lens:'operate services, units, and logs like a sysadmin', signal:'failed units, bad ordering, restart loops', safety:'reload unit definitions and inspect status before restart storms' },
+    cron: { lens:'schedule work with visible outputs and predictable timing', signal:'silent failures, timezone drift, bad schedules', safety:'always log scheduled jobs and dry-run the command itself first' },
+    archives: { lens:'package and sync data without losing metadata or consistency', signal:'partial backups, wrong excludes, permission drift', safety:'dry-run archive and sync jobs before deleting or mirroring' },
+    'env-shell': { lens:'shape the shell environment without creating hidden surprises', signal:'PATH issues, alias drift, wrong startup file', safety:'make shell config changes incremental and easy to revert' },
+    monitoring: { lens:'read system signals before tuning blindly', signal:'CPU wait, open files, syscall churn, kernel errors', safety:'correlate at least two signals before concluding root cause' },
+    security: { lens:'reduce attack surface while preserving operational access', signal:'open ports, weak ssh, missing bans or firewall rules', safety:'test from a second session before locking down remote access' },
+    containers: { lens:'understand the Linux primitives behind Docker-style workflows', signal:'wrong image assumptions, namespace confusion, leaky containers', safety:'separate build, runtime, and host concerns clearly' },
+    kernel: { lens:'tune and inspect the OS core carefully', signal:'boot issues, bad sysctl values, broken modules', safety:'persist kernel changes only after validating them live' },
+    'perf-tuning': { lens:'optimize only after identifying the real bottleneck', signal:'file descriptor limits, CPU hotspots, swap churn', safety:'measure baseline and rollback criteria before tuning' },
+    interview: { lens:'explain Linux behavior clearly under pressure', signal:'vague definitions, hand-wavy troubleshooting', safety:'anchor answers in commands, files, and runtime evidence' },
+  };
+  return guides[cid] || { lens:'build operational fluency through repeatable Linux practice', signal:'unclear runtime behavior and weak troubleshooting loops', safety:'make changes incrementally and verify outcomes directly' };
+}
+
+function getGenericDemoLines(cid, tid){
+  const topic = getTopic(cid, tid);
+  if(!topic) return [];
+  const cmd = topic.cmd || tid;
+  const title = topic.title || tid;
+  const lens = getChapterLens(cid);
+  return [
+    `<span class="tp">root@linux:~#</span> <span class="tc2">${esc(cmd)} --help | head -12</span>`,
+    `<span class="to">${esc(title)} practice context loaded</span>`,
+    `<span class="to">COMMAND: ${esc(cmd)}</span>`,
+    `<span class="to">FOCUS: ${esc(topic.desc || 'core Linux workflow')}</span>`,
+    `<span class="to">CHAPTER: ${esc(getChapter(cid)?.title || cid)}</span>`,
+    `<span class="to">LENS: ${esc(lens.lens)}</span>`,
+    `<span class="tp">root@linux:~#</span> <span class="tc2">printf '%s\n' "Signal: ${esc(lens.signal)}"</span>`,
+    `<span class="to-y">Signal: ${esc(lens.signal)}</span>`,
+    `<span class="tp">root@linux:~#</span> <span class="tcur"></span>`,
+  ];
+}
+
+function renderLinuxDemo(cid, tid){
+  const topic = getTopic(cid, tid);
+  const lens = getChapterLens(cid);
+  const id = demoId(cid, tid);
+  if(!TERM_DATA[id]) TERM_DATA[id] = getGenericDemoLines(cid, tid);
+  return mkTerm(id, `${topic?.cmd || tid} — Linux walkthrough`, TERM_DATA[id], true) +
+    `<div class="callout info"><strong>Practice Sequence</strong>Run the command on a harmless target first, observe the signal it exposes, then move into the adjacent tabs to learn the safe production version.</div>` +
+    `<div class="callout warn"><strong>Operational Guardrail</strong>${esc(lens.safety)}</div>`;
+}
+
+function renderLinuxList(title, items){
+  return `<div class="sec">${title}</div><ul class="fl">${items.map(item=>`<li>${item}</li>`).join('')}</ul>`;
+}
+
+function renderLinuxTable(title, headers, rows){
+  return `<div class="sec">${title}</div><table class="tbl"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+
+function renderLinuxStructuredTab(cid, tid, tab){
+  const ch = getChapter(cid);
+  const topic = getTopic(cid, tid);
+  if(!ch || !topic) return '';
+  const lens = getChapterLens(cid);
+  const cmd = `<code>${esc(topic.cmd || tid)}</code>`;
+  const title = esc(topic.title || tid);
+  const desc = esc(topic.desc || 'Core Linux workflow');
+  const useCase = `Use ${cmd} when you need to work on ${desc.toLowerCase()} while keeping ${lens.lens}.`;
+  const scenario = `In a live Linux system, ${title} usually matters when you first notice ${lens.signal}.`;
+  const adjacent = esc((topic.tabs || ['Demo']).filter(t=>t!==tab && t!=='Demo')[0] || 'Examples');
+
+  if(tab==='Demo') return renderLinuxDemo(cid, tid);
+  if(tab==='Examples') return renderLinuxList(`${title} Examples`, [
+    `<strong>${cmd}</strong> in its basic form first, then layer flags only after the plain output makes sense.`,
+    `Use <strong>${cmd}</strong> as part of a pipeline when you need fast inspection during incidents.`,
+    `Apply <strong>${cmd}</strong> against a safe test file or temp directory before touching production data.`,
+    `Capture the before/after output of <strong>${cmd}</strong> in notes so troubleshooting stays reproducible.`,
+  ]) + `<div class="callout info"><strong>Scenario</strong>${scenario}</div>`;
+  if(tab==='Tips') return renderLinuxList(`${title} Tips`, [
+    `Read the man page for <strong>${cmd}</strong> and focus on the “EXAMPLES” section first.`,
+    `Prefer repeatable commands over one-off shell history so the workflow can be reused by the team.`,
+    `When output is noisy, pair <strong>${cmd}</strong> with <code>grep</code>, <code>less</code>, or redirection.`,
+    `Practice the command on a disposable VM until the flags feel automatic.`,
+  ]) + `<div class="callout tip"><strong>Use It Like A Sysadmin</strong>${useCase}</div>`;
+  if(tab==='Flags' || tab==='Commands' || tab==='Usage' || tab==='Subcommands' || tab==='Filters') {
+    return renderLinuxTable(`${title} ${tab}`, ['Pattern', 'Why it matters'], [
+      [`${cmd} --help`, 'Fastest way to see supported flags on the host you are actually using'],
+      [`man ${esc(topic.cmd || tid)}`, 'Full reference with caveats, edge cases, and examples'],
+      [`${cmd} <target>`, `Start from the narrowest possible target for ${desc.toLowerCase()}`],
+      [`${cmd} ... | less`, 'Page through long output instead of losing signal in scrollback'],
+      [`${cmd} ... 2>/tmp/${esc(tid)}.err`, 'Split stdout and stderr when debugging failures'],
+    ]) + `<div class="callout warn"><strong>Guardrail</strong>${esc(lens.safety)}</div>`;
+  }
+  if(tab==='Shortcuts' || tab==='Workflow' || tab==='Patterns' || tab==='Config' || tab==='Persistent' || tab==='Recovery' || tab==='Search') {
+    return renderLinuxList(`${title} ${tab}`, [
+      `Start with the smallest successful command that proves <strong>${cmd}</strong> works in this environment.`,
+      `Add one extra option at a time so you always know which flag changed the behavior.`,
+      `Write the final working form into shell history, docs, or automation for future reuse.`,
+      `For production work, confirm permissions, paths, and rollback steps before running ${cmd}.`,
+    ]) + `<div class="callout info"><strong>Operational Lens</strong>${esc(lens.lens)}</div>`;
+  }
+  if(tab==='Comparison' || tab==='Hard vs Soft' || tab==='Key Types' || tab==='Types' || tab==='Scan Types' || tab==='Scale' || tab==='Order' || tab==='Anatomy' || tab==='Syntax' || tab==='How It Works' || tab==='Common Vars' || tab==='Symbolic' || tab==='Tuning' || tab==='tuning') {
+    return renderLinuxTable(`${title} ${tab}`, ['Concept', 'Use it when'], [
+      ['Basic usage', `You need the shortest path to get value from ${cmd}`],
+      ['Safer workflow', 'You are changing system state and want a reversible sequence'],
+      ['Production pattern', 'You need observability, logging, and repeatability around the command'],
+      ['Troubleshooting angle', 'The command works differently than expected and you need to isolate why'],
+    ]) + `<div class="callout tip"><strong>Decision Rule</strong>${useCase}</div>`;
+  }
+  if(tab==='Safety' || tab==='Security' || tab==='Best Practices' || tab==='/etc/fstab' || tab==='/etc/shadow' || tab==='/etc/limits.conf' || tab==='SUID/SGID' || tab==='Unit Files' || tab==='Backup Recipe') {
+    return renderLinuxList(`${title} ${tab}`, [
+      `Verify the target and permissions before running <strong>${cmd}</strong> on real systems.`,
+      `Prefer a dry run, preview mode, or read-only inspection path whenever one exists.`,
+      `Keep a rollback path ready: backups, copies, versioned config, or a second shell session.`,
+      `After using <strong>${cmd}</strong>, confirm the actual system state instead of assuming success from exit output alone.`,
+    ]) + `<div class="callout danger"><strong>Safety Rule</strong>${esc(lens.safety)}</div>`;
+  }
+  if(tab==='Regex' || tab==='Expressions' || tab==='FD Table' || tab==='Octal Table' || tab==='Output Fields' || tab==='Special Vars') {
+    return renderLinuxTable(`${title} ${tab}`, ['Reference', 'Meaning'], [
+      ['Core syntax', `The minimum syntax you need to use ${cmd} confidently`],
+      ['Common pattern', 'The option or structure seen most often in day-to-day ops work'],
+      ['Failure mode', 'What usually goes wrong when the command appears to “not work”'],
+      ['Debug step', `How to verify ${cmd} is operating on the file, process, or service you expect`],
+    ]) + `<div class="callout info"><strong>Scenario</strong>${scenario}</div>`;
+  }
+  return `<div class="sec">${tab}</div>
+<p class="bd"><strong>${title}</strong> sits inside <strong>${esc(ch.title)}</strong> and should be learned as operational practice, not trivia. ${useCase}</p>
+${renderLinuxTable('Field Guide', ['Lens', 'Guidance'], [
+  ['Chapter focus', esc(lens.lens)],
+  ['Typical signal', esc(lens.signal)],
+  ['Command path', esc(topic.cmd || tid)],
+  ['Next tab', adjacent],
+])}
+<div class="callout info"><strong>Study Flow</strong>Open <code>Demo</code>, validate the command shape, then use <code>${adjacent}</code> to move from learning to real troubleshooting.</div>
+<div class="callout warn"><strong>Operational Guardrail</strong>${esc(lens.safety)}</div>`;
+}
+
 // ═══════════════ RICH CONTENT ═══════════════
 function getContent(cid, tid, tab){
   const key = `${cid}:${tid}:${tab}`;
@@ -1839,14 +1995,55 @@ mkcd() { mkdir -p "$1" && cd "$1"; }
 </tbody></table>
 <div class="callout tip"><strong>Larger History</strong>Add to .bashrc: HISTSIZE=50000 HISTFILESIZE=100000 HISTCONTROL=ignoredups:erasedups — keeps 50k commands, removes duplicates.</div>`;
 
+  const structured = renderLinuxStructuredTab(cid, tid, tab);
+  if(structured) return structured;
+
   // ── default ──────────────────────────────────
   return `<div class="sec">${tab}</div>
-<p class="bd">Select a tab above to explore <strong>${tid}</strong> — including animated terminal demos, flags reference, examples, and production tips.</p>
-<div class="callout info"><strong>Click ▶ Run</strong>Every terminal in this guide is interactive — click the green Run button to watch the command execute with animated, colour-coded output exactly as it appears in a real Linux shell.</div>`;
+<p class="bd"><strong>${esc(tid)}</strong> belongs to this Linux track as a practical skill. If you reached this fallback path, treat the current tab as a focused drill: inspect the command, validate the target, and rehearse it on a safe system before production use.</p>
+<div class="callout info"><strong>Practice Rule</strong>Use the terminal demo, inspect the man page, and confirm the resulting system state after every command.</div>`;
 }
 
 // ═══════════════ RUNTIME ═══════════════
-let activeCh=null, activeTid=null, visited=new Set();
+const STORAGE_KEY = 'linux-mastery-progress-v2';
+let activeCh=null, activeTid=null, visited=new Set(), activeTab=null;
+
+function saveState(){
+  const payload = { visited:[...visited], activeCh, activeTid, activeTab };
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); } catch {}
+}
+
+function loadState(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const state = JSON.parse(raw);
+    visited = new Set(state.visited || []);
+    activeCh = state.activeCh || null;
+    activeTid = state.activeTid || null;
+    activeTab = state.activeTab || null;
+  } catch {}
+}
+
+function goStart(){
+  selChapter(CHAPTERS[0].id);
+}
+
+function resumeLast(){
+  if(activeCh && activeTid){
+    selChapter(activeCh);
+    setTimeout(()=>{
+      const card = [...document.querySelectorAll('.tc')].find(el=>el.textContent.includes(getTopic(activeCh, activeTid)?.title || ''));
+      if(card) selTopic(activeCh, activeTid, { currentTarget: card });
+      if(activeTab){
+        const tabEl = [...document.querySelectorAll('.rt')].find(el=>el.textContent===activeTab);
+        if(tabEl) selTab(tabEl, activeCh, activeTid, activeTab);
+      }
+    }, 10);
+    return;
+  }
+  goStart();
+}
 
 function renderNav(){
   document.getElementById('leftNav').innerHTML=CHAPTERS.map(ch=>`
@@ -1862,6 +2059,7 @@ function renderNav(){
 
 function selChapter(id){
   activeCh=id; activeTid=null; visited.add(id); updateProgress(); renderNav();
+  saveState();
   const ch=CHAPTERS.find(c=>c.id===id);
   clearTimers();
   document.getElementById('middle').innerHTML=`
@@ -1888,6 +2086,7 @@ function selChapter(id){
 
 function selTopic(cid,tid,ev){
   activeTid=tid;
+  activeCh=cid;
   document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
   ev.currentTarget.classList.add('active');
   const ch=CHAPTERS.find(c=>c.id===cid);
@@ -1900,6 +2099,8 @@ function selTopic(cid,tid,ev){
   const tabs=topic.tabs||['Demo'];
   document.getElementById('rightTabs').innerHTML=tabs.map((tab,i)=>
     `<div class="rt ${i===0?'active':''}" onclick="selTab(this,'${cid}','${tid}','${tab}')">${tab}</div>`).join('');
+  activeTab = tabs[0];
+  saveState();
   renderTab(cid,tid,tabs[0]);
 }
 
@@ -1907,6 +2108,8 @@ function selTab(el,cid,tid,tab){
   clearTimers();
   document.querySelectorAll('.rt').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
+  activeTab = tab;
+  saveState();
   renderTab(cid,tid,tab);
 }
 
@@ -1918,6 +2121,8 @@ function closeRight(){
   clearTimers();
   document.getElementById('rightPanel').classList.add('hidden');
   activeTid=null;
+  activeTab=null;
+  saveState();
   document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
 }
 
@@ -1937,7 +2142,9 @@ function updateProgress(){
   document.getElementById('progTxt').textContent=`${visited.size} / ${CHAPTERS.length} chapters visited`;
 }
 
+loadState();
 renderNav();
+updateProgress();
 </script>
 </body>
 </html>
