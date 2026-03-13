@@ -43,7 +43,25 @@ type ArgusViewEventRow = {
   created_at: string;
 };
 
-type ArgusSection = "overview" | "viewers" | ArgusAssetKind;
+type ClassifiedAccessRequestRow = {
+  id: string;
+  name: string;
+  email: string;
+  request_ip: string | null;
+  city: string | null;
+  region: string | null;
+  country: string | null;
+  isp: string | null;
+  timezone: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  source: string | null;
+  user_agent: string | null;
+  verified_at: string | null;
+  created_at: string;
+};
+
+type ArgusSection = "overview" | "viewers" | "access" | ArgusAssetKind;
 
 const db = supabase as unknown as {
   from: (table: string) => any;
@@ -58,6 +76,7 @@ const sectionMeta: Array<{
 }> = [
   { id: "overview", label: "Overview", icon: Radar, accent: "text-cyan-400" },
   { id: "viewers", label: "Viewer Logs", icon: Eye, accent: "text-emerald-400" },
+  { id: "access", label: "Access Logs", icon: Shield, accent: "text-fuchsia-400" },
   { id: "ship", label: "Ships", kind: "ship", icon: Globe, accent: "text-sky-400" },
   { id: "drone", label: "Drones", kind: "drone", icon: Activity, accent: "text-amber-400" },
   { id: "missile", label: "Missiles", kind: "missile", icon: Shield, accent: "text-rose-400" },
@@ -101,6 +120,12 @@ const formatDateTime = (value: string) =>
     hour: "numeric",
     minute: "2-digit",
   });
+
+const sectionDescription: Record<Exclude<ArgusSection, ArgusAssetKind>, string> = {
+  overview: "Monitor classified viewers, OTP-gated visitors, and current asset inventory.",
+  viewers: "Raw load telemetry captured from `/classified`, including IP and browser fingerprints.",
+  access: "Name + email submissions and OTP verification records for classified access.",
+};
 
 const buildAssetPayload = (asset: ArgusAssetRow, metadataText: string, polygonText: string) => {
   let metadata: Record<string, unknown> = {};
@@ -174,6 +199,22 @@ export default function AdminArgusControl() {
     },
   });
 
+  const { data: accessLogs = [], isLoading: accessLoading } = useQuery({
+    queryKey: ["admin-argus-access-requests"],
+    queryFn: async () => {
+      const { data, error } = await db
+        .from("classified_access_requests")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(250);
+      if (error) {
+        console.error("classified_access_requests query error", error);
+        return [] as ClassifiedAccessRequestRow[];
+      }
+      return (data || []) as ClassifiedAccessRequestRow[];
+    },
+  });
+
   const saveAsset = useMutation({
     mutationFn: async () => {
       if (!editor.name.trim()) throw new Error("Asset name is required.");
@@ -235,6 +276,7 @@ export default function AdminArgusControl() {
   }, [assets]);
 
   const activeViewerCount = useMemo(() => new Set(viewerLogs.map((row) => row.session_id).filter(Boolean)).size, [viewerLogs]);
+  const verifiedAccessCount = useMemo(() => accessLogs.filter((row) => Boolean(row.verified_at)).length, [accessLogs]);
 
   const selectedKind = sectionMeta.find((item) => item.id === section)?.kind || null;
   const filteredAssets = selectedKind ? assets.filter((asset) => asset.kind === selectedKind) : [];
@@ -314,7 +356,13 @@ export default function AdminArgusControl() {
           <CardContent className="space-y-2">
             {sectionMeta.map((item) => {
               const Icon = item.icon;
-              const count = item.kind ? countsByKind.get(item.kind) || 0 : item.id === "viewers" ? viewerLogs.length : assets.length;
+              const count = item.kind
+                ? countsByKind.get(item.kind) || 0
+                : item.id === "viewers"
+                  ? viewerLogs.length
+                  : item.id === "access"
+                    ? accessLogs.length
+                    : assets.length;
               return (
                 <button
                   key={item.id}
@@ -345,7 +393,7 @@ export default function AdminArgusControl() {
               <div>
                 <CardTitle className="text-xl text-foreground">{selectedMeta.label}</CardTitle>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                  {selectedKind ? kindDescription[selectedKind] : "Monitor classified viewers, captured locations, and current asset inventory."}
+                  {selectedKind ? kindDescription[selectedKind] : sectionDescription[section as Exclude<ArgusSection, ArgusAssetKind>]}
                 </p>
               </div>
               {selectedKind ? (
@@ -376,17 +424,20 @@ export default function AdminArgusControl() {
 
               <Card className="admin-panel">
                 <CardHeader>
-                  <CardTitle className="text-base text-foreground">Latest Viewers</CardTitle>
+                  <CardTitle className="text-base text-foreground">Latest Access Requests</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {viewerLogs.slice(0, 6).map((row) => (
+                  {accessLogs.slice(0, 6).map((row) => (
                     <div key={row.id} className="admin-surface px-4 py-3">
                       <div className="flex items-center justify-between gap-3">
-                        <div className="font-medium text-foreground">{row.ip_address || "Unknown IP"}</div>
+                        <div className="font-medium text-foreground">{row.name || "Unknown visitor"}</div>
                         <div className="text-xs text-muted-foreground">{formatDateTime(row.created_at)}</div>
                       </div>
-                      <div className="mt-1 text-sm text-muted-foreground">{formatPlace(row)}</div>
-                      <div className="mt-2 text-xs text-muted-foreground">{row.isp || "Unknown network"}</div>
+                      <div className="mt-1 text-sm text-muted-foreground">{row.email || "No email"}</div>
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {row.request_ip || "Unknown IP"} • {[row.city, row.country].filter(Boolean).join(", ") || "Unknown location"} •{" "}
+                        {row.verified_at ? "Verified" : "Pending"}
+                      </div>
                     </div>
                   ))}
                 </CardContent>
@@ -429,6 +480,60 @@ export default function AdminArgusControl() {
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete
                             </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {section === "access" ? (
+            <Card className="admin-panel">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base text-foreground">Classified OTP Access Logs</CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  {verifiedAccessCount} verified of {accessLogs.length} requests
+                </p>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <ScrollArea className="w-full">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-slate-800 hover:bg-transparent">
+                        <TableHead>Requested At</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>IP</TableHead>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Country</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(accessLoading ? [] : accessLogs).map((row) => (
+                        <TableRow key={row.id} className="border-slate-800">
+                          <TableCell className="text-foreground">{formatDateTime(row.created_at)}</TableCell>
+                          <TableCell className="text-foreground">{row.name}</TableCell>
+                          <TableCell className="text-foreground">{row.email}</TableCell>
+                          <TableCell className="font-mono text-xs text-cyan-300">{row.request_ip || "Unknown"}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {[row.city, row.region].filter(Boolean).join(", ") || "Unknown"}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">{row.country || "Unknown"}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={
+                                row.verified_at
+                                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                                  : "border-amber-500/30 bg-amber-500/10 text-amber-300"
+                              }
+                            >
+                              {row.verified_at ? "Verified" : "Pending"}
+                            </Badge>
                           </TableCell>
                         </TableRow>
                       ))}

@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Shield, Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
@@ -12,6 +14,12 @@ import { buildArgusBridgePayload, fetchOperatorInfo, type ArgusAssetRow, type Ar
 
 const STATIC_CLASSIFIED_VERSION = "2026-03-09-argus-viii-v2";
 const ARGUS_SESSION_KEY = "argus_viii_session_id";
+const CLASSIFIED_ACCESS_TOKEN_KEY = "classified_access_token";
+const CLASSIFIED_ACCESS_EXPIRES_KEY = "classified_access_expires_at";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const SUPABASE_PUBLISHABLE_KEY =
+  (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
+  (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined);
 
 const db = supabase as unknown as {
   from: (table: string) => any;
@@ -26,12 +34,87 @@ const getArgusSessionId = () => {
   return next;
 };
 
+const hasValidClassifiedAccess = () => {
+  if (typeof window === "undefined") return false;
+  const token = window.sessionStorage.getItem(CLASSIFIED_ACCESS_TOKEN_KEY);
+  const exp = window.sessionStorage.getItem(CLASSIFIED_ACCESS_EXPIRES_KEY);
+  if (!token || !exp) return false;
+  const ms = new Date(exp).getTime();
+  if (!Number.isFinite(ms) || ms <= Date.now()) {
+    window.sessionStorage.removeItem(CLASSIFIED_ACCESS_TOKEN_KEY);
+    window.sessionStorage.removeItem(CLASSIFIED_ACCESS_EXPIRES_KEY);
+    return false;
+  }
+  return true;
+};
+
+async function invokeEdgeWithFallback<T = any>(functionName: string, body: Record<string, unknown>): Promise<T> {
+  const first = await supabase.functions.invoke(functionName, { body });
+  if (!first.error) {
+    const maybeError = (first.data as { error?: string } | null)?.error;
+    if (!maybeError) return first.data as T;
+  }
+
+  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+    const rootCause = (first.data as { error?: string } | null)?.error || first.error?.message || "Edge function invoke failed.";
+    throw new Error(`${rootCause} Missing Supabase URL/publishable key for fallback call.`);
+  }
+
+  const url = `${SUPABASE_URL}/functions/v1/${functionName}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  const errText =
+    (data as { error?: string })?.error ||
+    (first.data as { error?: string } | null)?.error ||
+    first.error?.message ||
+    `Edge function ${functionName} failed`;
+  if (!res.ok || (data as { error?: string })?.error) {
+    throw new Error(errText);
+  }
+
+  return data as T;
+}
+
+const sanitizeGateError = (error: unknown, fallback: string) => {
+  const message = error instanceof Error ? error.message : "";
+  if (!message) return fallback;
+  const lower = message.toLowerCase();
+  if (
+    lower.includes("classified-access-") ||
+    lower.includes("edge function") ||
+    lower.includes("failed to fetch") ||
+    lower.includes("network") ||
+    lower.includes("cors")
+  ) {
+    return fallback;
+  }
+  return message;
+};
+
 const Classified = () => {
   const { theme } = useTheme();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const initialThemeRef = useRef(theme);
   const hasLoggedViewRef = useRef(false);
   const [iframeHeight, setIframeHeight] = useState(800);
+  const [accessVerified, setAccessVerified] = useState<boolean>(() => hasValidClassifiedAccess());
+  const [showAccessGate, setShowAccessGate] = useState(false);
+  const [gateStep, setGateStep] = useState<"capture" | "otp">("capture");
+  const [visitorName, setVisitorName] = useState("");
+  const [visitorEmail, setVisitorEmail] = useState("");
+  const [visitorOtp, setVisitorOtp] = useState("");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [gateError, setGateError] = useState<string | null>(null);
 
   const { data: managedAssets = [] } = useQuery({
     queryKey: ["classified-argus-assets"],
@@ -59,6 +142,14 @@ const Classified = () => {
   });
 
   const operatorInfo = operatorQuery.data as ArgusOperatorInfo | null | undefined;
+
+  useEffect(() => {
+    if (accessVerified) return;
+    const timer = window.setTimeout(() => {
+      setShowAccessGate(true);
+    }, 5000);
+    return () => window.clearTimeout(timer);
+  }, [accessVerified]);
 
   useEffect(() => {
     const calc = () => {
@@ -137,6 +228,92 @@ const Classified = () => {
     ? `${operatorInfo.ip} • ${[operatorInfo.city, operatorInfo.country].filter(Boolean).join(", ")}`
     : "Waiting for user network lookup";
 
+  const sendClassifiedOtp = async () => {
+    setGateError(null);
+    const name = visitorName.trim();
+    const email = visitorEmail.trim().toLowerCase();
+    if (!name || !email) {
+      setGateError("Please provide your name and email.");
+      return;
+    }
+    setIsSendingOtp(true);
+    try {
+      await invokeEdgeWithFallback("classified-access-send-otp", {
+        name,
+        email,
+        operator: operatorInfo
+          ? {
+              ip: operatorInfo.ip,
+              city: operatorInfo.city,
+              region: operatorInfo.region,
+              country: operatorInfo.country,
+              isp: operatorInfo.isp,
+              timezone: operatorInfo.timezone,
+              latitude: operatorInfo.latitude,
+              longitude: operatorInfo.longitude,
+              source: operatorInfo.source,
+            }
+          : null,
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+      });
+      setGateStep("otp");
+    } catch (e) {
+      setGateError(sanitizeGateError(e, "Unable to send OTP right now. Please try again shortly."));
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const verifyClassifiedOtp = async () => {
+    setGateError(null);
+    const name = visitorName.trim();
+    const email = visitorEmail.trim().toLowerCase();
+    const code = visitorOtp.trim();
+    if (!name || !email || !code) {
+      setGateError("Please enter name, email and OTP.");
+      return;
+    }
+    setIsVerifyingOtp(true);
+    try {
+      const data = await invokeEdgeWithFallback<{ accessToken?: string; expiresAt?: string }>(
+        "classified-access-verify-otp",
+        {
+          name,
+          email,
+          code,
+          operator: operatorInfo
+            ? {
+                ip: operatorInfo.ip,
+                city: operatorInfo.city,
+                region: operatorInfo.region,
+                country: operatorInfo.country,
+                isp: operatorInfo.isp,
+                timezone: operatorInfo.timezone,
+                latitude: operatorInfo.latitude,
+                longitude: operatorInfo.longitude,
+                source: operatorInfo.source,
+              }
+            : null,
+          userAgent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+        },
+      );
+      const token = (data as { accessToken?: string }).accessToken;
+      const expiresAt = (data as { expiresAt?: string }).expiresAt;
+      if (!token || !expiresAt) {
+        throw new Error("Verification succeeded but access token was missing.");
+      }
+      window.sessionStorage.setItem(CLASSIFIED_ACCESS_TOKEN_KEY, token);
+      window.sessionStorage.setItem(CLASSIFIED_ACCESS_EXPIRES_KEY, expiresAt);
+      setAccessVerified(true);
+      setShowAccessGate(false);
+      setVisitorOtp("");
+    } catch (e) {
+      setGateError(sanitizeGateError(e, "Unable to verify OTP right now. Please try again shortly."));
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -206,7 +383,7 @@ const Classified = () => {
           ref={iframeRef}
           title="Classified ARGUS VIII Interface"
           src={iframeSrc}
-          className="block w-full border-0"
+          className={cn("block w-full border-0 transition", !accessVerified && showAccessGate && "pointer-events-none blur-[1.5px]")}
           style={{ height: iframeHeight }}
           allow="same-origin fullscreen"
           onLoad={() => {
@@ -216,6 +393,77 @@ const Classified = () => {
           }}
         />
       </main>
+
+      {!accessVerified && showAccessGate ? (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/85 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-cyan-400/30 bg-slate-950/95 p-6 shadow-[0_0_50px_rgba(34,211,238,0.15)]">
+            <div className="mb-5">
+              <p className="text-xs font-mono uppercase tracking-[0.2em] text-cyan-300">Classified Access</p>
+              <h2 className="mt-2 text-xl font-semibold text-white">Verify Name + Email With OTP</h2>
+              <p className="mt-2 text-sm text-slate-300">
+                Access is locked until OTP verification is completed.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="classified-name" className="text-slate-200">Name</Label>
+                <Input
+                  id="classified-name"
+                  value={visitorName}
+                  onChange={(e) => setVisitorName(e.target.value)}
+                  placeholder="Your full name"
+                  className="border-cyan-400/20 bg-slate-900 text-slate-100"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="classified-email" className="text-slate-200">Email</Label>
+                <Input
+                  id="classified-email"
+                  type="email"
+                  value={visitorEmail}
+                  onChange={(e) => setVisitorEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="border-cyan-400/20 bg-slate-900 text-slate-100"
+                />
+              </div>
+              {gateStep === "otp" ? (
+                <div className="space-y-2">
+                  <Label htmlFor="classified-otp" className="text-slate-200">OTP</Label>
+                  <Input
+                    id="classified-otp"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={visitorOtp}
+                    onChange={(e) => setVisitorOtp(e.target.value.replace(/\\D/g, "").slice(0, 6))}
+                    placeholder="6-digit OTP"
+                    className="border-cyan-400/20 bg-slate-900 text-slate-100"
+                  />
+                </div>
+              ) : null}
+            </div>
+
+            {gateError ? <p className="mt-3 text-sm text-rose-300">{gateError}</p> : null}
+
+            <div className="mt-5 flex gap-2">
+              {gateStep === "capture" ? (
+                <Button className="w-full" onClick={sendClassifiedOtp} disabled={isSendingOtp}>
+                  {isSendingOtp ? "Sending OTP..." : "Send OTP"}
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" className="border-cyan-400/30 text-cyan-200" onClick={sendClassifiedOtp} disabled={isSendingOtp}>
+                    {isSendingOtp ? "Resending..." : "Resend OTP"}
+                  </Button>
+                  <Button className="flex-1" onClick={verifyClassifiedOtp} disabled={isVerifyingOtp}>
+                    {isVerifyingOtp ? "Verifying..." : "Verify & Unlock"}
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

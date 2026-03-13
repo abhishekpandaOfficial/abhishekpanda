@@ -457,9 +457,14 @@ canvas#rc{position:absolute;inset:0;border-radius:50%;}
     <div class="stl">LIVE FLIGHTS <span class="livebadge"><span class="dot dot-g" style="width:5px;height:5px;"></span><span id="flightSrcLabel">LOADING</span></span></div>
     <div class="alist" id="flightList"><div style="font-family:var(--fm);font-size:9px;color:var(--textd);text-align:center;padding:12px;line-height:1.6;">FETCHING LIVE ADS-B DATA…<br><span style="font-size:8px">Trying multiple sources</span></div></div>
   </div>
+  <div class="sec">
+    <div class="stl">REGIONAL AIRPORT OPS <span style="font-family:var(--fm);font-size:7.5px;color:var(--green)">DAILY + HOURLY LIVE</span></div>
+    <div class="alist" id="globalAirportList"><div style="font-family:var(--fm);font-size:8px;color:var(--textd);text-align:center;padding:10px;line-height:1.6;">WAITING FOR LIVE FEED…</div></div>
+  </div>
   <div class="sec"><div class="stl">UAV / DRONES</div><div class="alist" id="droneList"></div></div>
   <div class="sec"><div class="stl">MISSILES <span style="font-family:var(--fm);font-size:7.5px;color:var(--orange)">SIMULATED</span></div><div class="alist" id="missileList"></div></div>
-  <div class="sec"><div class="stl">SATELLITES</div><div class="alist" id="satList"></div></div>
+  <div class="sec"><div class="stl">SATELLITES <span style="font-family:var(--fm);font-size:7.5px;color:var(--purple)">SIM / MANAGED</span></div><div class="alist" id="satList"></div></div>
+  <div class="sec"><div class="stl">DATA SOURCE STATUS</div><div class="alist" id="sourceStatus"></div></div>
   <div class="sec">
     <div class="stl" style="color:var(--red)">⚡ CYBER / SIGINT THREATS</div>
     <div class="alist" id="cyberList"></div>
@@ -478,7 +483,7 @@ canvas#rc{position:absolute;inset:0;border-radius:50%;}
   <!-- SEARCH BAR -->
   <div class="search-wrap">
     <div class="search-row">
-      <input class="search-input" id="searchInp" type="text" placeholder="⌕  CITY · COUNTRY · REGION · FLIGHT CODE (BA123, AA100)…" autocomplete="off" spellcheck="false"/>
+      <input class="search-input" id="searchInp" type="text" placeholder="⌕  CITY · COUNTRY · AIRPORT (DEL/VIDP) · FLIGHT (BA123) · ICAO24 (A1B2C3) · ASSET ID…" autocomplete="off" spellcheck="false"/>
       <button class="search-btn" onclick="doSearch()">LOCATE</button>
       <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
     </div>
@@ -741,11 +746,15 @@ function initARGUS(){
   drawRadar();
 
   // ── ICONS ─────────────────────────────────────────────
-  function makeArrow(col,hdg){
+  function makeArrow(col,hdg,label='',emoji=''){
+    const tag=label?`<div style="position:absolute;left:50%;transform:translateX(-50%);bottom:-9px;padding:0 3px;height:10px;line-height:10px;background:rgba(2,6,12,0.92);border:1px solid ${col};border-radius:2px;font-family:var(--fm);font-size:6px;color:${col};letter-spacing:0.08em;">${label}</div>`:'';
+    const ico=emoji?`<div style="position:absolute;top:-7px;right:-5px;font-size:9px;filter:drop-shadow(0 0 3px ${col});">${emoji}</div>`:'';
     return L.divIcon({
-      html:`<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;transform:rotate(${hdg}deg);">
-        <svg width="16" height="16" viewBox="0 0 16 16"><polygon points="8,1 13,15 8,11 3,15" fill="${col}" opacity="0.9"/></svg></div>`,
-      iconSize:[20,20],iconAnchor:[10,10],className:''
+      html:`<div style="position:relative;width:26px;height:26px;display:flex;align-items:center;justify-content:center;transform:rotate(${hdg}deg);">
+        <svg width="16" height="16" viewBox="0 0 16 16"><polygon points="8,1 13,15 8,11 3,15" fill="${col}" opacity="0.92"/></svg>
+        ${ico}${tag}
+      </div>`,
+      iconSize:[26,26],iconAnchor:[13,13],className:''
     });
   }
   function makeIcon(emoji,col,pulse=false){
@@ -819,6 +828,156 @@ function initARGUS(){
     return { raw:clean, iata, num, icao, icaoCallsign:icao?(icao+num):null };
   }
 
+  function positionSourceLabel(s){
+    const map={0:'ADS-B',1:'ASTERIX',2:'MLAT'};
+    return map[s?.[16]]||'UNKNOWN';
+  }
+
+  function lastContactAge(s){
+    const last=s?.[4];
+    if(!last) return '—';
+    const age=Math.max(0,Math.round(Date.now()/1000-last));
+    return `${age}s`;
+  }
+
+  function searchAssetToken(q){
+    const token=q.trim().toUpperCase();
+    if(token.length<3) return false;
+    const groups=[
+      {kind:'SHIP',emoji:'⛴',items:SHIPS,open:(a)=>showShip(a),focus:(a)=>map.flyTo([a.lat,a.lng],7,{animate:true,duration:1.2})},
+      {kind:'DRONE',emoji:'⬡',items:DRONES,open:(a)=>showDrone(a),focus:(a)=>map.flyTo([a.lat,a.lng],8,{animate:true,duration:1.2})},
+      {kind:'MISSILE',emoji:'🚀',items:MISSILES,open:(a)=>showMissile(a),focus:(a)=>map.flyTo([a.lat,a.lng],6,{animate:true,duration:1.2})},
+      {kind:'SAT',emoji:'🛰',items:SATS,open:(a)=>showSat(a),focus:(a)=>map.flyTo([a.lat,a.lng],4,{animate:true,duration:1.2})},
+    ];
+    const hits=[];
+    groups.forEach(g=>{
+      g.items.forEach(a=>{
+        const hay=`${a.id||''} ${a.name||''} ${a.type||''}`.toUpperCase();
+        if(hay.includes(token)) hits.push({...a,_meta:g});
+      });
+    });
+    GLOBAL_AIRPORTS.forEach(ap=>{
+      const hay=`${ap.iata} ${ap.icao} ${ap.city} ${ap.name}`.toUpperCase();
+      if(hay.includes(token)){
+        hits.push({
+          ...ap,
+          id:ap.icao,
+          type:'AIRPORT',
+          _meta:{
+            kind:'AIRPORT',
+            emoji:'🛫',
+            open:(a)=>{
+              map.flyTo([a.lat,a.lng],8,{animate:true,duration:1.2});
+              const live=(window.liveFlightData||[]).filter(s=>{
+                const lat=s?.[6],lng=s?.[5];
+                return lat!=null&&lng!=null&&distanceKm(a.lat,a.lng,lat,lng)<=130;
+              });
+              const top=live.slice(0,8).map(s=>{
+                const cs=(s[1]||'UNKN').trim()||'UNKN';
+                const alt=Math.round(s[13]||s[7]||0);
+                const spd=Math.round((s[9]||0)*1.94);
+                const carrier=airlineProfileFromCallsign(cs,s[2]||'');
+                const st=classifyFlightStatus(s);
+                const rt=estimateRouteForFlight(s);
+                return `<div class="loc-row"><span class="loc-lbl">${carrier.flag} ${carrier.tag} · ${cs}</span><span class="loc-val">${st} · ${rt} · ALT ${alt}m · ${spd}kt</span></div>`;
+              }).join('')||'<div class="loc-row"><span class="loc-lbl">NO LIVE TRACKS</span><span class="loc-val">—</span></div>';
+              setDet(`<div class="dttl">🛫 ${a.name}</div>
+                <div class="dgrid">
+                  ${dfRow('AIRPORT',`${a.iata} / ${a.icao}`,'hl')}
+                  ${dfRow('CITY',a.city,'')}
+                  ${dfRow('COUNTRY',a.country,'')}
+                  ${dfRow('LIVE TRACKS',live.length,live.length?'gn':'')}
+                </div>
+                <div style="margin-top:8px;"><div class="dl">NEARBY LIVE FLIGHTS</div>${top}</div>
+                <div class="sfooter">SEARCH MODE: AIRPORT OPS · LIVE FEED</div>`);
+            },
+            focus:(a)=>map.flyTo([a.lat,a.lng],8,{animate:true,duration:1.2})
+          }
+        });
+      }
+    });
+    if(!hits.length) return false;
+    sDrop.innerHTML='';
+    hits.slice(0,14).forEach(a=>{
+      const div=document.createElement('div'); div.className='sr-item'; div.tabIndex=0;
+      div.innerHTML=`<div class="sr-badge sr-place">${a._meta.emoji} ${a._meta.kind}</div>
+        <div class="sr-name">${a.id||'—'} · ${a.name||'UNKNOWN'}</div>
+        <div class="sr-type">${a.type||'—'}</div>
+        <div class="sr-coords">LAT ${Number(a.lat).toFixed(3)} · LNG ${Number(a.lng).toFixed(3)}</div>`;
+      div.onclick=()=>{sDrop.classList.remove('vis');a._meta.focus(a);a._meta.open(a);};
+      div.onkeydown=e=>{if(e.key==='Enter'){sDrop.classList.remove('vis');a._meta.focus(a);a._meta.open(a);}};
+      sDrop.appendChild(div);
+    });
+    sDrop.classList.add('vis');
+    return true;
+  }
+
+  async function searchByIcao24(hex){
+    const token=hex.trim().toLowerCase();
+    const liveData=window.liveFlightData||[];
+    const local=liveData.find(s=>(s[0]||'').toLowerCase()===token);
+    if(local){
+      plotLiveFlight(local,(local[1]||token).trim(),local[2]||'Unknown',local[0]||token);
+      sDrop.classList.remove('vis');
+      return true;
+    }
+    sDrop.innerHTML=`<div class="sr-loading"><div class="sr-spin"></div>SEARCHING ICAO24 ${token.toUpperCase()}…</div>`;
+    sDrop.classList.add('vis');
+    const proxies=[
+      `https://corsproxy.io/?https://opensky-network.org/api/states/all?icao24=${token}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent('https://opensky-network.org/api/states/all?icao24='+token)}`
+    ];
+    for(const url of proxies){
+      try{
+        const r=await fetch(url,{signal:AbortSignal.timeout(8000)});
+        if(!r.ok) continue;
+        const data=await r.json();
+        const states=(data?.states||[]).filter(s=>s[5]!=null&&s[6]!=null);
+        if(states.length){
+          plotLiveFlight(states[0],(states[0][1]||token).trim(),states[0][2]||'Unknown',states[0][0]||token);
+          sDrop.classList.remove('vis');
+          return true;
+        }
+      } catch(e){}
+    }
+    setDet(`<div class="dttl">✈ ${token.toUpperCase()}</div>
+      <div style="padding:8px;border:1px solid color-mix(in srgb,var(--orange) 25%,transparent);background:color-mix(in srgb,var(--orange) 8%,transparent);font-family:var(--fm);font-size:8.5px;color:var(--orange);">
+        ICAO24 not found in current live feed. Aircraft may be on ground, out-of-coverage, or temporarily unavailable.
+      </div>
+      <div class="sfooter">LOOKUP: OPENSKY LIVE QUERY · ${new Date().toUTCString()}</div>`);
+    return false;
+  }
+
+  function searchLiveFlightToken(q){
+    const token=q.trim().toUpperCase();
+    if(token.length<3) return false;
+    const liveData=window.liveFlightData||[];
+    const hits=liveData.filter(s=>{
+      const cs=(s[1]||'').trim().toUpperCase();
+      const hex=(s[0]||'').toUpperCase();
+      return cs.includes(token)||hex.startsWith(token);
+    }).slice(0,14);
+    if(!hits.length) return false;
+    sDrop.innerHTML='';
+    hits.forEach(s=>{
+      const cs=(s[1]||'UNKN').trim().toUpperCase();
+      const hex=(s[0]||'—').toUpperCase();
+      const carrier=airlineProfileFromCallsign(cs,s[2]||'');
+      const alt=Math.round((s[13]||s[7]||0));
+      const spd=Math.round((s[9]||0)*1.94);
+      const div=document.createElement('div'); div.className='sr-item'; div.tabIndex=0;
+      div.innerHTML=`<div class="sr-badge sr-flight" style="border-color:${carrier.color};color:${carrier.color}">${carrier.flag} ${carrier.tag} · LIVE MATCH</div>
+        <div class="sr-name">${cs}</div>
+        <div class="sr-type">${carrier.name} · ${s[2]||'—'} · ALT ${alt}m · ${spd}kt</div>
+        <div class="sr-coords">ICAO24 ${hex}</div>`;
+      div.onclick=()=>{sDrop.classList.remove('vis');plotLiveFlight(s,cs,s[2]||'Unknown',cs);};
+      div.onkeydown=e=>{if(e.key==='Enter'){sDrop.classList.remove('vis');plotLiveFlight(s,cs,s[2]||'Unknown',cs);}};
+      sDrop.appendChild(div);
+    });
+    sDrop.classList.add('vis');
+    return true;
+  }
+
   sInp.addEventListener('input',()=>{
     const q=sInp.value.trim();
     sClear.classList.toggle('vis',q.length>0);
@@ -836,7 +995,14 @@ function initARGUS(){
       sHint.textContent=`📡 ICAO24 HEX DETECTED — PRESS ENTER TO SEARCH AIRCRAFT`;
       sHint.classList.add('vis');
     } else {
-      searchTimer=setTimeout(()=>searchPlace(q),420);
+      sHint.textContent=`🔎 SMART SEARCH — airports, assets, live callsigns, places`;
+      sHint.classList.add('vis');
+      searchTimer=setTimeout(async()=>{
+        if(ICAO_RE.test(q)) { await searchByIcao24(q); return; }
+        if(searchLiveFlightToken(q)) return;
+        if(searchAssetToken(q)) return;
+        searchPlace(q);
+      },420);
     }
   });
   sInp.addEventListener('keydown',e=>{
@@ -854,8 +1020,11 @@ function initARGUS(){
       flyToCoord(parseFloat(coordM[1]),parseFloat(coordM[2]),`${coordM[1]}, ${coordM[2]}`);
       sDrop.classList.remove('vis'); return;
     }
-    if(FLIGHT_RE.test(q)) searchFlight(q);
-    else searchPlace(q);
+    if(FLIGHT_RE.test(q)) { searchFlight(q); return; }
+    if(ICAO_RE.test(q)) { searchByIcao24(q); return; }
+    if(searchLiveFlightToken(q)) return;
+    if(searchAssetToken(q)) return;
+    searchPlace(q);
   };
 
   window.clearSearch=()=>{
@@ -1055,29 +1224,20 @@ function initARGUS(){
     const lat=s[6], lng=s[5], hdg=s[10]||0;
     const alt=Math.round(s[7]||s[13]||0);
     const spd=Math.round((s[9]||0)*1.94);
+    const carrier=airlineProfileFromCallsign(callsign,s[2]||'');
     LYR.search.clearLayers();
-    const m=L.marker([lat,lng],{icon:makeArrow('#00ffee',hdg)}).addTo(LYR.search);
+    const m=L.marker([lat,lng],{icon:makeArrow(carrier.color,hdg,carrier.tag,carrier.icon)}).addTo(LYR.search);
     // Pulsing ring around live aircraft
-    const ring=L.circle([lat,lng],{radius:80000,color:'#00c8ff',weight:1,fillOpacity:0.04,dashArray:'4,4'}).addTo(LYR.search);
+    const ring=L.circle([lat,lng],{radius:80000,color:carrier.color,weight:1,fillOpacity:0.04,dashArray:'4,4'}).addTo(LYR.search);
     m.bindPopup(`<div style="font-family:'Share Tech Mono';font-size:10px;min-width:160px;">
-      <div style="color:#00c8ff;font-size:8px;margin-bottom:5px;letter-spacing:0.12em;">✈ LIVE TRACK</div>
+      <div style="color:${carrier.color};font-size:8px;margin-bottom:5px;letter-spacing:0.12em;">${carrier.flag} ${carrier.tag} · LIVE TRACK</div>
       <div style="color:#ddeeff;font-size:13px;font-weight:bold;margin-bottom:4px;">${callsign}</div>
-      <div style="color:#adc8d8;">${airlineName} · Flight ${num}</div>
+      <div style="color:#adc8d8;">${carrier.name} · ${airlineName} · Flight ${num}</div>
       <hr style="border-color:rgba(0,200,255,0.15);margin:6px 0;">
-      <div>ALT <b style="color:#00c8ff">${alt}m</b> · SPD <b style="color:#00c8ff">${spd}kt</b></div>
-      <div>HDG <b style="color:#00c8ff">${Math.round(hdg)}°</b></div></div>`,{maxWidth:260}).openPopup();
+      <div>ALT <b style="color:${carrier.color}">${alt}m</b> · SPD <b style="color:${carrier.color}">${spd}kt</b></div>
+      <div>HDG <b style="color:${carrier.color}">${Math.round(hdg)}°</b></div></div>`,{maxWidth:260}).openPopup();
     map.flyTo([lat,lng],8,{animate:true,duration:1.5});
-    setDet(`<div class="dttl" style="color:var(--cyan);">✈ ${callsign}</div>
-      <div style="font-family:var(--fm);font-size:9px;color:var(--green);margin-bottom:8px;display:flex;align-items:center;gap:5px;">
-        <div class="dot dot-g"></div> LIVE POSITION ACQUIRED</div>
-      <div class="dgrid">
-        ${dfRow('CALLSIGN',callsign,'hl')}${dfRow('AIRLINE',airlineName,'')}
-        ${dfRow('FLIGHT NO',num,'')}${dfRow('COUNTRY',s[2]||'—','')}
-        ${dfRow('ALTITUDE',alt+'m / FL'+Math.round(alt/30.48),'')}${dfRow('SPEED',spd+' kt','')}
-        ${dfRow('HEADING',Math.round(hdg)+'°','')}${dfRow('ON GROUND',s[8]?'YES':'NO','')}
-        ${dfRow('LATITUDE',lat.toFixed(5)+'°','')}${dfRow('LONGITUDE',lng.toFixed(5)+'°','')}
-      </div>
-      <div class="sfooter">SOURCE: ADS-B LIVE · ICAO24: ${s[0]||'—'} · ${new Date().toUTCString()}</div>`);
+    showFlightLive(s, callsign);
   }
 
   function plotRouteFromAdsbdb(callsign, airlineName, fInfo){
@@ -1219,20 +1379,272 @@ function initARGUS(){
     });
   }
 
+  const GLOBAL_AIRPORTS=[
+    {icao:'KJFK',iata:'JFK',name:'John F. Kennedy International',city:'New York',country:'USA',flag:'🇺🇸',lat:40.6413,lng:-73.7781},
+    {icao:'KLAX',iata:'LAX',name:'Los Angeles International',city:'Los Angeles',country:'USA',flag:'🇺🇸',lat:33.9416,lng:-118.4085},
+    {icao:'KATL',iata:'ATL',name:'Hartsfield-Jackson Atlanta',city:'Atlanta',country:'USA',flag:'🇺🇸',lat:33.6407,lng:-84.4277},
+    {icao:'EGLL',iata:'LHR',name:'Heathrow Airport',city:'London',country:'UK',flag:'🇬🇧',lat:51.4700,lng:-0.4543},
+    {icao:'LFPG',iata:'CDG',name:'Charles de Gaulle Airport',city:'Paris',country:'France',flag:'🇫🇷',lat:49.0097,lng:2.5479},
+    {icao:'EDDF',iata:'FRA',name:'Frankfurt Airport',city:'Frankfurt',country:'Germany',flag:'🇩🇪',lat:50.0379,lng:8.5622},
+    {icao:'EHAM',iata:'AMS',name:'Amsterdam Schiphol',city:'Amsterdam',country:'Netherlands',flag:'🇳🇱',lat:52.3105,lng:4.7683},
+    {icao:'LEMD',iata:'MAD',name:'Adolfo Suarez Madrid-Barajas',city:'Madrid',country:'Spain',flag:'🇪🇸',lat:40.4983,lng:-3.5676},
+    {icao:'LTFM',iata:'IST',name:'Istanbul Airport',city:'Istanbul',country:'Turkey',flag:'🇹🇷',lat:41.2753,lng:28.7519},
+    {icao:'OMDB',iata:'DXB',name:'Dubai International',city:'Dubai',country:'UAE',flag:'🇦🇪',lat:25.2532,lng:55.3657},
+    {icao:'OTHH',iata:'DOH',name:'Hamad International',city:'Doha',country:'Qatar',flag:'🇶🇦',lat:25.2731,lng:51.6081},
+    {icao:'OEJN',iata:'JED',name:'King Abdulaziz International',city:'Jeddah',country:'Saudi Arabia',flag:'🇸🇦',lat:21.6796,lng:39.1565},
+    {icao:'VABB',iata:'BOM',name:'Chhatrapati Shivaji Maharaj Intl',city:'Mumbai',country:'India',flag:'🇮🇳',lat:19.0896,lng:72.8656},
+    {icao:'VIDP',iata:'DEL',name:'Indira Gandhi International',city:'Delhi',country:'India',flag:'🇮🇳',lat:28.5562,lng:77.1000},
+    {icao:'VOBL',iata:'BLR',name:'Kempegowda International',city:'Bengaluru',country:'India',flag:'🇮🇳',lat:13.1989,lng:77.7068},
+    {icao:'VOMM',iata:'MAA',name:'Chennai International',city:'Chennai',country:'India',flag:'🇮🇳',lat:12.9941,lng:80.1709},
+    {icao:'VECC',iata:'CCU',name:'Netaji Subhas Chandra Bose Intl',city:'Kolkata',country:'India',flag:'🇮🇳',lat:22.6547,lng:88.4467},
+    {icao:'VOHS',iata:'HYD',name:'Rajiv Gandhi International',city:'Hyderabad',country:'India',flag:'🇮🇳',lat:17.2403,lng:78.4294},
+    {icao:'WSSS',iata:'SIN',name:'Singapore Changi Airport',city:'Singapore',country:'Singapore',flag:'🇸🇬',lat:1.3644,lng:103.9915},
+    {icao:'VHHH',iata:'HKG',name:'Hong Kong International',city:'Hong Kong',country:'Hong Kong',flag:'🇭🇰',lat:22.3080,lng:113.9185},
+    {icao:'ZBAA',iata:'PEK',name:'Beijing Capital International',city:'Beijing',country:'China',flag:'🇨🇳',lat:40.0799,lng:116.6031},
+    {icao:'ZSPD',iata:'PVG',name:'Shanghai Pudong International',city:'Shanghai',country:'China',flag:'🇨🇳',lat:31.1443,lng:121.8083},
+    {icao:'RJTT',iata:'HND',name:'Tokyo Haneda Airport',city:'Tokyo',country:'Japan',flag:'🇯🇵',lat:35.5494,lng:139.7798},
+    {icao:'RJAA',iata:'NRT',name:'Narita International',city:'Tokyo',country:'Japan',flag:'🇯🇵',lat:35.7719,lng:140.3929},
+    {icao:'RKSI',iata:'ICN',name:'Incheon International',city:'Seoul',country:'South Korea',flag:'🇰🇷',lat:37.4602,lng:126.4407},
+    {icao:'YSSY',iata:'SYD',name:'Sydney Kingsford Smith',city:'Sydney',country:'Australia',flag:'🇦🇺',lat:-33.9399,lng:151.1753},
+    {icao:'YMML',iata:'MEL',name:'Melbourne Airport',city:'Melbourne',country:'Australia',flag:'🇦🇺',lat:-37.6733,lng:144.8433},
+    {icao:'NZAA',iata:'AKL',name:'Auckland Airport',city:'Auckland',country:'New Zealand',flag:'🇳🇿',lat:-37.0082,lng:174.7850},
+    {icao:'CYYZ',iata:'YYZ',name:'Toronto Pearson International',city:'Toronto',country:'Canada',flag:'🇨🇦',lat:43.6777,lng:-79.6248},
+    {icao:'CYVR',iata:'YVR',name:'Vancouver International',city:'Vancouver',country:'Canada',flag:'🇨🇦',lat:49.1967,lng:-123.1815},
+    {icao:'SBGR',iata:'GRU',name:'Sao Paulo Guarulhos',city:'Sao Paulo',country:'Brazil',flag:'🇧🇷',lat:-23.4356,lng:-46.4731},
+    {icao:'SAEZ',iata:'EZE',name:'Ministro Pistarini International',city:'Buenos Aires',country:'Argentina',flag:'🇦🇷',lat:-34.8222,lng:-58.5358},
+    {icao:'SKBO',iata:'BOG',name:'El Dorado International',city:'Bogota',country:'Colombia',flag:'🇨🇴',lat:4.7016,lng:-74.1469},
+    {icao:'FAOR',iata:'JNB',name:'O.R. Tambo International',city:'Johannesburg',country:'South Africa',flag:'🇿🇦',lat:-26.1337,lng:28.2420},
+    {icao:'HECA',iata:'CAI',name:'Cairo International',city:'Cairo',country:'Egypt',flag:'🇪🇬',lat:30.1219,lng:31.4056},
+    {icao:'HKJK',iata:'NBO',name:'Jomo Kenyatta International',city:'Nairobi',country:'Kenya',flag:'🇰🇪',lat:-1.3192,lng:36.9278},
+  ];
+
+  const AIRLINE_PROFILES={
+    AAL:{name:'American Airlines',tag:'AA',flag:'🇺🇸',color:'#2f6cf6',icon:'✈'},
+    DAL:{name:'Delta Air Lines',tag:'DL',flag:'🇺🇸',color:'#d7192d',icon:'✈'},
+    UAL:{name:'United Airlines',tag:'UA',flag:'🇺🇸',color:'#0c5da5',icon:'✈'},
+    SWA:{name:'Southwest',tag:'WN',flag:'🇺🇸',color:'#f9a602',icon:'✈'},
+    BAW:{name:'British Airways',tag:'BA',flag:'🇬🇧',color:'#075aaa',icon:'✈'},
+    DLH:{name:'Lufthansa',tag:'LH',flag:'🇩🇪',color:'#05164d',icon:'✈'},
+    AFR:{name:'Air France',tag:'AF',flag:'🇫🇷',color:'#1b4db3',icon:'✈'},
+    KLM:{name:'KLM',tag:'KL',flag:'🇳🇱',color:'#00a1e4',icon:'✈'},
+    UAE:{name:'Emirates',tag:'EK',flag:'🇦🇪',color:'#c8102e',icon:'✈'},
+    ETD:{name:'Etihad',tag:'EY',flag:'🇦🇪',color:'#b4975a',icon:'✈'},
+    QTR:{name:'Qatar Airways',tag:'QR',flag:'🇶🇦',color:'#5c153b',icon:'✈'},
+    THY:{name:'Turkish Airlines',tag:'TK',flag:'🇹🇷',color:'#d1142b',icon:'✈'},
+    IGO:{name:'IndiGo',tag:'6E',flag:'🇮🇳',color:'#1b2a90',icon:'✈'},
+    AIC:{name:'Air India',tag:'AI',flag:'🇮🇳',color:'#d22630',icon:'✈'},
+    VTI:{name:'Vistara',tag:'UK',flag:'🇮🇳',color:'#5b2d82',icon:'✈'},
+    SEJ:{name:'SpiceJet',tag:'SG',flag:'🇮🇳',color:'#e30613',icon:'✈'},
+    SIA:{name:'Singapore Airlines',tag:'SQ',flag:'🇸🇬',color:'#f6a800',icon:'✈'},
+    CPA:{name:'Cathay Pacific',tag:'CX',flag:'🇭🇰',color:'#006564',icon:'✈'},
+    CCA:{name:'Air China',tag:'CA',flag:'🇨🇳',color:'#c4002f',icon:'✈'},
+    CES:{name:'China Eastern',tag:'MU',flag:'🇨🇳',color:'#3a74c9',icon:'✈'},
+    CSN:{name:'China Southern',tag:'CZ',flag:'🇨🇳',color:'#0c57a0',icon:'✈'},
+    JAL:{name:'Japan Airlines',tag:'JL',flag:'🇯🇵',color:'#d40124',icon:'✈'},
+    ANA:{name:'All Nippon Airways',tag:'NH',flag:'🇯🇵',color:'#0063b1',icon:'✈'},
+    KAL:{name:'Korean Air',tag:'KE',flag:'🇰🇷',color:'#1570b8',icon:'✈'},
+    QFA:{name:'Qantas',tag:'QF',flag:'🇦🇺',color:'#d0021b',icon:'✈'},
+    ANZ:{name:'Air New Zealand',tag:'NZ',flag:'🇳🇿',color:'#111111',icon:'✈'},
+    ACA:{name:'Air Canada',tag:'AC',flag:'🇨🇦',color:'#d80621',icon:'✈'},
+    WJA:{name:'WestJet',tag:'WS',flag:'🇨🇦',color:'#0076a8',icon:'✈'},
+    LAT:{name:'LATAM',tag:'LA',flag:'🇨🇱',color:'#572364',icon:'✈'},
+    TAM:{name:'LATAM Brasil',tag:'JJ',flag:'🇧🇷',color:'#572364',icon:'✈'},
+    ETH:{name:'Ethiopian',tag:'ET',flag:'🇪🇹',color:'#078930',icon:'✈'},
+    KQA:{name:'Kenya Airways',tag:'KQ',flag:'🇰🇪',color:'#c8102e',icon:'✈'},
+    SAA:{name:'South African Airways',tag:'SA',flag:'🇿🇦',color:'#006341',icon:'✈'},
+    MSR:{name:'EgyptAir',tag:'MS',flag:'🇪🇬',color:'#003087',icon:'✈'},
+  };
+
+  function distanceKm(lat1,lng1,lat2,lng2){
+    const R=6371;
+    const dLat=(lat2-lat1)*Math.PI/180;
+    const dLng=(lng2-lng1)*Math.PI/180;
+    const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  }
+
+  function nearestAirport(lat,lng){
+    let best=null;
+    let bestD=Number.POSITIVE_INFINITY;
+    GLOBAL_AIRPORTS.forEach(ap=>{
+      const d=distanceKm(lat,lng,ap.lat,ap.lng);
+      if(d<bestD){bestD=d;best=ap;}
+    });
+    return {airport:best,distKm:bestD};
+  }
+
+  function classifyFlightStatus(s){
+    const onGnd=!!s?.[8];
+    const alt=(s?.[13]||s?.[7]||0);
+    const vr=s?.[11]||0;
+    if(onGnd) return 'STANDBY';
+    if(alt<1800 && vr>0.6) return 'DEPARTING';
+    if(alt<1800 && vr<-0.6) return 'ARRIVING';
+    if(alt<500 && Math.abs(vr)<=0.6) return 'SCHEDULED';
+    return 'ENROUTE';
+  }
+
+  function estimateRouteForFlight(s){
+    const lat=s?.[6],lng=s?.[5],hdg=((s?.[10]||0)*Math.PI/180);
+    if(lat==null||lng==null) return 'ROUTE N/A';
+    const from=nearestAirport(lat,lng);
+    const projectedLat=lat+Math.cos(hdg)*3.2;
+    const projectedLng=lng+Math.sin(hdg)*3.2;
+    const to=nearestAirport(projectedLat,projectedLng);
+    const fromCode=from.airport?.iata||'???';
+    const toCode=to.airport?.iata||'???';
+    if(fromCode===toCode) return `${fromCode} AREA`;
+    return `${fromCode} → ${toCode}`;
+  }
+
+  function resolveFlightProfile(){
+    return {mode:'GLOBAL',label:'GLOBAL AIRSPACE',bbox:null,airports:GLOBAL_AIRPORTS};
+  }
+
+  function openSkyUrlForProfile(){
+    return 'https://opensky-network.org/api/states/all';
+  }
+
+  function filterStatesForProfile(states){
+    return states;
+  }
+
+  function hashColor(seed){
+    let h=0;
+    for(let i=0;i<seed.length;i++) h=(h<<5)-h+seed.charCodeAt(i);
+    const n=Math.abs(h)%360;
+    return `hsl(${n} 75% 52%)`;
+  }
+
+  function airlineProfileFromCallsign(callsign,country=''){
+    const cs=(callsign||'').trim().toUpperCase();
+    const prefix=(cs.match(/^([A-Z]{3}|[A-Z0-9]{2})/)||[])[1]||'UNK';
+    const direct=AIRLINE_PROFILES[prefix];
+    if(direct) return {...direct, code:prefix};
+    const byIataCode=IATA_ICAO[prefix];
+    if(byIataCode && AIRLINE_PROFILES[byIataCode]) return {...AIRLINE_PROFILES[byIataCode], code:byIataCode};
+    const fallbackColor=hashColor(prefix);
+    const flag=(country||'').toLowerCase().includes('india')?'🇮🇳':'🌐';
+    return {name:'Unknown Carrier',tag:prefix,flag,color:fallbackColor,icon:'✈',code:prefix};
+  }
+
+  function countryKey(v=''){
+    return String(v||'').trim().toUpperCase().replace(/[^A-Z]/g,'');
+  }
+
+  function regionalAirportCatalog(){
+    const c=countryKey(window.__argusOperatorCountry||'');
+    const code=countryKey(window.__argusOperatorCountryCode||'');
+    const byCountry=GLOBAL_AIRPORTS.filter(ap=>{
+      const ak=countryKey(ap.country);
+      if(!ak) return false;
+      return (c && ak===c) || (code && (ak===code || ak.startsWith(code)));
+    });
+    if(byCountry.length>=3) return byCountry;
+    if(window._opLat!=null && window._opLng!=null){
+      return [...GLOBAL_AIRPORTS]
+        .sort((a,b)=>distanceKm(window._opLat,window._opLng,a.lat,a.lng)-distanceKm(window._opLat,window._opLng,b.lat,b.lng))
+        .slice(0,18);
+    }
+    return GLOBAL_AIRPORTS.slice(0,18);
+  }
+
+  function renderGlobalAirportOps(states, profile){
+    const list=document.getElementById('globalAirportList'); if(!list) return;
+    if(!profile || !Array.isArray(profile.airports) || !profile.airports.length){
+      list.innerHTML='<div style="font-family:var(--fm);font-size:8px;color:var(--textd);text-align:center;padding:10px;line-height:1.6;">NO AIRPORT CATALOG AVAILABLE.</div>';
+      return;
+    }
+    const now=new Date();
+    const day=now.toISOString().slice(0,10);
+    const hourKey=`${day} ${String(now.getUTCHours()).padStart(2,'0')}:00 UTC`;
+    const refreshTs=now.toISOString().replace('T',' ').slice(0,16)+' UTC';
+    const regionalAirports=regionalAirportCatalog();
+    const statsStore=(window.__argusAirportStats=window.__argusAirportStats||{daily:{},hourly:{}});
+
+    const mapped=regionalAirports.map(ap=>{
+      const nearby=(states||[]).filter(s=>{
+        const lat=s?.[6],lng=s?.[5];
+        if(lat==null||lng==null) return false;
+        return distanceKm(ap.lat,ap.lng,lat,lng)<=130;
+      });
+      let dep=0,arr=0,ovr=0,stdby=0,sch=0;
+      nearby.forEach(s=>{
+        const st=classifyFlightStatus(s);
+        if(st==='DEPARTING') dep++;
+        else if(st==='ARRIVING') arr++;
+        else if(st==='STANDBY') stdby++;
+        else if(st==='SCHEDULED') sch++;
+        else ovr++;
+      });
+      const dKey=`${day}:${ap.icao}`;
+      const hKey=`${hourKey}:${ap.icao}`;
+      const dayStats=(statsStore.daily[dKey]=statsStore.daily[dKey]||{max:0});
+      const hourStats=(statsStore.hourly[hKey]=statsStore.hourly[hKey]||{max:0});
+      dayStats.max=Math.max(dayStats.max, nearby.length);
+      hourStats.max=Math.max(hourStats.max, nearby.length);
+      return {ap,nearby,dep,arr,ovr,stdby,sch,total:nearby.length,dayMax:dayStats.max,hourMax:hourStats.max};
+    }).sort((a,b)=>b.total-a.total);
+
+    list.innerHTML='';
+    mapped.forEach(entry=>{
+      const div=document.createElement('div'); div.className='aitem';
+      div.innerHTML=`<span class="ai-ico">🛫</span>
+        <span class="ai-cs">${entry.ap.flag||'🌍'} ${entry.ap.iata} · ${entry.ap.city}</span>
+        <span class="ai-st" style="color:var(--green)">${entry.total}</span>`;
+      div.onclick=()=>{
+        map.flyTo([entry.ap.lat,entry.ap.lng],8,{animate:true,duration:1.2});
+        const top=entry.nearby.slice(0,10).map(s=>{
+          const cs=(s[1]||'UNKN').trim()||'UNKN';
+          const alt=Math.round(s[13]||s[7]||0);
+          const spd=Math.round((s[9]||0)*1.94);
+          const age=lastContactAge(s);
+          const apf=airlineProfileFromCallsign(cs,s[2]||'');
+          const st=classifyFlightStatus(s);
+          const rt=estimateRouteForFlight(s);
+          return `<div class="loc-row"><span class="loc-lbl">${apf.flag} ${apf.tag} · ${cs}</span><span class="loc-val">${st} · ${rt} · ALT ${alt}m · ${spd}kt · ${age}</span></div>`;
+        }).join('')||'<div class="loc-row"><span class="loc-lbl">NO LIVE TRACKS</span><span class="loc-val">—</span></div>';
+        setDet(`<div class="dttl">🛫 ${entry.ap.name}</div>
+          <div class="loc-type">REGIONAL AIRPORT OPS · ${day} · ${hourKey}</div>
+          <div class="dgrid">
+            ${dfRow('AIRPORT',`${entry.ap.iata} / ${entry.ap.icao}`,'hl')}
+            ${dfRow('CITY',entry.ap.city,'')}
+            ${dfRow('COUNTRY',entry.ap.country,'')}
+            ${dfRow('LIVE TRACKS',entry.total,'gn')}
+            ${dfRow('DEPARTING',entry.dep,entry.dep>0?'gn':'')}
+            ${dfRow('ARRIVING',entry.arr,entry.arr>0?'hl':'')}
+            ${dfRow('STANDBY',entry.stdby,entry.stdby>0?'wa':'')}
+            ${dfRow('SCHEDULED',entry.sch,entry.sch>0?'hl':'')}
+            ${dfRow('ENROUTE',entry.ovr,'')}
+            ${dfRow('DAY PEAK',entry.dayMax,'')}
+            ${dfRow('HOUR PEAK',entry.hourMax,'')}
+          </div>
+          <div style="margin-top:8px;">
+            <div class="dl">LIVE NEARBY FLIGHTS</div>
+            ${top}
+          </div>
+          <div class="sfooter">DATA: OPENSKY LIVE STATES · LAST REFRESH ${refreshTs} · AUTO REFRESH 1m + 1h</div>`);
+      };
+      list.appendChild(div);
+    });
+  }
+
   let flightRefreshInterval=null;
   let usingSimFlights=false;
 
   async function fetchFlights(){
     const srcEl=document.getElementById('flightSrc');
     const srcLabel=document.getElementById('flightSrcLabel');
+    const profile=resolveFlightProfile();
+    const directOpenSky=openSkyUrlForProfile();
     srcEl.style.color='var(--cyan)';
-    srcEl.textContent='✈ ADS-B: FETCHING…';
+    srcEl.textContent=`✈ ADS-B: FETCHING… (${profile.label})`;
 
     // Sources to try in order
     const sources=[
-      {name:'OpenSky Direct',url:'https://opensky-network.org/api/states/all'},
-      {name:'CORS Proxy 1',url:'https://corsproxy.io/?https://opensky-network.org/api/states/all'},
-      {name:'AllOrigins',url:'https://api.allorigins.win/raw?url='+encodeURIComponent('https://opensky-network.org/api/states/all')},
+      {name:'OpenSky Direct',url:directOpenSky},
+      {name:'CORS Proxy 1',url:'https://corsproxy.io/?'+directOpenSky},
+      {name:'AllOrigins',url:'https://api.allorigins.win/raw?url='+encodeURIComponent(directOpenSky)},
       {name:'ADS-B Exchange',url:'https://corsproxy.io/?https://adsbexchange-com1.p.rapidapi.com/v2/json'},
     ];
 
@@ -1241,14 +1653,19 @@ function initARGUS(){
         const r=await fetch(src.url,{signal:AbortSignal.timeout(10000)});
         if(!r.ok) continue;
         const data=await r.json();
-        const states=(data?.states||[]).filter(s=>s[5]!=null&&s[6]!=null&&!s[8]);
-        if(states.length>10){
+        const rawStates=(data?.states||[]).filter(s=>s[5]!=null&&s[6]!=null&&!s[8]);
+        const states=filterStatesForProfile(rawStates);
+        if(states.length>5){
           window.liveFlightData=states;
+          window.__argusFlightProfile=profile.mode;
+          window.__argusFlightSyncAt=Date.now();
+          window.__argusFlightSource=src.name;
           usingSimFlights=false;
-          renderFlights(states,src.name);
+          renderFlights(states,src.name,profile);
+          renderSourceStatus();
           srcEl.style.color='var(--green)';
-          srcEl.textContent=`✈ ADS-B LIVE · ${states.length} AC · ${src.name}`;
-          srcLabel.textContent='LIVE '+src.name.toUpperCase();
+          srcEl.textContent=`✈ ADS-B LIVE · ${states.length} AC · ${profile.label} · ${src.name}`;
+          srcLabel.textContent=`LIVE ${src.name.toUpperCase()}`;
           return;
         }
       } catch(e){}
@@ -1256,23 +1673,29 @@ function initARGUS(){
 
     // All sources failed — use simulation
     const simFlights=generateSimFlights();
-    window.liveFlightData=simFlights;
+    const simProfiled=filterStatesForProfile(simFlights);
+    window.liveFlightData=simProfiled;
+    window.__argusFlightProfile=profile.mode;
+    window.__argusFlightSyncAt=Date.now();
+    window.__argusFlightSource='SIMULATED';
     usingSimFlights=true;
-    renderFlights(simFlights,'SIMULATED');
+    renderFlights(simProfiled,'SIMULATED',profile);
+    renderSourceStatus();
     srcEl.style.color='var(--orange)';
-    srcEl.textContent='✈ ADS-B: SIMULATED (API offline)';
+    srcEl.textContent=`✈ ADS-B: SIMULATED (${profile.label})`;
     srcLabel.textContent='SIMULATED';
   }
 
-  function renderFlights(states,source){
+  function renderFlights(states,source,profile){
     LYR.flights.clearLayers();
     const list=document.getElementById('flightList'); list.innerHTML='';
     const shown=states.slice(0,400);
     shown.forEach(s=>{
       const cs=(s[1]||'').trim()||'UNKN';
+      const carrier=airlineProfileFromCallsign(cs,s[2]||'');
       const lat=s[6],lng=s[5],hdg=s[10]||0;
-      const m=L.marker([lat,lng],{icon:makeArrow('#00c8ff',hdg)}).addTo(LYR.flights);
-      m.bindTooltip(`✈ ${cs}`);
+      const m=L.marker([lat,lng],{icon:makeArrow(carrier.color,hdg,carrier.tag,carrier.icon)}).addTo(LYR.flights);
+      m.bindTooltip(`${carrier.flag} ${carrier.tag} · ${cs}`);
       m.on('click',()=>showFlight(s,cs));
     });
     document.getElementById('cntAC').textContent=states.length;
@@ -1280,9 +1703,10 @@ function initARGUS(){
     // List top 20
     states.slice(0,20).forEach(s=>{
       const cs=(s[1]||'').trim()||'UNKN';
+      const carrier=airlineProfileFromCallsign(cs,s[2]||'');
       const lat=s[6],lng=s[5];
       const it=document.createElement('div'); it.className='aitem';
-      it.innerHTML=`<span class="ai-ico">✈</span><span class="ai-cs">${cs}</span><span class="ai-st">${s[2]||'—'}</span>`;
+      it.innerHTML=`<span class="ai-ico" style="color:${carrier.color}">${carrier.icon}</span><span class="ai-cs">${carrier.flag} ${carrier.tag} · ${cs}</span><span class="ai-st">${s[2]||'—'}</span>`;
       it.onclick=()=>{map.flyTo([lat,lng],9,{animate:true,duration:1.2});showFlight(s,cs);};
       list.appendChild(it);
     });
@@ -1292,6 +1716,7 @@ function initARGUS(){
       info.textContent='⚠ SIMULATED — ADS-B APIS OFFLINE';
       list.appendChild(info);
     }
+    renderGlobalAirportOps(states,profile);
   }
 
   // ── ASSET DATA ──────────────────────────────────────
@@ -1492,8 +1917,32 @@ function initARGUS(){
     </div><div class="sfooter">SOURCE: ADS-B LIVE · ICAO24: ${s[0]||'—'} · ${new Date().toUTCString()}</div>`);
   }
 
+  function renderSourceStatus(){
+    const list=document.getElementById('sourceStatus'); if(!list) return;
+    const flags=window.__argusBridgeAssetFlags||{};
+    const syncAt=window.__argusFlightSyncAt?new Date(window.__argusFlightSyncAt):null;
+    const ageSec=syncAt?Math.max(0,Math.round((Date.now()-syncAt.getTime())/1000)):null;
+    const ageLabel=ageSec==null?'—':(ageSec<60?`${ageSec}s`:`${Math.round(ageSec/60)}m`);
+    const profileLabel=(window.__argusFlightProfile||'GLOBAL');
+    const rows=[
+      {label:'Flights',status:usingSimFlights?'SIMULATED':'LIVE',detail:`${window.__argusFlightSource||'UNKNOWN'} · ${profileLabel}`,col:usingSimFlights?'var(--orange)':'var(--green)'},
+      {label:'Naval',status:flags.ships?'MANAGED':'SIMULATED',detail:`${SHIPS.length} tracks`,col:flags.ships?'var(--green)':'var(--orange)'},
+      {label:'Drones',status:flags.drones?'MANAGED':'SIMULATED',detail:`${DRONES.length} tracks`,col:flags.drones?'var(--green)':'var(--orange)'},
+      {label:'Missiles',status:flags.missiles?'MANAGED':'SIMULATED',detail:`${MISSILES.length} tracks`,col:flags.missiles?'var(--green)':'var(--orange)'},
+      {label:'Satellites',status:flags.sats?'MANAGED':'SIMULATED',detail:`${SATS.length} tracks`,col:flags.sats?'var(--green)':'var(--orange)'},
+      {label:'Conflicts',status:flags.conflicts?'MANAGED':'MODELED',detail:`${CONFLICTS.length} zones`,col:flags.conflicts?'var(--green)':'var(--yellow)'},
+    ];
+    list.innerHTML=rows.map(r=>`<div class="aitem">
+      <span class="ai-cs" style="font-size:8.5px;min-width:78px;">${r.label}</span>
+      <span class="ai-st" style="color:${r.col};font-size:8px;min-width:72px;">${r.status}</span>
+      <span class="ai-st" style="font-size:7.5px;">${r.detail}</span>
+    </div>`).join('')+`<div style="font-family:var(--fm);font-size:7.5px;color:var(--textd);padding:6px 4px 2px;">Flight sync age: ${ageLabel}</div>`;
+  }
+
   function applyOperatorOverride(operator){
     if(!operator) return;
+    window.__argusOperatorCountry=operator.country||'';
+    window.__argusOperatorCountryCode=operator.countryCode||'';
     const setField=(id,val,cls='')=>{
       const el=document.getElementById(id); if(!el) return;
       if(typeof val === 'undefined' || val === null || val === '') return;
@@ -1527,12 +1976,20 @@ function initARGUS(){
       applyOperatorOverride(bridge.operator);
     }
     if(bridge.assets){
+      window.__argusBridgeAssetFlags={
+        ships:Array.isArray(bridge.assets.ships),
+        drones:Array.isArray(bridge.assets.drones),
+        missiles:Array.isArray(bridge.assets.missiles),
+        sats:Array.isArray(bridge.assets.sats),
+        conflicts:Array.isArray(bridge.assets.conflicts),
+      };
       if(Array.isArray(bridge.assets.ships)) SHIPS = bridge.assets.ships;
       if(Array.isArray(bridge.assets.drones)) DRONES = bridge.assets.drones;
       if(Array.isArray(bridge.assets.missiles)) MISSILES = bridge.assets.missiles;
       if(Array.isArray(bridge.assets.sats)) SATS = bridge.assets.sats;
       if(Array.isArray(bridge.assets.conflicts)) CONFLICTS = bridge.assets.conflicts;
       renderConflicts(); renderShips(); renderDrones(); renderMissiles(); renderSats();
+      renderSourceStatus();
     }
   }
 
@@ -1754,6 +2211,7 @@ function initARGUS(){
         const ip=d.ip||d.query||d.ip_address||'—';
         const city=d.city||'—';
         const country=d.country_name||d.country||'—';
+        const countryCode=(d.country_code||d.countryCode||'').toUpperCase();
         const region=d.region_code||d.regionName||d.region||'';
         const isp=d.org||d.isp||d.connection?.isp||'—';
         const tz=d.timezone||d.time_zone?.id||'—';
@@ -1764,6 +2222,8 @@ function initARGUS(){
         setField('opISP', isp.length>22?isp.substring(0,22)+'…':isp, '');
         setField('opTZ', tz.split('/').slice(-1)[0]||tz, '');
         setField('opStatus', '● ACQUIRED', 'green');
+        window.__argusOperatorCountry=country||'';
+        window.__argusOperatorCountryCode=countryCode;
         // Auto-fly map to operator location silently
         if(lat&&lng){
           window._opLat=lat; window._opLng=lng;
@@ -1795,6 +2255,7 @@ function initARGUS(){
   // Replaces showFlight — fetches today's LIVE data for this ICAO24
   async function showFlightLive(s, callsign){
     const cs=callsign||(s[1]||'UNKN').trim().toUpperCase();
+    const carrier=airlineProfileFromCallsign(cs,s[2]||'');
     const icao24=s[0]||'';
     const now=new Date();
     const todayStr=`${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-${String(now.getUTCDate()).padStart(2,'0')}`;
@@ -1806,11 +2267,14 @@ function initARGUS(){
     const sqk=s[14]||'—';
     const onGnd=s[8];
     const lat=s[6], lng=s[5];
+    const posSrc=positionSourceLabel(s);
+    const contactAge=lastContactAge(s);
+    const feedSrc=(window.__argusFlightSource||'OPENSKY').toUpperCase();
     // Phase of flight
     const phase=onGnd?'ON GROUND':alt<1000?'TAXI/CLIMBOUT':alt<3000?'DEPARTURE':alt>9000?'CRUISE':'CLIMB/DESCENT';
     const phaseCol=onGnd?'wa':alt>9000?'gn':'hl';
     // Render immediate snapshot
-    setDet(`<div class="dttl">✈ ${cs}</div>
+    setDet(`<div class="dttl" style="color:${carrier.color}">${carrier.flag} ${carrier.tag} · ${cs}</div>
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
         <div class="dot dot-g"></div>
         <span style="font-family:var(--fm);font-size:8px;color:var(--green);">LIVE · ${nowUTC}</span>
@@ -1821,6 +2285,7 @@ function initARGUS(){
       </div>
       <div class="dgrid">
         ${dfRow('CALLSIGN',cs,'hl')}
+        ${dfRow('AIRLINE',`${carrier.flag} ${carrier.name} (${carrier.tag})`,'')}
         ${dfRow('ICAO24',icao24||'—','')}
         ${dfRow('COUNTRY',s[2]||'—','')}
         ${dfRow('SQUAWK',sqk,sqk==='7500'?'dr':sqk==='7700'?'dr':sqk==='7600'?'wa':'')}
@@ -1830,13 +2295,15 @@ function initARGUS(){
         ${dfRow('VERT RATE',(vspd>0?'↑':'↓')+Math.abs(Math.round(vspd))+'m/s',vspd>0?'gn':vspd<-3?'wa':'')}
         ${dfRow('LATITUDE',lat?lat.toFixed(5)+'°':'—','')}
         ${dfRow('LONGITUDE',lng?lng.toFixed(5)+'°':'—','')}
+        ${dfRow('POSITION SRC',posSrc,posSrc==='ADS-B'?'gn':'')}
+        ${dfRow('LAST CONTACT',contactAge,contactAge!=='—'&&(parseInt(contactAge,10)>120)?'wa':'')}
         ${dfRow('DATE',todayStr,'')}
-        ${dfRow('DATA AGE','< 60 sec','gn')}
+        ${dfRow('DATA AGE',contactAge==='—'?'UNKNOWN':contactAge,contactAge!=='—'&&(parseInt(contactAge,10)<=60)?'gn':'')}
       </div>
       ${sqk==='7500'?'<div style="margin-top:6px;padding:5px 8px;background:color-mix(in srgb,var(--red) 20%,transparent);border:1px solid var(--red);font-family:var(--fm);font-size:8.5px;color:var(--red);">⚠ SQUAWK 7500 — HIJACK ALERT</div>':''}
       ${sqk==='7700'?'<div style="margin-top:6px;padding:5px 8px;background:color-mix(in srgb,var(--red) 20%,transparent);border:1px solid var(--red);font-family:var(--fm);font-size:8.5px;color:var(--red);">⚠ SQUAWK 7700 — GENERAL EMERGENCY</div>':''}
       ${sqk==='7600'?'<div style="margin-top:6px;padding:5px 8px;background:color-mix(in srgb,var(--orange) 15%,transparent);border:1px solid var(--orange);font-family:var(--fm);font-size:8.5px;color:var(--orange);">⚠ SQUAWK 7600 — RADIO FAILURE</div>':''}
-      <div class="sfooter">SOURCE: ADS-B OPENSKY · ICAO24: ${icao24} · ${todayStr}</div>`);
+      <div class="sfooter">SOURCE: ${feedSrc} · POSITION: ${posSrc} · ICAO24: ${icao24} · ${todayStr}</div>`);
     // Fetch route from adsbdb asynchronously
     if(cs&&cs!=='UNKN') enrichFlightRoute(cs, icao24);
   }
@@ -1867,7 +2334,7 @@ function initARGUS(){
     const now=new Date();
     const nowUTC=`${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')} UTC`;
     if(btn){btn.textContent='↻ REFRESH';btn.disabled=false;}
-    setDet(document.getElementById('detBox').innerHTML.replace('< 60 sec','STALE').replace('dot-g','dot-r'));
+    setDet(document.getElementById('detBox').innerHTML.replace('dot-g','dot-r'));
     const staleDiv=document.createElement('div');
     staleDiv.style.cssText='margin-top:6px;padding:5px 8px;background:color-mix(in srgb,var(--orange) 12%,transparent);border:1px solid var(--orange);font-family:var(--fm);font-size:8.5px;color:var(--orange);';
     staleDiv.textContent=`⚠ AIRCRAFT NOT IN LIVE FEED AT ${nowUTC} — MAY HAVE LANDED`;
@@ -2077,6 +2544,7 @@ function initARGUS(){
   // ── INIT ALL ──────────────────────────────────────
   renderConflicts(); renderShips(); renderDrones(); renderMissiles(); renderSats();
   renderIntel(); renderAlerts(); renderTicker();
+  renderSourceStatus();
 
   // Remove loading overlay
   document.getElementById('loadBar').style.width='100%';
@@ -2090,6 +2558,7 @@ function initARGUS(){
   // Start fetching flights
   fetchFlights();
   setInterval(fetchFlights,60000);
+  setInterval(fetchFlights,3600000);
   setInterval(driftAll,3500);
   setInterval(()=>{INTEL.push(INTEL.shift());renderIntel();},25000);
 
