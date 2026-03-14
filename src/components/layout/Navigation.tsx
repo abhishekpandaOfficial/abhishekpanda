@@ -79,6 +79,7 @@ export const Navigation = () => {
     location.pathname === "/efcore-mastery" ||
     location.pathname === "/dotnet-mastery" ||
     location.pathname === "/dotnet-mastery-toc" ||
+    location.pathname === "/docker-mastery" ||
     location.pathname === "/design-patterns-guide" ||
     location.pathname === "/solid-principles-guide" ||
     location.pathname === "/blogs/solid-principles" ||

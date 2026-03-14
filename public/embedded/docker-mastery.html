@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Docker Mastery — Complete Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080a0c;--sf:#0c0f12;--card:#101418;--card2:#151a1f;
+  --b1:#1a2530;--b2:#243548;--b3:#2496ed40;
+  --d1:#2496ed;--d2:#4ab5f5;--d3:#7eceff;
+  --or:#ff6b35;--or2:#ff8c5a;--or3:#ffad82;
+  --gr:#00d26a;--gr2:#26e585;--ye:#ffd166;
+  --pu:#b388ff;--re:#ff4757;--cy:#00e5ff;
+  --tx:#d0e8f8;--tx2:#5a8aaa;--tx3:#1a3045;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;--disp:'Bebas Neue',sans-serif;
+  --lw:270px;--rw:560px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:14px}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(36,150,237,.005) 3px,rgba(36,150,237,.005) 4px);pointer-events:none;z-index:9999}
+
+/* TOPBAR */
+.topbar{height:54px;background:var(--sf);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 18px;gap:12px;flex-shrink:0;position:relative;z-index:100}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--d1) 20%,var(--or) 50%,var(--d2) 80%,transparent)}
+.logo-icon{width:36px;height:36px;border-radius:8px;background:var(--card);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 20px rgba(36,150,237,.25)}
+.logo-name{font-family:var(--disp);font-size:22px;letter-spacing:5px;background:linear-gradient(135deg,var(--d1),var(--or));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.logo-sub{font-size:8px;color:var(--tx3);font-family:var(--mono);letter-spacing:2px;margin-top:2px}
+.top-sep{flex:1}
+.t-stat{background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:3px 9px;font-size:9.5px;font-family:var(--mono);color:var(--tx3)}
+.t-stat b{color:var(--d2)}.t-stat b.or{color:var(--or)}
+.t-badge{background:rgba(36,150,237,.07);border:1px solid var(--b2);border-radius:3px;padding:4px 11px;font-size:9px;color:var(--d2);font-family:var(--mono);letter-spacing:1px}
+.blink{animation:bl .9s step-end infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* LEFT NAV */
+.lp{width:var(--lw);background:var(--sf);border-right:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.lp-hdr{padding:11px 13px 9px;border-bottom:1px solid var(--b1)}
+.lp-hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.lp-hdr-row h3{font-family:var(--mono);font-size:8px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase}
+.prog-bar{background:var(--b1);border-radius:2px;height:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--d1),var(--or));width:0%;transition:width .5s;box-shadow:0 0 6px rgba(36,150,237,.4)}
+.prog-txt{font-size:8px;color:var(--tx3);font-family:var(--mono);margin-top:4px}
+.lnav{flex:1;overflow-y:auto;padding:3px 0}
+.lnav::-webkit-scrollbar{width:2px}
+.lnav::-webkit-scrollbar-thumb{background:var(--b2)}
+.ci{display:flex;align-items:center;gap:7px;padding:7px 12px;cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.ci:hover{background:rgba(36,150,237,.04);border-left-color:var(--b2)}
+.ci.active{background:rgba(36,150,237,.08);border-left-color:var(--d1)}
+.ci.active .cn{color:var(--d2)}
+.ci-icon{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.ci-info{flex:1;min-width:0}
+.cn{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.cm{font-size:8px;color:var(--tx3);font-family:var(--mono)}
+.lv{font-size:7px;padding:1px 5px;border-radius:2px;font-family:var(--mono);font-weight:700;flex-shrink:0;text-transform:uppercase;letter-spacing:.5px}
+
+/* MIDDLE */
+.mid{flex:1;overflow-y:auto;padding:18px;min-width:0}
+.mid::-webkit-scrollbar{width:4px}
+.mid::-webkit-scrollbar-thumb{background:var(--b2)}
+
+/* WELCOME */
+.wlc{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:65vh;text-align:center;padding:32px;animation:fu .45s ease}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.wlc-logo{font-size:72px;margin-bottom:6px;animation:whale-bob 3s ease-in-out infinite}
+@keyframes whale-bob{0%,100%{transform:translateY(0) rotate(-2deg);filter:drop-shadow(0 0 20px rgba(36,150,237,.4))}50%{transform:translateY(-8px) rotate(2deg);filter:drop-shadow(0 0 40px rgba(255,107,53,.5))}}
+.wlc-title{font-family:var(--disp);font-size:44px;letter-spacing:6px;background:linear-gradient(135deg,var(--d1),var(--or) 55%,var(--d2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;line-height:1}
+.wlc-sub{font-size:12px;color:var(--tx2);max-width:520px;line-height:1.75;margin-bottom:24px;font-family:var(--mono)}
+.wlc-prompt{font-family:var(--mono);font-size:13px;color:var(--d2);margin-bottom:20px}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.sc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px 18px;text-align:center;min-width:90px;transition:border-color .2s}
+.sc:hover{border-color:var(--b2)}
+.sc-n{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--d2);display:block;line-height:1;text-shadow:0 0 10px rgba(36,150,237,.3)}
+.sc-n.or{color:var(--or);text-shadow:0 0 10px rgba(255,107,53,.3)}
+.sc-n.gr{color:var(--gr);text-shadow:0 0 10px rgba(0,210,106,.3)}
+.sc-l{font-size:8px;color:var(--tx3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;display:block}
+.wlc-hint{font-size:9px;color:var(--tx3);font-family:var(--mono);margin-top:16px;letter-spacing:1px}
+
+/* ARCHITECTURE DIAGRAM STYLES */
+.arch{background:var(--card);border:1px solid var(--b1);border-radius:8px;padding:16px;margin:10px 0;position:relative;overflow:hidden}
+.arch::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(36,150,237,.05) 0%,transparent 70%);pointer-events:none}
+.arch-title{font-family:var(--mono);font-size:8px;color:var(--d2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.arch-title::after{content:'';flex:1;height:1px;background:var(--b1)}
+.az{border:1px solid;border-radius:6px;padding:10px;flex:1;min-width:110px}
+.az.client{border-color:rgba(36,150,237,.4);background:rgba(36,150,237,.05)}
+.az.daemon{border-color:rgba(255,107,53,.4);background:rgba(255,107,53,.04)}
+.az.containerd{border-color:rgba(0,210,106,.3);background:rgba(0,210,106,.04)}
+.az.registry{border-color:rgba(179,136,255,.4);background:rgba(179,136,255,.05)}
+.az.net{border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.04)}
+.az-title{font-family:var(--mono);font-size:8px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.az.client .az-title{color:var(--d2)}
+.az.daemon .az-title{color:var(--or)}
+.az.containerd .az-title{color:var(--gr)}
+.az.registry .az-title{color:var(--pu)}
+.az.net .az-title{color:var(--cy)}
+.ac{background:var(--card2);border:1px solid var(--b1);border-radius:4px;padding:5px 8px;margin-bottom:4px;font-family:var(--mono);font-size:9.5px}
+.ac-n{font-weight:700;margin-bottom:1px}
+.ac-d{font-size:8px;color:var(--tx3);line-height:1.4}
+.ac.docker-cli .ac-n{color:var(--d2)}
+.ac.docker-daemon .ac-n{color:var(--or)}
+.ac.containerd-c .ac-n{color:var(--gr)}
+.ac.runc-c .ac-n{color:var(--gr2)}
+.ac.buildkit .ac-n{color:var(--ye)}
+.ac.image-reg .ac-n{color:var(--pu)}
+.ac.container-box .ac-n{color:var(--d3)}
+
+/* FLOW */
+.flow{display:flex;align-items:center;gap:0;margin:10px 0;overflow-x:auto;padding:12px;background:var(--card);border:1px solid var(--b1);border-radius:6px;flex-wrap:wrap;row-gap:6px}
+.fbox{background:var(--card2);border:1px solid var(--b1);border-radius:5px;padding:7px 11px;font-family:var(--mono);font-size:10px;white-space:nowrap;text-align:center;flex-shrink:0}
+.fbox .fb-label{font-size:7.5px;color:var(--tx3);margin-bottom:2px;text-transform:uppercase;letter-spacing:1px}
+.fbox .fb-name{font-weight:700}
+.farr{padding:0 6px;color:var(--tx3);font-size:14px;flex-shrink:0}
+.farr.cmd{padding:0 4px;font-family:var(--mono);font-size:9px;color:var(--d2);display:flex;flex-direction:column;align-items:center;gap:2px}
+.farr.cmd span{color:var(--tx3);font-size:8px}
+
+/* LAYER STACK (image layers) */
+.layers{display:flex;flex-direction:column;gap:3px;margin:10px 0}
+.layer{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:4px;font-family:var(--mono);font-size:10px;border:1px solid;transition:transform .15s}
+.layer:hover{transform:translateX(4px)}
+.layer.rw{border-color:rgba(255,107,53,.4);background:rgba(255,107,53,.06)}
+.layer.ro{border-color:rgba(36,150,237,.2);background:rgba(36,150,237,.04)}
+.layer.base{border-color:rgba(0,210,106,.2);background:rgba(0,210,106,.04)}
+.layer-badge{font-size:7px;padding:2px 5px;border-radius:2px;font-weight:700;letter-spacing:1px}
+.layer.rw .layer-badge{background:rgba(255,107,53,.2);color:var(--or)}
+.layer.ro .layer-badge{background:rgba(36,150,237,.15);color:var(--d2)}
+.layer.base .layer-badge{background:rgba(0,210,106,.15);color:var(--gr)}
+.layer-name{flex:1;font-weight:600}
+.layer.rw .layer-name{color:var(--or)}
+.layer.ro .layer-name{color:var(--d2)}
+.layer.base .layer-name{color:var(--gr)}
+.layer-desc{font-size:8.5px;color:var(--tx3)}
+
+/* CHAPTER HEADER */
+.ch-hdr{margin-bottom:18px;animation:fu .3s ease}
+.ch-ey{font-size:8px;color:var(--d2);font-family:var(--mono);letter-spacing:3px;text-transform:uppercase;margin-bottom:5px}
+.ch-t{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--tx);line-height:1.1;margin-bottom:8px}
+.ch-d{font-size:11.5px;color:var(--tx2);line-height:1.7;max-width:640px;font-family:var(--mono)}
+.ch-chips{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:3px 8px;font-size:9px;color:var(--tx2);font-family:var(--mono)}
+.chip-dot{width:4px;height:4px;border-radius:50%}
+
+/* TOPIC GRID */
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:8px;animation:fu .4s ease .08s both}
+.tc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--d1),var(--or));opacity:0;transition:opacity .2s}
+.tc:hover{border-color:var(--b2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(36,150,237,.1)}
+.tc:hover::before,.tc.active::before{opacity:1}
+.tc.active{border-color:var(--d1);background:var(--card2);box-shadow:0 0 0 1px rgba(36,150,237,.3)}
+.tc-cmd{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--d2);margin-bottom:3px;text-shadow:0 0 8px rgba(36,150,237,.3)}
+.tc-title{font-size:10px;font-weight:600;color:var(--tx);margin-bottom:3px;font-family:var(--mono)}
+.tc-d{font-size:9.5px;color:var(--tx3);line-height:1.4}
+.tc-tags{display:flex;gap:3px;margin-top:7px;flex-wrap:wrap}
+.tag{font-size:7px;padding:2px 4px;border-radius:2px;font-family:var(--mono);font-weight:700;letter-spacing:.3px}
+.tag.beginner{background:rgba(0,210,106,.1);color:#00d26a;border:1px solid rgba(0,210,106,.2)}
+.tag.intermediate{background:rgba(255,209,102,.1);color:#ffd166;border:1px solid rgba(255,209,102,.2)}
+.tag.advanced{background:rgba(179,136,255,.1);color:#b388ff;border:1px solid rgba(179,136,255,.2)}
+.tag.essential{background:rgba(36,150,237,.1);color:var(--d2);border:1px solid rgba(36,150,237,.25)}
+.tag.dotnet{background:rgba(122,54,182,.12);color:#9c6fff;border:1px solid rgba(122,54,182,.3)}
+.tag.production{background:rgba(0,229,255,.08);color:var(--cy);border:1px solid rgba(0,229,255,.2)}
+.tag.security{background:rgba(255,71,87,.1);color:#ff4757;border:1px solid rgba(255,71,87,.2)}
+.tag.microservice{background:rgba(255,107,53,.1);color:var(--or);border:1px solid rgba(255,107,53,.25)}
+
+/* RIGHT PANEL */
+.rp{width:var(--rw);background:var(--sf);border-left:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .25s}
+.rp.hidden{width:0;border:none;overflow:hidden}
+.rp-hdr{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.rp-hdr h3{flex:1;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--d2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xbtn{width:22px;height:22px;border-radius:3px;border:1px solid var(--b1);background:transparent;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--mono);transition:all .15s}
+.xbtn:hover{background:var(--b1);color:var(--tx)}
+.rp-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;overflow-x:auto}
+.rp-tabs::-webkit-scrollbar{height:0}
+.rt{padding:7px 13px;font-size:9.5px;color:var(--tx3);font-family:var(--mono);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;letter-spacing:.5px}
+.rt:hover{color:var(--tx)}
+.rt.active{color:var(--d2);border-bottom-color:var(--d2)}
+.rb{flex:1;overflow-y:auto;padding:14px}
+.rb::-webkit-scrollbar{width:2px}
+.rb::-webkit-scrollbar-thumb{background:var(--b2)}
+@keyframes sr{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.rb>*{animation:sr .2s ease both}
+
+/* CONTENT ELEMENTS */
+.sec{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--d2);margin:16px 0 7px;display:flex;align-items:center;gap:7px;letter-spacing:1.5px;text-transform:uppercase}
+.sec::after{content:'';flex:1;height:1px;background:var(--b1)}
+.sec.or{color:var(--or)}.sec.gr{color:var(--gr)}.sec.ye{color:var(--ye)}.sec.re{color:var(--re)}.sec.pu{color:var(--pu)}
+.sec:first-child{margin-top:0}
+p.bd{font-size:11.5px;line-height:1.75;color:var(--tx2);margin-bottom:9px;font-family:var(--mono)}
+strong{color:var(--tx)}
+
+.callout{border-left:2px solid;padding:9px 12px;border-radius:0 4px 4px 0;margin:9px 0;font-size:10.5px;line-height:1.7;font-family:var(--mono)}
+.callout.info{border-color:var(--d2);background:rgba(36,150,237,.05);color:var(--tx2)}
+.callout.warn{border-color:var(--ye);background:rgba(255,209,102,.05);color:var(--tx2)}
+.callout.tip{border-color:var(--or);background:rgba(255,107,53,.04);color:var(--tx2)}
+.callout.danger{border-color:var(--re);background:rgba(255,71,87,.05);color:var(--tx2)}
+.callout.prod{border-color:var(--gr);background:rgba(0,210,106,.04);color:var(--tx2)}
+.callout.dotnet{border-color:var(--pu);background:rgba(179,136,255,.05);color:var(--tx2)}
+.callout strong{display:block;font-size:7.5px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.callout.info strong{color:var(--d2)}.callout.warn strong{color:var(--ye)}.callout.tip strong{color:var(--or)}
+.callout.danger strong{color:var(--re)}.callout.prod strong{color:var(--gr)}.callout.dotnet strong{color:var(--pu)}
+
+/* TERMINAL */
+.tw{background:#020608;border:1px solid var(--b2);border-radius:7px;overflow:hidden;margin:10px 0;box-shadow:0 0 24px rgba(36,150,237,.07)}
+.tb{display:flex;align-items:center;gap:5px;padding:7px 11px;background:#030810;border-bottom:1px solid var(--b1)}
+.td{width:9px;height:9px;border-radius:50%}
+.td.r{background:#ff5f57}.td.y{background:#febc2e}.td.g{background:#28c840}
+.tt{flex:1;text-align:center;font-size:9px;color:var(--tx3);font-family:var(--mono)}
+.tr-btn{background:transparent;border:1px solid var(--b2);border-radius:3px;color:var(--d2);font-family:var(--mono);font-size:8px;padding:2px 8px;cursor:pointer;transition:all .15s;letter-spacing:1px}
+.tr-btn:hover{background:rgba(36,150,237,.1);border-color:var(--d1)}
+.tr-btn.running{color:var(--ye);border-color:var(--ye)}
+.ts{padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.65;min-height:90px;max-height:460px;overflow-y:auto}
+.ts::-webkit-scrollbar{width:2px}
+.ts::-webkit-scrollbar-thumb{background:var(--b2)}
+.tl{display:block;white-space:pre-wrap;word-break:break-all}
+.tp{color:var(--d2)}.tc2{color:#fff}
+.to{color:#6eb3d8}
+.to-g{color:#4ade80;font-weight:600}
+.to-r{color:#f87171}
+.to-y{color:var(--ye)}
+.to-b{color:#93c5fd}
+.to-c{color:var(--cy)}
+.to-m{color:var(--pu)}
+.to-w{color:#fff;font-weight:600}
+.to-or{color:var(--or);font-weight:600}
+.to-dim{color:var(--tx3)}
+.tcur{display:inline-block;width:7px;height:13px;background:var(--d2);margin-left:1px;animation:bl .9s step-end infinite;vertical-align:text-bottom}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:10.5px;margin:8px 0}
+.tbl th{background:var(--card2);color:var(--d2);font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:7px 9px;text-align:left;border-bottom:1px solid var(--b1)}
+.tbl td{padding:6px 9px;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.02);vertical-align:top;line-height:1.5;font-family:var(--mono);font-size:10px}
+.tbl tr:hover td{background:rgba(36,150,237,.02)}
+.tbl td:first-child{color:var(--d2);white-space:nowrap;font-weight:600}
+.tbl td.or{color:var(--or)}.tbl td.gr{color:var(--gr)}.tbl td.ye{color:var(--ye)}
+.tbl td.re{color:var(--re)}.tbl td.pu{color:var(--pu)}.tbl td.cy{color:var(--cy)}
+
+.fl{list-style:none;margin:6px 0}
+.fl li{display:flex;align-items:flex-start;gap:7px;padding:4px 0;font-size:10.5px;color:var(--tx2);line-height:1.55;border-bottom:1px solid rgba(255,255,255,.02);font-family:var(--mono)}
+.fl li::before{content:'🐳';font-size:9px;margin-top:1px;flex-shrink:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}
+.mc{background:var(--card);border:1px solid var(--b1);border-radius:4px;padding:10px;font-family:var(--mono)}
+.mc h4{font-size:8px;font-weight:700;color:var(--d2);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.mc h4.or{color:var(--or)}.mc h4.gr{color:var(--gr)}.mc h4.ye{color:var(--ye)}.mc h4.pu{color:var(--pu)}.mc h4.re{color:var(--re)}
+.mc p{font-size:10px;color:var(--tx2);line-height:1.55}
+
+/* CODE BLOCK */
+.code{background:#020608;border:1px solid var(--b1);border-radius:6px;padding:14px;margin:8px 0;font-family:var(--mono);font-size:10.5px;line-height:1.85;overflow-x:auto;position:relative}
+.dk{color:var(--d2)}.dv{color:var(--cy)}.ds{color:var(--gr)}.dn{color:var(--ye)}.dc{color:var(--tx3)}.dm{color:var(--pu)}.dor{color:var(--or)}
+
+/* Q&A */
+.qa-item{border:1px solid var(--b1);border-radius:4px;margin-bottom:7px;overflow:hidden}
+.qa-item:hover{border-color:var(--b2)}
+.qa-q{padding:9px 12px;cursor:pointer;display:flex;align-items:flex-start;gap:7px;background:var(--card);transition:background .15s}
+.qa-q:hover{background:var(--card2)}
+.qa-qi{width:17px;height:17px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;font-family:var(--mono);flex-shrink:0;margin-top:1px}
+.qa-qt{flex:1;font-size:10.5px;color:var(--tx);font-weight:500;line-height:1.5;font-family:var(--mono)}
+.qa-ch{color:var(--tx3);transition:transform .3s;flex-shrink:0;font-size:9px;margin-top:3px}
+.qa-item.open .qa-ch{transform:rotate(180deg)}
+.qa-a{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.qa-item.open .qa-a{max-height:1400px}
+.qa-ab{padding:12px;font-size:10.5px;color:var(--tx2);line-height:1.8;border-top:1px solid var(--b1);background:#020608;font-family:var(--mono)}
+.qa-ab code{background:var(--card);border:1px solid var(--b1);border-radius:2px;padding:1px 4px;color:var(--d2)}
+.filter-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.fbtn{font-size:8px;padding:2px 7px;border-radius:3px;border:1px solid var(--b1);background:transparent;color:var(--tx3);cursor:pointer;font-family:var(--mono);letter-spacing:.5px;transition:all .15s}
+.fbtn:hover,.fbtn.active{border-color:var(--d2);color:var(--d2);background:rgba(36,150,237,.06)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo-icon">🐳</div>
+  <div>
+    <div class="logo-name">DOCKER MASTERY</div>
+    <div class="logo-sub">ARCHITECTURE · ALL COMMANDS · .NET CORE · MICROSERVICES · PRODUCTION · 2025</div>
+  </div>
+  <div class="top-sep"></div>
+  <div class="t-stat"><b>22</b> Chapters</div>
+  <div class="t-stat"><b>100+</b> Commands</div>
+  <div class="t-stat"><b>200+</b> <b class="or">Animated</b> Demos</div>
+  <div class="t-stat"><b>100</b> Q&amp;A</div>
+  <div class="t-badge">Docker <b>27</b> · Compose v2 · .NET 8</div>
+</div>
+<div class="layout">
+  <div class="lp">
+    <div class="lp-hdr">
+      <div class="lp-hdr-row"><h3>// Docker Learning Path</h3></div>
+      <div class="prog-bar"><div class="prog-fill" id="progBar"></div></div>
+      <div class="prog-txt" id="progTxt">0 / 22 chapters visited</div>
+    </div>
+    <nav class="lnav" id="leftNav"></nav>
+  </div>
+  <div class="mid" id="middle">
+    <div class="wlc">
+      <div class="wlc-logo">🐳</div>
+      <div class="wlc-title">DOCKER MASTERY</div>
+      <div class="wlc-prompt"><span class="blink">▌</span> docker run --rm -it your-future:mastery</div>
+      <p class="wlc-sub">Architecture internals. Every command animated. .NET Core containers.<br>Microservices patterns. From <code style="color:var(--d2)">docker run hello-world</code> to production-grade deployments.</p>
+      <div class="stat-row">
+        <div class="sc"><span class="sc-n">22</span><span class="sc-l">Chapters</span></div>
+        <div class="sc"><span class="sc-n">100+</span><span class="sc-l">Commands</span></div>
+        <div class="sc"><span class="sc-n or">200+</span><span class="sc-l">Animated</span></div>
+        <div class="sc"><span class="sc-n gr">100</span><span class="sc-l">Q&amp;A</span></div>
+        <div class="sc"><span class="sc-n" style="color:var(--pu)">∞</span><span class="sc-l">Patterns</span></div>
+      </div>
+      <div class="wlc-hint">← select chapter · animated demos · .NET examples · microservices patterns</div>
+    </div>
+  </div>
+  <div class="rp hidden" id="rightPanel">
+    <div class="rp-hdr">
+      <h3 id="rightTitle">$ docker select-topic</h3>
+      <button class="xbtn" onclick="closeRight()">✕</button>
+    </div>
+    <div class="rp-tabs" id="rightTabs"></div>
+    <div class="rb" id="rightBody"></div>
+  </div>
+</div>
+<script>
+
+const CHAPTERS=[
+{id:'architecture',icon:'🏗️',color:'#2496ed',bg:'rgba(36,150,237,.12)',lc:'#4ab5f5',level:'FOUNDATION',
+ title:'Docker Architecture',sub:'Daemon · Client · containerd · runc · BuildKit · OCI',
+ desc:'How Docker actually works under the hood — the daemon, containerd, runc, image layers with Copy-on-Write, the OCI standard, and what happens every time you run a container.',
+ topics:[
+  {id:'overview',cmd:'Architecture',title:'Full Architecture Diagram',desc:'Docker client → daemon → containerd → runc — complete data flows',tags:['essential'],tabs:['Diagram','Client-Daemon','containerd & runc','OCI Standard']},
+  {id:'image-layers',cmd:'Image Layers',title:'Image Layer Model',desc:'Union filesystem, Copy-on-Write, shared base layers, writable container layer',tags:['essential'],tabs:['Diagram','Layer Demo','CoW Explained','Storage Drivers']},
+  {id:'namespaces',cmd:'Namespaces & cgroups',title:'Container Internals',desc:'Linux namespaces (pid,net,mnt,uts,ipc), cgroups for resource limits — how isolation works',tags:['advanced'],tabs:['Diagram','Namespaces','cgroups','vs VM']},
+ ]},
+{id:'images',icon:'📦',color:'#2496ed',bg:'rgba(36,150,237,.1)',lc:'#4ab5f5',level:'ESSENTIAL',
+ title:'Images',sub:'pull · build · tag · push · inspect · history · prune',
+ desc:'Docker images are the blueprints. Learn to pull from registries, inspect layers, tag for environments, push to DockerHub/ECR/ACR, and manage image lifecycle.',
+ topics:[
+  {id:'pull-run',cmd:'docker pull',title:'Pull & Manage Images',desc:'docker pull, images, inspect, history, rmi, prune',tags:['essential'],tabs:['Demo','inspect deep dive','history','prune']},
+  {id:'tag-push',cmd:'docker tag / push',title:'Tag & Push Images',desc:'Semantic versioning with tags, push to DockerHub, ECR, ACR, GHCR',tags:['essential'],tabs:['Demo','Tag Strategy','Registries','ECR Push']},
+  {id:'image-inspect',cmd:'docker inspect',title:'Inspect & Analyse',desc:'Layer sizes, env vars, entrypoint, exposed ports, volumes',tabs:['Demo','Layer Analysis','Image Sizes','Best Practices'],tags:['intermediate']},
+ ]},
+{id:'containers',icon:'📫',color:'#ff6b35',bg:'rgba(255,107,53,.1)',lc:'#ff6b35',level:'ESSENTIAL',
+ title:'Containers',sub:'run · exec · stop · rm · logs · stats · inspect · cp',
+ desc:'Every container lifecycle command — create, run, pause, stop, kill, remove. Inspect running containers, execute commands, copy files, monitor resources.',
+ topics:[
+  {id:'docker-run',cmd:'docker run',title:'docker run — All Flags',desc:'The most important command — every flag explained with examples',tags:['essential'],tabs:['Demo','All Flags','Port Mapping','Volume Mounts']},
+  {id:'lifecycle',cmd:'Container Lifecycle',title:'Container Lifecycle',desc:'create → start → pause → unpause → stop → kill → rm state machine',tags:['essential'],tabs:['Demo','State Machine','Restart Policies','Graceful Stop']},
+  {id:'exec-logs',cmd:'docker exec / logs',title:'Exec, Logs & Inspect',desc:'Execute commands inside containers, stream logs, inspect state',tags:['essential'],tabs:['Demo','exec patterns','logs flags','stats & top']},
+  {id:'container-mgmt',cmd:'docker ps / rm',title:'Manage Containers',desc:'List, filter, remove, prune — keeping your environment clean',tabs:['Demo','Filters','Bulk Remove','Prune'],tags:['essential']},
+ ]},
+{id:'dockerfile',icon:'📄',color:'#2496ed',bg:'rgba(36,150,237,.1)',lc:'#4ab5f5',level:'ESSENTIAL',
+ title:'Dockerfile — Complete Guide',sub:'FROM · RUN · COPY · ENV · ARG · EXPOSE · CMD · ENTRYPOINT',
+ desc:'Every Dockerfile instruction with examples, best practices, layer caching strategies, and real-world patterns for optimal, secure, small images.',
+ topics:[
+  {id:'instructions',cmd:'Dockerfile',title:'All Instructions',desc:'FROM, RUN, COPY, ADD, ENV, ARG, EXPOSE, VOLUME, CMD, ENTRYPOINT, WORKDIR, USER',tags:['essential'],tabs:['Demo','All Instructions','CMD vs ENTRYPOINT','ARG vs ENV']},
+  {id:'best-practices',cmd:'Best Practices',title:'Dockerfile Best Practices',desc:'Layer order for cache, .dockerignore, non-root user, minimal base images',tags:['essential'],tabs:['Demo','Layer Caching','dockerignore','.NET Patterns']},
+  {id:'multistage',cmd:'Multi-stage Build',title:'Multi-stage Builds',desc:'Build in one stage, copy artifacts to lean runtime image — drastically smaller images',tags:['essential'],tabs:['Demo','Pattern','.NET Multi-stage','Size Comparison']},
+  {id:'buildkit',cmd:'BuildKit',title:'BuildKit — Advanced Builds',desc:'Parallel builds, build secrets, SSH agent forwarding, cache mounts',tags:['advanced'],tabs:['Demo','Cache Mounts','Build Secrets','SSH Forward']},
+ ]},
+{id:'dotnet',icon:'💜',color:'#7c3aed',bg:'rgba(124,58,237,.12)',lc:'#9c6fff',level:'ESSENTIAL',
+ title:'.NET Core with Docker',sub:'Dockerfile · SDK vs Runtime · ASP.NET · Health checks · Compose',
+ desc:'Production-grade Docker containers for .NET 8/9. SDK vs Runtime images, multi-stage builds, health checks, environment configuration, and running ASP.NET Core + Worker Services.',
+ topics:[
+  {id:'dotnet-dockerfile',cmd:'.NET Dockerfile',title:'Production .NET Dockerfile',desc:'Multi-stage: restore → build → publish → runtime. Minimal final image.',tags:['essential','dotnet'],tabs:['Demo','ASP.NET API','Worker Service','Minimal API']},
+  {id:'dotnet-compose',cmd:'compose + .NET',title:'Docker Compose for .NET',desc:'API + database + cache + message bus full stack local development',tags:['essential','dotnet'],tabs:['Demo','Compose YAML','Hot Reload','Override']},
+  {id:'dotnet-env',cmd:'ENV / secrets',title:'Config & Secrets in .NET',desc:'appsettings, environment variables, Docker secrets, user-secrets in dev',tags:['intermediate','dotnet'],tabs:['Demo','appsettings','Secrets','Key Vault']},
+  {id:'dotnet-health',cmd:'HEALTHCHECK',title:'Health Checks',desc:'HEALTHCHECK instruction, ASP.NET health check middleware, readiness vs liveness',tags:['intermediate','dotnet'],tabs:['Demo','Dockerfile','ASP.NET Middleware','Compose']},
+  {id:'dotnet-optimize',cmd:'Optimization',title:'Optimize .NET Images',desc:'Chiseled images, self-contained, AOT compilation, image size analysis',tabs:['Demo','Chiseled','Self-Contained','AOT'],tags:['advanced','dotnet']},
+ ]},
+{id:'networking',icon:'🌐',color:'#00e5ff',bg:'rgba(0,229,255,.08)',lc:'#00e5ff',level:'INTERMEDIATE',
+ title:'Docker Networking',sub:'bridge · host · overlay · macvlan · none · custom',
+ desc:'How containers communicate — bridge networks, DNS resolution between containers, host networking, overlay for multi-host, and exposing ports to the outside world.',
+ topics:[
+  {id:'network-overview',cmd:'docker network',title:'Network Types',desc:'bridge, host, overlay, macvlan, none — when to use each',tags:['essential'],tabs:['Demo','Network Types','DNS','Packet Flow']},
+  {id:'bridge-net',cmd:'bridge network',title:'Bridge Networks',desc:'Default and custom bridge — container DNS, isolation, user-defined networks',tags:['intermediate'],tabs:['Demo','Custom Bridge','Container DNS','Inspect']},
+  {id:'overlay-net',cmd:'overlay network',title:'Overlay Networks',desc:'Multi-host networking for Swarm — VXLAN encapsulation, encrypted overlay',tags:['advanced'],tabs:['Demo','VXLAN','Swarm Overlay','Encryption']},
+  {id:'port-mapping',cmd:'Port Mapping',title:'Port Mapping & Publishing',desc:'-p, -P, EXPOSE, binding to specific interfaces, UDP ports',tabs:['Demo','Flags','EXPOSE vs -p','Best Practices'],tags:['essential']},
+ ]},
+{id:'volumes',icon:'💾',color:'#b388ff',bg:'rgba(179,136,255,.08)',lc:'#b388ff',level:'INTERMEDIATE',
+ title:'Volumes & Storage',sub:'volume · bind mount · tmpfs · named volumes · backup',
+ desc:'Persist and share data between containers and host. Named volumes vs bind mounts vs tmpfs — performance, security, and when to use each.',
+ topics:[
+  {id:'volumes-types',cmd:'docker volume',title:'Volume Types',desc:'Named volumes, bind mounts, tmpfs — create, inspect, backup, restore',tags:['essential'],tabs:['Demo','Comparison','Named Volumes','Backup & Restore']},
+  {id:'bind-mounts',cmd:'Bind Mounts',title:'Bind Mounts',desc:'Mount host directory into container — dev workflow, config injection',tags:['intermediate'],tabs:['Demo','Dev Workflow','.NET Hot Reload','Permissions']},
+  {id:'volume-patterns',cmd:'Volume Patterns',title:'Volume Patterns',desc:'Data containers, init containers, read-only volumes, sidecar sync',tabs:['Demo','Patterns','Compose Volumes','DB Volumes'],tags:['intermediate']},
+ ]},
+{id:'compose',icon:'🎼',color:'#ff6b35',bg:'rgba(255,107,53,.1)',lc:'#ff6b35',level:'ESSENTIAL',
+ title:'Docker Compose',sub:'services · networks · volumes · profiles · secrets · depends_on',
+ desc:'Define and run multi-container applications declaratively. The complete Compose reference — services, dependency ordering, health-based depends_on, secrets, and environment management.',
+ topics:[
+  {id:'compose-basics',cmd:'docker compose',title:'Compose Fundamentals',desc:'up, down, ps, logs, exec, build — the daily driver commands',tags:['essential'],tabs:['Demo','Core Commands','Watch Mode','Profiles']},
+  {id:'compose-yaml',cmd:'compose.yaml',title:'Compose File Deep Dive',desc:'Every key explained — services, networks, volumes, secrets, configs',tags:['essential'],tabs:['Demo','Full Example','depends_on','Healthcheck']},
+  {id:'compose-override',cmd:'override files',title:'Environment Overrides',desc:'compose.override.yaml for dev, CI, and staging differences',tags:['intermediate'],tabs:['Demo','Dev Override','CI Override','Merge Rules']},
+  {id:'compose-production',cmd:'Compose in Prod',title:'Compose for Production',desc:'Deploying with Compose, secrets, resource limits, restart policies',tags:['advanced'],tabs:['Demo','Secrets','Resources','Best Practices']},
+ ]},
+{id:'microservices',icon:'🔬',color:'#ff6b35',bg:'rgba(255,107,53,.12)',lc:'#ff6b35',level:'ADVANCED',
+ title:'Microservices with Docker',sub:'patterns · API Gateway · Service discovery · circuit breaker',
+ desc:'Build and deploy a real microservices system — API Gateway, independent services, inter-service communication, service discovery, and resilience patterns all containerized.',
+ topics:[
+  {id:'ms-architecture',cmd:'MS Architecture',title:'Microservices Architecture',desc:'API Gateway + services diagram — full system design with Docker',tags:['essential','microservice'],tabs:['Diagram','Services Map','Communication','Data Patterns']},
+  {id:'ms-compose',cmd:'MS Compose Stack',title:'Full Stack Compose',desc:'API Gateway + 4 services + DB per service + message bus in one Compose file',tags:['essential','microservice'],tabs:['Demo','Compose YAML','.NET Services','Ports & DNS']},
+  {id:'ms-gateway',cmd:'API Gateway',title:'API Gateway Pattern',desc:'NGINX / YARP / Ocelot as gateway — routing, auth, rate limiting',tags:['advanced','microservice'],tabs:['Demo','NGINX Config','YARP .NET','Auth Pattern']},
+  {id:'ms-messaging',cmd:'Message Bus',title:'Async Messaging',desc:'RabbitMQ / Kafka in Docker — publish/subscribe, dead letter queues',tags:['advanced','microservice'],tabs:['Demo','RabbitMQ Compose','MassTransit .NET','Patterns']},
+  {id:'ms-patterns',cmd:'Resilience',title:'Resilience Patterns',desc:'Retry, circuit breaker, health checks — Polly with .NET in Docker',tabs:['Demo','Polly .NET','Health Aggregator','Circuit Breaker'],tags:['advanced','microservice']},
+ ]},
+{id:'registry',icon:'🗄️',color:'#2496ed',bg:'rgba(36,150,237,.08)',lc:'#4ab5f5',level:'INTERMEDIATE',
+ title:'Docker Registry',sub:'DockerHub · ECR · ACR · GHCR · self-hosted · Harbor',
+ desc:'Store and distribute Docker images. Configure private registries, authenticate to cloud registries, implement image lifecycle policies, and scan for vulnerabilities.',
+ topics:[
+  {id:'dockerhub',cmd:'DockerHub',title:'DockerHub',desc:'Login, push, pull, automated builds, access tokens, rate limits',tags:['essential'],tabs:['Demo','Push Flow','Access Tokens','Rate Limits']},
+  {id:'ecr',cmd:'AWS ECR',title:'Amazon ECR',desc:'Authenticate with aws ecr get-login-password, lifecycle policies, scanning',tags:['intermediate'],tabs:['Demo','Auth','Lifecycle Policy','Scanning']},
+  {id:'acr',cmd:'Azure ACR',title:'Azure Container Registry',desc:'az acr login, tasks for CI builds, geo-replication, managed identity',tabs:['Demo','Auth','Tasks','Best Practices'],tags:['intermediate']},
+  {id:'ghcr',cmd:'GHCR',title:'GitHub Container Registry',desc:'Push from GitHub Actions, package visibility, cosign signing',tabs:['Demo','Actions Push','Signing','Best Practices'],tags:['intermediate']},
+ ]},
+{id:'security',icon:'🔒',color:'#ff4757',bg:'rgba(255,71,87,.08)',lc:'#ff4757',level:'ADVANCED',
+ title:'Docker Security',sub:'non-root · read-only · scan · secrets · AppArmor · seccomp',
+ desc:'Harden containers against attacks — non-root users, read-only filesystems, capability dropping, image scanning with Trivy, Docker secrets, and security profiles.',
+ topics:[
+  {id:'sec-basics',cmd:'Security Basics',title:'Container Security Fundamentals',desc:'non-root user, read-only fs, drop capabilities, no new privileges',tags:['essential','security'],tabs:['Demo','Dockerfile','Run Flags','Security Checklist']},
+  {id:'image-scan',cmd:'Trivy / Grype',title:'Image Vulnerability Scanning',desc:'Trivy scan, Grype, integrate in CI pipeline, SBOM generation',tags:['advanced','security'],tabs:['Demo','Trivy Scan','CI Integration','SBOM']},
+  {id:'docker-secrets',cmd:'docker secrets',title:'Docker Secrets',desc:'Swarm secrets, Compose secrets, runtime injection vs build-time',tags:['intermediate','security'],tabs:['Demo','Swarm Secrets','Compose Secrets','Best Practices']},
+  {id:'rootless',cmd:'Rootless Docker',title:'Rootless Docker & Podman',desc:'Run Docker daemon and containers without root — maximum security',tags:['advanced','security'],tabs:['Demo','Setup','Podman Drop-in','User Namespaces']},
+ ]},
+{id:'buildopt',icon:'⚡',color:'#ffd166',bg:'rgba(255,209,102,.08)',lc:'#ffd166',level:'INTERMEDIATE',
+ title:'Build Optimization',sub:'layer cache · .dockerignore · BuildKit · SBOM · cache mounts',
+ desc:'Build images 10× faster. Maximise layer cache hits, parallelise stages with BuildKit, use cache mounts for package managers, and minimise final image size.',
+ topics:[
+  {id:'layer-cache',cmd:'Cache Strategy',title:'Layer Cache Mastery',desc:'Order instructions for maximum cache reuse — the most impactful optimisation',tags:['essential'],tabs:['Demo','Cache Rules','Bad vs Good','.NET Cache Order']},
+  {id:'buildkit-adv',cmd:'BuildKit',title:'BuildKit Features',desc:'--mount=type=cache, --secret, parallel stages, heredoc syntax',tags:['advanced'],tabs:['Demo','Cache Mounts','Parallel Stages','Heredoc']},
+  {id:'image-size',cmd:'Image Size',title:'Minimise Image Size',desc:'Alpine, Distroless, Chiseled .NET, multi-stage, dive tool analysis',tags:['intermediate'],tabs:['Demo','Base Images','Dive Tool','Comparison']},
+ ]},
+{id:'monitoring',icon:'📊',color:'#00d26a',bg:'rgba(0,210,106,.07)',lc:'#00d26a',level:'INTERMEDIATE',
+ title:'Monitoring & Logging',sub:'stats · events · logs · Prometheus · Grafana · cAdvisor',
+ desc:'Monitor container resource usage, stream and aggregate logs, expose metrics to Prometheus, and visualise in Grafana. Log drivers for production log management.',
+ topics:[
+  {id:'stats-events',cmd:'docker stats',title:'Stats, Events & Top',desc:'Real-time resource usage, system events, process listing inside container',tags:['intermediate'],tabs:['Demo','Stats Output','Events','docker top']},
+  {id:'log-drivers',cmd:'Log Drivers',title:'Log Drivers',desc:'json-file, journald, syslog, fluentd, awslogs, gelf — configure per container',tags:['intermediate'],tabs:['Demo','Log Drivers','Fluentd','AWS CloudWatch']},
+  {id:'prometheus',cmd:'Prometheus',title:'Prometheus + Grafana Stack',desc:'cAdvisor metrics, node-exporter, Prometheus scrape, Grafana dashboards',tags:['advanced'],tabs:['Demo','Compose Stack','Metrics','Dashboard']},
+ ]},
+{id:'swarm',icon:'🐝',color:'#ffd166',bg:'rgba(255,209,102,.08)',lc:'#ffd166',level:'ADVANCED',
+ title:'Docker Swarm',sub:'init · service · stack · overlay · rolling update · secrets',
+ desc:'Docker\'s built-in orchestration — deploy services across a cluster, rolling updates, secrets management, and overlay networking without Kubernetes complexity.',
+ topics:[
+  {id:'swarm-setup',cmd:'docker swarm',title:'Swarm Setup & Nodes',desc:'Init swarm, join workers/managers, node management, quorum',tags:['intermediate'],tabs:['Demo','Init','Node Management','HA Setup']},
+  {id:'swarm-service',cmd:'docker service',title:'Swarm Services',desc:'Create, scale, update, rollback services — the atomic unit of Swarm',tags:['intermediate'],tabs:['Demo','Create','Rolling Update','Constraints']},
+  {id:'swarm-stack',cmd:'docker stack',title:'Stacks — Compose on Swarm',desc:'Deploy Compose files to Swarm — services, secrets, configs at scale',tags:['advanced'],tabs:['Demo','Stack YAML','Secrets','Routing Mesh']},
+ ]},
+{id:'cicd',icon:'🔄',color:'#00d26a',bg:'rgba(0,210,106,.08)',lc:'#00d26a',level:'INTERMEDIATE',
+ title:'CI/CD with Docker',sub:'GitHub Actions · GitLab CI · BuildKit · multi-arch · signing',
+ desc:'Build, scan, tag, push and deploy Docker images in CI pipelines. Multi-platform builds for ARM/AMD64, image signing with Cosign, GitHub Actions end-to-end.',
+ topics:[
+  {id:'gh-actions',cmd:'GitHub Actions',title:'GitHub Actions Pipeline',desc:'Build → test → scan → push → deploy in one workflow YAML',tags:['essential'],tabs:['Demo','Workflow YAML','.NET Actions','Matrix Build']},
+  {id:'gitlab-ci',cmd:'GitLab CI',title:'GitLab CI Pipeline',desc:'Docker-in-Docker, Kaniko builds, registry integration, environments',tags:['intermediate'],tabs:['Demo','Pipeline YAML','DinD vs Kaniko','Environments']},
+  {id:'multi-arch',cmd:'buildx',title:'Multi-Architecture Builds',desc:'Build for linux/amd64 AND linux/arm64 with docker buildx and QEMU',tags:['advanced'],tabs:['Demo','buildx Commands','ARM64','CI Multi-arch']},
+ ]},
+{id:'compose-adv',icon:'🧩',color:'#ff6b35',bg:'rgba(255,107,53,.08)',lc:'#ff6b35',level:'ADVANCED',
+ title:'Advanced Compose Patterns',sub:'Watch · profiles · extends · GPU · resource limits',
+ desc:'Power features in Compose — watch mode for dev hot-reload, GPU access, service extension, environment matrix, and resource constraints.',
+ topics:[
+  {id:'compose-watch',cmd:'compose watch',title:'Compose Watch Mode',desc:'Hot-reload containers when source changes — action: sync/rebuild/sync+restart',tags:['intermediate'],tabs:['Demo','Watch Config','.NET Watch','Comparison']},
+  {id:'compose-profiles',cmd:'profiles',title:'Profiles & Conditional Services',desc:'Optional services activated by profile — monitoring, debug, test containers',tags:['intermediate'],tabs:['Demo','Profile YAML','Use Cases','Activation']},
+  {id:'compose-extend',cmd:'extends',title:'Service Extension & DRY',desc:'extends keyword, anchor/alias in YAML, reusable base services',tabs:['Demo','extends','YAML Anchors','Fragments'],tags:['advanced']},
+ ]},
+{id:'dotnet-advanced',icon:'💜',color:'#7c3aed',bg:'rgba(124,58,237,.1)',lc:'#9c6fff',level:'ADVANCED',
+ title:'Advanced .NET Docker',sub:'AOT · Chiseled · gRPC · Dapr · OpenTelemetry',
+ desc:'Cutting-edge .NET container patterns — Native AOT with tiny images, chiseled Ubuntu base, gRPC services, Dapr sidecar, OpenTelemetry in Compose.',
+ topics:[
+  {id:'dotnet-aot',cmd:'Native AOT',title:'Native AOT Containers',desc:'.NET 8 Native AOT — sub-second startup, 50MB images, no runtime needed',tags:['advanced','dotnet'],tabs:['Demo','Dockerfile','Limitations','Benchmarks']},
+  {id:'dotnet-grpc',cmd:'gRPC in Docker',title:'gRPC Services',desc:'gRPC .NET service + client in Compose, HTTP/2, proto files',tags:['advanced','dotnet'],tabs:['Demo','Compose YAML','Dockerfile','Testing']},
+  {id:'dotnet-dapr',cmd:'Dapr sidecar',title:'Dapr with .NET',desc:'Dapr sidecar injection in Compose — state, pub/sub, service invocation',tabs:['Demo','Compose YAML','State Store','Pub/Sub'],tags:['advanced','dotnet']},
+  {id:'dotnet-otel',cmd:'OpenTelemetry',title:'OpenTelemetry + OTEL Collector',desc:'Traces, metrics, logs from .NET → OTEL Collector → Jaeger, Prometheus',tabs:['Demo','Compose Stack','.NET SDK','Dashboards'],tags:['advanced','dotnet']},
+ ]},
+{id:'production',icon:'🚀',color:'#00d26a',bg:'rgba(0,210,106,.08)',lc:'#00d26a',level:'PRODUCTION',
+ title:'Production Best Practices',sub:'health checks · resource limits · logging · update strategy',
+ desc:'Production checklist for Docker deployments — resource limits, health checks, graceful shutdown, immutable tags, image hardening, and operational readiness.',
+ topics:[
+  {id:'prod-checklist',cmd:'Checklist',title:'Production Checklist',desc:'20 must-have practices before going to production with containers',tags:['essential','production'],tabs:['Demo','Checklist','Resource Limits','Health Checks']},
+  {id:'graceful-shutdown',cmd:'Graceful Shutdown',title:'Graceful Shutdown',desc:'SIGTERM handling in .NET, pre-stop hooks, terminationGracePeriod, draining',tags:['intermediate','production'],tabs:['Demo','.NET SIGTERM','Compose Stop','Timeout Tuning']},
+  {id:'immutable-infra',cmd:'Immutable Tags',title:'Immutable Infrastructure',desc:'Never :latest in prod, SHA digests, image promotion workflow',tabs:['Demo','Tag Strategy','Digest Pinning','Promotion Flow'],tags:['essential','production']},
+ ]},
+{id:'troubleshoot',icon:'🚑',color:'#ff4757',bg:'rgba(255,71,87,.08)',lc:'#ff4757',level:'ALL',
+ title:'Troubleshooting Playbook',sub:'OOM · exit codes · network · disk · slow builds',
+ desc:'Systematic debug methodology for every common Docker failure — container exits, networking issues, build failures, disk space, and performance problems.',
+ topics:[
+  {id:'container-debug',cmd:'Container Failures',title:'Container Debug',desc:'Exit codes, OOMKilled, can\'t start, env var issues — fix each',tags:['essential'],tabs:['Demo','Exit Codes','OOMKilled','Startup Failures']},
+  {id:'network-debug',cmd:'Network Debug',title:'Network Troubleshooting',desc:'Containers can\'t communicate, port not accessible, DNS failures',tags:['intermediate'],tabs:['Demo','Can\'t Connect','DNS Debug','Port Issues']},
+  {id:'build-debug',cmd:'Build Failures',title:'Build Troubleshooting',desc:'Cache invalidation, COPY errors, permission issues, slow builds',tabs:['Demo','Cache Busting','Permissions','BuildKit Debug'],tags:['intermediate']},
+  {id:'perf-debug',cmd:'Performance',title:'Performance & Disk',desc:'Docker disk usage, slow containers, resource contention, prune strategy',tabs:['Demo','Disk Usage','Prune','Resource Limits'],tags:['intermediate']},
+ ]},
+{id:'docker-k8s',icon:'☸️',color:'#2496ed',bg:'rgba(36,150,237,.08)',lc:'#4ab5f5',level:'ADVANCED',
+ title:'Docker → Kubernetes Migration',sub:'Compose to K8s · Kompose · Helm · mindset shift',
+ desc:'Migrate from Docker Compose to Kubernetes. Convert Compose files with Kompose, understand the conceptual mapping, and know what changes between Docker and K8s.',
+ topics:[
+  {id:'compose-to-k8s',cmd:'Kompose',title:'Compose → K8s with Kompose',desc:'Convert docker-compose.yaml to K8s manifests automatically',tags:['intermediate'],tabs:['Demo','Mapping Table','Kompose','What Changes']},
+  {id:'docker-vs-k8s',cmd:'Docker vs K8s',title:'Docker vs Kubernetes',desc:'When to use Compose, Swarm, or K8s — decision framework',tabs:['Overview','Comparison','Decision Tree','Migration Path'],tags:['intermediate']},
+ ]},
+{id:'windows-containers',icon:'🪟',color:'#2496ed',bg:'rgba(36,150,237,.07)',lc:'#4ab5f5',level:'INTERMEDIATE',
+ title:'Windows Containers',sub:'Windows vs Linux · .NET Framework · nano server · process isolation',
+ desc:'Windows container fundamentals for .NET Framework workloads. Nano Server vs Server Core, process isolation vs Hyper-V isolation, and migrating legacy apps.',
+ topics:[
+  {id:'win-basics',cmd:'Windows Containers',title:'Windows Container Basics',desc:'Nano Server, Server Core, process isolation, Hyper-V isolation modes',tags:['intermediate','dotnet'],tabs:['Demo','Base Images','Isolation Modes','Limitations']},
+  {id:'dotnet-framework',cmd:'.NET Framework',title:'.NET Framework in Docker',desc:'Containerise legacy .NET Framework apps — IIS, ASP.NET, WCF',tabs:['Demo','Dockerfile','IIS','Migration Path'],tags:['intermediate','dotnet']},
+ ]},
+{id:'interview',icon:'🎤',color:'#b388ff',bg:'rgba(179,136,255,.1)',lc:'#b388ff',level:'ALL',
+ title:'Interview Q&A',sub:'Beginner · Intermediate · Advanced · .NET & Production',
+ desc:'100 Docker interview questions with detailed answers. Architecture internals, networking, security, .NET containers, and production scenarios.',
+ topics:[
+  {id:'iq-basics',cmd:'Q 1–25',title:'Beginner Questions',desc:'Core concepts — images, containers, Dockerfile, volumes, basic networking',tags:['beginner'],tabs:['Q&A']},
+  {id:'iq-intermediate',cmd:'Q 26–55',title:'Intermediate Questions',desc:'Compose, networking internals, multi-stage builds, security basics',tags:['intermediate'],tabs:['Q&A']},
+  {id:'iq-advanced',cmd:'Q 56–80',title:'Advanced Questions',desc:'BuildKit internals, storage drivers, Swarm, layer model, optimisation',tags:['advanced'],tabs:['Q&A']},
+  {id:'iq-dotnet',cmd:'Q 81–100',title:'.NET & Production',desc:'.NET Docker patterns, microservices, CI/CD, production hardening',tabs:['Q&A'],tags:['dotnet','production']},
+ ]},
+];
+
+// ═══ TERMINAL ENGINE ═══
+let termTimers=[];
+function clearTimers(){termTimers.forEach(clearTimeout);termTimers=[];}
+function mkTerm(id,title,autoRun){
+  const h=`<div class="tw" id="tw_${id}">
+<div class="tb"><div class="td r"></div><div class="td y"></div><div class="td g"></div>
+<div class="tt">docker — ${title}</div>
+<button class="tr-btn" id="rb_${id}" onclick="runTerm('${id}')">▶ Run</button></div>
+<div class="ts" id="ts_${id}"><span class="tl"><span class="tp">❯</span><span class="tcur"></span></span></div>
+</div>`;
+  if(autoRun) setTimeout(()=>runTerm(id),400);
+  return h;
+}
+function runTerm(id){
+  const scr=document.getElementById('ts_'+id);
+  const btn=document.getElementById('rb_'+id);
+  if(!scr||!btn) return;
+  clearTimers();scr.innerHTML='';
+  btn.textContent='⏳';btn.classList.add('running');
+  const lines=TERM_DATA[id]||[];
+  let delay=0;
+  lines.forEach((ln,i)=>{
+    const t=setTimeout(()=>{
+      const s=document.createElement('span');
+      s.className='tl';s.innerHTML=ln;
+      scr.appendChild(s);scr.scrollTop=scr.scrollHeight;
+      if(i===lines.length-1){btn.textContent='▶ Run';btn.classList.remove('running');}
+    },delay);
+    termTimers.push(t);
+    delay+=ln.includes('class="tp"')?300:ln.trim()===''?35:52;
+  });
+}
+
+const TERM_DATA={
+
+// ── docker pull / images ─────────────────────────
+'pull-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker pull nginx:1.25-alpine</span>',
+ '<span class="to">1.25-alpine: Pulling from library/nginx</span>',
+ '<span class="to">c926b61bad3b: Pull complete   <span class="to-dim">← Base Alpine layer</span></span>',
+ '<span class="to">f5b28aff8af1: Pull complete   <span class="to-dim">← nginx binary layer</span></span>',
+ '<span class="to">7b25fb59e994: Pull complete   <span class="to-dim">← nginx config layer</span></span>',
+ '<span class="to">Digest: sha256:3c4c1f42a89e343c7b050bf5a1c8a79b3de8a20f358f8dcfefdbd0ae3932a901</span>',
+ '<span class="to-g">Status: Downloaded newer image for nginx:1.25-alpine</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker images</span>',
+ '<span class="to">REPOSITORY   TAG           IMAGE ID       CREATED        SIZE</span>',
+ '<span class="to-g">nginx        1.25-alpine   3c4c1f42a89e   3 weeks ago    43.3MB</span>',
+ '<span class="to">nginx        latest        e784f4560448   3 weeks ago    187MB</span>',
+ '<span class="to">myapp        v2.1.0        9f3d4e5b2c1a   2 days ago     312MB</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker image inspect nginx:1.25-alpine --format "{{json .Config.Env}}"</span>',
+ '<span class="to">["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","NGINX_VERSION=1.25.3"]</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker image history nginx:1.25-alpine</span>',
+ '<span class="to">IMAGE          CREATED        CREATED BY                           SIZE</span>',
+ '<span class="to-g">3c4c1f42a89e   3 weeks ago    /bin/sh -c #(nop) CMD ["nginx"...]   0B</span>',
+ '<span class="to">7b25fb59e994   3 weeks ago    /bin/sh -c nginx-entrypoint.sh       13.3MB</span>',
+ '<span class="to">c926b61bad3b   5 weeks ago    /bin/sh -c apk add --no-cache ...     6.4MB</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── docker run ───────────────────────────────────
+'docker-run-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker run hello-world</span>',
+ '<span class="to-g">Hello from Docker!</span>',
+ '<span class="to">This message shows that your installation appears to be working correctly.</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker run -d -p 8080:80 --name webserver nginx:1.25-alpine</span>',
+ '<span class="to">3f8b2a1c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a</span>',
+ '<span class="to-dim"># -d=detached -p host:container --name=friendly name</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker run -it --rm ubuntu:22.04 bash</span>',
+ '<span class="to-dim"># -it=interactive tty --rm=auto delete on exit</span>',
+ '<span class="to">root@a1b2c3d4e5f6:/#</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker run -d \</span>',
+ '<span class="to">  --name myapp \</span>',
+ '<span class="to">  --restart=unless-stopped \</span>',
+ '<span class="to">  --memory=512m --cpus=1.5 \</span>',
+ '<span class="to">  -e DB_HOST=postgres -e APP_ENV=production \</span>',
+ '<span class="to">  -v myapp-data:/app/data \</span>',
+ '<span class="to">  -p 127.0.0.1:5000:8080 \</span>',
+ '<span class="to">  --health-cmd="curl -f http://localhost:8080/health" \</span>',
+ '<span class="to">  --health-interval=30s \</span>',
+ '<span class="to">  --network=myapp-net \</span>',
+ '<span class="to">  ghcr.io/originxlabs/myapp:v2.1.0</span>',
+ '<span class="to-g">7d4b9f8c6e2a1f5d3c0b8a7e6f4d2c1b0a9f8e7d</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── container lifecycle ──────────────────────────
+'lifecycle-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker ps</span>',
+ '<span class="to">CONTAINER ID   IMAGE      COMMAND   CREATED   STATUS         PORTS                  NAMES</span>',
+ '<span class="to-g">3f8b2a1c4d5e   nginx:...  "nginx"   5m ago    Up 5 minutes   0.0.0.0:8080->80/tcp   webserver</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker stop webserver</span>',
+ '<span class="to-y">webserver</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker ps -a</span>',
+ '<span class="to">CONTAINER ID   IMAGE      STATUS                      NAMES</span>',
+ '<span class="to-y">3f8b2a1c4d5e   nginx:...  Exited (0) 2 seconds ago   webserver</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker start webserver && docker ps</span>',
+ '<span class="to-g">webserver</span>',
+ '<span class="to-g">3f8b2a1c4d5e   nginx:...   Up 1 second   0.0.0.0:8080->80/tcp   webserver</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker pause webserver && docker ps</span>',
+ '<span class="to-y">3f8b2a1c4d5e   nginx:...   Up 2 minutes (Paused)   webserver</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker unpause webserver</span>',
+ '<span class="to-g">webserver</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker kill --signal=SIGTERM webserver</span>',
+ '<span class="to-dim"># SIGTERM = graceful shutdown request</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker rm webserver && docker ps -a</span>',
+ '<span class="to-dim"># Container gone — image still exists</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── docker exec / logs ───────────────────────────
+'exec-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker exec -it webserver sh</span>',
+ '<span class="to">/ #</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker exec webserver nginx -t</span>',
+ '<span class="to-g">nginx: the configuration file /etc/nginx/nginx.conf syntax is ok</span>',
+ '<span class="to-g">nginx: configuration file /etc/nginx/nginx.conf test is successful</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker exec -e DEBUG=true webserver printenv DEBUG</span>',
+ '<span class="to">true</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker logs -f --tail=50 --since=5m webserver</span>',
+ '<span class="to">172.17.0.1 - - [15/Jan/2025:10:22:44 +0000] "GET / HTTP/1.1" 200 615</span>',
+ '<span class="to">172.17.0.1 - - [15/Jan/2025:10:22:45 +0000] "GET /health HTTP/1.1" 200 2</span>',
+ '<span class="to-dim"># -f=follow --tail=50 --since=5m (time filter)</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker stats webserver --no-stream</span>',
+ '<span class="to">NAME        CPU %    MEM USAGE / LIMIT    MEM %   NET I/O    BLOCK I/O</span>',
+ '<span class="to-g">webserver   0.02%    6.344MiB / 512MiB    1.24%   1.2kB/1kB  0B/0B</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker cp webserver:/var/log/nginx/access.log ./nginx-access.log</span>',
+ '<span class="to-g">Successfully copied 5.12kB to ./nginx-access.log</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Dockerfile build ─────────────────────────────
+'dockerfile-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker build -t myapp:v1.0 .</span>',
+ '<span class="to">[+] Building 42.3s (14/14) FINISHED</span>',
+ '<span class="to"> => [internal] load build definition from Dockerfile</span>',
+ '<span class="to-g"> => [1/7] FROM mcr.microsoft.com/dotnet/sdk:8.0</span>',
+ '<span class="to-g"> => [2/7] WORKDIR /src</span>',
+ '<span class="to-g"> => [3/7] COPY *.csproj ./</span>',
+ '<span class="to-g"> => [4/7] RUN dotnet restore</span>',
+ '<span class="to-g"> => [5/7] COPY . .</span>',
+ '<span class="to-g"> => [6/7] RUN dotnet publish -c Release -o /out</span>',
+ '<span class="to-g"> => [7/7] FROM mcr.microsoft.com/dotnet/aspnet:8.0</span>',
+ '<span class="to-g"> => COPY --from=0 /out .</span>',
+ '<span class="to-g"> => exporting to image</span>',
+ '<span class="to-g"> => naming to docker.io/library/myapp:v1.0</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker build --no-cache --progress=plain -t myapp:v1.0 . 2>&1 | head -20</span>',
+ '<span class="to-dim"># --no-cache=ignore cache --progress=plain=verbose output</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker build --build-arg APP_ENV=production --build-arg BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) -t myapp:v1.0 .</span>',
+ '<span class="to-dim"># Pass build-time arguments to ARG instructions</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker image ls myapp</span>',
+ '<span class="to">REPOSITORY   TAG     IMAGE ID       CREATED         SIZE</span>',
+ '<span class="to-g">myapp        v1.0    9f3d4e5b2c1a   2 seconds ago   218MB</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── .NET Dockerfile ──────────────────────────────
+'dotnet-demo':[
+ '<span class="tp">❯</span> <span class="tc2">cat Dockerfile</span>',
+ '<span class="to-dim"># Stage 1: Restore dependencies (cached separately)</span>',
+ '<span class="to-b">FROM</span><span class="to"> mcr.microsoft.com/dotnet/sdk:8.0 </span><span class="to-b">AS</span><span class="to"> restore</span>',
+ '<span class="to-b">WORKDIR</span><span class="to"> /src</span>',
+ '<span class="to-b">COPY</span><span class="to"> ["MyApi/MyApi.csproj", "MyApi/"]</span>',
+ '<span class="to-b">RUN</span><span class="to"> dotnet restore "MyApi/MyApi.csproj"</span>',
+ '<span class="to"> </span>',
+ '<span class="to-dim"># Stage 2: Build and publish</span>',
+ '<span class="to-b">FROM</span><span class="to"> restore </span><span class="to-b">AS</span><span class="to"> publish</span>',
+ '<span class="to-b">COPY</span><span class="to"> . .</span>',
+ '<span class="to-b">RUN</span><span class="to"> dotnet publish "MyApi/MyApi.csproj" -c Release -o /app/publish --no-restore</span>',
+ '<span class="to"> </span>',
+ '<span class="to-dim"># Stage 3: Lean runtime image (SDK NOT included)</span>',
+ '<span class="to-b">FROM</span><span class="to"> mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled </span><span class="to-b">AS</span><span class="to"> final</span>',
+ '<span class="to-b">WORKDIR</span><span class="to"> /app</span>',
+ '<span class="to-b">USER</span><span class="to"> app</span>',
+ '<span class="to-b">COPY</span><span class="to"> --from=publish /app/publish .</span>',
+ '<span class="to-b">EXPOSE</span><span class="to"> 8080</span>',
+ '<span class="to-b">HEALTHCHECK</span><span class="to"> --interval=30s CMD curl -f http://localhost:8080/health || exit 1</span>',
+ '<span class="to-b">ENTRYPOINT</span><span class="to"> ["dotnet", "MyApi.dll"]</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker build -t myapi:v1.0 . && docker images myapi</span>',
+ '<span class="to-g">myapi   v1.0   a3b4c5d6   10s ago   218MB</span>',
+ '<span class="to-dim"># SDK = 900MB → Runtime only = 218MB!</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Docker Compose ───────────────────────────────
+'compose-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker compose up -d</span>',
+ '<span class="to">[+] Running 6/6</span>',
+ '<span class="to-g"> ✔ Network myapp_default        Created</span>',
+ '<span class="to-g"> ✔ Volume "myapp_pgdata"        Created</span>',
+ '<span class="to-g"> ✔ Container myapp-db-1         Started</span>',
+ '<span class="to-g"> ✔ Container myapp-redis-1      Started</span>',
+ '<span class="to-g"> ✔ Container myapp-api-1        Started</span>',
+ '<span class="to-g"> ✔ Container myapp-nginx-1      Started</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker compose ps</span>',
+ '<span class="to">NAME             IMAGE        SERVICE   STATUS    PORTS</span>',
+ '<span class="to-g">myapp-api-1      myapi:v1.0   api       running   0.0.0.0:8080->8080/tcp</span>',
+ '<span class="to-g">myapp-db-1       postgres:16  db        running   5432/tcp</span>',
+ '<span class="to-g">myapp-redis-1    redis:7      redis     running   6379/tcp</span>',
+ '<span class="to-g">myapp-nginx-1    nginx:1.25   nginx     running   0.0.0.0:80->80/tcp</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker compose logs -f api</span>',
+ '<span class="to">myapp-api-1  | info: Microsoft.Hosting.Lifetime[14] Now listening on: http://[::]:8080</span>',
+ '<span class="to">myapp-api-1  | info: Microsoft.Hosting.Lifetime[0] Application started.</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker compose scale api=3</span>',
+ '<span class="to-g">[+] Running 2/2 — scaled to 3 replicas</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker compose down -v</span>',
+ '<span class="to-y">Removed containers, networks and volumes</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Microservices Compose ─────────────────────────
+'ms-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker compose -f compose.microservices.yaml up -d</span>',
+ '<span class="to">[+] Running 12/12</span>',
+ '<span class="to-g"> ✔ Container ms-rabbitmq-1        Started</span>',
+ '<span class="to-g"> ✔ Container ms-postgres-order-1  Started</span>',
+ '<span class="to-g"> ✔ Container ms-postgres-user-1   Started</span>',
+ '<span class="to-g"> ✔ Container ms-redis-1           Started</span>',
+ '<span class="to-g"> ✔ Container ms-user-service-1    Started</span>',
+ '<span class="to-g"> ✔ Container ms-order-service-1   Started</span>',
+ '<span class="to-g"> ✔ Container ms-product-service-1 Started</span>',
+ '<span class="to-g"> ✔ Container ms-notify-service-1  Started</span>',
+ '<span class="to-g"> ✔ Container ms-gateway-1         Started</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker compose -f compose.microservices.yaml ps --format table</span>',
+ '<span class="to">SERVICE          REPLICAS   STATUS   PORTS</span>',
+ '<span class="to-g">gateway          1/1        running  0.0.0.0:80->80/tcp</span>',
+ '<span class="to-g">user-service     1/1        running  8081/tcp (internal)</span>',
+ '<span class="to-g">order-service    1/1        running  8082/tcp (internal)</span>',
+ '<span class="to-g">product-service  1/1        running  8083/tcp (internal)</span>',
+ '<span class="to-g">notify-service   1/1        running  8084/tcp (internal)</span>',
+ '<span class="to-g">rabbitmq         1/1        running  5672,15672/tcp</span>',
+ '<span class="to-dim"># All services on internal ms-network — only gateway exposed</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Network demo ─────────────────────────────────
+'network-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker network create --driver bridge myapp-net</span>',
+ '<span class="to-g">a1b2c3d4e5f67890abcdef1234567890</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker network ls</span>',
+ '<span class="to">NETWORK ID     NAME          DRIVER    SCOPE</span>',
+ '<span class="to-g">a1b2c3d4e5f6   myapp-net     bridge    local</span>',
+ '<span class="to">b2c3d4e5f6a7   bridge        bridge    local</span>',
+ '<span class="to">c3d4e5f6a7b8   host          host      local</span>',
+ '<span class="to">d4e5f6a7b8c9   none          null      local</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker run -d --name api --network myapp-net myapi:v1.0</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker run -d --name db --network myapp-net postgres:16</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker exec api ping db</span>',
+ '<span class="to-g">PING db (172.20.0.3): 56 data bytes</span>',
+ '<span class="to-g">64 bytes from 172.20.0.3: icmp_seq=0 ttl=64 time=0.094 ms</span>',
+ '<span class="to-dim"># Containers on same custom network resolve by NAME</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker network inspect myapp-net --format "{{json .Containers}}" | jq</span>',
+ '<span class="to">{</span>',
+ '<span class="to">  "api": { "IPv4Address": "172.20.0.2/16" },</span>',
+ '<span class="to">  "db":  { "IPv4Address": "172.20.0.3/16" }</span>',
+ '<span class="to">}</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Volume demo ──────────────────────────────────
+'volume-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker volume create pgdata</span>',
+ '<span class="to-g">pgdata</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker run -d --name postgres -v pgdata:/var/lib/postgresql/data -e POSTGRES_PASSWORD=secret postgres:16</span>',
+ '<span class="to">3f8b2a1c4d5e...</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker volume inspect pgdata</span>',
+ '<span class="to">[{</span>',
+ '<span class="to">  "Name": "pgdata",</span>',
+ '<span class="to">  "Driver": "local",</span>',
+ '<span class="to">  "Mountpoint": "/var/lib/docker/volumes/pgdata/_data",</span>',
+ '<span class="to">  "Labels": {},</span>',
+ '<span class="to">  "Scope": "local"</span>',
+ '<span class="to">}]</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker run --rm -v pgdata:/source -v $(pwd)/backups:/backup alpine tar czf /backup/pgdata-$(date +%Y%m%d).tar.gz -C /source .</span>',
+ '<span class="to-g">✓ Backup created: backups/pgdata-20250115.tar.gz</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker volume ls && docker volume prune -f</span>',
+ '<span class="to-y">Deleted Volumes: temp-vol-1, temp-vol-2</span>',
+ '<span class="to-g">Total reclaimed space: 482MB</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Security scan ────────────────────────────────
+'security-demo':[
+ '<span class="tp">❯</span> <span class="tc2">trivy image myapi:v1.0</span>',
+ '<span class="to">myapi:v1.0 (ubuntu 22.04)</span>',
+ '<span class="to">Total: 3 (HIGH: 1, MEDIUM: 2, LOW: 0, CRITICAL: 0)</span>',
+ '<span class="to">┌──────────────┬───────────────┬──────────┬──────────────────┬───────────────┐</span>',
+ '<span class="to">│ Library      │ Vulnerability │ Severity │ Installed        │ Fixed Version │</span>',
+ '<span class="to">├──────────────┼───────────────┼──────────┼──────────────────┼───────────────┤</span>',
+ '<span class="to-y">│ libssl3      │ CVE-2024-1234 │ HIGH     │ 3.0.2-0ubuntu1.1 │ 3.0.2-0u1.13  │</span>',
+ '<span class="to">│ libexpat1    │ CVE-2024-5678 │ MEDIUM   │ 2.4.7-1          │ 2.4.7-1+deb   │</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker run --security-opt no-new-privileges:true --read-only --cap-drop ALL --cap-add NET_BIND_SERVICE myapi:v1.0</span>',
+ '<span class="to-dim"># --security-opt no-new-privileges: block setuid escalation</span>',
+ '<span class="to-dim"># --read-only: container filesystem is read-only</span>',
+ '<span class="to-dim"># --cap-drop ALL --cap-add NET_BIND_SERVICE: drop all capabilities, only add what is needed</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker run --user 1001:1001 myapi:v1.0</span>',
+ '<span class="to-dim"># Run as non-root UID 1001</span>',
+ '<span class="tp">❯</span> <span class="tc2">trivy image --format sarif --output results.sarif myapi:v1.0</span>',
+ '<span class="to-g">SARIF report written to results.sarif — import to GitHub Security tab</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── docker stats / events ────────────────────────
+'stats-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker stats --no-stream</span>',
+ '<span class="to">CONTAINER ID   NAME         CPU %   MEM USAGE / LIMIT    MEM %   NET I/O         BLOCK I/O</span>',
+ '<span class="to-g">3f8b2a1c4d5e   webserver    0.02%   6.3MiB / 512MiB      1.2%    1.2MB / 887kB   0B / 0B</span>',
+ '<span class="to-y">7d4b9f8c6e2a   api-1        78.4%   312MiB / 1GiB        30.5%   45MB / 22MB     22MB / 4MB</span>',
+ '<span class="to-g">9a1b3c5d7e9f   postgres     1.1%    128MiB / 2GiB        6.2%    880kB / 22MB    88MB / 16MB</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker events --filter type=container --filter event=die --since 1h</span>',
+ '<span class="to-r">2025-01-15T10:22:44Z container die a1b2c3d (exitCode=137, image=myapi:v1.0, name=api-1)</span>',
+ '<span class="to-dim"># exitCode=137 = OOMKilled! Increase memory limit.</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker system df</span>',
+ '<span class="to">TYPE              TOTAL   ACTIVE   SIZE        RECLAIMABLE</span>',
+ '<span class="to">Images            18      6        8.42GB      3.21GB (38%)</span>',
+ '<span class="to">Containers        4       4        122MB       0B</span>',
+ '<span class="to">Local Volumes     12      5        4.82GB      2.41GB (50%)</span>',
+ '<span class="to">Build Cache       89      0        1.2GB       1.2GB</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker system prune -a --volumes -f</span>',
+ '<span class="to-y">Deleted Images: 12. Deleted Containers: 0. Deleted Volumes: 7.</span>',
+ '<span class="to-g">Total reclaimed space: 6.84GB</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── GitHub Actions ───────────────────────────────
+'actions-demo':[
+ '<span class="tp">❯</span> <span class="tc2">cat .github/workflows/docker.yml</span>',
+ '<span class="to-b">name:</span><span class="to"> Docker Build Push</span>',
+ '<span class="to-b">on:</span>',
+ '<span class="to">  push: { branches: [main], tags: ["v*"] }</span>',
+ '<span class="to">  pull_request: { branches: [main] }</span>',
+ '<span class="to-b">jobs:</span>',
+ '<span class="to">  build:</span>',
+ '<span class="to">    runs-on: ubuntu-latest</span>',
+ '<span class="to">    steps:</span>',
+ '<span class="to">    - uses: actions/checkout@v4</span>',
+ '<span class="to">    - uses: docker/setup-buildx-action@v3</span>',
+ '<span class="to">    - uses: docker/login-action@v3</span>',
+ '<span class="to">      with: { registry: ghcr.io, username: \${{github.actor}}, password: \${{secrets.GITHUB_TOKEN}} }</span>',
+ '<span class="to">    - uses: docker/metadata-action@v5</span>',
+ '<span class="to">      id: meta</span>',
+ '<span class="to">      with: { images: ghcr.io/\${{github.repository}} }</span>',
+ '<span class="to">    - name: Build and push</span>',
+ '<span class="to">      uses: docker/build-push-action@v5</span>',
+ '<span class="to">      with:</span>',
+ '<span class="to">        push: true</span>',
+ '<span class="to">        tags: \${{steps.meta.outputs.tags}}</span>',
+ '<span class="to">        cache-from: type=gha</span>',
+ '<span class="to">        cache-to: type=gha,mode=max</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Troubleshoot ─────────────────────────────────
+'trouble-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker ps</span>',
+ '<span class="to">CONTAINER ID   IMAGE      STATUS                    NAMES</span>',
+ '<span class="to-r">a1b2c3d4e5f6   myapi:v1   Exited (137) 2 min ago   api-1</span>',
+ '<span class="to-dim"># Exit 137 = OOMKilled</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker inspect api-1 --format "{{.State}}"</span>',
+ '<span class="to">{Running:false ExitCode:137 OOMKilled:true FinishedAt:2025-01-15T10:22:44Z}</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker events --filter container=api-1 --since 10m</span>',
+ '<span class="to-r">2025-01-15T10:22:44Z container oom api-1 — out of memory</span>',
+ '<span class="to-r">2025-01-15T10:22:44Z container die api-1 — exitCode=137</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker logs api-1 | tail -20</span>',
+ '<span class="to-r">System.OutOfMemoryException: Insufficient memory to continue the execution of the program.</span>',
+ '<span class="to-dim"># Fix: increase --memory limit or fix memory leak</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker run -d --memory=1g --memory-swap=1g --name api-1-fixed myapi:v1</span>',
+ '<span class="to-g">7d4b9f8c6e2a1f5d...</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker stats api-1-fixed --no-stream</span>',
+ '<span class="to-g">api-1-fixed   42.1%   387MiB / 1GiB   37.8%   healthy</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── Swarm demo ───────────────────────────────────
+'swarm-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker swarm init --advertise-addr 192.168.1.10</span>',
+ '<span class="to-g">Swarm initialized: current node is now a manager.</span>',
+ '<span class="to">To add a worker: docker swarm join --token SWMTKN-1-xxx 192.168.1.10:2377</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker service create --name webapi --replicas 3 --publish 8080:8080 --update-delay 10s --update-failure-action rollback myapi:v1.0</span>',
+ '<span class="to-g">service created: xo3i5bm7d8v2</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker service ls</span>',
+ '<span class="to">ID             NAME     MODE         REPLICAS   IMAGE       PORTS</span>',
+ '<span class="to-g">xo3i5bm7d8v2   webapi   replicated   3/3        myapi:v1.0  *:8080->8080/tcp</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker service update --image myapi:v2.0 webapi</span>',
+ '<span class="to">overall progress: 1 out of 3 tasks...</span>',
+ '<span class="to">overall progress: 2 out of 3 tasks...</span>',
+ '<span class="to-g">overall progress: 3 out of 3 tasks — update complete</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker service rollback webapi</span>',
+ '<span class="to-y">Rolling back webapi to v1.0...</span>',
+ '<span class="to-g">webapi rolled back to v1.0</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+// ── multi-arch buildx ────────────────────────────
+'multiarch-demo':[
+ '<span class="tp">❯</span> <span class="tc2">docker buildx create --name mybuilder --use --bootstrap</span>',
+ '<span class="to-g">mybuilder — builder instance created and bootstrapped</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t myapi:v2.0 --push .</span>',
+ '<span class="to">[+] Building 124.3s (28/28) FINISHED</span>',
+ '<span class="to-g"> => [linux/amd64] FROM mcr.microsoft.com/dotnet/sdk:8.0</span>',
+ '<span class="to-g"> => [linux/arm64] FROM mcr.microsoft.com/dotnet/sdk:8.0</span>',
+ '<span class="to-g"> => [linux/arm/v7] FROM mcr.microsoft.com/dotnet/sdk:8.0</span>',
+ '<span class="to-dim"># All 3 platforms build in PARALLEL</span>',
+ '<span class="to-g"> => pushing layers for linux/amd64</span>',
+ '<span class="to-g"> => pushing layers for linux/arm64</span>',
+ '<span class="to-g"> => pushing manifest list</span>',
+ '<span class="tp">❯</span> <span class="tc2">docker buildx imagetools inspect myapi:v2.0</span>',
+ '<span class="to">Name:      docker.io/originxlabs/myapi:v2.0</span>',
+ '<span class="to">MediaType: application/vnd.oci.image.index.v1+json</span>',
+ '<span class="to">Manifests:</span>',
+ '<span class="to-g">  Platform: linux/amd64</span>',
+ '<span class="to-g">  Platform: linux/arm64</span>',
+ '<span class="to-g">  Platform: linux/arm/v7</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+
+};
+
+// ═══ INTERVIEW Q&A ═══
+function getIQs(tid){
+const dc={BEGINNER:'#00d26a',INTERMEDIATE:'#ffd166',ADVANCED:'#b388ff',DOTNET:'#9c6fff',PRODUCTION:'#00e5ff'};
+const D={
+'iq-basics':[
+{q:"What is Docker and how does it differ from a Virtual Machine?",diff:"BEGINNER",a:"Docker is a containerisation platform that packages applications and their dependencies into lightweight, portable containers. Key differences from VMs: (1) <code>Isolation level</code> — VMs virtualise entire hardware with a full guest OS kernel. Containers share the HOST kernel, only isolating processes via Linux namespaces and cgroups. (2) <code>Size</code> — VMs are gigabytes (full OS). Container images are megabytes (just the app and its libraries). (3) <code>Startup time</code> — VMs take minutes to boot. Containers start in milliseconds. (4) <code>Resource usage</code> — VMs reserve RAM/CPU for the guest OS. Containers only use what the process needs. When to use VMs: different OS kernel needed (Windows containers on Linux), strong security isolation (multi-tenant), legacy apps that require full OS access."},
+{q:"Explain the Docker architecture — client, daemon, containerd, runc.",diff:"BEGINNER",a:"Docker has a layered architecture: (1) <code>Docker Client (CLI)</code> — the command-line tool you type into. Sends REST API requests to the Docker daemon via a Unix socket (/var/run/docker.sock) or TCP. (2) <code>Docker Daemon (dockerd)</code> — the background service that manages images, containers, networks, and volumes. It delegates container management to containerd. (3) <code>containerd</code> — the container runtime. Manages the full container lifecycle: image pull from registry, snapshot management, container start/stop. It is OCI-compliant. (4) <code>runc</code> — the lowest-level container runner. containerd calls runc to actually create the container (set up namespaces, cgroups, start process). runc is a standalone binary that implements the OCI Runtime Specification. (5) <code>BuildKit</code> — the modern build engine (replaced legacy builder). Handles parallel stage builds, cache mounts, build secrets."},
+{q:"What is the difference between a Docker Image and a Container?",diff:"BEGINNER",a:"A <code>Docker Image</code> is a read-only blueprint — a layered filesystem snapshot containing the application code, runtime, libraries, environment variables, and config. It is immutable. Built from a Dockerfile. Stored in a registry. Multiple containers can share the same image. A <code>Container</code> is a running instance of an image. When you start a container, Docker adds a thin writable layer (the container layer) on top of the read-only image layers using a Union Filesystem (overlayfs). This is the Copy-on-Write layer — only files that are modified in the container are copied to this layer. When you delete a container, this layer is deleted — the image is unaffected. Analogy: Image is a class definition, Container is an instance of that class."},
+{q:"What is a Dockerfile and what are its most important instructions?",diff:"BEGINNER",a:"A Dockerfile is a text file containing instructions to build a Docker image. Key instructions: <code>FROM</code> — base image (every Dockerfile starts here). <code>RUN</code> — execute command in a new layer (install packages, compile code). <code>COPY</code> — copy files from build context into image. <code>WORKDIR</code> — set working directory (preferred over cd). <code>ENV</code> — set environment variables baked into image. <code>ARG</code> — build-time variables (not in final image). <code>EXPOSE</code> — document which port the app listens on (informational only). <code>VOLUME</code> — declare mount point for external volumes. <code>USER</code> — switch to non-root user. <code>HEALTHCHECK</code> — how Docker tests if container is healthy. <code>ENTRYPOINT</code> — the main command (not easily overridden). <code>CMD</code> — default arguments to ENTRYPOINT (easily overridden). <code>LABEL</code> — metadata. <code>STOPSIGNAL</code> — signal to stop the container (default SIGTERM)."},
+{q:"What is the difference between CMD and ENTRYPOINT?",diff:"BEGINNER",a:"<code>ENTRYPOINT</code> defines the main executable — it is NOT easily overridden at runtime. Think of it as the command the container always runs. <code>CMD</code> provides default arguments to ENTRYPOINT — it IS easily overridden at runtime with arguments after docker run. Example: ENTRYPOINT ['dotnet'] CMD ['MyApi.dll'] → docker run myapp = runs 'dotnet MyApi.dll'. docker run myapp MyOtherApi.dll = runs 'dotnet MyOtherApi.dll' (CMD overridden). Shell form vs Exec form: Shell form: CMD dotnet MyApi.dll → runs as /bin/sh -c 'dotnet MyApi.dll'. Does NOT receive signals (SIGTERM goes to sh, not dotnet). Exec form (preferred): CMD ['dotnet','MyApi.dll'] → runs dotnet directly as PID 1. Receives SIGTERM for graceful shutdown. Always use exec form for proper signal handling."},
+{q:"Explain Docker networking — how do containers communicate?",diff:"BEGINNER",a:"Docker creates virtual networks and connects containers to them. <code>Default bridge network</code> — all containers join this if no network specified. Containers can only communicate by IP address (no DNS). <code>User-defined bridge</code> — create with docker network create. Containers resolve each other by name (automatic DNS). Preferred for production. <code>Host network</code> (--network=host) — container shares host network stack. Best performance, no port mapping needed, less isolation. Linux only. <code>None network</code> — no networking at all. Maximum isolation. <code>Overlay network</code> — for Docker Swarm multi-host networking. Creates a VXLAN tunnel between hosts. DNS works: within a user-defined network, Docker runs an embedded DNS server (127.0.0.11). Container names and service names resolve to container IPs automatically."},
+{q:"What is Docker Compose and when would you use it?",diff:"BEGINNER",a:"Docker Compose defines and runs multi-container applications from a YAML file (compose.yaml). Instead of running multiple docker run commands with complex flags, you declare all services, networks, and volumes declaratively. Key commands: <code>docker compose up -d</code> — start all services in background. <code>docker compose down</code> — stop and remove containers and networks. <code>docker compose logs -f service-name</code> — follow logs. <code>docker compose exec service-name bash</code> — shell into running service. <code>docker compose ps</code> — see all service status. Use cases: (1) Local development — API + database + cache + message bus with one command, (2) CI/CD — spin up integration test environment, (3) Small production deployments (single host). Compose automatically creates a dedicated network for the app — all services can reach each other by service name."},
+{q:"What is a Docker Volume and why do you need it?",diff:"BEGINNER",a:"Containers are ephemeral — when a container is deleted, its writable layer (all file changes) is lost. Docker Volumes persist data beyond container lifecycle. Three types: (1) <code>Named volumes</code> (docker volume create mydata) — managed by Docker, stored in /var/lib/docker/volumes/. Best for databases and persistent app data. Shareable between containers. (2) <code>Bind mounts</code> (-v /host/path:/container/path) — mount any host directory into container. Best for dev (mount source code, config files). Host path must exist. (3) <code>tmpfs mounts</code> — stored in host RAM, not on disk. Best for temporary sensitive data (never written to disk). When NOT to use volumes: if data is generated by the container and only needed during its lifetime, use the container layer or tmpfs."},
+],
+'iq-intermediate':[
+{q:"How does the Docker image layer system and Copy-on-Write work?",diff:"INTERMEDIATE",a:"Docker images use a Union Filesystem (OverlayFS on modern systems) that stacks multiple read-only layers. Each instruction in a Dockerfile that modifies the filesystem (RUN, COPY, ADD) creates a new layer. Layers are content-addressed (SHA256 of content) — identical layers are shared between images. Copy-on-Write (CoW): when a running container modifies a file, Docker copies that file from the read-only image layer to the container\'s writable layer — ONLY then is it modified. The original image layer is unchanged. Benefits: (1) Multiple containers share image layers — 10 containers running the same image share the read-only layers, only differing in their tiny writable layer. (2) Fast startup — no copy on start. (3) Efficient push/pull — only changed layers transferred. Storage driver implements this: overlayfs (default and recommended on modern Linux), devicemapper, btrfs, zfs."},
+{q:"What is a multi-stage Dockerfile and why is it important?",diff:"INTERMEDIATE",a:"Multi-stage builds use multiple FROM instructions in one Dockerfile, each starting a new build stage. You COPY artifacts from one stage to another. The final image only contains what you copy into the last stage. Critical for .NET apps: SDK image (900MB) is needed to build but NOT to run. ASP.NET Runtime image (218MB) is sufficient to run. Multi-stage: Stage 1 FROM dotnet/sdk:8.0 AS build → restore, build, publish. Stage 2 FROM dotnet/aspnet:8.0 AS final → COPY --from=build /out . → ENTRYPOINT. Result: 900MB SDK not in final image. Final image is ~220MB instead of ~950MB. Benefits: (1) Smaller images — faster pull, less attack surface. (2) No build tools in production image — sdk, git, compilers all excluded. (3) Build secrets never reach final image. (4) Cache optimization — restore stage cached separately from build stage."},
+{q:"How does Docker networking work at the packet level?",diff:"INTERMEDIATE",a:"When Docker creates a container on a bridge network: (1) Creates a virtual ethernet pair (veth pair) — one end inside the container as eth0, one on the host. (2) Container gets an IP from the bridge subnet (172.17.0.0/16 for default bridge). (3) Docker sets up iptables NAT rules for port mapping and outbound internet access. Packet flow — container → internet: Container eth0 → veth → docker0 bridge → iptables MASQUERADE rule → host eth0 → internet. Packet flow — external port → container: external request → host eth0 → iptables DNAT rule (0.0.0.0:8080 → 172.17.0.2:80) → docker0 bridge → veth → container eth0. Container → Container (same network): eth0 → veth → bridge → veth → eth0 (no iptables involved — direct bridge routing). DNS: embedded DNS resolver at 127.0.0.11 in each container. Container names registered with Docker DNS automatically on user-defined networks."},
+{q:"How do you handle environment-specific configuration in Docker?",diff:"INTERMEDIATE",a:"Multiple approaches for different use cases: (1) <code>Environment variables</code> — docker run -e DB_HOST=postgres or in compose: environment: DB_HOST: postgres. Simple and universally supported. (2) <code>env_file in Compose</code> — env_file: .env or .env.production. Keeps secrets out of compose.yaml. (3) <code>Docker secrets (Swarm)</code> — encrypted at rest and in transit, only exposed to specific services, mounted at /run/secrets/. For production clusters. (4) <code>Compose secrets</code> — file-based secrets in Compose, mounted into containers as files. (5) <code>Build ARGs</code> — ARG instructions for build-time config (NOT available at runtime, not in final image). For .NET: Environment variables map to IConfiguration automatically. ASPNETCORE_ENVIRONMENT=Production switches appsettings.json profile. Use double underscore __ for nested config: ConnectionStrings__Default becomes ConnectionStrings:Default. NEVER bake secrets into images or Dockerfiles. Use external secret stores (Vault, AWS Secrets Manager, Azure Key Vault) in production."},
+{q:"What is BuildKit and how does it improve Docker builds?",diff:"INTERMEDIATE",a:"BuildKit is the modern Docker build engine (enabled by default since Docker 23). Key improvements over legacy builder: (1) <code>Parallel builds</code> — independent stages build simultaneously (multi-arch, multi-platform). (2) <code>Build cache mounts</code> (--mount=type=cache) — mount package manager caches between builds without including in final image. dotnet restore cache: RUN --mount=type=cache,target=/root/.nuget dotnet restore. (3) <code>Build secrets</code> (--mount=type=secret) — pass secrets during build that never appear in layers or history: RUN --mount=type=secret,id=nuget_key dotnet nuget add source --api-key $(cat /run/secrets/nuget_key). (4) <code>SSH forwarding</code> — use your SSH agent during build for private git repos. (5) <code>Inline Dockerfile</code> (heredoc syntax). (6) <code>Faster layer resolution</code> — concurrent layer push/pull. Enable: DOCKER_BUILDKIT=1 (default in modern Docker)."},
+],
+'iq-advanced':[
+{q:"Explain Docker storage drivers — what is OverlayFS?",diff:"ADVANCED",a:"OverlayFS (overlay2 driver) is the default and recommended storage driver. It uses Linux kernel\'s overlay filesystem: Two directories merged into one view. Lower dir = read-only image layers. Upper dir = writable container layer. Merged = unified view. How COPY-on-Write works in overlay2: When container reads a file — read from lower (image) layer directly. When container writes a file — kernel copies file from lower to upper dir first (copy-up), then modifies in upper. Original in lower unchanged. Performance implications: First write to large file is slow (copy-up). Subsequent writes are fast. Small files: efficient. Large files (especially databases): avoid overlay storage, use volumes (bypass overlay entirely, write directly to host filesystem). Other drivers: devicemapper (older RHEL), btrfs, zfs (feature-rich, less common). Check: docker info | grep Storage Driver."},
+{q:"How does Docker handle container security — namespaces and capabilities?",diff:"ADVANCED",a:"Docker uses Linux kernel features for isolation: (1) <code>Namespaces</code> — isolate views of system resources: PID namespace (separate process tree, PID 1 in container), Network namespace (separate network stack, interfaces, routing), Mount namespace (separate filesystem mount points), UTS namespace (separate hostname and domain name), IPC namespace (separate inter-process communication), User namespace (separate UID/GID mappings — rootless Docker). (2) <code>cgroups (Control Groups)</code> — limit and account for resource usage: CPU (shares, quota, cpuset), Memory (limit, swap, OOM priority), Block I/O (bps, iops limits), Network I/O (tc, netem). (3) <code>Linux Capabilities</code> — fine-grained root privileges. Docker drops most capabilities by default (keeps: CHOWN, DAC_OVERRIDE, NET_BIND_SERVICE etc). Drop all: --cap-drop ALL. Add specific: --cap-add NET_ADMIN. (4) <code>Seccomp profiles</code> — filter syscalls the container can make. Default profile blocks 44 dangerous syscalls. (5) <code>AppArmor/SELinux</code> — Mandatory Access Control profiles."},
+{q:"How do you optimise a Docker image for production — what are the best practices?",diff:"ADVANCED",a:"Complete optimisation checklist: (1) <code>Use official minimal base images</code> — Alpine (5MB), Distroless, Chiseled (.NET) instead of ubuntu/debian (80-120MB). (2) <code>Multi-stage builds</code> — build tools and SDK never in final image. (3) <code>Layer order for cache</code> — COPY package files → RUN install → COPY source. This way dependency install is cached unless package files change. (4) <code>Combine RUN commands</code> — RUN apt-get update && apt-get install -y pkg && apt-get clean && rm -rf /var/lib/apt/lists/* is ONE layer, not four. (5) <code>.dockerignore</code> — exclude .git, node_modules, bin, obj, test results from build context. Smaller context = faster build. (6) <code>Non-root user</code> — USER app or USER 1001:1001. (7) <code>Read-only filesystem</code> — --read-only with tmpfs for /tmp. (8) <code>Pinned versions</code> — FROM nginx:1.25.3-alpine NOT nginx:latest. (9) <code>HEALTHCHECK</code> — Docker knows if your app is actually healthy, not just running. (10) <code>Scan images</code> — trivy image in CI pipeline."},
+],
+'iq-dotnet':[
+{q:"What is the difference between dotnet/sdk, dotnet/runtime, and dotnet/aspnet images?",diff:"DOTNET",a:"Microsoft publishes several .NET base images with different sizes and purposes: <code>mcr.microsoft.com/dotnet/sdk:8.0</code> (~900MB) — Full .NET SDK: compiler (Roslyn), CLI (dotnet build/publish/test), NuGet, templates. Use ONLY in build stages, never in final production image. <code>mcr.microsoft.com/dotnet/runtime:8.0</code> (~220MB) — .NET runtime only. For console apps, workers, CLI tools. No ASP.NET components. <code>mcr.microsoft.com/dotnet/aspnet:8.0</code> (~250MB) — Runtime + ASP.NET Core components (Kestrel, Middleware pipeline). For web APIs, MVC apps, Blazor Server. <code>mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled</code> (~120MB) — Ubuntu Chiseled base — ultra-minimal, non-root, no shell, no package manager. Most secure option. <code>mcr.microsoft.com/dotnet/runtime-deps:8.0</code> — Just the native dependencies (.NET not included). For self-contained single-file apps. Pattern: SDK in build stage → aspnet or chiseled in final stage. This alone reduces image from 900MB to 120-250MB."},
+{q:"How do you handle graceful shutdown in a .NET Docker container?",diff:"DOTNET",a:"Proper graceful shutdown requires three things: (1) <code>Use exec form ENTRYPOINT</code> — ENTRYPOINT ['dotnet','MyApi.dll'] NOT shell form. Shell form wraps in /bin/sh -c which does NOT forward signals to your process. (2) <code>Handle SIGTERM in .NET</code> — ASP.NET Core handles this automatically via IHostApplicationLifetime. Worker Services need: lifetime.ApplicationStopping.Register(() => { /* drain work */ }). For custom logic: AppDomain.CurrentDomain.ProcessExit += (s,e) => { /* cleanup */ }. (3) <code>Configure timeout in Docker/Compose</code> — docker stop by default sends SIGTERM, waits 10 seconds, then SIGKILL. Increase for slow-draining apps: docker stop --time=60 container or in Compose: stop_grace_period: 60s. (4) <code>Kestrel shutdown</code> — IWebHostBuilder.UseShutdownTimeout(TimeSpan.FromSeconds(30)) gives connections 30s to finish. (5) <code>Health check readiness</code> — stop reporting healthy as soon as shutdown starts so load balancer stops sending traffic before SIGTERM arrives."},
+{q:"Describe a production-ready microservices setup with Docker Compose for .NET.",diff:"DOTNET",a:"A production-grade .NET microservices compose setup includes: (1) <code>Each service has its own Dockerfile</code> — multi-stage build (restore → build → publish → runtime). (2) <code>Service-specific databases</code> — each microservice owns its data store (user-service has user-db, order-service has order-db). No shared database. (3) <code>Message broker</code> — RabbitMQ or Kafka for async communication between services. (4) <code>API Gateway</code> — NGINX or YARP .NET reverse proxy as single entry point. Routes /api/users → user-service:8080, /api/orders → order-service:8080. (5) <code>Service discovery via Compose DNS</code> — services call each other by service name (http://order-service). Compose DNS resolves. (6) <code>Health checks on all services</code> — depends_on with condition: service_healthy ensures startup order. (7) <code>Dedicated networks</code> — frontend-net (gateway + services), backend-net (services + databases). Databases NOT on frontend-net. (8) <code>Secrets for credentials</code> — db passwords via Compose secrets or environment files excluded from git. (9) <code>Resource limits</code> — deploy.resources.limits for each service. (10) <code>Centralised logging</code> — all services log JSON to stdout, aggregated by Fluentd/Loki."},
+{q:"How do you implement health checks for a .NET API in Docker?",diff:"DOTNET",a:"Three layers of health checks: (1) <code>Dockerfile HEALTHCHECK</code> — Docker daemon level check: HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 CMD curl -f http://localhost:8080/health || exit 1. Status: healthy / unhealthy / starting. (2) <code>ASP.NET Core Health Checks middleware</code> — builder.Services.AddHealthChecks() .AddSqlServer(connectionString) .AddRedis(redisConnection) .AddRabbitMQ(rabbitConnection). app.MapHealthChecks('/health/ready', new() { Predicate = r => r.Tags.Contains('ready') }); app.MapHealthChecks('/health/live', new() { Predicate = _ => false }); // just 200 OK. (3) <code>Docker Compose depends_on</code> — in Compose, link service health to startup order: depends_on: db: condition: service_healthy. Patterns: /health/live — is the app running? (never check dependencies). /health/ready — is the app ready to serve traffic? (check DB, cache connections). Use IHealthCheck to add custom checks for any dependency."},
+],
+};
+return D[tid]||[];
+}
+
+// ═══ CODE BLOCK ═══
+function code(c){return `<div class="code">${c}</div>`;}
+
+// ═══ ARCHITECTURE DIAGRAM ═══
+function dockerArch(){return `<div class="arch">
+<div class="arch-title">🐳 Docker Architecture — Full Internal Flow</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+  <div class="az client" style="min-width:130px">
+    <div class="az-title">💻 Docker Client</div>
+    <div class="ac docker-cli"><div class="ac-n">docker CLI</div><div class="ac-d">REST API calls via /var/run/docker.sock or TCP 2376</div></div>
+    <div class="ac docker-cli"><div class="ac-n">Docker Compose</div><div class="ac-d">Multi-container orchestration — calls daemon per service</div></div>
+    <div class="ac docker-cli"><div class="ac-n">Docker Desktop</div><div class="ac-d">GUI + manages Linux VM on Mac/Windows</div></div>
+  </div>
+  <div class="az daemon" style="min-width:150px">
+    <div class="az-title">⚙️ Docker Daemon (dockerd)</div>
+    <div class="ac docker-daemon"><div class="ac-n">REST API Server</div><div class="ac-d">Receives client requests, manages objects</div></div>
+    <div class="ac buildkit"><div class="ac-n">BuildKit</div><div class="ac-d">Parallel builds, cache mounts, secrets, multi-arch</div></div>
+    <div class="ac docker-daemon"><div class="ac-n">Image Store</div><div class="ac-d">Manages layers, content-addressable storage</div></div>
+    <div class="ac docker-daemon"><div class="ac-n">Network/Volume</div><div class="ac-d">Creates bridges, overlay nets, manages volume drivers</div></div>
+  </div>
+  <div class="az containerd" style="min-width:150px">
+    <div class="az-title">🟢 containerd + runc</div>
+    <div class="ac containerd-c"><div class="ac-n">containerd</div><div class="ac-d">Container lifecycle: pull, create, start, stop, delete</div></div>
+    <div class="ac containerd-c"><div class="ac-n">Snapshotter (overlayfs)</div><div class="ac-d">Manages image layer union mounts</div></div>
+    <div class="ac runc-c"><div class="ac-n">runc</div><div class="ac-d">Creates namespaces + cgroups, starts actual process</div></div>
+    <div class="ac container-box"><div class="ac-n">Container (PID 1)</div><div class="ac-d">Your app process — pid/net/mnt/uts namespaces</div></div>
+  </div>
+  <div class="az registry" style="min-width:120px">
+    <div class="az-title">🗄️ Registry</div>
+    <div class="ac image-reg"><div class="ac-n">DockerHub</div><div class="ac-d">Public images — docker pull</div></div>
+    <div class="ac image-reg"><div class="ac-n">ECR / ACR / GHCR</div><div class="ac-d">Private cloud registries</div></div>
+    <div class="ac image-reg"><div class="ac-n">Harbor / Nexus</div><div class="ac-d">Self-hosted registries with scanning</div></div>
+  </div>
+</div>
+<div style="margin-top:10px"><div class="az net">
+<div class="az-title">🌐 linux kernel (shared with host)</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<div class="ac"><div class="ac-n" style="color:var(--cy)">Namespaces</div><div class="ac-d">pid · net · mnt · uts · ipc · user</div></div>
+<div class="ac"><div class="ac-n" style="color:var(--cy)">cgroups v2</div><div class="ac-d">CPU · memory · I/O limits</div></div>
+<div class="ac"><div class="ac-n" style="color:var(--cy)">OverlayFS</div><div class="ac-d">Union filesystem for image layers</div></div>
+<div class="ac"><div class="ac-n" style="color:var(--cy)">iptables / nftables</div><div class="ac-d">NAT for port mapping, network isolation</div></div>
+<div class="ac"><div class="ac-n" style="color:var(--cy)">seccomp</div><div class="ac-d">Syscall filter — blocks 44 dangerous calls by default</div></div>
+</div></div></div>
+</div>`;}
+
+function imageLayers(){return `<div class="arch">
+<div class="arch-title">📦 Image Layer Model — Copy-on-Write</div>
+<div class="layers">
+  <div class="layer rw"><span class="layer-badge">R/W</span><span class="layer-name">Container Writable Layer</span><span class="layer-desc">Only exists while container runs. Deleted on container rm. OverlayFS upper dir.</span></div>
+  <div class="layer ro"><span class="layer-badge">R/O</span><span class="layer-name">COPY . . (app source)</span><span class="layer-desc">SHA256: a3b4c5... · 24MB · added in last stage</span></div>
+  <div class="layer ro"><span class="layer-badge">R/O</span><span class="layer-name">RUN dotnet publish (compiled app)</span><span class="layer-desc">SHA256: d7e8f9... · 18MB · build output</span></div>
+  <div class="layer ro"><span class="layer-badge">R/O</span><span class="layer-name">COPY *.csproj + RUN dotnet restore</span><span class="layer-desc">SHA256: 1b2c3d... · 156MB · NuGet packages — CACHED unless .csproj changes</span></div>
+  <div class="layer ro"><span class="layer-badge">R/O</span><span class="layer-name">WORKDIR / ENV / USER</span><span class="layer-desc">SHA256: e4f5a6... · 0B · metadata layer</span></div>
+  <div class="layer base"><span class="layer-badge">BASE</span><span class="layer-name">FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled</span><span class="layer-desc">SHA256: 7b8c9d... · 118MB · SHARED with all other .NET containers — pulled once</span></div>
+</div>
+<div class="callout info"><strong>Copy-on-Write</strong>When a container modifies a file in a read-only layer, OverlayFS copies ONLY that file to the container writable layer (upper dir), then modifies it there. The original layer is untouched. 10 containers sharing an image only have 1 copy of those read-only layers in memory.</div>
+</div>`;}
+
+// ═══ CONTENT FUNCTION ═══
+function getContent(cid,tid,tab){
+  const key=`${cid}:${tid}:${tab}`;
+
+  // Interview Q&A
+  if(tid.startsWith('iq-')){
+    const qs=getIQs(tid);
+    const dc={BEGINNER:'#00d26a',INTERMEDIATE:'#ffd166',ADVANCED:'#b388ff',DOTNET:'#9c6fff',PRODUCTION:'#00e5ff'};
+    const cid2='qc_'+tid;
+    const items=qs.map((q,i)=>`<div class="qa-item" data-diff="${q.diff}" onclick="toggleQA(this)">
+<div class="qa-q"><div class="qa-qi" style="background:${dc[q.diff]||'#2496ed'}22;color:${dc[q.diff]||'#2496ed'};border:1px solid ${dc[q.diff]||'#2496ed'}44">Q${i+1}</div>
+<div class="qa-qt">${q.q}</div><span class="tag ${q.diff.toLowerCase()}">${q.diff}</span><span class="qa-ch">▼</span></div>
+<div class="qa-a"><div class="qa-ab">${q.a}</div></div></div>`).join('');
+    return `<div id="${cid2}"><div class="filter-row">
+<button class="fbtn active" onclick="filterQs(this,'all',document.getElementById('${cid2}'))">All</button>
+${Object.keys(dc).map(d=>`<button class="fbtn" onclick="filterQs(this,'${d}',document.getElementById('${cid2}'))">${d}</button>`).join('')}
+</div>${items}</div>`;
+  }
+
+  // ── ARCHITECTURE ──────────────────────────────
+  if(key==='architecture:overview:Diagram') return dockerArch()+
+    `<div class="callout info"><strong>Key Insight</strong>Docker client and daemon are separate processes communicating over a Unix socket. The daemon delegates to containerd which delegates to runc. This layered architecture means you can swap runc for gVisor (sandboxed) or run containerd directly in Kubernetes.</div>`;
+
+  if(key==='architecture:overview:Client-Daemon') return `<div class="sec">Request Flow: docker run → container</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">1</div><div class="fb-name" style="color:var(--d2)">docker run cmd</div></div>
+  <div class="farr cmd">→<span>REST API</span><span>Unix socket</span></div>
+  <div class="fbox"><div class="fb-label">2</div><div class="fb-name" style="color:var(--or)">dockerd</div></div>
+  <div class="farr cmd">→<span>gRPC</span></div>
+  <div class="fbox"><div class="fb-label">3</div><div class="fb-name" style="color:var(--gr)">containerd</div></div>
+  <div class="farr cmd">→<span>spawn</span></div>
+  <div class="fbox"><div class="fb-label">4</div><div class="fb-name" style="color:var(--gr2)">containerd-shim</div></div>
+  <div class="farr cmd">→<span>exec</span></div>
+  <div class="fbox"><div class="fb-label">5</div><div class="fb-name" style="color:var(--ye)">runc</div></div>
+  <div class="farr cmd">→<span>namespaces</span></div>
+  <div class="fbox"><div class="fb-label">6</div><div class="fb-name" style="color:var(--d3)">PID 1 (app)</div></div>
+</div>
+<div class="callout tip"><strong>containerd-shim</strong>The shim process stays alive even after runc exits. This allows Docker daemon to restart without killing running containers. The shim is the parent of PID 1 in the container — it forwards signals and collects exit status.</div>`;
+
+  if(key==='architecture:image-layers:Diagram') return imageLayers();
+  if(key==='architecture:image-layers:Layer Demo') return mkTerm('pull-demo','image layers & history',true);
+  if(key==='architecture:image-layers:CoW Explained') return `<div class="sec">Copy-on-Write Performance Impact</div>
+<div class="grid2">
+<div class="mc"><h4>Fast operations (no CoW)</h4><p>Reading a file → reads directly from image layer. No copy. As fast as reading from disk.</p></div>
+<div class="mc"><h4 class="ye">Slow operations (CoW penalty)</h4><p>First write to a file from image layer → file must be copied to upper dir first. Large files (GB) cause noticeable delay on first write.</p></div>
+<div class="mc"><h4 class="re">Never store DB files in container layer</h4><p>Postgres/MySQL data in container writable layer suffers CoW overhead on every write and data is LOST when container is deleted. Use volumes!</p></div>
+<div class="mc"><h4 class="gr">Volume bypass CoW</h4><p>Volumes mount directly into the container filesystem — bypassing OverlayFS entirely. Native disk performance. Data persists.</p></div>
+</div>`;
+
+  if(key==='architecture:namespaces:Diagram') return `<div class="sec">Linux Namespaces — How Isolation Works</div>
+<table class="tbl"><thead><tr><th>Namespace</th><th>Isolates</th><th>Container sees</th></tr></thead><tbody>
+<tr><td>PID</td><td>Process IDs</td><td>Own PID tree — PID 1 is your app. Cannot see host processes.</td></tr>
+<tr><td>NET</td><td>Network stack</td><td>Own eth0, IP address, routing table, iptables rules</td></tr>
+<tr><td>MNT</td><td>Filesystem mounts</td><td>Own root filesystem (image layers). Cannot see host filesystem.</td></tr>
+<tr><td>UTS</td><td>Hostname</td><td>Own hostname (container ID by default)</td></tr>
+<tr><td>IPC</td><td>IPC resources</td><td>Own semaphores, message queues, shared memory</td></tr>
+<tr><td>USER</td><td>UID/GID mappings</td><td>UID 0 in container maps to non-root UID on host (rootless Docker)</td></tr>
+<tr><td>CGROUP</td><td>cgroup root</td><td>Cannot see host cgroup hierarchy</td></tr>
+</tbody></table>
+<div class="sec or">cgroups — Resource Limits</div>
+<table class="tbl"><thead><tr><th>cgroup</th><th>Flag</th><th>Example</th></tr></thead><tbody>
+<tr><td>cpu</td><td>--cpus, --cpu-shares</td><td>--cpus=1.5 (max 1.5 cores), --cpu-shares=512 (relative weight)</td></tr>
+<tr><td>memory</td><td>--memory, --memory-swap</td><td>--memory=512m (hard limit, OOMKilled if exceeded)</td></tr>
+<tr><td>blkio</td><td>--blkio-weight, --device-read-bps</td><td>--device-read-bps=/dev/sda:100mb</td></tr>
+<tr><td>cpuset</td><td>--cpuset-cpus</td><td>--cpuset-cpus=0,1 (pin to specific cores)</td></tr>
+</tbody></table>`;
+
+  if(key==='architecture:namespaces:vs VM') return `<div class="sec">Container vs VM Architecture</div>
+<div class="grid2">
+<div class="mc"><h4>🐳 Container</h4>
+<div class="layers" style="margin-top:8px">
+<div class="layer rw" style="font-size:9px;padding:5px"><span class="layer-badge">APP</span><span class="layer-name">App Process (PID 1)</span></div>
+<div class="layer ro" style="font-size:9px;padding:5px"><span class="layer-badge">LIB</span><span class="layer-name">App Libraries (image layers)</span></div>
+<div class="layer base" style="font-size:9px;padding:5px"><span class="layer-badge">OS</span><span class="layer-name">Host Linux Kernel (shared!)</span></div>
+</div>
+<p style="font-size:9.5px;color:var(--tx3);font-family:var(--mono);margin-top:8px">Startup: milliseconds. Size: MB. Kernel: shared. Isolation: namespaces+cgroups.</p>
+</div>
+<div class="mc"><h4 class="or">🖥️ Virtual Machine</h4>
+<div class="layers" style="margin-top:8px">
+<div class="layer rw" style="font-size:9px;padding:5px;border-color:rgba(255,107,53,.4)"><span class="layer-badge" style="background:rgba(255,107,53,.2);color:var(--or)">APP</span><span class="layer-name" style="color:var(--or)">Application</span></div>
+<div class="layer ro" style="font-size:9px;padding:5px;border-color:rgba(255,107,53,.3)"><span class="layer-badge" style="background:rgba(255,107,53,.15);color:var(--or)">GOS</span><span class="layer-name" style="color:var(--or)">Guest OS (full kernel)</span></div>
+<div class="layer base" style="font-size:9px;padding:5px"><span class="layer-badge">HV</span><span class="layer-name">Hypervisor (KVM/VMware/HyperV)</span></div>
+<div class="layer base" style="font-size:9px;padding:5px"><span class="layer-badge">HW</span><span class="layer-name">Physical Hardware</span></div>
+</div>
+<p style="font-size:9.5px;color:var(--tx3);font-family:var(--mono);margin-top:8px">Startup: minutes. Size: GB. Kernel: separate guest OS. Isolation: hardware virtualisation.</p>
+</div>
+</div>`;
+
+  // ── IMAGES ────────────────────────────────────
+  if(key==='images:pull-run:Demo') return mkTerm('pull-demo','docker pull & images',true);
+  if(key==='images:pull-run:inspect deep dive') return `<div class="sec">docker inspect Deep Dive</div>`+
+    code(`<span class="dk">docker image inspect nginx:1.25-alpine --format '{{json .Config}}'</span> <span class="dc">| jq</span>
+
+<span class="dc"># Key fields:</span>
+<span class="dn">"Env":</span>    <span class="ds">["PATH=/usr/local/sbin:...","NGINX_VERSION=1.25.3"]</span>
+<span class="dn">"Cmd":</span>    <span class="ds">["nginx","-g","daemon off;"]</span>
+<span class="dn">"Entrypoint":</span> <span class="ds">["/docker-entrypoint.sh"]</span>
+<span class="dn">"ExposedPorts":</span> <span class="ds">{"80/tcp": {}}</span>
+<span class="dn">"WorkingDir":</span> <span class="ds">""</span>
+<span class="dn">"User":</span>   <span class="ds">""</span>  <span class="dc"># root! — check and run as non-root</span>
+<span class="dn">"Volumes":</span> <span class="ds">null</span>
+
+<span class="dk">docker image inspect nginx:1.25-alpine --format '{{.RootFS.Layers}}'</span>
+<span class="dc"># Shows SHA256 of each layer</span>
+
+<span class="dk">docker image inspect nginx:1.25-alpine --format '{{.Size}}'</span>
+<span class="ds">45383568</span>  <span class="dc"># 43.3 MB</span>`);
+
+  if(key==='images:tag-push:Demo') return code(`<span class="dc"># Tag for DockerHub</span>
+<span class="dk">docker tag myapp:v1.0 originxlabs/myapp:v1.0</span>
+<span class="dk">docker tag myapp:v1.0 originxlabs/myapp:latest</span>
+
+<span class="dc"># Push to DockerHub</span>
+<span class="dk">docker login --username originxlabs</span>
+<span class="dk">docker push originxlabs/myapp:v1.0</span>
+<span class="dk">docker push originxlabs/myapp:latest</span>
+
+<span class="dc"># Tag for GitHub Container Registry</span>
+<span class="dk">docker tag myapp:v1.0 ghcr.io/originxlabs/myapp:v1.0</span>
+<span class="dk">docker login ghcr.io --username originxlabs --password ${GITHUB_TOKEN}</span>
+<span class="dk">docker push ghcr.io/originxlabs/myapp:v1.0</span>
+
+<span class="dc"># Tag for AWS ECR</span>
+<span class="dk">aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 123456789.dkr.ecr.ap-south-1.amazonaws.com</span>
+<span class="dk">docker tag myapp:v1.0 123456789.dkr.ecr.ap-south-1.amazonaws.com/myapp:v1.0</span>
+<span class="dk">docker push 123456789.dkr.ecr.ap-south-1.amazonaws.com/myapp:v1.0</span>
+
+<span class="dc"># Pin by digest (immutable) for production</span>
+<span class="dk">docker pull nginx:1.25-alpine</span>
+<span class="dk">docker inspect --format '{{index .RepoDigests 0}}' nginx:1.25-alpine</span>
+<span class="ds">nginx@sha256:3c4c1f42a89e343c7b050bf5a1c8a79b3de8a20f358f8dcfefdbd0ae3932a901</span>`);
+
+  // ── CONTAINERS ────────────────────────────────
+  if(key==='containers:docker-run:Demo') return mkTerm('docker-run-demo','docker run — all flags',true);
+  if(key==='containers:docker-run:All Flags') return `<div class="sec">docker run Flags Reference</div>
+<table class="tbl"><thead><tr><th>Flag</th><th>Purpose</th><th>Example</th></tr></thead><tbody>
+<tr><td>-d</td><td>Detached (background)</td><td>-d</td></tr>
+<tr><td>-it</td><td>Interactive + TTY (shell)</td><td>-it ubuntu bash</td></tr>
+<tr><td>--rm</td><td>Auto-remove on exit</td><td>--rm (for one-off tasks)</td></tr>
+<tr><td>--name</td><td>Container name</td><td>--name webserver</td></tr>
+<tr><td>-p, --publish</td><td>Port mapping host:container</td><td>-p 8080:80</td></tr>
+<tr><td>-P</td><td>Publish all EXPOSE'd ports randomly</td><td>-P</td></tr>
+<tr><td>-e, --env</td><td>Environment variable</td><td>-e DB_HOST=postgres</td></tr>
+<tr><td>--env-file</td><td>Load env vars from file</td><td>--env-file .env</td></tr>
+<tr><td>-v, --volume</td><td>Mount volume or bind</td><td>-v mydata:/app/data</td></tr>
+<tr><td>--mount</td><td>Mount (explicit syntax)</td><td>--mount type=volume,src=mydata,dst=/app/data</td></tr>
+<tr><td>--network</td><td>Connect to network</td><td>--network myapp-net</td></tr>
+<tr><td>--restart</td><td>Restart policy</td><td>--restart=unless-stopped</td></tr>
+<tr><td>--memory</td><td>Memory limit (OOMKill if exceeded)</td><td>--memory=512m</td></tr>
+<tr><td>--cpus</td><td>CPU limit</td><td>--cpus=1.5</td></tr>
+<tr><td>--user</td><td>Run as user:group</td><td>--user 1001:1001</td></tr>
+<tr><td>--read-only</td><td>Read-only root filesystem</td><td>--read-only</td></tr>
+<tr><td>--cap-drop</td><td>Drop Linux capability</td><td>--cap-drop ALL</td></tr>
+<tr><td>--health-cmd</td><td>Health check command</td><td>--health-cmd="curl -f http://localhost/health"</td></tr>
+<tr><td>--entrypoint</td><td>Override ENTRYPOINT</td><td>--entrypoint /bin/sh</td></tr>
+<tr><td>--workdir</td><td>Override WORKDIR</td><td>-w /tmp</td></tr>
+</tbody></table>`;
+
+  if(key==='containers:lifecycle:Demo') return mkTerm('lifecycle-demo','container lifecycle',true);
+  if(key==='containers:lifecycle:State Machine') return `<div class="sec">Container State Machine</div>
+<div class="flow" style="flex-direction:column;align-items:flex-start;gap:5px">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="fbox" style="min-width:80px"><div class="fb-name" style="color:var(--d2)">Created</div></div>
+    <div class="farr">→</div>
+    <div class="fbox" style="min-width:80px"><div class="fb-name" style="color:var(--gr)">Running</div></div>
+    <div class="farr">→</div>
+    <div class="fbox" style="min-width:80px"><div class="fb-name" style="color:var(--ye)">Paused</div></div>
+    <div class="farr">→</div>
+    <div class="fbox" style="min-width:80px"><div class="fb-name" style="color:var(--gr)">Running</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="fbox" style="min-width:80px"><div class="fb-name" style="color:var(--gr)">Running</div></div>
+    <div class="farr cmd">→<span>docker stop (SIGTERM→SIGKILL)</span></div>
+    <div class="fbox" style="min-width:80px"><div class="fb-name" style="color:var(--or)">Stopped</div></div>
+    <div class="farr cmd">→<span>docker rm</span></div>
+    <div class="fbox" style="min-width:80px"><div class="fb-name" style="color:var(--re)">Deleted</div></div>
+  </div>
+</div>
+<div class="sec">Restart Policies</div>
+<table class="tbl"><thead><tr><th>Policy</th><th>Behavior</th><th>Use Case</th></tr></thead><tbody>
+<tr><td>no (default)</td><td>Never restart</td><td>One-off scripts, debugging</td></tr>
+<tr><td>on-failure[:N]</td><td>Restart on non-zero exit, max N times</td><td>Batch jobs that may fail</td></tr>
+<tr><td>always</td><td>Always restart, even on docker daemon restart</td><td>Critical services</td></tr>
+<tr><td>unless-stopped</td><td>Always restart UNLESS explicitly stopped by user</td><td>Production services (recommended)</td></tr>
+</tbody></table>`;
+
+  if(key==='containers:exec-logs:Demo') return mkTerm('exec-demo','exec, logs, stats',true);
+
+  // ── DOCKERFILE ────────────────────────────────
+  if(key==='dockerfile:instructions:Demo') return mkTerm('dockerfile-demo','docker build',true);
+  if(key==='dockerfile:instructions:All Instructions') return `<div class="sec">Dockerfile Instructions Reference</div>
+<table class="tbl"><thead><tr><th>Instruction</th><th>Purpose</th><th>Example / Notes</th></tr></thead><tbody>
+<tr><td>FROM</td><td>Base image — starts every stage</td><td>FROM mcr.microsoft.com/dotnet/aspnet:8.0</td></tr>
+<tr><td>RUN</td><td>Execute command, creates new layer</td><td>RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*</td></tr>
+<tr><td>COPY</td><td>Copy files from build context</td><td>COPY ["src/*.csproj", "src/"] — preferred over ADD</td></tr>
+<tr><td>ADD</td><td>COPY + auto-extract tar + URL support</td><td>Use COPY unless you need tar extraction</td></tr>
+<tr><td>WORKDIR</td><td>Set working directory (creates if absent)</td><td>WORKDIR /app — use instead of RUN mkdir && cd</td></tr>
+<tr><td>ENV</td><td>Environment variable (in image AND at runtime)</td><td>ENV ASPNETCORE_URLS=http://+:8080</td></tr>
+<tr><td>ARG</td><td>Build-time variable (NOT in final image)</td><td>ARG BUILD_DATE — pass with --build-arg</td></tr>
+<tr><td>EXPOSE</td><td>Document port (does NOT publish)</td><td>EXPOSE 8080 — informational, use -p to publish</td></tr>
+<tr><td>VOLUME</td><td>Declare mount point for external volumes</td><td>VOLUME ["/app/data"]</td></tr>
+<tr><td>USER</td><td>Switch to non-root user</td><td>USER app or USER 1001:1001</td></tr>
+<tr><td>LABEL</td><td>Image metadata</td><td>LABEL maintainer="abhishek@originxlabs.com"</td></tr>
+<tr><td>HEALTHCHECK</td><td>How Docker tests if container is healthy</td><td>HEALTHCHECK --interval=30s CMD curl -f http://localhost:8080/health</td></tr>
+<tr><td>ENTRYPOINT</td><td>Main command — exec form preferred</td><td>ENTRYPOINT ["dotnet", "MyApi.dll"]</td></tr>
+<tr><td>CMD</td><td>Default args to ENTRYPOINT — easily overridden</td><td>CMD ["--environment", "Production"]</td></tr>
+<tr><td>STOPSIGNAL</td><td>Signal Docker sends to stop container</td><td>STOPSIGNAL SIGTERM (default)</td></tr>
+<tr><td>ONBUILD</td><td>Trigger instruction in child images</td><td>For base images that others extend</td></tr>
+</tbody></table>`;
+
+  if(key==='dockerfile:instructions:CMD vs ENTRYPOINT') return `<div class="sec">CMD vs ENTRYPOINT — Decision Guide</div>
+<div class="grid2">
+<div class="mc"><h4>ENTRYPOINT (exec form)</h4>`+code(`<span class="dk">ENTRYPOINT</span> <span class="ds">["dotnet", "MyApi.dll"]</span>
+<span class="dc"># docker run myapp</span>
+<span class="dc">#   → dotnet MyApi.dll</span>
+<span class="dc"># docker run myapp OtherApi.dll</span>
+<span class="dc">#   → dotnet OtherApi.dll (CMD overridden)</span>`)+`<p>Use when container has ONE purpose. The command is fixed.</p></div>
+<div class="mc"><h4 class="or">CMD only</h4>`+code(`<span class="dk">CMD</span> <span class="ds">["nginx", "-g", "daemon off;"]</span>
+<span class="dc"># docker run nginx</span>
+<span class="dc">#   → nginx -g daemon off;</span>
+<span class="dc"># docker run nginx echo hello</span>
+<span class="dc">#   → echo hello (CMD completely replaced)</span>`)+`<p>Use for flexible images where default can be replaced.</p></div>
+</div>
+<div class="callout danger"><strong>NEVER use shell form for ENTRYPOINT in production</strong>ENTRYPOINT dotnet MyApi.dll runs as: /bin/sh -c "dotnet MyApi.dll". PID 1 is sh, NOT dotnet. SIGTERM goes to sh which may ignore it, causing 10-second SIGKILL timeout every time you stop the container. Always use exec form: ENTRYPOINT ["dotnet", "MyApi.dll"]</div>`;
+
+  if(key==='dockerfile:best-practices:Layer Caching') return `<div class="sec">Layer Cache Optimisation — The Critical Skill</div>
+<p class="bd">Each RUN, COPY, ADD instruction creates a layer. Docker caches layers. If a layer changes, ALL subsequent layers are invalidated. Order instructions from <strong>least likely to change → most likely to change</strong>.</p>
+<div class="grid2">
+<div class="mc"><h4 class="re">❌ Cache-busting order</h4>`+code(`<span class="dk">COPY</span> . .          <span class="dc"># EVERY code change invalidates this!</span>
+<span class="dk">RUN</span> dotnet restore <span class="dc"># ...and this — 30s restore every build!</span>
+<span class="dk">RUN</span> dotnet build`)+`</div>
+<div class="mc"><h4 class="gr">✅ Cache-friendly order</h4>`+code(`<span class="dk">COPY</span> *.csproj ./   <span class="dc"># only changes when deps change</span>
+<span class="dk">RUN</span> dotnet restore  <span class="dc"># CACHED until .csproj changes!</span>
+<span class="dk">COPY</span> . .            <span class="dc"># source changes — but restore cached</span>
+<span class="dk">RUN</span> dotnet build`)+`</div>
+</div>
+<div class="callout info"><strong>Cache rule</strong>Docker checks if the instruction and its inputs are identical to a cached layer. For COPY, it hashes the files. For RUN, it compares the command string. Order dependencies (package files) before source code — dependencies change far less often.</div>`;
+
+  if(key==='dockerfile:multistage:Demo') return mkTerm('dockerfile-demo','multi-stage build',true);
+  if(key==='dockerfile:multistage:.NET Multi-stage') return `<div class="sec">Production .NET 8 Multi-Stage Dockerfile</div>`+
+    code(`<span class="dc"># ── Stage 1: Restore (cached unless .csproj changes) ──────</span>
+<span class="dk">FROM</span> <span class="ds">mcr.microsoft.com/dotnet/sdk:8.0</span> <span class="dk">AS</span> <span class="ds">restore</span>
+<span class="dk">WORKDIR</span> <span class="dv">/src</span>
+<span class="dc"># Copy ONLY project files first — enables Docker cache for restore</span>
+<span class="dk">COPY</span> <span class="ds">["src/MyApi/MyApi.csproj", "src/MyApi/"]</span>
+<span class="dk">COPY</span> <span class="ds">["src/MyApi.Core/MyApi.Core.csproj", "src/MyApi.Core/"]</span>
+<span class="dk">RUN</span> dotnet restore <span class="dv">"src/MyApi/MyApi.csproj"</span>
+
+<span class="dc"># ── Stage 2: Build + Publish ───────────────────────────────</span>
+<span class="dk">FROM</span> <span class="ds">restore</span> <span class="dk">AS</span> <span class="ds">publish</span>
+<span class="dk">COPY</span> . .
+<span class="dk">RUN</span> dotnet publish <span class="dv">"src/MyApi/MyApi.csproj"</span> \\
+    -c Release \\
+    -o <span class="dv">/app/publish</span> \\
+    --no-restore \\
+    /p:UseAppHost=false
+
+<span class="dc"># ── Stage 3: Lean Runtime (Chiseled — no shell, no root) ──</span>
+<span class="dk">FROM</span> <span class="ds">mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled</span> <span class="dk">AS</span> <span class="ds">final</span>
+<span class="dk">WORKDIR</span> <span class="dv">/app</span>
+<span class="dk">EXPOSE</span> <span class="dn">8080</span>
+<span class="dk">USER</span> <span class="ds">app</span>  <span class="dc"># non-root UID 1654</span>
+<span class="dk">COPY</span> --from=publish <span class="dv">/app/publish</span> .
+<span class="dk">HEALTHCHECK</span> --interval=30s --timeout=10s --start-period=40s --retries=3 \\
+    <span class="dk">CMD</span> <span class="ds">["curl", "-f", "http://localhost:8080/health"]</span>
+<span class="dk">ENTRYPOINT</span> <span class="ds">["dotnet", "MyApi.dll"]</span>
+
+<span class="dc"># Result: SDK 900MB → Final 120MB (Chiseled) ✓</span>`);
+
+  if(key==='dockerfile:multistage:Size Comparison') return `<div class="sec">Base Image Size Comparison (.NET 8)</div>
+<table class="tbl"><thead><tr><th>Base Image</th><th>Size</th><th>Use Case</th><th>Root?</th></tr></thead><tbody>
+<tr><td>dotnet/sdk:8.0</td><td class="re">~900MB</td><td>BUILD only — never production</td><td class="re">yes</td></tr>
+<tr><td>dotnet/aspnet:8.0</td><td class="ye">~250MB</td><td>ASP.NET Core apps — production default</td><td class="ye">yes</td></tr>
+<tr><td>dotnet/aspnet:8.0-alpine</td><td class="gr">~110MB</td><td>Smaller, but glibc compat issues</td><td class="ye">yes</td></tr>
+<tr><td>dotnet/aspnet:8.0-jammy-chiseled</td><td class="gr">~120MB</td><td>Ultra-minimal Ubuntu — recommended</td><td class="gr">no (app)</td></tr>
+<tr><td>dotnet/runtime:8.0</td><td class="ye">~220MB</td><td>Console/Worker apps (no ASP.NET)</td><td class="ye">yes</td></tr>
+<tr><td>dotnet/runtime-deps:8.0</td><td class="gr">~80MB</td><td>Self-contained single-file apps</td><td class="ye">yes</td></tr>
+</tbody></table>`;
+
+  // ── .NET ──────────────────────────────────────
+  if(key==='dotnet:dotnet-dockerfile:Demo') return mkTerm('dotnet-demo','.NET Docker multi-stage',true);
+  if(key==='dotnet:dotnet-dockerfile:ASP.NET API') return `<div class="sec">Complete ASP.NET Core API Dockerfile</div>`+
+    code(`<span class="dk">FROM</span> <span class="ds">mcr.microsoft.com/dotnet/sdk:8.0</span> <span class="dk">AS</span> <span class="ds">build</span>
+<span class="dk">ARG</span> <span class="ds">BUILD_CONFIGURATION=Release</span>
+<span class="dk">WORKDIR</span> <span class="dv">/src</span>
+<span class="dk">COPY</span> <span class="ds">["MyApi.csproj", "."]</span>
+<span class="dk">RUN</span> dotnet restore <span class="dv">"MyApi.csproj"</span>
+<span class="dk">COPY</span> . .
+<span class="dk">RUN</span> dotnet build <span class="dv">"MyApi.csproj"</span> -c <span class="dm">${BUILD_CONFIGURATION}</span> -o /app/build
+
+<span class="dk">FROM</span> <span class="ds">build</span> <span class="dk">AS</span> <span class="ds">publish</span>
+<span class="dk">RUN</span> dotnet publish <span class="dv">"MyApi.csproj"</span> \\
+    -c <span class="dm">${BUILD_CONFIGURATION}</span> \\
+    -o /app/publish \\
+    /p:UseAppHost=false
+
+<span class="dk">FROM</span> <span class="ds">mcr.microsoft.com/dotnet/aspnet:8.0</span> <span class="dk">AS</span> <span class="ds">final</span>
+<span class="dk">WORKDIR</span> <span class="dv">/app</span>
+<span class="dc"># Security: run as non-root</span>
+<span class="dk">RUN</span> adduser --disabled-password --home /app --shell /bin/sh --uid 1001 appuser
+<span class="dk">USER</span> <span class="ds">appuser</span>
+<span class="dc"># Override Kestrel port (avoids port 80 which needs root)</span>
+<span class="dk">ENV</span> <span class="ds">ASPNETCORE_HTTP_PORTS=8080</span>
+<span class="dk">EXPOSE</span> <span class="dn">8080</span>
+<span class="dk">COPY</span> --from=publish --chown=appuser:appuser /app/publish .
+<span class="dk">HEALTHCHECK</span> --interval=30s --timeout=10s --retries=3 \\
+    <span class="dk">CMD</span> <span class="ds">["dotnet-dump", "ps"]</span>  <span class="dc"># or curl if installed</span>
+<span class="dk">ENTRYPOINT</span> <span class="ds">["dotnet", "MyApi.dll"]</span>`);
+
+  if(key==='dotnet:dotnet-compose:Demo') return mkTerm('compose-demo','docker compose full stack',true);
+  if(key==='dotnet:dotnet-compose:Compose YAML') return `<div class="sec">Full .NET Stack compose.yaml</div>`+
+    code(`<span class="dk">services:</span>
+  <span class="dk">api:</span>
+    <span class="dk">build:</span>
+      <span class="dk">context:</span> <span class="dv">./src/MyApi</span>
+      <span class="dk">dockerfile:</span> <span class="dv">Dockerfile</span>
+      <span class="dk">target:</span> <span class="dv">final</span>
+    <span class="dk">environment:</span>
+      <span class="dk">ASPNETCORE_ENVIRONMENT:</span> <span class="dv">Development</span>
+      <span class="dk">ASPNETCORE_HTTP_PORTS:</span> <span class="dn">8080</span>
+      <span class="dk">ConnectionStrings__Default:</span> <span class="dv">Server=db;Database=myapp;User Id=sa;Password=${DB_PASSWORD}</span>
+      <span class="dk">Redis__Connection:</span> <span class="dv">redis:6379</span>
+    <span class="dk">ports:</span> <span class="dm">["8080:8080"]</span>
+    <span class="dk">depends_on:</span>
+      <span class="dk">db:</span> <span class="dk">condition:</span> <span class="dv">service_healthy</span>
+      <span class="dk">redis:</span> <span class="dk">condition:</span> <span class="dv">service_healthy</span>
+    <span class="dk">volumes:</span>
+      <span class="dm">- ./src/MyApi:/app:ro</span>  <span class="dc"># hot reload in dev</span>
+    <span class="dk">restart:</span> <span class="dv">unless-stopped</span>
+
+  <span class="dk">db:</span>
+    <span class="dk">image:</span> <span class="dv">postgres:16-alpine</span>
+    <span class="dk">environment:</span>
+      <span class="dk">POSTGRES_DB:</span> <span class="dv">myapp</span>
+      <span class="dk">POSTGRES_USER:</span> <span class="dv">sa</span>
+      <span class="dk">POSTGRES_PASSWORD:</span> <span class="dm">${DB_PASSWORD}</span>
+    <span class="dk">volumes:</span> <span class="dm">["pgdata:/var/lib/postgresql/data"]</span>
+    <span class="dk">healthcheck:</span>
+      <span class="dk">test:</span> <span class="ds">["CMD-SHELL","pg_isready -U sa -d myapp"]</span>
+      <span class="dk">interval:</span> <span class="dv">10s</span>  <span class="dk">retries:</span> <span class="dn">5</span>
+
+  <span class="dk">redis:</span>
+    <span class="dk">image:</span> <span class="dv">redis:7-alpine</span>
+    <span class="dk">command:</span> <span class="dv">redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru</span>
+    <span class="dk">healthcheck:</span>
+      <span class="dk">test:</span> <span class="ds">["CMD","redis-cli","ping"]</span>
+      <span class="dk">interval:</span> <span class="dv">10s</span>
+
+<span class="dk">volumes:</span>
+  <span class="dk">pgdata:</span>`);
+
+  // ── MICROSERVICES ─────────────────────────────
+  if(key==='microservices:ms-architecture:Diagram') return `<div class="sec">Microservices Architecture Diagram</div>
+<div class="arch">
+<div class="arch-title">🔬 Docker Microservices Stack — OriginX Labs</div>
+<div class="flow" style="flex-direction:column;gap:8px;flex-wrap:nowrap">
+  <div style="text-align:center"><div class="fbox" style="display:inline-block;min-width:180px"><div class="fb-label">External Traffic</div><div class="fb-name" style="color:var(--or)">Internet / Client App</div></div></div>
+  <div style="text-align:center;font-size:16px;color:var(--tx3)">↓</div>
+  <div style="text-align:center"><div class="fbox" style="display:inline-block;min-width:250px;border-color:rgba(255,107,53,.4)"><div class="fb-label">:80/:443 — API Gateway</div><div class="fb-name" style="color:var(--or)">NGINX / YARP / Ocelot</div></div></div>
+  <div style="display:flex;gap:6px;justify-content:center;font-size:10px;color:var(--tx3)">↙↓↘</div>
+  <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+    <div class="fbox"><div class="fb-label">:8081</div><div class="fb-name" style="color:var(--d2)">user-service</div></div>
+    <div class="fbox"><div class="fb-label">:8082</div><div class="fb-name" style="color:var(--d2)">order-service</div></div>
+    <div class="fbox"><div class="fb-label">:8083</div><div class="fb-name" style="color:var(--d2)">product-service</div></div>
+    <div class="fbox"><div class="fb-label">:8084</div><div class="fb-name" style="color:var(--d2)">notify-service</div></div>
+  </div>
+  <div style="text-align:center;font-size:11px;color:var(--tx3)">↕ async events via RabbitMQ ↕</div>
+  <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+    <div class="fbox"><div class="fb-label">users-db</div><div class="fb-name" style="color:var(--pu)">PostgreSQL</div></div>
+    <div class="fbox"><div class="fb-label">orders-db</div><div class="fb-name" style="color:var(--pu)">PostgreSQL</div></div>
+    <div class="fbox"><div class="fb-label">products-db</div><div class="fb-name" style="color:var(--pu)">PostgreSQL</div></div>
+    <div class="fbox"><div class="fb-label">cache</div><div class="fb-name" style="color:var(--pu)">Redis</div></div>
+    <div class="fbox"><div class="fb-label">events</div><div class="fb-name" style="color:var(--pu)">RabbitMQ</div></div>
+  </div>
+</div>
+</div>
+<div class="callout tip"><strong>Database per service</strong>Each microservice owns its data store — no shared database. Services communicate via async events (RabbitMQ) or synchronous HTTP through the API gateway. This enables independent deployment and scaling.</div>`;
+
+  if(key==='microservices:ms-compose:Demo') return mkTerm('ms-demo','microservices stack',true);
+  if(key==='microservices:ms-compose:Compose YAML') return `<div class="sec">Microservices compose.yaml</div>`+
+    code(`<span class="dk">services:</span>
+  <span class="dk">gateway:</span>
+    <span class="dk">image:</span> <span class="dv">nginx:1.25-alpine</span>
+    <span class="dk">ports:</span> <span class="dm">["80:80"]</span>
+    <span class="dk">volumes:</span> <span class="dm">["./nginx/gateway.conf:/etc/nginx/conf.d/default.conf:ro"]</span>
+    <span class="dk">networks:</span> <span class="dm">["frontend","internal"]</span>
+    <span class="dk">depends_on:</span> [user-service, order-service, product-service]
+
+  <span class="dk">user-service:</span>
+    <span class="dk">build:</span> <span class="dv">./services/UserService</span>
+    <span class="dk">environment:</span>
+      <span class="dk">ConnectionStrings__Default:</span> <span class="dv">Server=users-db;Database=users;User Id=sa;Password=${DB_PASSWORD}</span>
+      <span class="dk">RabbitMQ__Host:</span> <span class="dv">rabbitmq</span>
+    <span class="dk">networks:</span> <span class="dm">["internal","users-db-net"]</span>
+    <span class="dk">depends_on:</span>
+      <span class="dk">users-db:</span> <span class="dk">condition:</span> <span class="dv">service_healthy</span>
+      <span class="dk">rabbitmq:</span> <span class="dk">condition:</span> <span class="dv">service_healthy</span>
+
+  <span class="dk">order-service:</span>
+    <span class="dk">build:</span> <span class="dv">./services/OrderService</span>
+    <span class="dk">environment:</span>
+      <span class="dk">UserService__Url:</span> <span class="dv">http://user-service:8080</span>  <span class="dc"># service DNS!</span>
+      <span class="dk">ConnectionStrings__Default:</span> <span class="dv">Server=orders-db;...</span>
+    <span class="dk">networks:</span> <span class="dm">["internal","orders-db-net"]</span>
+
+  <span class="dk">users-db:</span>
+    <span class="dk">image:</span> <span class="dv">postgres:16-alpine</span>
+    <span class="dk">volumes:</span> <span class="dm">["users-pgdata:/var/lib/postgresql/data"]</span>
+    <span class="dk">networks:</span> <span class="dm">["users-db-net"]</span>  <span class="dc"># only user-service can reach this DB!</span>
+    <span class="dk">healthcheck:</span>
+      <span class="dk">test:</span> <span class="ds">["CMD-SHELL","pg_isready -U sa -d users"]</span>
+
+  <span class="dk">rabbitmq:</span>
+    <span class="dk">image:</span> <span class="dv">rabbitmq:3.13-management-alpine</span>
+    <span class="dk">ports:</span> <span class="dm">["15672:15672"]</span>  <span class="dc"># management UI</span>
+    <span class="dk">healthcheck:</span>
+      <span class="dk">test:</span> <span class="ds">["CMD","rabbitmq-diagnostics","-q","ping"]</span>
+
+<span class="dk">networks:</span>
+  <span class="dk">frontend:</span>      <span class="dc"># gateway + services</span>
+  <span class="dk">internal:</span>      <span class="dc"># services only</span>
+  <span class="dk">users-db-net:</span>  <span class="dc"># user-service + users-db only</span>
+  <span class="dk">orders-db-net:</span> <span class="dc"># order-service + orders-db only</span>`);
+
+  if(key==='microservices:ms-gateway:NGINX Config') return `<div class="sec">NGINX API Gateway Config</div>`+
+    code(`<span class="dk">upstream</span> <span class="dv">user_service</span> {
+    server <span class="ds">user-service:8080</span>;  <span class="dc"># Docker DNS resolves service name</span>
+}
+<span class="dk">upstream</span> <span class="dv">order_service</span> {
+    server <span class="ds">order-service:8080</span>;
+}
+
+<span class="dk">server</span> {
+    listen <span class="dn">80</span>;
+
+    <span class="dc"># Rate limiting</span>
+    limit_req_zone <span class="dm">$binary_remote_addr</span> zone=api:10m rate=<span class="dn">100r/m</span>;
+
+    location /api/users {
+        limit_req zone=api burst=<span class="dn">20</span>;
+        proxy_pass http://user_service;
+        proxy_set_header Host <span class="dm">$host</span>;
+        proxy_set_header X-Real-IP <span class="dm">$remote_addr</span>;
+    }
+    location /api/orders {
+        proxy_pass http://order_service;
+    }
+
+    <span class="dc"># Health endpoint for load balancer</span>
+    location /health {
+        return <span class="dn">200</span> <span class="ds">'OK'</span>;
+        add_header Content-Type text/plain;
+    }
+}`);
+
+  // ── NETWORKING ────────────────────────────────
+  if(key==='networking:network-overview:Demo') return mkTerm('network-demo','docker networks',true);
+  if(key==='networking:network-overview:Network Types') return `<div class="sec">Docker Network Drivers</div>
+<table class="tbl"><thead><tr><th>Driver</th><th>Scope</th><th>Use Case</th><th>DNS?</th></tr></thead><tbody>
+<tr><td>bridge (default)</td><td>Single host</td><td>All containers on same host. Containers in default bridge use IPs only (no DNS).</td><td class="re">No (default bridge)</td></tr>
+<tr><td>bridge (user-defined)</td><td>Single host</td><td>App containers — prefer this. DNS resolution by container name. Better isolation.</td><td class="gr">Yes</td></tr>
+<tr><td>host</td><td>Single host</td><td>Max performance, no port mapping. Container shares host network. Linux only.</td><td>N/A (host)</td></tr>
+<tr><td>overlay</td><td>Multi-host</td><td>Docker Swarm services across multiple machines. VXLAN tunnel.</td><td class="gr">Yes</td></tr>
+<tr><td>macvlan</td><td>Single host</td><td>Container needs MAC address on physical network (legacy app integration).</td><td class="ye">Optional</td></tr>
+<tr><td>none</td><td>Single host</td><td>No networking. Maximum isolation. Security-sensitive containers.</td><td class="re">No</td></tr>
+<tr><td>ipvlan</td><td>Single host</td><td>Like macvlan but shares host MAC. Better for VLANs.</td><td class="ye">Optional</td></tr>
+</tbody></table>`;
+
+  if(key==='networking:network-overview:Packet Flow') return `<div class="sec">Packet Flow — Container → Internet</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">Container</div><div class="fb-name" style="color:var(--d2)">eth0 → 172.17.0.2</div></div>
+  <div class="farr cmd">→<span>veth pair</span></div>
+  <div class="fbox"><div class="fb-label">Host Bridge</div><div class="fb-name" style="color:var(--or)">docker0 bridge</div></div>
+  <div class="farr cmd">→<span>iptables MASQUERADE</span><span>NAT: src→host IP</span></div>
+  <div class="fbox"><div class="fb-label">Host NIC</div><div class="fb-name" style="color:var(--ye)">eth0 → 192.168.1.5</div></div>
+  <div class="farr cmd">→<span>internet</span></div>
+  <div class="fbox"><div class="fb-label">Internet</div><div class="fb-name" style="color:var(--gr)">sees host IP</div></div>
+</div>
+<div class="sec">Port Mapping — External → Container</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">Request</div><div class="fb-name" style="color:var(--or)">:8080 (host)</div></div>
+  <div class="farr cmd">→<span>iptables DNAT</span><span>0.0.0.0:8080→172.17.0.2:80</span></div>
+  <div class="fbox"><div class="fb-label">Bridge</div><div class="fb-name" style="color:var(--d2)">docker0</div></div>
+  <div class="farr cmd">→<span>veth pair</span></div>
+  <div class="fbox"><div class="fb-label">Container</div><div class="fb-name" style="color:var(--gr)">172.17.0.2:80</div></div>
+</div>`;
+
+  // ── VOLUMES ───────────────────────────────────
+  if(key==='volumes:volumes-types:Demo') return mkTerm('volume-demo','docker volumes',true);
+  if(key==='volumes:volumes-types:Comparison') return `<div class="sec">Volume Types Comparison</div>
+<table class="tbl"><thead><tr><th>Type</th><th>Syntax</th><th>Managed by</th><th>Persists?</th><th>Best for</th></tr></thead><tbody>
+<tr><td>Named Volume</td><td>-v mydata:/app/data</td><td>Docker</td><td class="gr">Yes</td><td>Database data, persistent app data, sharing between containers</td></tr>
+<tr><td>Bind Mount</td><td>-v /host/path:/container/path</td><td>You (host)</td><td class="gr">Yes (on host)</td><td>Dev: mount source code, config files. Production: external storage.</td></tr>
+<tr><td>tmpfs</td><td>--tmpfs /tmp</td><td>Kernel RAM</td><td class="re">No (RAM only)</td><td>Sensitive temp data, speed-critical temp files, never write to disk</td></tr>
+<tr><td>Anonymous Vol</td><td>VOLUME /data in Dockerfile</td><td>Docker</td><td class="ye">Until rm -v</td><td>Avoid — prefer named volumes for clarity</td></tr>
+</tbody></table>`;
+
+  // ── COMPOSE ───────────────────────────────────
+  if(key==='compose:compose-basics:Demo') return mkTerm('compose-demo','docker compose',true);
+  if(key==='compose:compose-yaml:Full Example') return code(`<span class="dk">services:</span>
+  <span class="dk">api:</span>
+    <span class="dk">build:</span>
+      <span class="dk">context:</span> <span class="dv">.</span>
+      <span class="dk">dockerfile:</span> <span class="dv">Dockerfile</span>
+      <span class="dk">args:</span>
+        <span class="dk">BUILD_DATE:</span> <span class="dm">\${BUILD_DATE}</span>
+    <span class="dk">image:</span> <span class="dv">myapi:dev</span>
+    <span class="dk">restart:</span> <span class="dv">unless-stopped</span>
+    <span class="dk">ports:</span> <span class="dm">["8080:8080"]</span>
+    <span class="dk">environment:</span>
+      <span class="dk">- ASPNETCORE_ENVIRONMENT=Development</span>
+    <span class="dk">env_file:</span> <span class="dm">- .env</span>  <span class="dc"># override with .env file</span>
+    <span class="dk">volumes:</span>
+      <span class="dm">- ./src:/app/src:ro</span>
+      <span class="dm">- appdata:/app/data</span>
+    <span class="dk">networks:</span> <span class="dm">["app-net"]</span>
+    <span class="dk">depends_on:</span>
+      <span class="dk">db:</span>
+        <span class="dk">condition:</span> <span class="dv">service_healthy</span>  <span class="dc"># wait for health check!</span>
+        <span class="dk">restart:</span> <span class="dv">true</span>
+    <span class="dk">healthcheck:</span>
+      <span class="dk">test:</span> <span class="ds">["CMD","curl","-f","http://localhost:8080/health"]</span>
+      <span class="dk">interval:</span> <span class="dv">30s</span>
+      <span class="dk">timeout:</span> <span class="dv">10s</span>
+      <span class="dk">retries:</span> <span class="dn">3</span>
+      <span class="dk">start_period:</span> <span class="dv">40s</span>
+    <span class="dk">deploy:</span>
+      <span class="dk">resources:</span>
+        <span class="dk">limits:</span>
+          <span class="dk">cpus:</span> <span class="dn">'1.5'</span>
+          <span class="dk">memory:</span> <span class="dv">512M</span>
+        <span class="dk">reservations:</span>
+          <span class="dk">cpus:</span> <span class="dn">'0.25'</span>
+          <span class="dk">memory:</span> <span class="dv">128M</span>
+
+  <span class="dk">db:</span>
+    <span class="dk">image:</span> <span class="dv">postgres:16-alpine</span>
+    <span class="dk">environment:</span>
+      <span class="dk">POSTGRES_DB:</span> <span class="dv">myapp</span>
+      <span class="dk">POSTGRES_USER:</span> <span class="dv">postgres</span>
+      <span class="dk">POSTGRES_PASSWORD_FILE:</span> <span class="dv">/run/secrets/db_password</span>  <span class="dc"># secret!</span>
+    <span class="dk">secrets:</span> <span class="dm">["db_password"]</span>
+    <span class="dk">volumes:</span> <span class="dm">["pgdata:/var/lib/postgresql/data"]</span>
+    <span class="dk">networks:</span> <span class="dm">["app-net"]</span>
+    <span class="dk">healthcheck:</span>
+      <span class="dk">test:</span> <span class="ds">["CMD-SHELL","pg_isready -U postgres"]</span>
+      <span class="dk">interval:</span> <span class="dv">10s</span>  <span class="dk">retries:</span> <span class="dn">5</span>
+
+<span class="dk">secrets:</span>
+  <span class="dk">db_password:</span>
+    <span class="dk">file:</span> <span class="dv">./secrets/db_password.txt</span>
+
+<span class="dk">volumes:</span>
+  <span class="dk">pgdata:</span>
+  <span class="dk">appdata:</span>
+
+<span class="dk">networks:</span>
+  <span class="dk">app-net:</span>
+    <span class="dk">driver:</span> <span class="dv">bridge</span>`);
+
+  // ── SECURITY ──────────────────────────────────
+  if(key==='security:sec-basics:Demo') return mkTerm('security-demo','container security',true);
+  if(key==='security:sec-basics:Security Checklist') return `<div class="sec">Docker Security Checklist</div>
+<ul class="fl">
+<li><strong>Non-root user</strong> — USER 1001:1001 or USER app in Dockerfile. Never run as root in production.</li>
+<li><strong>Read-only filesystem</strong> — --read-only or readOnly: true. Mount tmpfs for /tmp if needed.</li>
+<li><strong>Drop all capabilities</strong> — --cap-drop ALL --cap-add only-what-is-needed</li>
+<li><strong>No new privileges</strong> — --security-opt no-new-privileges:true (blocks setuid binaries)</li>
+<li><strong>Limit resources</strong> — --memory=512m --cpus=1 (OOM protection and DoS prevention)</li>
+<li><strong>Scan images</strong> — trivy image myapp:latest in CI pipeline before push</li>
+<li><strong>Pin base images</strong> — FROM nginx:1.25.3-alpine NOT nginx:latest</li>
+<li><strong>No secrets in build</strong> — use BuildKit --secret not ENV or ARG for credentials</li>
+<li><strong>Use .dockerignore</strong> — exclude .git, .env, *.key, credentials from build context</li>
+<li><strong>Minimal base image</strong> — Alpine, Distroless, or Chiseled — fewer packages = less attack surface</li>
+<li><strong>Seccomp profile</strong> — default Docker seccomp blocks 44 dangerous syscalls</li>
+<li><strong>Keep images updated</strong> — rebuild with latest base image monthly (dependency updates)</li>
+</ul>`;
+
+  // ── MONITORING ────────────────────────────────
+  if(key==='monitoring:stats-events:Demo') return mkTerm('stats-demo','stats, events, system df',true);
+  if(key==='monitoring:prometheus:Demo') return `<div class="sec">Prometheus + Grafana + cAdvisor Stack</div>`+
+    code(`<span class="dk">services:</span>
+  <span class="dk">prometheus:</span>
+    <span class="dk">image:</span> <span class="dv">prom/prometheus:v2.50.0</span>
+    <span class="dk">ports:</span> <span class="dm">["9090:9090"]</span>
+    <span class="dk">volumes:</span>
+      <span class="dm">- ./prometheus.yml:/etc/prometheus/prometheus.yml:ro</span>
+      <span class="dm">- prometheus-data:/prometheus</span>
+    <span class="dk">command:</span>
+      <span class="dm">- --config.file=/etc/prometheus/prometheus.yml</span>
+      <span class="dm">- --storage.tsdb.retention.time=15d</span>
+
+  <span class="dk">grafana:</span>
+    <span class="dk">image:</span> <span class="dv">grafana/grafana:10.2.0</span>
+    <span class="dk">ports:</span> <span class="dm">["3000:3000"]</span>
+    <span class="dk">volumes:</span> <span class="dm">["grafana-data:/var/lib/grafana"]</span>
+    <span class="dk">environment:</span>
+      <span class="dk">GF_SECURITY_ADMIN_PASSWORD:</span> <span class="dv">admin</span>
+
+  <span class="dk">cadvisor:</span>
+    <span class="dk">image:</span> <span class="dv">gcr.io/cadvisor/cadvisor:v0.49.1</span>
+    <span class="dk">volumes:</span>
+      <span class="dm">- /:/rootfs:ro</span>
+      <span class="dm">- /var/run:/var/run:ro</span>
+      <span class="dm">- /sys:/sys:ro</span>
+      <span class="dm">- /var/lib/docker/:/var/lib/docker:ro</span>
+    <span class="dk">ports:</span> <span class="dm">["8080:8080"]</span>
+    <span class="dk">privileged:</span> <span class="ds">true</span>  <span class="dc"># needs host access</span>`);
+
+  // ── CICD ──────────────────────────────────────
+  if(key==='cicd:gh-actions:Demo') return mkTerm('actions-demo','GitHub Actions pipeline',true);
+  if(key==='cicd:multi-arch:Demo') return mkTerm('multiarch-demo','multi-arch buildx',true);
+
+  // ── SWARM ─────────────────────────────────────
+  if(key==='swarm:swarm-setup:Demo') return mkTerm('swarm-demo','docker swarm',true);
+
+  // ── TROUBLESHOOT ──────────────────────────────
+  if(key==='troubleshoot:container-debug:Demo') return mkTerm('trouble-demo','container troubleshooting',true);
+  if(key==='troubleshoot:container-debug:Exit Codes') return `<div class="sec">Docker Exit Code Reference</div>
+<table class="tbl"><thead><tr><th>Exit Code</th><th>Meaning</th><th>Fix</th></tr></thead><tbody>
+<tr><td class="gr">0</td><td>Success — container completed normally</td><td>Normal for Jobs. Check if expected.</td></tr>
+<tr><td class="re">1</td><td>Application error — generic failure</td><td>docker logs container — check application error</td></tr>
+<tr><td class="re">127</td><td>Command not found</td><td>Fix ENTRYPOINT/CMD — binary not in image</td></tr>
+<tr><td class="re">128+N</td><td>Fatal signal N received</td><td>Exit 130=SIGINT, 137=SIGKILL/OOMKill, 143=SIGTERM</td></tr>
+<tr><td class="re">137</td><td>OOMKilled — out of memory</td><td>docker inspect → OOMKilled:true → increase --memory</td></tr>
+<tr><td class="ye">139</td><td>Segmentation fault</td><td>Application bug. Enable core dumps for debug build.</td></tr>
+<tr><td class="ye">143</td><td>SIGTERM not handled — graceful timeout</td><td>Fix signal handling in app. Use exec form ENTRYPOINT.</td></tr>
+</tbody></table>`;
+
+  if(key==='troubleshoot:network-debug:Can\'t Connect') return `<div class="sec">Network Debug Toolkit</div>
+<ul class="fl">
+<li><strong>Check both containers are on same network:</strong> docker inspect container1 | grep Networks → docker inspect container2 | grep Networks</li>
+<li><strong>Ping by name:</strong> docker exec api ping -c3 db — should work on user-defined bridge networks</li>
+<li><strong>Check DNS:</strong> docker exec api nslookup db — should return container IP</li>
+<li><strong>Check port open:</strong> docker exec api nc -zv db 5432</li>
+<li><strong>Full network debug pod:</strong> docker run --rm -it --network myapp-net nicolaka/netshoot nmap -p 1-65535 db</li>
+<li><strong>Port not accessible from host:</strong> docker port container-name — check -p flags. docker ps shows port mappings.</li>
+<li><strong>Service not responding:</strong> docker exec api curl -v http://db:5432 — verify service is listening on right port inside container</li>
+</ul>`;
+
+  // ── COMPOSE WATCH ─────────────────────────────
+  if(key==='compose-adv:compose-watch:Demo') return code(`<span class="dk">services:</span>
+  <span class="dk">api:</span>
+    <span class="dk">build:</span> <span class="dv">.</span>
+    <span class="dk">develop:</span>
+      <span class="dk">watch:</span>
+        <span class="dc"># Sync source files without rebuild</span>
+        - <span class="dk">action:</span> <span class="dv">sync</span>
+          <span class="dk">path:</span> <span class="dv">./src</span>
+          <span class="dk">target:</span> <span class="dv">/app/src</span>
+          <span class="dk">ignore:</span>
+            - <span class="dv">node_modules/</span>
+            - <span class="dv">bin/</span>
+            - <span class="dv">obj/</span>
+        <span class="dc"># Rebuild + restart when project file changes</span>
+        - <span class="dk">action:</span> <span class="dv">rebuild</span>
+          <span class="dk">path:</span> <span class="dv">./src/MyApi.csproj</span>
+        <span class="dc"># Sync+restart for config changes</span>
+        - <span class="dk">action:</span> <span class="dv">sync+restart</span>
+          <span class="dk">path:</span> <span class="dv">./appsettings.Development.json</span>
+          <span class="dk">target:</span> <span class="dv">/app/appsettings.Development.json</span>
+
+<span class="dc"># Run with: docker compose watch</span>`);
+
+  return `<div class="sec">${tab}</div>
+<p class="bd">Select a tab above to explore <strong>${tid}</strong> — animated Docker demos, complete YAML examples, architecture diagrams, .NET patterns and production tips.</p>
+<div class="callout info"><strong>Click ▶ Run</strong>Every terminal demo animates real Docker command output — watch images pull layer by layer, containers start, compose stacks spin up, and builds complete with cache hits.</div>`;
+}
+
+// ═══ RUNTIME ═══
+let activeCh=null,activeTid=null,visited=new Set();
+function renderNav(){
+  document.getElementById('leftNav').innerHTML=CHAPTERS.map(ch=>`
+<div class="ci ${activeCh===ch.id?'active':''}" onclick="selChapter('${ch.id}')">
+  <div class="ci-icon" style="background:${ch.bg}">${ch.icon}</div>
+  <div class="ci-info"><div class="cn">${ch.title}</div><div class="cm">${ch.topics.length} topics · ${ch.sub.split('·')[0]}</div></div>
+  <span class="lv" style="background:${ch.lc}18;color:${ch.lc};border:1px solid ${ch.lc}33">${ch.level}</span>
+</div>`).join('');
+}
+function selChapter(id){
+  activeCh=id;activeTid=null;visited.add(id);updateProgress();renderNav();
+  const ch=CHAPTERS.find(c=>c.id===id);
+  clearTimers();
+  document.getElementById('middle').innerHTML=`
+<div class="ch-hdr">
+  <div class="ch-ey">Chapter ${CHAPTERS.indexOf(ch)+1} of ${CHAPTERS.length}</div>
+  <div class="ch-t">${ch.icon} ${ch.title}</div>
+  <p class="ch-d">${ch.desc}</p>
+  <div class="ch-chips">
+    <div class="chip"><span class="chip-dot" style="background:${ch.lc}"></span>${ch.level}</div>
+    <div class="chip">📚 ${ch.topics.length} Topics</div>
+    <div class="chip">🐳 ${ch.sub}</div>
+  </div>
+</div>
+<div class="tg">${ch.topics.map(t=>`
+<div class="tc" onclick="selTopic('${ch.id}','${t.id}',event)">
+  <div class="tc-cmd">${t.cmd}</div>
+  <div class="tc-title">${t.title}</div>
+  <div class="tc-d">${t.desc}</div>
+  <div class="tc-tags">${(t.tags||[]).map(tag=>`<span class="tag ${tag}">${tag}</span>`).join('')}</div>
+</div>`).join('')}
+</div>`;
+  closeRight();
+}
+function selTopic(cid,tid,ev){
+  activeTid=tid;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+  ev.currentTarget.classList.add('active');
+  const ch=CHAPTERS.find(c=>c.id===cid);
+  const topic=ch?.topics.find(t=>t.id===tid);
+  if(!topic) return;
+  clearTimers();
+  const rp=document.getElementById('rightPanel');
+  rp.classList.remove('hidden');
+  document.getElementById('rightTitle').textContent='$ docker '+topic.cmd;
+  const tabs=topic.tabs||['Demo'];
+  document.getElementById('rightTabs').innerHTML=tabs.map((tab,i)=>
+    `<div class="rt ${i===0?'active':''}" onclick="selTab(this,'${cid}','${tid}','${tab}')">${tab}</div>`).join('');
+  renderTab(cid,tid,tabs[0]);
+}
+function selTab(el,cid,tid,tab){
+  clearTimers();
+  document.querySelectorAll('.rt').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTab(cid,tid,tab);
+}
+function renderTab(cid,tid,tab){
+  document.getElementById('rightBody').innerHTML=getContent(cid,tid,tab);
+}
+function closeRight(){
+  clearTimers();
+  document.getElementById('rightPanel').classList.add('hidden');
+  activeTid=null;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+}
+function toggleQA(el){el.classList.toggle('open');}
+function filterQs(btn,diff,container){
+  container.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  container.querySelectorAll('.qa-item').forEach(item=>{
+    item.style.display=(diff==='all'||item.dataset.diff===diff)?'':'none';
+  });
+}
+function updateProgress(){
+  const pct=Math.round(visited.size/CHAPTERS.length*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`${visited.size} / ${CHAPTERS.length} chapters visited`;
+}
+renderNav();
+</script>
+</body>
+</html>

@@ -63,6 +63,7 @@ const LinqMastery = lazy(() => import("./pages/LinqMastery"));
 const DotnetMastery = lazy(() => import("./pages/DotnetMastery"));
 const MicroservicesMastery = lazy(() => import("./pages/MicroservicesMastery"));
 const KafkaMastery = lazy(() => import("./pages/KafkaMastery"));
+const DockerMastery = lazy(() => import("./pages/DockerMastery"));
 const KubernetesMastery = lazy(() => import("./pages/KubernetesMastery"));
 const BlazorMastery = lazy(() => import("./pages/BlazorMastery"));
 const EFCoreMastery = lazy(() => import("./pages/EFCoreMastery"));
@@ -218,6 +219,7 @@ const App = () => {
                 <Route path="/cheatsheets/dotnet-mastery" element={<DotnetMastery />} />
                 <Route path="/cheatsheets/microservices-mastery" element={<MicroservicesMastery />} />
                 <Route path="/cheatsheets/kafka-mastery" element={<KafkaMastery />} />
+                <Route path="/cheatsheets/docker-mastery" element={<DockerMastery />} />
                 <Route path="/cheatsheets/kubernetes-mastery" element={<KubernetesMastery />} />
                 <Route path="/cheatsheets/blazor-mastery" element={<BlazorMastery />} />
                 <Route path="/cheatsheets/efcore-mastery" element={<EFCoreMastery />} />
@@ -243,6 +245,7 @@ const App = () => {
                 <Route path="/blogs/dotnet-mastery" element={<Navigate to="/cheatsheets/dotnet-mastery" replace />} />
                 <Route path="/blogs/microservices-mastery" element={<Navigate to="/cheatsheets/microservices-mastery" replace />} />
                 <Route path="/blogs/kafka-mastery" element={<Navigate to="/cheatsheets/kafka-mastery" replace />} />
+                <Route path="/blogs/docker-mastery" element={<Navigate to="/cheatsheets/docker-mastery" replace />} />
                 <Route path="/blogs/kubernetes-mastery" element={<Navigate to="/cheatsheets/kubernetes-mastery" replace />} />
                 <Route path="/blogs/blazor-mastery" element={<Navigate to="/cheatsheets/blazor-mastery" replace />} />
                 <Route path="/blogs/golang-mastery" element={<Navigate to="/cheatsheets/golang-mastery" replace />} />
@@ -282,6 +285,7 @@ const App = () => {
                 <Route path="/dotnet-mastery" element={<Navigate to="/cheatsheets/dotnet-mastery" replace />} />
                 <Route path="/microservices-mastery" element={<Navigate to="/cheatsheets/microservices-mastery" replace />} />
                 <Route path="/kafka-mastery" element={<Navigate to="/cheatsheets/kafka-mastery" replace />} />
+                <Route path="/docker-mastery" element={<Navigate to="/cheatsheets/docker-mastery" replace />} />
                 <Route path="/kubernetes-mastery" element={<Navigate to="/cheatsheets/kubernetes-mastery" replace />} />
                 <Route path="/blazor-mastery" element={<Navigate to="/cheatsheets/blazor-mastery" replace />} />
                 <Route path="/efcore-mastery" element={<Navigate to="/cheatsheets/efcore-mastery" replace />} />
@@ -293,6 +297,7 @@ const App = () => {
                 <Route path="/techhub/dotnet-mastery" element={<DotnetMastery />} />
                 <Route path="/techhub/microservices-mastery" element={<MicroservicesMastery />} />
                 <Route path="/techhub/kafka-mastery" element={<KafkaMastery />} />
+                <Route path="/techhub/docker-mastery" element={<DockerMastery />} />
                 <Route path="/techhub/kubernetes-mastery" element={<KubernetesMastery />} />
                 <Route path="/techhub/blazor-mastery" element={<BlazorMastery />} />
                 <Route path="/techhub/efcore-mastery" element={<EFCoreMastery />} />

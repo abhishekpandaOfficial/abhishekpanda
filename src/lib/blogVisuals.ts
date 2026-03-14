@@ -85,6 +85,7 @@ const SERIES_PALETTES: Record<string, VisualPalette> = {
   "design-patterns": { from: "#23110a", via: "#c2410c", to: "#7c2d12", accent: "#fdba74", soft: "#ffedd5", line: "rgba(255,237,213,0.24)" },
   "microservices-mastery": { from: "#081a20", via: "#0369a1", to: "#0f766e", accent: "#67e8f9", soft: "#cffafe", line: "rgba(207,250,254,0.24)" },
   "kafka-mastery": { from: "#181127", via: "#6d28d9", to: "#111827", accent: "#c084fc", soft: "#f3e8ff", line: "rgba(243,232,255,0.24)" },
+  "docker-mastery": { from: "#08111e", via: "#0b5cab", to: "#0f766e", accent: "#7dd3fc", soft: "#e0f2fe", line: "rgba(224,242,254,0.24)" },
   "blazor-mastery": { from: "#120d24", via: "#7c3aed", to: "#1d4ed8", accent: "#c4b5fd", soft: "#ede9fe", line: "rgba(237,233,254,0.24)" },
   "golang-mastery": { from: "#04131b", via: "#007d9c", to: "#0f766e", accent: "#7de3ff", soft: "#d6f7ff", line: "rgba(214,247,255,0.24)" },
   "linux-mastery": { from: "#061107", via: "#166534", to: "#0a4f1d", accent: "#86efac", soft: "#dcfce7", line: "rgba(220,252,231,0.24)" },
@@ -219,6 +220,15 @@ const getSeriesPattern = (series: BlogSeriesTrack, palette: VisualPalette) => {
         <path d="M766 146h230M766 206h230M766 266h230M766 326h230" stroke="${line}" stroke-width="6" stroke-linecap="round"/>
         <circle cx="804" cy="146" r="12" fill="${accent}" /><circle cx="876" cy="206" r="12" fill="${accent}" /><circle cx="948" cy="266" r="12" fill="${accent}" /><circle cx="1020" cy="326" r="12" fill="${accent}" />
         <text x="886" y="426" text-anchor="middle" fill="${soft}" font-family="JetBrains Mono, monospace" font-size="28" font-weight="700">partitions · streams · offsets</text>`;
+    case "docker-mastery":
+      return `<rect x="728" y="104" width="304" height="220" rx="30" fill="rgba(255,255,255,.05)" stroke="${line}" />
+        <rect x="772" y="160" width="54" height="54" rx="12" fill="rgba(255,255,255,.08)" stroke="${line}" />
+        <rect x="842" y="160" width="54" height="54" rx="12" fill="rgba(255,255,255,.08)" stroke="${line}" />
+        <rect x="912" y="160" width="54" height="54" rx="12" fill="rgba(255,255,255,.08)" stroke="${line}" />
+        <rect x="982" y="160" width="54" height="54" rx="12" fill="${accent}" opacity=".9" />
+        <path d="M806 214v48M876 214v48M946 214v48M1010 214v48M770 262h268" stroke="${line}" stroke-width="7" stroke-linecap="round"/>
+        <path d="M760 392c48-36 102-56 162-56 62 0 118 20 168 56" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round"/>
+        <text x="886" y="446" text-anchor="middle" fill="${soft}" font-family="JetBrains Mono, monospace" font-size="26" font-weight="700">images · compose · registries</text>`;
     case "blazor-mastery":
       return `<rect x="748" y="100" width="276" height="232" rx="30" fill="rgba(255,255,255,.06)" stroke="${line}" />
         <path d="M804 152h164M804 196h164M804 240h104" stroke="${line}" stroke-width="7" stroke-linecap="round"/>
