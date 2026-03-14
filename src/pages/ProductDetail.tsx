@@ -41,6 +41,7 @@ export default function ProductDetail() {
 
   const Icon = product.icon;
   const isStackCraft = product.slug === "stackcraft";
+  const isChronyx = product.slug === "chronyx";
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,9 +57,19 @@ export default function ProductDetail() {
             Back to Projects
           </Link>
 
-          <div className={`mt-6 overflow-hidden rounded-[2rem] border p-8 md:p-10 ${isStackCraft ? "border-sky-400/20 bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.20),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(34,211,238,0.10),transparent_26%),linear-gradient(160deg,rgba(8,17,31,0.98),rgba(14,26,46,0.92))]" : "border-border/60 bg-gradient-to-br from-card via-card to-primary/10"}`}>
+          <div className={`mt-6 overflow-hidden rounded-[2rem] border p-8 md:p-10 ${isStackCraft ? "border-sky-400/20 bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.20),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(34,211,238,0.10),transparent_26%),linear-gradient(160deg,rgba(8,17,31,0.98),rgba(14,26,46,0.92))]" : isChronyx ? "border-cyan-400/20 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.18),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(45,212,191,0.12),transparent_30%),linear-gradient(160deg,rgba(10,15,29,0.96),rgba(15,23,42,0.92))]" : "border-border/60 bg-gradient-to-br from-card via-card to-primary/10"}`}>
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_360px] xl:items-start">
               <div className="max-w-4xl">
+                {isChronyx && product.logoSrc ? (
+                  <div className="mb-6 inline-flex items-center gap-4 rounded-[1.5rem] border border-white/10 bg-black/20 px-5 py-4 shadow-[0_20px_60px_rgba(15,23,42,0.24)]">
+                    <img src={product.logoSrc} alt={product.logoAlt || `${product.title} logo`} className="h-14 w-14 rounded-2xl object-contain" loading="eager" />
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">Official Product</p>
+                      <p className="mt-1 text-sm font-semibold text-white/90">getchronyx.com</p>
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="flex flex-wrap items-center gap-2">
                   <div className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.2em] ${isStackCraft ? "border-sky-400/25 bg-sky-500/10 text-sky-300" : "border-primary/25 bg-primary/10 text-primary"}`}>
                     {product.eyebrow || "Product"}
@@ -103,6 +114,14 @@ export default function ProductDetail() {
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
+                  {product.externalUrl ? (
+                    <Button variant="outline" asChild>
+                      <a href={product.externalUrl} target="_blank" rel="noopener noreferrer">
+                        Visit Official Site
+                        <ArrowRight className="h-4 w-4" />
+                      </a>
+                    </Button>
+                  ) : null}
                 </div>
               </div>
 
@@ -120,6 +139,21 @@ export default function ProductDetail() {
                     <p className="mt-1 text-sm font-semibold text-foreground">{`/products/${product.slug}`}</p>
                   </div>
                 </div>
+
+                {product.externalUrl ? (
+                  <div className="mt-4 rounded-2xl border border-border/60 bg-card/80 px-4 py-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-primary">Official Website</p>
+                    <a
+                      href={product.externalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-flex items-center gap-2 text-sm font-semibold text-foreground transition hover:text-primary"
+                    >
+                      {product.externalUrl.replace(/^https?:\/\//, "")}
+                      <ArrowRight className="h-4 w-4" />
+                    </a>
+                  </div>
+                ) : null}
 
                 <div className="mt-6 space-y-3">
                   {(product.highlights || []).map((item) => (

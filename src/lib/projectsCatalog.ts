@@ -8,6 +8,7 @@ export type ProjectCard = ResourceHubCard & {
   slug?: string;
   launchTo?: string;
   launchLabel?: string;
+  externalUrl?: string;
   detailTitle?: string;
   detailDescription?: string;
   longDescription?: string;
@@ -127,35 +128,36 @@ export const PROJECT_CARDS: ProjectCard[] = [
   },
   {
     title: "CHRONYX",
-    description: "A personal intelligence and productivity destination positioned as a real product surface inside the site.",
+    description: "A quiet personal system of record for notes, study planning, finance tracking, and everyday life organization.",
     to: productRoute("chronyx"),
     icon: Sparkles,
     logoSrc: chronyxLogo,
     logoAlt: "CHRONYX",
-    tags: ["Product", "Personal Intelligence", "Platform"],
+    tags: ["Product", "Productivity", "Personal System"],
     eyebrow: "Live Project",
     statusLabel: "Live",
     ctaLabel: "View details",
     slug: "chronyx",
     launchTo: "/chronyx",
     launchLabel: "Open CHRONYX",
-    detailTitle: "CHRONYX Product Overview",
-    detailDescription: "CHRONYX is the personal intelligence layer focused on organization, visibility, and higher-signal personal productivity workflows.",
+    externalUrl: "https://www.getchronyx.com",
+    detailTitle: "CHRONYX | A Quiet Space for Your Life",
+    detailDescription: "CHRONYX is a calm, private personal space for notes, planning, finance tracking, and life organization.",
     longDescription:
-      "CHRONYX is positioned as an internal product surface for personal intelligence and focused productivity. It is meant to feel like a dedicated product destination rather than a simple feature page, with space for structured workflows, planning, and information control.",
-    highlights: ["Personal intelligence destination", "Productivity-focused structure", "Internal product route"],
+      "CHRONYX is designed as a quiet personal system of record rather than a noisy productivity dashboard. It brings together study planning, finance tracking, AI-powered notes, and everyday organization into one focused surface built for clarity, privacy, and reliable daily use.",
+    highlights: ["Personal system of record", "Study planner and progress workflows", "Finance tracking with calm visibility", "AI-powered notes and summaries", "Official product site: getchronyx.com"],
     detailSections: [
       {
-        title: "Product Role",
-        description: "Acts as a focused destination for personal planning, intelligence, and decision support within the broader site.",
+        title: "Core Promise",
+        description: "Creates a quiet, private place to capture notes, decisions, plans, and life context without turning the product into a distraction machine.",
       },
       {
-        title: "User Experience",
-        description: "Designed to feel product-like, with clearer structure and purpose than a simple informational landing page.",
+        title: "Everyday Workflows",
+        description: "Combines study planning, finance tracking, and AI-assisted note organization so routine life management feels structured and easy to revisit.",
       },
       {
-        title: "Access Pattern",
-        description: "Available as its own internal route so visitors can move from product detail directly into the live experience.",
+        title: "Product Positioning",
+        description: "Presented as a real standalone product destination with both an internal detail route and the official public product site at getchronyx.com.",
       },
     ],
   },
