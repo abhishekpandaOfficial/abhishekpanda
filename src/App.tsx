@@ -64,6 +64,8 @@ const DotnetMastery = lazy(() => import("./pages/DotnetMastery"));
 const MicroservicesMastery = lazy(() => import("./pages/MicroservicesMastery"));
 const KafkaMastery = lazy(() => import("./pages/KafkaMastery"));
 const DockerMastery = lazy(() => import("./pages/DockerMastery"));
+const PostgresqlMastery = lazy(() => import("./pages/PostgresqlMastery"));
+const MsSqlServerMastery = lazy(() => import("./pages/MsSqlServerMastery"));
 const KubernetesMastery = lazy(() => import("./pages/KubernetesMastery"));
 const BlazorMastery = lazy(() => import("./pages/BlazorMastery"));
 const EFCoreMastery = lazy(() => import("./pages/EFCoreMastery"));
@@ -220,6 +222,8 @@ const App = () => {
                 <Route path="/cheatsheets/microservices-mastery" element={<MicroservicesMastery />} />
                 <Route path="/cheatsheets/kafka-mastery" element={<KafkaMastery />} />
                 <Route path="/cheatsheets/docker-mastery" element={<DockerMastery />} />
+                <Route path="/cheatsheets/postgresql-mastery" element={<PostgresqlMastery />} />
+                <Route path="/cheatsheets/ms-sql-server-mastery" element={<MsSqlServerMastery />} />
                 <Route path="/cheatsheets/kubernetes-mastery" element={<KubernetesMastery />} />
                 <Route path="/cheatsheets/blazor-mastery" element={<BlazorMastery />} />
                 <Route path="/cheatsheets/efcore-mastery" element={<EFCoreMastery />} />
@@ -246,6 +250,8 @@ const App = () => {
                 <Route path="/blogs/microservices-mastery" element={<Navigate to="/cheatsheets/microservices-mastery" replace />} />
                 <Route path="/blogs/kafka-mastery" element={<Navigate to="/cheatsheets/kafka-mastery" replace />} />
                 <Route path="/blogs/docker-mastery" element={<Navigate to="/cheatsheets/docker-mastery" replace />} />
+                <Route path="/blogs/postgresql-mastery" element={<Navigate to="/cheatsheets/postgresql-mastery" replace />} />
+                <Route path="/blogs/ms-sql-server-mastery" element={<Navigate to="/cheatsheets/ms-sql-server-mastery" replace />} />
                 <Route path="/blogs/kubernetes-mastery" element={<Navigate to="/cheatsheets/kubernetes-mastery" replace />} />
                 <Route path="/blogs/blazor-mastery" element={<Navigate to="/cheatsheets/blazor-mastery" replace />} />
                 <Route path="/blogs/golang-mastery" element={<Navigate to="/cheatsheets/golang-mastery" replace />} />
@@ -286,6 +292,8 @@ const App = () => {
                 <Route path="/microservices-mastery" element={<Navigate to="/cheatsheets/microservices-mastery" replace />} />
                 <Route path="/kafka-mastery" element={<Navigate to="/cheatsheets/kafka-mastery" replace />} />
                 <Route path="/docker-mastery" element={<Navigate to="/cheatsheets/docker-mastery" replace />} />
+                <Route path="/postgresql-mastery" element={<Navigate to="/cheatsheets/postgresql-mastery" replace />} />
+                <Route path="/ms-sql-server-mastery" element={<Navigate to="/cheatsheets/ms-sql-server-mastery" replace />} />
                 <Route path="/kubernetes-mastery" element={<Navigate to="/cheatsheets/kubernetes-mastery" replace />} />
                 <Route path="/blazor-mastery" element={<Navigate to="/cheatsheets/blazor-mastery" replace />} />
                 <Route path="/efcore-mastery" element={<Navigate to="/cheatsheets/efcore-mastery" replace />} />
@@ -298,6 +306,8 @@ const App = () => {
                 <Route path="/techhub/microservices-mastery" element={<MicroservicesMastery />} />
                 <Route path="/techhub/kafka-mastery" element={<KafkaMastery />} />
                 <Route path="/techhub/docker-mastery" element={<DockerMastery />} />
+                <Route path="/techhub/postgresql-mastery" element={<PostgresqlMastery />} />
+                <Route path="/techhub/ms-sql-server-mastery" element={<MsSqlServerMastery />} />
                 <Route path="/techhub/kubernetes-mastery" element={<KubernetesMastery />} />
                 <Route path="/techhub/blazor-mastery" element={<BlazorMastery />} />
                 <Route path="/techhub/efcore-mastery" element={<EFCoreMastery />} />
