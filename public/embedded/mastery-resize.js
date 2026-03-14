@@ -77,14 +77,27 @@
       }
 
       #${SEARCH_UI_ID} {
-        position: fixed;
-        top: 70px;
-        right: 18px;
-        z-index: 1600;
-        width: min(360px, calc(100vw - 24px));
+        position: relative;
+        z-index: 5;
+        width: 100%;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
+        margin-bottom: 10px;
+        padding: 0;
+        border-radius: 0;
+        border: none;
+        background: transparent;
+        box-shadow: none;
+        backdrop-filter: none;
+      }
+
+      #${SEARCH_UI_ID}.is-floating-fallback {
+        position: fixed;
+        top: 70px;
+        left: 18px;
+        z-index: 1600;
+        width: min(320px, calc(100vw - 24px));
         padding: 12px;
         border-radius: 14px;
         border: 1px solid var(--border, rgba(148, 163, 184, 0.18));
@@ -95,7 +108,7 @@
 
       #${SEARCH_UI_ID} .mastery-search-row {
         display: flex;
-        gap: 8px;
+        gap: 0;
         align-items: center;
       }
 
@@ -111,6 +124,13 @@
         outline: none;
       }
 
+      .lp-hdr #${SEARCH_UI_ID} input,
+      .left-panel #${SEARCH_UI_ID} input,
+      #leftPanel #${SEARCH_UI_ID} input,
+      .lp #${SEARCH_UI_ID} input {
+        width: 100%;
+      }
+
       #${SEARCH_UI_ID} input::placeholder {
         color: var(--text-muted, #94a3b8);
       }
@@ -120,24 +140,11 @@
         box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.14);
       }
 
-      #${SEARCH_UI_ID} button {
-        border: 1px solid var(--border, rgba(148, 163, 184, 0.24));
-        background: var(--bg-card, rgba(15, 23, 42, 0.7));
-        color: var(--text-primary, #e2e8f0);
-        border-radius: 10px;
-        padding: 8px 10px;
-        cursor: pointer;
-        font: 11px/1 'JetBrains Mono', monospace;
-      }
-
-      #${SEARCH_UI_ID} button:hover {
-        border-color: rgba(250, 204, 21, 0.45);
-      }
-
       #${SEARCH_UI_ID} .mastery-search-status {
         min-height: 16px;
         color: var(--text-secondary, #cbd5e1);
         font: 11px/1.4 'JetBrains Mono', monospace;
+        padding: 0 2px;
       }
 
       #${SEARCH_UI_ID} .mastery-search-status.is-miss {
@@ -157,7 +164,7 @@
         box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.5);
       }
 
-      [data-theme="light"] #${SEARCH_UI_ID} {
+      [data-theme="light"] #${SEARCH_UI_ID}.is-floating-fallback {
         box-shadow: 0 18px 34px rgba(15, 23, 42, 0.12);
       }
 
@@ -239,7 +246,7 @@
       }
 
       @media (max-width: 900px) {
-        #${SEARCH_UI_ID} {
+        #${SEARCH_UI_ID}.is-floating-fallback {
           top: auto;
           bottom: 12px;
           right: 12px;
@@ -478,41 +485,36 @@
     shell.innerHTML = `
       <div class="mastery-search-row">
         <input type="text" id="masteryGlobalSearchInput" placeholder="Search this mastery..." autocomplete="off" spellcheck="false" />
-        <button type="button" id="masteryPrevHit" aria-label="Previous match">↑</button>
-        <button type="button" id="masteryNextHit" aria-label="Next match">↓</button>
-        <button type="button" id="masteryClearSearch" aria-label="Clear search">✕</button>
       </div>
       <div class="mastery-search-status"></div>
     `;
-    document.body.appendChild(shell);
+
+    const host =
+      document.querySelector(".lp-hdr") ||
+      document.querySelector("#leftPanel .lp-hdr") ||
+      document.querySelector(".left-panel .lp-hdr") ||
+      document.querySelector(".lp") ||
+      document.querySelector("#leftPanel") ||
+      document.querySelector(".left-panel");
+
+    if (host) {
+      host.appendChild(shell);
+    } else {
+      shell.classList.add("is-floating-fallback");
+      document.body.appendChild(shell);
+    }
 
     const input = shell.querySelector("#masteryGlobalSearchInput");
-    const prev = shell.querySelector("#masteryPrevHit");
-    const next = shell.querySelector("#masteryNextHit");
-    const clear = shell.querySelector("#masteryClearSearch");
 
     input.addEventListener("input", () => performSearch(input.value));
     input.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
-        if (highlightNodes.length) updateActiveHighlight(activeHighlightIndex + 1);
-        else performSearch(input.value);
+        performSearch(input.value);
       } else if (event.key === "Escape") {
         input.value = "";
         clearHighlights();
         setSearchStatus("");
       }
-    });
-
-    prev.addEventListener("click", () => updateActiveHighlight(activeHighlightIndex - 1));
-    next.addEventListener("click", () => {
-      if (!highlightNodes.length) performSearch(input.value);
-      else updateActiveHighlight(activeHighlightIndex + 1);
-    });
-    clear.addEventListener("click", () => {
-      input.value = "";
-      clearHighlights();
-      setSearchStatus("");
-      input.focus();
     });
   }
 
