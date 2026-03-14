@@ -1020,6 +1020,84 @@ function imageLayers(){return `<div class="arch">
 <div class="callout info"><strong>Copy-on-Write</strong>When a container modifies a file in a read-only layer, OverlayFS copies ONLY that file to the container writable layer (upper dir), then modifies it there. The original layer is untouched. 10 containers sharing an image only have 1 copy of those read-only layers in memory.</div>
 </div>`;}
 
+function getDockerTopic(cid, tid){
+  const chapter = CHAPTERS.find(ch => ch.id === cid);
+  const topic = chapter?.topics.find(tp => tp.id === tid);
+  return { chapter, topic };
+}
+
+function dockerTabFocus(tab){
+  const t = String(tab).toLowerCase();
+  if (t.includes('diagram') || t.includes('map') || t.includes('flow') || t.includes('overview')) return 'architecture';
+  if (t.includes('demo') || t.includes('commands') || t.includes('setup') || t.includes('inspect') || t.includes('auth') || t.includes('create')) return 'hands-on';
+  if (t.includes('yaml') || t.includes('dockerfile') || t.includes('config') || t.includes('compose') || t.includes('file')) return 'config';
+  if (t.includes('best') || t.includes('security') || t.includes('limits') || t.includes('patterns') || t.includes('strategy') || t.includes('checklist')) return 'practice';
+  if (t.includes('debug') || t.includes('scan') || t.includes('health') || t.includes('monitor') || t.includes('troubleshoot')) return 'operations';
+  return 'concept';
+}
+
+function renderDockerGenericTab(cid, tid, tab){
+  const { chapter, topic } = getDockerTopic(cid, tid);
+  if (!chapter || !topic) {
+    return `<div class="sec">${tab}</div><p class="bd">This Docker topic could not be loaded.</p>`;
+  }
+
+  const focus = dockerTabFocus(tab);
+  const safeCmd = topic.cmd || 'docker command';
+  const safeTitle = topic.title || tid;
+  const desc = topic.desc || 'Docker concept details';
+  const tags = (topic.tags || []).join(' · ') || 'docker';
+
+  const summary = {
+    architecture: `This tab explains how <strong>${safeTitle}</strong> fits into the wider Docker runtime, what talks to what, and where the sharp edges usually show up in production.`,
+    'hands-on': `This tab focuses on how teams actually use <strong>${safeTitle}</strong> day to day: the command shape, the flags that matter, and the signals to watch in output.`,
+    config: `This tab focuses on the configuration surface for <strong>${safeTitle}</strong>, especially the YAML, Dockerfile, or environment settings that tend to matter most.`,
+    practice: `This tab turns <strong>${safeTitle}</strong> into practical guidance: safe defaults, performance trade-offs, and the production habits that keep teams out of trouble.`,
+    operations: `This tab focuses on operating <strong>${safeTitle}</strong> under load: visibility, health signals, failure modes, and the checks you want before production incidents do it for you.`,
+    concept: `This tab rounds out <strong>${safeTitle}</strong> with the missing concepts, trade-offs, and operational context so the topic reads as a complete lesson rather than a glossary item.`
+  }[focus];
+
+  const bullets = {
+    architecture: [
+      `Primary concept: ${desc}.`,
+      `Chapter context: ${chapter.title} ties this topic to ${chapter.sub}.`,
+      `Design question: what layer owns the concern, and what can be delegated to the Docker engine, runtime, or host OS?`
+    ],
+    'hands-on': [
+      `Start with the canonical command or workflow for <code>${safeCmd}</code>.`,
+      `Verify the result with an inspect-style command, logs, or status output before assuming success.`,
+      `Prefer repeatable flags and named resources so the behavior is obvious during reviews and debugging.`
+    ],
+    config: [
+      `Treat configuration as code: keep it readable, explicit, and environment-specific only where needed.`,
+      `Prefer small, composable files over one giant file that hides intent.`,
+      `Review how this topic interacts with secrets, restart behavior, networking, and image immutability.`
+    ],
+    practice: [
+      `Keep the happy path simple, but document the failure path too.`,
+      `Optimize for reproducibility first, then for size, speed, and polish.`,
+      `Use the smallest capability set, the smallest image surface, and the clearest rollback path you can.`
+    ],
+    operations: [
+      `Decide what “healthy” means before wiring alerts or restart policies.`,
+      `Capture the one or two commands that confirm the issue fastest under pressure.`,
+      `Make the failure mode observable through logs, events, metrics, or container state.`
+    ],
+    concept: [
+      `Know what problem ${safeTitle} solves before reaching for it by habit.`,
+      `Map it to one of the core Docker concerns: image, runtime, network, storage, build, or operations.`,
+      `Use tags like ${tags} to decide whether the topic is foundational, advanced, or production-facing.`
+    ]
+  }[focus];
+
+  return `<div class="sec">${tab}</div>
+<p class="bd"><strong>${safeTitle}</strong> sits inside <strong>${chapter.title}</strong> and covers ${desc}</p>
+<p class="bd">${summary}</p>
+<ul class="fl">${bullets.map(item => `<li>${item}</li>`).join('')}</ul>
+<div class="callout info"><strong>Concept to keep</strong>${safeTitle} matters most when you connect the command or configuration to a real runtime effect: container startup, image size, network reachability, security posture, or deploy safety.</div>
+<div class="callout tip"><strong>Review lens</strong>For this tab, ask three questions: what changes on disk or in memory, what becomes visible to operators, and what would fail first if the config were wrong.</div>`;
+}
+
 // ═══ CONTENT FUNCTION ═══
 function getContent(cid,tid,tab){
   const key=`${cid}:${tid}:${tab}`;
@@ -1684,9 +1762,7 @@ ${Object.keys(dc).map(d=>`<button class="fbtn" onclick="filterQs(this,'${d}',doc
 
 <span class="dc"># Run with: docker compose watch</span>`);
 
-  return `<div class="sec">${tab}</div>
-<p class="bd">Select a tab above to explore <strong>${tid}</strong> — animated Docker demos, complete YAML examples, architecture diagrams, .NET patterns and production tips.</p>
-<div class="callout info"><strong>Click ▶ Run</strong>Every terminal demo animates real Docker command output — watch images pull layer by layer, containers start, compose stacks spin up, and builds complete with cache hits.</div>`;
+  return renderDockerGenericTab(cid, tid, tab);
 }
 
 // ═══ RUNTIME ═══
@@ -1770,5 +1846,6 @@ function updateProgress(){
 }
 renderNav();
 </script>
+<script src="/embedded/mastery-resize.js"></script>
 </body>
 </html>

@@ -614,6 +614,20 @@ const chapters = [
   ]
 },
 {
+  id:10.5, num:"11A", title:"Multithreading", icon:"🧵",
+  color:"#22c55e", bg:"rgba(34,197,94,0.1)",
+  desc:"From first principles to production-grade concurrency — threads, the thread pool, race conditions, synchronization, signaling, and real C# multithreading architecture.",
+  tags:["Core","Concurrency","Architecture"],
+  topics:[
+    {id:"t11m_1",title:"Threads, Processes & CPU Basics",icon:"🧠",desc:"Process vs thread, OS scheduling, cores, context switching, why threads exist",tags:["Beginner","Core"]},
+    {id:"t11m_2",title:"Creating Threads & Using ThreadPool",icon:"🏗️",desc:"Thread class, foreground/background threads, ThreadPool, when not to create raw threads",tags:["Core","Important"]},
+    {id:"t11m_3",title:"Race Conditions & Shared State",icon:"⚠️",desc:"Data races, non-determinism, memory visibility, why shared mutable state is dangerous",tags:["Core","Important"]},
+    {id:"t11m_4",title:"lock, Monitor & Synchronization",icon:"🔒",desc:"lock keyword, Monitor.Enter/Exit, critical sections, contention, deadlock prevention",tags:["Intermediate","Concurrency"]},
+    {id:"t11m_5",title:"Interlocked, volatile & Thread-Safe Patterns",icon:"⚙️",desc:"Atomic operations, volatile reads/writes, immutability, concurrent counters, double-checking risks",tags:["Advanced","Performance"]},
+    {id:"t11m_6",title:"Signaling, Coordination & Producer-Consumer",icon:"🚦",desc:"AutoResetEvent, ManualResetEventSlim, SemaphoreSlim, CountdownEvent, BlockingCollection, Channels",tags:["Advanced","Architecture"]},
+  ]
+},
+{
   id:11, num:"12", title:"Memory & Performance", icon:"🚀",
   color:"#06b6d4", bg:"rgba(6,182,212,0.1)",
   desc:"Span<T>, Memory<T>, GC tuning, and high-performance C# techniques.",
@@ -1571,7 +1585,7 @@ sections: [
 
 <span class="cmt">// Consume async stream</span>
 <span class="kw">await foreach</span> (<span class="kw">var</span> num <span class="kw">in</span> <span class="fn">GenerateNumbersAsync</span>())
-    <span class="type">Console</span>.<span class="fn">WriteLine</span>(num);</span>`},
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(num);`},
 {type:"callout", kind:"danger", icon:"🚫", text:"<strong>Deadlock trap!</strong> Never call <code>.Result</code> or <code>.Wait()</code> on a Task in ASP.NET or UI code — it causes deadlocks. Always use <code>await</code> all the way up the call stack."}
 ]},
 
@@ -2136,6 +2150,388 @@ sections: [
     }
 }`},
 {type:"callout", kind:"info", icon:"🧭", text:"The best question is not 'Should I always use ConfigureAwait(false)?' but 'Does this code need to resume on a specific context?'"}
+]},
+
+"t11m_1": {
+title: "Threads, Processes & CPU Basics",
+breadcrumb: "Chapter 11A · Multithreading",
+subtitle: "Start from the real machine model: what a process is, what a thread is, how the OS scheduler uses CPU cores, and why multithreading exists at all.",
+badges: [{text:"Beginner",color:"#10b981"},{text:"Core",color:"#00d4ff"},{text:"Concurrency",color:"#22c55e"}],
+sections: [
+{type:"prose", title:"Plain English First", content:`
+<p>A <strong>process</strong> is a running application with its own memory space. A <strong>thread</strong> is a path of execution inside that process.</p>
+<p>One process can have many threads. All threads in the same process share the same heap, static fields, and most application state. That shared access is why multithreading can be powerful, and also why it can go wrong.</p>
+<ul>
+<li><strong>Process</strong> — isolation boundary, own memory, own loaded assemblies</li>
+<li><strong>Thread</strong> — unit of execution scheduled by the OS</li>
+<li><strong>Core</strong> — physical CPU worker that can run a thread at a moment in time</li>
+<li><strong>Context switch</strong> — when the OS pauses one thread and resumes another</li>
+</ul>
+<p>Multithreading helps when work can happen <strong>at the same time</strong> or when one thread should stay responsive while another does background work.</p>
+`},
+{type:"diagram", title:"Process → Threads → CPU Flow", svg:`
+<svg width="520" height="250" viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="mta1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#22c55e"/></marker></defs>
+<rect x="18" y="40" width="190" height="160" rx="10" fill="#111827" stroke="#22c55e" stroke-width="1.5"/>
+<text x="113" y="62" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#22c55e">ONE PROCESS</text>
+<text x="36" y="88" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">Shared heap</text>
+<text x="36" y="108" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">Static fields</text>
+<rect x="38" y="126" width="60" height="46" rx="6" fill="#0b1120" stroke="#22c55e"/>
+<text x="68" y="145" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">Thread A</text>
+<text x="68" y="159" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">UI / request</text>
+<rect x="110" y="126" width="60" height="46" rx="6" fill="#0b1120" stroke="#22c55e"/>
+<text x="140" y="145" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">Thread B</text>
+<text x="140" y="159" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">worker</text>
+<rect x="278" y="58" width="90" height="54" rx="8" fill="#111827" stroke="#f59e0b" stroke-width="1.5"/>
+<text x="323" y="82" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">CPU Core 1</text>
+<text x="323" y="98" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">runs one thread</text>
+<rect x="396" y="58" width="90" height="54" rx="8" fill="#111827" stroke="#f59e0b" stroke-width="1.5"/>
+<text x="441" y="82" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">CPU Core 2</text>
+<text x="441" y="98" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">runs one thread</text>
+<line x1="170" y1="148" x2="274" y2="84" stroke="#22c55e" stroke-width="1.5" marker-end="url(#mta1)" stroke-dasharray="6 3"/>
+<line x1="100" y1="148" x2="392" y2="84" stroke="#22c55e" stroke-width="1.5" marker-end="url(#mta1)" stroke-dasharray="6 3"/>
+<text x="325" y="164" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#94a3b8">If there are more runnable threads than cores, the OS time-slices them.</text>
+</svg>`},
+{type:"table", title:"Mental Model Cheatsheet", headers:["Term","Meaning in plain English"], rows:[
+["Process","Your running app and its memory boundary."],
+["Thread","A worker inside that app that executes code."],
+["Parallelism","Two threads literally running at the same time on different cores."],
+["Concurrency","Multiple threads making progress over time, even if not always simultaneously."],
+["Context switch","The CPU pauses one thread and resumes another."]
+]},
+{type:"scenario", title:"Real-world scenario", content:`
+<p>A desktop app has one UI thread. If that thread also calculates a huge report, the app freezes. Moving the report work to another thread keeps the UI responsive while the heavy work continues in the background.</p>
+<p>In server code, multiple requests may run on multiple thread-pool threads so one slow request does not block every other request.</p>
+`},
+{type:"callout", kind:"info", icon:"🧠", text:"The first big multithreading idea is this: threads share memory by default. That is why they are fast to use together, and why they require discipline."}
+]},
+
+"t11m_2": {
+title: "Creating Threads & Using ThreadPool",
+breadcrumb: "Chapter 11A · Multithreading",
+subtitle: "Learn the difference between raw threads and the .NET thread pool, when each is appropriate, and why most modern code should prefer the pool.",
+badges: [{text:"Core",color:"#00d4ff"},{text:"Important",color:"#ef4444"},{text:"Runtime",color:"#22c55e"}],
+sections: [
+{type:"prose", title:"Raw Thread vs ThreadPool", content:`
+<p>You <strong>can</strong> create a thread directly with <code>new Thread(...)</code>, but in real applications you usually should not unless you have a very specific reason.</p>
+<ul>
+<li><strong>Thread</strong> — dedicated OS thread you manage explicitly</li>
+<li><strong>ThreadPool</strong> — managed pool of reusable worker threads provided by .NET</li>
+</ul>
+<p>The thread pool avoids the cost of constantly creating and destroying threads. It is the default engine behind Tasks, request handling, timers, and much of modern .NET concurrency.</p>
+`},
+{type:"diagram", title:"Dedicated Thread vs ThreadPool Architecture", svg:`
+<svg width="520" height="250" viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg">
+<rect x="24" y="40" width="200" height="160" rx="10" fill="#111827" stroke="#22c55e" stroke-width="1.5"/>
+<text x="124" y="62" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#22c55e">Dedicated Thread</text>
+<text x="42" y="92" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">You create it</text>
+<text x="42" y="112" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">You start it</text>
+<text x="42" y="132" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">You own lifetime and cost</text>
+<text x="42" y="152" font-family="'JetBrains Mono',monospace" font-size="9" fill="#94a3b8">Good for long-running dedicated work</text>
+<rect x="290" y="40" width="206" height="160" rx="10" fill="#111827" stroke="#00d4ff" stroke-width="1.5"/>
+<text x="393" y="62" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#00d4ff">ThreadPool</text>
+<rect x="310" y="84" width="48" height="36" rx="6" fill="#0b1120" stroke="#00d4ff"/><text x="334" y="106" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#e2e8f0">Worker 1</text>
+<rect x="370" y="84" width="48" height="36" rx="6" fill="#0b1120" stroke="#00d4ff"/><text x="394" y="106" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#e2e8f0">Worker 2</text>
+<rect x="430" y="84" width="48" height="36" rx="6" fill="#0b1120" stroke="#00d4ff"/><text x="454" y="106" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#e2e8f0">Worker 3</text>
+<text x="308" y="146" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">.NET schedules short work items</text>
+<text x="308" y="166" font-family="'JetBrains Mono',monospace" font-size="9" fill="#94a3b8">Tasks, async continuations, request work</text>
+</svg>`},
+{type:"code", title:"Thread and ThreadPool Examples", lang:"csharp", code:`<span class="cmt">// 1. Dedicated thread: you own it directly</span>
+<span class="kw">var</span> thread = <span class="kw">new</span> <span class="type">Thread</span>(() =>
+{
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"Running on dedicated thread."</span>);
+    <span class="cmt">// Long-running loop or special thread affinity work can live here.</span>
+});
+
+thread.<span class="prop">IsBackground</span> = <span class="kw">true</span>; <span class="cmt">// background threads do not keep the process alive</span>
+thread.<span class="fn">Start</span>();
+
+<span class="cmt">// 2. ThreadPool: queue short work items</span>
+<span class="type">ThreadPool</span>.<span class="fn">QueueUserWorkItem</span>(_ =>
+{
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"Running on pooled worker thread."</span>);
+});
+
+<span class="cmt">// 3. Task uses the thread pool by default</span>
+<span class="kw">await</span> <span class="type">Task</span>.<span class="fn">Run</span>(() =>
+{
+    <span class="cmt">// CPU-bound work delegated to a worker thread</span>
+    <span class="type">double</span> result = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i &lt; <span class="num">1_000_000</span>; i++)
+        result += Math.<span class="fn">Sqrt</span>(i);
+    <span class="type">Console</span>.<span class="fn">WriteLine</span>(result);
+});`},
+{type:"table", title:"When to choose what", headers:["Option","Use it when"], rows:[
+["Thread","You need a dedicated long-lived thread or very specific behavior."],
+["ThreadPool / Task.Run","You have short-lived CPU work that should reuse existing worker threads."],
+["async/await","The work is mostly waiting on I/O, not burning CPU."],
+["LongRunning Task","You want Task-based code but need to hint that the work should not consume a normal pool worker."]
+]},
+{type:"callout", kind:"warn", icon:"🏗️", text:"Creating too many raw threads hurts more than it helps. Each thread has startup cost, stack memory cost, and scheduling overhead."}
+]},
+
+"t11m_3": {
+title: "Race Conditions & Shared State",
+breadcrumb: "Chapter 11A · Multithreading",
+subtitle: "The core bug class in multithreaded programs: two threads touching the same mutable data without coordination and producing random, non-repeatable results.",
+badges: [{text:"Core",color:"#00d4ff"},{text:"Important",color:"#ef4444"},{text:"Concurrency",color:"#22c55e"}],
+sections: [
+{type:"prose", title:"What Is a Race Condition?", content:`
+<p>A <strong>race condition</strong> happens when correctness depends on the exact timing of multiple threads.</p>
+<p>If two threads both read and write the same data without synchronization, the final result can change from run to run. That is why multithreading bugs are often hard to reproduce: the code may work 100 times and fail on the 101st.</p>
+<p>The classic example is incrementing a shared counter. <code>counter++</code> looks like one step in C#, but internally it is more like:</p>
+<ul>
+<li>read current value</li>
+<li>add one</li>
+<li>write new value back</li>
+</ul>
+<p>If two threads interleave those steps, increments can be lost.</p>
+`},
+{type:"diagram", title:"Lost Update Race", svg:`
+<svg width="520" height="260" viewBox="0 0 520 260" xmlns="http://www.w3.org/2000/svg">
+<rect x="30" y="26" width="200" height="200" rx="10" fill="#111827" stroke="#ef4444" stroke-width="1.5"/>
+<text x="130" y="48" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#ef4444">Thread A</text>
+<text x="50" y="82" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">reads counter = 5</text>
+<text x="50" y="118" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">adds 1 → 6</text>
+<text x="50" y="154" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">writes 6</text>
+<rect x="288" y="26" width="200" height="200" rx="10" fill="#111827" stroke="#ef4444" stroke-width="1.5"/>
+<text x="388" y="48" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#ef4444">Thread B</text>
+<text x="308" y="82" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">reads counter = 5</text>
+<text x="308" y="118" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">adds 1 → 6</text>
+<text x="308" y="154" font-family="'JetBrains Mono',monospace" font-size="9" fill="#e2e8f0">writes 6</text>
+<text x="260" y="238" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#94a3b8">Expected final value: 7. Actual value after the race: 6.</text>
+</svg>`},
+{type:"code", title:"A Real Race Condition", lang:"csharp", code:`<span class="kw">int</span> counter = <span class="num">0</span>;
+
+<span class="type">Parallel</span>.<span class="fn">For</span>(<span class="num">0</span>, <span class="num">100_000</span>, _ =>
+{
+    counter++; <span class="cmt">// NOT thread-safe</span>
+});
+
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(counter); 
+<span class="cmt">// Often less than 100000 because some increments were lost.</span>
+
+<span class="cmt">// Safer version using Interlocked</span>
+counter = <span class="num">0</span>;
+<span class="type">Parallel</span>.<span class="fn">For</span>(<span class="num">0</span>, <span class="num">100_000</span>, _ =>
+{
+    <span class="type">Interlocked</span>.<span class="fn">Increment</span>(<span class="kw">ref</span> counter);
+});
+
+<span class="type">Console</span>.<span class="fn">WriteLine</span>(counter); <span class="cmt">// 100000</span>`},
+{type:"scenario", title:"Real-world scenario", content:`
+<p>An e-commerce app keeps an in-memory count of active carts. Under load, multiple requests increment and decrement the same number. Without synchronization, metrics become wrong, autoscaling decisions become misleading, and debugging gets confusing because the bug appears only under concurrency.</p>
+`},
+{type:"callout", kind:"danger", icon:"⚠️", text:"If multiple threads can mutate the same state, assume there is a bug until you can point to the synchronization strategy that makes it safe."}
+]},
+
+"t11m_4": {
+title: "lock, Monitor & Synchronization",
+breadcrumb: "Chapter 11A · Multithreading",
+subtitle: "Protect critical sections with lock and Monitor, understand what mutual exclusion really means, and learn the habits that prevent deadlocks and contention storms.",
+badges: [{text:"Intermediate",color:"#f59e0b"},{text:"Concurrency",color:"#22c55e"},{text:"Architecture",color:"#7c3aed"}],
+sections: [
+{type:"prose", title:"What lock Actually Does", content:`
+<p><code>lock</code> means: only one thread at a time may enter this critical section for this lock object.</p>
+<p>It is the simplest and most common tool for protecting shared mutable state in C#. Under the hood, <code>lock</code> is syntax sugar around <code>Monitor.Enter</code> and <code>Monitor.Exit</code> inside a <code>try/finally</code>.</p>
+<p>Use it when:</p>
+<ul>
+<li>multiple operations must be treated as one safe unit</li>
+<li>you are protecting object invariants</li>
+<li>atomic helpers like Interlocked are not enough</li>
+</ul>
+`},
+{type:"code", title:"lock and Monitor in Practice", lang:"csharp", code:`<span class="kw">public sealed class</span> <span class="type">Inventory</span>
+{
+    <span class="kw">private readonly</span> <span class="type">object</span> _gate = <span class="kw">new</span>();
+    <span class="kw">private</span> <span class="type">int</span> _stock = <span class="num">10</span>;
+
+    <span class="kw">public</span> <span class="type">bool</span> <span class="fn">TryReserve</span>(<span class="type">int</span> quantity)
+    {
+        <span class="kw">lock</span> (_gate)
+        {
+            <span class="cmt">// The check and the update must happen together.</span>
+            <span class="kw">if</span> (quantity &lt;= <span class="num">0</span> || quantity &gt; _stock)
+                <span class="kw">return</span> <span class="kw">false</span>;
+
+            _stock -= quantity;
+            <span class="kw">return</span> <span class="kw">true</span>;
+        }
+    }
+}
+
+<span class="cmt">// lock is syntax sugar for Monitor.Enter/Exit</span>
+<span class="type">bool</span> lockTaken = <span class="kw">false</span>;
+<span class="kw">try</span>
+{
+    <span class="type">Monitor</span>.<span class="fn">Enter</span>(_gate, <span class="kw">ref</span> lockTaken);
+    <span class="cmt">// critical section</span>
+}
+<span class="kw">finally</span>
+{
+    <span class="kw">if</span> (lockTaken)
+        <span class="type">Monitor</span>.<span class="fn">Exit</span>(_gate);
+}`},
+{type:"table", title:"Synchronization rules that matter", headers:["Rule","Reason"], rows:[
+["Lock on a private object", "Prevents unrelated code from accidentally using the same lock."],
+["Keep critical sections short", "Long locks create contention and hurt throughput."],
+["Do not lock on this, typeof(...), or strings", "Those can be shared outside your control."],
+["Acquire locks in a consistent order", "This is one of the main ways to prevent deadlocks."]
+]},
+{type:"diagram", title:"Critical Section Architecture", svg:`
+<svg width="520" height="220" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+<rect x="20" y="70" width="140" height="70" rx="8" fill="#111827" stroke="#22c55e" stroke-width="1.5"/>
+<text x="90" y="94" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Thread A</text>
+<text x="90" y="114" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">enters lock</text>
+<rect x="190" y="54" width="140" height="102" rx="10" fill="#0d2018" stroke="#10b981" stroke-width="1.5"/>
+<text x="260" y="82" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#10b981">Critical Section</text>
+<text x="260" y="106" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#e2e8f0">shared state update</text>
+<text x="260" y="124" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#e2e8f0">one thread at a time</text>
+<rect x="360" y="70" width="140" height="70" rx="8" fill="#111827" stroke="#ef4444" stroke-width="1.5"/>
+<text x="430" y="94" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Thread B</text>
+<text x="430" y="114" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">waits until released</text>
+</svg>`},
+{type:"scenario", title:"Real-world scenario", content:`
+<p>A payment service must update account balance and ledger entry together. If two threads can reserve the same balance at once, money appears or disappears. A lock around the state transition protects the invariant while the update is happening.</p>
+`},
+{type:"callout", kind:"warn", icon:"🔒", text:"A lock solves correctness first. If lock contention later becomes a bottleneck, optimize after measuring rather than removing synchronization blindly."}
+]},
+
+"t11m_5": {
+title: "Interlocked, volatile & Thread-Safe Patterns",
+breadcrumb: "Chapter 11A · Multithreading",
+subtitle: "Use lighter-weight synchronization when a full lock is too much: atomic operations, memory visibility rules, immutability, and practical patterns for safe shared state.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"Performance",color:"#10b981"},{text:"Concurrency",color:"#22c55e"}],
+sections: [
+{type:"prose", title:"When lock Is More Than You Need", content:`
+<p>Sometimes the shared operation is tiny: increment a counter, swap a reference, or read a stop flag. In those cases a full lock may be unnecessary.</p>
+<ul>
+<li><strong>Interlocked</strong> gives atomic operations like increment, exchange, and compare-exchange</li>
+<li><strong>volatile</strong> affects memory visibility of reads and writes, not full atomicity of complex work</li>
+<li><strong>immutability</strong> often beats synchronization because there is no shared mutation to protect</li>
+</ul>
+<p>The key is to choose the smallest tool that still preserves correctness.</p>
+`},
+{type:"code", title:"Atomic Operations and Visibility", lang:"csharp", code:`<span class="kw">private</span> <span class="type">int</span> _processed;
+<span class="kw">private volatile</span> <span class="type">bool</span> _shouldStop;
+<span class="kw">private</span> <span class="type">string</span> _status = <span class="str">"starting"</span>;
+
+<span class="kw">public</span> <span class="type">void</span> <span class="fn">MarkProcessed</span>()
+{
+    <span class="cmt">// Atomic increment: no lost updates.</span>
+    <span class="type">Interlocked</span>.<span class="fn">Increment</span>(<span class="kw">ref</span> _processed);
+}
+
+<span class="kw">public</span> <span class="type">void</span> <span class="fn">RequestStop</span>()
+{
+    _shouldStop = <span class="kw">true</span>; <span class="cmt">// volatile write becomes visible to other threads promptly</span>
+}
+
+<span class="kw">public</span> <span class="type">void</span> <span class="fn">RunWorker</span>()
+{
+    <span class="kw">while</span> (!_shouldStop)
+    {
+        <span class="cmt">// do small unit of work</span>
+    }
+}
+
+<span class="kw">public</span> <span class="type">void</span> <span class="fn">SwapStatus</span>()
+{
+    <span class="cmt">// Atomic reference replacement</span>
+    <span class="type">Interlocked</span>.<span class="fn">Exchange</span>(<span class="kw">ref</span> _status, <span class="str">"running"</span>);
+}`},
+{type:"table", title:"Choose the right tool", headers:["Need","Best starting tool"], rows:[
+["Increment / decrement / swap", "Interlocked"],
+["Visibility of a simple stop flag", "volatile or CancellationToken depending on design"],
+["Multi-step invariant", "lock / Monitor"],
+["Read-mostly shared config", "Immutable object + atomic reference swap"]
+]},
+{type:"scenario", title:"Real-world scenario", content:`
+<p>A telemetry pipeline counts processed events at very high speed. Using a lock around every increment would add unnecessary contention. <code>Interlocked.Increment</code> keeps the count correct with much lower coordination overhead.</p>
+<p>Another service updates a read-only configuration snapshot and swaps the reference atomically so workers always see a whole, consistent config object.</p>
+`},
+{type:"callout", kind:"info", icon:"⚙️", text:"volatile is not a magic thread-safety keyword. It helps with visibility of simple reads and writes, but it does not make a multi-step operation safe."}
+]},
+
+"t11m_6": {
+title: "Signaling, Coordination & Producer-Consumer",
+breadcrumb: "Chapter 11A · Multithreading",
+subtitle: "Move beyond mutual exclusion and learn how threads coordinate: waiting, releasing, throttling, and passing work safely through queues and channels.",
+badges: [{text:"Advanced",color:"#f59e0b"},{text:"Architecture",color:"#7c3aed"},{text:"Concurrency",color:"#22c55e"}],
+sections: [
+{type:"prose", title:"Coordination Is Different From Locking", content:`
+<p><strong>Locking</strong> answers: “who is allowed in the critical section?”</p>
+<p><strong>Coordination primitives</strong> answer: “when should a thread wait, continue, or wake another thread up?”</p>
+<p>Common tools:</p>
+<ul>
+<li><code>SemaphoreSlim</code> — limit concurrency to N workers</li>
+<li><code>ManualResetEventSlim</code> — open a gate and release many waiters</li>
+<li><code>AutoResetEvent</code> — release one waiter at a time</li>
+<li><code>CountdownEvent</code> — wait until a set of workers finish</li>
+<li><code>BlockingCollection&lt;T&gt;</code> or <code>Channel&lt;T&gt;</code> — producer-consumer pipelines</li>
+</ul>
+<p>In modern .NET, <strong>Channel&lt;T&gt;</strong> is often one of the best tools for in-process background pipelines.</p>
+`},
+{type:"diagram", title:"Producer-Consumer Architecture Flow", svg:`
+<svg width="520" height="250" viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="mta6" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#22c55e"/></marker></defs>
+<rect x="24" y="84" width="120" height="60" rx="8" fill="#111827" stroke="#22c55e" stroke-width="1.5"/>
+<text x="84" y="106" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Producer</text>
+<text x="84" y="124" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">request / event / file</text>
+<rect x="200" y="70" width="120" height="88" rx="10" fill="#0d2018" stroke="#10b981" stroke-width="1.5"/>
+<text x="260" y="98" text-anchor="middle" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#10b981">Channel Queue</text>
+<text x="260" y="118" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#e2e8f0">buffer + backpressure</text>
+<text x="260" y="136" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">safe handoff</text>
+<rect x="376" y="84" width="120" height="60" rx="8" fill="#111827" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="436" y="106" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#e2e8f0">Consumer</text>
+<text x="436" y="124" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#94a3b8">background worker</text>
+<line x1="144" y1="114" x2="196" y2="114" stroke="#22c55e" stroke-width="1.5" marker-end="url(#mta6)" stroke-dasharray="6 3"/>
+<line x1="320" y1="114" x2="372" y2="114" stroke="#22c55e" stroke-width="1.5" marker-end="url(#mta6)" stroke-dasharray="6 3"/>
+<text x="260" y="204" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#94a3b8">This pattern reduces shared-state bugs because producers hand work off instead of mutating the same object graph together.</text>
+</svg>`},
+{type:"code", title:"Channel<T> Producer-Consumer Example", lang:"csharp", code:`<span class="kw">using</span> System.Threading.Channels;
+
+<span class="kw">var</span> channel = <span class="type">Channel</span>.<span class="fn">CreateBounded</span>&lt;<span class="type">string</span>&gt;(<span class="num">100</span>);
+
+<span class="cmt">// Producer</span>
+<span class="kw">var</span> producer = <span class="type">Task</span>.<span class="fn">Run</span>(<span class="kw">async</span> () =>
+{
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++)
+    {
+        <span class="kw">await</span> channel.Writer.<span class="fn">WriteAsync</span>(<span class="str">$"job-{i}"</span>);
+    }
+
+    channel.Writer.<span class="fn">Complete</span>();
+});
+
+<span class="cmt">// Consumer</span>
+<span class="kw">var</span> consumer = <span class="type">Task</span>.<span class="fn">Run</span>(<span class="kw">async</span> () =>
+{
+    <span class="kw">await foreach</span> (<span class="kw">var</span> job <span class="kw">in</span> channel.Reader.<span class="fn">ReadAllAsync</span>())
+    {
+        <span class="type">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Processing {job}"</span>);
+        <span class="kw">await</span> <span class="type">Task</span>.<span class="fn">Delay</span>(<span class="num">50</span>); <span class="cmt">// simulate work</span>
+    }
+});
+
+<span class="kw">await</span> <span class="type">Task</span>.<span class="fn">WhenAll</span>(producer, consumer);
+
+<span class="cmt">// SemaphoreSlim example: allow only 3 concurrent operations</span>
+<span class="kw">var</span> gate = <span class="kw">new</span> <span class="type">SemaphoreSlim</span>(<span class="num">3</span>);
+<span class="kw">await</span> gate.<span class="fn">WaitAsync</span>();
+<span class="kw">try</span>
+{
+    <span class="cmt">// protected limited-concurrency work</span>
+}
+<span class="kw">finally</span>
+{
+    gate.<span class="fn">Release</span>();
+}`},
+{type:"scenario", title:"Real-world scenario", content:`
+<p>A web API receives file-import requests faster than they should be written to the database. Instead of letting every request update shared batch state directly, the API writes import jobs into a bounded channel. A background consumer reads the jobs in order, applies throttling, and keeps the write path stable.</p>
+<p>This design is easier to reason about because the threads are coordinating through a queue instead of racing over the same mutable objects.</p>
+`},
+{type:"callout", kind:"success", icon:"🚦", text:"When possible, design systems so threads communicate by handing work off, not by fighting over the same shared state. Coordination beats accidental contention."}
 ]},
 
 "t12_1": {
@@ -4687,6 +5083,29 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;');
 }
 
+function highlightGeneratedCode(source, lang = 'csharp') {
+  const escaped = escapeHtml(source).replace(/\r\n/g, '\n');
+  if (lang !== 'csharp') return escaped;
+
+  const placeholders = [];
+  const stash = (html) => {
+    const key = `__TOK_${placeholders.length}__`;
+    placeholders.push(html);
+    return key;
+  };
+
+  let html = escaped
+    .replace(/(\/\/[^\n]*)/g, (_, comment) => stash(`<span class="cmt">${comment}</span>`))
+    .replace(/(&quot;(?:\\.|[^&])*?&quot;)/g, (_, str) => stash(`<span class="str">${str}</span>`))
+    .replace(/\b(\d+(?:\.\d+)?(?:m|f|d|L|UL|u|l)?)\b/g, '<span class="num">$1</span>')
+    .replace(/\b(public|private|protected|internal|static|sealed|abstract|partial|readonly|record|struct|class|interface|enum|namespace|using|return|new|if|else|switch|case|default|break|continue|for|foreach|while|do|try|catch|finally|throw|await|async|var|void|bool|true|false|null|this|base|where|out|ref|in|is|as|get|set|init)\b/g, '<span class="kw">$1</span>')
+    .replace(/\b(string|int|long|short|byte|char|decimal|double|float|object|Guid|DateTime|TimeSpan|Task|ValueTask|CancellationToken|IEnumerable|IAsyncEnumerable|List|Dictionary|HashSet|Span|ReadOnlySpan|ArrayPool|HttpClient|Console|File)\b/g, '<span class="type">$1</span>')
+    .replace(/\b([a-z_][A-Za-z0-9_]*)\s*(?=\()/g, '<span class="fn">$1</span>');
+
+  html = html.replace(/(__TOK_(\d+)__)/g, (_, __, index) => placeholders[Number(index)]);
+  return html;
+}
+
 function getBlueprintForTopic(topicId) {
   const key = topicId.split('_')[0];
   return GENERATED_BLUEPRINTS[key] || GENERATED_BLUEPRINTS.t1;
@@ -4697,6 +5116,242 @@ function inferTopicLevel(tags = []) {
   if (tags.some(tag => tag.includes('Advanced'))) return 'Advanced';
   if (tags.some(tag => tag.includes('Beginner'))) return 'Beginner';
   return 'Core';
+}
+
+function getTopicFocus(topic, blueprint) {
+  const summary = `${topic.title} ${topic.desc} ${(topic.tags || []).join(' ')}`.toLowerCase();
+  if (summary.includes('nullable') || summary.includes('null')) {
+    return {
+      use: 'when you want the compiler to help you model absence explicitly and remove avoidable NullReferenceException paths',
+      avoid: 'when warnings are suppressed instead of fixed with better null-state design',
+      trade: 'nullable reference types add a little annotation work up front, but they pay it back through safer APIs and fewer production null bugs',
+      notes: ['Model optional values explicitly.', 'Prefer guard clauses and null-state narrowing.', 'Do not silence warnings without a reason.'],
+      scenario: 'A shared SDK exposes DTOs and service methods to many teams, so null contracts must be obvious at compile time rather than guessed at runtime.'
+    };
+  }
+  if (summary.includes('string')) {
+    return {
+      use: 'when formatting text, building payloads, parsing input, or comparing values with the right culture and case rules',
+      avoid: 'when repeated concatenation or culture-insensitive comparisons are hidden inside loops or critical validation code',
+      trade: 'strings are convenient and immutable, which improves safety, but careless usage creates allocations and subtle comparison bugs',
+      notes: ['Pick Ordinal vs culture-aware comparison deliberately.', 'Use interpolation for clarity, StringBuilder for heavy concatenation.', 'Normalize external input near the boundary.'],
+      scenario: 'An API builds log lines, URLs, and cache keys, so string handling must stay readable while still avoiding accidental allocation spikes.'
+    };
+  }
+  if (summary.includes('collection') || summary.includes('list') || summary.includes('dictionary') || summary.includes('hashset') || summary.includes('array')) {
+    return {
+      use: 'when choosing the right in-memory structure for lookup speed, ordering, uniqueness, iteration style, and mutation behavior',
+      avoid: 'when one familiar collection is used for every problem without checking complexity or memory trade-offs',
+      trade: 'collections make data handling simple, but each structure optimizes different operations and can become expensive when misapplied',
+      notes: ['Start from required operations: lookup, ordering, uniqueness, mutation.', 'Watch hidden allocations from repeated materialization.', 'Prefer immutable collections when shared state is risky.'],
+      scenario: 'A service keeps hot reference data in memory and needs predictable lookup cost without turning every path into manual indexing code.'
+    };
+  }
+  if (summary.includes('async') || summary.includes('task') || summary.includes('parallel') || summary.includes('cancellation')) {
+    return {
+      use: 'when coordinating I/O-bound work, cancellation, concurrency, and responsiveness without blocking request threads',
+      avoid: 'when async code is mixed with synchronous waiting or when CPU-bound work is mistaken for asynchronous work',
+      trade: 'async improves scalability and responsiveness, but it adds state-machine behavior, cancellation paths, and more moving pieces to reason about',
+      notes: ['Pass CancellationToken through the full call chain.', 'Await tasks instead of blocking on them.', 'Use parallelism only when the work is truly independent.'],
+      scenario: 'A web API calls three downstream services and must remain responsive under load while honoring request cancellation and timeout policies.'
+    };
+  }
+  if (summary.includes('linq') || summary.includes('query') || summary.includes('lambda')) {
+    return {
+      use: 'when projecting, filtering, grouping, and reshaping data with concise pipelines that still read like business intent',
+      avoid: 'when pipelines become too clever to debug or when deferred execution causes repeated enumeration unexpectedly',
+      trade: 'LINQ and lambdas compress a lot of intent into a small surface area, but they can hide allocations, execution timing, and query translation boundaries',
+      notes: ['Know whether the query runs in memory or against a provider.', 'Materialize only when you need a stable snapshot.', 'Keep pipelines readable enough to debug.'],
+      scenario: 'A reporting feature transforms order data into dashboard summaries and needs expressive query code without losing control of execution cost.'
+    };
+  }
+  if (summary.includes('record') || summary.includes('immutable') || summary.includes('required') || summary.includes('primary constructor')) {
+    return {
+      use: 'when modeling data that benefits from immutability, value-based equality, and safer initialization',
+      avoid: 'when newer syntax is added only for novelty without making the model clearer',
+      trade: 'modern language features reduce boilerplate and tighten invariants, but mixed conventions can make a codebase harder to scan',
+      notes: ['Use records for data-centric models.', 'Use required/init members to enforce valid construction.', 'Adopt new syntax where it clarifies intent, not just where it is available.'],
+      scenario: 'A team modernizes DTOs and options classes so invalid partially-initialized objects become harder to create.'
+    };
+  }
+  if (summary.includes('exception') || summary.includes('error')) {
+    return {
+      use: 'when protecting boundaries, preserving diagnostics, and translating failures into a form the caller can understand',
+      avoid: 'when exceptions are used as normal branching or swallowed without context',
+      trade: 'exception handling carries rich diagnostics, but weak boundaries can hide the true failure source and complicate recovery',
+      notes: ['Catch close to a boundary where you can add context.', 'Preserve the original exception when rethrowing.', 'Model expected failures separately from exceptional ones.'],
+      scenario: 'A service touches files, HTTP APIs, and a database, so failures must be logged with context without burying the original cause.'
+    };
+  }
+  return {
+    use: blueprint.use,
+    avoid: blueprint.avoid,
+    trade: blueprint.trade,
+    notes: ['Tie the feature to a concrete design need.', 'Optimize for clarity before cleverness.', 'Review runtime trade-offs when the topic is on a hot path.'],
+    scenario: blueprint.scenario
+  };
+}
+
+function buildTopicSpecificCode(topic, blueprint) {
+  const summary = `${topic.title} ${topic.desc} ${(topic.tags || []).join(' ')}`.toLowerCase();
+  const header = `// ${topic.title}\n// Focus: ${topic.desc}\n// The comments call out the design choice instead of repeating the syntax.`;
+
+  if (summary.includes('nullable') || summary.includes('null')) {
+    return `${header}
+public sealed class CustomerProfile
+{
+    public required string Name { get; init; }
+    public string? PreferredEmail { get; init; } // Optional data stays nullable.
+}
+
+public static string BuildGreeting(CustomerProfile profile)
+{
+    // Guard clauses keep the null-state obvious to both readers and the compiler.
+    if (string.IsNullOrWhiteSpace(profile.Name))
+    {
+        throw new ArgumentException("Name is required.", nameof(profile));
+    }
+
+    return profile.PreferredEmail is { Length: > 0 } email
+        ? $"Hello {profile.Name} ({email})"
+        : $"Hello {profile.Name}";
+}`;
+  }
+
+  if (summary.includes('string')) {
+    return `${header}
+using System.Text;
+
+var parts = new[] { "north", "america", "sales" };
+var keyBuilder = new StringBuilder();
+
+foreach (var part in parts)
+{
+    // Normalize at the boundary so downstream comparisons stay predictable.
+    if (keyBuilder.Length > 0) keyBuilder.Append(':');
+    keyBuilder.Append(part.Trim().ToUpperInvariant());
+}
+
+string cacheKey = keyBuilder.ToString();
+Console.WriteLine(cacheKey);`;
+  }
+
+  if (summary.includes('collection') || summary.includes('list') || summary.includes('dictionary') || summary.includes('hashset') || summary.includes('array')) {
+    return `${header}
+var usersById = new Dictionary<int, string>
+{
+    [101] = "Ava",
+    [102] = "Noah"
+};
+
+// Choose Dictionary when key lookup is the primary operation.
+if (usersById.TryGetValue(102, out var userName))
+{
+    Console.WriteLine($"Found: {userName}");
+}
+
+var uniqueRoles = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+{
+    "Admin",
+    "admin",
+    "Reviewer"
+};
+
+Console.WriteLine($"Unique roles: {uniqueRoles.Count}");`;
+  }
+
+  if (summary.includes('async') || summary.includes('task') || summary.includes('parallel') || summary.includes('cancellation')) {
+    return `${header}
+public static async Task<string> LoadDashboardAsync(HttpClient httpClient, CancellationToken ct)
+{
+    using var response = await httpClient.GetAsync("https://example.com/dashboard", ct);
+    response.EnsureSuccessStatusCode();
+
+    // Await keeps the thread free while the I/O completes.
+    return await response.Content.ReadAsStringAsync(ct);
+}`;
+  }
+
+  if (summary.includes('linq') || summary.includes('query') || summary.includes('lambda')) {
+    return `${header}
+var orders = new[]
+{
+    new { Customer = "Ava", Total = 1200m },
+    new { Customer = "Ava", Total = 350m },
+    new { Customer = "Noah", Total = 900m }
+};
+
+var vipCustomers = orders
+    .Where(order => order.Total >= 500m) // Filter early to reduce later work.
+    .GroupBy(order => order.Customer)
+    .Select(group => new { Customer = group.Key, Revenue = group.Sum(x => x.Total) })
+    .OrderByDescending(result => result.Revenue)
+    .ToList(); // Materialize once when a stable snapshot is needed.`;
+  }
+
+  if (summary.includes('record') || summary.includes('immutable') || summary.includes('required') || summary.includes('primary constructor')) {
+    return `${header}
+public sealed class ApiOptions
+{
+    public required string BaseUrl { get; init; }
+    public required string ApiKey { get; init; }
+}
+
+public readonly record struct Money(decimal Amount, string Currency);
+
+var options = new ApiOptions
+{
+    BaseUrl = "https://api.example.com",
+    ApiKey = "live-key"
+};
+
+// Value-based equality makes data-centric models easier to reason about.
+var total = new Money(99m, "USD");`;
+  }
+
+  if (summary.includes('exception') || summary.includes('error')) {
+    return `${header}
+try
+{
+    string configJson = File.ReadAllText("appsettings.json");
+    Console.WriteLine(configJson);
+}
+catch (FileNotFoundException ex)
+{
+    // Add business context, but preserve the original exception details.
+    Console.WriteLine($"Configuration file missing: {ex.FileName}");
+    throw;
+}
+finally
+{
+    Console.WriteLine("Configuration check completed.");
+}`;
+  }
+
+  return `${header}
+${blueprint.code}
+
+// Production checklist:
+// 1. Keep the public API intention-revealing.
+// 2. Write tests around the behavior that can regress.
+// 3. Measure performance before adding complexity.`;
+}
+
+function buildTopicSpecificDefinition(ch, topic, blueprint, focus) {
+  return `
+    <p><strong>${topic.title}</strong> sits inside <strong>${ch.title}</strong> and focuses on ${topic.desc}.</p>
+    <p>This topic becomes important when you need to make a deliberate engineering choice ${focus.use}.</p>
+    <p><strong>Definition:</strong> in this chapter, it belongs to <strong>${blueprint.area}</strong> and influences how readable, safe, and maintainable your C# code will be once it reaches production.</p>
+  `;
+}
+
+function buildTopicSpecificPractice(topic, focus) {
+  return `
+    <p><strong>Use it when:</strong> ${focus.use}</p>
+    <p><strong>Be careful when:</strong> ${focus.avoid}</p>
+    <p><strong>Main trade-off:</strong> ${focus.trade}</p>
+    <p><strong>Checklist:</strong> ${focus.notes.join(' ')}</p>
+  `;
 }
 
 function buildGeneratedDiagram(ch, topic, blueprint) {
@@ -4741,28 +5396,31 @@ function buildGeneratedDiagram(ch, topic, blueprint) {
 }
 
 function buildGeneratedTable(topic, blueprint) {
+  const focus = getTopicFocus(topic, blueprint);
   return {
     type: 'table',
     title: 'Definitions, Use Cases, and Trade-offs',
     headers: ['Dimension', 'Guidance'],
     rows: [
       ['What is it?', `<strong>${topic.title}</strong> focuses on ${topic.desc}.`],
-      ['When to use', blueprint.use],
-      ['When to be careful', blueprint.avoid],
-      ['Trade-off', blueprint.trade],
-      ['Typical C# value', `This topic is most useful when you want clear, correct, idiomatic C# instead of accidental complexity.`]
+      ['When to use', focus.use],
+      ['When to be careful', focus.avoid],
+      ['Trade-off', focus.trade],
+      ['Review checklist', focus.notes.join(' ')],
+      ['Typical C# value', `Use ${topic.title} to make intent clearer in production code, not just to demonstrate syntax knowledge.`]
     ]
   };
 }
 
 function buildGeneratedScenario(topic, blueprint) {
+  const focus = getTopicFocus(topic, blueprint);
   return {
     type: 'scenario',
     title: `Scenario · ${topic.title} in practice`,
     content: `
-      <p>${blueprint.scenario}</p>
-      <p><strong>Use case:</strong> teams need this topic when code clarity, performance, or correctness depends on understanding the underlying C# behavior instead of copying patterns blindly.</p>
-      <p><strong>What to watch:</strong> choose the simplest construct that preserves intent, testability, and runtime safety.</p>
+      <p>${focus.scenario}</p>
+      <p><strong>Use case:</strong> the team reaches for <strong>${topic.title}</strong> when ${focus.use}.</p>
+      <p><strong>What to watch:</strong> ${focus.avoid}.</p>
     `
   };
 }
@@ -4770,10 +5428,12 @@ function buildGeneratedScenario(topic, blueprint) {
 function buildGeneratedDetail(ch, topic) {
   const blueprint = getBlueprintForTopic(topic.id);
   const level = inferTopicLevel(topic.tags);
+  const focus = getTopicFocus(topic, blueprint);
+  const generatedCode = buildTopicSpecificCode(topic, blueprint);
   return {
     title: topic.title,
     breadcrumb: `Chapter ${ch.num} · ${ch.title}`,
-    subtitle: `${topic.desc}. This guide covers the definition, when to use it, trade-offs, practical C# code, visual flow, scenarios, and interview-focused context.`,
+    subtitle: `${topic.desc}. This guide covers what the topic solves, when it fits, trade-offs to watch, a practical C# example with comments, and production context.`,
     badges: [
       { text: level, color: ch.color },
       ...topic.tags.slice(0, 3).map(tag => ({
@@ -4785,22 +5445,12 @@ function buildGeneratedDetail(ch, topic) {
       {
         type: 'prose',
         title: 'What Is It?',
-        content: `
-          <p><strong>${topic.title}</strong> is part of <strong>${ch.title}</strong> and covers ${topic.desc}.</p>
-          <p>In practice, this topic matters because it changes how code is modeled, how the compiler interprets your intent, or how the runtime behaves when the code executes.</p>
-          <h4>Definition</h4>
-          <p>This topic sits in the area of <strong>${blueprint.area}</strong>. Engineers use it to write clearer APIs, safer domain models, and more maintainable production code.</p>
-        `
+        content: buildTopicSpecificDefinition(ch, topic, blueprint, focus)
       },
       {
         type: 'prose',
         title: 'When To Use It and What The Trade-offs Are',
-        content: `
-          <p><strong>When to use:</strong> ${blueprint.use}</p>
-          <p><strong>When to be careful:</strong> ${blueprint.avoid}</p>
-          <p><strong>Trade-offs:</strong> ${blueprint.trade}</p>
-          <p><strong>Rule of thumb:</strong> connect the language feature to a concrete need in readability, correctness, performance, or design flexibility.</p>
-        `
+        content: buildTopicSpecificPractice(topic, focus)
       },
       buildGeneratedTable(topic, blueprint),
       {
@@ -4812,21 +5462,14 @@ function buildGeneratedDetail(ch, topic) {
         type: 'code',
         title: `C# example · ${topic.title}`,
         lang: 'csharp',
-        code: escapeHtml(`// ${topic.title} — practical C# example
-// This sketch shows how the topic usually appears in real code.
-${blueprint.code}
-
-// Production notes:
-// 1. Keep the intent obvious.
-// 2. Prefer explicit, testable behavior over clever syntax.
-// 3. Use profiling or code review to validate trade-offs.`)
+        code: highlightGeneratedCode(generatedCode, 'csharp')
       },
       buildGeneratedScenario(topic, blueprint),
       {
         type: 'callout',
         kind: 'info',
         icon: '💡',
-        text: `<strong>${topic.title} takeaway:</strong> ${blueprint.callout}`
+        text: `<strong>${topic.title} takeaway:</strong> ${focus.trade}. ${blueprint.callout}`
       }
     ]
   };
