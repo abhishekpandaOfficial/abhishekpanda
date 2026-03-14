@@ -313,6 +313,18 @@
     activeHighlightIndex = -1;
   }
 
+  function escapeRegExp(value) {
+    return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function getSearchTerms(rawQuery) {
+    return String(rawQuery || "")
+      .toLowerCase()
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+  }
+
   function setSearchStatus(message, miss = false) {
     const status = document.querySelector(`#${SEARCH_UI_ID} .mastery-search-status`);
     if (!status) return;
@@ -345,19 +357,18 @@
       document.querySelector(".detail-content"),
       document.querySelector(".mid"),
       document.querySelector(".middle"),
-      document.querySelector(".right-panel"),
-      document.body
+      document.querySelector(".right-panel")
     ].filter(Boolean);
   }
 
   function searchVisibleText(query) {
     clearHighlights();
-    if (!query) {
+    const terms = getSearchTerms(query);
+    if (!terms.length) {
       setSearchStatus("");
       return false;
     }
 
-    const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
     const roots = collectSearchRoots();
     const seen = new Set();
 
@@ -385,16 +396,18 @@
       while (walker.nextNode()) matches.push(walker.currentNode);
 
       for (const node of matches) {
-        regex.lastIndex = 0;
         const text = node.nodeValue;
-        if (!regex.test(text)) continue;
+        const lowerText = text.toLowerCase();
+        if (!terms.every((term) => lowerText.includes(term))) continue;
 
-        regex.lastIndex = 0;
         const frag = document.createDocumentFragment();
         let lastIndex = 0;
+        const termPattern = new RegExp(`(${terms.map(escapeRegExp).join("|")})`, "gi");
         let match;
-        while ((match = regex.exec(text)) !== null) {
-          if (match.index > lastIndex) frag.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+        while ((match = termPattern.exec(text)) !== null) {
+          if (match.index > lastIndex) {
+            frag.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+          }
           const mark = document.createElement("mark");
           mark.className = SEARCH_HIT_CLASS;
           mark.textContent = match[0];
@@ -417,19 +430,21 @@
   }
 
   function tryNavigateToMatch(query) {
-    const q = query.toLowerCase();
+    const terms = getSearchTerms(query);
     const chaptersData = Array.isArray(window.chapters) ? window.chapters : Array.isArray(window.CHAPTERS) ? window.CHAPTERS : null;
-    if (!chaptersData) return false;
+    if (!chaptersData || !terms.length) return false;
+
+    const matchesTerms = (value) => terms.every((term) => String(value || "").toLowerCase().includes(term));
 
     const chapterIndex = chaptersData.findIndex((chapter) => {
       const haystack = `${chapter.title || ""} ${chapter.desc || ""} ${(chapter.tags || []).join(" ")}`.toLowerCase();
-      return haystack.includes(q) || (chapter.topics || []).some((topic) => `${topic.title || ""} ${topic.desc || ""} ${(topic.tags || []).join(" ")}`.toLowerCase().includes(q));
+      return matchesTerms(haystack) || (chapter.topics || []).some((topic) => matchesTerms(`${topic.title || ""} ${topic.desc || ""} ${(topic.tags || []).join(" ")}`));
     });
 
     if (chapterIndex < 0) return false;
 
     const chapter = chaptersData[chapterIndex];
-    const topic = (chapter.topics || []).find((item) => `${item.title || ""} ${item.desc || ""} ${(item.tags || []).join(" ")}`.toLowerCase().includes(q));
+    const topic = (chapter.topics || []).find((item) => matchesTerms(`${item.title || ""} ${item.desc || ""} ${(item.tags || []).join(" ")}`));
 
     try {
       if (typeof window.selectChapter === "function") {
