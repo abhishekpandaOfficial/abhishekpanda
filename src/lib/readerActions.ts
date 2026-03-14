@@ -311,6 +311,11 @@ export const applyEmbeddedThemeBridge = (doc: Document, theme: ReaderTheme) => {
         };
 
   const bridgeCss = `
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
     html {
       color-scheme: ${theme};
     }
@@ -337,6 +342,9 @@ export const applyEmbeddedThemeBridge = (doc: Document, theme: ReaderTheme) => {
     }
     body {
       overflow-x: hidden;
+    }
+    main, section, article, aside, div, figure {
+      max-width: 100%;
     }
     h1, h2, h3, h4, h5, h6 {
       font-family: Inter, ui-sans-serif, system-ui, sans-serif !important;
@@ -373,14 +381,57 @@ export const applyEmbeddedThemeBridge = (doc: Document, theme: ReaderTheme) => {
     svg text[fill="#fff"], svg text[fill="#ffffff"] {
       fill: var(--text) !important;
     }
+    table {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      border-collapse: collapse;
+    }
+    pre {
+      max-width: 100%;
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    code, td, th, p, li, figcaption {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
     img, picture, svg, video, canvas, iframe {
       max-width: 100% !important;
+      height: auto !important;
       visibility: visible !important;
+    }
+    svg {
+      display: block;
+      overflow: visible;
     }
     img, video, canvas {
       height: auto;
       object-fit: contain;
       opacity: 1 !important;
+    }
+    .diagram,
+    .diagram-box,
+    .arch,
+    .flow,
+    .mermaid,
+    .code-block,
+    .code-body,
+    .callout,
+    .qa-item,
+    .topic-card,
+    .tc,
+    .mc,
+    .sc,
+    .rb,
+    .detail-content,
+    .right-panel,
+    .middle-panel,
+    .left-panel {
+      max-width: 100%;
+      overflow-wrap: anywhere;
     }
     img[alt*="logo" i], .logo img, [class*="logo"] img {
       object-fit: contain !important;

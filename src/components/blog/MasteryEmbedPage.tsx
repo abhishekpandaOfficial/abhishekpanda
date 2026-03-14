@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { Navigation } from "@/components/layout/Navigation";
 import { useTheme } from "@/components/ThemeProvider";
@@ -27,12 +27,32 @@ export function MasteryEmbedPage({
   embedPath,
   version,
   backgroundClassName = "bg-[#080c14]",
-  sectionLabel = "Blogs",
-  sectionHref = "/blogs",
+  sectionLabel,
+  sectionHref,
 }: MasteryEmbedPageProps) {
   const { theme } = useTheme();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const initialThemeRef = useRef(theme);
+  const location = useLocation();
+
+  const resolvedSection = useMemo(() => {
+    if (sectionLabel && sectionHref) {
+      return { label: sectionLabel, href: sectionHref };
+    }
+
+    if (location.pathname.startsWith("/ai-ml-hub")) {
+      return { label: "AI / ML Hub", href: "/ai-ml-hub" };
+    }
+
+    if (location.pathname.startsWith("/techhub")) {
+      return { label: "TechHub", href: "/techhub" };
+    }
+
+    return {
+      label: sectionLabel || "Blogs",
+      href: sectionHref || "/blogs",
+    };
+  }, [location.pathname, sectionHref, sectionLabel]);
 
   const src = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
@@ -60,7 +80,7 @@ export function MasteryEmbedPage({
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to={sectionHref}>{sectionLabel}</Link>
+                  <Link to={resolvedSection.href}>{resolvedSection.label}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />

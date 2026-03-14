@@ -3,6 +3,14 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Brain, CheckCircle2, Layers3, Sparkles } from "lucide-react";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { AI_ML_SERIES_BY_SLUG, getAiMlSeriesHref } from "@/lib/aiMlSeries";
 import { useTheme } from "@/components/ThemeProvider";
 import { getBlogSeriesVisual } from "@/lib/blogVisuals";
@@ -55,6 +63,26 @@ export default function AiMlSeries() {
 
       <main className="pt-24 pb-20">
         <section className="container mx-auto px-4">
+          <Breadcrumb className="mb-4">
+            <BreadcrumbList className="text-xs md:text-sm">
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/ai-ml-hub">AI / ML Hub</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{series.detailTitle || series.title}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+
           <Link
             to="/ai-ml-hub"
             className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/80 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/30 hover:text-primary"

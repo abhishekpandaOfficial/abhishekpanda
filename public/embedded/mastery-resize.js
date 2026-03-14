@@ -35,6 +35,76 @@
         color: var(--text-primary, #e5edf8);
       }
 
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      img,
+      picture,
+      svg,
+      video,
+      canvas,
+      iframe {
+        max-width: 100%;
+      }
+
+      img,
+      video,
+      canvas {
+        height: auto;
+      }
+
+      svg {
+        display: block;
+        height: auto;
+      }
+
+      pre,
+      code,
+      td,
+      th,
+      p,
+      li {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      pre {
+        max-width: 100%;
+        overflow: auto;
+        white-space: pre-wrap;
+      }
+
+      table {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      .layout,
+      .lay,
+      .left-panel,
+      .middle-panel,
+      .right-panel,
+      #leftPanel,
+      #middlePanel,
+      #rightPanel,
+      .rb,
+      .detail-content,
+      .diagram,
+      .diagram-box,
+      .arch,
+      .code-block,
+      .code-body,
+      .callout,
+      .qa-item {
+        min-width: 0;
+        max-width: 100%;
+      }
+
       .${HANDLE_CLASS} {
         width: 12px;
         flex: 0 0 12px;
@@ -729,6 +799,8 @@
     const observer = new MutationObserver(syncState);
     observer.observe(rightPanel, { attributes: true, attributeFilter: ["class", "style"] });
     observer.observe(layout, { attributes: true, attributeFilter: ["class", "style"] });
+    if (middlePanel) observer.observe(middlePanel, { attributes: true, attributeFilter: ["class", "style"] });
+    if (leftPanel) observer.observe(leftPanel, { attributes: true, attributeFilter: ["class", "style"] });
 
     syncState();
   }

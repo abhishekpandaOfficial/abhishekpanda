@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { useTheme } from "@/components/ThemeProvider";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { measureEmbeddedFrameHeight, syncThemeToEmbeddedFrame } from "@/lib/embeddedFrame";
 
 const ModelComparisonPage = () => {
@@ -66,6 +75,27 @@ const ModelComparisonPage = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <main className="pt-16 md:pt-20">
+        <div className="border-b border-border/60 bg-background/95 px-4 py-3 backdrop-blur md:px-6">
+          <Breadcrumb>
+            <BreadcrumbList className="text-xs md:text-sm">
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/ai-ml-hub">AI / ML Hub</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>AI Model Comparison</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
         <iframe
           ref={iframeRef}
           title="AI Model Comparison"
