@@ -1,0 +1,2809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multithreading: Zero to Hero — C# Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070b14;
+  --bg2: #0d1220;
+  --bg3: #111827;
+  --card: #0f1829;
+  --card2: #141e30;
+  --border: rgba(0,212,170,0.12);
+  --border2: rgba(255,107,53,0.12);
+  --teal: #00d4aa;
+  --teal2: #00ffcc;
+  --orange: #ff6b35;
+  --purple: #a855f7;
+  --blue: #3b82f6;
+  --yellow: #fbbf24;
+  --red: #ef4444;
+  --green: #22c55e;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --code-bg: #0a0f1e;
+  --head: 'Syne', sans-serif;
+  --body: 'Outfit', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 3px; }
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, #070b14 0%, #0d1829 40%, #091420 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 64px 40px 48px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(0,212,170,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-block;
+  background: rgba(0,212,170,0.1);
+  border: 1px solid rgba(0,212,170,0.3);
+  color: var(--teal);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  animation: badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(0,212,170,0.2); }
+  50% { box-shadow: 0 0 20px 4px rgba(0,212,170,0.1); }
+}
+.hero h1 {
+  font-family: var(--head);
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+}
+.hero h1 span.accent { color: var(--teal); }
+.hero h1 span.accent2 { color: var(--orange); }
+.hero-sub {
+  color: var(--text2);
+  font-size: 15px;
+  max-width: 560px;
+  margin: 0 auto 32px;
+}
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.stat {
+  text-align: center;
+}
+.stat-num {
+  font-family: var(--head);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--teal);
+  display: block;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* LAYOUT */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 20px 0;
+}
+.sidebar-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text3);
+  padding: 0 16px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  color: var(--text3);
+  text-decoration: none;
+  font-size: 12px;
+  font-family: var(--body);
+  border-left: 2px solid transparent;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.nav-item:hover, .nav-item.active {
+  color: var(--teal);
+  border-left-color: var(--teal);
+  background: rgba(0,212,170,0.04);
+}
+.nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.nav-group {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.nav-group-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text3);
+  padding: 0 16px 6px;
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: 32px 24px;
+}
+
+/* MODULE SECTION */
+.module-section {
+  margin-bottom: 48px;
+}
+.module-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.module-num {
+  background: linear-gradient(135deg, var(--teal), #00ffaa);
+  color: #000;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.module-num.orange { background: linear-gradient(135deg, var(--orange), #ff9f6b); }
+.module-num.purple { background: linear-gradient(135deg, var(--purple), #c084fc); }
+.module-num.blue { background: linear-gradient(135deg, var(--blue), #60a5fa); }
+.module-num.yellow { background: linear-gradient(135deg, var(--yellow), #fde68a); }
+.module-num.red { background: linear-gradient(135deg, var(--red), #f87171); }
+.module-title {
+  font-family: var(--head);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+.module-desc {
+  font-size: 12px;
+  color: var(--text3);
+  margin-left: auto;
+  font-family: var(--mono);
+}
+
+/* 2-COLUMN GRID */
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.col-span2 { grid-column: 1 / -1; }
+
+/* CONCEPT CARD */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.card:hover {
+  border-color: rgba(0,212,170,0.3);
+  transform: translateY(-1px);
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--teal), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.card:hover::before { opacity: 1; }
+.card.orange { border-color: var(--border2); }
+.card.orange::before { background: linear-gradient(90deg, var(--orange), transparent); }
+.card.orange:hover { border-color: rgba(255,107,53,0.3); }
+.card.purple { border-color: rgba(168,85,247,0.12); }
+.card.purple::before { background: linear-gradient(90deg, var(--purple), transparent); }
+.card.blue { border-color: rgba(59,130,246,0.12); }
+.card.blue::before { background: linear-gradient(90deg, var(--blue), transparent); }
+.card.red { border-color: rgba(239,68,68,0.15); }
+.card.red::before { background: linear-gradient(90deg, var(--red), transparent); }
+.card.yellow { border-color: rgba(251,191,36,0.12); }
+.card.yellow::before { background: linear-gradient(90deg, var(--yellow), transparent); }
+
+.card-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  margin-bottom: 6px;
+  opacity: 0.7;
+}
+.card-num.orange { color: var(--orange); }
+.card-num.purple { color: var(--purple); }
+.card-num.blue { color: var(--blue); }
+.card-num.red { color: var(--red); }
+.card-num.yellow { color: var(--yellow); }
+
+.card-title {
+  font-family: var(--head);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.card-body {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.65;
+}
+.card-body p { margin-bottom: 8px; }
+.card-body p:last-child { margin-bottom: 0; }
+
+/* INLINE CODE */
+code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: rgba(0,212,170,0.08);
+  border: 1px solid rgba(0,212,170,0.15);
+  color: var(--teal);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* CODE BLOCK */
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid rgba(0,212,170,0.1);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: #a5f3fc;
+  overflow-x: auto;
+  margin: 12px 0;
+  position: relative;
+}
+.code-block .kw { color: #c084fc; }
+.code-block .cls { color: #60a5fa; }
+.code-block .str { color: #86efac; }
+.code-block .cm { color: var(--text3); font-style: italic; }
+.code-block .nm { color: #fbbf24; }
+.code-block .op { color: #f472b6; }
+.code-lang {
+  position: absolute;
+  top: 8px; right: 12px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text3);
+}
+
+/* HIGHLIGHT BOX */
+.highlight {
+  background: rgba(0,212,170,0.05);
+  border-left: 3px solid var(--teal);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  margin: 10px 0;
+  font-size: 13px;
+  color: var(--text2);
+}
+.highlight.orange { background: rgba(255,107,53,0.05); border-left-color: var(--orange); }
+.highlight.red { background: rgba(239,68,68,0.05); border-left-color: var(--red); }
+.highlight.purple { background: rgba(168,85,247,0.05); border-left-color: var(--purple); }
+.highlight.yellow { background: rgba(251,191,36,0.05); border-left-color: var(--yellow); }
+.highlight.blue { background: rgba(59,130,246,0.05); border-left-color: var(--blue); }
+
+/* TAGS / CHIPS */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip {
+  background: rgba(0,212,170,0.08);
+  border: 1px solid rgba(0,212,170,0.2);
+  color: var(--teal);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.chip.orange { background: rgba(255,107,53,0.08); border-color: rgba(255,107,53,0.2); color: var(--orange); }
+.chip.red { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); color: var(--red); }
+.chip.green { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.2); color: var(--green); }
+
+/* COMPARISON TABLE */
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 10px;
+}
+.comp-table th {
+  background: rgba(0,212,170,0.08);
+  color: var(--teal);
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.comp-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--text2);
+  vertical-align: top;
+}
+.comp-table tr:last-child td { border-bottom: none; }
+.comp-table td:first-child { color: var(--teal); font-family: var(--mono); font-size: 11px; }
+
+/* ===== ANIMATED FLOW DIAGRAMS ===== */
+.flow-diagram {
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.flow-node {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  text-align: center;
+  min-width: 160px;
+  position: relative;
+  animation: nodePulse 3s ease-in-out infinite;
+}
+.flow-node.teal { border-color: rgba(0,212,170,0.4); color: var(--teal); background: rgba(0,212,170,0.06); }
+.flow-node.orange { border-color: rgba(255,107,53,0.4); color: var(--orange); background: rgba(255,107,53,0.06); }
+.flow-node.purple { border-color: rgba(168,85,247,0.4); color: var(--purple); background: rgba(168,85,247,0.06); }
+.flow-node.blue { border-color: rgba(59,130,246,0.4); color: var(--blue); background: rgba(59,130,246,0.06); }
+.flow-node.red { border-color: rgba(239,68,68,0.4); color: var(--red); background: rgba(239,68,68,0.06); }
+.flow-node.yellow { border-color: rgba(251,191,36,0.4); color: var(--yellow); background: rgba(251,191,36,0.06); }
+
+@keyframes nodePulse {
+  0%,100% { box-shadow: none; }
+  50% { box-shadow: 0 0 12px rgba(0,212,170,0.08); }
+}
+
+.flow-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin: 2px 0;
+}
+.flow-arrow-line {
+  width: 2px;
+  height: 16px;
+  background: linear-gradient(to bottom, var(--teal), transparent);
+  position: relative;
+  overflow: hidden;
+}
+.flow-arrow-line::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0; right: 0;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, var(--teal2));
+  animation: flowDown 1.5s linear infinite;
+}
+@keyframes flowDown {
+  0% { top: -100%; }
+  100% { top: 100%; }
+}
+.flow-arrow-head {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid var(--teal);
+}
+.flow-arrow.orange .flow-arrow-line { background: linear-gradient(to bottom, var(--orange), transparent); }
+.flow-arrow.orange .flow-arrow-line::after { background: linear-gradient(to bottom, transparent, #ff9f6b); }
+.flow-arrow.orange .flow-arrow-head { border-top-color: var(--orange); }
+
+/* Horizontal flow */
+.flow-h {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.flow-h-arrow {
+  display: flex;
+  align-items: center;
+  margin: 0 2px;
+}
+.flow-h-line {
+  height: 2px;
+  width: 20px;
+  background: linear-gradient(to right, var(--teal), transparent);
+  position: relative;
+  overflow: hidden;
+}
+.flow-h-line::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: -100%;
+  width: 100%;
+  background: linear-gradient(to right, transparent, var(--teal2));
+  animation: flowRight 1.5s linear infinite;
+}
+@keyframes flowRight {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+.flow-h-head {
+  width: 0; height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid var(--teal);
+}
+
+/* PARALLEL LANES */
+.parallel-flow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 16px 0;
+}
+.parallel-lane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+.parallel-lane-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.parallel-bar {
+  width: 100%;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  position: relative;
+  overflow: hidden;
+}
+.parallel-bar.teal { background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.3); color: var(--teal); }
+.parallel-bar.orange { background: rgba(255,107,53,0.1); border: 1px solid rgba(255,107,53,0.3); color: var(--orange); }
+.parallel-bar.purple { background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.3); color: var(--purple); }
+.parallel-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 2s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* LOCK ANIMATION */
+.lock-demo {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
+}
+.thread-box {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-align: center;
+  min-width: 80px;
+}
+.thread-box.active { border-color: var(--green); color: var(--green); animation: activeThread 1s ease-in-out infinite; }
+.thread-box.waiting { border-color: var(--orange); color: var(--orange); animation: waitThread 1.5s ease-in-out infinite; }
+@keyframes activeThread { 0%,100%{opacity:1} 50%{opacity:0.7} }
+@keyframes waitThread { 0%,100%{opacity:0.5} 50%{opacity:1} }
+
+.lock-icon {
+  font-size: 24px;
+  animation: lockBounce 2s ease-in-out infinite;
+}
+@keyframes lockBounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+
+/* BADGE PILL */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0,212,170,0.1);
+  border: 1px solid rgba(0,212,170,0.25);
+  color: var(--teal);
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.badge.orange { background: rgba(255,107,53,0.1); border-color: rgba(255,107,53,0.25); color: var(--orange); }
+.badge.green { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.25); color: var(--green); }
+.badge.red { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.25); color: var(--red); }
+.badge.purple { background: rgba(168,85,247,0.1); border-color: rgba(168,85,247,0.25); color: var(--purple); }
+
+/* LIST STYLES */
+.concept-list { list-style: none; padding: 0; margin: 8px 0; }
+.concept-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--text2);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.concept-list li:last-child { border-bottom: none; }
+.concept-list li::before {
+  content: '▸';
+  color: var(--teal);
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: 11px;
+}
+
+/* SECTION DIVIDER */
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 32px 0;
+}
+
+/* BREADCRUMB */
+.breadcrumb {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  margin-bottom: 6px;
+}
+
+/* RACE CONDITION VISUAL */
+.race-demo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 12px 0;
+}
+.race-box {
+  background: var(--code-bg);
+  border-radius: 8px;
+  padding: 12px;
+}
+.race-box-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.race-box-title.bad { color: var(--red); }
+.race-box-title.good { color: var(--green); }
+
+/* COUNTER ANIMATION */
+.counter-anim {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px 0;
+}
+.counter-anim.bad { color: var(--red); animation: badCounter 2s steps(1) infinite; }
+.counter-anim.good { color: var(--green); }
+@keyframes badCounter {
+  0%{content:'1600'} 25%{content:'1750'} 50%{content:'1820'} 75%{content:'1600'} 100%{content:'1600'}
+}
+
+/* DEADLOCK VISUAL */
+.deadlock-visual {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 16px 8px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dl-node {
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--red);
+  text-align: center;
+  animation: deadlockPulse 2s ease-in-out infinite;
+}
+.dl-node:nth-child(3) { animation-delay: 1s; }
+@keyframes deadlockPulse { 0%,100%{opacity:0.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.03)} }
+.dl-arrow {
+  font-size: 18px;
+  color: var(--orange);
+  animation: arrowBlink 1s ease-in-out infinite;
+}
+@keyframes arrowBlink { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+/* PRODUCER-CONSUMER */
+.pc-flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  padding: 12px 0;
+  flex-wrap: wrap;
+}
+.pc-node {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-align: center;
+}
+.pc-queue {
+  display: flex;
+  gap: 3px;
+}
+.pc-item {
+  width: 18px;
+  height: 28px;
+  border-radius: 4px;
+  background: rgba(0,212,170,0.2);
+  border: 1px solid rgba(0,212,170,0.4);
+  animation: queueMove 2s ease-in-out infinite;
+}
+.pc-item:nth-child(2) { animation-delay: 0.3s; opacity: 0.7; }
+.pc-item:nth-child(3) { animation-delay: 0.6s; opacity: 0.4; }
+@keyframes queueMove { 0%,100%{transform:translateX(0)} 50%{transform:translateX(3px)} }
+
+/* ARCHITECTURE DIAGRAM */
+.arch-diagram {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 10px 0;
+}
+.arch-layer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.arch-box {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  flex: 1;
+  text-align: center;
+  max-width: 200px;
+}
+.arch-box.teal { border-color: rgba(0,212,170,0.3); color: var(--teal); background: rgba(0,212,170,0.05); }
+.arch-box.orange { border-color: rgba(255,107,53,0.3); color: var(--orange); background: rgba(255,107,53,0.05); }
+.arch-box.blue { border-color: rgba(59,130,246,0.3); color: var(--blue); background: rgba(59,130,246,0.05); }
+.arch-box.purple { border-color: rgba(168,85,247,0.3); color: var(--purple); background: rgba(168,85,247,0.05); }
+.arch-arrow {
+  width: 2px;
+  height: 12px;
+  background: var(--border);
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+.arch-arrow::after {
+  content:'';
+  position:absolute;
+  top:-100%;left:0;right:0;
+  height:100%;
+  background: linear-gradient(to bottom, transparent, var(--teal));
+  animation: archFlow 1.2s linear infinite;
+}
+@keyframes archFlow { 0%{top:-100%} 100%{top:100%} }
+
+/* ASYNC AWAIT FLOW */
+.async-flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: 8px;
+  padding: 8px 0;
+}
+.async-timeline {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.async-block {
+  padding: 6px 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  border-bottom: 1px solid var(--border);
+}
+.async-block:last-child { border-bottom: none; }
+.async-block.active { background: rgba(0,212,170,0.08); color: var(--teal); }
+.async-block.wait { background: rgba(251,191,36,0.06); color: var(--yellow); }
+.async-block.resume { background: rgba(34,197,94,0.06); color: var(--green); }
+
+/* THREADPOOL VISUAL */
+.pool-visual {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 10px 0;
+}
+.pool-thread {
+  height: 36px;
+  border-radius: 6px;
+  background: rgba(0,212,170,0.08);
+  border: 1px solid rgba(0,212,170,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  animation: threadActive 3s ease-in-out infinite;
+}
+.pool-thread:nth-child(2) { animation-delay: 0.5s; }
+.pool-thread:nth-child(3) { animation-delay: 1s; }
+.pool-thread:nth-child(4) { animation-delay: 1.5s; }
+.pool-thread:nth-child(5) { animation-delay: 0.3s; background: rgba(255,107,53,0.08); border-color: rgba(255,107,53,0.2); color: var(--orange); }
+.pool-thread:nth-child(6) { animation-delay: 0.8s; background: rgba(168,85,247,0.08); border-color: rgba(168,85,247,0.2); color: var(--purple); }
+.pool-thread:nth-child(7) { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.2); color: var(--blue); animation-delay: 1.2s; }
+.pool-thread:nth-child(8) { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.2); color: var(--green); animation-delay: 1.7s; }
+@keyframes threadActive { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.03)} }
+
+/* KESTREL FLOW */
+.kestrel-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px;
+}
+.k-node {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  width: 100%;
+  max-width: 220px;
+  text-align: center;
+  transition: all 0.2s;
+}
+.k-node:hover { border-color: rgba(0,212,170,0.3); color: var(--teal); }
+
+/* SEMAPHORE VISUAL */
+.sem-visual {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+.sem-thread {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+}
+.sem-thread.allowed { background: rgba(34,197,94,0.12); border: 2px solid var(--green); color: var(--green); animation: semAllow 2s ease-in-out infinite; }
+.sem-thread.waiting { background: rgba(255,107,53,0.12); border: 2px solid var(--orange); color: var(--orange); animation: semWait 1.5s ease-in-out infinite; }
+@keyframes semAllow { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+@keyframes semWait { 0%,100%{opacity:0.5} 50%{opacity:1} }
+.sem-counter {
+  background: rgba(0,212,170,0.1);
+  border: 1px solid rgba(0,212,170,0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--teal);
+}
+
+/* COMPARISON SIDE BY SIDE */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 10px 0;
+}
+.compare-col {
+  border-radius: 8px;
+  padding: 12px;
+}
+.compare-col.bad { background: rgba(239,68,68,0.04); border: 1px solid rgba(239,68,68,0.15); }
+.compare-col.good { background: rgba(34,197,94,0.04); border: 1px solid rgba(34,197,94,0.15); }
+.compare-col-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.compare-col.bad .compare-col-title { color: var(--red); }
+.compare-col.good .compare-col-title { color: var(--green); }
+
+/* ACTOR MODEL */
+.actor-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0;
+  flex-wrap: wrap;
+}
+.actor-node {
+  background: rgba(168,85,247,0.08);
+  border: 1px solid rgba(168,85,247,0.3);
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--purple);
+  text-align: center;
+  animation: actorPulse 2s ease-in-out infinite;
+}
+.actor-node:nth-child(3) { animation-delay: 0.7s; }
+.actor-node:nth-child(5) { animation-delay: 1.4s; }
+@keyframes actorPulse { 0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,0.2)} 50%{box-shadow:0 0 12px 3px rgba(168,85,247,0.15)} }
+.actor-msg {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text3);
+  text-align: center;
+  padding: 2px 0;
+}
+.actor-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* MENTAL MODEL */
+.mental-model {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.mm-top {
+  background: rgba(0,212,170,0.08);
+  border: 1px solid rgba(0,212,170,0.2);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--teal);
+  margin-bottom: 8px;
+}
+.mm-branches {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.mm-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.mm-branch-line {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.mm-branch-line::after {
+  content: '';
+  position: absolute;
+  top: -100%; left: 0; right: 0;
+  height: 100%;
+  background: var(--teal);
+  animation: branchFlow 1.5s linear infinite;
+}
+@keyframes branchFlow { 0%{top:-100%} 100%{top:100%} }
+.mm-task {
+  background: rgba(0,212,170,0.06);
+  border: 1px solid rgba(0,212,170,0.15);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--teal);
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .cols2 { grid-template-columns: 1fr; }
+  .hero { padding: 40px 20px 32px; }
+  .main { padding: 20px 16px; }
+}
+@media (max-width: 1100px) {
+  .cols3 { grid-template-columns: 1fr 1fr; }
+}
+
+/* FOOTER */
+.page-footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 24px 40px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+}
+.page-footer span { color: var(--teal); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-badge">C# Complete Reference</div>
+  <h1>Multithreading<br><span class="accent">Zero</span> to <span class="accent2">Hero</span></h1>
+  <p class="hero-sub">A complete guide to concurrent programming in C# — from basic threads to enterprise-scale architecture patterns.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">41</span><span class="stat-label">Concepts</span></div>
+    <div class="stat"><span class="stat-num">12</span><span class="stat-label">Modules</span></div>
+    <div class="stat"><span class="stat-num">30+</span><span class="stat-label">Code Examples</span></div>
+    <div class="stat"><span class="stat-num">10+</span><span class="stat-label">Flow Diagrams</span></div>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR NAV -->
+<nav class="sidebar">
+  <div class="sidebar-title">Navigation</div>
+  <a class="nav-item active" href="#m1"><span class="nav-dot"></span>Foundations</a>
+  <a class="nav-item" href="#m2"><span class="nav-dot"></span>Thread Basics</a>
+  <a class="nav-item" href="#m3"><span class="nav-dot"></span>Synchronization</a>
+  <a class="nav-item" href="#m4"><span class="nav-dot"></span>Async / Await</a>
+  <a class="nav-item" href="#m5"><span class="nav-dot"></span>Real World</a>
+  <div class="nav-group">
+    <div class="nav-group-title">Advanced</div>
+    <a class="nav-item" href="#m6"><span class="nav-dot"></span>Mutex & Semaphore</a>
+    <a class="nav-item" href="#m7"><span class="nav-dot"></span>Monitor & Collections</a>
+    <a class="nav-item" href="#m8"><span class="nav-dot"></span>Patterns & Problems</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Enterprise</div>
+    <a class="nav-item" href="#m9"><span class="nav-dot"></span>Enterprise Patterns</a>
+    <a class="nav-item" href="#m10"><span class="nav-dot"></span>TPL Deep Dive</a>
+    <a class="nav-item" href="#m11"><span class="nav-dot"></span>Sync Context</a>
+    <a class="nav-item" href="#m12"><span class="nav-dot"></span>Production Scale</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Reference</div>
+    <a class="nav-item" href="#summary"><span class="nav-dot"></span>Summary Table</a>
+    <a class="nav-item" href="#kestrel"><span class="nav-dot"></span>Kestrel Internals</a>
+    <a class="nav-item" href="#threadpool-internal"><span class="nav-dot"></span>ThreadPool Internals</a>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+<!-- ============ MODULE 1: FOUNDATIONS ============ -->
+<section class="module-section" id="m1">
+  <div class="module-header">
+    <span class="module-num">MODULE 01</span>
+    <span class="module-title">Foundations</span>
+    <span class="module-desc">Concepts #1 – #4</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- CARD 1: What is Multithreading -->
+    <div class="card">
+      <div class="card-num">#01</div>
+      <div class="card-title">What is Multithreading?</div>
+      <div class="card-body">
+        <p><strong style="color:var(--teal)">Multithreading</strong> allows a program to run multiple tasks at the same time within the same process. A <code>thread</code> is the smallest unit of execution inside a program.</p>
+        <div class="highlight">In C#, threads run using: <code>Thread</code>, <code>Task</code>, <code>ThreadPool</code>, <code>async/await</code></div>
+
+        <!-- Animated Single vs Multi -->
+        <div style="margin-top:14px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:var(--code-bg);border-radius:8px;padding:12px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Single Thread</div>
+              <div class="flow-diagram" style="gap:2px">
+                <div class="flow-node" style="font-size:11px;padding:5px 10px;min-width:120px">Download File</div>
+                <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+                <div class="flow-node" style="font-size:11px;padding:5px 10px;min-width:120px">Update Progress</div>
+                <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+                <div class="flow-node" style="font-size:11px;padding:5px 10px;min-width:120px">Accept Input</div>
+              </div>
+            </div>
+            <div style="background:var(--code-bg);border-radius:8px;padding:12px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Multithreaded</div>
+              <div class="parallel-flow" style="flex-direction:column;gap:6px">
+                <div class="parallel-bar teal">Download File</div>
+                <div class="parallel-bar orange">Update Progress</div>
+                <div class="parallel-bar purple">Accept Input</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2: Why Use Multithreading -->
+    <div class="card orange">
+      <div class="card-num orange">#02</div>
+      <div class="card-title">Why Use Multithreading?</div>
+      <div class="card-body">
+        <p>Multithreading improves <strong style="color:var(--orange)">performance and responsiveness</strong>.</p>
+        <div class="compare-grid">
+          <div class="compare-col bad">
+            <div class="compare-col-title">✗ Without Threading</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text2)">User clicks "Generate Report"<br><span style="color:var(--red)">UI freezes for 10 seconds</span></div>
+          </div>
+          <div class="compare-col good">
+            <div class="compare-col-title">✓ With Threading</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text2)">Report runs in background<br><span style="color:var(--green)">UI remains usable</span></div>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px">MAIN REASONS</div>
+          <ul class="concept-list">
+            <li>Better CPU usage</li>
+            <li>Faster execution</li>
+            <li>Responsive UI</li>
+            <li>Background processing</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 3: When to Use -->
+    <div class="card blue">
+      <div class="card-num blue">#03</div>
+      <div class="card-title">When to Use Multithreading?</div>
+      <div class="card-body">
+        <div class="chips" style="margin-bottom:10px">
+          <span class="chip">Independent tasks</span>
+          <span class="chip">Time-consuming</span>
+          <span class="chip">Background tasks</span>
+        </div>
+        <ul class="concept-list">
+          <li>Processing multiple files simultaneously</li>
+          <li>Handling multiple users in a server</li>
+          <li>Database &amp; API calls</li>
+          <li>Image processing / AI/ML calculations</li>
+          <li>Logging, Monitoring, File uploads</li>
+        </ul>
+        <div class="highlight red" style="margin-top:10px">
+          <strong style="color:var(--red)">Avoid</strong> when tasks depend heavily on each other, or too many threads create overhead.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 4: Thread Creation -->
+    <div class="card purple">
+      <div class="card-num purple">#04</div>
+      <div class="card-title">Thread Creation in C#</div>
+      <div class="card-body">
+        <p>There are <strong style="color:var(--purple)">multiple ways</strong> to create threads in C#.</p>
+        <table class="comp-table" style="margin-top:10px">
+          <tr><th>Approach</th><th>Best For</th></tr>
+          <tr><td>Thread class</td><td>Manual, fine-grained control</td></tr>
+          <tr><td>ThreadPool</td><td>Short background tasks</td></tr>
+          <tr><td>Task</td><td>Modern async operations</td></tr>
+          <tr><td>async/await</td><td>I/O-bound operations</td></tr>
+        </table>
+        <div style="margin-top:12px">
+          <div class="flow-h">
+            <div class="flow-node" style="min-width:80px;font-size:11px;padding:6px 10px">Thread</div>
+            <div class="flow-h-arrow"><div class="flow-h-line"></div><div class="flow-h-head"></div></div>
+            <div class="flow-node purple" style="min-width:80px;font-size:11px;padding:6px 10px">ThreadPool</div>
+            <div class="flow-h-arrow"><div class="flow-h-line"></div><div class="flow-h-head"></div></div>
+            <div class="flow-node teal" style="min-width:80px;font-size:11px;padding:6px 10px">Task</div>
+            <div class="flow-h-arrow"><div class="flow-h-line"></div><div class="flow-h-head"></div></div>
+            <div class="flow-node orange" style="min-width:80px;font-size:11px;padding:6px 10px">async/await</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ MODULE 2: THREAD BASICS ============ -->
+<section class="module-section" id="m2">
+  <div class="module-header">
+    <span class="module-num orange">MODULE 02</span>
+    <span class="module-title">Thread Basics</span>
+    <span class="module-desc">Concepts #5 – #8</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- CARD 5: Thread Class -->
+    <div class="card">
+      <div class="card-num">#05</div>
+      <div class="card-title">Using the Thread Class</div>
+      <div class="card-body">
+        <p>Namespace: <code>using System.Threading;</code></p>
+        <div class="code-block">
+          <span class="kw">static void</span> <span class="nm">PrintNumbers</span>() {
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">1</span>; i&lt;=<span class="nm">5</span>; i++) {
+    Console.<span class="nm">WriteLine</span>(<span class="str">"Thread: "</span> + i);
+    Thread.<span class="nm">Sleep</span>(<span class="nm">1000</span>);
+  }
+}
+<span class="kw">static void</span> <span class="nm">Main</span>() {
+  Thread t = <span class="kw">new</span> <span class="cls">Thread</span>(PrintNumbers);
+  t.<span class="nm">Start</span>();
+  Console.<span class="nm">WriteLine</span>(<span class="str">"Main thread running"</span>);
+}</div>
+        <!-- Thread execution diagram -->
+        <div style="margin-top:10px;background:var(--code-bg);border-radius:8px;padding:12px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">EXECUTION FLOW</div>
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <div class="flow-diagram" style="flex:1">
+              <div class="flow-node teal" style="font-size:11px;padding:5px">Main Thread</div>
+              <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+              <div class="flow-node" style="font-size:11px;padding:5px">Spawns Thread</div>
+              <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+              <div class="flow-node orange" style="font-size:11px;padding:5px">PrintNumbers()</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 6: Passing Parameters -->
+    <div class="card orange">
+      <div class="card-num orange">#06</div>
+      <div class="card-title">Passing Parameters to a Thread</div>
+      <div class="card-body">
+        <div class="code-block">
+<span class="kw">static void</span> <span class="nm">PrintTable</span>(<span class="kw">object</span> number) {
+  <span class="kw">int</span> n = (<span class="kw">int</span>)number;
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">1</span>; i&lt;=<span class="nm">5</span>; i++)
+    Console.<span class="nm">WriteLine</span>(n + <span class="str">" x "</span> + i + <span class="str">" = "</span> + (n*i));
+}
+<span class="kw">static void</span> <span class="nm">Main</span>() {
+  Thread t = <span class="kw">new</span> <span class="cls">Thread</span>(PrintTable);
+  t.<span class="nm">Start</span>(<span class="nm">5</span>); <span class="cm">// pass parameter</span>
+}</div>
+        <div class="highlight orange" style="margin-top:10px">
+          Parameters are passed as <code>object</code> and must be cast to the correct type inside the thread method.
+        </div>
+        <div style="font-family:var(--mono);font-size:12px;background:var(--code-bg);border-radius:6px;padding:8px;margin-top:8px;color:var(--green)">
+          Output:<br>5 x 1 = 5<br>5 x 2 = 10<br>5 x 3 = 15 ...
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 7: Thread.Sleep -->
+    <div class="card yellow">
+      <div class="card-num yellow">#07</div>
+      <div class="card-title">Thread.Sleep()</div>
+      <div class="card-body">
+        <p>Pauses a thread for a specific time (in milliseconds).</p>
+        <div class="code-block">
+<span class="cm">// Pause thread for 2 seconds</span>
+Thread.<span class="nm">Sleep</span>(<span class="nm">2000</span>);
+
+<span class="cm">// Output every 1 second</span>
+<span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">1</span>; i&lt;=<span class="nm">3</span>; i++) {
+  Console.<span class="nm">WriteLine</span>(i);
+  Thread.<span class="nm">Sleep</span>(<span class="nm">1000</span>);
+}</div>
+        <!-- Sleep timeline visualization -->
+        <div style="margin-top:12px;background:var(--code-bg);border-radius:8px;padding:10px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">TIMELINE</div>
+          <div style="display:flex;gap:4px;align-items:center">
+            <div style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);border-radius:4px;padding:5px 10px;font-family:var(--mono);font-size:11px;color:var(--yellow)">Run</div>
+            <div style="height:2px;width:30px;background:rgba(251,191,36,0.3);border-radius:2px;position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--yellow));animation:shimmer 1.5s infinite"></div></div>
+            <div style="background:rgba(100,116,139,0.15);border:1px solid rgba(100,116,139,0.3);border-radius:4px;padding:5px 10px;font-family:var(--mono);font-size:11px;color:var(--text3)">Sleep 2s</div>
+            <div style="height:2px;width:30px;background:rgba(251,191,36,0.3);border-radius:2px;position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--yellow));animation:shimmer 1.5s infinite"></div></div>
+            <div style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);border-radius:4px;padding:5px 10px;font-family:var(--mono);font-size:11px;color:var(--yellow)">Resume</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 8: Joining Threads -->
+    <div class="card">
+      <div class="card-num">#08</div>
+      <div class="card-title">Joining Threads</div>
+      <div class="card-body">
+        <p><code>Join()</code> waits for a thread to finish before continuing execution.</p>
+        <div class="code-block">
+Thread t = <span class="kw">new</span> <span class="cls">Thread</span>(PrintNumbers);
+t.<span class="nm">Start</span>();
+t.<span class="nm">Join</span>(); <span class="cm">// wait here</span>
+Console.<span class="nm">WriteLine</span>(<span class="str">"Thread finished"</span>);</div>
+        <div style="margin-top:12px">
+          <div class="flow-diagram">
+            <div class="flow-node teal" style="font-size:11px;padding:5px;min-width:150px">Main Thread starts</div>
+            <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+            <div class="flow-node orange" style="font-size:11px;padding:5px;min-width:150px">New Thread runs</div>
+            <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+            <div class="flow-node yellow" style="font-size:11px;padding:5px;min-width:150px">Main waits (Join)</div>
+            <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+            <div class="flow-node" style="font-size:11px;padding:5px;min-width:150px;border-color:rgba(34,197,94,0.4);color:var(--green);background:rgba(34,197,94,0.06)">"Thread finished"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ MODULE 3: SYNCHRONIZATION ============ -->
+<section class="module-section" id="m3">
+  <div class="module-header">
+    <span class="module-num red">MODULE 03</span>
+    <span class="module-title">Synchronization</span>
+    <span class="module-desc">Concepts #9 – #13</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- CARD 9: Race Condition -->
+    <div class="card red">
+      <div class="card-num red">#09</div>
+      <div class="card-title">Race Condition</div>
+      <div class="card-body">
+        <p>When <strong style="color:var(--red)">multiple threads access the same variable</strong>, problems occur — threads interfere with each other's operations.</p>
+        <div class="compare-grid">
+          <div class="compare-col bad">
+            <div class="compare-col-title">✗ Problem</div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--red)">Expected: 2000<br>Actual: 1600–1800</div>
+          </div>
+          <div class="compare-col bad">
+            <div class="compare-col-title" style="color:var(--orange)">Why?</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text2)">Threads both read &amp; write<br>counter++ simultaneously</div>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top:10px">
+<span class="kw">int</span> counter = <span class="nm">0</span>;
+<span class="kw">void</span> <span class="nm">Increment</span>() {
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">0</span>; i&lt;<span class="nm">1000</span>; i++)
+    counter++; <span class="cm">// NOT thread-safe!</span>
+}</div>
+        <!-- Animated race visualization -->
+        <div style="margin-top:10px;background:var(--code-bg);border-radius:8px;padding:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="thread-box waiting">T1<br>counter++</div>
+            <div style="text-align:center">
+              <div style="font-family:var(--mono);font-size:22px;color:var(--red);animation:badCounter 2s steps(1) infinite" id="badCount">≠ 2000</div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">CONFLICT</div>
+            </div>
+            <div class="thread-box active">T2<br>counter++</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 10: Lock -->
+    <div class="card">
+      <div class="card-num">#10</div>
+      <div class="card-title">Lock — Thread Synchronization</div>
+      <div class="card-body">
+        <p>The <code>lock</code> statement ensures <strong style="color:var(--teal)">only one thread runs the block at a time</strong>, preventing race conditions.</p>
+        <div class="code-block">
+<span class="kw">static object</span> lockObj = <span class="kw">new object</span>();
+<span class="kw">static void</span> <span class="nm">Increment</span>() {
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">0</span>; i&lt;<span class="nm">1000</span>; i++) {
+    <span class="kw">lock</span>(lockObj) {
+      counter++; <span class="cm">// thread-safe ✓</span>
+    }
+  }
+}</div>
+        <!-- Lock animation -->
+        <div style="margin-top:10px;background:var(--code-bg);border-radius:8px;padding:12px">
+          <div class="lock-demo">
+            <div class="thread-box active">T1<br>RUNNING</div>
+            <div style="text-align:center">
+              <div class="lock-icon">🔒</div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--teal)">LOCKED</div>
+            </div>
+            <div class="thread-box waiting">T2<br>WAITING</div>
+          </div>
+          <div style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--green);margin-top:6px">Result: counter = 2000 ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 11: ThreadPool -->
+    <div class="card purple">
+      <div class="card-num purple">#11</div>
+      <div class="card-title">ThreadPool</div>
+      <div class="card-body">
+        <p>Creating threads manually is <strong style="color:var(--orange)">expensive</strong>. C# provides <code>ThreadPool</code> for managing threads automatically — <strong style="color:var(--purple)">reusing threads</strong> for better performance.</p>
+        <div class="code-block">
+<span class="cls">ThreadPool</span>.<span class="nm">QueueUserWorkItem</span>(state => {
+  Console.<span class="nm">WriteLine</span>(<span class="str">"ThreadPool working"</span>);
+});</div>
+        <!-- Pool visualization -->
+        <div class="pool-visual" style="margin-top:12px">
+          <div class="pool-thread">T1</div>
+          <div class="pool-thread">T2</div>
+          <div class="pool-thread">T3</div>
+          <div class="pool-thread">T4</div>
+          <div class="pool-thread">T5</div>
+          <div class="pool-thread">T6</div>
+          <div class="pool-thread">T7</div>
+          <div class="pool-thread">T8</div>
+        </div>
+        <div class="chips">
+          <span class="chip">Reuses threads</span>
+          <span class="chip">Better performance</span>
+          <span class="chip">Less memory</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 12: Task -->
+    <div class="card">
+      <div class="card-num">#12</div>
+      <div class="card-title">Task — Modern Multithreading</div>
+      <div class="card-body">
+        <p>The <strong style="color:var(--teal)">recommended modern way</strong> to run background work. Namespace: <code>System.Threading.Tasks</code></p>
+        <div class="code-block">
+Task task = <span class="cls">Task</span>.<span class="nm">Run</span>(() => {
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">1</span>; i&lt;=<span class="nm">5</span>; i++)
+    Console.<span class="nm">WriteLine</span>(i);
+});
+task.<span class="nm">Wait</span>(); <span class="cm">// wait for completion</span></div>
+        <div class="highlight" style="margin-top:10px">
+          <strong>Advantages:</strong> Simpler API, more powerful, handles thread management internally, supports cancellation and continuation.
+        </div>
+        <!-- Task vs Thread comparison -->
+        <table class="comp-table" style="margin-top:10px">
+          <tr><th>Feature</th><th>Thread</th><th>Task</th></tr>
+          <tr><td>API</td><td style="color:var(--text2)">Manual</td><td style="color:var(--green)">Modern</td></tr>
+          <tr><td>Cancel</td><td style="color:var(--red)">Hard</td><td style="color:var(--green)">Built-in</td></tr>
+          <tr><td>Pool</td><td style="color:var(--red)">No</td><td style="color:var(--green)">Yes</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- CARD 13: Parallel Processing -->
+    <div class="card blue col-span2">
+      <div class="card-num blue">#13</div>
+      <div class="card-title">Parallel Processing</div>
+      <div class="card-body">
+        <p>Used for <strong style="color:var(--blue)">CPU-heavy operations</strong>. The <code>Parallel</code> class runs iterations simultaneously across multiple cores.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <div class="code-block">
+<span class="cm">// Parallel.For</span>
+<span class="cls">Parallel</span>.<span class="nm">For</span>(<span class="nm">1</span>, <span class="nm">5</span>, i => {
+  Console.<span class="nm">WriteLine</span>(<span class="str">"Number: "</span> + i);
+});
+<span class="cm">// All iterations run in parallel</span></div>
+          </div>
+          <div>
+            <!-- Parallel execution visual -->
+            <div style="background:var(--code-bg);border-radius:8px;padding:12px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Parallel Execution</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div class="parallel-bar teal" style="animation-delay:0s">Loop i=1</div>
+                <div class="parallel-bar orange" style="animation-delay:0.2s">Loop i=2</div>
+                <div class="parallel-bar purple" style="animation-delay:0.4s">Loop i=3</div>
+                <div class="parallel-bar blue" style="animation-delay:0.6s">Loop i=4</div>
+              </div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--green);margin-top:8px;text-align:center">All run simultaneously ✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ MODULE 4: ASYNC/AWAIT ============ -->
+<section class="module-section" id="m4">
+  <div class="module-header">
+    <span class="module-num yellow">MODULE 04</span>
+    <span class="module-title">Async / Await</span>
+    <span class="module-desc">Concept #14</span>
+  </div>
+
+  <div class="cols2">
+
+    <div class="card yellow col-span2">
+      <div class="card-num yellow">#14</div>
+      <div class="card-title">Async / Await — Modern Approach</div>
+      <div class="card-body">
+        <p>Used for <strong style="color:var(--yellow)">I/O-bound operations</strong>. The <code>async/await</code> pattern allows a thread to be released while waiting, greatly improving scalability.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div>
+            <div class="code-block">
+<span class="kw">static async</span> <span class="cls">Task</span> <span class="nm">Main</span>() {
+  <span class="kw">await</span> <span class="nm">DownloadData</span>();
+  Console.<span class="nm">WriteLine</span>(<span class="str">"Finished"</span>);
+}
+<span class="kw">static async</span> <span class="cls">Task</span> <span class="nm">DownloadData</span>() {
+  <span class="kw">await</span> <span class="cls">Task</span>.<span class="nm">Delay</span>(<span class="nm">3000</span>);
+  Console.<span class="nm">WriteLine</span>(<span class="str">"Data downloaded"</span>);
+}</div>
+          </div>
+          <div>
+            <div style="background:var(--code-bg);border-radius:8px;padding:14px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">Execution Flow</div>
+              <div class="flow-diagram" style="gap:2px">
+                <div class="flow-node yellow" style="font-size:11px;padding:6px;min-width:180px">Start DownloadData()</div>
+                <div class="flow-arrow"><div class="flow-arrow-line" style="background:linear-gradient(to bottom,var(--yellow),transparent)"></div><div class="flow-arrow-head" style="border-top-color:var(--yellow)"></div></div>
+                <div class="flow-node" style="font-size:11px;padding:6px;min-width:180px;border-color:rgba(100,116,139,0.3);color:var(--text3)">await Task.Delay → thread released</div>
+                <div class="flow-arrow"><div class="flow-arrow-line" style="background:linear-gradient(to bottom,var(--yellow),transparent)"></div><div class="flow-arrow-head" style="border-top-color:var(--yellow)"></div></div>
+                <div class="flow-node" style="font-size:11px;padding:6px;min-width:180px;border-color:rgba(34,197,94,0.3);color:var(--green);background:rgba(34,197,94,0.05)">"Data downloaded"</div>
+                <div class="flow-arrow"><div class="flow-arrow-line" style="background:linear-gradient(to bottom,var(--yellow),transparent)"></div><div class="flow-arrow-head" style="border-top-color:var(--yellow)"></div></div>
+                <div class="flow-node yellow" style="font-size:11px;padding:6px;min-width:180px">"Finished"</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="highlight yellow" style="margin-top:10px">
+          Key insight: The <code>await</code> keyword <strong>releases the thread</strong> while waiting — it does NOT block. The thread is freed to handle other work.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ MODULE 5: REAL WORLD ============ -->
+<section class="module-section" id="m5">
+  <div class="module-header">
+    <span class="module-num">MODULE 05</span>
+    <span class="module-title">Real World & Mental Models</span>
+    <span class="module-desc">Concepts #15 – #17</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- CARD 15: Real World Example -->
+    <div class="card">
+      <div class="card-num">#15</div>
+      <div class="card-title">Real-World Example</div>
+      <div class="card-body">
+        <p>Processing multiple files simultaneously using <code>Parallel.For</code>:</p>
+        <div class="code-block">
+<span class="kw">static void</span> <span class="nm">ProcessFile</span>(<span class="kw">int</span> fileId) {
+  Console.<span class="nm">WriteLine</span>(<span class="str">$"Processing file {fileId}"</span>);
+  <span class="cls">Task</span>.<span class="nm">Delay</span>(<span class="nm">1000</span>).<span class="nm">Wait</span>();
+}
+<span class="kw">static void</span> <span class="nm">Main</span>() {
+  <span class="cls">Parallel</span>.<span class="nm">For</span>(<span class="nm">1</span>, <span class="nm">6</span>, ProcessFile);
+}</div>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">
+          <div class="parallel-bar teal" style="font-size:11px">Processing file 1</div>
+          <div class="parallel-bar orange" style="animation-delay:0.15s;font-size:11px">Processing file 2</div>
+          <div class="parallel-bar purple" style="animation-delay:0.3s;font-size:11px">Processing file 3</div>
+          <div class="parallel-bar blue" style="animation-delay:0.45s;font-size:11px">Processing file 4</div>
+          <div class="parallel-bar" style="animation-delay:0.6s;font-size:11px;background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:var(--green)">Processing file 5</div>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--green);margin-top:8px;text-align:right">All run simultaneously ✓</div>
+      </div>
+    </div>
+
+    <!-- CARD 16: Summary -->
+    <div class="card orange">
+      <div class="card-num orange">#16</div>
+      <div class="card-title">Summary of Concepts</div>
+      <div class="card-body">
+        <table class="comp-table">
+          <tr><th>Concept</th><th>Purpose</th></tr>
+          <tr><td>Thread</td><td>Create manual threads</td></tr>
+          <tr><td>Thread.Sleep</td><td>Pause thread</td></tr>
+          <tr><td>Join</td><td>Wait for thread</td></tr>
+          <tr><td>Lock</td><td>Prevent race conditions</td></tr>
+          <tr><td>ThreadPool</td><td>Reuse threads</td></tr>
+          <tr><td>Task</td><td>Modern threading</td></tr>
+          <tr><td>Parallel</td><td>CPU parallel processing</td></tr>
+          <tr><td>Async/Await</td><td>Asynchronous operations</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- CARD 17: Mental Model -->
+    <div class="card blue col-span2">
+      <div class="card-num blue">#17</div>
+      <div class="card-title">Simple Mental Model</div>
+      <div class="card-body">
+        <p>Think of a <strong style="color:var(--blue)">process as a manager</strong> assigning workers (threads) to different tasks simultaneously.</p>
+        <div class="mental-model" style="margin-top:12px">
+          <div class="mm-top">Process</div>
+          <div class="mm-branches">
+            <div class="mm-branch">
+              <div class="mm-branch-line"></div>
+              <div class="mm-task">Thread 1 → Task A</div>
+            </div>
+            <div class="mm-branch">
+              <div class="mm-branch-line" style="animation-delay:0.5s"></div>
+              <div class="mm-task" style="border-color:rgba(255,107,53,0.2);color:var(--orange);background:rgba(255,107,53,0.06)">Thread 2 → Task B</div>
+            </div>
+            <div class="mm-branch">
+              <div class="mm-branch-line" style="animation-delay:1s"></div>
+              <div class="mm-task" style="border-color:rgba(168,85,247,0.2);color:var(--purple);background:rgba(168,85,247,0.06)">Thread 3 → Task C</div>
+            </div>
+          </div>
+        </div>
+        <div class="highlight blue" style="margin-top:12px">
+          <strong>Multiple threads = multiple workers doing tasks simultaneously</strong> — this is the core mental model for all multithreading concepts.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ MODULE 6: MUTEX & SEMAPHORE ============ -->
+<section class="module-section" id="m6">
+  <div class="module-header">
+    <span class="module-num purple">MODULE 06</span>
+    <span class="module-title">Mutex &amp; Semaphore</span>
+    <span class="module-desc">Concepts #18 – #19</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- CARD 18: Mutex -->
+    <div class="card purple">
+      <div class="card-num purple">#18</div>
+      <div class="card-title">Mutex — Mutual Exclusion</div>
+      <div class="card-body">
+        <p>A <strong style="color:var(--purple)">Mutex</strong> ensures only one thread or process can access a resource at a time. Similar to <code>lock</code>, but <strong>works across processes</strong>.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">WHEN TO USE</div>
+            <ul class="concept-list">
+              <li>Multiple processes need synchronization</li>
+              <li>File access must be controlled</li>
+              <li>System-level locking required</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">USE CASES</div>
+            <ul class="concept-list">
+              <li>Files</li>
+              <li>Database writes</li>
+              <li>Shared memory</li>
+              <li>System resources</li>
+            </ul>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top:10px">
+<span class="kw">static</span> <span class="cls">Mutex</span> mutex = <span class="kw">new</span> <span class="cls">Mutex</span>();
+<span class="kw">static void</span> <span class="nm">Write</span>() {
+  mutex.<span class="nm">WaitOne</span>(); <span class="cm">// acquire</span>
+  <span class="cm">// critical section</span>
+  Console.<span class="nm">WriteLine</span>(<span class="str">"Thread Entered"</span>);
+  Thread.<span class="nm">Sleep</span>(<span class="nm">2000</span>);
+  Console.<span class="nm">WriteLine</span>(<span class="str">"Thread Leaving"</span>);
+  mutex.<span class="nm">ReleaseMutex</span>(); <span class="cm">// release</span>
+}</div>
+        <!-- Mutex flow -->
+        <div style="margin-top:10px;background:var(--code-bg);border-radius:8px;padding:10px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">EXECUTION ORDER</div>
+          <div class="flow-diagram" style="gap:2px">
+            <div class="flow-node purple" style="font-size:11px;padding:5px">Thread1 enters</div>
+            <div class="flow-arrow"><div class="flow-arrow-line" style="background:linear-gradient(to bottom,var(--purple),transparent)"></div><div class="flow-arrow-head" style="border-top-color:var(--purple)"></div></div>
+            <div class="flow-node waiting" style="font-size:11px;padding:5px;border-color:rgba(255,107,53,0.4);color:var(--orange);background:rgba(255,107,53,0.06)">Thread2 waits</div>
+            <div class="flow-arrow"><div class="flow-arrow-line" style="background:linear-gradient(to bottom,var(--purple),transparent)"></div><div class="flow-arrow-head" style="border-top-color:var(--purple)"></div></div>
+            <div class="flow-node" style="font-size:11px;padding:5px;border-color:rgba(34,197,94,0.4);color:var(--green);background:rgba(34,197,94,0.05)">Thread1 exits → Thread2 enters</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 19: Semaphore -->
+    <div class="card">
+      <div class="card-num">#19</div>
+      <div class="card-title">Semaphore</div>
+      <div class="card-body">
+        <p>A <strong style="color:var(--teal)">Semaphore</strong> allows multiple threads to access a resource but <strong>limits the number of concurrent threads</strong>.</p>
+        <!-- Semaphore Visual -->
+        <div style="background:var(--code-bg);border-radius:8px;padding:12px;margin:10px 0;text-align:center">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">DB Pool = 2 slots</div>
+          <div class="sem-visual">
+            <div class="sem-thread allowed">T1</div>
+            <div class="sem-thread allowed">T2</div>
+            <div class="sem-counter">2/2<br><span style="font-size:9px;color:var(--text3)">slots used</span></div>
+            <div class="sem-thread waiting">T3</div>
+            <div class="sem-thread waiting">T4</div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:6px">
+            <span class="badge green">T1 ✓ Running</span>
+            <span class="badge green">T2 ✓ Running</span>
+            <span class="badge orange">T3 ⏳ Waiting</span>
+            <span class="badge orange">T4 ⏳ Waiting</span>
+          </div>
+        </div>
+        <div class="code-block">
+<span class="cm">// initialCount=2, maxCount=2</span>
+<span class="kw">static</span> <span class="cls">Semaphore</span> sem = <span class="kw">new</span> <span class="cls">Semaphore</span>(<span class="nm">2</span>, <span class="nm">2</span>);
+<span class="kw">static void</span> <span class="nm">Access</span>() {
+  sem.<span class="nm">WaitOne</span>();  <span class="cm">// request slot</span>
+  <span class="cm">// ... work ...</span>
+  sem.<span class="nm">Release</span>(); <span class="cm">// free slot</span>
+}</div>
+        <div class="chips" style="margin-top:8px">
+          <span class="chip">API throttling</span>
+          <span class="chip">DB connection limits</span>
+          <span class="chip">Resource pools</span>
+          <span class="chip">Rate limiting</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ MODULE 7: MONITOR & COLLECTIONS ============ -->
+<section class="module-section" id="m7">
+  <div class="module-header">
+    <span class="module-num blue">MODULE 07</span>
+    <span class="module-title">Monitor &amp; Concurrent Collections</span>
+    <span class="module-desc">Concepts #20 – #21</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- CARD 20: Monitor -->
+    <div class="card blue">
+      <div class="card-num blue">#20</div>
+      <div class="card-title">Monitor</div>
+      <div class="card-body">
+        <p><code>Monitor</code> is a <strong style="color:var(--blue)">low-level synchronization mechanism</strong> used internally by <code>lock</code>. It provides fine-grained control.</p>
+        <div class="highlight blue">
+          <code>lock(obj) { }</code> is equivalent to <code>Monitor.Enter(obj)</code> + <code>Monitor.Exit(obj)</code>
+        </div>
+        <div style="margin-top:10px">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px">MONITOR METHODS</div>
+          <div class="chips">
+            <span class="chip" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:var(--blue)">Enter</span>
+            <span class="chip" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:var(--blue)">Exit</span>
+            <span class="chip" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:var(--blue)">Wait</span>
+            <span class="chip" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:var(--blue)">Pulse</span>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top:10px">
+<span class="kw">static object</span> obj = <span class="kw">new object</span>();
+<span class="kw">static void</span> <span class="nm">Work</span>() {
+  <span class="cls">Monitor</span>.<span class="nm">Enter</span>(obj);
+  <span class="kw">try</span> {
+    Console.<span class="nm">WriteLine</span>(<span class="str">"Thread working"</span>);
+    Thread.<span class="nm">Sleep</span>(<span class="nm">2000</span>);
+  } <span class="kw">finally</span> {
+    <span class="cls">Monitor</span>.<span class="nm">Exit</span>(obj); <span class="cm">// always release!</span>
+  }
+}
+<span class="cm">// Equivalent to:</span>
+<span class="cm">// lock(obj) { /* code */ }</span></div>
+      </div>
+    </div>
+
+    <!-- CARD 21: Concurrent Collections -->
+    <div class="card">
+      <div class="card-num">#21</div>
+      <div class="card-title">Concurrent Collections</div>
+      <div class="card-body">
+        <p>Normal collections are <strong style="color:var(--red)">NOT thread-safe</strong>. Multiple threads can corrupt data. Use <code>System.Collections.Concurrent</code> instead.</p>
+        <div class="compare-grid" style="margin:10px 0">
+          <div class="compare-col bad">
+            <div class="compare-col-title">✗ NOT Safe</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--red)">List&lt;T&gt;<br>Dictionary&lt;T&gt;<br>Queue&lt;T&gt;</div>
+          </div>
+          <div class="compare-col good">
+            <div class="compare-col-title">✓ Thread-Safe</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--green)">ConcurrentDictionary<br>ConcurrentQueue<br>ConcurrentStack<br>BlockingCollection</div>
+          </div>
+        </div>
+        <div class="code-block">
+<span class="kw">using</span> <span class="cls">System.Collections.Concurrent</span>;
+<span class="cm">// Thread-safe dictionary</span>
+<span class="kw">var</span> dict = <span class="kw">new</span> <span class="cls">ConcurrentDictionary</span>&lt;<span class="kw">int</span>, <span class="kw">string</span>&gt;();
+dict.<span class="nm">TryAdd</span>(<span class="nm">1</span>, <span class="str">"Apple"</span>);
+dict.<span class="nm">TryAdd</span>(<span class="nm">2</span>, <span class="str">"Banana"</span>);
+Console.<span class="nm">WriteLine</span>(dict[<span class="nm">1</span>]); <span class="cm">// "Apple"</span></div>
+        <div class="chips" style="margin-top:8px">
+          <span class="chip">Thread-safe</span>
+          <span class="chip">No locking needed</span>
+          <span class="chip">High performance</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ MODULE 8: PATTERNS & PROBLEMS ============ -->
+<section class="module-section" id="m8">
+  <div class="module-header">
+    <span class="module-num red">MODULE 08</span>
+    <span class="module-title">Patterns &amp; Problems</span>
+    <span class="module-desc">Concepts #22 – #24</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- CARD 22: CancellationToken -->
+    <div class="card">
+      <div class="card-num">#22</div>
+      <div class="card-title">CancellationToken</div>
+      <div class="card-body">
+        <p>Allows <strong style="color:var(--teal)">graceful cancellation</strong> of tasks. Instead of killing threads, we <em>request</em> cancellation and the task checks for it.</p>
+        <div class="chips" style="margin-bottom:10px">
+          <span class="chip">Long running tasks</span>
+          <span class="chip">Microservices</span>
+          <span class="chip">Background jobs</span>
+          <span class="chip">Cloud APIs</span>
+        </div>
+        <div class="code-block">
+<span class="kw">static async</span> <span class="cls">Task</span> <span class="nm">Work</span>(<span class="cls">CancellationToken</span> token) {
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">0</span>; i&lt;<span class="nm">10</span>; i++) {
+    <span class="kw">if</span>(token.<span class="nm">IsCancellationRequested</span>) {
+      Console.<span class="nm">WriteLine</span>(<span class="str">"Cancelled"</span>);
+      <span class="kw">return</span>;
+    }
+    Console.<span class="nm">WriteLine</span>(i);
+    <span class="kw">await</span> <span class="cls">Task</span>.<span class="nm">Delay</span>(<span class="nm">1000</span>);
+  }
+}
+<span class="kw">var</span> cts = <span class="kw">new</span> <span class="cls">CancellationTokenSource</span>();
+<span class="cls">Task</span> t = <span class="nm">Work</span>(cts.<span class="nm">Token</span>);
+<span class="kw">await</span> <span class="cls">Task</span>.<span class="nm">Delay</span>(<span class="nm">3000</span>);
+cts.<span class="nm">Cancel</span>(); <span class="cm">// request cancellation</span>
+<span class="kw">await</span> t;</div>
+      </div>
+    </div>
+
+    <!-- CARD 23: Deadlock -->
+    <div class="card red">
+      <div class="card-num red">#23</div>
+      <div class="card-title">Deadlock</div>
+      <div class="card-body">
+        <p>Occurs when <strong style="color:var(--red)">two threads wait for each other forever</strong> — system freezes.</p>
+        <!-- Deadlock visual -->
+        <div class="deadlock-visual">
+          <div class="dl-node">Thread1<br><small>holds LockA<br>wants LockB</small></div>
+          <div>
+            <div class="dl-arrow">⟵ waiting</div>
+            <div class="dl-arrow" style="transform:rotate(180deg)">⟵ waiting</div>
+          </div>
+          <div class="dl-node">Thread2<br><small>holds LockB<br>wants LockA</small></div>
+        </div>
+        <div class="code-block">
+<span class="cm">// DEADLOCK EXAMPLE - avoid this!</span>
+<span class="kw">void</span> <span class="nm">Thread1</span>() {
+  <span class="kw">lock</span>(lock1) {
+    Thread.<span class="nm">Sleep</span>(<span class="nm">1000</span>);
+    <span class="kw">lock</span>(lock2) { <span class="cm">/* waits forever */</span> }
+  }
+}
+<span class="kw">void</span> <span class="nm">Thread2</span>() {
+  <span class="kw">lock</span>(lock2) {
+    Thread.<span class="nm">Sleep</span>(<span class="nm">1000</span>);
+    <span class="kw">lock</span>(lock1) { <span class="cm">/* waits forever */</span> }
+  }
+}</div>
+        <div class="highlight red" style="margin-top:10px">
+          <strong>How to Avoid:</strong><br>
+          1. Always lock resources in the same order<br>
+          2. Avoid nested locks<br>
+          3. Use timeout locks
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 24: Producer Consumer -->
+    <div class="card blue col-span2">
+      <div class="card-num blue">#24</div>
+      <div class="card-title">Producer Consumer Pattern</div>
+      <div class="card-body">
+        <p>Very common in <strong style="color:var(--blue)">high-scale systems</strong>. Producer generates tasks, Consumer processes them. Used in message queues, streaming, data pipelines.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div>
+            <!-- Animated PC flow -->
+            <div style="background:var(--code-bg);border-radius:8px;padding:14px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">Flow Diagram</div>
+              <div class="pc-flow">
+                <div class="pc-node" style="border-color:rgba(0,212,170,0.3);color:var(--teal)">Producer</div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+                  <div style="font-family:var(--mono);font-size:9px;color:var(--text3)">enqueue</div>
+                  <div style="height:2px;width:24px;background:var(--border);position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--teal));animation:flowRight 1.5s linear infinite"></div></div>
+                  <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:6px solid var(--teal)"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:3px;align-items:center">
+                  <div style="font-family:var(--mono);font-size:9px;color:var(--text3)">QUEUE</div>
+                  <div class="pc-queue"><div class="pc-item"></div><div class="pc-item"></div><div class="pc-item"></div></div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+                  <div style="font-family:var(--mono);font-size:9px;color:var(--text3)">dequeue</div>
+                  <div style="height:2px;width:24px;background:var(--border);position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--orange));animation:flowRight 1.5s linear infinite 0.5s"></div></div>
+                  <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:6px solid var(--orange)"></div>
+                </div>
+                <div class="pc-node" style="border-color:rgba(255,107,53,0.3);color:var(--orange)">Consumer</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="code-block" style="height:100%;min-height:160px">
+<span class="kw">static</span> <span class="cls">BlockingCollection</span>&lt;<span class="kw">int</span>&gt; queue = <span class="kw">new</span>();
+<span class="kw">static void</span> <span class="nm">Producer</span>() {
+  <span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">1</span>; i&lt;=<span class="nm">5</span>; i++) {
+    queue.<span class="nm">Add</span>(i);
+  }
+  queue.<span class="nm">CompleteAdding</span>();
+}
+<span class="kw">static void</span> <span class="nm">Consumer</span>() {
+  <span class="kw">foreach</span>(<span class="kw">var</span> item <span class="kw">in</span>
+    queue.<span class="nm">GetConsumingEnumerable</span>())
+    Console.<span class="nm">WriteLine</span>(<span class="str">$"Consumed {item}"</span>);
+}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ MODULE 9: ENTERPRISE PATTERNS ============ -->
+<section class="module-section" id="m9">
+  <div class="module-header">
+    <span class="module-num orange">MODULE 09</span>
+    <span class="module-title">Enterprise Patterns</span>
+    <span class="module-desc">Concepts #25 – #29</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- CARD 25: Thread-Safe Singleton -->
+    <div class="card">
+      <div class="card-num">#25</div>
+      <div class="card-title">Thread-Safe Singleton</div>
+      <div class="card-body">
+        <p>Used in configuration services, caches, and logging frameworks. <code>Lazy&lt;T&gt;</code> provides built-in thread safety.</p>
+        <div class="code-block">
+<span class="kw">public sealed class</span> <span class="cls">Singleton</span> {
+  <span class="kw">private static readonly</span> <span class="cls">Lazy</span>&lt;<span class="cls">Singleton</span>&gt; instance
+    = <span class="kw">new</span> <span class="cls">Lazy</span>&lt;<span class="cls">Singleton</span>&gt;(
+        () => <span class="kw">new</span> <span class="cls">Singleton</span>());
+
+  <span class="kw">public static</span> <span class="cls">Singleton</span> Instance
+    => instance.<span class="nm">Value</span>;
+
+  <span class="kw">private</span> <span class="nm">Singleton</span>() { }
+}</div>
+        <div class="chips" style="margin-top:8px">
+          <span class="chip">Thread-safe</span>
+          <span class="chip">Lazy initialization</span>
+          <span class="chip">High performance</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 26-27: High Performance Architecture -->
+    <div class="card purple">
+      <div class="card-num purple">#26 – #27</div>
+      <div class="card-title">High Performance Architecture</div>
+      <div class="card-body">
+        <p>Real enterprise systems combine multiple techniques for maximum throughput.</p>
+        <div class="arch-diagram">
+          <div class="arch-layer"><div class="arch-box teal">Client Request</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-layer"><div class="arch-box orange">API Controller</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-layer"><div class="arch-box blue">Async Service Layer</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-layer"><div class="arch-box purple">Task Parallel Processing</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-layer"><div class="arch-box">Database / External APIs</div></div>
+        </div>
+        <div class="code-block" style="margin-top:10px">
+<span class="cm">// Process 1000 requests in parallel</span>
+<span class="cls">List</span>&lt;<span class="cls">Task</span>&gt; tasks = <span class="kw">new</span>();
+<span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">0</span>; i&lt;<span class="nm">10</span>; i++)
+  tasks.<span class="nm">Add</span>(<span class="cls">Task</span>.<span class="nm">Run</span>(() => Process()));
+<span class="kw">await</span> <span class="cls">Task</span>.<span class="nm">WhenAll</span>(tasks);</div>
+      </div>
+    </div>
+
+    <!-- CARD 28: Advanced Threading Mental Model -->
+    <div class="card blue">
+      <div class="card-num blue">#28</div>
+      <div class="card-title">Advanced Threading Mental Model</div>
+      <div class="card-body">
+        <div class="mental-model">
+          <div class="mm-top">Application</div>
+          <div style="margin:6px 0"><div class="mm-branch-line" style="margin:0 auto;height:14px"></div></div>
+          <div class="mm-top" style="background:rgba(255,107,53,0.08);border-color:rgba(255,107,53,0.2);color:var(--orange)">Tasks (Async)</div>
+          <div style="margin:6px 0"><div class="mm-branch-line" style="margin:0 auto;height:14px"></div></div>
+          <div class="mm-top" style="background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.2);color:var(--purple)">ThreadPool</div>
+          <div style="margin:6px 0"><div class="mm-branch-line" style="margin:0 auto;height:14px"></div></div>
+          <div class="mm-top" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:var(--blue)">Concurrent Structures</div>
+          <div style="margin:6px 0"><div class="mm-branch-line" style="margin:0 auto;height:14px"></div></div>
+          <div class="mm-top" style="background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.2);color:var(--yellow)">Synchronization (lock, mutex, semaphore)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 29: Modern .NET Tools -->
+    <div class="card">
+      <div class="card-num">#29</div>
+      <div class="card-title">Most Important Tools in Modern .NET</div>
+      <div class="card-body">
+        <table class="comp-table">
+          <tr><th>Tool</th><th>Usage</th></tr>
+          <tr><td>Task</td><td>Async operations</td></tr>
+          <tr><td>async/await</td><td>I/O concurrency</td></tr>
+          <tr><td>Parallel</td><td>CPU parallelism</td></tr>
+          <tr><td>lock</td><td>Thread synchronization</td></tr>
+          <tr><td>Semaphore</td><td>Resource limits</td></tr>
+          <tr><td>Mutex</td><td>Cross-process locking</td></tr>
+          <tr><td>Concurrent Collections</td><td>Thread-safe data</td></tr>
+          <tr><td>CancellationToken</td><td>Task cancellation</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ MODULE 10: TPL DEEP DIVE ============ -->
+<section class="module-section" id="m10">
+  <div class="module-header">
+    <span class="module-num">MODULE 10</span>
+    <span class="module-title">Task Parallel Library (TPL)</span>
+    <span class="module-desc">Concept #30</span>
+  </div>
+
+  <div class="cols2">
+
+    <div class="card col-span2">
+      <div class="card-num">#30</div>
+      <div class="card-title">Task Parallel Library — Deep Dive</div>
+      <div class="card-body">
+        <p>The <strong style="color:var(--teal)">Task Parallel Library (TPL)</strong> is the modern framework for parallel and asynchronous programming in .NET. Namespace: <code>System.Threading.Tasks</code></p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">TPL MANAGES</div>
+            <ul class="concept-list">
+              <li>Thread scheduling</li>
+              <li>Thread pooling</li>
+              <li>Parallel execution</li>
+              <li>Task continuation</li>
+            </ul>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin:12px 0 8px;text-transform:uppercase;letter-spacing:1px">WHY TPL EXISTS</div>
+            <div class="highlight red">Manual threads: expensive creation, poor scaling, manual lifecycle management</div>
+            <div class="highlight" style="margin-top:6px">TPL: uses <code>ThreadPool</code> automatically</div>
+          </div>
+          <div>
+            <!-- TPL Architecture -->
+            <div style="background:var(--code-bg);border-radius:8px;padding:14px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">TPL Architecture</div>
+              <div class="arch-diagram" style="background:transparent;border:none;padding:0">
+                <div class="arch-layer"><div class="arch-box teal">Application Code</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box orange">Task API (Task.Run / Parallel / async)</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box blue">Task Scheduler</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box purple">ThreadPool</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box">CPU Threads</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px">SIMPLE TASK</div>
+            <div class="code-block">
+Task task = <span class="cls">Task</span>.<span class="nm">Run</span>(() => {
+  Console.<span class="nm">WriteLine</span>(
+    <span class="str">"Background thread"</span>);
+});
+task.<span class="nm">Wait</span>();</div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px">MULTIPLE PARALLEL TASKS</div>
+            <div class="code-block">
+Task t1 = <span class="cls">Task</span>.<span class="nm">Run</span>(() => <span class="nm">Work</span>(<span class="nm">1</span>));
+Task t2 = <span class="cls">Task</span>.<span class="nm">Run</span>(() => <span class="nm">Work</span>(<span class="nm">2</span>));
+Task t3 = <span class="cls">Task</span>.<span class="nm">Run</span>(() => <span class="nm">Work</span>(<span class="nm">3</span>));
+<span class="cls">Task</span>.<span class="nm">WaitAll</span>(t1, t2, t3);</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ MODULE 11: SYNC CONTEXT ============ -->
+<section class="module-section" id="m11">
+  <div class="module-header">
+    <span class="module-num purple">MODULE 11</span>
+    <span class="module-title">Sync Context &amp; Async Pitfalls</span>
+    <span class="module-desc">Concepts #31 – #33</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- CARD 31: SynchronizationContext -->
+    <div class="card purple">
+      <div class="card-num purple">#31</div>
+      <div class="card-title">SynchronizationContext</div>
+      <div class="card-body">
+        <p><code>SynchronizationContext</code> controls <strong style="color:var(--purple)">where a continuation runs after <code>await</code></strong>. Critical for UI apps and ASP.NET.</p>
+        <!-- Arch diagram -->
+        <div style="background:var(--code-bg);border-radius:8px;padding:12px;margin:10px 0">
+          <div class="arch-diagram" style="background:transparent;border:none;padding:0">
+            <div class="arch-layer"><div class="arch-box purple">Async Method</div></div>
+            <div class="arch-arrow"></div>
+            <div class="arch-layer"><div class="arch-box" style="font-size:11px">await Task</div></div>
+            <div class="arch-arrow"></div>
+            <div class="arch-layer"><div class="arch-box orange">Continuation</div></div>
+            <div class="arch-arrow"></div>
+            <div class="arch-layer"><div class="arch-box teal">SynchronizationContext decides thread</div></div>
+          </div>
+        </div>
+        <div class="highlight purple">
+          <strong>UI Applications:</strong> Background thread cannot update UI. Only the UI thread can update UI — SynchronizationContext ensures the continuation runs on the correct thread.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 32: ConfigureAwait -->
+    <div class="card">
+      <div class="card-num">#32</div>
+      <div class="card-title">ConfigureAwait(false)</div>
+      <div class="card-body">
+        <p>Tells the runtime: <em>"Do not resume on the original SynchronizationContext."</em> Avoids unnecessary thread switching for <strong style="color:var(--teal)">better performance</strong>.</p>
+        <div class="compare-grid" style="margin:10px 0">
+          <div style="background:var(--code-bg);border-radius:8px;padding:10px">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px">Without ConfigureAwait</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text2)">Thread A → await<br>ThreadPool → delay<br><span style="color:var(--yellow)">Thread A → resume (switch!)</span></div>
+          </div>
+          <div style="background:var(--code-bg);border-radius:8px;padding:10px">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--green);margin-bottom:6px">With ConfigureAwait(false)</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text2)">Thread A → await<br>ThreadPool → delay<br><span style="color:var(--green)">ThreadPool → resume (no switch!)</span></div>
+          </div>
+        </div>
+        <div class="code-block">
+<span class="kw">public async</span> <span class="cls">Task</span> <span class="nm">GetDataAsync</span>() {
+  <span class="kw">await</span> <span class="cls">Task</span>.<span class="nm">Delay</span>(<span class="nm">2000</span>)
+    .<span class="nm">ConfigureAwait</span>(<span class="kw">false</span>); <span class="cm">// no ctx switch</span>
+  Console.<span class="nm">WriteLine</span>(<span class="str">"Continuing work"</span>);
+}</div>
+        <div class="chips" style="margin-top:8px">
+          <span class="chip orange">backend services</span>
+          <span class="chip orange">ASP.NET Core</span>
+          <span class="chip orange">high-performance APIs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 33: Async Deadlocks -->
+    <div class="card red col-span2">
+      <div class="card-num red">#33</div>
+      <div class="card-title">Async Deadlocks</div>
+      <div class="card-body">
+        <p>Occurs when a thread <strong style="color:var(--red)">waits synchronously for an async operation</strong> — creating a circular dependency that freezes everything.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">✗ Deadlock Pattern</div>
+            <div class="code-block" style="border-color:rgba(239,68,68,0.2)">
+<span class="cm">// BAD - causes deadlock!</span>
+<span class="kw">static void</span> <span class="nm">Main</span>() {
+  <span class="kw">var</span> task = <span class="nm">GetDataAsync</span>();
+  <span class="cm">// .Result blocks the thread</span>
+  <span class="kw">int</span> r = task.<span class="nm">Result</span>; <span class="cm">// ❌</span>
+}</span>
+            </div>
+            <div style="background:var(--code-bg);border-radius:8px;padding:10px;margin-top:8px">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--red)">Main thread waits for task<br>↓<br>Task waits to resume on main thread<br>↓<br>Main thread is blocked<br>↓<br><strong>DEADLOCK 💀</strong></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">✓ Correct Approach</div>
+            <div class="code-block" style="border-color:rgba(34,197,94,0.2)">
+<span class="cm">// GOOD - use await!</span>
+<span class="kw">static async</span> <span class="cls">Task</span> <span class="nm">Main</span>() {
+  <span class="kw">int</span> r = <span class="kw">await</span> <span class="nm">GetDataAsync</span>();
+  Console.<span class="nm">WriteLine</span>(r); <span class="cm">// ✓</span>
+}</div>
+            <div class="highlight" style="margin-top:8px">
+              <strong>Rule:</strong> Never use <code>.Result</code> or <code>.Wait()</code> on async methods in synchronization contexts. Always <code>await</code> all the way.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ MODULE 12: PRODUCTION SCALE ============ -->
+<section class="module-section" id="m12">
+  <div class="module-header">
+    <span class="module-num">MODULE 12</span>
+    <span class="module-title">Production Scale</span>
+    <span class="module-desc">Concepts #34 – #39</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- CARD 34: Thread-Safe Caching -->
+    <div class="card">
+      <div class="card-num">#34</div>
+      <div class="card-title">Thread-Safe Caching</div>
+      <div class="card-body">
+        <p>Caching must be thread-safe in high-traffic APIs. Using a plain <code>Dictionary</code> is dangerous — multiple threads may corrupt it.</p>
+        <div class="compare-grid" style="margin:10px 0">
+          <div class="compare-col bad">
+            <div class="compare-col-title">✗ Dangerous</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--red)">Dictionary&lt;string,string&gt; cache<br><br>Multiple threads → corruption</div>
+          </div>
+          <div class="compare-col good">
+            <div class="compare-col-title">✓ Safe</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--green)">ConcurrentDictionary&lt;string,string&gt; cache<br><br>Thread-safe ✓</div>
+          </div>
+        </div>
+        <div class="code-block">
+<span class="kw">static</span> <span class="cls">ConcurrentDictionary</span>&lt;<span class="kw">int</span>,<span class="kw">string</span>&gt; cache = <span class="kw">new</span>();
+<span class="cm">// Thread-safe add</span>
+cache.<span class="nm">TryAdd</span>(<span class="nm">1</span>, <span class="str">"Product A"</span>);
+<span class="cm">// Thread-safe read</span>
+Console.<span class="nm">WriteLine</span>(cache[<span class="nm">1</span>]);</div>
+      </div>
+    </div>
+
+    <!-- CARD 35: Actor Model -->
+    <div class="card purple">
+      <div class="card-num purple">#35</div>
+      <div class="card-title">Actor Model</div>
+      <div class="card-body">
+        <p>Used in distributed systems and messaging platforms. <strong style="color:var(--purple)">Actors communicate via messages</strong>, not shared memory — fewer race conditions.</p>
+        <!-- Actor flow -->
+        <div style="background:var(--code-bg);border-radius:8px;padding:12px;margin:10px 0">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">ACTOR COMMUNICATION</div>
+          <div class="actor-flow">
+            <div class="actor-node">Actor<br>A</div>
+            <div class="actor-arrow">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--purple)">msg</div>
+              <div style="width:28px;height:1px;background:var(--purple);opacity:0.4;position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--purple));animation:flowRight 1s linear infinite"></div></div>
+              <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid var(--purple);opacity:0.7"></div>
+            </div>
+            <div class="actor-node" style="animation-delay:0.7s">Actor<br>B</div>
+            <div class="actor-arrow">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--purple)">msg</div>
+              <div style="width:28px;height:1px;background:var(--purple);opacity:0.4;position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--purple));animation:flowRight 1s linear infinite 0.5s"></div></div>
+              <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid var(--purple);opacity:0.7"></div>
+            </div>
+            <div class="actor-node" style="animation-delay:1.4s">Actor<br>C</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px;text-align:center">No shared state → fewer race conditions</div>
+        </div>
+        <div class="code-block">
+<span class="cm">// Channels-based Actor pattern</span>
+<span class="kw">var</span> mailbox = <span class="cls">Channel</span>.<span class="nm">CreateUnbounded</span>&lt;<span class="kw">string</span>&gt;();
+<span class="cm">// Send message</span>
+<span class="kw">await</span> mailbox.<span class="nm">Writer</span>.<span class="nm">WriteAsync</span>(<span class="str">"Hello"</span>);
+<span class="cm">// Process messages</span>
+<span class="kw">await foreach</span>(<span class="kw">var</span> msg <span class="kw">in</span>
+  mailbox.<span class="nm">Reader</span>.<span class="nm">ReadAllAsync</span>())</div>
+        <div class="chips" style="margin-top:8px">
+          <span class="chip" style="background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.2);color:var(--purple)">Akka.NET</span>
+          <span class="chip" style="background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.2);color:var(--purple)">Distributed systems</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 36: ASP.NET Core -->
+    <div class="card blue col-span2">
+      <div class="card-num blue">#36</div>
+      <div class="card-title">How ASP.NET Core Handles Multithreading</div>
+      <div class="card-body">
+        <p>ASP.NET Core is <strong style="color:var(--blue)">fully asynchronous and thread-pooled</strong>.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div>
+            <div style="background:var(--code-bg);border-radius:8px;padding:14px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">Request Flow</div>
+              <div class="arch-diagram" style="background:transparent;border:none;padding:0">
+                <div class="arch-layer"><div class="arch-box teal">Client Request</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box orange">Kestrel Web Server</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box purple">ThreadPool Thread</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box blue">ASP.NET Middleware</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box">Async Service Layer</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box">Database / External APIs</div></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="code-block" style="height:100%">
+<span class="cls">[ApiController]</span>
+<span class="cls">[Route("api/products")]</span>
+<span class="kw">public class</span> <span class="cls">ProductController</span>
+  : <span class="cls">ControllerBase</span> {
+  <span class="cls">[HttpGet]</span>
+  <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">IActionResult</span>&gt; Get() {
+    <span class="kw">var</span> products =
+      <span class="kw">await</span> <span class="nm">GetFromDatabase</span>();
+    <span class="kw">return</span> <span class="nm">Ok</span>(products);
+  }
+}</div>
+            <div class="compare-grid" style="margin-top:8px">
+              <div class="compare-col bad">
+                <div class="compare-col-title">✗ Without async</div>
+                <div style="font-family:var(--mono);font-size:11px;color:var(--red)">1000 users<br>1000 threads<br>Server crashes</div>
+              </div>
+              <div class="compare-col good">
+                <div class="compare-col-title">✓ With async</div>
+                <div style="font-family:var(--mono);font-size:11px;color:var(--green)">1000 users<br>50 threads reused<br>Server scalable</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 37: High Performance Async Pattern -->
+    <div class="card">
+      <div class="card-num">#37</div>
+      <div class="card-title">High Performance Async Pattern</div>
+      <div class="card-body">
+        <p>Common enterprise layered architecture for scalable async processing.</p>
+        <div class="arch-diagram" style="margin:10px 0">
+          <div class="arch-layer"><div class="arch-box teal">Controller</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-layer"><div class="arch-box orange">Service Layer (Async)</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-layer"><div class="arch-box blue">Repository Layer</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-layer"><div class="arch-box">Database</div></div>
+        </div>
+        <div class="code-block">
+<span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">Product</span>&gt; <span class="nm">GetProduct</span>(<span class="kw">int</span> id) {
+  <span class="kw">return await</span> repository.<span class="nm">GetProductAsync</span>(id);
+}</div>
+      </div>
+    </div>
+
+    <!-- CARD 38: Enterprise Concurrency Model -->
+    <div class="card orange">
+      <div class="card-num orange">#38</div>
+      <div class="card-title">Real Enterprise Concurrency Model</div>
+      <div class="card-body">
+        <div class="arch-diagram" style="margin:10px 0">
+          <div class="arch-layer"><div class="arch-box teal">Load Balancer</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-layer"><div class="arch-box orange">API Gateway</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-layer"><div class="arch-box purple">Microservices</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-layer"><div class="arch-box blue">Async Task Processing</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-layer"><div class="arch-box">ThreadPool</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-layer"><div class="arch-box">Database / Cache</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 39: Key Principles -->
+    <div class="card col-span2">
+      <div class="card-num">#39</div>
+      <div class="card-title">Key Principles — Senior .NET Engineers</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--green);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Always Do</div>
+            <ul class="concept-list">
+              <li>Prefer <code>async/await</code></li>
+              <li>Avoid blocking calls (<code>.Result</code>, <code>.Wait()</code>)</li>
+              <li>Use Concurrent collections</li>
+              <li>Use <code>CancellationToken</code></li>
+              <li>Avoid shared state</li>
+              <li>Prefer message passing</li>
+            </ul>
+          </div>
+          <div>
+            <div class="mental-model">
+              <div class="mm-top">Application</div>
+              <div style="margin:4px 0"><div class="mm-branch-line" style="margin:0 auto;height:12px"></div></div>
+              <div class="mm-top" style="background:rgba(255,107,53,0.08);border-color:rgba(255,107,53,0.2);color:var(--orange)">Tasks (Async)</div>
+              <div style="margin:4px 0"><div class="mm-branch-line" style="margin:0 auto;height:12px"></div></div>
+              <div class="mm-top" style="background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.2);color:var(--purple)">ThreadPool</div>
+              <div style="margin:4px 0"><div class="mm-branch-line" style="margin:0 auto;height:12px"></div></div>
+              <div class="mm-top" style="background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.2);color:var(--yellow)">Sync Tools + Concurrent Structures</div>
+              <div style="margin:4px 0"><div class="mm-branch-line" style="margin:0 auto;height:12px"></div></div>
+              <div class="mm-top" style="background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.2);color:var(--green)">High-performance scalable system</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ SUMMARY TABLE ============ -->
+<section class="module-section" id="summary">
+  <div class="module-header">
+    <span class="module-num yellow">REFERENCE</span>
+    <span class="module-title">Complete Concept Summary</span>
+  </div>
+  <div class="card col-span2">
+    <div class="card-body">
+      <table class="comp-table" style="width:100%">
+        <thead>
+          <tr><th>#</th><th>Concept</th><th>Category</th><th>Key Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>01</td><td style="color:var(--text)">What is Multithreading?</td><td><span class="badge">Foundation</span></td><td style="color:var(--text2)">Run multiple tasks simultaneously in one process</td></tr>
+          <tr><td>02</td><td style="color:var(--text)">Why Use Multithreading?</td><td><span class="badge">Foundation</span></td><td style="color:var(--text2)">Better CPU usage, responsive UI, background processing</td></tr>
+          <tr><td>03</td><td style="color:var(--text)">When to Use?</td><td><span class="badge">Foundation</span></td><td style="color:var(--text2)">Independent, time-consuming, background tasks</td></tr>
+          <tr><td>04</td><td style="color:var(--text)">Thread Creation</td><td><span class="badge">Foundation</span></td><td style="color:var(--text2)">Thread, ThreadPool, Task, async/await</td></tr>
+          <tr><td>05</td><td style="color:var(--text)">Thread Class</td><td><span class="badge orange">Basics</span></td><td style="color:var(--text2)">Manual thread creation with System.Threading</td></tr>
+          <tr><td>06</td><td style="color:var(--text)">Passing Parameters</td><td><span class="badge orange">Basics</span></td><td style="color:var(--text2)">Pass data to threads via object parameter</td></tr>
+          <tr><td>07</td><td style="color:var(--text)">Thread.Sleep()</td><td><span class="badge orange">Basics</span></td><td style="color:var(--text2)">Pause thread execution for N milliseconds</td></tr>
+          <tr><td>08</td><td style="color:var(--text)">Join()</td><td><span class="badge orange">Basics</span></td><td style="color:var(--text2)">Wait for thread completion before continuing</td></tr>
+          <tr><td>09</td><td style="color:var(--text)">Race Condition</td><td><span class="badge red">Sync</span></td><td style="color:var(--text2)">Threads corrupt shared data — must be prevented</td></tr>
+          <tr><td>10</td><td style="color:var(--text)">Lock</td><td><span class="badge red">Sync</span></td><td style="color:var(--text2)">One thread at a time in critical section</td></tr>
+          <tr><td>11</td><td style="color:var(--text)">ThreadPool</td><td><span class="badge red">Sync</span></td><td style="color:var(--text2)">Reuse threads, auto-managed, better performance</td></tr>
+          <tr><td>12</td><td style="color:var(--text)">Task</td><td><span class="badge red">Sync</span></td><td style="color:var(--text2)">Modern threading abstraction over ThreadPool</td></tr>
+          <tr><td>13</td><td style="color:var(--text)">Parallel</td><td><span class="badge red">Sync</span></td><td style="color:var(--text2)">CPU-bound parallel loops and operations</td></tr>
+          <tr><td>14</td><td style="color:var(--text)">Async / Await</td><td><span class="badge yellow">Async</span></td><td style="color:var(--text2)">Non-blocking I/O, releases thread while waiting</td></tr>
+          <tr><td>15</td><td style="color:var(--text)">Real-World Example</td><td><span class="badge">Real World</span></td><td style="color:var(--text2)">Processing multiple files with Parallel.For</td></tr>
+          <tr><td>16</td><td style="color:var(--text)">Summary Table</td><td><span class="badge">Real World</span></td><td style="color:var(--text2)">Quick reference for all threading concepts</td></tr>
+          <tr><td>17</td><td style="color:var(--text)">Mental Model</td><td><span class="badge">Real World</span></td><td style="color:var(--text2)">Process → Threads → Tasks visualization</td></tr>
+          <tr><td>18</td><td style="color:var(--text)">Mutex</td><td><span class="badge purple">Advanced</span></td><td style="color:var(--text2)">Cross-process synchronization primitive</td></tr>
+          <tr><td>19</td><td style="color:var(--text)">Semaphore</td><td><span class="badge purple">Advanced</span></td><td style="color:var(--text2)">Limit concurrent access to N threads</td></tr>
+          <tr><td>20</td><td style="color:var(--text)">Monitor</td><td><span class="badge purple">Advanced</span></td><td style="color:var(--text2)">Low-level sync, what lock uses internally</td></tr>
+          <tr><td>21</td><td style="color:var(--text)">Concurrent Collections</td><td><span class="badge purple">Advanced</span></td><td style="color:var(--text2)">Thread-safe data structures</td></tr>
+          <tr><td>22</td><td style="color:var(--text)">CancellationToken</td><td><span class="badge">Patterns</span></td><td style="color:var(--text2)">Graceful task cancellation</td></tr>
+          <tr><td>23</td><td style="color:var(--text)">Deadlock</td><td><span class="badge red">Patterns</span></td><td style="color:var(--text2)">Threads waiting forever — lock ordering prevents it</td></tr>
+          <tr><td>24</td><td style="color:var(--text)">Producer Consumer</td><td><span class="badge">Patterns</span></td><td style="color:var(--text2)">BlockingCollection queue pattern</td></tr>
+          <tr><td>25</td><td style="color:var(--text)">Thread-Safe Singleton</td><td><span class="badge orange">Enterprise</span></td><td style="color:var(--text2)">Lazy&lt;T&gt; for safe singleton initialization</td></tr>
+          <tr><td>26</td><td style="color:var(--text)">High Perf Architecture</td><td><span class="badge orange">Enterprise</span></td><td style="color:var(--text2)">Async + Task + ThreadPool + ConcurrentCollections</td></tr>
+          <tr><td>27</td><td style="color:var(--text)">Enterprise Example</td><td><span class="badge orange">Enterprise</span></td><td style="color:var(--text2)">Task.WhenAll for 1000+ parallel API requests</td></tr>
+          <tr><td>28</td><td style="color:var(--text)">Advanced Mental Model</td><td><span class="badge orange">Enterprise</span></td><td style="color:var(--text2)">Application → Tasks → ThreadPool → Sync stack</td></tr>
+          <tr><td>29</td><td style="color:var(--text)">Modern .NET Tools</td><td><span class="badge orange">Enterprise</span></td><td style="color:var(--text2)">Reference table of all threading tools</td></tr>
+          <tr><td>30</td><td style="color:var(--text)">Task Parallel Library</td><td><span class="badge purple">TPL</span></td><td style="color:var(--text2)">Architecture: App → Task API → Scheduler → Pool → CPU</td></tr>
+          <tr><td>31</td><td style="color:var(--text)">SynchronizationContext</td><td><span class="badge purple">Sync Ctx</span></td><td style="color:var(--text2)">Controls where continuation runs after await</td></tr>
+          <tr><td>32</td><td style="color:var(--text)">ConfigureAwait(false)</td><td><span class="badge purple">Sync Ctx</span></td><td style="color:var(--text2)">Skip context switch for better perf in backend</td></tr>
+          <tr><td>33</td><td style="color:var(--text)">Async Deadlocks</td><td><span class="badge red">Pitfalls</span></td><td style="color:var(--text2)">Never use .Result/.Wait() — always await</td></tr>
+          <tr><td>34</td><td style="color:var(--text)">Thread-Safe Caching</td><td><span class="badge">Production</span></td><td style="color:var(--text2)">ConcurrentDictionary for high-traffic cache</td></tr>
+          <tr><td>35</td><td style="color:var(--text)">Actor Model</td><td><span class="badge">Production</span></td><td style="color:var(--text2)">Message-passing, no shared state, Akka.NET</td></tr>
+          <tr><td>36</td><td style="color:var(--text)">ASP.NET Core Threading</td><td><span class="badge">Production</span></td><td style="color:var(--text2)">Fully async, Kestrel + ThreadPool architecture</td></tr>
+          <tr><td>37</td><td style="color:var(--text)">High Perf Async Pattern</td><td><span class="badge">Production</span></td><td style="color:var(--text2)">Controller → Service → Repository → DB</td></tr>
+          <tr><td>38</td><td style="color:var(--text)">Enterprise Concurrency Model</td><td><span class="badge">Production</span></td><td style="color:var(--text2)">Load Balancer → Gateway → Microservices → Pool</td></tr>
+          <tr><td>39</td><td style="color:var(--text)">Senior .NET Principles</td><td><span class="badge">Production</span></td><td style="color:var(--text2)">async/await, no blocking, concurrent collections</td></tr>
+          <tr><td>40</td><td style="color:var(--text)">ThreadPool Internals</td><td><span class="badge green">Deep Dive</span></td><td style="color:var(--text2)">Global queue, local queues, work-stealing, hill climbing</td></tr>
+          <tr><td>41</td><td style="color:var(--text)">Kestrel Internals</td><td><span class="badge green">Deep Dive</span></td><td style="color:var(--text2)">System.IO.Pipelines, non-blocking I/O, millions of requests</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ THREADPOOL INTERNALS ============ -->
+<section class="module-section" id="threadpool-internal">
+  <div class="module-header">
+    <span class="module-num">DEEP DIVE</span>
+    <span class="module-title">How .NET ThreadPool Works Internally</span>
+    <span class="module-desc">Concept #40</span>
+  </div>
+
+  <div class="cols2">
+
+    <div class="card col-span2">
+      <div class="card-num">#40</div>
+      <div class="card-title">ThreadPool Internal Architecture</div>
+      <div class="card-body">
+        <p>The .NET ThreadPool is a <strong style="color:var(--teal)">managed pool of worker threads</strong>. Instead of creating threads manually (expensive: ~1MB per thread, context switching overhead), .NET uses a <strong>shared pool of reusable threads</strong>.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px">
+
+          <!-- Component 1: Global Queue -->
+          <div style="background:var(--code-bg);border-radius:8px;padding:14px">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--teal);margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px">① Global Work Queue</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:8px">A shared queue storing all queued tasks. Threads pick tasks from this queue.</p>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.2);border-radius:4px;padding:5px 10px;font-family:var(--mono);font-size:11px;color:var(--teal);animation:nodePulse 2s ease-in-out infinite">Task 1</div>
+              <div style="background:rgba(0,212,170,0.06);border:1px solid rgba(0,212,170,0.15);border-radius:4px;padding:5px 10px;font-family:var(--mono);font-size:11px;color:var(--teal);animation:nodePulse 2s ease-in-out infinite 0.3s">Task 2</div>
+              <div style="background:rgba(0,212,170,0.04);border:1px solid rgba(0,212,170,0.1);border-radius:4px;padding:5px 10px;font-family:var(--mono);font-size:11px;color:var(--teal);animation:nodePulse 2s ease-in-out infinite 0.6s">Task 3</div>
+            </div>
+          </div>
+
+          <!-- Component 2: Work Stealing -->
+          <div style="background:var(--code-bg);border-radius:8px;padding:14px">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--orange);margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px">② Work-Stealing Queues</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:8px">Each thread has its own local queue. Idle threads <strong style="color:var(--orange)">steal work</strong> from busy threads.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div style="text-align:center">
+                <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:4px">T1 Queue</div>
+                <div style="background:rgba(0,212,170,0.06);border-radius:4px;padding:3px 6px;font-family:var(--mono);font-size:10px;color:var(--teal)">TaskA</div>
+                <div style="background:rgba(0,212,170,0.06);border-radius:4px;padding:3px 6px;font-family:var(--mono);font-size:10px;color:var(--teal);margin-top:3px">TaskB</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:4px">T3 (idle)</div>
+                <div style="background:rgba(255,107,53,0.08);border-radius:4px;padding:3px 6px;font-family:var(--mono);font-size:10px;color:var(--orange);animation:badCounter 1.5s ease-in-out infinite">steals TaskB ↑</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Component 3: Hill Climbing -->
+          <div style="background:var(--code-bg);border-radius:8px;padding:14px">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--purple);margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px">③ Hill Climbing Algorithm</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:8px">Automatically decides thread count to maximize throughput with minimum overhead.</p>
+            <div style="display:flex;align-items:flex-end;gap:4px;height:60px;padding:0 4px">
+              <div style="width:12px;background:rgba(168,85,247,0.4);border-radius:2px 2px 0 0;height:30%"></div>
+              <div style="width:12px;background:rgba(168,85,247,0.5);border-radius:2px 2px 0 0;height:55%"></div>
+              <div style="width:12px;background:rgba(168,85,247,0.7);border-radius:2px 2px 0 0;height:80%"></div>
+              <div style="width:12px;background:rgba(168,85,247,1);border-radius:2px 2px 0 0;height:100%;animation:threadActive 2s ease-in-out infinite"></div>
+              <div style="width:12px;background:rgba(168,85,247,0.7);border-radius:2px 2px 0 0;height:80%"></div>
+              <div style="width:12px;background:rgba(168,85,247,0.5);border-radius:2px 2px 0 0;height:55%"></div>
+              <div style="width:12px;background:rgba(168,85,247,0.3);border-radius:2px 2px 0 0;height:35%"></div>
+            </div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px;text-align:center">threads → optimal point ← reduce</div>
+          </div>
+
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">EXECUTION FLOW</div>
+            <div class="flow-diagram" style="gap:2px">
+              <div class="flow-node teal" style="font-size:11px;padding:5px">Task.Run()</div>
+              <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+              <div class="flow-node orange" style="font-size:11px;padding:5px">Task Scheduler</div>
+              <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+              <div class="flow-node purple" style="font-size:11px;padding:5px">ThreadPool Queue</div>
+              <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+              <div class="flow-node blue" style="font-size:11px;padding:5px">Worker Thread picks task</div>
+              <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+              <div class="flow-node" style="font-size:11px;padding:5px;border-color:rgba(34,197,94,0.4);color:var(--green);background:rgba(34,197,94,0.05)">Execute Task ✓</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">CONFIGURATION &amp; BENEFITS</div>
+            <div class="code-block">
+<span class="cm">// Configure thread count</span>
+<span class="cls">ThreadPool</span>.<span class="nm">SetMinThreads</span>(<span class="nm">4</span>, <span class="nm">4</span>);
+<span class="cls">ThreadPool</span>.<span class="nm">SetMaxThreads</span>(<span class="nm">100</span>, <span class="nm">100</span>);</div>
+            <div style="margin-top:8px">
+              <ul class="concept-list">
+                <li>Avoids thread creation cost</li>
+                <li>Reuses threads across tasks</li>
+                <li>Uses work-stealing for load balance</li>
+                <li>Dynamically scales thread count</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ============ KESTREL INTERNALS ============ -->
+<section class="module-section" id="kestrel">
+  <div class="module-header">
+    <span class="module-num orange">DEEP DIVE</span>
+    <span class="module-title">How Kestrel Handles Millions of Requests</span>
+    <span class="module-desc">Concept #41</span>
+  </div>
+
+  <div class="cols2">
+
+    <div class="card col-span2">
+      <div class="card-num">#41</div>
+      <div class="card-title">Kestrel Web Server — Internal Architecture</div>
+      <div class="card-body">
+        <p>Kestrel is the <strong style="color:var(--teal)">high-performance web server</strong> used by ASP.NET Core, designed to handle <strong>millions of concurrent requests</strong> using a small thread pool.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px">
+
+          <!-- Left: Full Architecture -->
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Internal Components</div>
+            <div style="background:var(--code-bg);border-radius:8px;padding:14px">
+              <div class="arch-diagram" style="background:transparent;border:none;padding:0">
+                <div class="arch-layer"><div class="arch-box teal">Internet / Client</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box orange">Connection Listener (Socket)</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box blue">Transport Layer</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box purple">System.IO.Pipelines</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box">HTTP Parser</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box">Middleware Pipeline</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box teal">Controller / Endpoint</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: 4 Key Techniques -->
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">4 Key Techniques</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="background:rgba(0,212,170,0.05);border:1px solid rgba(0,212,170,0.2);border-radius:8px;padding:10px">
+                <div style="font-family:var(--mono);font-size:11px;color:var(--teal);margin-bottom:4px">① Non-blocking I/O</div>
+                <div style="font-size:12px;color:var(--text2)">Thread starts reading → released → network completes → thread resumes. Never blocks waiting for network.</div>
+              </div>
+              <div style="background:rgba(255,107,53,0.05);border:1px solid rgba(255,107,53,0.2);border-radius:8px;padding:10px">
+                <div style="font-family:var(--mono);font-size:11px;color:var(--orange);margin-bottom:4px">② ThreadPool Reuse</div>
+                <div style="font-size:12px;color:var(--text2)">10,000 requests → only ~50 threads reused via ThreadPool</div>
+              </div>
+              <div style="background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:10px">
+                <div style="font-family:var(--mono);font-size:11px;color:var(--yellow);margin-bottom:4px">③ Async/Await Everywhere</div>
+                <div style="font-size:12px;color:var(--text2)">Every request is asynchronous. Thread released while waiting for DB, file, API calls.</div>
+              </div>
+              <div style="background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.2);border-radius:8px;padding:10px">
+                <div style="font-family:var(--mono);font-size:11px;color:var(--purple);margin-bottom:4px">④ System.IO.Pipelines</div>
+                <div style="font-size:12px;color:var(--text2)">Zero-copy buffers, minimal memory allocations, efficient streaming. Reduces GC pressure.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Full request-to-response flow -->
+        <div style="margin-top:16px;background:var(--code-bg);border-radius:10px;padding:16px">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Full Request-to-Response Flow</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap">
+            <div class="flow-node teal" style="font-size:10px;padding:6px 10px;min-width:90px">Client</div>
+            <div class="flow-h-arrow" style="flex-shrink:0"><div class="flow-h-line" style="width:16px"></div><div class="flow-h-head"></div></div>
+            <div class="flow-node orange" style="font-size:10px;padding:6px 10px;min-width:90px">Kestrel Socket</div>
+            <div class="flow-h-arrow" style="flex-shrink:0"><div class="flow-h-line" style="width:16px"></div><div class="flow-h-head"></div></div>
+            <div class="flow-node blue" style="font-size:10px;padding:6px 10px;min-width:90px">I/O Pipeline</div>
+            <div class="flow-h-arrow" style="flex-shrink:0"><div class="flow-h-line" style="width:16px"></div><div class="flow-h-head"></div></div>
+            <div class="flow-node purple" style="font-size:10px;padding:6px 10px;min-width:90px">ThreadPool</div>
+            <div class="flow-h-arrow" style="flex-shrink:0"><div class="flow-h-line" style="width:16px"></div><div class="flow-h-head"></div></div>
+            <div class="flow-node yellow" style="font-size:10px;padding:6px 10px;min-width:90px">Middleware</div>
+            <div class="flow-h-arrow" style="flex-shrink:0"><div class="flow-h-line" style="width:16px"></div><div class="flow-h-head"></div></div>
+            <div class="flow-node" style="font-size:10px;padding:6px 10px;min-width:90px;border-color:rgba(34,197,94,0.3);color:var(--green)">Controller</div>
+            <div class="flow-h-arrow" style="flex-shrink:0"><div class="flow-h-line" style="width:16px"></div><div class="flow-h-head"></div></div>
+            <div class="flow-node teal" style="font-size:10px;padding:6px 10px;min-width:90px">Async DB Call</div>
+            <div class="flow-h-arrow" style="flex-shrink:0"><div class="flow-h-line" style="width:16px"></div><div class="flow-h-head"></div></div>
+            <div class="flow-node" style="font-size:10px;padding:6px 10px;min-width:90px;border-color:rgba(34,197,94,0.3);color:var(--green)">Response ✓</div>
+          </div>
+        </div>
+
+        <!-- Why fast + Production arch -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Why ASP.NET Core Is Extremely Fast</div>
+            <ul class="concept-list">
+              <li>Kestrel server with socket listeners</li>
+              <li>Fully async architecture</li>
+              <li>ThreadPool scheduling</li>
+              <li>System.IO.Pipelines networking</li>
+              <li>Minimal GC allocations (Span&lt;T&gt;, Memory&lt;T&gt;)</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Production Architecture</div>
+            <div class="arch-diagram" style="margin:0">
+              <div class="arch-layer"><div class="arch-box teal">Users</div></div>
+              <div class="arch-arrow"></div>
+              <div class="arch-layer"><div class="arch-box orange">Cloud Load Balancer</div></div>
+              <div class="arch-arrow"></div>
+              <div class="arch-layer"><div class="arch-box blue">Reverse Proxy (NGINX)</div></div>
+              <div class="arch-arrow"></div>
+              <div class="arch-layer"><div class="arch-box purple">Kestrel Servers</div></div>
+              <div class="arch-arrow"></div>
+              <div class="arch-layer"><div class="arch-box">Redis Cache / Database</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="highlight" style="margin-top:12px">
+          <strong>Final Mental Model:</strong> A <strong>small number of threads</strong> can handle <strong>millions of requests</strong> because threads are never blocked — they are always released while waiting for I/O, then reused for the next request.
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+</div>
+
+<div class="page-footer">
+  <span>Multithreading: Zero to Hero</span> — Complete C# Concurrency Reference &nbsp;·&nbsp; All 41 concepts &nbsp;·&nbsp; <span>C# / .NET</span>
+</div>
+
+<script>
+// Smooth active nav on scroll
+const sections = document.querySelectorAll('.module-section');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navItems.forEach(n => n.classList.remove('active'));
+      const active = document.querySelector(`.nav-item[href="#${id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => observer.observe(s));
+
+// Animated bad counter
+const bc = document.getElementById('badCount');
+if (bc) {
+  const vals = ['≠ 2000','1600','1820','1750','1600','1900'];
+  let i = 0;
+  setInterval(() => { bc.textContent = vals[i++ % vals.length]; }, 600);
+}
+</script>
+</body>
+</html>

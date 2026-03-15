@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BackFire 🔥 — Distributed Background Job System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+<style>
+  :root {
+    --fire-1: #ff2200;
+    --fire-2: #ff6600;
+    --fire-3: #ffaa00;
+    --fire-4: #ffd700;
+    --bg-deep:   #07070d;
+    --bg-card:   #0f0f1a;
+    --bg-code:   #0a0a14;
+    --bg-glass:  rgba(255,102,0,0.04);
+    --border:    rgba(255,102,0,0.18);
+    --border-bright: rgba(255,170,0,0.45);
+    --text-main: #ece9e0;
+    --text-dim:  #8a8575;
+    --text-code: #f0c070;
+    --radius: 10px;
+    --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-main);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15.5px;
+    line-height: 1.75;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ─── SIDEBAR NAV ─── */
+  #sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: rgba(7,7,13,0.96);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    padding: 28px 0 28px;
+    backdrop-filter: blur(12px);
+  }
+  #sidebar::-webkit-scrollbar { width: 3px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--fire-2); border-radius: 2px; }
+
+  .sidebar-logo {
+    padding: 0 22px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .sidebar-logo .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--fire-2), var(--fire-4));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .sidebar-logo .logo-sub {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .nav-section-title {
+    font-size: 9.5px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 14px 22px 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  #sidebar a {
+    display: block;
+    padding: 6px 22px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: var(--transition);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #sidebar a:hover, #sidebar a.active {
+    color: var(--fire-3);
+    border-left-color: var(--fire-2);
+    background: rgba(255,102,0,0.06);
+  }
+
+  /* ─── MAIN LAYOUT ─── */
+  #main {
+    margin-left: 230px;
+    padding: 0 48px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -60px; right: -80px;
+    width: 500px; height: 500px;
+    background: radial-gradient(ellipse, rgba(255,102,0,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,102,0,0.1);
+    border: 1px solid var(--border-bright);
+    border-radius: 100px;
+    padding: 4px 14px;
+    font-size: 11.5px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--fire-3);
+    letter-spacing: 0.06em;
+    margin-bottom: 22px;
+  }
+  .hero-badge::before { content: '●'; font-size: 8px; color: var(--fire-1); animation: pulse 2s infinite; }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(42px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.05;
+    background: linear-gradient(135deg, #fff 20%, var(--fire-3) 60%, var(--fire-2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 18px;
+  }
+
+  .hero-description {
+    font-size: 16.5px;
+    color: var(--text-dim);
+    max-width: 560px;
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .tag {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 13px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--fire-3);
+  }
+
+  /* ─── SECTION ─── */
+  .doc-section {
+    margin-bottom: 70px;
+    scroll-margin-top: 28px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 26px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--fire-2);
+    letter-spacing: 0.1em;
+    opacity: 0.7;
+    min-width: 28px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(20px, 2.5vw, 27px);
+    font-weight: 700;
+    color: #fff;
+  }
+
+  /* ─── CARDS / PROSE ─── */
+  .prose p { margin-bottom: 14px; color: var(--text-main); }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 20px 0;
+  }
+  .feature-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--fire-1), var(--fire-3));
+    transform: scaleX(0);
+    transition: var(--transition);
+    transform-origin: left;
+  }
+  .feature-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+  .feature-card:hover::before { transform: scaleX(1); }
+  .feature-card .card-icon { font-size: 22px; margin-bottom: 8px; }
+  .feature-card .card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .feature-card .card-desc { font-size: 12.5px; color: var(--text-dim); }
+
+  /* ─── TABLE ─── */
+  .doc-table-wrap { overflow-x: auto; margin: 20px 0; }
+  .doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .doc-table th {
+    background: rgba(255,102,0,0.12);
+    color: var(--fire-3);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 11px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-bright);
+  }
+  .doc-table td {
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+  }
+  .doc-table tr:hover td { background: rgba(255,102,0,0.04); }
+  .doc-table td:first-child { font-family: 'JetBrains Mono', monospace; color: var(--fire-3); font-size: 13px; }
+
+  /* ─── CODE BLOCK ─── */
+  .code-block {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 18px 0;
+    position: relative;
+  }
+  .code-header {
+    background: rgba(255,102,0,0.08);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .code-dot.red   { background: #ff5f57; }
+  .code-dot.amber { background: #febc2e; }
+  .code-dot.green { background: #28c840; }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    margin-left: auto;
+  }
+  .code-block pre {
+    padding: 20px 22px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-code);
+    tab-size: 2;
+  }
+  .code-block pre::-webkit-scrollbar { height: 4px; }
+  .code-block pre::-webkit-scrollbar-thumb { background: var(--fire-2); }
+
+  /* syntax highlights */
+  .kw { color: #ff6eb4; }
+  .ty { color: #7ec8e3; }
+  .st { color: #98d982; }
+  .cm { color: #5a6a5a; font-style: italic; }
+  .nu { color: var(--fire-4); }
+  .fn { color: #d4a5ff; }
+
+  /* ─── MERMAID DIAGRAMS ─── */
+  .diagram-wrap {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 18px 22px;
+    margin: 22px 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .diagram-label {
+    position: absolute;
+    top: 10px; left: 16px;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--fire-2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .diagram-wrap .mermaid {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Mermaid SVG overrides injected after render */
+  .mermaid svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* ─── ANIMATED ARROWS (post-render via JS) ─── */
+  @keyframes dash-flow {
+    from { stroke-dashoffset: 100; }
+    to   { stroke-dashoffset: 0; }
+  }
+  @keyframes dash-flow-rev {
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: -100; }
+  }
+
+  /* ─── LIST STYLES ─── */
+  .doc-list {
+    list-style: none;
+    margin: 14px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .doc-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14.5px;
+    color: var(--text-main);
+  }
+  .doc-list li::before {
+    content: '▸';
+    color: var(--fire-2);
+    font-size: 11px;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  /* ─── INFO BOXES ─── */
+  .info-box {
+    background: rgba(255,170,0,0.06);
+    border-left: 3px solid var(--fire-3);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin: 18px 0;
+    font-size: 14px;
+    color: var(--text-main);
+  }
+  .warn-box {
+    background: rgba(255,34,0,0.06);
+    border-left: 3px solid var(--fire-1);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin: 18px 0;
+    font-size: 14px;
+  }
+
+  /* ─── METRICS ROW ─── */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+    margin: 20px 0;
+  }
+  .metric-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    transition: var(--transition);
+  }
+  .metric-card:hover { border-color: var(--border-bright); }
+  .metric-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--fire-3), var(--fire-4));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .metric-label { font-size: 11.5px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+
+  /* ─── PLUGIN GRID ─── */
+  .plugin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 12px;
+    margin: 18px 0;
+  }
+  .plugin-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--fire-3);
+    transition: var(--transition);
+  }
+  .plugin-item:hover { border-color: var(--border-bright); background: rgba(255,102,0,0.06); }
+
+  /* ─── SECTION DIVIDER ─── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+    margin: 60px 0;
+  }
+
+  /* ─── ARCHITECTURE LABEL ─── */
+  .arch-label {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--fire-2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    opacity: 0.8;
+  }
+
+  /* ─── SUBSECTION H3 ─── */
+  h3.sub {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--fire-3);
+    margin: 24px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h3.sub::before {
+    content: '';
+    display: inline-block;
+    width: 16px; height: 2px;
+    background: var(--fire-2);
+    border-radius: 2px;
+  }
+
+  /* ─── FOOTER ─── */
+  .doc-footer {
+    margin-top: 80px;
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  #progress {
+    position: fixed;
+    top: 0; left: 230px; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--fire-1), var(--fire-3), var(--fire-4));
+    transform-origin: left;
+    transform: scaleX(0);
+    z-index: 200;
+    transition: transform 0.1s;
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg-deep); }
+  ::-webkit-scrollbar-thumb { background: var(--fire-2); border-radius: 3px; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .doc-section { animation: fadeInUp 0.5s ease both; }
+  .doc-section:nth-child(1)  { animation-delay: 0.05s; }
+  .doc-section:nth-child(2)  { animation-delay: 0.10s; }
+  .doc-section:nth-child(3)  { animation-delay: 0.15s; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    #sidebar { display: none; }
+    #main { margin-left: 0; padding: 0 20px 60px; }
+    #progress { left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">🔥 BackFire</div>
+    <div class="logo-sub">Production Docs · v1.0</div>
+  </div>
+  <div class="nav-section-title">Overview</div>
+  <a href="#s1">01 · What is BackFire?</a>
+  <a href="#s2">02 · High-Level Architecture</a>
+  <div class="nav-section-title">Core Design</div>
+  <a href="#s3">03 · BackFire Vision</a>
+  <a href="#s4">04 · Core Features</a>
+  <a href="#s5">05 · Architecture</a>
+  <a href="#s6">06 · Solution Structure</a>
+  <div class="nav-section-title">Implementation</div>
+  <a href="#s7">07 · Domain Models</a>
+  <a href="#s8">08 · Storage Abstraction</a>
+  <a href="#s9">09 · SQL Storage</a>
+  <a href="#s10">10 · Redis Queue Engine</a>
+  <a href="#s11">11 · Distributed Locking</a>
+  <a href="#s12">12 · Worker Engine</a>
+  <a href="#s13">13 · Job Executor</a>
+  <a href="#s14">14 · Retry Policy</a>
+  <a href="#s15">15 · Cron Scheduler</a>
+  <div class="nav-section-title">Operations</div>
+  <a href="#s16">16 · Queue Priorities</a>
+  <a href="#s17">17 · Dashboard</a>
+  <a href="#s18">18 · SignalR Real-Time</a>
+  <a href="#s19">19 · ASP.NET Endpoint</a>
+  <a href="#s20">20 · Client API</a>
+  <a href="#s21">21 · Horizontal Scaling</a>
+  <a href="#s22">22 · Kubernetes Deploy</a>
+  <a href="#s23">23 · Observability</a>
+  <div class="nav-section-title">Extensibility</div>
+  <a href="#s24">24 · Plugin System</a>
+  <a href="#s25">25 · Performance Goals</a>
+  <a href="#s26">26 · Production Architecture</a>
+  <a href="#s27">27 · Open Source Strategy</a>
+  <a href="#s28">28 · Future Features</a>
+</nav>
+
+<!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+<main id="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">Project 1 · Open Source · .NET &amp; Polyglot</div>
+    <h1>BackFire 🔥</h1>
+    <p class="hero-description">
+      A practical end-to-end blueprint to build an open-source background job system like Hangfire in .NET — a distributed job queue + worker system designed for horizontal scalability.
+    </p>
+    <div class="hero-tags">
+      <span class="tag">fire-and-forget</span>
+      <span class="tag">delayed jobs</span>
+      <span class="tag">cron scheduling</span>
+      <span class="tag">auto retries</span>
+      <span class="tag">dashboard</span>
+      <span class="tag">distributed workers</span>
+      <span class="tag">redis / sql</span>
+      <span class="tag">plugin storage</span>
+    </div>
+  </div>
+
+  <!-- ─── SECTION 1 ─── -->
+  <section class="doc-section" id="s1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">What is BackFire?</h2>
+    </div>
+    <p class="prose">
+      <strong>BackFire</strong> is a background job processing system for .NET and others.
+    </p>
+
+    <h3 class="sub">Purpose</h3>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="card-icon">⚡</div>
+        <div class="card-title">Outside Request Lifecycle</div>
+        <div class="card-desc">Execute tasks outside the request lifecycle</div>
+      </div>
+      <div class="feature-card">
+        <div class="card-icon">🛡️</div>
+        <div class="card-title">Reliable Processing</div>
+        <div class="card-desc">Run reliable background processing</div>
+      </div>
+      <div class="feature-card">
+        <div class="card-icon">📡</div>
+        <div class="card-title">Multiple Workers</div>
+        <div class="card-desc">Scale across multiple workers</div>
+      </div>
+    </div>
+
+    <h3 class="sub">Example Jobs</h3>
+    <ul class="doc-list">
+      <li>Send emails</li>
+      <li>Process payments</li>
+      <li>Generate reports</li>
+      <li>Resize images</li>
+      <li>AI processing</li>
+    </ul>
+  </section>
+
+  <!-- ─── SECTION 2 ─── -->
+  <section class="doc-section" id="s2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">High-Level Architecture</h2>
+    </div>
+    <div class="diagram-wrap">
+      <span class="diagram-label">flowchart · system overview</span>
+      <div class="mermaid" id="diag-1">
+flowchart LR
+  ClientApp(["🖥️ ClientApp"]):::client --> BackFireClient["⚡ BackFireClient"]:::client
+  BackFireClient --> JobStorage[("🗄️ JobStorage")]:::storage
+  Worker1["👷 Worker 1"]:::worker --> JobStorage
+  Worker2["👷 Worker 2"]:::worker --> JobStorage
+  Worker3["👷 Worker 3"]:::worker --> JobStorage
+  JobStorage --> Queue["📋 Queue"]:::queue
+  Queue --> WorkerPool["🔧 WorkerPool"]:::worker
+  WorkerPool --> JobExecutor["⚙️ JobExecutor"]:::exec
+  JobExecutor --> ResultStore[("✅ ResultStore")]:::storage
+  Dashboard["📊 Dashboard"]:::dash --> JobStorage
+  classDef client fill:#ff6600,stroke:#ff8c00,color:#fff,font-weight:bold
+  classDef storage fill:#1a3a5c,stroke:#2a5a9c,color:#7ec8e3
+  classDef worker fill:#1a4a2a,stroke:#2a8a4a,color:#98d982
+  classDef queue fill:#3a2a1a,stroke:#8a5a2a,color:#ffd700
+  classDef exec fill:#3a1a3a,stroke:#8a2a8a,color:#d4a5ff
+  classDef dash fill:#1a2a3a,stroke:#2a4a6a,color:#98c4e8
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── SECTION 3 ─── -->
+  <section class="doc-section" id="s3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">BackFire Vision</h2>
+    </div>
+    <p class="prose"><strong>BackFire</strong> is an open-source distributed background job processing system for .NET.</p>
+
+    <h3 class="sub">Goals</h3>
+    <ul class="doc-list">
+      <li>Simple developer API</li>
+      <li>Distributed job processing</li>
+      <li>Horizontal scalability</li>
+      <li>Reliable retries</li>
+      <li>Observability dashboard</li>
+      <li>Plugin storage engines</li>
+    </ul>
+
+    <h3 class="sub">Example Use Cases</h3>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="card-icon">📧</div><div class="card-title">Email Notifications</div><div class="card-desc">Async transactional emails</div></div>
+      <div class="feature-card"><div class="card-icon">🔗</div><div class="card-title">Data Pipelines</div><div class="card-desc">ETL and transformation jobs</div></div>
+      <div class="feature-card"><div class="card-icon">🤖</div><div class="card-title">AI Inference Tasks</div><div class="card-desc">ML inference background tasks</div></div>
+      <div class="feature-card"><div class="card-icon">📊</div><div class="card-title">Scheduled Reports</div><div class="card-desc">Cron-based report generation</div></div>
+      <div class="feature-card"><div class="card-icon">🎞️</div><div class="card-title">Video/Image Processing</div><div class="card-desc">Media resizing and encoding</div></div>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 4 ─── -->
+  <section class="doc-section" id="s4">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">BackFire Core Features — Version 1 Roadmap</h2>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Feature</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Fire-and-Forget Jobs</td><td>Run immediately</td></tr>
+          <tr><td>Delayed Jobs</td><td>Run later</td></tr>
+          <tr><td>Recurring Jobs</td><td>Cron-based</td></tr>
+          <tr><td>Retries</td><td>Automatic retry</td></tr>
+          <tr><td>Distributed Workers</td><td>Multiple servers</td></tr>
+          <tr><td>Dashboard</td><td>Monitor jobs</td></tr>
+          <tr><td>Queue System</td><td>Redis / SQL</td></tr>
+          <tr><td>Plugin Storage</td><td>Extensible</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 5 ─── -->
+  <section class="doc-section" id="s5">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">BackFire High-Level Architecture</h2>
+    </div>
+    <div class="diagram-wrap">
+      <span class="diagram-label">flowchart · data flow</span>
+      <div class="mermaid" id="diag-2">
+flowchart LR
+  App(["🖥️ Application"]):::client --> BFC["⚡ BackFireClient"]:::client
+  BFC --> JS[("🗄️ JobStorage")]:::storage
+  JS --> Q["📋 Queue"]:::queue
+  Q --> W1["👷 Worker 1"]:::worker
+  Q --> W2["👷 Worker 2"]:::worker
+  Q --> W3["👷 Worker 3"]:::worker
+  W1 --> JE["⚙️ JobExecutor"]:::exec
+  W2 --> JE
+  Sched["⏰ Scheduler"]:::sched --> JS
+  Dash["📊 Dashboard"]:::dash --> JS
+  classDef client fill:#ff6600,stroke:#ff8c00,color:#fff,font-weight:bold
+  classDef storage fill:#1a3a5c,stroke:#2a5a9c,color:#7ec8e3
+  classDef worker fill:#1a4a2a,stroke:#2a8a4a,color:#98d982
+  classDef queue fill:#3a2a1a,stroke:#8a5a2a,color:#ffd700
+  classDef exec fill:#3a1a3a,stroke:#8a2a8a,color:#d4a5ff
+  classDef sched fill:#3a3a1a,stroke:#8a8a2a,color:#ffe082
+  classDef dash fill:#1a2a3a,stroke:#2a4a6a,color:#98c4e8
+      </div>
+    </div>
+
+    <h3 class="sub">Core Components</h3>
+    <ul class="doc-list">
+      <li>Client API</li>
+      <li>Storage layer</li>
+      <li>Queue system</li>
+      <li>Worker system</li>
+      <li>Scheduler</li>
+      <li>Dashboard</li>
+    </ul>
+  </section>
+
+  <!-- ─── SECTION 6 ─── -->
+  <section class="doc-section" id="s6">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2 class="section-title">BackFire Solution Structure</h2>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot red"></div>
+        <div class="code-dot amber"></div>
+        <div class="code-dot green"></div>
+        <span class="code-lang">directory tree</span>
+      </div>
+      <pre>BackFire/
+├── src/
+│   ├── BackFire.Core
+│   ├── BackFire.Client
+│   ├── BackFire.Server
+│   ├── BackFire.Worker
+│   ├── BackFire.Storage.Sql
+│   ├── BackFire.Storage.Redis
+│   ├── BackFire.Scheduler
+│   └── BackFire.Dashboard
+│
+├── samples/
+│   └── BackFire.SampleApp
+│
+└── tests/
+    └── BackFire.Tests</pre>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── SECTION 7 ─── -->
+  <section class="doc-section" id="s7">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2 class="section-title">BackFire Core Domain Models</h2>
+    </div>
+    <h3 class="sub">5.1 Job Model</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div>
+        <span class="code-lang">C# · BackFire.Core.Models</span>
+      </div>
+      <pre><span class="kw">namespace</span> <span class="ty">BackFire</span>.Core.Models;
+
+<span class="kw">public class</span> <span class="ty">Job</span>
+{
+    <span class="kw">public</span> <span class="ty">Guid</span>      Id          { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="ty">string</span>    Type        { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="st">""</span>;
+    <span class="kw">public</span> <span class="ty">string</span>    Method      { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="st">""</span>;
+    <span class="kw">public</span> <span class="ty">string</span>    Arguments   { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="st">""</span>;
+    <span class="kw">public</span> <span class="ty">string</span>    Queue       { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="st">"default"</span>;
+    <span class="kw">public</span> <span class="ty">DateTime</span>  CreatedAt   { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="ty">DateTime?</span> ScheduledAt { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="ty">int</span>       RetryCount  { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="ty">string</span>    Status      { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="st">"Queued"</span>;
+}</pre>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 8 ─── -->
+  <section class="doc-section" id="s8">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2 class="section-title">Storage Abstraction Layer</h2>
+    </div>
+    <h3 class="sub">6.1 Storage Interface</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div>
+        <span class="code-lang">C# · IJobStorage</span>
+      </div>
+      <pre><span class="kw">public interface</span> <span class="ty">IJobStorage</span>
+{
+    <span class="ty">Task</span>                    <span class="fn">EnqueueAsync</span>(<span class="ty">Job</span> job);
+    <span class="ty">Task</span>&lt;<span class="ty">Job?</span>&gt;             <span class="fn">FetchNextJobAsync</span>(<span class="ty">string</span> queue);
+    <span class="ty">Task</span>                    <span class="fn">MarkProcessingAsync</span>(<span class="ty">Guid</span> id);
+    <span class="ty">Task</span>                    <span class="fn">MarkCompletedAsync</span>(<span class="ty">Guid</span> id);
+    <span class="ty">Task</span>                    <span class="fn">MarkFailedAsync</span>(<span class="ty">Guid</span> id);
+    <span class="ty">Task</span>&lt;<span class="ty">IEnumerable</span>&lt;<span class="ty">Job</span>&gt;&gt; <span class="fn">GetAllJobsAsync</span>();
+}</pre>
+    </div>
+    <div class="info-box">
+      This interface allows supporting: <strong>SQL Server</strong>, <strong>PostgreSQL</strong>, <strong>Redis</strong>, <strong>MongoDB</strong> — and any future storage engine through the plugin system.
+    </div>
+  </section>
+
+  <!-- ─── SECTION 9 ─── -->
+  <section class="doc-section" id="s9">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2 class="section-title">SQL Storage Implementation</h2>
+    </div>
+    <h3 class="sub">Schema</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div>
+        <span class="code-lang">SQL · Jobs table</span>
+      </div>
+      <pre><span class="kw">CREATE TABLE</span> Jobs
+(
+    Id          <span class="ty">UNIQUEIDENTIFIER</span> <span class="kw">PRIMARY KEY</span>,
+    Type        <span class="ty">NVARCHAR</span>(<span class="nu">200</span>),
+    Method      <span class="ty">NVARCHAR</span>(<span class="nu">200</span>),
+    Arguments   <span class="ty">NVARCHAR</span>(<span class="kw">MAX</span>),
+    Queue       <span class="ty">NVARCHAR</span>(<span class="nu">50</span>),
+    Status      <span class="ty">NVARCHAR</span>(<span class="nu">50</span>),
+    RetryCount  <span class="ty">INT</span>,
+    CreatedAt   <span class="ty">DATETIME</span>,
+    ScheduledAt <span class="ty">DATETIME</span>
+);</pre>
+    </div>
+    <h3 class="sub">Implementation</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div>
+        <span class="code-lang">C# · SQL EnqueueAsync</span>
+      </div>
+      <pre><span class="kw">public async</span> <span class="ty">Task</span> <span class="fn">EnqueueAsync</span>(<span class="ty">Job</span> job)
+{
+    <span class="kw">var</span> sql = <span class="st">@"INSERT INTO Jobs
+        VALUES(@Id,@Type,@Method,@Arguments,@Queue,
+               @Status,@RetryCount,@CreatedAt,@ScheduledAt)"</span>;
+
+    <span class="kw">await</span> _connection.<span class="fn">ExecuteAsync</span>(sql, job);
+}</pre>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 10 ─── -->
+  <section class="doc-section" id="s10">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2 class="section-title">Redis Queue Engine (High Performance)</h2>
+    </div>
+    <p class="prose">Redis is ideal for <strong>fast job queues</strong>.</p>
+
+    <div class="diagram-wrap">
+      <span class="diagram-label">flowchart · redis queue</span>
+      <div class="mermaid" id="diag-3">
+flowchart LR
+  C(["🖥️ Client"]):::client --> RQ["🔴 RedisQueue"]:::redis
+  RQ --> W["👷 Worker"]:::worker
+  W --> E["⚙️ Executor"]:::exec
+  classDef client fill:#ff6600,stroke:#ff8c00,color:#fff,font-weight:bold
+  classDef redis fill:#c0392b,stroke:#e74c3c,color:#fff,font-weight:bold
+  classDef worker fill:#1a4a2a,stroke:#2a8a4a,color:#98d982
+  classDef exec fill:#3a1a3a,stroke:#8a2a8a,color:#d4a5ff
+      </div>
+    </div>
+
+    <h3 class="sub">Push Job</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · Redis Push</span></div>
+      <pre><span class="kw">await</span> redis.<span class="fn">ListLeftPushAsync</span>(
+    <span class="st">"backfire:queue:default"</span>,
+    <span class="ty">JsonSerializer</span>.<span class="fn">Serialize</span>(job));</pre>
+    </div>
+    <h3 class="sub">Worker Pulls Job</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · Redis Pop</span></div>
+      <pre><span class="kw">var</span> job = <span class="kw">await</span> redis.<span class="fn">ListRightPopAsync</span>(<span class="st">"backfire:queue:default"</span>);</pre>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── SECTION 11 ─── -->
+  <section class="doc-section" id="s11">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <h2 class="section-title">Distributed Locking System</h2>
+    </div>
+    <div class="warn-box">
+      When multiple workers run, we must avoid duplicate execution. Solution: <strong style="color:var(--fire-2)">distributed lock</strong>
+    </div>
+
+    <div class="diagram-wrap">
+      <span class="diagram-label">flowchart · distributed lock</span>
+      <div class="mermaid" id="diag-4">
+flowchart LR
+  W1["👷 Worker 1"]:::worker --> LS["🔒 LockService"]:::lock
+  W2["👷 Worker 2"]:::worker --> LS
+  W3["👷 Worker 3"]:::worker --> LS
+  LS --> Redis["🔴 Redis"]:::redis
+  classDef worker fill:#1a4a2a,stroke:#2a8a4a,color:#98d982
+  classDef lock fill:#4a2a1a,stroke:#aa6a3a,color:#ffc870
+  classDef redis fill:#c0392b,stroke:#e74c3c,color:#fff,font-weight:bold
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · Redis Lock</span></div>
+      <pre><span class="kw">var</span> lockKey = <span class="st">$"lock:job:{job.Id}"</span>;
+
+<span class="ty">bool</span> acquired = <span class="kw">await</span> redis.<span class="fn">StringSetAsync</span>(
+    lockKey,
+    <span class="st">"locked"</span>,
+    <span class="ty">TimeSpan</span>.<span class="fn">FromMinutes</span>(<span class="nu">5</span>),
+    <span class="ty">When</span>.NotExists);
+
+<span class="kw">if</span> (!acquired)
+    <span class="kw">return</span>;</pre>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 12 ─── -->
+  <section class="doc-section" id="s12">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <h2 class="section-title">Worker Engine</h2>
+    </div>
+    <p class="prose">Worker continuously processes jobs.</p>
+
+    <div class="diagram-wrap">
+      <span class="diagram-label">flowchart · worker loop</span>
+      <div class="mermaid" id="diag-5">
+flowchart TD
+  WL(["🔄 WorkerLoop"]):::start --> FJ["📥 FetchJob"]:::step
+  FJ --> LJ["🔒 LockJob"]:::lock
+  LJ --> EX["⚙️ Execute"]:::exec
+  EX --> SUC["✅ Success"]:::ok
+  EX --> FAIL["❌ Failure"]:::fail
+  FAIL --> RET["🔁 Retry"]:::retry
+  SUC --> NJ["➡️ NextJob"]:::step
+  NJ --> WL
+  RET --> WL
+  classDef start fill:#ff6600,stroke:#ff8c00,color:#fff,font-weight:bold
+  classDef step fill:#1a3a5c,stroke:#2a5a9c,color:#7ec8e3
+  classDef lock fill:#4a2a1a,stroke:#aa6a3a,color:#ffc870
+  classDef exec fill:#3a1a3a,stroke:#8a2a8a,color:#d4a5ff
+  classDef ok fill:#1a4a2a,stroke:#2a8a4a,color:#98d982
+  classDef fail fill:#4a1a1a,stroke:#8a2a2a,color:#ff8080
+  classDef retry fill:#3a3a1a,stroke:#8a8a2a,color:#ffe082
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · Worker Loop</span></div>
+      <pre><span class="kw">while</span> (<span class="kw">true</span>)
+{
+    <span class="kw">var</span> job = <span class="kw">await</span> storage.<span class="fn">FetchNextJobAsync</span>(<span class="st">"default"</span>);
+
+    <span class="kw">if</span> (job == <span class="kw">null</span>)
+    {
+        <span class="kw">await</span> <span class="ty">Task</span>.<span class="fn">Delay</span>(<span class="nu">1000</span>);
+        <span class="kw">continue</span>;
+    }
+
+    <span class="kw">await</span> executor.<span class="fn">ExecuteAsync</span>(job);
+}</pre>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 13 ─── -->
+  <section class="doc-section" id="s13">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <h2 class="section-title">Job Executor</h2>
+    </div>
+    <p class="prose">Responsible for executing job methods.</p>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · JobExecutor</span></div>
+      <pre><span class="kw">public async</span> <span class="ty">Task</span> <span class="fn">ExecuteAsync</span>(<span class="ty">Job</span> job)
+{
+    <span class="kw">var</span> type     = <span class="ty">Type</span>.<span class="fn">GetType</span>(job.Type);
+    <span class="kw">var</span> instance = <span class="ty">Activator</span>.<span class="fn">CreateInstance</span>(type!);
+    <span class="kw">var</span> method   = type!.<span class="fn">GetMethod</span>(job.Method);
+    <span class="kw">var</span> args     = <span class="ty">JsonSerializer</span>.<span class="fn">Deserialize</span>&lt;<span class="ty">object[]</span>&gt;(job.Arguments);
+
+    <span class="kw">var</span> result = method!.<span class="fn">Invoke</span>(instance, args);
+
+    <span class="kw">if</span> (result <span class="kw">is</span> <span class="ty">Task</span> task)
+        <span class="kw">await</span> task;
+}</pre>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 14 ─── -->
+  <section class="doc-section" id="s14">
+    <div class="section-header">
+      <span class="section-num">14</span>
+      <h2 class="section-title">Retry Policy System</h2>
+    </div>
+    <p class="prose">Retries improve reliability.</p>
+
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Attempt</th><th>Strategy</th></tr></thead>
+        <tbody>
+          <tr><td>1st failure</td><td>Retry immediately</td></tr>
+          <tr><td>2nd failure</td><td>Retry after 10s</td></tr>
+          <tr><td>3rd failure</td><td>Retry after 1m</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · Retry Logic</span></div>
+      <pre><span class="kw">if</span> (job.RetryCount &lt; <span class="nu">3</span>)
+{
+    job.RetryCount++;
+    <span class="kw">await</span> storage.<span class="fn">EnqueueAsync</span>(job);
+}
+<span class="kw">else</span>
+{
+    <span class="kw">await</span> storage.<span class="fn">MarkFailedAsync</span>(job.Id);
+}</pre>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 15 ─── -->
+  <section class="doc-section" id="s15">
+    <div class="section-header">
+      <span class="section-num">15</span>
+      <h2 class="section-title">Cron Scheduler System</h2>
+    </div>
+    <p class="prose">BackFire supports recurring jobs.</p>
+
+    <div class="diagram-wrap">
+      <span class="diagram-label">flowchart · cron scheduler</span>
+      <div class="mermaid" id="diag-6">
+flowchart LR
+  CJ["⏱️ CronJobs"]:::cron --> S["⏰ Scheduler"]:::sched
+  S --> Q["📋 Queue"]:::queue
+  Q --> W["👷 Worker"]:::worker
+  classDef cron fill:#4a3a1a,stroke:#aa8a3a,color:#ffe082
+  classDef sched fill:#3a3a1a,stroke:#8a8a2a,color:#ffe082
+  classDef queue fill:#3a2a1a,stroke:#8a5a2a,color:#ffd700
+  classDef worker fill:#1a4a2a,stroke:#2a8a4a,color:#98d982
+      </div>
+    </div>
+
+    <h3 class="sub">Example Cron Job</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · Recurring Job</span></div>
+      <pre><span class="ty">RecurringJob</span>.<span class="fn">AddOrUpdate</span>(
+    <span class="st">"daily-report"</span>,
+    () =&gt; reportService.<span class="fn">Generate</span>(),
+    <span class="st">"0 0 * * *"</span>)</pre>
+    </div>
+
+    <h3 class="sub">Scheduler Loop</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · Scheduler Loop</span></div>
+      <pre><span class="kw">while</span> (<span class="kw">true</span>)
+{
+    <span class="kw">var</span> jobs = <span class="kw">await</span> storage.<span class="fn">GetScheduledJobs</span>();
+
+    <span class="kw">foreach</span> (<span class="kw">var</span> job <span class="kw">in</span> jobs)
+    {
+        <span class="kw">await</span> queue.<span class="fn">EnqueueAsync</span>(job);
+    }
+
+    <span class="kw">await</span> <span class="ty">Task</span>.<span class="fn">Delay</span>(<span class="nu">60000</span>);
+}</pre>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── SECTION 16 ─── -->
+  <section class="doc-section" id="s16">
+    <div class="section-header">
+      <span class="section-num">16</span>
+      <h2 class="section-title">Queue Priorities</h2>
+    </div>
+    <p class="prose">Multiple queues:</p>
+
+    <div class="feature-grid">
+      <div class="feature-card"><div class="card-icon">🔴</div><div class="card-title">critical</div><div class="card-desc">Highest priority — processed first always</div></div>
+      <div class="feature-card"><div class="card-icon">🟡</div><div class="card-title">default</div><div class="card-desc">Standard priority for regular jobs</div></div>
+      <div class="feature-card"><div class="card-icon">🟢</div><div class="card-title">low</div><div class="card-desc">Background tasks, processed last</div></div>
+    </div>
+
+    <h3 class="sub">Worker Config</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · Queue Priority Config</span></div>
+      <pre><span class="kw">var</span> queues = <span class="kw">new</span> [] { <span class="st">"critical"</span>, <span class="st">"default"</span>, <span class="st">"low"</span> };</pre>
+    </div>
+
+    <div class="diagram-wrap">
+      <span class="diagram-label">flowchart · queue priorities</span>
+      <div class="mermaid" id="diag-7">
+flowchart LR
+  CQ["🔴 CriticalQueue"]:::crit --> W["👷 Worker"]:::worker
+  DQ["🟡 DefaultQueue"]:::def --> W
+  LQ["🟢 LowQueue"]:::low --> W
+  classDef crit fill:#4a1a1a,stroke:#cc3333,color:#ff8080,font-weight:bold
+  classDef def fill:#3a2a1a,stroke:#8a5a2a,color:#ffd700
+  classDef low fill:#1a3a1a,stroke:#2a8a2a,color:#98d982
+  classDef worker fill:#1a3a5c,stroke:#2a5a9c,color:#7ec8e3
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 17 ─── -->
+  <section class="doc-section" id="s17">
+    <div class="section-header">
+      <span class="section-num">17</span>
+      <h2 class="section-title">BackFire Dashboard</h2>
+    </div>
+
+    <h3 class="sub">Monitor</h3>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="card-icon">📋</div><div class="card-title">Queued Jobs</div><div class="card-desc">All jobs waiting to be executed</div></div>
+      <div class="feature-card"><div class="card-icon">⚙️</div><div class="card-title">Running Jobs</div><div class="card-desc">Jobs currently being processed</div></div>
+      <div class="feature-card"><div class="card-icon">❌</div><div class="card-title">Failures</div><div class="card-desc">Failed jobs with error details</div></div>
+      <div class="feature-card"><div class="card-icon">🔁</div><div class="card-title">Retries</div><div class="card-desc">Jobs scheduled for retry</div></div>
+    </div>
+
+    <div class="diagram-wrap">
+      <span class="diagram-label">flowchart · dashboard architecture</span>
+      <div class="mermaid" id="diag-8">
+flowchart LR
+  B(["🌐 Browser"]):::client --> D["📊 Dashboard"]:::dash
+  D --> API["🔌 API"]:::api
+  API --> JS[("🗄️ JobStorage")]:::storage
+  classDef client fill:#ff6600,stroke:#ff8c00,color:#fff,font-weight:bold
+  classDef dash fill:#1a2a3a,stroke:#2a4a6a,color:#98c4e8
+  classDef api fill:#2a1a3a,stroke:#5a2a8a,color:#d4a5ff
+  classDef storage fill:#1a3a5c,stroke:#2a5a9c,color:#7ec8e3
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 18 ─── -->
+  <section class="doc-section" id="s18">
+    <div class="section-header">
+      <span class="section-num">18</span>
+      <h2 class="section-title">SignalR Real-Time Dashboard</h2>
+    </div>
+    <p class="prose">Use SignalR to update dashboard instantly.</p>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · SignalR Hub</span></div>
+      <pre><span class="kw">public class</span> <span class="ty">JobHub</span> : <span class="ty">Hub</span>
+{
+    <span class="kw">public async</span> <span class="ty">Task</span> <span class="fn">BroadcastUpdate</span>(<span class="ty">string</span> message)
+    {
+        <span class="kw">await</span> Clients.All.<span class="fn">SendAsync</span>(<span class="st">"JobUpdate"</span>, message);
+    }
+}</pre>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 19 ─── -->
+  <section class="doc-section" id="s19">
+    <div class="section-header">
+      <span class="section-num">19</span>
+      <h2 class="section-title">ASP.NET Dashboard Endpoint</h2>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · Minimal API Endpoint</span></div>
+      <pre>app.<span class="fn">MapGet</span>(<span class="st">"/backfire/jobs"</span>, <span class="kw">async</span> (<span class="ty">IJobStorage</span> storage) =&gt;
+{
+    <span class="kw">return await</span> storage.<span class="fn">GetAllJobsAsync</span>();
+});</pre>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 20 ─── -->
+  <section class="doc-section" id="s20">
+    <div class="section-header">
+      <span class="section-num">20</span>
+      <h2 class="section-title">BackFire Client API</h2>
+    </div>
+    <h3 class="sub">Developer Usage</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · Client Enqueue</span></div>
+      <pre><span class="kw">var</span> client = <span class="kw">new</span> <span class="ty">BackFireClient</span>(storage);
+
+<span class="kw">await</span> client.<span class="fn">EnqueueAsync</span>&lt;<span class="ty">EmailService</span>&gt;(
+    <span class="st">"SendEmail"</span>,
+    <span class="kw">new</span> { to = <span class="st">"user@test.com"</span> });</pre>
+    </div>
+    <h3 class="sub">Service Example</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · EmailService</span></div>
+      <pre><span class="kw">public class</span> <span class="ty">EmailService</span>
+{
+    <span class="kw">public async</span> <span class="ty">Task</span> <span class="fn">SendEmail</span>(<span class="ty">string</span> to)
+    {
+        <span class="ty">Console</span>.<span class="fn">WriteLine</span>(<span class="st">$"Sending email to {to}"</span>);
+        <span class="kw">await</span> <span class="ty">Task</span>.<span class="fn">Delay</span>(<span class="nu">1000</span>);
+    }
+}</pre>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── SECTION 21 ─── -->
+  <section class="doc-section" id="s21">
+    <div class="section-header">
+      <span class="section-num">21</span>
+      <h2 class="section-title">Horizontal Scaling Architecture</h2>
+    </div>
+    <div class="diagram-wrap">
+      <span class="diagram-label">flowchart · horizontal scaling</span>
+      <div class="mermaid" id="diag-9">
+flowchart LR
+  API(["🔌 API"]):::api --> RQ["🔴 RedisQueue"]:::redis
+  RQ --> W1["👷 Worker 1"]:::worker
+  RQ --> W2["👷 Worker 2"]:::worker
+  RQ --> W3["👷 Worker 3"]:::worker
+  RQ --> W4["👷 Worker 4"]:::worker
+  classDef api fill:#2a1a3a,stroke:#5a2a8a,color:#d4a5ff
+  classDef redis fill:#c0392b,stroke:#e74c3c,color:#fff,font-weight:bold
+  classDef worker fill:#1a4a2a,stroke:#2a8a4a,color:#98d982
+      </div>
+    </div>
+
+    <h3 class="sub">Workers Can Scale Across</h3>
+    <ul class="doc-list">
+      <li>Containers</li>
+      <li>Kubernetes</li>
+      <li>Cloud VMs</li>
+    </ul>
+  </section>
+
+  <!-- ─── SECTION 22 ─── -->
+  <section class="doc-section" id="s22">
+    <div class="section-header">
+      <span class="section-num">22</span>
+      <h2 class="section-title">Kubernetes Deployment Architecture</h2>
+    </div>
+    <div class="diagram-wrap">
+      <span class="diagram-label">flowchart · kubernetes</span>
+      <div class="mermaid" id="diag-10">
+flowchart LR
+  U(["👤 Users"]):::user --> LB["⚖️ LoadBalancer"]:::lb
+  LB --> AP["🔌 API Pods"]:::api
+  AP --> RC["🔴 RedisCluster"]:::redis
+  RC --> WP["👷 WorkerPods"]:::worker
+  WP --> DB[("🗄️ Database")]:::storage
+  classDef user fill:#ff6600,stroke:#ff8c00,color:#fff,font-weight:bold
+  classDef lb fill:#2a3a4a,stroke:#4a6a8a,color:#98c4e8
+  classDef api fill:#2a1a3a,stroke:#5a2a8a,color:#d4a5ff
+  classDef redis fill:#c0392b,stroke:#e74c3c,color:#fff,font-weight:bold
+  classDef worker fill:#1a4a2a,stroke:#2a8a4a,color:#98d982
+  classDef storage fill:#1a3a5c,stroke:#2a5a9c,color:#7ec8e3
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 23 ─── -->
+  <section class="doc-section" id="s23">
+    <div class="section-header">
+      <span class="section-num">23</span>
+      <h2 class="section-title">Observability &amp; Monitoring</h2>
+    </div>
+    <p class="prose">BackFire should integrate with:</p>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="card-icon">📡</div><div class="card-title">OpenTelemetry</div><div class="card-desc">Distributed traces, metrics, logs</div></div>
+      <div class="feature-card"><div class="card-icon">🔥</div><div class="card-title">Prometheus</div><div class="card-desc">Time-series metrics scraping</div></div>
+      <div class="feature-card"><div class="card-icon">📊</div><div class="card-title">Grafana</div><div class="card-desc">Visualization dashboards</div></div>
+    </div>
+
+    <h3 class="sub">Metrics Example</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">Prometheus · Metric Names</span></div>
+      <pre>backfire_jobs_total
+backfire_jobs_failed
+backfire_queue_length</pre>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 24 ─── -->
+  <section class="doc-section" id="s24">
+    <div class="section-header">
+      <span class="section-num">24</span>
+      <h2 class="section-title">Plugin System</h2>
+    </div>
+    <p class="prose">BackFire should support extensions.</p>
+
+    <h3 class="sub">Example Plugins</h3>
+    <div class="plugin-grid">
+      <div class="plugin-item">BackFire.Storage.Mongo</div>
+      <div class="plugin-item">BackFire.Storage.Redis</div>
+      <div class="plugin-item">BackFire.RetryPolicies</div>
+      <div class="plugin-item">BackFire.Notifications</div>
+    </div>
+
+    <h3 class="sub">Plugin Interface</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">C# · IBackFirePlugin</span></div>
+      <pre><span class="kw">public interface</span> <span class="ty">IBackFirePlugin</span>
+{
+    <span class="kw">void</span> <span class="fn">Configure</span>(<span class="ty">IServiceCollection</span> services);
+}</pre>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 25 ─── -->
+  <section class="doc-section" id="s25">
+    <div class="section-header">
+      <span class="section-num">25</span>
+      <h2 class="section-title">Performance Goals</h2>
+    </div>
+    <p class="prose">Target metrics:</p>
+    <div class="metrics-row">
+      <div class="metric-card"><span class="metric-val">&lt;10ms</span><span class="metric-label">job latency</span></div>
+      <div class="metric-card"><span class="metric-val">100k</span><span class="metric-label">jobs / sec</span></div>
+      <div class="metric-card"><span class="metric-val">∞</span><span class="metric-label">worker scaling</span></div>
+      <div class="metric-card"><span class="metric-val">HIGH</span><span class="metric-label">fault tolerance</span></div>
+    </div>
+
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Metric</th><th>Goal</th></tr></thead>
+        <tbody>
+          <tr><td>Job latency</td><td>&lt;10ms</td></tr>
+          <tr><td>Throughput</td><td>100k jobs/sec</td></tr>
+          <tr><td>Worker scaling</td><td>Unlimited</td></tr>
+          <tr><td>Fault tolerance</td><td>High</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 26 ─── -->
+  <section class="doc-section" id="s26">
+    <div class="section-header">
+      <span class="section-num">26</span>
+      <h2 class="section-title">Final Production Architecture</h2>
+    </div>
+    <div class="diagram-wrap">
+      <span class="diagram-label">flowchart · full production system</span>
+      <div class="mermaid" id="diag-11">
+flowchart TD
+  CA(["🖥️ ClientApp"]):::client --> BFC["⚡ BackFireClient"]:::client
+  BFC --> RQ["🔴 RedisQueue"]:::redis
+  RQ --> W1["👷 Worker 1"]:::worker
+  RQ --> W2["👷 Worker 2"]:::worker
+  RQ --> W3["👷 Worker 3"]:::worker
+  W1 --> EX["⚙️ Executor"]:::exec
+  W2 --> EX
+  EX --> DB[("🗄️ Database")]:::storage
+  SCH["⏰ Scheduler"]:::sched --> RQ
+  DASH["📊 Dashboard"]:::dash --> DB
+  DASH --> RQ
+  classDef client fill:#ff6600,stroke:#ff8c00,color:#fff,font-weight:bold
+  classDef redis fill:#c0392b,stroke:#e74c3c,color:#fff,font-weight:bold
+  classDef worker fill:#1a4a2a,stroke:#2a8a4a,color:#98d982
+  classDef exec fill:#3a1a3a,stroke:#8a2a8a,color:#d4a5ff
+  classDef storage fill:#1a3a5c,stroke:#2a5a9c,color:#7ec8e3
+  classDef sched fill:#3a3a1a,stroke:#8a8a2a,color:#ffe082
+  classDef dash fill:#1a2a3a,stroke:#2a4a6a,color:#98c4e8
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 27 ─── -->
+  <section class="doc-section" id="s27">
+    <div class="section-header">
+      <span class="section-num">27</span>
+      <h2 class="section-title">Open Source Strategy</h2>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dot red"></div><div class="code-dot amber"></div><div class="code-dot green"></div><span class="code-lang">GitHub</span></div>
+      <pre>github.com/backfire-io/backfire</pre>
+    </div>
+
+    <h3 class="sub">Must Include</h3>
+    <ul class="doc-list">
+      <li>MIT License</li>
+      <li>Documentation</li>
+      <li>Sample apps</li>
+      <li>Benchmarks</li>
+      <li>Contribution guide</li>
+    </ul>
+  </section>
+
+  <!-- ─── SECTION 28 ─── -->
+  <section class="doc-section" id="s28">
+    <div class="section-header">
+      <span class="section-num">28</span>
+      <h2 class="section-title">Future Features</h2>
+    </div>
+    <p class="prose">Future roadmap:</p>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="card-icon">📦</div><div class="card-title">Job Batching</div><div class="card-desc">Group jobs into atomic batches</div></div>
+      <div class="feature-card"><div class="card-icon">🔗</div><div class="card-title">Pipeline Processing</div><div class="card-desc">Chain jobs in sequence</div></div>
+      <div class="feature-card"><div class="card-icon">🔭</div><div class="card-title">Distributed Tracing</div><div class="card-desc">End-to-end job trace IDs</div></div>
+      <div class="feature-card"><div class="card-icon">🚦</div><div class="card-title">Rate Limiting</div><div class="card-desc">Throttle job execution rate</div></div>
+      <div class="feature-card"><div class="card-icon">🌐</div><div class="card-title">Job Dependency Graphs</div><div class="card-desc">DAG-based job ordering</div></div>
+      <div class="feature-card"><div class="card-icon">⚙️</div><div class="card-title">Workflow Engine</div><div class="card-desc">Complex multi-step workflows</div></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="doc-footer">
+    BackFire 🔥 · Production Documentation · Project 1 · Open Source · MIT License
+  </footer>
+
+</main>
+
+<script>
+// ─── MERMAID CONFIG ───────────────────────────────────────
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor:        '#ff6600',
+    primaryTextColor:    '#ffffff',
+    primaryBorderColor:  '#ff8c00',
+    lineColor:           '#ff8c00',
+    secondaryColor:      '#1a3a5c',
+    tertiaryColor:       '#1a4a2a',
+    background:          '#0f0f1a',
+    mainBkg:             '#1a1a2e',
+    nodeBorder:          '#ff6600',
+    clusterBkg:          '#0f0f1a',
+    titleColor:          '#ffd700',
+    edgeLabelBackground: '#0f0f1a',
+    fontFamily:          'JetBrains Mono, monospace',
+    fontSize:            '13px',
+  },
+  flowchart: {
+    htmlLabels: true,
+    curve: 'basis',
+    padding: 20,
+    nodeSpacing: 50,
+    rankSpacing: 60,
+  }
+});
+
+// ─── ANIMATE ARROWS AFTER MERMAID RENDERS ────────────────
+function animateDiagramArrows() {
+  const svgs = document.querySelectorAll('.mermaid svg');
+  svgs.forEach((svg, svgIdx) => {
+    // Arrow paths (edges)
+    const paths = svg.querySelectorAll('.edgePath path, .flowchart-link');
+    paths.forEach((path, i) => {
+      const len = path.getTotalLength ? path.getTotalLength() : 120;
+      path.style.strokeDasharray = `${len}`;
+      path.style.strokeDashoffset = `${len}`;
+      path.style.animation = `drawPath 0.8s ease forwards`;
+      path.style.animationDelay = `${0.1 * i + 0.3}s`;
+      path.style.stroke = 'url(#fireGrad' + svgIdx + ')' ;
+      path.style.strokeWidth = '2px';
+      path.style.filter = 'drop-shadow(0 0 4px rgba(255,120,0,0.5))';
+    });
+
+    // Add gradient def to each SVG
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    defs.innerHTML = `
+      <linearGradient id="fireGrad${svgIdx}" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%"   stop-color="#ff2200"/>
+        <stop offset="50%"  stop-color="#ff6600"/>
+        <stop offset="100%" stop-color="#ffd700"/>
+      </linearGradient>
+      <style>
+        @keyframes drawPath {
+          to { stroke-dashoffset: 0; }
+        }
+        @keyframes flowPulse {
+          0%,100% { stroke-opacity: 0.7; }
+          50%      { stroke-opacity: 1; }
+        }
+      </style>
+    `;
+    svg.insertBefore(defs, svg.firstChild);
+
+    // After draw completes, add flowing animation
+    paths.forEach((path, i) => {
+      const delay = 0.1 * i + 0.3 + 0.8; // after drawPath
+      setTimeout(() => {
+        const len = path.getTotalLength ? path.getTotalLength() : 120;
+        path.style.animation = 'none';
+        path.style.strokeDasharray = `${len * 0.15} ${len * 0.85}`;
+        path.style.strokeDashoffset = '0';
+        path.style.animation = `flowAnim 2.5s linear infinite`;
+        path.style.animationDelay = `${i * 0.15}s`;
+      }, (delay) * 1000);
+    });
+
+    // Add keyframe for flow animation
+    if (!document.getElementById('flowKeyframes')) {
+      const style = document.createElement('style');
+      style.id = 'flowKeyframes';
+      style.textContent = `
+        @keyframes flowAnim {
+          0%   { stroke-dashoffset: 0; }
+          100% { stroke-dashoffset: -300; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Arrowhead markers
+    const markers = svg.querySelectorAll('marker path, marker polygon');
+    markers.forEach(m => {
+      m.style.fill = '#ff8c00';
+      m.style.filter = 'drop-shadow(0 0 3px #ff6600)';
+    });
+
+    // Node glow on hover
+    const nodes = svg.querySelectorAll('.node rect, .node circle, .node polygon, .node ellipse');
+    nodes.forEach(node => {
+      node.style.transition = 'filter 0.3s';
+      node.addEventListener('mouseover', () => {
+        node.style.filter = 'drop-shadow(0 0 8px rgba(255,150,0,0.8))';
+      });
+      node.addEventListener('mouseout', () => {
+        node.style.filter = '';
+      });
+    });
+  });
+}
+
+// Run after mermaid finishes rendering
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(animateDiagramArrows, 1200);
+});
+
+// Also try after a second delay for reliability
+setTimeout(animateDiagramArrows, 2500);
+
+// ─── PROGRESS BAR ─────────────────────────────────────────
+const progressBar = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = scrolled / maxScroll;
+  progressBar.style.transform = `scaleX(${progress})`;
+});
+
+// ─── ACTIVE NAV LINK ──────────────────────────────────────
+const sections = document.querySelectorAll('.doc-section[id]');
+const navLinks = document.querySelectorAll('#sidebar a');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => link.classList.remove('active'));
+      const activeLink = document.querySelector(`#sidebar a[href="#${entry.target.id}"]`);
+      if (activeLink) activeLink.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

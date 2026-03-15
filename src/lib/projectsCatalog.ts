@@ -1,4 +1,4 @@
-import { Brain, Briefcase, Code2, FileText, FolderOpen, Server, Sparkles } from "lucide-react";
+import { Brain, Briefcase, Code2, FileText, Flame, FolderOpen, Server, Sparkles } from "lucide-react";
 import type { ResourceHubCard, ResourceHubMetric } from "@/components/content/ResourceHubPage";
 
 import openowlLogo from "@/assets/openowl-dark.svg";
@@ -24,7 +24,7 @@ const productRoute = (slug: string) => `/products/${slug}`;
 export const PROJECT_METRICS: ResourceHubMetric[] = [
   {
     label: "Live Destinations",
-    value: "10",
+    value: "11",
     description: "Project-facing products, platforms, and upcoming apps across your public ecosystem.",
     icon: FolderOpen,
   },
@@ -226,6 +226,43 @@ export const PROJECT_CARDS: ProjectCard[] = [
       {
         title: "Current State",
         description: "Presented as a dedicated internal product detail page so the product story is visible without sending users away.",
+      },
+    ],
+  },
+  {
+    title: "BackFire",
+    description: "A distributed background job system for .NET with retries, cron scheduling, worker orchestration, storage plugins, and dashboard tooling.",
+    to: productRoute("backfire"),
+    icon: Flame,
+    tags: [".NET", "Distributed Systems", "Jobs", "Open Source"],
+    eyebrow: "Project",
+    statusLabel: "Internal Detail",
+    ctaLabel: "View details",
+    slug: "backfire",
+    externalUrl: "/backfire-docs.html",
+    detailTitle: "BackFire - Distributed Background Job System",
+    detailDescription: "BackFire is a build-focused project for reliable background job processing across distributed .NET workers with pluggable storage and production-oriented operational tooling.",
+    longDescription:
+      "BackFire is positioned as a distributed background job platform for fire-and-forget tasks, delayed jobs, cron scheduling, retries, and horizontally scalable workers. The uploaded document lays out the architectural vision, core domain models, storage abstractions, dashboard plan, and production deployment direction for the system.",
+    highlights: [
+      "Distributed worker architecture",
+      "Retries, delays, and cron scheduling",
+      "Redis and SQL storage strategy",
+      "Dashboard and observability planning",
+      "Open-source project direction",
+    ],
+    detailSections: [
+      {
+        title: "Core Runtime",
+        description: "Covers queueing, execution, retry handling, distributed locking, and worker coordination for background job processing at scale.",
+      },
+      {
+        title: "Platform Architecture",
+        description: "Defines a pluggable storage layer with SQL and Redis paths, real-time dashboard concepts, and horizontal scaling patterns for production usage.",
+      },
+      {
+        title: "Documentation Route",
+        description: "The full BackFire technical document is now available directly from the project entry so visitors can open the full design write-up from the Projects area.",
       },
     ],
   },

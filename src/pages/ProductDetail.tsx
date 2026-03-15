@@ -42,6 +42,7 @@ export default function ProductDetail() {
   const Icon = product.icon;
   const isStackCraft = product.slug === "stackcraft";
   const isChronyx = product.slug === "chronyx";
+  const isDocumentationLink = Boolean(product.externalUrl?.endsWith(".html") || product.externalUrl?.startsWith("/"));
 
   return (
     <div className="min-h-screen bg-background">
@@ -117,7 +118,7 @@ export default function ProductDetail() {
                   {product.externalUrl ? (
                     <Button variant="outline" asChild>
                       <a href={product.externalUrl} target="_blank" rel="noopener noreferrer">
-                        Visit Official Site
+                        {isDocumentationLink ? "Open Documentation" : "Visit Official Site"}
                         <ArrowRight className="h-4 w-4" />
                       </a>
                     </Button>
@@ -142,7 +143,9 @@ export default function ProductDetail() {
 
                 {product.externalUrl ? (
                   <div className="mt-4 rounded-2xl border border-border/60 bg-card/80 px-4 py-3">
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-primary">Official Website</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-primary">
+                      {isDocumentationLink ? "Project Documentation" : "Official Website"}
+                    </p>
                     <a
                       href={product.externalUrl}
                       target="_blank"

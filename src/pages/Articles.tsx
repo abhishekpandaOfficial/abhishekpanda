@@ -12,7 +12,7 @@ import { Footer } from "@/components/layout/Footer";
 import ArticlesGrid from "@/components/articles/ArticlesGrid";
 import ArticleCard from "@/components/articles/ArticleCard";
 import ArticleDetail from "@/components/articles/ArticleDetail";
-import { ARTICLES, ARTICLES_BY_SLUG } from "@/content/articles";
+import { ARTICLES, ARTICLES_BY_SLUG, compareArticles } from "@/content/articles";
 
 const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, "") || "https://www.abhishekpanda.com";
 type ArticleSortMode = "latest" | "top" | "title" | "date";
@@ -76,12 +76,13 @@ export default function Articles() {
     }
 
     return [...list].sort((a, b) => {
+      const featuredSort = compareArticles(a, b);
       const dateA = parseArticleDate(a.publishedAt)?.getTime() ?? 0;
       const dateB = parseArticleDate(b.publishedAt)?.getTime() ?? 0;
-
       if (filter === "top") return b.readMinutes - a.readMinutes || dateB - dateA;
       if (filter === "title") return a.title.localeCompare(b.title);
-      return dateB - dateA;
+      if (filter === "latest") return featuredSort;
+      return featuredSort || dateB - dateA;
     });
   }, [filter, search, selectedDate, selectedTag]);
 

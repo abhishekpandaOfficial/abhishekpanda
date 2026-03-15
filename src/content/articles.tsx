@@ -1,4 +1,4 @@
-import { BarChart3, Code2, FileStack, Lock, Newspaper, ScanSearch, ShieldCheck, type LucideIcon } from "lucide-react";
+import { BarChart3, BadgeCheck, Code2, FileStack, Lock, Newspaper, ScanSearch, ShieldCheck, type LucideIcon } from "lucide-react";
 import {
   SiApachekafka,
   SiAmazonwebservices,
@@ -60,6 +60,8 @@ export type ArticleRecord = {
   plainText: string;
   assetUrl: string;
   heroImage: string;
+  featured: boolean;
+  featuredRank: number | null;
 };
 
 const MAX_ARTICLE_TAGS = 7;
@@ -86,6 +88,38 @@ const CUSTOM_ARTICLE_HERO_IMAGES: Record<string, string> = {
   "dotnet-mastery-2026": "/article-heroes/dotnet-mastery-2026.svg",
   "microservices-patterns-dotnet": "/article-heroes/microservices-patterns-dotnet.svg",
   "solid-principles-guide": "/article-heroes/solid-principles-guide.svg",
+};
+
+const ARTICLE_METADATA_OVERRIDES: Record<
+  string,
+  Partial<
+    Pick<ArticleRecord, "title" | "eyebrow" | "description" | "heroLabel" | "heroValue" | "publishedAt" | "featured" | "featuredRank">
+  > & {
+    tags?: string[];
+  }
+> = {
+  "system-design-10m-users-dotnet": {
+    title: "How to Design a System Handling 10M Users in .NET",
+    eyebrow: "Scale Blueprint",
+    description: "A systems design walkthrough for building .NET platforms that stay resilient, observable, and cost-aware at 10 million users.",
+    heroLabel: "Scale Target",
+    heroValue: "10M users",
+    publishedAt: "March 15, 2026",
+    featured: true,
+    featuredRank: 1,
+    tags: [".NET", "System Design", "Scalability", "Architecture", "Cloud Native"],
+  },
+  "csharp-multithreading-zero-to-hero": {
+    title: "Multithreading: Zero to Hero - C# Complete Guide",
+    eyebrow: "Concurrency Mastery",
+    description: "A practical C# multithreading guide covering threads, tasks, synchronization, async coordination, and production-safe concurrency patterns.",
+    heroLabel: "Coverage",
+    heroValue: "Zero to Hero",
+    publishedAt: "March 14, 2026",
+    featured: true,
+    featuredRank: 2,
+    tags: [".NET", "C#", "Multithreading", "Concurrency", "Architecture"],
+  },
 };
 
 const FALLBACK_DATE = new Date("2026-03-06T00:00:00").toLocaleDateString("en-US", {
@@ -795,18 +829,26 @@ const buildArticleRecord = (filePath: string, html: string, assetUrl: string): A
   const heroImage =
     CUSTOM_ARTICLE_HERO_IMAGES[slug] ||
     extractHeroImage(safeHtml, assetUrl, title, tags, heroTag || headings[0] || "Articles Hub", description);
+  const metadata = ARTICLE_METADATA_OVERRIDES[slug];
+  const mergedTags = metadata?.tags ? unique([...metadata.tags, ...tags]).slice(0, MAX_ARTICLE_TAGS) : tags;
+  const finalTitle = metadata?.title || title;
+  const finalDescription = metadata?.description || description;
+  const finalEyebrow = metadata?.eyebrow || heroTag || headings[0] || "Articles Hub";
+  const finalHeroLabel = metadata?.heroLabel || heroLabel;
+  const finalHeroValue = metadata?.heroValue || firstPercent;
+  const finalPublishedAt = metadata?.publishedAt || FALLBACK_DATE;
 
   return {
     slug,
-    title,
-    eyebrow: heroTag || headings[0] || "Articles Hub",
-    description,
+    title: finalTitle,
+    eyebrow: finalEyebrow,
+    description: finalDescription,
     intro,
-    heroLabel,
-    heroValue: firstPercent,
-    publishedAt: FALLBACK_DATE,
+    heroLabel: finalHeroLabel,
+    heroValue: finalHeroValue,
+    publishedAt: finalPublishedAt,
     readMinutes,
-    tags,
+    tags: mergedTags,
     logos,
     keyPoints: normalizedKeyPoints,
     relatedBlogs: deriveRelatedBlogs(tags),
@@ -814,20 +856,28 @@ const buildArticleRecord = (filePath: string, html: string, assetUrl: string): A
     plainText,
     assetUrl,
     heroImage,
+    featured: Boolean(metadata?.featured),
+    featuredRank: metadata?.featuredRank ?? null,
   };
+};
+
+export const compareArticles = (a: ArticleRecord, b: ArticleRecord) => {
+  const rankA = a.featuredRank ?? Number.POSITIVE_INFINITY;
+  const rankB = b.featuredRank ?? Number.POSITIVE_INFINITY;
+  if (rankA !== rankB) return rankA - rankB;
+
+  const dateA = new Date(a.publishedAt);
+  const dateB = new Date(b.publishedAt);
+  if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+    return dateB.getTime() - dateA.getTime();
+  }
+
+  return b.title.localeCompare(a.title);
 };
 
 export const ARTICLES: ArticleRecord[] = Object.entries(rawArticles)
   .map(([filePath, html]) => buildArticleRecord(filePath, html, articleAssetUrls[filePath] || ""))
-  .sort((a, b) => {
-    // Sort by publishedAt descending, fallback to title
-    const dateA = new Date(a.publishedAt);
-    const dateB = new Date(b.publishedAt);
-    if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
-      return dateB.getTime() - dateA.getTime();
-    }
-    return b.title.localeCompare(a.title);
-  });
+  .sort(compareArticles);
 
 export const ARTICLES_BY_SLUG = new Map(ARTICLES.map((article) => [article.slug, article]));
 
@@ -858,7 +908,7 @@ export const ARTICLE_TONE_BAR_CLASSES: Record<ArticleTone, string> = {
   success: "bg-emerald-500",
 };
 
-export const FEATURED_ARTICLE_ICON = FileStack;
+export const FEATURED_ARTICLE_ICON = BadgeCheck;
 export const ARTICLE_HUB_ICONS = [SiGooglechrome, SiFirefoxbrowser, SiDuckduckgo];
 
 export const getRelatedArticles = (article: ArticleRecord, limit = 3) =>
