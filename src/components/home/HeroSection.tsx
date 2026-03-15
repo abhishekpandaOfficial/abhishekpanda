@@ -19,36 +19,57 @@ const floatingTechStacks = [
     icon: Code2,
     title: ".NET Core",
     subtitle: "Microservices",
-    position: "top-[12%] left-[4%]",
+    position: "top-[10%] left-[2%] xl:left-[4%]",
     delay: 0,
   },
   {
-    icon: Cloud,
-    title: "Azure · AWS",
-    subtitle: "Cloud Native",
-    position: "top-[18%] right-[5%]",
-    delay: 0.3,
+    icon: Database,
+    title: "Data APIs",
+    subtitle: "Realtime Layer",
+    position: "top-[29%] left-[4%] xl:left-[7%]",
+    delay: 0.16,
   },
   {
     icon: Brain,
     title: "AI/ML",
     subtitle: "Agentic Flows",
-    position: "bottom-[24%] left-[6%]",
-    delay: 0.6,
+    position: "bottom-[31%] left-[3%] xl:left-[6%]",
+    delay: 0.32,
   },
   {
-    icon: Database,
-    title: "Data + APIs",
-    subtitle: "Realtime Stack",
-    position: "bottom-[18%] right-[7%]",
-    delay: 0.9,
+    icon: Shield,
+    title: "Platform Sec",
+    subtitle: "Zero Trust",
+    position: "bottom-[10%] left-[2%] xl:left-[4%]",
+    delay: 0.48,
+  },
+  {
+    icon: Cloud,
+    title: "Azure · AWS",
+    subtitle: "Cloud Native",
+    position: "top-[12%] right-[2%] xl:right-[4%]",
+    delay: 0.64,
   },
   {
     icon: Cpu,
     title: "LLM Systems",
     subtitle: "Inference & Ops",
-    position: "top-[46%] right-[2%]",
-    delay: 1.1,
+    position: "top-[31%] right-[4%] xl:right-[7%]",
+    delay: 0.8,
+  },
+  {
+    icon: FolderOpen,
+    title: "Product Ships",
+    subtitle: "Execution First",
+    position: "bottom-[29%] right-[3%] xl:right-[6%]",
+    delay: 0.96,
+  },
+  {
+    icon: Send,
+    title: "Founder Mode",
+    subtitle: "Ideas to Launch",
+    position: "bottom-[9%] right-[2%] xl:right-[4%]",
+    delay: 1.12,
   },
 ];
 
@@ -87,6 +108,24 @@ const primaryCtas = [
     description: "Connect with Abhishek on LinkedIn",
     className:
       "border-violet-400/20 bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.18),transparent_42%),linear-gradient(160deg,rgba(245,243,255,0.96),rgba(237,233,254,0.9))] text-violet-950 hover:border-violet-400/45 hover:shadow-[0_24px_60px_-35px_rgba(168,85,247,0.48)] dark:bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.22),transparent_38%),linear-gradient(160deg,rgba(59,7,100,0.94),rgba(76,29,149,0.92))] dark:text-white",
+  },
+  {
+    label: "Enter Tech Hub",
+    to: "/techhub",
+    icon: Cpu,
+    eyebrow: "Mastery",
+    description: "Jump into deep technical learning tracks",
+    className:
+      "border-amber-400/20 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.16),transparent_40%),linear-gradient(160deg,rgba(255,251,235,0.96),rgba(254,243,199,0.9))] text-amber-950 hover:border-amber-400/45 hover:shadow-[0_24px_60px_-35px_rgba(245,158,11,0.42)] dark:bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.2),transparent_38%),linear-gradient(160deg,rgba(69,26,3,0.94),rgba(120,53,15,0.9))] dark:text-white",
+  },
+  {
+    label: "Read Deep Dives",
+    to: "/articles",
+    icon: BookOpenText,
+    eyebrow: "Writing",
+    description: "Open long-form architecture and engineering articles",
+    className:
+      "border-rose-400/20 bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.16),transparent_40%),linear-gradient(160deg,rgba(255,241,242,0.96),rgba(255,228,230,0.9))] text-rose-950 hover:border-rose-400/45 hover:shadow-[0_24px_60px_-35px_rgba(244,63,94,0.42)] dark:bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.2),transparent_38%),linear-gradient(160deg,rgba(76,5,25,0.94),rgba(136,19,55,0.9))] dark:text-white",
   },
 ];
 
@@ -139,6 +178,153 @@ const RotatingEmojiBadge = ({
   </span>
 );
 
+const clockOrbitMarks = Array.from({ length: 12 }, (_, index) => index);
+const clockFaceNumbers = [
+  { label: "12", className: "top-[10px] left-1/2 -translate-x-1/2" },
+  { label: "3", className: "right-[12px] top-1/2 -translate-y-1/2" },
+  { label: "6", className: "bottom-[10px] left-1/2 -translate-x-1/2" },
+  { label: "9", className: "left-[12px] top-1/2 -translate-y-1/2" },
+];
+
+const MagicalLocalClock = () => {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const currentHour = now.getHours();
+  const hours = currentHour % 12;
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+  const hourRotation = hours * 30 + minutes * 0.5;
+  const minuteRotation = minutes * 6 + seconds * 0.1;
+  const secondRotation = seconds * 6;
+  const hourProgress = ((currentHour % 24) / 24) * 100;
+  const minuteProgress = (minutes / 60) * 100;
+  const secondProgress = (seconds / 60) * 100;
+  const digitalTime = now.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  const readableDate = now.toLocaleDateString([], {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 18, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.55, delay: 0.38 }}
+      className="mx-auto mb-6 w-full max-w-[320px]"
+    >
+      <div className="flex items-center gap-3">
+        <div className="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full border border-sky-400/25 bg-[radial-gradient(circle,rgba(255,255,255,0.98),rgba(219,234,254,0.74))] shadow-[inset_0_0_20px_rgba(255,255,255,0.9),0_18px_45px_-26px_rgba(56,189,248,0.65)] dark:bg-[radial-gradient(circle,rgba(15,23,42,0.98),rgba(30,41,59,0.9))]">
+          <div className="absolute inset-[6px] rounded-full border border-sky-400/20" />
+          <div className="absolute inset-[12px] rounded-full border border-dashed border-violet-400/25" />
+          <div className="absolute inset-[18px] rounded-full border border-cyan-400/20" />
+          {clockOrbitMarks.map((mark) => (
+            <span
+              key={mark}
+              className="absolute left-1/2 top-1/2 h-[36px] w-[2px] -translate-x-1/2 -translate-y-full origin-bottom rounded-full bg-gradient-to-b from-sky-500/95 to-transparent dark:from-sky-300/95"
+              style={{
+                transform: `translate(-50%, -100%) rotate(${mark * 30}deg)`,
+                opacity: mark % 3 === 0 ? 0.95 : 0.45,
+              }}
+            />
+          ))}
+          {clockFaceNumbers.map((number) => (
+            <span
+              key={number.label}
+              className={`absolute text-[10px] font-black tracking-tight text-slate-900/85 dark:text-white ${number.className}`}
+            >
+              {number.label}
+            </span>
+          ))}
+          <span className="absolute h-[78px] w-[78px] rounded-full border border-cyan-400/10 shadow-[0_0_24px_rgba(34,211,238,0.18)]" />
+          <span
+            className="absolute left-1/2 top-1/2 h-7 w-1.5 origin-bottom rounded-full bg-slate-900 shadow-[0_0_18px_rgba(14,165,233,0.28)] dark:bg-white"
+            style={{ transform: `translate(-50%, -100%) rotate(${hourRotation}deg)` }}
+          />
+          <span
+            className="absolute left-1/2 top-1/2 h-9 w-1 origin-bottom rounded-full bg-sky-500 shadow-[0_0_18px_rgba(14,165,233,0.45)]"
+            style={{ transform: `translate(-50%, -100%) rotate(${minuteRotation}deg)` }}
+          />
+          <span
+            className="absolute left-1/2 top-1/2 h-10 w-0.5 origin-bottom rounded-full bg-fuchsia-500 shadow-[0_0_18px_rgba(217,70,239,0.48)]"
+            style={{ transform: `translate(-50%, -100%) rotate(${secondRotation}deg)` }}
+          />
+          <span className="absolute h-3.5 w-3.5 rounded-full border border-white/60 bg-slate-950 shadow-[0_0_18px_rgba(14,165,233,0.3)] dark:bg-white" />
+        </div>
+
+          <div className="min-w-0 text-left">
+            <div className="text-[1.35rem] font-black tracking-[-0.05em] text-foreground md:text-[1.5rem]">
+              {digitalTime}
+            </div>
+            <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              {readableDate}
+            </div>
+            <div className="mt-3 space-y-1.5">
+              <div className="flex items-center justify-center gap-2 text-[9px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                <span>Hours</span>
+                <span className="text-sky-500/80 dark:text-sky-300/80">|</span>
+                <span>Minutes</span>
+                <span className="text-violet-500/80 dark:text-violet-300/80">|</span>
+                <span>Seconds</span>
+              </div>
+              <div className="grid h-2.5 grid-cols-3 gap-1 overflow-hidden rounded-full bg-slate-200/80 p-0.5 shadow-[inset_0_1px_3px_rgba(15,23,42,0.08)] dark:bg-white/10">
+                {[
+                  {
+                    key: "hours",
+                    value: hourProgress,
+                    tint:
+                      "from-sky-500 via-cyan-400 to-blue-500 dark:from-sky-300 dark:via-cyan-300 dark:to-blue-300",
+                  },
+                  {
+                    key: "minutes",
+                    value: minuteProgress,
+                    tint:
+                      "from-violet-500 via-fuchsia-500 to-pink-500 dark:from-violet-300 dark:via-fuchsia-300 dark:to-pink-300",
+                  },
+                  {
+                    key: "seconds",
+                    value: secondProgress,
+                    tint:
+                      "from-emerald-500 via-teal-400 to-cyan-500 dark:from-emerald-300 dark:via-teal-300 dark:to-cyan-300",
+                  },
+                ].map((metric) => (
+                  <div
+                    key={metric.key}
+                    className="relative overflow-hidden rounded-full bg-white/70 dark:bg-white/5"
+                  >
+                    <motion.div
+                      className={`h-full rounded-full bg-gradient-to-r ${metric.tint}`}
+                      animate={{ width: `${metric.value}%` }}
+                      transition={{ duration: 0.45, ease: "easeOut" }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-between text-[9px] font-semibold tracking-[0.12em] text-muted-foreground">
+                <span>{Math.round(hourProgress)}%</span>
+                <span>{Math.round(minuteProgress)}%</span>
+                <span>{Math.round(secondProgress)}%</span>
+              </div>
+            </div>
+          </div>
+      </div>
+    </motion.div>
+  );
+};
+
 export const HeroSection = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [taglineIndex, setTaglineIndex] = useState(0);
@@ -184,7 +370,7 @@ export const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-[100svh] flex items-center justify-center overflow-hidden pt-16">
+    <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-24 md:pt-28">
       {/* Background Effects */}
       <div className="absolute inset-0 mesh-gradient" />
       <div className="absolute inset-0 hero-grid-overlay" />
@@ -216,7 +402,7 @@ export const HeroSection = () => {
         }}
       />
 
-      <div className="relative w-full px-4 py-8 md:px-6 md:py-10 xl:px-8">
+      <div className="relative w-full px-4 py-4 md:px-6 md:py-6 xl:px-8">
         <div className="pointer-events-none absolute inset-0 hidden lg:block">
           {floatingTechStacks.map((stack, index) => (
             <motion.div
@@ -240,13 +426,13 @@ export const HeroSection = () => {
           ))}
         </div>
 
-        <div className="mx-auto w-full max-w-[1120px] text-center">
+        <div className="mx-auto w-full max-w-[1040px] text-center">
           {/* Avatar with Hover Tagline */}
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="mb-5 md:mb-6"
+            className="mb-4 md:mb-5"
           >
             <div 
               className="relative inline-block group cursor-pointer"
@@ -274,7 +460,7 @@ export const HeroSection = () => {
 
               {/* Avatar Container */}
               <motion.div 
-                className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary via-secondary to-purple p-1 shadow-glow-lg"
+                className="h-24 w-24 rounded-full bg-gradient-to-br from-primary via-secondary to-purple p-1 shadow-glow-lg md:h-28 md:w-28"
                 animate={isHovered ? { scale: 1.05 } : { scale: 1 }}
                 transition={{ duration: 0.3 }}
                 whileHover={{ boxShadow: "0 0 60px hsl(217 91% 60% / 0.5)" }}
@@ -312,7 +498,7 @@ export const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h1 className="audiowide-regular mb-3 text-balance text-4xl leading-[1.02] tracking-[0.01em] text-foreground md:text-6xl lg:text-7xl xl:text-[5.15rem]">
+            <h1 className="audiowide-regular mb-2 text-balance text-4xl leading-[1.02] tracking-[0.01em] text-foreground md:text-6xl lg:text-7xl xl:text-[5rem]">
               <RotatingEmojiBadge
                 className="mr-3 md:mr-4"
                 emoji={greetingEmojis[emojiCycleIndex]}
@@ -325,7 +511,7 @@ export const HeroSection = () => {
                 emoji={greetingEmojis[(emojiCycleIndex + 10) % greetingEmojis.length]}
               />
             </h1>
-            <p className="mb-4 text-lg font-medium tracking-[-0.02em] text-muted-foreground md:text-2xl xl:text-[1.65rem]">
+            <p className="mb-3 text-base font-medium tracking-[-0.02em] text-muted-foreground md:text-xl xl:text-[1.4rem]">
               Architecting production-ready .NET, Cloud, and AI systems
             </p>
           </motion.div>
@@ -335,7 +521,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="mx-auto mb-6 max-w-4xl text-base leading-relaxed text-foreground/80 md:text-lg xl:text-[1.2rem]"
+            className="mx-auto mb-4 max-w-3xl text-sm leading-relaxed text-foreground/80 md:text-base xl:text-[1.05rem]"
           >
             Building reliable products with clear architecture, strong execution, and measurable outcomes.
           </motion.p>
@@ -345,7 +531,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-wrap justify-center gap-2.5 md:gap-3 mb-6"
+            className="mb-4 flex flex-wrap justify-center gap-2.5 md:gap-3"
           >
             {badges.map((badge, index) => (
               <motion.div
@@ -380,7 +566,6 @@ export const HeroSection = () => {
             transition={{ duration: 0.45, delay: 0.52 }}
             className="mb-3"
           >
-            <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground mb-3">Connect Everywhere</div>
             <HeroSocialIcons className="justify-center" />
           </motion.div>
 
@@ -388,36 +573,20 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.58 }}
-            className="mx-auto mb-5 w-full max-w-5xl"
+            className="mx-auto mb-2 w-full max-w-3xl"
           >
-            <div className="mb-3 text-xs uppercase tracking-[0.16em] text-muted-foreground">Start Here</div>
-            <div className="flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap xl:flex-nowrap">
+            <div className="flex flex-wrap justify-center gap-2.5">
               {primaryCtas.map((cta) => {
                 const content = (
                   <>
-                    <div className="flex min-w-0 flex-1 items-start gap-3 text-left">
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-black/10 bg-white/70 shadow-sm dark:border-white/10 dark:bg-white/10">
-                        <cta.icon className="h-5 w-5" />
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-[10px] font-black uppercase tracking-[0.18em] opacity-70">
-                          {cta.eyebrow}
-                        </span>
-                        <span className="mt-1 block text-sm font-bold md:text-[15px]">
-                          {cta.label}
-                        </span>
-                        <span className="mt-1 block text-xs leading-5 opacity-75">
-                          {cta.description}
-                        </span>
-                      </span>
-                    </div>
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white/70 shadow-sm transition-transform duration-300 group-hover:translate-x-1 dark:border-white/10 dark:bg-white/10">
-                      <ArrowRight className="h-4 w-4" />
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white/70 shadow-sm dark:border-white/10 dark:bg-white/10">
+                      <cta.icon className="h-4 w-4" />
                     </span>
+                    <span className="text-sm font-semibold md:text-[15px]">{cta.label}</span>
                   </>
                 );
 
-                const className = `group inline-flex items-center justify-between gap-3 rounded-[1.6rem] border px-4 py-4 text-sm font-semibold backdrop-blur-xl transition hover:-translate-y-1 sm:flex-1 sm:basis-[calc(50%-0.375rem)] xl:min-w-[240px] xl:flex-1 ${cta.className}`;
+                const className = `group inline-flex items-center justify-center gap-2.5 rounded-full border px-4 py-3 text-sm font-semibold backdrop-blur-xl transition hover:-translate-y-0.5 ${cta.className}`;
 
                 if (cta.href) {
                   return (
@@ -440,10 +609,9 @@ export const HeroSection = () => {
                 );
               })}
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">
-              Open the main engineering blogs, jump into AI/ML mastery tracks, read articles, or go directly to active product work.
-            </p>
           </motion.div>
+
+          <MagicalLocalClock />
 
         </div>
       </div>

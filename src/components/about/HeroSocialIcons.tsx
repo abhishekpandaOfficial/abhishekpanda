@@ -35,9 +35,10 @@ export const HeroSocialIcons = ({ profiles: providedProfiles, className }: HeroS
         const Icon: any = iconForKey(p.icon_key);
         const iconColor = resolvedIconColor(p.brand_color);
         const distance = hoveredIndex === null ? 99 : Math.abs(hoveredIndex - index);
-        const scale = hoveredIndex === null ? 1 : distance === 0 ? 1.28 : distance === 1 ? 1.14 : distance === 2 ? 1.06 : 1;
-        const y = hoveredIndex === null ? 0 : distance === 0 ? -12 : distance === 1 ? -7 : distance === 2 ? -3 : 0;
-        const blur = hoveredIndex !== null && distance > 2 ? "blur(0.5px)" : "blur(0px)";
+        const scale = hoveredIndex === null ? 1 : distance === 0 ? 1.42 : distance === 1 ? 1.2 : distance === 2 ? 1.09 : 1;
+        const y = hoveredIndex === null ? 0 : distance === 0 ? -16 : distance === 1 ? -9 : distance === 2 ? -4 : 0;
+        const blur = hoveredIndex !== null && distance > 2 ? "blur(0.7px)" : "blur(0px)";
+        const skewX = hoveredIndex === null ? 0 : distance === 0 ? -2 : distance === 1 ? -1 : 0;
 
         return (
           <Tooltip key={p.platform}>
@@ -55,18 +56,21 @@ export const HeroSocialIcons = ({ profiles: providedProfiles, className }: HeroS
                 style={{
                   scale,
                   y,
+                  x: hoveredIndex === null ? 0 : hoveredIndex > index ? -2 : hoveredIndex < index ? 2 : 0,
+                  skewX,
                   filter: blur,
                   zIndex: hoveredIndex === null ? 1 : Math.max(1, 10 - distance),
                 }}
-                whileHover={{ rotateX: -8, rotateY: 6 }}
-                className="group relative flex h-12 w-12 origin-bottom items-center justify-center rounded-[1.15rem] border border-white/55 bg-white/65 backdrop-blur-lg shadow-[0_8px_20px_rgba(15,23,42,0.12)] transition-[box-shadow,border-color] duration-300 hover:shadow-[0_20px_45px_-18px_rgba(59,130,246,0.55)] sm:h-14 sm:w-14 dark:border-white/20 dark:bg-slate-900/65 dark:shadow-[0_8px_22px_rgba(2,6,23,0.55)]"
+                whileHover={{ rotateX: -10, rotateY: 10 }}
+                className="group relative flex h-12 w-12 origin-bottom items-center justify-center rounded-[1.15rem] border border-white/55 bg-white/65 backdrop-blur-lg shadow-[0_10px_24px_rgba(15,23,42,0.13)] transition-[box-shadow,border-color,background-color] duration-300 hover:shadow-[0_26px_60px_-20px_rgba(59,130,246,0.58)] sm:h-14 sm:w-14 dark:border-white/20 dark:bg-slate-900/65 dark:shadow-[0_10px_28px_rgba(2,6,23,0.58)]"
                 title={p.display_name}
               >
                 <span className="absolute inset-0 rounded-[1.15rem] bg-gradient-to-br from-primary/15 via-transparent to-secondary/15 opacity-70 transition-opacity group-hover:opacity-100" />
-                <span className="absolute inset-x-[18%] bottom-1 h-2 rounded-full bg-sky-500/20 blur-md transition-all duration-300 group-hover:bg-sky-500/35" />
+                <span className="absolute inset-x-[15%] -bottom-1 h-3 rounded-full bg-sky-500/20 blur-md transition-all duration-300 group-hover:bg-sky-500/40 group-hover:blur-lg" />
+                <span className="absolute -bottom-5 left-1/2 h-4 w-[76%] -translate-x-1/2 rounded-full bg-slate-950/12 blur-lg transition-all duration-300 group-hover:w-[88%] group-hover:bg-slate-950/20 dark:bg-black/45 dark:group-hover:bg-black/60" />
                 <motion.span
                   className="relative flex items-center justify-center"
-                  animate={hoveredIndex === index ? { scale: 1.18 } : { scale: 1 }}
+                  animate={hoveredIndex === index ? { scale: 1.2, y: -1 } : { scale: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 320, damping: 20 }}
                 >
                   <Icon className="relative h-5 w-5 sm:h-6 sm:w-6" style={{ color: iconColor }} />

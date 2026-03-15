@@ -5,7 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import GsapInfiniteCardSlider from "@/components/home/GsapInfiniteCardSlider";
-import { ARTICLES } from "@/content/articles";
+import { FEATURED_HOME_ARTICLES, type ArticleSummary } from "@/content/articleSummaries";
 import { AI_ML_SERIES } from "@/lib/aiMlSeries";
 import { BLOG_SERIES, getBlogSeriesHref, matchesBlogSeries } from "@/lib/blogSeries";
 import { usePublishedPersonalBlogs } from "@/hooks/usePublishedPersonalBlogs";
@@ -165,7 +165,7 @@ function ShowcasePanel({ index, kicker, title, description, actionHref, actionLa
   );
 }
 
-function HomeArticleMiniCard({ article, featured = false }: { article: (typeof ARTICLES)[number]; featured?: boolean }) {
+function HomeArticleMiniCard({ article, featured = false }: { article: ArticleSummary; featured?: boolean }) {
   return (
     <Link
       to={`/articles/${article.slug}`}
@@ -329,7 +329,7 @@ function HomeSeriesMiniCard({
 function ArticleSlider({
   articles,
 }: {
-  articles: typeof ARTICLES;
+  articles: ArticleSummary[];
 }) {
   return (
     <GsapInfiniteCardSlider
@@ -347,7 +347,7 @@ export function HomeStackedShowcase() {
   const rootRef = useRef<HTMLDivElement>(null);
   const { personalPosts } = usePublishedPersonalBlogs();
   const { theme } = useTheme();
-  const featuredArticles = useMemo(() => ARTICLES.slice(0, 6), []);
+  const featuredArticles = useMemo(() => FEATURED_HOME_ARTICLES, []);
 
   const blogSeriesCounts = useMemo(
     () =>

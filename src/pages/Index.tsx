@@ -1,7 +1,6 @@
 import { lazy, Suspense, memo } from "react";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
-import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
 import { DeferredSection } from "@/components/performance/DeferredSection";
 
@@ -9,6 +8,7 @@ import { DeferredSection } from "@/components/performance/DeferredSection";
 const HomeStackedShowcase = lazy(() => import("@/components/home/HomeStackedShowcase"));
 const NewsletterSection = lazy(() => import("@/components/home/NewsletterSection").then(m => ({ default: m.NewsletterSection })));
 const NewsletterPopup = lazy(() => import("@/components/NewsletterPopup").then(m => ({ default: m.NewsletterPopup })));
+const Footer = lazy(() => import("@/components/layout/Footer").then((m) => ({ default: m.Footer })));
 
 // Minimal loading placeholder
 const SectionLoader = memo(() => (
@@ -77,8 +77,13 @@ const Index = () => {
             </Suspense>
           </motion.section>
         </DeferredSection>
+
+        <DeferredSection minHeight={320} fallback={<SectionLoader />}>
+          <Suspense fallback={<SectionLoader />}>
+            <Footer />
+          </Suspense>
+        </DeferredSection>
       </motion.main>
-      <Footer />
       <Suspense fallback={null}>
         <NewsletterPopup delay={8000} />
       </Suspense>
