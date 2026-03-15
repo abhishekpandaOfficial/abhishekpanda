@@ -4,7 +4,6 @@ import { ArrowRight, Brain, FolderOpen, Newspaper, ScrollText } from "lucide-rea
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import ArticleCard from "@/components/articles/ArticleCard";
 import GsapInfiniteCardSlider from "@/components/home/GsapInfiniteCardSlider";
 import { ARTICLES } from "@/content/articles";
 import { AI_ML_SERIES } from "@/lib/aiMlSeries";
@@ -166,10 +165,189 @@ function ShowcasePanel({ index, kicker, title, description, actionHref, actionLa
   );
 }
 
+function HomeArticleMiniCard({ article, featured = false }: { article: (typeof ARTICLES)[number]; featured?: boolean }) {
+  return (
+    <Link
+      to={`/articles/${article.slug}`}
+      className="group relative flex h-full min-h-[260px] flex-col overflow-hidden rounded-[1.5rem] border border-border/60 bg-card/88 shadow-[0_18px_55px_rgba(15,23,42,0.10)] transition duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_24px_80px_rgba(59,130,246,0.16)]"
+    >
+      <div className="relative aspect-[16/9] overflow-hidden border-b border-border/60">
+        <img
+          src={article.heroImage}
+          alt={article.title}
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+          loading="lazy"
+          decoding="async"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/82 via-slate-950/18 to-transparent" />
+        <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+          <span className="rounded-full border border-white/20 bg-black/25 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white backdrop-blur-sm">
+            {article.eyebrow}
+          </span>
+          {featured ? (
+            <span className="rounded-full border border-sky-300/25 bg-sky-400/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white backdrop-blur-sm">
+              Featured
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="line-clamp-2 text-lg font-black tracking-tight text-foreground">{article.title}</h3>
+        <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">{article.description}</p>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {article.tags.slice(0, 3).map((tag, index) => (
+            <span
+              key={`${article.slug}-mini-tag-${tag}`}
+              className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${TAG_PALETTE[(index + article.slug.length) % TAG_PALETTE.length]}`}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-auto flex items-center justify-between gap-3 pt-4 text-xs text-muted-foreground">
+          <span>{article.readMinutes} min read</span>
+          <span className="inline-flex items-center gap-2 font-semibold text-primary">
+            Open article
+            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function HomeSeriesMiniCard({
+  to,
+  visual,
+  title,
+  subtitle,
+  tags,
+  logos,
+  countLabel,
+  actionLabel,
+  theme,
+  rgb,
+}: {
+  to: string;
+  visual: string;
+  title: string;
+  subtitle: string;
+  tags: string[];
+  logos: string[];
+  countLabel: string;
+  actionLabel: string;
+  theme: string;
+  rgb: string;
+}) {
+  return (
+    <Link
+      to={to}
+      style={{ ["--series-rgb" as string]: rgb }}
+      className="group relative isolate flex h-full min-h-[260px] overflow-hidden rounded-[1.5rem] border border-border/60 bg-card/88 shadow-[0_18px_55px_rgba(15,23,42,0.10)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_24px_80px_rgba(59,130,246,0.16)]"
+    >
+      <div
+        className="absolute inset-0 opacity-90"
+        style={{
+          background:
+            "radial-gradient(circle at top right, rgba(var(--series-rgb), 0.24), transparent 40%), radial-gradient(circle at bottom left, rgba(var(--series-rgb), 0.14), transparent 34%), linear-gradient(140deg, rgba(var(--series-rgb), 0.06), transparent 35%, rgba(var(--series-rgb), 0.10))",
+        }}
+      />
+      <div className="relative flex h-full flex-col">
+        <div className={cn("relative aspect-[16/9] overflow-hidden border-b border-border/60", theme === "dark" ? "border-white/10" : "border-slate-900/10")}>
+          <img src={visual} alt={title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" loading="lazy" decoding="async" />
+          <div
+            className={cn(
+              "absolute inset-0",
+              theme === "dark"
+                ? "bg-gradient-to-t from-slate-950/78 via-slate-950/16 to-transparent"
+                : "bg-gradient-to-t from-white/88 via-white/12 to-transparent"
+            )}
+          />
+          <div className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-3">
+            <div className="flex max-w-[82%] flex-wrap gap-1.5">
+              {tags.slice(0, 2).map((tag) => (
+                <span
+                  key={`${title}-mini-header-${tag}`}
+                  className={cn(
+                    "inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide",
+                    theme === "dark"
+                      ? "border-white/50 bg-black/28 text-white"
+                      : "border-slate-900/12 bg-white/82 text-slate-900 shadow-sm"
+                  )}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <ArrowRight className={cn("h-4 w-4 shrink-0 transition-all group-hover:translate-x-1", theme === "dark" ? "text-white/85" : "text-slate-900/70")} />
+          </div>
+        </div>
+
+        <div className="flex flex-1 flex-col p-4">
+          <h3 className="line-clamp-2 text-lg font-black tracking-tight text-foreground">{title}</h3>
+          <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">{subtitle}</p>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {tags.slice(0, 3).map((tag) => (
+              <span
+                key={`${title}-mini-tag-${tag}`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/80 px-2.5 py-1 text-[10px] font-semibold text-foreground/85"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-primary/70" />
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {logos.slice(0, 3).map((logo, logoIndex) => (
+              <span
+                key={`${title}-mini-logo-${logoIndex}`}
+                className="flex h-8 w-8 items-center justify-center rounded-xl border border-border/70 bg-background/95 p-1.5 shadow-sm"
+              >
+                <img src={logo} alt="" className="h-full w-full object-contain" loading="lazy" decoding="async" />
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-auto flex items-center justify-between gap-3 pt-4 text-xs text-muted-foreground">
+            <span>{countLabel}</span>
+            <span className="inline-flex items-center gap-2 font-semibold text-primary">
+              {actionLabel}
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function ArticleSlider({
+  articles,
+}: {
+  articles: typeof ARTICLES;
+}) {
+  return (
+    <GsapInfiniteCardSlider
+      items={articles}
+      speed={40}
+      reverse={false}
+      autoPlay={false}
+      itemClassName="w-[240px] shrink-0 sm:w-[260px] lg:w-[280px]"
+      renderItem={(article, index) => <HomeArticleMiniCard article={article} featured={index === 0} />}
+    />
+  );
+}
+
 export function HomeStackedShowcase() {
   const rootRef = useRef<HTMLDivElement>(null);
   const { personalPosts } = usePublishedPersonalBlogs();
   const { theme } = useTheme();
+  const featuredArticles = useMemo(() => ARTICLES.slice(0, 6), []);
 
   const blogSeriesCounts = useMemo(
     () =>
@@ -199,43 +377,52 @@ export function HomeStackedShowcase() {
   useLayoutEffect(() => {
     if (!rootRef.current) return;
     const ctx = gsap.context(() => {
-      const panels = gsap.utils.toArray<HTMLElement>("[data-home-stack-panel]", rootRef.current);
+      const mm = gsap.matchMedia();
 
-      panels.forEach((panel, index) => {
-        gsap.set(panel, { transformOrigin: "center top" });
+      mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
+        const panels = gsap.utils.toArray<HTMLElement>("[data-home-stack-panel]", rootRef.current);
 
-        gsap.fromTo(
-          panel,
-          { y: 64, opacity: 0.78 },
-          {
-            y: 0,
-            opacity: 1,
+        panels.forEach((panel, index) => {
+          gsap.set(panel, { transformOrigin: "center top", willChange: "transform, opacity" });
+
+          gsap.fromTo(
+            panel,
+            { y: 32, opacity: 0.92 },
+            {
+              y: 0,
+              opacity: 1,
+              ease: "none",
+              scrollTrigger: {
+                trigger: panel,
+                start: "top bottom-=8%",
+                end: "top 70%",
+                scrub: 0.4,
+              },
+            },
+          );
+
+          const nextPanel = panels[index + 1];
+          if (!nextPanel) return;
+
+          gsap.to(panel, {
+            scale: 0.985,
+            y: -20,
             ease: "none",
             scrollTrigger: {
-              trigger: panel,
-              start: "top bottom-=6%",
-              end: "top 58%",
-              scrub: true,
+              trigger: nextPanel,
+              start: "top 88%",
+              end: "top 38%",
+              scrub: 0.45,
             },
-          },
-        );
-
-        const nextPanel = panels[index + 1];
-        if (!nextPanel) return;
-
-        gsap.to(panel, {
-          scale: 0.965,
-          y: -42,
-          filter: "saturate(0.92) brightness(0.96)",
-          ease: "none",
-          scrollTrigger: {
-            trigger: nextPanel,
-            start: "top 82%",
-            end: "top 20%",
-            scrub: true,
-          },
+          });
         });
       });
+
+      mm.add("(max-width: 1023px), (prefers-reduced-motion: reduce)", () => {
+        gsap.set("[data-home-stack-panel]", { clearProps: "all" });
+      });
+
+      return () => mm.revert();
     }, rootRef);
 
     return () => ctx.revert();
@@ -269,102 +456,26 @@ export function HomeStackedShowcase() {
                   items={BLOG_SERIES}
                   speed={42}
                   reverse={false}
-                  itemClassName="w-[300px] md:w-[360px] xl:w-[380px]"
+                  autoPlay={false}
+                  itemClassName="w-[240px] shrink-0 sm:w-[260px] lg:w-[280px]"
                   renderItem={(series) => {
                     const to = getBlogSeriesHref(series);
                     const count = blogSeriesCounts.get(series.slug) ?? 0;
                     const visual = getBlogSeriesVisual(series, theme);
 
                     return (
-                      <Link
+                      <HomeSeriesMiniCard
                         to={to}
-                        style={{ ["--series-rgb" as string]: series.rgb }}
-                        className={cn(
-                          "group relative isolate flex h-full overflow-hidden rounded-[2rem] border bg-card/78 shadow-[0_20px_60px_rgba(15,23,42,0.08)] transition-all duration-300 backdrop-blur-sm",
-                          "hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_28px_90px_rgba(59,130,246,0.16)]",
-                          "border-border/60",
-                        )}
-                      >
-                        <div
-                          className="absolute inset-0 opacity-90"
-                          style={{
-                            background:
-                              "radial-gradient(circle at top right, rgba(var(--series-rgb), 0.28), transparent 40%), radial-gradient(circle at bottom left, rgba(var(--series-rgb), 0.18), transparent 32%), linear-gradient(140deg, rgba(var(--series-rgb), 0.08), transparent 35%, rgba(var(--series-rgb), 0.12))",
-                          }}
-                        />
-                        <div className="relative flex h-full flex-col">
-                          <div className={cn("relative aspect-[16/10] overflow-hidden", theme === "dark" ? "border-b border-white/10" : "border-b border-slate-900/10")}>
-                            <img src={visual} alt={series.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" />
-                            <div
-                              className={cn(
-                                "absolute inset-0",
-                                theme === "dark"
-                                  ? "bg-gradient-to-t from-slate-950/72 via-slate-950/18 to-transparent"
-                                  : "bg-gradient-to-t from-white/90 via-white/18 to-transparent"
-                              )}
-                            />
-                            <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
-                              <div className="flex max-w-[80%] flex-wrap gap-1.5">
-                                {series.tags.slice(0, 3).map((tag) => (
-                                  <span
-                                    key={`${series.slug}-slider-header-tag-${tag}`}
-                                    className={cn(
-                                      "inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide",
-                                      theme === "dark"
-                                        ? "border-white/60 bg-black/30 text-white dark:border-white/35 dark:bg-white/20"
-                                        : "border-slate-900/12 bg-white/82 text-slate-900 shadow-sm"
-                                    )}
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                              <ArrowRight
-                                className={cn(
-                                  "h-5 w-5 flex-shrink-0 transition-all group-hover:translate-x-1",
-                                  theme === "dark" ? "text-white/85 group-hover:text-white" : "text-slate-900/70 group-hover:text-slate-950"
-                                )}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="flex flex-1 flex-col p-5">
-                            <h3 className="editorial-card-title text-xl font-black text-foreground sm:text-[1.35rem]">{series.title}</h3>
-                            <p className="editorial-copy mt-2 text-sm leading-7 text-muted-foreground">{series.subtitle}</p>
-
-                            <div className="mt-4 flex flex-wrap gap-2">
-                              {series.tags.map((tag) => (
-                                <span
-                                  key={`${series.slug}-slider-tag-${tag}`}
-                                  className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/80 px-2.5 py-1 text-[11px] font-semibold text-foreground/85"
-                                >
-                                  <span className="h-1.5 w-1.5 rounded-full bg-primary/70" />
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-
-                            <div className="mt-5 flex flex-wrap items-center gap-2">
-                              {series.logos.map((logo, logoIndex) => (
-                                <span
-                                  key={`${series.slug}-slider-logo-${logoIndex}`}
-                                  className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border/70 bg-background/95 p-2 shadow-sm"
-                                >
-                                  <img src={logo} alt="" className="h-full w-full object-contain" loading="lazy" />
-                                </span>
-                              ))}
-                            </div>
-
-                            <div className="editorial-meta mt-5 flex items-center justify-between gap-3 border-t border-border/60 pt-4 text-xs text-muted-foreground">
-                              <span>{count > 0 ? `${count} website chapter${count === 1 ? "" : "s"}` : "Mastery Series"}</span>
-                              <span className="inline-flex items-center gap-2 font-semibold text-foreground">
-                                {series.actionLabel || "Open Guide"}
-                                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
+                        visual={visual}
+                        title={series.title}
+                        subtitle={series.subtitle}
+                        tags={series.tags}
+                        logos={series.logos}
+                        countLabel={count > 0 ? `${count} website chapter${count === 1 ? "" : "s"}` : "Mastery Series"}
+                        actionLabel={series.actionLabel || "Open Guide"}
+                        theme={theme}
+                        rgb={series.rgb}
+                      />
                     );
                   }}
                 />
@@ -387,102 +498,26 @@ export function HomeStackedShowcase() {
                 items={AI_ML_SERIES}
                 speed={42}
                 reverse={true}
-                itemClassName="w-[300px] md:w-[360px] xl:w-[380px]"
+                autoPlay={false}
+                itemClassName="w-[240px] shrink-0 sm:w-[260px] lg:w-[280px]"
                 renderItem={(series) => {
                   const to = getBlogSeriesHref(series);
                   const count = aiMlSeriesCounts.get(series.slug) ?? 0;
                   const visual = getBlogSeriesVisual(series, theme);
 
                   return (
-                    <Link
+                    <HomeSeriesMiniCard
                       to={to}
-                      style={{ ["--series-rgb" as string]: series.rgb }}
-                      className={cn(
-                        "group relative isolate flex h-full overflow-hidden rounded-[2rem] border bg-card/78 shadow-[0_20px_60px_rgba(15,23,42,0.08)] transition-all duration-300 backdrop-blur-sm",
-                        "hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_28px_90px_rgba(59,130,246,0.16)]",
-                        "border-border/60",
-                      )}
-                    >
-                      <div
-                        className="absolute inset-0 opacity-90"
-                        style={{
-                          background:
-                            "radial-gradient(circle at top right, rgba(var(--series-rgb), 0.28), transparent 40%), radial-gradient(circle at bottom left, rgba(var(--series-rgb), 0.18), transparent 32%), linear-gradient(140deg, rgba(var(--series-rgb), 0.08), transparent 35%, rgba(var(--series-rgb), 0.12))",
-                        }}
-                      />
-                      <div className="relative flex h-full flex-col">
-                        <div className={cn("relative aspect-[16/10] overflow-hidden", theme === "dark" ? "border-b border-white/10" : "border-b border-slate-900/10")}>
-                          <img src={visual} alt={series.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" />
-                          <div
-                            className={cn(
-                              "absolute inset-0",
-                              theme === "dark"
-                                ? "bg-gradient-to-t from-slate-950/72 via-slate-950/18 to-transparent"
-                                : "bg-gradient-to-t from-white/90 via-white/18 to-transparent"
-                            )}
-                          />
-                          <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
-                            <div className="flex max-w-[80%] flex-wrap gap-1.5">
-                              {series.tags.slice(0, 3).map((tag) => (
-                                <span
-                                  key={`${series.slug}-aiml-slider-header-tag-${tag}`}
-                                  className={cn(
-                                    "inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide",
-                                    theme === "dark"
-                                      ? "border-white/60 bg-black/30 text-white dark:border-white/35 dark:bg-white/20"
-                                      : "border-slate-900/12 bg-white/82 text-slate-900 shadow-sm"
-                                  )}
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                            <ArrowRight
-                              className={cn(
-                                "h-5 w-5 flex-shrink-0 transition-all group-hover:translate-x-1",
-                                theme === "dark" ? "text-white/85 group-hover:text-white" : "text-slate-900/70 group-hover:text-slate-950"
-                              )}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex flex-1 flex-col p-5">
-                          <h3 className="editorial-card-title text-xl font-black text-foreground sm:text-[1.35rem]">{series.title}</h3>
-                          <p className="editorial-copy mt-2 text-sm leading-7 text-muted-foreground">{series.subtitle}</p>
-
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            {series.tags.map((tag) => (
-                              <span
-                                key={`${series.slug}-aiml-slider-tag-${tag}`}
-                                className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/80 px-2.5 py-1 text-[11px] font-semibold text-foreground/85"
-                              >
-                                <span className="h-1.5 w-1.5 rounded-full bg-primary/70" />
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-
-                          <div className="mt-5 flex flex-wrap items-center gap-2">
-                            {series.logos.map((logo, logoIndex) => (
-                              <span
-                                key={`${series.slug}-aiml-slider-logo-${logoIndex}`}
-                                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border/70 bg-background/95 p-2 shadow-sm"
-                              >
-                                <img src={logo} alt="" className="h-full w-full object-contain" loading="lazy" />
-                              </span>
-                            ))}
-                          </div>
-
-                          <div className="editorial-meta mt-5 flex items-center justify-between gap-3 border-t border-border/60 pt-4 text-xs text-muted-foreground">
-                            <span>{count > 0 ? `${count} website chapter${count === 1 ? "" : "s"}` : "Mastery Series"}</span>
-                            <span className="inline-flex items-center gap-2 font-semibold text-foreground">
-                              {series.actionLabel || "Open Guide"}
-                              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
+                      visual={visual}
+                      title={series.title}
+                      subtitle={series.subtitle}
+                      tags={series.tags}
+                      logos={series.logos}
+                      countLabel={count > 0 ? `${count} website chapter${count === 1 ? "" : "s"}` : "Mastery Series"}
+                      actionLabel={series.actionLabel || "Open Guide"}
+                      theme={theme}
+                      rgb={series.rgb}
+                    />
                   );
                 }}
               />
@@ -499,13 +534,7 @@ export function HomeStackedShowcase() {
               actionLabel="Open articles"
               icon={Newspaper}
             >
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {ARTICLES.map((article, index) => (
-                  <div key={article.slug} className={index === 0 ? "md:col-span-2 xl:col-span-1" : ""}>
-                    <ArticleCard article={article} />
-                  </div>
-                ))}
-              </div>
+              <ArticleSlider articles={featuredArticles} />
             </ShowcasePanel>
           </div>
 

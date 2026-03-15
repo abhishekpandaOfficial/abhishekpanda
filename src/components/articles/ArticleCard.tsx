@@ -105,7 +105,7 @@ const renderLogo = (logo: ArticleLogo, index: number) => {
       title={logo.name}
     >
       {logo.imageSrc ? (
-        <img src={logo.imageSrc} alt={logo.name} className="h-5 w-5 object-contain" loading="lazy" />
+        <img src={logo.imageSrc} alt={logo.name} className="h-5 w-5 object-contain" loading="lazy" decoding="async" />
       ) : Icon ? (
         <Icon className={`h-4 w-4 ${logo.colorClass || "text-foreground"}`} />
       ) : (
@@ -137,11 +137,12 @@ export default function ArticleCard({ article, featured = false, variant }: Arti
 
         <div className={`relative aspect-[16/10] w-full overflow-hidden ${isSpotlight ? "min-h-[240px]" : "min-h-[220px]"}`}>
           <img
-            src={article.heroImage}
-            alt={article.title}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.05]"
-            loading="lazy"
-          />
+          src={article.heroImage}
+          alt={article.title}
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.05]"
+          loading="lazy"
+          decoding="async"
+        />
           <div className={`absolute inset-0 bg-gradient-to-t ${theme.heroTint}`} />
           <div className="absolute inset-x-5 top-5 flex items-start justify-between gap-3">
             <span className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] backdrop-blur-md ${theme.meta}`}>

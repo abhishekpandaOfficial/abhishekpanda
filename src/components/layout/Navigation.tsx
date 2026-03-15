@@ -47,16 +47,24 @@ const galaxySubLinks = [
 
 export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const isHomePage = location.pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const nextScrollY = window.scrollY;
+      setIsScrolled(nextScrollY > 20);
+      if (isHomePage) {
+        setScrollProgress(Math.min(nextScrollY / 180, 1));
+      }
     };
+
+    handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isHomePage]);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -94,6 +102,13 @@ export const Navigation = () => {
   const desktopNavIconClass = "h-4 w-4 shrink-0 transition-transform group-hover:scale-110 xl:h-[17px] xl:w-[17px] 2xl:h-[18px] 2xl:w-[18px]";
   const mobileNavItemClass = "flex items-center gap-3.5 rounded-xl px-4 py-3.5 text-base font-medium transition-all duration-200";
   const mobileNavIconClass = "h-5 w-5 shrink-0";
+  const landingHeaderHeight = 88 - scrollProgress * 20;
+  const landingHeaderPadding = 24 - scrollProgress * 10;
+  const landingHeaderRadius = 28 - scrollProgress * 12;
+  const landingLogoScale = 1.06 - scrollProgress * 0.12;
+  const landingShadow = `0 ${14 + scrollProgress * 18}px ${34 + scrollProgress * 26}px -${24 - scrollProgress * 8}px rgba(15,23,42,${0.08 + scrollProgress * 0.18})`;
+  const landingBorderOpacity = 0.08 + scrollProgress * 0.16;
+  const landingBackgroundOpacity = 0.38 + scrollProgress * 0.42;
 
   return (
     <>
@@ -106,11 +121,49 @@ export const Navigation = () => {
             ? "bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm"
             : "bg-transparent"
         )}
+        style={
+          isHomePage
+            ? {
+                backgroundColor: `hsl(var(--background) / ${landingBackgroundOpacity})`,
+                backdropFilter: `blur(${10 + scrollProgress * 14}px) saturate(${1 + scrollProgress * 0.22})`,
+                borderBottomColor: `hsl(var(--border) / ${landingBorderOpacity})`,
+                boxShadow: landingShadow,
+              }
+            : undefined
+        }
       >
-        <div className="container mx-auto px-4">
-          <div className="grid h-16 grid-cols-[auto_1fr_auto] items-center gap-4 md:h-[4.5rem] 2xl:h-20">
+        <div
+          className={cn("mx-auto w-full px-4 md:px-6 xl:px-8", isHomePage ? "max-w-none" : "container")}
+          style={
+            isHomePage
+              ? {
+                  paddingTop: `${landingHeaderPadding}px`,
+                  paddingBottom: `${Math.max(10, landingHeaderPadding - 6)}px`,
+                }
+              : undefined
+          }
+        >
+          <div
+            className="grid grid-cols-[auto_1fr_auto] items-center gap-4"
+            style={
+              isHomePage
+                ? {
+                    minHeight: `${landingHeaderHeight}px`,
+                    borderRadius: `${landingHeaderRadius}px`,
+                    paddingInline: `${16 + (1 - scrollProgress) * 12}px`,
+                    background: `linear-gradient(180deg, hsl(var(--background) / ${0.66 + scrollProgress * 0.18}), hsl(var(--background) / ${0.54 + scrollProgress * 0.26}))`,
+                    border: `1px solid hsl(var(--border) / ${0.2 + scrollProgress * 0.14})`,
+                    boxShadow: `inset 0 1px 0 hsl(var(--background) / 0.48), 0 12px 30px -24px rgba(15,23,42,${0.18 + scrollProgress * 0.1})`,
+                  }
+                : { height: "4rem" }
+            }
+          >
             {/* Logo */}
-            <PrefetchLink to="/" className="flex items-center gap-2 group justify-self-start">
+            <PrefetchLink
+              to="/"
+              className="flex items-center gap-2 group justify-self-start"
+              style={isHomePage ? { transform: `scale(${landingLogoScale})`, transformOrigin: "left center" } : undefined}
+            >
               <div className="group-hover:scale-110 transition-transform duration-300">
                 <AbhishekAnimatedLogo size="md" animate />
               </div>

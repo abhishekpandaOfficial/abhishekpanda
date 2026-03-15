@@ -12,6 +12,7 @@ type GsapInfiniteCardSliderProps<T> = {
   speed?: number;
   reverse?: boolean;
   showNavigation?: boolean;
+  autoPlay?: boolean;
 };
 
 export function GsapInfiniteCardSlider<T>({
@@ -22,6 +23,7 @@ export function GsapInfiniteCardSlider<T>({
   speed = 46,
   reverse = false,
   showNavigation = true,
+  autoPlay = true,
 }: GsapInfiniteCardSliderProps<T>) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -44,6 +46,8 @@ export function GsapInfiniteCardSlider<T>({
         const loopDistance = track.scrollWidth / 2;
         if (loopDistance <= 0) return;
 
+        if (!autoPlay) return;
+
         loopTween = gsap.to(track, {
           x: reverse ? 0 : -loopDistance,
           duration: Math.max(24, loopDistance / speed),
@@ -61,27 +65,43 @@ export function GsapInfiniteCardSlider<T>({
       const onEnter = () => loopTween?.pause();
       const onLeave = () => loopTween?.resume();
 
-      viewport.addEventListener("mouseenter", onEnter);
-      viewport.addEventListener("mouseleave", onLeave);
-      viewport.addEventListener("touchstart", onEnter, { passive: true });
-      viewport.addEventListener("touchend", onLeave);
+      if (autoPlay) {
+        viewport.addEventListener("mouseenter", onEnter);
+        viewport.addEventListener("mouseleave", onLeave);
+        viewport.addEventListener("touchstart", onEnter, { passive: true });
+        viewport.addEventListener("touchend", onLeave);
+      }
 
       return () => {
         resizeObserver.disconnect();
-        viewport.removeEventListener("mouseenter", onEnter);
-        viewport.removeEventListener("mouseleave", onLeave);
-        viewport.removeEventListener("touchstart", onEnter);
-        viewport.removeEventListener("touchend", onLeave);
+        if (autoPlay) {
+          viewport.removeEventListener("mouseenter", onEnter);
+          viewport.removeEventListener("mouseleave", onLeave);
+          viewport.removeEventListener("touchstart", onEnter);
+          viewport.removeEventListener("touchend", onLeave);
+        }
         loopTween?.kill();
       };
     }, root);
 
     return () => ctx.revert();
-  }, [items, reverse, speed]);
+  }, [autoPlay, items, reverse, speed]);
 
   if (!items.length) return null;
 
   const nudgeTrack = (direction: "prev" | "next") => {
+    if (!autoPlay) {
+      const viewport = viewportRef.current;
+      if (!viewport) return;
+
+      const amount = Math.max(260, Math.round(viewport.clientWidth * 0.82));
+      viewport.scrollBy({
+        left: direction === "next" ? amount : -amount,
+        behavior: "smooth",
+      });
+      return;
+    }
+
     const track = trackRef.current;
     if (!track) return;
 
@@ -128,16 +148,28 @@ export function GsapInfiniteCardSlider<T>({
       ) : null}
       <div
         ref={viewportRef}
-        className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-background/45 px-3 py-3 md:px-4"
+        className={cn(
+          "relative rounded-[2rem] border border-border/60 bg-background/45 px-3 py-3 md:px-4",
+          autoPlay
+            ? "overflow-hidden"
+            : "overflow-x-auto overflow-y-hidden scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        )}
       >
         <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-10 bg-gradient-to-r from-background via-background/80 to-transparent md:w-16" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-10 bg-gradient-to-l from-background via-background/80 to-transparent md:w-16" />
 
-        <div ref={trackRef} className="flex w-max gap-5 md:gap-6">
-          {loopItems.map((item, index) => (
+        <div
+          ref={trackRef}
+          className={cn("flex w-max gap-5 md:gap-6", !autoPlay && "min-w-full")}
+        >
+          {(autoPlay ? loopItems : items).map((item, index) => (
             <div
-              key={index}
-              className={cn("w-[280px] shrink-0 md:w-[340px] xl:w-[360px]", itemClassName)}
+              key={`${autoPlay ? "loop" : "item"}-${index}`}
+              className={cn(
+                "w-[280px] shrink-0 md:w-[340px] xl:w-[360px]",
+                !autoPlay && "snap-start",
+                itemClassName,
+              )}
             >
               {renderItem(item, index % items.length)}
             </div>

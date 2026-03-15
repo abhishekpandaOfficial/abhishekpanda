@@ -6,6 +6,30 @@ import { VitePWA } from "vite-plugin-pwa";
 // https://vitejs.dev/config/
 export default defineConfig(() => {
   const cmsOrigin = process.env.VITE_CMS_ORIGIN || "http://localhost:1337";
+  const chunkGroups: Array<[string, string[]]> = [
+    ["motion-vendor", ["framer-motion", "gsap"]],
+    ["content-vendor", ["react-markdown", "remark-gfm", "rehype-raw", "rehype-slug", "rehype-highlight", "rehype-autolink-headings", "highlight.js", "github-slugger"]],
+    ["charts-vendor", ["recharts"]],
+    ["map-vendor", ["mapbox-gl"]],
+    ["three-vendor", ["three"]],
+    ["blocknote-vendor", ["@blocknote"]],
+    ["shiki-vendor", ["shiki"]],
+    ["mermaid-vendor", ["mermaid"]],
+    ["redoc-vendor", ["redoc"]],
+    ["reader-vendor", ["jszip", "epubjs"]],
+  ];
+
+  const manualChunks = (id: string) => {
+    if (!id.includes("node_modules")) return undefined;
+
+    for (const [chunkName, matchers] of chunkGroups) {
+      if (matchers.some((matcher) => id.includes(`/node_modules/${matcher}/`) || id.includes(`/node_modules/${matcher}`))) {
+        return chunkName;
+      }
+    }
+
+    return undefined;
+  };
 
   return {
     server: {
@@ -146,6 +170,26 @@ export default defineConfig(() => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+      },
+    },
+    build: {
+      target: "es2020",
+      minify: "esbuild",
+      cssMinify: true,
+      sourcemap: false,
+      reportCompressedSize: true,
+      cssCodeSplit: true,
+      assetsInlineLimit: 4096,
+      modulePreload: {
+        polyfill: true,
+      },
+      rollupOptions: {
+        output: {
+          manualChunks,
+          chunkFileNames: "assets/[name]-[hash].js",
+          entryFileNames: "assets/[name]-[hash].js",
+          assetFileNames: "assets/[name]-[hash][extname]",
+        },
       },
     },
   };

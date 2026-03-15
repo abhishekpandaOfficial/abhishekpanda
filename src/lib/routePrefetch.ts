@@ -24,6 +24,7 @@ const routeImporters: Array<[pattern: RegExp, () => Promise<unknown>]> = [
 ];
 
 const prefetchedRoutes = new Set<string>();
+const scheduledRoutes = new Set<string>();
 
 const normalizePath = (to: string) => {
   try {
@@ -34,13 +35,48 @@ const normalizePath = (to: string) => {
   }
 };
 
+const canPrefetch = () => {
+  if (typeof window === "undefined" || typeof navigator === "undefined") return false;
+
+  const connection = navigator as Navigator & {
+    connection?: { saveData?: boolean; effectiveType?: string };
+  };
+
+  if (connection.connection?.saveData) return false;
+  if (connection.connection?.effectiveType && ["slow-2g", "2g"].includes(connection.connection.effectiveType)) {
+    return false;
+  }
+
+  return true;
+};
+
+const scheduleIdlePrefetch = (pathname: string, importer: () => Promise<unknown>) => {
+  if (scheduledRoutes.has(pathname)) return;
+  scheduledRoutes.add(pathname);
+
+  const run = () => {
+    prefetchedRoutes.add(pathname);
+    scheduledRoutes.delete(pathname);
+    void importer();
+  };
+
+  if ("requestIdleCallback" in window) {
+    (window as Window & { requestIdleCallback: (cb: IdleRequestCallback, options?: IdleRequestOptions) => number }).requestIdleCallback(
+      () => run(),
+      { timeout: 1200 },
+    );
+    return;
+  }
+
+  window.setTimeout(run, 120);
+};
+
 export const prefetchRoute = (to: string) => {
   const pathname = normalizePath(to);
-  if (!pathname.startsWith("/") || prefetchedRoutes.has(pathname)) return;
+  if (!pathname.startsWith("/") || prefetchedRoutes.has(pathname) || !canPrefetch()) return;
 
   const match = routeImporters.find(([pattern]) => pattern.test(pathname));
   if (!match) return;
 
-  prefetchedRoutes.add(pathname);
-  void match[1]();
+  scheduleIdlePrefetch(pathname, match[1]);
 };

@@ -10,8 +10,8 @@ import { RouteScrollRestoration } from "@/components/layout/RouteScrollRestorati
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Index from "./pages/Index";
 import { RouteSeo } from "@/components/seo/RouteSeo";
-import { BrandIntro } from "@/components/BrandIntro";
-import AdminWebVault from "@/components/admin/AdminWebVault";
+const BrandIntro = lazy(() => import("@/components/BrandIntro").then((m) => ({ default: m.BrandIntro })));
+const AdminWebVault = lazy(() => import("@/components/admin/AdminWebVault"));
 
 const About = lazy(() => import("./pages/About"));
 const Blog = lazy(() => import("./pages/Blog"));
@@ -126,6 +126,17 @@ const RouteLoader = () => (
   </div>
 );
 
+const DelayedRouteLoader = () => {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setVisible(true), 180);
+    return () => window.clearTimeout(timeout);
+  }, []);
+
+  return visible ? <RouteLoader /> : null;
+};
+
 const LegacyCheatsheetSeriesRedirect = () => {
   const { seriesSlug } = useParams();
   return <Navigate to={seriesSlug ? `/cheatsheets/${seriesSlug}` : "/cheatsheets"} replace />;
@@ -137,17 +148,7 @@ const LegacyAiMlSeriesRedirect = () => {
 };
 
 const App = () => {
-  const [showIntro, setShowIntro] = useState(() => {
-    if (typeof window === "undefined") return false;
-    if (window.location.pathname !== "/") return false;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return false;
-
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
-    if (connection?.saveData) return false;
-    if (connection?.effectiveType && ["slow-2g", "2g"].includes(connection.effectiveType)) return false;
-
-    return sessionStorage.getItem("ap-home-intro-seen") !== "1";
-  });
+  const [showIntro, setShowIntro] = useState(false);
 
   useEffect(() => {
     if (!showIntro) return;
@@ -181,8 +182,10 @@ const App = () => {
             <AnalyticsWrapper>
               <RouteScrollRestoration />
               <RouteSeo />
-              <AnimatePresence>{showIntro ? <BrandIntro /> : null}</AnimatePresence>
-              <Suspense fallback={<RouteLoader />}>
+              <AnimatePresence>
+                <Suspense fallback={null}>{showIntro ? <BrandIntro /> : null}</Suspense>
+              </AnimatePresence>
+              <Suspense fallback={<DelayedRouteLoader />}>
                 <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
@@ -262,10 +265,10 @@ const App = () => {
                 <Route path="/blogs/linux-mastery" element={<Navigate to="/cheatsheets/linux-mastery" replace />} />
                 <Route path="/blogs/:seriesSlug" element={<LegacyCheatsheetSeriesRedirect />} />
                 <Route path="/blog/techhub" element={<Navigate to="/techhub" replace />} />
-                <Route path="/articles" element={<Suspense fallback={<RouteLoader />}><ArticlesPage /></Suspense>} />
-                <Route path="/articles/:slug" element={<Suspense fallback={<RouteLoader />}><ArticlesPage /></Suspense>} />
-                <Route path="/scriptures" element={<Suspense fallback={<RouteLoader />}><Scriptures /></Suspense>} />
-                <Route path="/scriptures/:slug" element={<Suspense fallback={<RouteLoader />}><Scriptures /></Suspense>} />
+                <Route path="/articles" element={<Suspense fallback={<DelayedRouteLoader />}><ArticlesPage /></Suspense>} />
+                <Route path="/articles/:slug" element={<Suspense fallback={<DelayedRouteLoader />}><ArticlesPage /></Suspense>} />
+                <Route path="/scriptures" element={<Suspense fallback={<DelayedRouteLoader />}><Scriptures /></Suspense>} />
+                <Route path="/scriptures/:slug" element={<Suspense fallback={<DelayedRouteLoader />}><Scriptures /></Suspense>} />
                 <Route path="/case-studies" element={<CaseStudies />} />
                 <Route path="/case-studies/:slug" element={<CaseStudies />} />
                 <Route path="/interview" element={<Interview />} />

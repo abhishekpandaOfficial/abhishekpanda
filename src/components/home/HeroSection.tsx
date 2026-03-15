@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, Code2, Cloud, Brain, Database, Cpu, ArrowRight, Shield, FolderOpen, Send } from "lucide-react";
+import { Sparkles, Code2, Cloud, Brain, Database, Cpu, ArrowRight, Shield, FolderOpen, Send, Building2, BookOpenText } from "lucide-react";
 import abhishekAvatar from "@/assets/abhishek-avatar.png";
 import abhishekAvatarAlt from "@/assets/abhishek-avatar-alt.png";
 import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
 
 const badges = [
-  { icon: Code2, label: "C# Architect", color: "from-primary to-secondary", to: "/csharp-mastery" },
-  { icon: Brain, label: "AI/ML Engineer", color: "from-secondary to-purple" },
-  { icon: Cloud, label: "Cloud Specialist", color: "from-sky to-primary" },
+  { icon: Code2, label: ".NET Architect", color: "from-primary to-secondary", to: "/dotnet-mastery" },
+  { icon: Brain, label: "AI/ML Architect", color: "from-secondary to-purple", to: "/ai-ml-hub" },
+  { icon: Cloud, label: "Cloud Architect", color: "from-sky to-primary", to: "/techhub" },
+  { icon: Building2, label: "Founder", color: "from-amber-500 to-orange-500", to: "/about" },
+  { icon: BookOpenText, label: "Author", color: "from-fuchsia-500 to-rose-500", to: "/articles" },
 ];
 
 const floatingTechStacks = [
@@ -58,19 +60,6 @@ const taglines = [
   "Engineering clarity from idea to production.",
 ];
 
-const nameTypographyVariants = [
-  "typo-ap-1",
-  "typo-ap-2",
-  "typo-ap-3",
-  "typo-ap-4",
-  "typo-ap-5",
-  "typo-ap-6",
-  "typo-ap-7",
-  "typo-ap-8",
-  "typo-ap-9",
-  "typo-ap-10",
-];
-
 const primaryCtas = [
   {
     label: "View Projects",
@@ -101,12 +90,61 @@ const primaryCtas = [
   },
 ];
 
+const greetingEmojis = [
+  "👋",
+  "😎",
+  "🤩",
+  "🥳",
+  "🤖",
+  "✨",
+  "🎉",
+  "🚀",
+  "🌈",
+  "💫",
+  "⚡",
+  "🔥",
+  "🌟",
+  "🪄",
+  "💎",
+  "🎈",
+  "🛸",
+  "🎯",
+  "🤓",
+  "😺",
+];
+
+const RotatingEmojiBadge = ({
+  emoji,
+  className,
+}: {
+  emoji: string;
+  className?: string;
+}) => (
+  <span
+    className={`relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-border/60 bg-background/80 align-middle text-[1.9rem] shadow-[0_18px_40px_-28px_rgba(14,165,233,0.55)] backdrop-blur-xl md:h-11 md:w-11 lg:h-12 lg:w-12 ${className ?? ""}`}
+    aria-hidden="true"
+  >
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.span
+        key={emoji}
+        initial={{ opacity: 0, scale: 0.72, rotate: -10, y: 8 }}
+        animate={{ opacity: 1, scale: 1, rotate: 0, y: 0 }}
+        exit={{ opacity: 0, scale: 0.72, rotate: 10, y: -8 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+        className="inline-flex items-center justify-center"
+      >
+        {emoji}
+      </motion.span>
+    </AnimatePresence>
+  </span>
+);
+
 export const HeroSection = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [taglineIndex, setTaglineIndex] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [currentAvatar, setCurrentAvatar] = useState(abhishekAvatar);
-  const [nameTypographyIndex, setNameTypographyIndex] = useState(0);
+  const [currentAvatar, setCurrentAvatar] = useState(abhishekAvatarAlt);
+  const [emojiCycleIndex, setEmojiCycleIndex] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -118,16 +156,16 @@ export const HeroSection = () => {
 
   useEffect(() => {
     if (hasScrolled) {
-      setCurrentAvatar(abhishekAvatarAlt);
-    } else if (!isHovered) {
       setCurrentAvatar(abhishekAvatar);
+    } else if (!isHovered) {
+      setCurrentAvatar(abhishekAvatarAlt);
     }
   }, [hasScrolled, isHovered]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
-      setNameTypographyIndex((prev) => (prev + 1) % nameTypographyVariants.length);
-    }, 1800);
+      setEmojiCycleIndex((prev) => (prev + 1) % greetingEmojis.length);
+    }, 200);
 
     return () => window.clearInterval(interval);
   }, []);
@@ -135,13 +173,13 @@ export const HeroSection = () => {
   const handleHover = () => {
     setIsHovered(true);
     setTaglineIndex(Math.floor(Math.random() * taglines.length));
-    setCurrentAvatar(abhishekAvatarAlt);
+    setCurrentAvatar(abhishekAvatar);
   };
 
   const handleHoverEnd = () => {
     setIsHovered(false);
     if (!hasScrolled) {
-      setCurrentAvatar(abhishekAvatar);
+      setCurrentAvatar(abhishekAvatarAlt);
     }
   };
 
@@ -274,22 +312,20 @@ export const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h1 className="mb-3 text-4xl font-black leading-[1.02] tracking-tight md:text-6xl lg:text-7xl xl:text-[5.6rem]">
-              <span className="text-foreground">Hi, I'm </span>
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={nameTypographyVariants[nameTypographyIndex]}
-                  initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
-                  transition={{ duration: 0.45, ease: "easeOut" }}
-                  className={`gradient-text inline-block ${nameTypographyVariants[nameTypographyIndex]}`}
-                >
-                  Abhishek Panda
-                </motion.span>
-              </AnimatePresence>
+            <h1 className="audiowide-regular mb-3 text-balance text-4xl leading-[1.02] tracking-[0.01em] text-foreground md:text-6xl lg:text-7xl xl:text-[5.15rem]">
+              <RotatingEmojiBadge
+                className="mr-3 md:mr-4"
+                emoji={greetingEmojis[emojiCycleIndex]}
+              />
+              <span className="inline-block bg-gradient-to-r from-slate-950 via-sky-700 to-cyan-600 bg-clip-text tracking-[0.02em] text-transparent dark:from-white dark:via-sky-200 dark:to-cyan-300">
+                Abhishek Panda
+              </span>
+              <RotatingEmojiBadge
+                className="ml-3 md:ml-4"
+                emoji={greetingEmojis[(emojiCycleIndex + 10) % greetingEmojis.length]}
+              />
             </h1>
-            <p className="mb-4 text-lg font-medium text-muted-foreground md:text-2xl xl:text-[1.7rem]">
+            <p className="mb-4 text-lg font-medium tracking-[-0.02em] text-muted-foreground md:text-2xl xl:text-[1.65rem]">
               Architecting production-ready .NET, Cloud, and AI systems
             </p>
           </motion.div>
