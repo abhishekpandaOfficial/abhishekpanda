@@ -1,16 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { useTheme } from "@/components/ThemeProvider";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { EmbeddedAtlasPageShell } from "@/components/atlas/EmbeddedAtlasPageShell";
 import { measureEmbeddedFrameHeight, syncThemeToEmbeddedFrame } from "@/lib/embeddedFrame";
 
 const OpenSourceModels = () => {
@@ -74,28 +66,18 @@ const OpenSourceModels = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main className="pt-16 md:pt-20">
-        <div className="border-b border-border/60 bg-background/95 px-4 py-3 backdrop-blur md:px-6">
-          <Breadcrumb>
-            <BreadcrumbList className="text-xs md:text-sm">
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/">Home</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/ai-ml-hub">AI / ML Hub</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Open Source Models</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
+      <EmbeddedAtlasPageShell
+        title="Open Source Models"
+        description="Explore open-weight and community-led LLMs with a dedicated full-width surface for architecture scanning, family comparison, and theme-aware benchmark reading."
+        badge="Open Weight Galaxy"
+        accentClassName="border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300"
+        metricItems={[
+          { label: "Source", value: "Open-weight ecosystem" },
+          { label: "Focus", value: "Community and deployable stacks" },
+          { label: "Theme", value: "Light and dark aware" },
+          { label: "Layout", value: "Full-width responsive reading" },
+        ]}
+      >
         <iframe
           ref={iframeRef}
           title="Open Source LLM Models"
@@ -109,7 +91,7 @@ const OpenSourceModels = () => {
             window.setTimeout(measureFromIframe, 500);
           }}
         />
-      </main>
+      </EmbeddedAtlasPageShell>
       <Footer />
     </div>
   );

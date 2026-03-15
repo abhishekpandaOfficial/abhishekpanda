@@ -60,10 +60,10 @@ export function ResourceHubPage({
       <Navigation />
 
       <main className="pt-24 pb-20">
-        <section className="container mx-auto px-4">
-          <div className="overflow-hidden rounded-[2rem] border border-border/60 bg-gradient-to-br from-card via-card to-primary/10 p-8 md:p-10">
+        <section className="w-full px-4 md:px-6 xl:px-8 2xl:px-10">
+          <div className="overflow-hidden rounded-[2rem] border border-border/60 bg-gradient-to-br from-card via-card to-primary/10 p-6 md:p-8 xl:p-10">
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] xl:items-start">
-              <div className="max-w-4xl">
+              <div className="max-w-5xl">
                 <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-primary">
                   {eyebrow}
                 </div>
@@ -91,7 +91,7 @@ export function ResourceHubPage({
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 xl:content-start">
                 {metrics.map((metric) => {
                   const Icon = metric.icon;
                   return (
@@ -110,13 +110,13 @@ export function ResourceHubPage({
           </div>
 
           <section className="mt-10">
-            <div className="mb-6">
+            <div className="mb-6 max-w-5xl">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Explore</p>
               <h2 className="mt-2 text-3xl font-black tracking-tight text-foreground">{sectionTitle}</h2>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground md:text-base">{sectionDescription}</p>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 2xl:grid-cols-3">
               {cards.map((card) => {
                 const Icon = card.icon;
                 const isStackCraft = card.title === "StackCraft";
@@ -193,7 +193,7 @@ export function ResourceHubPage({
                       key={cardKey}
                       to={card.to}
                       className={cn(
-                        "group rounded-[1.75rem] border p-6 transition",
+                        "group h-full rounded-[1.75rem] border p-6 transition",
                         isStackCraft
                           ? "border-sky-400/20 bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.16),transparent_32%),linear-gradient(160deg,rgba(10,18,34,0.96),rgba(14,27,48,0.9))] hover:border-sky-300/40 hover:shadow-[0_30px_68px_rgba(59,109,240,0.14)]"
                           : "border-border/60 bg-card/80 hover:border-primary/30 hover:bg-card",
@@ -207,7 +207,7 @@ export function ResourceHubPage({
                 return (
                   <div
                     key={cardKey}
-                    className="rounded-[1.75rem] border border-dashed border-border/60 bg-card/70 p-6"
+                    className="h-full rounded-[1.75rem] border border-dashed border-border/60 bg-card/70 p-6"
                   >
                     {cardContent}
                   </div>

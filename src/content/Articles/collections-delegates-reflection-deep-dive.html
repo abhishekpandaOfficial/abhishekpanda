@@ -1,0 +1,2779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C# Collections, Delegates, Events & Reflection Deep Dive</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070b14;
+  --bg2: #0d1220;
+  --bg3: #111827;
+  --card: #0f1829;
+  --card2: #141e30;
+  --border: rgba(0,212,170,0.12);
+  --border2: rgba(255,107,53,0.12);
+  --teal: #00d4aa;
+  --teal2: #00ffcc;
+  --orange: #ff6b35;
+  --purple: #a855f7;
+  --blue: #3b82f6;
+  --yellow: #fbbf24;
+  --red: #ef4444;
+  --green: #22c55e;
+  --pink: #ec4899;
+  --cyan: #06b6d4;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --code-bg: #0a0f1e;
+  --head: 'Syne', sans-serif;
+  --body: 'Outfit', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { background:var(--bg); color:var(--text); font-family:var(--body); font-size:14px; line-height:1.6; overflow-x:hidden; }
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--bg2); }
+::-webkit-scrollbar-thumb { background:var(--teal); border-radius:3px; }
+
+/* HERO */
+.hero {
+  background:linear-gradient(135deg,#070b14 0%,#0d1829 40%,#091420 100%);
+  border-bottom:1px solid var(--border);
+  padding:64px 40px 48px;
+  position:relative; overflow:hidden; text-align:center;
+}
+.hero::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(0,212,170,0.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-grid {
+  position:absolute; inset:0;
+  background-image: linear-gradient(rgba(0,212,170,0.03) 1px,transparent 1px), linear-gradient(90deg,rgba(0,212,170,0.03) 1px,transparent 1px);
+  background-size:40px 40px; pointer-events:none;
+}
+.hero-badge {
+  display:inline-block; background:rgba(0,212,170,0.1);
+  border:1px solid rgba(0,212,170,0.3); color:var(--teal);
+  font-family:var(--mono); font-size:11px; padding:4px 14px;
+  border-radius:20px; letter-spacing:2px; text-transform:uppercase;
+  margin-bottom:20px; animation:badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,212,170,0.2)} 50%{box-shadow:0 0 20px 4px rgba(0,212,170,0.1)} }
+.hero h1 { font-family:var(--head); font-size:clamp(2rem,5vw,3.8rem); font-weight:800; line-height:1.1; letter-spacing:-1px; margin-bottom:16px; }
+.hero h1 .a1{color:var(--teal)} .hero h1 .a2{color:var(--orange)} .hero h1 .a3{color:var(--purple)} .hero h1 .a4{color:var(--yellow)} .hero h1 .a5{color:var(--pink)}
+.hero-sub { color:var(--text2); font-size:15px; max-width:620px; margin:0 auto 32px; }
+.hero-stats { display:flex; justify-content:center; gap:32px; flex-wrap:wrap; }
+.stat { text-align:center; }
+.stat-num { font-family:var(--head); font-size:28px; font-weight:800; color:var(--teal); display:block; }
+.stat-label { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; }
+
+/* TOPIC TABS */
+.topic-tabs {
+  display:flex; gap:0; background:var(--bg2);
+  border-bottom:1px solid var(--border); overflow-x:auto; position:sticky; top:0; z-index:50;
+}
+.topic-tab {
+  display:flex; align-items:center; gap:8px; padding:14px 22px;
+  font-family:var(--mono); font-size:12px; color:var(--text3);
+  cursor:pointer; border-bottom:2px solid transparent;
+  white-space:nowrap; transition:all 0.2s; text-decoration:none;
+}
+.topic-tab:hover { color:var(--teal); background:rgba(0,212,170,0.04); }
+.topic-tab.active { color:var(--teal); border-bottom-color:var(--teal); }
+.topic-tab .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+/* THREE COLUMN LAYOUT */
+.layout3 { display:grid; grid-template-columns:220px 1fr 260px; min-height:100vh; }
+
+/* LEFT SIDEBAR */
+.sidebar-left {
+  background:var(--bg2); border-right:1px solid var(--border);
+  position:sticky; top:48px; height:calc(100vh - 48px);
+  overflow-y:auto; padding:16px 0;
+}
+.sidebar-left::-webkit-scrollbar { width:3px; }
+.sidebar-section-title {
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:2px; color:var(--text3); padding:10px 14px 6px;
+}
+.sidebar-section-title.colored { color:var(--teal); }
+.nav-item {
+  display:flex; align-items:center; gap:7px;
+  padding:6px 14px; color:var(--text3); text-decoration:none;
+  font-size:12px; font-family:var(--body);
+  border-left:2px solid transparent; transition:all 0.2s;
+}
+.nav-item:hover,.nav-item.active { color:var(--teal); border-left-color:var(--teal); background:rgba(0,212,170,0.04); }
+.nav-item .nd { width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; }
+.nav-divider { border:none; border-top:1px solid var(--border); margin:8px 14px; }
+.syllabus-badge {
+  display:inline-block; font-family:var(--mono); font-size:9px;
+  background:rgba(0,212,170,0.08); border:1px solid rgba(0,212,170,0.2);
+  color:var(--teal); padding:1px 6px; border-radius:10px; margin-left:auto;
+}
+
+/* MAIN */
+.main { padding:28px 24px; min-width:0; }
+
+/* RIGHT PANEL */
+.sidebar-right {
+  background:var(--bg2); border-left:1px solid var(--border);
+  position:sticky; top:48px; height:calc(100vh - 48px);
+  overflow-y:auto; padding:16px;
+}
+.sidebar-right::-webkit-scrollbar { width:3px; }
+.qa-title {
+  font-family:var(--head); font-size:13px; font-weight:700;
+  color:var(--text); margin-bottom:12px; padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+}
+.qa-item { margin-bottom:14px; }
+.qa-q {
+  font-family:var(--mono); font-size:11px; color:var(--teal);
+  margin-bottom:4px; display:flex; align-items:flex-start; gap:6px;
+}
+.qa-q::before { content:'Q'; background:rgba(0,212,170,0.15); border-radius:3px; padding:0 4px; flex-shrink:0; }
+.qa-a {
+  font-size:12px; color:var(--text2); line-height:1.55;
+  padding-left:20px;
+}
+.qa-a code { font-family:var(--mono); font-size:11px; background:rgba(0,212,170,0.08); border:1px solid rgba(0,212,170,0.15); color:var(--teal); padding:1px 5px; border-radius:3px; }
+.qa-divider { border:none; border-top:1px solid rgba(255,255,255,0.04); margin:12px 0; }
+
+/* MODULE */
+.module-section { margin-bottom:52px; }
+.module-header {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:24px; padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+.module-num {
+  background:linear-gradient(135deg,var(--teal),#00ffaa);
+  color:#000; font-family:var(--mono); font-size:11px; font-weight:600;
+  padding:3px 10px; border-radius:4px; flex-shrink:0; white-space:nowrap;
+}
+.module-num.orange{background:linear-gradient(135deg,var(--orange),#ff9f6b)}
+.module-num.purple{background:linear-gradient(135deg,var(--purple),#c084fc)}
+.module-num.blue{background:linear-gradient(135deg,var(--blue),#60a5fa)}
+.module-num.yellow{background:linear-gradient(135deg,var(--yellow),#fde68a)}
+.module-num.red{background:linear-gradient(135deg,var(--red),#f87171)}
+.module-num.pink{background:linear-gradient(135deg,var(--pink),#f9a8d4)}
+.module-num.cyan{background:linear-gradient(135deg,var(--cyan),#67e8f9)}
+.module-title { font-family:var(--head); font-size:18px; font-weight:700; color:var(--text); }
+.module-desc { font-size:12px; color:var(--text3); margin-left:auto; font-family:var(--mono); }
+
+/* GRIDS */
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.col-span2{grid-column:1/-1}
+.col-span3{grid-column:1/-1}
+
+/* CARD */
+.card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:12px; padding:20px;
+  position:relative; overflow:hidden;
+  transition:border-color 0.2s,transform 0.2s;
+}
+.card:hover { border-color:rgba(0,212,170,0.3); transform:translateY(-1px); }
+.card::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; background:linear-gradient(90deg,var(--teal),transparent); opacity:0; transition:opacity 0.2s; }
+.card:hover::before{opacity:1}
+.card.orange{border-color:var(--border2)}.card.orange::before{background:linear-gradient(90deg,var(--orange),transparent)}.card.orange:hover{border-color:rgba(255,107,53,0.3)}
+.card.purple{border-color:rgba(168,85,247,0.12)}.card.purple::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.card.blue{border-color:rgba(59,130,246,0.12)}.card.blue::before{background:linear-gradient(90deg,var(--blue),transparent)}
+.card.red{border-color:rgba(239,68,68,0.15)}.card.red::before{background:linear-gradient(90deg,var(--red),transparent)}
+.card.yellow{border-color:rgba(251,191,36,0.12)}.card.yellow::before{background:linear-gradient(90deg,var(--yellow),transparent)}
+.card.pink{border-color:rgba(236,72,153,0.12)}.card.pink::before{background:linear-gradient(90deg,var(--pink),transparent)}
+.card.cyan{border-color:rgba(6,182,212,0.12)}.card.cyan::before{background:linear-gradient(90deg,var(--cyan),transparent)}
+.card.green-card{border-color:rgba(34,197,94,0.12)}.card.green-card::before{background:linear-gradient(90deg,var(--green),transparent)}
+
+.card-num{font-family:var(--mono);font-size:10px;color:var(--teal);margin-bottom:6px;opacity:0.7}
+.card-num.orange{color:var(--orange)}.card-num.purple{color:var(--purple)}.card-num.blue{color:var(--blue)}.card-num.red{color:var(--red)}.card-num.yellow{color:var(--yellow)}.card-num.pink{color:var(--pink)}.card-num.cyan{color:var(--cyan)}.card-num.green{color:var(--green)}
+.card-title{font-family:var(--head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px}
+.card-body{font-size:13px;color:var(--text2);line-height:1.65}
+.card-body p{margin-bottom:8px}
+.card-body p:last-child{margin-bottom:0}
+
+/* INLINE CODE */
+code{font-family:var(--mono);font-size:12px;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.15);color:var(--teal);padding:1px 6px;border-radius:4px}
+
+/* CODE BLOCK */
+.code-block {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0)),
+    var(--code-bg);
+  border:1px solid rgba(0,212,170,0.12);
+  border-radius:14px; padding:44px 18px 18px;
+  font-family:var(--mono); font-size:12px; line-height:1.7;
+  color:#a5f3fc; overflow-x:auto; margin:12px 0; position:relative;
+  box-shadow:0 22px 48px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.03);
+}
+.code-block::before{
+  content:''; position:absolute; top:14px; left:16px; width:10px; height:10px; border-radius:50%;
+  background:#ff5f57; box-shadow:18px 0 0 #febc2e, 36px 0 0 #28c840;
+}
+.code-block::after{
+  content:'Annotated Example'; position:absolute; top:11px; right:14px;
+  font-size:9px; letter-spacing:1.4px; text-transform:uppercase; color:var(--text3);
+  font-family:var(--mono); padding:4px 8px; border-radius:999px;
+  border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02);
+}
+.code-block .kw{color:#c084fc}.code-block .cls{color:#60a5fa}.code-block .str{color:#86efac}
+.code-block .cm{color:var(--text3);font-style:italic}.code-block .nm{color:#fbbf24}
+.code-block .op{color:#f472b6}.code-block .prop{color:#67e8f9}.code-block .attr{color:#fb923c}
+.code-lang{
+  position:absolute;top:14px;right:14px;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--teal); border:1px solid rgba(0,212,170,0.18); background:rgba(0,212,170,0.07);
+  padding:4px 8px; border-radius:999px;
+}
+
+/* HIGHLIGHT BOX */
+.highlight{background:rgba(0,212,170,0.05);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:10px 14px;margin:10px 0;font-size:13px;color:var(--text2)}
+.highlight.orange{background:rgba(255,107,53,0.05);border-left-color:var(--orange)}
+.highlight.red{background:rgba(239,68,68,0.05);border-left-color:var(--red)}
+.highlight.purple{background:rgba(168,85,247,0.05);border-left-color:var(--purple)}
+.highlight.yellow{background:rgba(251,191,36,0.05);border-left-color:var(--yellow)}
+.highlight.blue{background:rgba(59,130,246,0.05);border-left-color:var(--blue)}
+.highlight.pink{background:rgba(236,72,153,0.05);border-left-color:var(--pink)}
+.highlight.green{background:rgba(34,197,94,0.05);border-left-color:var(--green)}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.2);color:var(--teal);font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:20px}
+.chip.orange{background:rgba(255,107,53,0.08);border-color:rgba(255,107,53,0.2);color:var(--orange)}
+.chip.red{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.2);color:var(--red)}
+.chip.green{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.2);color:var(--green)}
+.chip.purple{background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.2);color:var(--purple)}
+.chip.blue{background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:var(--blue)}
+.chip.yellow{background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.2);color:var(--yellow)}
+.chip.pink{background:rgba(236,72,153,0.08);border-color:rgba(236,72,153,0.2);color:var(--pink)}
+
+/* TABLE */
+.comp-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.comp-table th{background:rgba(0,212,170,0.08);color:var(--teal);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.comp-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text2);vertical-align:top}
+.comp-table tr:last-child td{border-bottom:none}
+.comp-table td:first-child{color:var(--teal);font-family:var(--mono);font-size:11px}
+
+/* CONCEPT LIST */
+.concept-list{list-style:none;padding:0;margin:8px 0}
+.concept-list li{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:13px;color:var(--text2);border-bottom:1px solid rgba(255,255,255,0.03)}
+.concept-list li:last-child{border-bottom:none}
+.concept-list li::before{content:'▸';color:var(--teal);flex-shrink:0;margin-top:1px;font-size:11px}
+
+/* FLOW ANIMATIONS */
+.flow-diagram{padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:0}
+.flow-node{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 20px;font-family:var(--mono);font-size:12px;color:var(--text);text-align:center;min-width:160px;position:relative;animation:nodePulse 3s ease-in-out infinite}
+.flow-node.teal{border-color:rgba(0,212,170,0.4);color:var(--teal);background:rgba(0,212,170,0.06)}
+.flow-node.orange{border-color:rgba(255,107,53,0.4);color:var(--orange);background:rgba(255,107,53,0.06)}
+.flow-node.purple{border-color:rgba(168,85,247,0.4);color:var(--purple);background:rgba(168,85,247,0.06)}
+.flow-node.blue{border-color:rgba(59,130,246,0.4);color:var(--blue);background:rgba(59,130,246,0.06)}
+.flow-node.yellow{border-color:rgba(251,191,36,0.4);color:var(--yellow);background:rgba(251,191,36,0.06)}
+.flow-node.red{border-color:rgba(239,68,68,0.4);color:var(--red);background:rgba(239,68,68,0.06)}
+.flow-node.green-node{border-color:rgba(34,197,94,0.4);color:var(--green);background:rgba(34,197,94,0.06)}
+.flow-node.pink{border-color:rgba(236,72,153,0.4);color:var(--pink);background:rgba(236,72,153,0.06)}
+@keyframes nodePulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px rgba(0,212,170,0.08)}}
+.flow-arrow{display:flex;flex-direction:column;align-items:center;gap:0;margin:2px 0}
+.flow-arrow-line{width:2px;height:16px;background:linear-gradient(to bottom,var(--teal),transparent);position:relative;overflow:hidden}
+.flow-arrow-line::after{content:'';position:absolute;top:-100%;left:0;right:0;height:100%;background:linear-gradient(to bottom,transparent,var(--teal2));animation:flowDown 1.5s linear infinite}
+@keyframes flowDown{0%{top:-100%}100%{top:100%}}
+.flow-arrow-head{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--teal)}
+.flow-arrow.orange .flow-arrow-line{background:linear-gradient(to bottom,var(--orange),transparent)}
+.flow-arrow.orange .flow-arrow-line::after{background:linear-gradient(to bottom,transparent,#ff9f6b)}
+.flow-arrow.orange .flow-arrow-head{border-top-color:var(--orange)}
+.flow-arrow.purple .flow-arrow-line{background:linear-gradient(to bottom,var(--purple),transparent)}
+.flow-arrow.purple .flow-arrow-line::after{background:linear-gradient(to bottom,transparent,#c084fc)}
+.flow-arrow.purple .flow-arrow-head{border-top-color:var(--purple)}
+.flow-arrow.blue .flow-arrow-line{background:linear-gradient(to bottom,var(--blue),transparent)}
+.flow-arrow.blue .flow-arrow-line::after{background:linear-gradient(to bottom,transparent,#60a5fa)}
+.flow-arrow.blue .flow-arrow-head{border-top-color:var(--blue)}
+.flow-arrow.pink .flow-arrow-line{background:linear-gradient(to bottom,var(--pink),transparent)}
+.flow-arrow.pink .flow-arrow-line::after{background:linear-gradient(to bottom,transparent,#f9a8d4)}
+.flow-arrow.pink .flow-arrow-head{border-top-color:var(--pink)}
+
+/* Horizontal flow */
+.flow-h{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center}
+.flow-h-arrow{display:flex;align-items:center;margin:0 2px}
+.flow-h-line{height:2px;width:20px;background:linear-gradient(to right,var(--teal),transparent);position:relative;overflow:hidden}
+.flow-h-line::after{content:'';position:absolute;top:0;bottom:0;left:-100%;width:100%;background:linear-gradient(to right,transparent,var(--teal2));animation:flowRight 1.5s linear infinite}
+@keyframes flowRight{0%{left:-100%}100%{left:100%}}
+.flow-h-head{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid var(--teal)}
+
+/* PARALLEL BARS */
+.parallel-bar{width:100%;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;position:relative;overflow:hidden;margin-bottom:6px}
+.parallel-bar.teal{background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.3);color:var(--teal)}
+.parallel-bar.orange{background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);color:var(--orange)}
+.parallel-bar.purple{background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:var(--purple)}
+.parallel-bar.blue{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:var(--blue)}
+.parallel-bar.yellow{background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);color:var(--yellow)}
+.parallel-bar.pink{background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.3);color:var(--pink)}
+.parallel-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.05),transparent);transform:translateX(-100%);animation:shimmer 2s ease-in-out infinite}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* ARCH DIAGRAM */
+.arch-diagram{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin:10px 0}
+.arch-layer{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px}
+.arch-box{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-family:var(--mono);font-size:11px;color:var(--text2);flex:1;text-align:center;max-width:200px}
+.arch-box.teal{border-color:rgba(0,212,170,0.3);color:var(--teal);background:rgba(0,212,170,0.05)}
+.arch-box.orange{border-color:rgba(255,107,53,0.3);color:var(--orange);background:rgba(255,107,53,0.05)}
+.arch-box.blue{border-color:rgba(59,130,246,0.3);color:var(--blue);background:rgba(59,130,246,0.05)}
+.arch-box.purple{border-color:rgba(168,85,247,0.3);color:var(--purple);background:rgba(168,85,247,0.05)}
+.arch-box.yellow{border-color:rgba(251,191,36,0.3);color:var(--yellow);background:rgba(251,191,36,0.05)}
+.arch-box.pink{border-color:rgba(236,72,153,0.3);color:var(--pink);background:rgba(236,72,153,0.05)}
+.arch-arrow{width:2px;height:12px;background:var(--border);margin:0 auto;position:relative;overflow:hidden}
+.arch-arrow::after{content:'';position:absolute;top:-100%;left:0;right:0;height:100%;background:linear-gradient(to bottom,transparent,var(--teal));animation:archFlow 1.2s linear infinite}
+@keyframes archFlow{0%{top:-100%}100%{top:100%}}
+
+/* COMPARE GRID */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+.compare-col{border-radius:8px;padding:12px}
+.compare-col.bad{background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.15)}
+.compare-col.good{background:rgba(34,197,94,0.04);border:1px solid rgba(34,197,94,0.15)}
+.compare-col-title{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.compare-col.bad .compare-col-title{color:var(--red)}
+.compare-col.good .compare-col-title{color:var(--green)}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.25);color:var(--teal);font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:12px}
+.badge.orange{background:rgba(255,107,53,0.1);border-color:rgba(255,107,53,0.25);color:var(--orange)}
+.badge.green{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.25);color:var(--green)}
+.badge.red{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.25);color:var(--red)}
+.badge.purple{background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.25);color:var(--purple)}
+.badge.blue{background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.25);color:var(--blue)}
+.badge.yellow{background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.25);color:var(--yellow)}
+.badge.pink{background:rgba(236,72,153,0.1);border-color:rgba(236,72,153,0.25);color:var(--pink)}
+
+/* SECTION DIVIDER */
+.section-divider{border:none;border-top:1px solid var(--border);margin:32px 0}
+
+/* MENTAL MODEL */
+.mental-model{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.mm-top{background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.2);border-radius:8px;padding:8px 16px;display:inline-block;font-family:var(--mono);font-size:12px;color:var(--teal);margin-bottom:8px}
+.mm-branches{display:flex;justify-content:center;gap:12px;margin-top:8px;flex-wrap:wrap}
+.mm-branch{display:flex;flex-direction:column;align-items:center;gap:4px}
+.mm-branch-line{width:1px;height:20px;background:var(--border);position:relative;overflow:hidden}
+.mm-branch-line::after{content:'';position:absolute;top:-100%;left:0;right:0;height:100%;background:var(--teal);animation:branchFlow 1.5s linear infinite}
+@keyframes branchFlow{0%{top:-100%}100%{top:100%}}
+.mm-task{background:rgba(0,212,170,0.06);border:1px solid rgba(0,212,170,0.15);border-radius:6px;padding:5px 12px;font-family:var(--mono);font-size:11px;color:var(--teal)}
+
+/* DELEGATE VISUAL */
+.delegate-chain{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.delegate-node{background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:6px;padding:7px 14px;font-family:var(--mono);font-size:12px;color:var(--purple);display:flex;align-items:center;gap:8px;animation:delegatePulse 2.5s ease-in-out infinite}
+.delegate-node:nth-child(2){animation-delay:0.4s}
+.delegate-node:nth-child(3){animation-delay:0.8s}
+@keyframes delegatePulse{0%,100%{opacity:0.7}50%{opacity:1;box-shadow:0 0 8px rgba(168,85,247,0.2)}}
+.delegate-connector{width:2px;height:12px;background:linear-gradient(to bottom,var(--purple),transparent);margin:0 auto;position:relative;overflow:hidden}
+.delegate-connector::after{content:'';position:absolute;top:-100%;left:0;right:0;height:100%;background:linear-gradient(to bottom,transparent,#c084fc);animation:flowDown 1.5s linear infinite}
+
+/* EVENT VISUAL */
+.event-pub-sub{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:start;margin:12px 0}
+.event-pub{background:rgba(255,107,53,0.06);border:1px solid rgba(255,107,53,0.2);border-radius:8px;padding:12px;text-align:center}
+.event-sub{background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:8px}
+.event-wire{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding-top:20px}
+.event-wire-line{width:2px;height:30px;background:linear-gradient(to bottom,var(--orange),var(--green));position:relative;overflow:hidden}
+.event-wire-line::after{content:'';position:absolute;top:-100%;left:0;right:0;height:100%;background:rgba(255,255,255,0.3);animation:flowDown 1s linear infinite}
+.event-sub-item{font-family:var(--mono);font-size:11px;color:var(--green);padding:4px 8px;border-radius:4px;border:1px solid rgba(34,197,94,0.2);margin-bottom:4px;animation:subPulse 2s ease-in-out infinite}
+.event-sub-item:nth-child(2){animation-delay:0.5s}
+.event-sub-item:nth-child(3){animation-delay:1s}
+@keyframes subPulse{0%,100%{opacity:0.6}50%{opacity:1}}
+
+/* REFLECTION VISUAL */
+.reflect-visual{display:flex;gap:10px;align-items:stretch;margin:12px 0;flex-wrap:wrap}
+.reflect-box{flex:1;min-width:120px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:12px}
+.reflect-box-title{font-family:var(--mono);font-size:10px;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.reflect-item{font-size:12px;color:var(--text2);padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.reflect-item:last-child{border-bottom:none}
+
+/* RESPONSIVE */
+@media(max-width:1300px){.layout3{grid-template-columns:200px 1fr 0}.sidebar-right{display:none}}
+@media(max-width:900px){.layout3{grid-template-columns:0 1fr 0}.sidebar-left{display:none}.cols2{grid-template-columns:1fr}.hero{padding:40px 20px 32px}.main{padding:20px 16px}}
+@media(max-width:1100px){.cols3{grid-template-columns:1fr 1fr}}
+
+/* FOOTER */
+.page-footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3)}
+.page-footer span{color:var(--teal)}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-badge">C# Complete Reference · Zero to Hero</div>
+  <h1><span class="a1">Collections</span> · <span class="a2">Delegates</span><br><span class="a3">Events</span> · <span class="a5">Reflection</span></h1>
+  <p class="hero-sub">A complete, deeply explained guide to C# Collections, Generic Collections, Delegates, Events &amp; Reflection — with real-world examples, use cases, code, and Q&amp;A.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">5</span><span class="stat-label">Major Topics</span></div>
+    <div class="stat"><span class="stat-num">14</span><span class="stat-label">Modules</span></div>
+    <div class="stat"><span class="stat-num">60+</span><span class="stat-label">Code Examples</span></div>
+    <div class="stat"><span class="stat-num">80+</span><span class="stat-label">Q&amp;A</span></div>
+    <div class="stat"><span class="stat-num">25+</span><span class="stat-label">Diagrams</span></div>
+  </div>
+</div>
+
+<!-- TOPIC TABS -->
+<div class="topic-tabs" id="topicTabs">
+  <a class="topic-tab active" href="#topic-collections"><span class="dot" style="background:var(--teal)"></span>Collections</a>
+  <a class="topic-tab" href="#topic-generic"><span class="dot" style="background:var(--orange)"></span>Generic Collections</a>
+  <a class="topic-tab" href="#topic-delegates"><span class="dot" style="background:var(--purple)"></span>Delegates</a>
+  <a class="topic-tab" href="#topic-events"><span class="dot" style="background:var(--yellow)"></span>Events</a>
+  <a class="topic-tab" href="#topic-reflection"><span class="dot" style="background:var(--pink)"></span>Reflection</a>
+  <a class="topic-tab" href="#topic-qa"><span class="dot" style="background:var(--red)"></span>Q&amp;A Master</a>
+</div>
+
+<div class="layout3">
+
+<!-- LEFT SIDEBAR: SYLLABUS -->
+<nav class="sidebar-left">
+  <div class="sidebar-section-title colored">📦 Collections</div>
+  <a class="nav-item" href="#m1"><span class="nd"></span>What &amp; Why <span class="syllabus-badge">M01</span></a>
+  <a class="nav-item" href="#m2"><span class="nd"></span>ArrayList &amp; Hashtable <span class="syllabus-badge">M02</span></a>
+  <a class="nav-item" href="#m3"><span class="nd"></span>Stack &amp; Queue <span class="syllabus-badge">M03</span></a>
+
+  <hr class="nav-divider">
+  <div class="sidebar-section-title" style="color:var(--orange)">🔷 Generic Collections</div>
+  <a class="nav-item" href="#m4"><span class="nd"></span>List&lt;T&gt; Deep Dive <span class="syllabus-badge">M04</span></a>
+  <a class="nav-item" href="#m5"><span class="nd"></span>Dictionary&lt;K,V&gt; <span class="syllabus-badge">M05</span></a>
+  <a class="nav-item" href="#m6"><span class="nd"></span>HashSet, Queue, Stack <span class="syllabus-badge">M06</span></a>
+  <a class="nav-item" href="#m7"><span class="nd"></span>LinkedList &amp; Sorted <span class="syllabus-badge">M07</span></a>
+
+  <hr class="nav-divider">
+  <div class="sidebar-section-title" style="color:var(--purple)">🎯 Delegates</div>
+  <a class="nav-item" href="#m8"><span class="nd"></span>Delegate Basics <span class="syllabus-badge">M08</span></a>
+  <a class="nav-item" href="#m9"><span class="nd"></span>Func, Action, Predicate <span class="syllabus-badge">M09</span></a>
+  <a class="nav-item" href="#m10"><span class="nd"></span>Multicast &amp; Lambda <span class="syllabus-badge">M10</span></a>
+
+  <hr class="nav-divider">
+  <div class="sidebar-section-title" style="color:var(--yellow)">⚡ Events</div>
+  <a class="nav-item" href="#m11"><span class="nd"></span>Events &amp; EventHandler <span class="syllabus-badge">M11</span></a>
+  <a class="nav-item" href="#m12"><span class="nd"></span>Pub/Sub Pattern <span class="syllabus-badge">M12</span></a>
+
+  <hr class="nav-divider">
+  <div class="sidebar-section-title" style="color:var(--pink)">🔍 Reflection</div>
+  <a class="nav-item" href="#m13"><span class="nd"></span>Reflection Basics <span class="syllabus-badge">M13</span></a>
+  <a class="nav-item" href="#m14"><span class="nd"></span>Advanced &amp; Real World <span class="syllabus-badge">M14</span></a>
+
+  <hr class="nav-divider">
+  <div class="sidebar-section-title" style="color:var(--red)">❓ Q&amp;A</div>
+  <a class="nav-item" href="#topic-qa"><span class="nd"></span>All Q&amp;A Topics</a>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+<!-- ══════════ TOPIC: COLLECTIONS ══════════ -->
+<div id="topic-collections" style="scroll-margin-top:96px">
+
+<!-- MODULE 1: WHAT & WHY COLLECTIONS -->
+<section class="module-section" id="m1">
+  <div class="module-header">
+    <span class="module-num">MODULE 01</span>
+    <span class="module-title">What Are Collections?</span>
+    <span class="module-desc">Concepts #1–#4</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card">
+      <div class="card-num">#01</div>
+      <div class="card-title">What is a Collection?</div>
+      <div class="card-body">
+        <p>A <strong style="color:var(--teal)">Collection</strong> in C# is a class that groups related objects together so you can work on them as a single unit — add, remove, find, sort.</p>
+        <div class="highlight">Think of a collection as a <strong>smart array</strong> — it can grow/shrink dynamically and provides built-in operations.</div>
+        <div style="margin-top:12px">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px">ARRAY vs COLLECTION</div>
+          <div class="compare-grid">
+            <div class="compare-col bad">
+              <div class="compare-col-title">✗ Array</div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--text2)">Fixed size<br>int[] arr = new int[5];<br><span style="color:var(--red)">Can't resize</span></div>
+            </div>
+            <div class="compare-col good">
+              <div class="compare-col-title">✓ Collection</div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--text2)">Dynamic size<br>ArrayList list = new();<br><span style="color:var(--green)">Add/Remove freely</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="chips">
+          <span class="chip">System.Collections</span>
+          <span class="chip">System.Collections.Generic</span>
+          <span class="chip">IEnumerable</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card orange">
+      <div class="card-num orange">#02</div>
+      <div class="card-title">Why Use Collections?</div>
+      <div class="card-body">
+        <ul class="concept-list">
+          <li><strong>Dynamic sizing</strong> — grow/shrink at runtime without declaring size</li>
+          <li><strong>Built-in operations</strong> — sort, search, filter, enumerate</li>
+          <li><strong>Type safety</strong> — generics prevent incorrect types</li>
+          <li><strong>Rich API</strong> — LINQ works on all collections</li>
+          <li><strong>Productivity</strong> — less code for common tasks</li>
+        </ul>
+        <div class="highlight orange" style="margin-top:10px">
+          <strong>Real scenario:</strong> A shopping cart has unknown item count. Use <code>List&lt;CartItem&gt;</code> — items added/removed dynamically.
+        </div>
+        <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:rgba(255,107,53,0.06);border:1px solid rgba(255,107,53,0.2);border-radius:6px;padding:8px">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--orange);margin-bottom:4px">USE WHEN</div>
+            <div style="font-size:12px;color:var(--text2)">Data count unknown, frequent add/remove, LINQ queries needed</div>
+          </div>
+          <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:6px;padding:8px">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--red);margin-bottom:4px">AVOID WHEN</div>
+            <div style="font-size:12px;color:var(--text2)">Fixed data, max performance needed, no type flexibility</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card blue col-span2">
+      <div class="card-num blue">#03</div>
+      <div class="card-title">Collection Namespaces &amp; Hierarchy</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase">System.Collections (Non-Generic)</div>
+            <div style="background:var(--code-bg);border-radius:8px;padding:12px">
+              <div class="arch-diagram" style="background:transparent;border:none;padding:0">
+                <div class="arch-layer"><div class="arch-box teal">ICollection</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box orange">ArrayList</div><div class="arch-box orange">Hashtable</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box blue">Stack</div><div class="arch-box blue">Queue</div><div class="arch-box blue">SortedList</div></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase">System.Collections.Generic (Generic)</div>
+            <div style="background:var(--code-bg);border-radius:8px;padding:12px">
+              <div class="arch-diagram" style="background:transparent;border:none;padding:0">
+                <div class="arch-layer"><div class="arch-box teal">ICollection&lt;T&gt;</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box orange">List&lt;T&gt;</div><div class="arch-box orange">Dictionary&lt;K,V&gt;</div></div>
+                <div class="arch-arrow"></div>
+                <div class="arch-layer"><div class="arch-box purple">HashSet&lt;T&gt;</div><div class="arch-box purple">Queue&lt;T&gt;</div><div class="arch-box purple">Stack&lt;T&gt;</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="highlight blue" style="margin-top:12px">
+          <strong>Rule of thumb:</strong> Always prefer <strong>Generic Collections</strong> (<code>System.Collections.Generic</code>) in modern C#. Non-generic collections exist for legacy compatibility.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- MODULE 2: ARRAYLIST & HASHTABLE -->
+<section class="module-section" id="m2">
+  <div class="module-header">
+    <span class="module-num orange">MODULE 02</span>
+    <span class="module-title">ArrayList &amp; Hashtable</span>
+    <span class="module-desc">Concepts #5–#8</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card">
+      <div class="card-num">#05</div>
+      <div class="card-title">ArrayList — What &amp; How</div>
+      <div class="card-body">
+        <p><strong style="color:var(--teal)">ArrayList</strong> is a non-generic, dynamically resizable array. It stores <strong>object</strong> references — any type can be stored.</p>
+        <div class="highlight red">⚠️ <strong>Not type-safe.</strong> Boxing/unboxing happens for value types. Prefer <code>List&lt;T&gt;</code> in modern C#.</div>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">using</span> System.Collections;
+
+<span class="cls">ArrayList</span> list = <span class="kw">new</span> <span class="cls">ArrayList</span>();
+list.Add(<span class="str">"Alice"</span>);   <span class="cm">// string</span>
+list.Add(<span class="nm">42</span>);         <span class="cm">// int — boxed to object</span>
+list.Add(<span class="kw">true</span>);       <span class="cm">// bool</span>
+
+list.Remove(<span class="str">"Alice"</span>);
+list.RemoveAt(<span class="nm">0</span>);
+list.Insert(<span class="nm">0</span>, <span class="str">"Bob"</span>);
+list.Sort();            <span class="cm">// sorts if uniform types</span>
+
+<span class="kw">foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> list)
+    Console.WriteLine(item);
+
+<span class="cm">// Boxing/Unboxing penalty:</span>
+<span class="kw">int</span> val = (<span class="kw">int</span>)list[<span class="nm">1</span>];  <span class="cm">// explicit cast needed</span></div>
+        <div style="margin-top:8px">
+          <table class="comp-table">
+            <thead><tr><th>Property</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Namespace</td><td>System.Collections</td></tr>
+              <tr><td>Type-safe</td><td style="color:var(--red)">No</td></tr>
+              <tr><td>Resize</td><td style="color:var(--green)">Dynamic</td></tr>
+              <tr><td>Duplicates</td><td>Allowed</td></tr>
+              <tr><td>Ordering</td><td>Insertion order</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card orange">
+      <div class="card-num orange">#06</div>
+      <div class="card-title">Hashtable — Key-Value Store</div>
+      <div class="card-body">
+        <p><strong style="color:var(--orange)">Hashtable</strong> stores data as key-value pairs. Keys must be unique. Both key &amp; value are <code>object</code> — not type-safe.</p>
+        <div class="highlight orange">⚠️ Non-generic. Use <code>Dictionary&lt;TKey,TValue&gt;</code> instead in modern code.</div>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="cls">Hashtable</span> ht = <span class="kw">new</span> <span class="cls">Hashtable</span>();
+
+<span class="cm">// Add key-value pairs</span>
+ht.Add(<span class="str">"Name"</span>, <span class="str">"Alice"</span>);
+ht.Add(<span class="str">"Age"</span>,  <span class="nm">30</span>);
+ht.Add(<span class="str">"City"</span>, <span class="str">"Mumbai"</span>);
+
+<span class="cm">// Access by key</span>
+<span class="kw">string</span> name = (<span class="kw">string</span>)ht[<span class="str">"Name"</span>];
+
+<span class="cm">// Check existence</span>
+<span class="kw">if</span> (ht.ContainsKey(<span class="str">"Age"</span>)) { ... }
+
+<span class="cm">// Remove</span>
+ht.Remove(<span class="str">"City"</span>);
+
+<span class="cm">// Iterate (order NOT guaranteed)</span>
+<span class="kw">foreach</span> (<span class="cls">DictionaryEntry</span> entry <span class="kw">in</span> ht)
+    Console.WriteLine($<span class="str">"{entry.Key}: {entry.Value}"</span>);</div>
+        <div class="highlight" style="margin-top:8px">
+          <strong>Real world use:</strong> Config settings store — <code>ht["ConnectionString"]</code> before generic era. Today use <code>Dictionary&lt;string,string&gt;</code>.
+        </div>
+      </div>
+    </div>
+
+    <div class="card purple col-span2">
+      <div class="card-num purple">#07</div>
+      <div class="card-title">SortedList — Non-Generic</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <p><strong style="color:var(--purple)">SortedList</strong> maintains key-value pairs <em>sorted by key</em> automatically. Internally uses parallel arrays for keys and values.</p>
+            <ul class="concept-list">
+              <li>Always sorted by key (ascending)</li>
+              <li>O(log n) binary search for retrieval</li>
+              <li>Access by key or index</li>
+              <li>Not thread-safe by default</li>
+            </ul>
+          </div>
+          <div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cls">SortedList</span> sl = <span class="kw">new</span> <span class="cls">SortedList</span>();
+sl.Add(<span class="nm">3</span>, <span class="str">"Charlie"</span>);
+sl.Add(<span class="nm">1</span>, <span class="str">"Alice"</span>);
+sl.Add(<span class="nm">2</span>, <span class="str">"Bob"</span>);
+
+<span class="cm">// Automatically sorted by key</span>
+<span class="cm">// Output: 1-Alice, 2-Bob, 3-Charlie</span>
+
+<span class="cm">// Access by key</span>
+<span class="kw">string</span> val = (<span class="kw">string</span>)sl[<span class="nm">1</span>]; <span class="cm">// "Alice"</span>
+
+<span class="cm">// Access by index</span>
+<span class="kw">string</span> v = (<span class="kw">string</span>)sl.GetByIndex(<span class="nm">0</span>);</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- MODULE 3: STACK & QUEUE -->
+<section class="module-section" id="m3">
+  <div class="module-header">
+    <span class="module-num blue">MODULE 03</span>
+    <span class="module-title">Stack &amp; Queue (Non-Generic)</span>
+    <span class="module-desc">Concepts #9–#12</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card blue">
+      <div class="card-num blue">#09</div>
+      <div class="card-title">Stack — LIFO (Last In, First Out)</div>
+      <div class="card-body">
+        <p><strong style="color:var(--blue)">Stack</strong> = LIFO structure. Last item pushed is first item popped. Like a stack of plates.</p>
+        <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <div class="flow-diagram" style="gap:2px">
+              <div class="flow-node blue" style="font-size:11px;padding:5px 10px;min-width:120px">Push(3) → Top</div>
+              <div class="flow-arrow blue"><div class="flow-arrow-line"></div><div class="flow-arrow-head" style="border-top-color:var(--blue)"></div></div>
+              <div class="flow-node" style="font-size:11px;padding:5px 10px;min-width:120px">Push(2)</div>
+              <div class="flow-arrow blue"><div class="flow-arrow-line"></div><div class="flow-arrow-head" style="border-top-color:var(--blue)"></div></div>
+              <div class="flow-node" style="font-size:11px;padding:5px 10px;min-width:120px">Push(1) → Bottom</div>
+            </div>
+            <div style="text-align:center;font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px">Pop() → returns 3 first</div>
+          </div>
+          <div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cls">Stack</span> s = <span class="kw">new</span> <span class="cls">Stack</span>();
+s.Push(<span class="str">"A"</span>);
+s.Push(<span class="str">"B"</span>);
+s.Push(<span class="str">"C"</span>);
+
+s.Pop();   <span class="cm">// "C" (LIFO)</span>
+s.Peek();  <span class="cm">// "B" (no remove)</span>
+s.Count;   <span class="cm">// 2</span>
+s.Contains(<span class="str">"A"</span>); <span class="cm">// true</span></div>
+          </div>
+        </div>
+        <div class="highlight blue" style="margin-top:8px">
+          <strong>Real world:</strong> Browser back button, undo/redo in editors, call stack in debugging, expression evaluation (parenthesis matching).
+        </div>
+        <div class="chips"><span class="chip blue">Push()</span><span class="chip blue">Pop()</span><span class="chip blue">Peek()</span><span class="chip blue">Count</span><span class="chip blue">Contains()</span></div>
+      </div>
+    </div>
+
+    <div class="card yellow">
+      <div class="card-num yellow">#10</div>
+      <div class="card-title">Queue — FIFO (First In, First Out)</div>
+      <div class="card-body">
+        <p><strong style="color:var(--yellow)">Queue</strong> = FIFO structure. First item enqueued is first item dequeued. Like a real-world queue/line.</p>
+        <div style="margin-top:10px">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <div class="flow-node yellow" style="font-size:10px;padding:5px 8px;min-width:70px">Enqueue<br>Item</div>
+            <div class="flow-h-arrow"><div class="flow-h-line" style="background:linear-gradient(to right,var(--yellow),transparent)"><style>.flow-h-line.y::after{background:linear-gradient(to right,transparent,#fde68a)}</style></div><div class="flow-h-head" style="border-left-color:var(--yellow)"></div></div>
+            <div class="flow-node" style="font-size:10px;padding:5px 8px;min-width:60px;border-color:rgba(251,191,36,0.3)">Item 3</div>
+            <div class="flow-node" style="font-size:10px;padding:5px 8px;min-width:60px;border-color:rgba(251,191,36,0.3)">Item 2</div>
+            <div class="flow-node" style="font-size:10px;padding:5px 8px;min-width:60px;border-color:rgba(251,191,36,0.3)">Item 1</div>
+            <div class="flow-h-arrow"><div class="flow-h-line" style="background:linear-gradient(to right,var(--yellow),transparent)"></div><div class="flow-h-head" style="border-left-color:var(--yellow)"></div></div>
+            <div class="flow-node yellow" style="font-size:10px;padding:5px 8px;min-width:70px">Dequeue<br>Item 1</div>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top:10px"><span class="code-lang">C#</span>
+<span class="cls">Queue</span> q = <span class="kw">new</span> <span class="cls">Queue</span>();
+q.Enqueue(<span class="str">"Task1"</span>);
+q.Enqueue(<span class="str">"Task2"</span>);
+q.Enqueue(<span class="str">"Task3"</span>);
+
+q.Dequeue(); <span class="cm">// "Task1" (FIFO)</span>
+q.Peek();    <span class="cm">// "Task2" (no remove)</span>
+q.Count;     <span class="cm">// 2</span></div>
+        <div class="highlight yellow" style="margin-top:8px">
+          <strong>Real world:</strong> Print queue, request processing, message broker (simplified), task scheduler, order processing in e-commerce.
+        </div>
+        <div class="chips"><span class="chip yellow">Enqueue()</span><span class="chip yellow">Dequeue()</span><span class="chip yellow">Peek()</span><span class="chip yellow">Count</span></div>
+      </div>
+    </div>
+
+    <!-- Real World Scenario -->
+    <div class="card col-span2" style="border-color:rgba(34,197,94,0.2)">
+      <div class="card-num green">#11</div>
+      <div class="card-title">🏢 Real Project Scenario: Customer Support System</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase">Ticket Queue (FIFO)</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// Customers arrive — FIFO</span>
+<span class="cls">Queue</span> ticketQueue = <span class="kw">new</span> <span class="cls">Queue</span>();
+ticketQueue.Enqueue(<span class="str">"Ticket#001"</span>);
+ticketQueue.Enqueue(<span class="str">"Ticket#002"</span>);
+ticketQueue.Enqueue(<span class="str">"Ticket#003"</span>);
+
+<span class="cm">// Agent picks next ticket</span>
+<span class="kw">string</span> next = 
+  (<span class="kw">string</span>)ticketQueue.Dequeue();
+<span class="cm">// "Ticket#001" — first served</span></div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase">Navigation History (LIFO)</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// Browser back navigation</span>
+<span class="cls">Stack</span> history = <span class="kw">new</span> <span class="cls">Stack</span>();
+history.Push(<span class="str">"/home"</span>);
+history.Push(<span class="str">"/products"</span>);
+history.Push(<span class="str">"/cart"</span>);
+
+<span class="cm">// Press Back</span>
+<span class="kw">string</span> prev = 
+  (<span class="kw">string</span>)history.Pop();
+<span class="cm">// "/cart" — last visited</span></div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase">Config Store (Hashtable)</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// App settings</span>
+<span class="cls">Hashtable</span> config = <span class="kw">new</span> <span class="cls">Hashtable</span>();
+config[<span class="str">"DbConn"</span>] = <span class="str">"Server=..."</span>;
+config[<span class="str">"Timeout"</span>] = <span class="nm">30</span>;
+config[<span class="str">"MaxRetry"</span>] = <span class="nm">3</span>;
+
+<span class="kw">int</span> t = (<span class="kw">int</span>)config[<span class="str">"Timeout"</span>];
+<span class="cm">// 30</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div><!-- end topic-collections -->
+
+<hr class="section-divider">
+
+<!-- ══════════ TOPIC: GENERIC COLLECTIONS ══════════ -->
+<div id="topic-generic" style="scroll-margin-top:96px">
+
+<!-- MODULE 4: List<T> -->
+<section class="module-section" id="m4">
+  <div class="module-header">
+    <span class="module-num orange">MODULE 04</span>
+    <span class="module-title">List&lt;T&gt; — The Universal Collection</span>
+    <span class="module-desc">Concepts #13–#18</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card col-span2">
+      <div class="card-num">#13</div>
+      <div class="card-title">What is List&lt;T&gt;?</div>
+      <div class="card-body">
+        <p><strong style="color:var(--teal)">List&lt;T&gt;</strong> is the most commonly used generic collection. It's a type-safe, dynamically resizing array. <code>T</code> is the type parameter — set at compile time.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">COMPLETE API OVERVIEW</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cls">List</span>&lt;<span class="kw">string</span>&gt; names = <span class="kw">new</span> <span class="cls">List</span>&lt;<span class="kw">string</span>&gt;();
+
+<span class="cm">// Add</span>
+names.Add(<span class="str">"Alice"</span>);
+names.AddRange(<span class="kw">new</span>[] { <span class="str">"Bob"</span>, <span class="str">"Charlie"</span> });
+names.Insert(<span class="nm">1</span>, <span class="str">"Dave"</span>);  <span class="cm">// at index 1</span>
+
+<span class="cm">// Access</span>
+<span class="kw">string</span> first = names[<span class="nm">0</span>];    <span class="cm">// O(1)</span>
+<span class="kw">int</span> idx = names.IndexOf(<span class="str">"Bob"</span>);
+
+<span class="cm">// Search</span>
+<span class="kw">bool</span> has = names.Contains(<span class="str">"Alice"</span>);
+<span class="kw">string</span> found = names.Find(x => x.StartsWith(<span class="str">"A"</span>));
+<span class="cls">List</span>&lt;<span class="kw">string</span>&gt; all = names.FindAll(x => x.Length > <span class="nm">3</span>);
+
+<span class="cm">// Sort</span>
+names.Sort();
+names.Sort((a, b) => a.CompareTo(b));
+
+<span class="cm">// Remove</span>
+names.Remove(<span class="str">"Dave"</span>);
+names.RemoveAt(<span class="nm">0</span>);
+names.RemoveAll(x => x.StartsWith(<span class="str">"C"</span>));
+
+<span class="cm">// Conversion</span>
+<span class="kw">string</span>[] arr = names.ToArray();
+<span class="cls">List</span>&lt;<span class="kw">string</span>&gt; copy = names.ToList();</div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">INTERNAL CAPACITY GROWTH</div>
+            <div class="arch-diagram">
+              <div class="arch-layer"><div class="arch-box teal">Initial: Capacity = 4</div></div>
+              <div class="arch-arrow"></div>
+              <div class="arch-layer"><div class="arch-box orange">Add 5th item → Capacity = 8</div></div>
+              <div class="arch-arrow"></div>
+              <div class="arch-layer"><div class="arch-box blue">Add 9th item → Capacity = 16</div></div>
+              <div class="arch-arrow"></div>
+              <div class="arch-layer"><div class="arch-box purple">Always doubles!</div></div>
+            </div>
+            <div class="highlight" style="margin-top:10px">
+              <strong>Performance tip:</strong> If you know size upfront use <code>new List&lt;T&gt;(capacity)</code> to avoid unnecessary re-allocations.
+            </div>
+            <div style="margin-top:10px">
+              <table class="comp-table">
+                <thead><tr><th>Operation</th><th>Complexity</th></tr></thead>
+                <tbody>
+                  <tr><td>Add</td><td style="color:var(--green)">O(1) amortized</td></tr>
+                  <tr><td>Insert(i, item)</td><td style="color:var(--orange)">O(n)</td></tr>
+                  <tr><td>Remove(item)</td><td style="color:var(--orange)">O(n)</td></tr>
+                  <tr><td>Access [i]</td><td style="color:var(--green)">O(1)</td></tr>
+                  <tr><td>Contains</td><td style="color:var(--orange)">O(n)</td></tr>
+                  <tr><td>Sort</td><td style="color:var(--yellow)">O(n log n)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card blue">
+      <div class="card-num blue">#14</div>
+      <div class="card-title">List&lt;T&gt; with LINQ</div>
+      <div class="card-body">
+        <p>LINQ (Language Integrated Query) works seamlessly with <code>List&lt;T&gt;</code> — filter, sort, project, aggregate.</p>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">var</span> products = <span class="kw">new</span> <span class="cls">List</span>&lt;<span class="cls">Product</span>&gt; {
+  <span class="kw">new</span>(<span class="str">"Laptop"</span>, <span class="nm">1200</span>, <span class="str">"Electronics"</span>),
+  <span class="kw">new</span>(<span class="str">"Book"</span>,   <span class="nm">25</span>,   <span class="str">"Education"</span>),
+  <span class="kw">new</span>(<span class="str">"Phone"</span>,  <span class="nm">800</span>,  <span class="str">"Electronics"</span>),
+  <span class="kw">new</span>(<span class="str">"Pen"</span>,    <span class="nm">2</span>,    <span class="str">"Education"</span>)
+};
+
+<span class="cm">// Filter + Sort + Project</span>
+<span class="kw">var</span> expensiveElec = products
+  .Where(p => p.Category == <span class="str">"Electronics"</span>)
+  .Where(p => p.Price > <span class="nm">500</span>)
+  .OrderByDescending(p => p.Price)
+  .Select(p => <span class="kw">new</span> { p.Name, p.Price });
+
+<span class="cm">// Aggregates</span>
+<span class="kw">decimal</span> total = products.Sum(p => p.Price);
+<span class="kw">decimal</span> avg   = products.Average(p => p.Price);
+<span class="kw">var</span> max        = products.MaxBy(p => p.Price);
+
+<span class="cm">// Grouping</span>
+<span class="kw">var</span> byCategory = products
+  .GroupBy(p => p.Category)
+  .Select(g => <span class="kw">new</span> {
+    Category = g.Key,
+    Count = g.Count(),
+    Total = g.Sum(p => p.Price)
+  });</div>
+      </div>
+    </div>
+
+    <div class="card orange">
+      <div class="card-num orange">#15</div>
+      <div class="card-title">🛒 Real World: E-Commerce Shopping Cart</div>
+      <div class="card-body">
+        <p>A shopping cart is the perfect real-world use case for <code>List&lt;T&gt;</code>.</p>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">public record</span> <span class="cls">CartItem</span>(<span class="kw">string</span> Name, <span class="kw">decimal</span> Price, <span class="kw">int</span> Qty);
+
+<span class="kw">public class</span> <span class="cls">ShoppingCart</span>
+{
+  <span class="kw">private readonly</span> <span class="cls">List</span>&lt;<span class="cls">CartItem</span>&gt; _items = <span class="kw">new</span>();
+
+  <span class="kw">public void</span> AddItem(<span class="cls">CartItem</span> item) =&gt; _items.Add(item);
+
+  <span class="kw">public void</span> RemoveItem(<span class="kw">string</span> name) =>
+    _items.RemoveAll(i => i.Name == name);
+
+  <span class="kw">public decimal</span> Total() =>
+    _items.Sum(i => i.Price * i.Qty);
+
+  <span class="kw">public</span> <span class="cls">List</span>&lt;<span class="cls">CartItem</span>&gt; GetDiscountItems() =>
+    _items.Where(i => i.Price > <span class="nm">100</span>).ToList();
+
+  <span class="kw">public void</span> ClearCart() => _items.Clear();
+}
+
+<span class="cm">// Usage</span>
+<span class="kw">var</span> cart = <span class="kw">new</span> <span class="cls">ShoppingCart</span>();
+cart.AddItem(<span class="kw">new</span>(<span class="str">"Laptop"</span>, <span class="nm">1200m</span>, <span class="nm">1</span>));
+cart.AddItem(<span class="kw">new</span>(<span class="str">"Mouse"</span>,  <span class="nm">30m</span>,   <span class="nm">2</span>));
+Console.WriteLine($<span class="str">"Total: {cart.Total()}"</span>); <span class="cm">// 1260</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- MODULE 5: DICTIONARY -->
+<section class="module-section" id="m5">
+  <div class="module-header">
+    <span class="module-num purple">MODULE 05</span>
+    <span class="module-title">Dictionary&lt;TKey,TValue&gt;</span>
+    <span class="module-desc">Concepts #19–#23</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card">
+      <div class="card-num">#19</div>
+      <div class="card-title">Dictionary — Fast Key-Value Lookup</div>
+      <div class="card-body">
+        <p><strong style="color:var(--teal)">Dictionary&lt;TKey,TValue&gt;</strong> stores unique-key to value mappings. Uses <strong>hash table</strong> internally — O(1) average lookup.</p>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">var</span> scores = <span class="kw">new</span> <span class="cls">Dictionary</span>&lt;<span class="kw">string</span>, <span class="kw">int</span>&gt;
+{
+  [<span class="str">"Alice"</span>] = <span class="nm">95</span>,
+  [<span class="str">"Bob"</span>]   = <span class="nm">87</span>,
+  [<span class="str">"Carol"</span>] = <span class="nm">91</span>
+};
+
+<span class="cm">// Add / Update</span>
+scores[<span class="str">"Dave"</span>] = <span class="nm">88</span>;      <span class="cm">// add</span>
+scores[<span class="str">"Alice"</span>] = <span class="nm">99</span>;    <span class="cm">// update</span>
+scores.Add(<span class="str">"Eve"</span>, <span class="nm">72</span>);    <span class="cm">// throws if key exists</span>
+
+<span class="cm">// Safe access</span>
+<span class="kw">if</span> (scores.TryGetValue(<span class="str">"Bob"</span>, <span class="kw">out int</span> score))
+  Console.WriteLine(score);  <span class="cm">// 87</span>
+
+<span class="cm">// Existence checks</span>
+scores.ContainsKey(<span class="str">"Alice"</span>); <span class="cm">// true</span>
+scores.ContainsValue(<span class="nm">95</span>);    <span class="cm">// true (O(n)!)</span>
+
+<span class="cm">// Iterate</span>
+<span class="kw">foreach</span> (<span class="kw">var</span> (key, val) <span class="kw">in</span> scores)
+  Console.WriteLine($<span class="str">"{key}: {val}"</span>);
+
+<span class="cm">// Keys / Values collections</span>
+<span class="kw">var</span> keys = scores.Keys.ToList();
+<span class="kw">var</span> vals = scores.Values.OrderByDescending(v => v);</div>
+        <div style="margin-top:10px">
+          <table class="comp-table">
+            <thead><tr><th>Operation</th><th>Complexity</th></tr></thead>
+            <tbody>
+              <tr><td>Add/Update</td><td style="color:var(--green)">O(1) avg</td></tr>
+              <tr><td>Get by key</td><td style="color:var(--green)">O(1) avg</td></tr>
+              <tr><td>ContainsKey</td><td style="color:var(--green)">O(1) avg</td></tr>
+              <tr><td>ContainsValue</td><td style="color:var(--red)">O(n)</td></tr>
+              <tr><td>Remove</td><td style="color:var(--green)">O(1) avg</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card purple">
+      <div class="card-num purple">#20</div>
+      <div class="card-title">🏦 Real World: Cache System &amp; Word Count</div>
+      <div class="card-body">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">IN-MEMORY CACHE</div>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">public class</span> <span class="cls">SimpleCache</span>&lt;TKey, TValue&gt;
+{
+  <span class="kw">private readonly</span> <span class="cls">Dictionary</span>&lt;TKey, TValue&gt; _store = <span class="kw">new</span>();
+
+  <span class="kw">public void</span> Set(TKey key, TValue val) => _store[key] = val;
+
+  <span class="kw">public TValue</span> GetOrSet(TKey key, <span class="cls">Func</span>&lt;TValue&gt; factory)
+  {
+    <span class="kw">if</span> (!_store.TryGetValue(key, <span class="kw">out var</span> val))
+      _store[key] = val = factory();
+    <span class="kw">return</span> val;
+  }
+}
+
+<span class="cm">// Word frequency counter</span>
+<span class="kw">string</span> text = <span class="str">"apple banana apple cherry banana apple"</span>;
+<span class="kw">var</span> freq = <span class="kw">new</span> <span class="cls">Dictionary</span>&lt;<span class="kw">string</span>, <span class="kw">int</span>&gt;();
+<span class="kw">foreach</span> (<span class="kw">var</span> word <span class="kw">in</span> text.Split(<span class="str">' '</span>))
+  freq[word] = freq.GetValueOrDefault(word) + <span class="nm">1</span>;
+<span class="cm">// apple:3, banana:2, cherry:1</span></div>
+        <div class="highlight purple" style="margin-top:8px">
+          <strong>Use in projects:</strong> User session storage, product catalog lookup by ID, route mapping, config management, token validation.
+        </div>
+        <div class="chips">
+          <span class="chip purple">TryGetValue()</span>
+          <span class="chip purple">GetValueOrDefault()</span>
+          <span class="chip purple">ContainsKey()</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card yellow col-span2">
+      <div class="card-num yellow">#21</div>
+      <div class="card-title">Dictionary vs Hashtable vs SortedDictionary</div>
+      <div class="card-body">
+        <table class="comp-table">
+          <thead>
+            <tr><th>Feature</th><th>Hashtable</th><th>Dictionary&lt;K,V&gt;</th><th>SortedDictionary&lt;K,V&gt;</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Type-safe</td><td style="color:var(--red)">No</td><td style="color:var(--green)">Yes</td><td style="color:var(--green)">Yes</td></tr>
+            <tr><td>Ordering</td><td>None</td><td>None</td><td style="color:var(--yellow)">Sorted by Key</td></tr>
+            <tr><td>Lookup</td><td>O(1) avg</td><td>O(1) avg</td><td>O(log n)</td></tr>
+            <tr><td>Thread-safe</td><td style="color:var(--yellow)">Read-safe</td><td style="color:var(--red)">No</td><td style="color:var(--red)">No</td></tr>
+            <tr><td>Null keys</td><td style="color:var(--green)">Allowed</td><td style="color:var(--red)">Not allowed</td><td style="color:var(--red)">Not allowed</td></tr>
+            <tr><td>Modern use</td><td style="color:var(--red)">Legacy</td><td style="color:var(--green)">✓ Preferred</td><td style="color:var(--yellow)">When sorted needed</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- MODULE 6: HashSet, Queue<T>, Stack<T> -->
+<section class="module-section" id="m6">
+  <div class="module-header">
+    <span class="module-num cyan">MODULE 06</span>
+    <span class="module-title">HashSet&lt;T&gt;, Queue&lt;T&gt;, Stack&lt;T&gt;</span>
+    <span class="module-desc">Concepts #24–#28</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card cyan">
+      <div class="card-num cyan">#24</div>
+      <div class="card-title">HashSet&lt;T&gt; — Unique Values Only</div>
+      <div class="card-body">
+        <p><strong style="color:var(--cyan)">HashSet&lt;T&gt;</strong> stores only unique elements with O(1) lookup. No duplicates allowed. Unordered collection.</p>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">var</span> visited = <span class="kw">new</span> <span class="cls">HashSet</span>&lt;<span class="kw">string</span>&gt;();
+visited.Add(<span class="str">"pageA"</span>);
+visited.Add(<span class="str">"pageB"</span>);
+visited.Add(<span class="str">"pageA"</span>); <span class="cm">// duplicate — ignored!</span>
+
+visited.Count; <span class="cm">// 2 (not 3)</span>
+visited.Contains(<span class="str">"pageA"</span>); <span class="cm">// O(1)!</span>
+
+<span class="cm">// Set operations</span>
+<span class="kw">var</span> setA = <span class="kw">new</span> <span class="cls">HashSet</span>&lt;<span class="kw">int</span>&gt; { <span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">3</span>,<span class="nm">4</span> };
+<span class="kw">var</span> setB = <span class="kw">new</span> <span class="cls">HashSet</span>&lt;<span class="kw">int</span>&gt; { <span class="nm">3</span>,<span class="nm">4</span>,<span class="nm">5</span>,<span class="nm">6</span> };
+
+setA.IntersectWith(setB);  <span class="cm">// {3,4}</span>
+setA.UnionWith(setB);      <span class="cm">// {1,2,3,4,5,6}</span>
+setA.ExceptWith(setB);     <span class="cm">// {1,2}</span>
+setA.IsSubsetOf(setB);     <span class="cm">// false</span></div>
+        <div class="highlight" style="margin-top:8px">
+          <strong>Real world:</strong> Unique visitor tracking, removing duplicates from data, role-permission checks, graph traversal (visited nodes).
+        </div>
+      </div>
+    </div>
+
+    <div class="card col-span2">
+      <div class="card-num">#25</div>
+      <div class="card-title">Generic Queue&lt;T&gt; &amp; Stack&lt;T&gt; — Type-Safe Versions</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--yellow);text-transform:uppercase;margin-bottom:8px">Queue&lt;T&gt;</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// Type-safe FIFO</span>
+<span class="kw">var</span> taskQueue = <span class="kw">new</span> <span class="cls">Queue</span>&lt;<span class="cls">PrintJob</span>&gt;();
+taskQueue.Enqueue(<span class="kw">new</span> <span class="cls">PrintJob</span>(<span class="str">"Doc1.pdf"</span>));
+taskQueue.Enqueue(<span class="kw">new</span> <span class="cls">PrintJob</span>(<span class="str">"Doc2.pdf"</span>));
+
+<span class="cls">PrintJob</span> next = taskQueue.Dequeue();
+<span class="cls">PrintJob</span> peek = taskQueue.Peek();
+
+<span class="cm">// TryDequeue — thread-safe-ish</span>
+<span class="kw">if</span> (taskQueue.TryDequeue(<span class="kw">out var</span> job))
+  Process(job);</div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--blue);text-transform:uppercase;margin-bottom:8px">Stack&lt;T&gt;</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// Type-safe LIFO</span>
+<span class="kw">var</span> undoStack = <span class="kw">new</span> <span class="cls">Stack</span>&lt;<span class="cls">Action</span>&gt;();
+
+<span class="cm">// Text editor undo system</span>
+undoStack.Push(() => DeleteLastChar());
+undoStack.Push(() => InsertChar(<span class="str">'A'</span>));
+undoStack.Push(() => DeleteWord());
+
+<span class="cm">// Ctrl+Z</span>
+<span class="kw">if</span> (undoStack.TryPop(<span class="kw">out var</span> action))
+  action();   <span class="cm">// Undoes last op</span></div>
+          </div>
+        </div>
+        <div class="highlight" style="margin-top:10px">
+          <strong>Why generic versions?</strong> No boxing/unboxing, compile-time type safety, no explicit casting, better performance, IntelliSense support.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- MODULE 7: LinkedList, SortedDictionary, ObservableCollection -->
+<section class="module-section" id="m7">
+  <div class="module-header">
+    <span class="module-num red">MODULE 07</span>
+    <span class="module-title">LinkedList, SortedDictionary &amp; ObservableCollection</span>
+    <span class="module-desc">Concepts #29–#34</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card red">
+      <div class="card-num red">#29</div>
+      <div class="card-title">LinkedList&lt;T&gt; — Doubly Linked List</div>
+      <div class="card-body">
+        <p><strong style="color:var(--red)">LinkedList&lt;T&gt;</strong> is a doubly linked list. O(1) insert/delete anywhere once you have the node, but O(n) search.</p>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">var</span> ll = <span class="kw">new</span> <span class="cls">LinkedList</span>&lt;<span class="kw">string</span>&gt;();
+<span class="kw">var</span> node1 = ll.AddLast(<span class="str">"A"</span>);
+<span class="kw">var</span> node2 = ll.AddLast(<span class="str">"C"</span>);
+ll.AddAfter(node1, <span class="str">"B"</span>);   <span class="cm">// A → B → C</span>
+ll.AddBefore(node2, <span class="str">"B2"</span>); <span class="cm">// O(1)!</span>
+
+ll.First.Value; <span class="cm">// "A"</span>
+ll.Last.Value;  <span class="cm">// "C"</span>
+
+ll.Remove(<span class="str">"B"</span>);        <span class="cm">// by value O(n)</span>
+ll.Remove(node1);       <span class="cm">// by node O(1)</span></div>
+        <div style="margin-top:8px">
+          <table class="comp-table">
+            <thead><tr><th>vs List&lt;T&gt;</th><th>LinkedList</th><th>List</th></tr></thead>
+            <tbody>
+              <tr><td>Insert at middle</td><td style="color:var(--green)">O(1)*</td><td style="color:var(--red)">O(n)</td></tr>
+              <tr><td>Access by index</td><td style="color:var(--red)">O(n)</td><td style="color:var(--green)">O(1)</td></tr>
+              <tr><td>Memory overhead</td><td style="color:var(--red)">High (nodes)</td><td style="color:var(--green)">Low (array)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">* after finding the node</div>
+      </div>
+    </div>
+
+    <div class="card pink">
+      <div class="card-num pink">#30</div>
+      <div class="card-title">ObservableCollection&lt;T&gt; — WPF/MAUI UI Binding</div>
+      <div class="card-body">
+        <p><strong style="color:var(--pink)">ObservableCollection&lt;T&gt;</strong> notifies subscribers when items are added/removed/replaced via <code>CollectionChanged</code> event. Essential for UI data binding.</p>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">using</span> System.Collections.ObjectModel;
+
+<span class="kw">var</span> items = <span class="kw">new</span> <span class="cls">ObservableCollection</span>&lt;<span class="kw">string</span>&gt;();
+
+<span class="cm">// Subscribe to changes</span>
+items.CollectionChanged += (sender, e) =>
+{
+  Console.WriteLine($<span class="str">"Action: {e.Action}"</span>);
+  <span class="cm">// Add, Remove, Replace, Move, Reset</span>
+};
+
+items.Add(<span class="str">"Alice"</span>);   <span class="cm">// fires Add event</span>
+items.Remove(<span class="str">"Alice"</span>); <span class="cm">// fires Remove event</span>
+items.Clear();           <span class="cm">// fires Reset event</span>
+
+<span class="cm">// In WPF ViewModel</span>
+<span class="kw">public class</span> <span class="cls">ViewModel</span>
+{
+  <span class="kw">public</span> <span class="cls">ObservableCollection</span>&lt;<span class="cls">Product</span>&gt; Products { <span class="kw">get</span>; }
+    = <span class="kw">new</span>();
+  <span class="cm">// UI auto-updates when Products changes!</span>
+}</div>
+        <div class="highlight pink" style="margin-top:8px">
+          <strong>Use when:</strong> Building WPF/MAUI/Blazor apps where UI must automatically reflect data changes.
+        </div>
+      </div>
+    </div>
+
+    <div class="card col-span2" style="border-color:rgba(251,191,36,0.2)">
+      <div class="card-num yellow">#31</div>
+      <div class="card-title">📊 Generic Collections Quick Reference — When to Use What</div>
+      <div class="card-body">
+        <table class="comp-table">
+          <thead>
+            <tr><th>Collection</th><th>Use When</th><th>Ordering</th><th>Duplicates</th><th>Key Lookup</th><th>Real World</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>List&lt;T&gt;</td><td>General purpose sequence</td><td>Insertion</td><td>Yes</td><td>Index O(1)</td><td>Cart items, results</td></tr>
+            <tr><td>Dictionary&lt;K,V&gt;</td><td>Fast key-based lookup</td><td>None</td><td>Keys: No</td><td>Key O(1)</td><td>Cache, configs, maps</td></tr>
+            <tr><td>HashSet&lt;T&gt;</td><td>Unique items, set ops</td><td>None</td><td>No</td><td>O(1)</td><td>Visited URLs, roles</td></tr>
+            <tr><td>Queue&lt;T&gt;</td><td>Process in order</td><td>FIFO</td><td>Yes</td><td>—</td><td>Job queue, printer</td></tr>
+            <tr><td>Stack&lt;T&gt;</td><td>Last-added first out</td><td>LIFO</td><td>Yes</td><td>—</td><td>Undo/redo, back nav</td></tr>
+            <tr><td>LinkedList&lt;T&gt;</td><td>Many mid-insertions</td><td>Insertion</td><td>Yes</td><td>O(n)</td><td>Music playlist, LRU</td></tr>
+            <tr><td>SortedDictionary</td><td>Sorted key-value pairs</td><td>By Key</td><td>Keys: No</td><td>O(log n)</td><td>Leaderboards</td></tr>
+            <tr><td>ObservableCollection</td><td>UI data binding</td><td>Insertion</td><td>Yes</td><td>Index O(1)</td><td>WPF/MAUI lists</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div><!-- end topic-generic -->
+
+<hr class="section-divider">
+
+<!-- ══════════ TOPIC: DELEGATES ══════════ -->
+<div id="topic-delegates" style="scroll-margin-top:96px">
+
+<!-- MODULE 8: DELEGATE BASICS -->
+<section class="module-section" id="m8">
+  <div class="module-header">
+    <span class="module-num purple">MODULE 08</span>
+    <span class="module-title">Delegates — Basics</span>
+    <span class="module-desc">Concepts #35–#40</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card">
+      <div class="card-num">#35</div>
+      <div class="card-title">What is a Delegate?</div>
+      <div class="card-body">
+        <p>A <strong style="color:var(--teal)">delegate</strong> is a type-safe function pointer — it holds a reference to a method and can invoke it later. Delegates are reference types.</p>
+        <div class="highlight">Think of a delegate as a <strong>variable that stores a method</strong> the same way an <code>int</code> variable stores a number.</div>
+        <div style="margin-top:12px">
+          <div style="background:var(--code-bg);border-radius:8px;padding:12px;font-family:var(--mono);font-size:12px;color:var(--text2)">
+            <div style="color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Mental Model</div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);border-radius:6px;padding:6px 12px;color:var(--purple)">Delegate Variable</div>
+              <div style="color:var(--text3)">→ points to →</div>
+              <div style="background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.3);border-radius:6px;padding:6px 12px;color:var(--teal)">Actual Method</div>
+            </div>
+            <div style="margin-top:8px;color:var(--text3);font-size:11px">Same as: int x → stores → 42</div>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top:10px"><span class="code-lang">C#</span>
+<span class="cm">// 1. Declare delegate type</span>
+<span class="kw">delegate</span> <span class="kw">void</span> <span class="cls">Greet</span>(<span class="kw">string</span> name);
+
+<span class="cm">// 2. Method matching signature</span>
+<span class="kw">void</span> SayHello(<span class="kw">string</span> name) =>
+  Console.WriteLine($<span class="str">"Hello, {name}!"</span>);
+
+<span class="kw">void</span> SayHi(<span class="kw">string</span> name) =>
+  Console.WriteLine($<span class="str">"Hi, {name}!"</span>);
+
+<span class="cm">// 3. Create delegate instance</span>
+<span class="cls">Greet</span> greetDelegate = SayHello;
+
+<span class="cm">// 4. Invoke — calls SayHello</span>
+greetDelegate(<span class="str">"Alice"</span>); <span class="cm">// Hello, Alice!</span>
+
+<span class="cm">// 5. Reassign</span>
+greetDelegate = SayHi;
+greetDelegate(<span class="str">"Bob"</span>);   <span class="cm">// Hi, Bob!</span></div>
+      </div>
+    </div>
+
+    <div class="card purple">
+      <div class="card-num purple">#36</div>
+      <div class="card-title">Why &amp; When Use Delegates?</div>
+      <div class="card-body">
+        <ul class="concept-list">
+          <li><strong>Callbacks</strong> — pass method as argument to another method</li>
+          <li><strong>Event handling</strong> — foundation of the event system</li>
+          <li><strong>Strategy pattern</strong> — swap algorithms at runtime</li>
+          <li><strong>LINQ</strong> — Func delegates power all LINQ queries</li>
+          <li><strong>Async callbacks</strong> — completion handlers</li>
+          <li><strong>Decoupling</strong> — caller doesn't know callee</li>
+        </ul>
+        <div class="highlight purple" style="margin-top:10px">
+          <strong>Key insight:</strong> Delegates enable <em>behavioral parameterization</em> — passing what TO DO as a parameter, not just what data.
+        </div>
+        <div style="margin-top:10px">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px">WHEN TO USE</div>
+          <div class="chips">
+            <span class="chip purple">Callbacks</span>
+            <span class="chip purple">Events</span>
+            <span class="chip purple">Strategy Pattern</span>
+            <span class="chip purple">LINQ/Lambda</span>
+            <span class="chip purple">Plugin system</span>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:6px">DELEGATE RULES</div>
+          <ul class="concept-list">
+            <li>Method signature must match delegate declaration exactly</li>
+            <li>Delegates are immutable reference types (like strings)</li>
+            <li>Can reference instance or static methods</li>
+            <li>Null delegates throw NullReferenceException — use <code>?.</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card col-span2">
+      <div class="card-num">#37</div>
+      <div class="card-title">🎯 Delegate as Callback — Real World Example</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">SCENARIO: Sort with Custom Comparison</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// Delegate type for comparison</span>
+<span class="kw">delegate</span> <span class="kw">int</span> <span class="cls">Comparer</span>&lt;T&gt;(T a, T b);
+
+<span class="kw">void</span> BubbleSort&lt;T&gt;(<span class="cls">List</span>&lt;T&gt; list, <span class="cls">Comparer</span>&lt;T&gt; compare)
+{
+  <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; list.Count - <span class="nm">1</span>; i++)
+    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="nm">0</span>; j &lt; list.Count - i - <span class="nm">1</span>; j++)
+      <span class="kw">if</span> (compare(list[j], list[j+<span class="nm">1</span>]) > <span class="nm">0</span>)
+        (list[j], list[j+<span class="nm">1</span>]) = (list[j+<span class="nm">1</span>], list[j]);
+}
+
+<span class="kw">var</span> nums = <span class="kw">new</span> <span class="cls">List</span>&lt;<span class="kw">int</span>&gt; { <span class="nm">5</span>,<span class="nm">3</span>,<span class="nm">8</span>,<span class="nm">1</span>,<span class="nm">9</span> };
+BubbleSort(nums, (a, b) => a - b);    <span class="cm">// ascending</span>
+BubbleSort(nums, (a, b) => b - a);    <span class="cm">// descending</span></div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">SCENARIO: Progress Reporting</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">delegate</span> <span class="kw">void</span> <span class="cls">ProgressCallback</span>(<span class="kw">int</span> percent);
+
+<span class="kw">void</span> ProcessData(<span class="kw">int</span>[] data, <span class="cls">ProgressCallback</span> onProgress)
+{
+  <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; data.Length; i++)
+  {
+    DoWork(data[i]);
+    <span class="kw">int</span> pct = (i + <span class="nm">1</span>) * <span class="nm">100</span> / data.Length;
+    onProgress?.Invoke(pct); <span class="cm">// safe invoke</span>
+  }
+}
+
+<span class="cm">// Console app</span>
+ProcessData(bigArray, p =>
+  Console.Write($<span class="str">"\rProgress: {p}%"</span>));
+
+<span class="cm">// GUI app</span>
+ProcessData(bigArray, p =>
+  progressBar.Value = p);</div>
+          </div>
+        </div>
+        <div class="highlight" style="margin-top:10px">
+          <strong>Power of delegates:</strong> <code>ProcessData</code> doesn't know HOW to report progress — the caller decides. The processing logic and the UI are completely decoupled.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- MODULE 9: FUNC, ACTION, PREDICATE -->
+<section class="module-section" id="m9">
+  <div class="module-header">
+    <span class="module-num blue">MODULE 09</span>
+    <span class="module-title">Func, Action &amp; Predicate</span>
+    <span class="module-desc">Concepts #41–#45</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card col-span2">
+      <div class="card-num">#41</div>
+      <div class="card-title">Built-in Delegate Types: Func, Action, Predicate</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div style="background:rgba(0,212,170,0.04);border:1px solid rgba(0,212,170,0.15);border-radius:10px;padding:14px">
+            <div style="font-family:var(--head);font-size:14px;font-weight:700;color:var(--teal);margin-bottom:8px">Func&lt;T, TResult&gt;</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Takes input, <strong>returns a value</strong>. Last type param is return type.</div>
+            <div class="code-block" style="font-size:11px"><span class="code-lang">C#</span>
+<span class="cm">// No params, returns int</span>
+<span class="cls">Func</span>&lt;<span class="kw">int</span>&gt; getNum = () => <span class="nm">42</span>;
+
+<span class="cm">// Takes string, returns int</span>
+<span class="cls">Func</span>&lt;<span class="kw">string</span>,<span class="kw">int</span>&gt; len = s => s.Length;
+
+<span class="cm">// Two params, returns bool</span>
+<span class="cls">Func</span>&lt;<span class="kw">int</span>,<span class="kw">int</span>,<span class="kw">bool</span>&gt; isSum = 
+  (a,b) => a+b > <span class="nm">10</span>;
+
+<span class="cm">// In LINQ Select</span>
+<span class="kw">var</span> lengths = names
+  .Select(<span class="cls">Func</span>&lt;<span class="kw">string</span>,<span class="kw">int</span>&gt; n => n.Length);</div>
+          </div>
+          <div style="background:rgba(255,107,53,0.04);border:1px solid rgba(255,107,53,0.15);border-radius:10px;padding:14px">
+            <div style="font-family:var(--head);font-size:14px;font-weight:700;color:var(--orange);margin-bottom:8px">Action&lt;T&gt;</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Takes input, <strong>returns void</strong>. Used for side effects.</div>
+            <div class="code-block" style="font-size:11px"><span class="code-lang">C#</span>
+<span class="cm">// No params, void</span>
+<span class="cls">Action</span> greet = () => Console.WriteLine(<span class="str">"Hi"</span>);
+
+<span class="cm">// Takes string, void</span>
+<span class="cls">Action</span>&lt;<span class="kw">string</span>&gt; log = msg =>
+  Console.WriteLine($<span class="str">"[LOG] {msg}"</span>);
+
+<span class="cm">// Two params, void</span>
+<span class="cls">Action</span>&lt;<span class="kw">string</span>,<span class="kw">int</span>&gt; addUser = 
+  (name, age) => db.Insert(name, age);
+
+<span class="cm">// In List.ForEach</span>
+names.ForEach(<span class="cls">Action</span>&lt;<span class="kw">string</span>&gt; n => Print(n));
+greet.Invoke();</div>
+          </div>
+          <div style="background:rgba(168,85,247,0.04);border:1px solid rgba(168,85,247,0.15);border-radius:10px;padding:14px">
+            <div style="font-family:var(--head);font-size:14px;font-weight:700;color:var(--purple);margin-bottom:8px">Predicate&lt;T&gt;</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Takes input, <strong>returns bool</strong>. Specialized Func&lt;T, bool&gt;.</div>
+            <div class="code-block" style="font-size:11px"><span class="code-lang">C#</span>
+<span class="cm">// Check condition on T</span>
+<span class="cls">Predicate</span>&lt;<span class="kw">int</span>&gt; isEven = n => n % <span class="nm">2</span> == <span class="nm">0</span>;
+<span class="cls">Predicate</span>&lt;<span class="kw">string</span>&gt; isLong = s => s.Length > <span class="nm">5</span>;
+
+isEven(<span class="nm">4</span>);   <span class="cm">// true</span>
+isEven(<span class="nm">7</span>);   <span class="cm">// false</span>
+
+<span class="cm">// List.FindAll uses Predicate</span>
+<span class="kw">var</span> nums = <span class="kw">new</span> <span class="cls">List</span>&lt;<span class="kw">int</span>&gt;{<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">3</span>,<span class="nm">4</span>,<span class="nm">5</span>};
+<span class="kw">var</span> evens = nums.FindAll(isEven);
+<span class="cm">// {2, 4}</span></div>
+          </div>
+        </div>
+        <div class="highlight" style="margin-top:12px">
+          <strong>Rule of thumb:</strong> Use <code>Func</code> when you need a return value, <code>Action</code> for side effects (void), <code>Predicate</code> for bool conditions. These eliminate the need to declare custom delegate types.
+        </div>
+      </div>
+    </div>
+
+    <div class="card blue">
+      <div class="card-num blue">#42</div>
+      <div class="card-title">Func in a Real Project — Pipeline Pattern</div>
+      <div class="card-body">
+        <p>Compose processing steps using <code>Func</code> delegates.</p>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// Data pipeline: string → processed string</span>
+<span class="kw">public static</span> <span class="cls">Func</span>&lt;T,T&gt; Compose&lt;T&gt;(<span class="kw">params</span> <span class="cls">Func</span>&lt;T,T&gt;[] funcs)
+  => input => funcs.Aggregate(input, (v, f) => f(v));
+
+<span class="cm">// Define steps</span>
+<span class="cls">Func</span>&lt;<span class="kw">string</span>, <span class="kw">string</span>&gt; trim    = s => s.Trim();
+<span class="cls">Func</span>&lt;<span class="kw">string</span>, <span class="kw">string</span>&gt; toLower = s => s.ToLower();
+<span class="cls">Func</span>&lt;<span class="kw">string</span>, <span class="kw">string</span>&gt; encode  = s => Uri.EscapeDataString(s);
+
+<span class="cm">// Build pipeline</span>
+<span class="kw">var</span> pipeline = Compose(trim, toLower, encode);
+
+<span class="cm">// Use it</span>
+<span class="kw">string</span> result = pipeline(<span class="str">"  Hello World  "</span>);
+<span class="cm">// → "hello%20world"</span>
+
+<span class="cm">// Real use case: middleware-like processing</span>
+<span class="cls">Func</span>&lt;<span class="cls">Order</span>, <span class="cls">Order</span>&gt; processOrder = Compose(
+  ValidateOrder,
+  CalculateDiscount,
+  ApplyTax,
+  GenerateInvoice
+);</div>
+      </div>
+    </div>
+
+    <div class="card orange">
+      <div class="card-num orange">#43</div>
+      <div class="card-title">Action in Real Projects — Event Logger</div>
+      <div class="card-body">
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">public class</span> <span class="cls">Logger</span>
+{
+  <span class="cm">// Keep every subscriber in one list so Log() can fan out to all of them.</span>
+  <span class="kw">private readonly</span> <span class="cls">List</span>&lt;<span class="cls">Action</span>&lt;<span class="kw">string</span>&gt;&gt; _handlers = <span class="kw">new</span>();
+
+  <span class="cm">// Register a new output target such as console, file, Slack, etc.</span>
+  <span class="kw">public void</span> AddHandler(<span class="cls">Action</span>&lt;<span class="kw">string</span>&gt; handler) =>
+    _handlers.Add(handler);
+
+  <span class="cm">// Publish the same message to every registered handler.</span>
+  <span class="kw">public void</span> Log(<span class="kw">string</span> message) =>
+    _handlers.ForEach(h => h(message));
+}
+
+<span class="cm">// Setup</span>
+<span class="kw">var</span> logger = <span class="kw">new</span> <span class="cls">Logger</span>();
+logger.AddHandler(msg => Console.WriteLine(msg));
+logger.AddHandler(msg => File.AppendAllText(<span class="str">"app.log"</span>, msg + <span class="str">"\n"</span>));
+logger.AddHandler(msg => SlackNotify(msg));
+
+<span class="cm">// Log — all handlers fire</span>
+logger.Log(<span class="str">"Payment processed"</span>);
+logger.Log(<span class="str">"Order shipped"</span>);</div>
+        <div class="highlight orange">
+          <strong>Real world:</strong> Used in ASP.NET middleware, logging pipelines, validation chains, notification systems.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- MODULE 10: MULTICAST & LAMBDA -->
+<section class="module-section" id="m10">
+  <div class="module-header">
+    <span class="module-num pink">MODULE 10</span>
+    <span class="module-title">Multicast Delegates &amp; Lambda Expressions</span>
+    <span class="module-desc">Concepts #46–#50</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card">
+      <div class="card-num">#46</div>
+      <div class="card-title">Multicast Delegate — Multiple Methods in One</div>
+      <div class="card-body">
+        <p>A delegate can hold references to <strong>multiple methods</strong>. When invoked, all methods are called in order. Use <code>+=</code> to add, <code>-=</code> to remove.</p>
+        <div class="delegate-chain">
+          <div class="delegate-node">📧 SendEmail(message)</div>
+          <div class="delegate-connector"></div>
+          <div class="delegate-node">📱 SendSMS(message)</div>
+          <div class="delegate-connector"></div>
+          <div class="delegate-node">🔔 PushNotification(message)</div>
+        </div>
+        <div style="text-align:center;font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px">notify("Order shipped!") → calls all three</div>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">delegate</span> <span class="kw">void</span> <span class="cls">Notify</span>(<span class="kw">string</span> msg);
+
+<span class="kw">void</span> SendEmail(<span class="kw">string</span> m) => Email.Send(m);
+<span class="kw">void</span> SendSMS(<span class="kw">string</span> m)   => SMS.Send(m);
+<span class="kw">void</span> PushNote(<span class="kw">string</span> m)  => Push.Send(m);
+
+<span class="cls">Notify</span> notify = SendEmail;
+notify += SendSMS;     <span class="cm">// add to chain</span>
+notify += PushNote;    <span class="cm">// add to chain</span>
+
+notify(<span class="str">"Order shipped!"</span>); <span class="cm">// calls ALL THREE</span>
+
+notify -= SendSMS;     <span class="cm">// remove from chain</span>
+notify(<span class="str">"Payment done"</span>); <span class="cm">// calls Email + Push only</span>
+
+<span class="cm">// Get invocation list</span>
+<span class="kw">var</span> list = notify.GetInvocationList();
+Console.WriteLine(list.Length); <span class="cm">// 2</span></div>
+        <div class="highlight" style="margin-top:8px">
+          <strong>⚠️ Caution:</strong> If any method throws, subsequent methods won't run. For production, invoke each individually with try-catch.
+        </div>
+      </div>
+    </div>
+
+    <div class="card purple">
+      <div class="card-num purple">#47</div>
+      <div class="card-title">Lambda Expressions with Delegates</div>
+      <div class="card-body">
+        <p><strong style="color:var(--purple)">Lambda expressions</strong> are shorthand for writing anonymous methods inline. They're the most common way to use delegates today.</p>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// Anonymous method (old style)</span>
+<span class="cls">Action</span>&lt;<span class="kw">string</span>&gt; printOld = <span class="kw">delegate</span>(<span class="kw">string</span> s) {
+  Console.WriteLine(s);
+};
+
+<span class="cm">// Lambda equivalent</span>
+<span class="cls">Action</span>&lt;<span class="kw">string</span>&gt; print = s => Console.WriteLine(s);
+
+<span class="cm">// Multi-line lambda</span>
+<span class="cls">Func</span>&lt;<span class="kw">int</span>, <span class="kw">int</span>&gt; factorial = n => {
+  <span class="kw">if</span> (n &lt;= <span class="nm">1</span>) <span class="kw">return</span> <span class="nm">1</span>;
+  <span class="kw">return</span> n * factorial(n - <span class="nm">1</span>);
+};
+
+<span class="cm">// Capture variables (closure)</span>
+<span class="kw">int</span> multiplier = <span class="nm">3</span>;
+<span class="cls">Func</span>&lt;<span class="kw">int</span>, <span class="kw">int</span>&gt; triple = x => x * multiplier;
+triple(<span class="nm">5</span>); <span class="cm">// 15 — captures 'multiplier'</span>
+
+multiplier = <span class="nm">10</span>;
+triple(<span class="nm">5</span>); <span class="cm">// 50 — uses updated 'multiplier'!</span></div>
+        <div class="highlight purple" style="margin-top:8px">
+          <strong>Closures:</strong> Lambda captures variables from the enclosing scope by <em>reference</em>. Changing the captured variable affects the lambda's result.
+        </div>
+      </div>
+    </div>
+
+    <div class="card col-span2" style="border-color:rgba(34,197,94,0.2)">
+      <div class="card-num green">#48</div>
+      <div class="card-title">🏭 Real World: Plugin / Strategy Pattern with Delegates</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">PAYMENT PROCESSOR — STRATEGY PATTERN</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">public class</span> <span class="cls">PaymentProcessor</span>
+{
+  <span class="cm">// Strategy via delegate</span>
+  <span class="kw">public</span> <span class="cls">Func</span>&lt;<span class="kw">decimal</span>, <span class="kw">bool</span>&gt; PaymentStrategy { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+  <span class="kw">public bool</span> ProcessPayment(<span class="kw">decimal</span> amount)
+  {
+    <span class="cm">// Guard clause: processing cannot continue until a strategy is plugged in.</span>
+    <span class="kw">if</span> (PaymentStrategy == <span class="kw">null</span>)
+      <span class="kw">throw new</span> <span class="cls">InvalidOperationException</span>(<span class="str">"No strategy"</span>);
+    <span class="cm">// Execute whichever algorithm is currently assigned.</span>
+    <span class="kw">return</span> PaymentStrategy(amount);
+  }
+}
+
+<span class="cm">// Strategies as lambdas</span>
+<span class="kw">var</span> processor = <span class="kw">new</span> <span class="cls">PaymentProcessor</span>();
+
+<span class="cm">// Use credit card</span>
+processor.PaymentStrategy = 
+  amount => CreditCard.Charge(amount);
+
+<span class="cm">// Switch to PayPal</span>
+processor.PaymentStrategy = 
+  amount => PayPal.Transfer(amount);
+
+<span class="cm">// Switch to Crypto</span>
+processor.PaymentStrategy = 
+  amount => Crypto.Pay(amount);
+
+<span class="cm">// Same code — different behavior</span>
+processor.ProcessPayment(<span class="nm">99.99m</span>);</div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">VALIDATION PIPELINE</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">public class</span> <span class="cls">Validator</span>&lt;T&gt;
+{
+  <span class="kw">private readonly</span> <span class="cls">List</span>&lt;<span class="cls">Func</span>&lt;T, <span class="kw">string</span>&gt;&gt; _rules = <span class="kw">new</span>();
+
+  <span class="kw">public</span> <span class="cls">Validator</span>&lt;T&gt; AddRule(<span class="cls">Func</span>&lt;T, <span class="kw">string</span>&gt; rule)
+  { _rules.Add(rule); <span class="kw">return this</span>; }
+
+  <span class="kw">public</span> <span class="cls">List</span>&lt;<span class="kw">string</span>&gt; Validate(T value)
+    => _rules
+        .Select(r => r(value))
+        .Where(e => e != <span class="kw">null</span>)
+        .ToList();
+}
+
+<span class="cm">// Use it</span>
+<span class="kw">var</span> v = <span class="kw">new</span> <span class="cls">Validator</span>&lt;<span class="kw">string</span>&gt;()
+  .AddRule(s => s == <span class="kw">null</span>     ? <span class="str">"Required"</span>   : <span class="kw">null</span>)
+  .AddRule(s => s?.Length &lt; <span class="nm">3</span>  ? <span class="str">"Too short"</span>   : <span class="kw">null</span>)
+  .AddRule(s => s?.Length > <span class="nm">50</span> ? <span class="str">"Too long"</span>    : <span class="kw">null</span>);
+
+<span class="kw">var</span> errors = v.Validate(<span class="str">"Hi"</span>);
+<span class="cm">// ["Too short"]</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div><!-- end topic-delegates -->
+
+<hr class="section-divider">
+
+<!-- ══════════ TOPIC: EVENTS ══════════ -->
+<div id="topic-events" style="scroll-margin-top:96px">
+
+<!-- MODULE 11: EVENTS -->
+<section class="module-section" id="m11">
+  <div class="module-header">
+    <span class="module-num yellow">MODULE 11</span>
+    <span class="module-title">Events — What, Why, How</span>
+    <span class="module-desc">Concepts #51–#56</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card">
+      <div class="card-num">#51</div>
+      <div class="card-title">What is an Event?</div>
+      <div class="card-body">
+        <p>An <strong style="color:var(--teal)">event</strong> is a mechanism for a class to notify other classes when something happens. Events are built on delegates — they are <em>delegate fields with controlled access</em>.</p>
+        <div style="margin-top:12px">
+          <div class="event-pub-sub">
+            <div class="event-pub">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--orange);margin-bottom:8px;text-transform:uppercase">Publisher</div>
+              <div style="font-size:12px;color:var(--text2)">Button, Timer, OrderService</div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--orange);margin-top:6px">Raises event →</div>
+            </div>
+            <div class="event-wire">
+              <div class="event-wire-line"></div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--text3)">event</div>
+            </div>
+            <div class="event-sub">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--green);margin-bottom:6px;text-transform:uppercase">Subscribers</div>
+              <div class="event-sub-item">LogService.OnOrder()</div>
+              <div class="event-sub-item">EmailService.SendConfirm()</div>
+              <div class="event-sub-item">InventoryService.Update()</div>
+            </div>
+          </div>
+        </div>
+        <div class="highlight" style="margin-top:10px">
+          <strong>Events vs Delegates:</strong> An event is a delegate that can only be invoked from within the class that declares it. Subscribers can only subscribe (<code>+=</code>) or unsubscribe (<code>-=</code>) — they can't invoke it directly.
+        </div>
+        <div class="chips">
+          <span class="chip">event keyword</span>
+          <span class="chip">EventHandler</span>
+          <span class="chip">Publisher</span>
+          <span class="chip">Subscriber</span>
+          <span class="chip">+= / -=</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card yellow">
+      <div class="card-num yellow">#52</div>
+      <div class="card-title">Basic Event Declaration &amp; Usage</div>
+      <div class="card-body">
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// Publisher class</span>
+<span class="kw">public class</span> <span class="cls">Button</span>
+{
+  <span class="cm">// Declare event using EventHandler delegate</span>
+  <span class="kw">public event</span> <span class="cls">EventHandler</span> Clicked;
+
+  <span class="cm">// Raise the event</span>
+  <span class="kw">public void</span> Click()
+  {
+    Console.WriteLine(<span class="str">"Button clicked!"</span>);
+    <span class="cm">// Raise: null-check and notify every subscriber currently attached.</span>
+    Clicked?.Invoke(<span class="kw">this</span>, <span class="cls">EventArgs</span>.Empty);
+  }
+}
+
+<span class="cm">// Subscriber</span>
+<span class="kw">var</span> btn = <span class="kw">new</span> <span class="cls">Button</span>();
+
+<span class="cm">// Subscribe</span>
+btn.Clicked += (sender, e) =>
+  Console.WriteLine(<span class="str">"Handler 1: Button was clicked!"</span>);
+
+btn.Clicked += (sender, e) =>
+  Console.WriteLine(<span class="str">"Handler 2: Logging the click..."</span>);
+
+<span class="cm">// Trigger</span>
+btn.Click();
+<span class="cm">// Button clicked!</span>
+<span class="cm">// Handler 1: Button was clicked!</span>
+<span class="cm">// Handler 2: Logging the click...</span>
+
+<span class="cm">// Unsubscribe</span>
+btn.Clicked -= <span class="cm">/* same handler ref */</span>;</div>
+      </div>
+    </div>
+
+    <div class="card col-span2">
+      <div class="card-num">#53</div>
+      <div class="card-title">Custom EventArgs — Passing Data with Events</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">CUSTOM EVENTARGS</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// 1. Create custom EventArgs</span>
+<span class="kw">public class</span> <span class="cls">OrderEventArgs</span> : <span class="cls">EventArgs</span>
+{
+  <span class="kw">public string</span> OrderId   { <span class="kw">get</span>; }
+  <span class="kw">public decimal</span> Amount  { <span class="kw">get</span>; }
+  <span class="kw">public string</span> Customer { <span class="kw">get</span>; }
+
+  <span class="kw">public</span> <span class="cls">OrderEventArgs</span>(<span class="kw">string</span> id, <span class="kw">decimal</span> amt, <span class="kw">string</span> cust)
+    => (OrderId, Amount, Customer) = (id, amt, cust);
+}
+
+<span class="cm">// 2. Publisher with typed event</span>
+<span class="kw">public class</span> <span class="cls">OrderService</span>
+{
+  <span class="kw">public event</span> <span class="cls">EventHandler</span>&lt;<span class="cls">OrderEventArgs</span>&gt; OrderPlaced;
+
+  <span class="kw">public void</span> PlaceOrder(<span class="kw">string</span> id, <span class="kw">decimal</span> amt, <span class="kw">string</span> cust)
+  {
+    <span class="cm">// ... business logic</span>
+    <span class="kw">var</span> args = <span class="kw">new</span> <span class="cls">OrderEventArgs</span>(id, amt, cust);
+    OrderPlaced?.Invoke(<span class="kw">this</span>, args);
+  }
+}</div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">SUBSCRIBERS</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">var</span> svc = <span class="kw">new</span> <span class="cls">OrderService</span>();
+
+<span class="cm">// Email service subscribes</span>
+svc.OrderPlaced += (_, e) =>
+{
+  Email.Send(e.Customer, 
+    $<span class="str">"Order {e.OrderId} confirmed!"</span>);
+};
+
+<span class="cm">// Inventory subscribes</span>
+svc.OrderPlaced += (_, e) =>
+{
+  Inventory.Reserve(e.OrderId);
+};
+
+<span class="cm">// Analytics subscribes</span>
+svc.OrderPlaced += (_, e) =>
+{
+  Analytics.Track(<span class="str">"order"</span>, e.Amount);
+};
+
+<span class="cm">// When an order is placed, ALL fire</span>
+svc.PlaceOrder(<span class="str">"ORD-001"</span>, <span class="nm">199.99m</span>, <span class="str">"alice@email.com"</span>);</div>
+          </div>
+        </div>
+        <div class="highlight" style="margin-top:10px">
+          <strong>Power of events:</strong> <code>OrderService</code> doesn't know about Email, Inventory, or Analytics — they subscribe independently. Perfectly decoupled.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- MODULE 12: PUB/SUB PATTERN -->
+<section class="module-section" id="m12">
+  <div class="module-header">
+    <span class="module-num green-card" style="background:linear-gradient(135deg,var(--green),#86efac);color:#000">MODULE 12</span>
+    <span class="module-title">Publisher-Subscriber Pattern &amp; Real World Events</span>
+    <span class="module-desc">Concepts #57–#62</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card col-span2">
+      <div class="card-num">#57</div>
+      <div class="card-title">🛒 Complete Real-World Event System: E-Commerce Order Lifecycle</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// ── EVENT ARGS ──</span>
+<span class="kw">public record</span> <span class="cls">OrderArgs</span>(<span class="kw">string</span> Id, <span class="kw">decimal</span> Amount) : <span class="cls">EventArgs</span>;
+<span class="kw">public record</span> <span class="cls">ShipArgs</span>(<span class="kw">string</span> OrderId, <span class="kw">string</span> Tracking) : <span class="cls">EventArgs</span>;
+
+<span class="cm">// ── PUBLISHER ──</span>
+<span class="kw">public class</span> <span class="cls">OrderLifecycle</span>
+{
+  <span class="kw">public event</span> <span class="cls">EventHandler</span>&lt;<span class="cls">OrderArgs</span>&gt;  OrderCreated;
+  <span class="kw">public event</span> <span class="cls">EventHandler</span>&lt;<span class="cls">OrderArgs</span>&gt;  PaymentReceived;
+  <span class="kw">public event</span> <span class="cls">EventHandler</span>&lt;<span class="cls">ShipArgs</span>&gt;  OrderShipped;
+  <span class="kw">public event</span> <span class="cls">EventHandler</span>&lt;<span class="cls">OrderArgs</span>&gt;  OrderCancelled;
+
+  <span class="kw">public void</span> Create(<span class="kw">string</span> id, <span class="kw">decimal</span> amt)
+    => OrderCreated?.Invoke(<span class="kw">this</span>, <span class="kw">new</span>(id, amt));
+  <span class="kw">public void</span> Pay(<span class="kw">string</span> id, <span class="kw">decimal</span> amt)
+    => PaymentReceived?.Invoke(<span class="kw">this</span>, <span class="kw">new</span>(id, amt));
+  <span class="kw">public void</span> Ship(<span class="kw">string</span> id, <span class="kw">string</span> tracking)
+    => OrderShipped?.Invoke(<span class="kw">this</span>, <span class="kw">new</span>(id, tracking));
+  <span class="kw">public void</span> Cancel(<span class="kw">string</span> id)
+    => OrderCancelled?.Invoke(<span class="kw">this</span>, <span class="kw">new</span>(id, <span class="nm">0</span>));
+}</div>
+          </div>
+          <div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// ── SUBSCRIBERS ──</span>
+<span class="kw">var</span> orders = <span class="kw">new</span> <span class="cls">OrderLifecycle</span>();
+
+<span class="cm">// Inventory service</span>
+orders.OrderCreated     += (_, e) => Inventory.Reserve(e.Id);
+orders.OrderCancelled   += (_, e) => Inventory.Release(e.Id);
+
+<span class="cm">// Payment service</span>
+orders.PaymentReceived  += (_, e) => Receipt.Generate(e.Id);
+
+<span class="cm">// Notification service</span>
+orders.OrderCreated     += (_, e) => SMS.Send($<span class="str">"Order {e.Id} placed"</span>);
+orders.PaymentReceived  += (_, e) => Email.Send($<span class="str">"Payment received"</span>);
+orders.OrderShipped     += (_, e) => Push.Send($<span class="str">"Shipped! Track: {e.Tracking}"</span>);
+
+<span class="cm">// Analytics</span>
+orders.OrderCreated     += (_, e) => Analytics.Log(<span class="str">"order_created"</span>, e.Amount);
+orders.PaymentReceived  += (_, e) => Analytics.Log(<span class="str">"payment"</span>, e.Amount);
+
+<span class="cm">// Simulate order flow</span>
+orders.Create(<span class="str">"ORD-001"</span>, <span class="nm">299.99m</span>);
+orders.Pay(<span class="str">"ORD-001"</span>, <span class="nm">299.99m</span>);
+orders.Ship(<span class="str">"ORD-001"</span>, <span class="str">"TRK-XYZ789"</span>);</div>
+          </div>
+        </div>
+        <div class="highlight green" style="margin-top:12px">
+          <strong>Architecture benefit:</strong> Each service is completely independent. Adding a new service (e.g., Loyalty Points) requires <em>zero changes</em> to <code>OrderLifecycle</code> — just subscribe to the events.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-num">#58</div>
+      <div class="card-title">Event Best Practices</div>
+      <div class="card-body">
+        <ul class="concept-list">
+          <li>Always use <code>?.Invoke()</code> — never invoke directly (null check)</li>
+          <li>Use <code>EventHandler&lt;T&gt;</code> for typed events</li>
+          <li>Always unsubscribe when done to prevent memory leaks</li>
+          <li>Use <code>WeakEventManager</code> in WPF for long-lived objects</li>
+          <li>Keep event handlers short — heavy logic in separate methods</li>
+          <li>Don't modify collection in foreach inside handler</li>
+        </ul>
+        <div class="code-block" style="margin-top:10px"><span class="code-lang">C#</span>
+<span class="cm">// GOOD: null-safe invoke</span>
+MyEvent?.Invoke(<span class="kw">this</span>, e);
+
+<span class="cm">// GOOD: store reference to unsubscribe</span>
+<span class="cls">EventHandler</span>&lt;<span class="cls">OrderArgs</span>&gt; handler = OnOrderCreated;
+service.OrderCreated += handler;
+<span class="cm">// ... later</span>
+service.OrderCreated -= handler; <span class="cm">// unsubscribe</span>
+
+<span class="cm">// BAD: lambda can't be unsubscribed</span>
+service.OrderCreated += (_, e) => HandleOrder(e); <span class="cm">// ⚠️</span></div>
+      </div>
+    </div>
+
+    <div class="card orange">
+      <div class="card-num orange">#59</div>
+      <div class="card-title">Events vs Delegates — Key Differences</div>
+      <div class="card-body">
+        <table class="comp-table">
+          <thead><tr><th>Feature</th><th>Delegate</th><th>Event</th></tr></thead>
+          <tbody>
+            <tr><td>Invoke from outside</td><td style="color:var(--green)">Yes</td><td style="color:var(--red)">No</td></tr>
+            <tr><td>Assign directly =</td><td style="color:var(--green)">Yes</td><td style="color:var(--red)">No (+=/-= only)</td></tr>
+            <tr><td>Multicast</td><td style="color:var(--green)">Yes</td><td style="color:var(--green)">Yes</td></tr>
+            <tr><td>Encapsulation</td><td style="color:var(--red)">Loose</td><td style="color:var(--green)">Strong</td></tr>
+            <tr><td>Typical use</td><td>Callbacks, LINQ</td><td>UI, domain events</td></tr>
+          </tbody>
+        </table>
+        <div class="highlight orange" style="margin-top:10px">
+          <strong>Rule:</strong> Use <code>event</code> when external code should react but never trigger. Use a delegate when callers can both pass and invoke.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div><!-- end topic-events -->
+
+<hr class="section-divider">
+
+<!-- ══════════ TOPIC: REFLECTION ══════════ -->
+<div id="topic-reflection" style="scroll-margin-top:96px">
+
+<!-- MODULE 13: REFLECTION BASICS -->
+<section class="module-section" id="m13">
+  <div class="module-header">
+    <span class="module-num pink">MODULE 13</span>
+    <span class="module-title">Reflection — Basics</span>
+    <span class="module-desc">Concepts #63–#68</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card">
+      <div class="card-num">#63</div>
+      <div class="card-title">What is Reflection?</div>
+      <div class="card-body">
+        <p><strong style="color:var(--teal)">Reflection</strong> is the ability of a program to inspect and modify its own structure and behavior at runtime. Using reflection, you can discover types, methods, properties, and attributes, and invoke them dynamically.</p>
+        <div class="highlight">Analogy: Reflection is like looking in a mirror — the program can see itself and act on what it sees.</div>
+        <div style="margin-top:12px">
+          <div class="mental-model">
+            <div class="mm-top">Assembly / DLL</div>
+            <div class="mm-branches">
+              <div class="mm-branch">
+                <div class="mm-branch-line"></div>
+                <div class="mm-task">Type (Class)</div>
+              </div>
+              <div class="mm-branch">
+                <div class="mm-branch-line"></div>
+                <div class="mm-task">Methods</div>
+              </div>
+              <div class="mm-branch">
+                <div class="mm-branch-line"></div>
+                <div class="mm-task">Properties</div>
+              </div>
+              <div class="mm-branch">
+                <div class="mm-branch-line"></div>
+                <div class="mm-task">Fields</div>
+              </div>
+              <div class="mm-branch">
+                <div class="mm-branch-line"></div>
+                <div class="mm-task">Attributes</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chips" style="margin-top:10px">
+          <span class="chip pink">System.Reflection</span>
+          <span class="chip pink">Type</span>
+          <span class="chip pink">Assembly</span>
+          <span class="chip pink">MethodInfo</span>
+          <span class="chip pink">PropertyInfo</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card pink">
+      <div class="card-num pink">#64</div>
+      <div class="card-title">Why &amp; When Use Reflection?</div>
+      <div class="card-body">
+        <ul class="concept-list">
+          <li><strong>Plugin systems</strong> — load unknown DLLs at runtime</li>
+          <li><strong>ORM frameworks</strong> — map DB columns to class properties (EF Core)</li>
+          <li><strong>DI containers</strong> — create instances without knowing type (Autofac)</li>
+          <li><strong>Serialization</strong> — JSON/XML convert properties to/from strings</li>
+          <li><strong>Test frameworks</strong> — NUnit finds [Test] methods via reflection</li>
+          <li><strong>Attribute processing</strong> — read custom attributes at runtime</li>
+        </ul>
+        <div class="highlight pink" style="margin-top:10px">
+          <strong>⚠️ Performance cost:</strong> Reflection is ~10-100x slower than direct invocation. Cache <code>MethodInfo</code> / <code>PropertyInfo</code> objects if called repeatedly.
+        </div>
+        <div style="margin-top:10px">
+          <div class="compare-grid">
+            <div class="compare-col bad">
+              <div class="compare-col-title">✗ Avoid When</div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--text2)">Hot path code<br>Performance-critical loops<br>Type is known at compile time</div>
+            </div>
+            <div class="compare-col good">
+              <div class="compare-col-title">✓ Use When</div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--text2)">Framework/library building<br>Type unknown at compile time<br>Plugin architecture</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card col-span2">
+      <div class="card-num">#65</div>
+      <div class="card-title">Reflection — Core API in Action</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">GETTING TYPE INFORMATION</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">public class</span> <span class="cls">Person</span>
+{
+  <span class="kw">public string</span>  Name { <span class="kw">get</span>; <span class="kw">set</span>; }
+  <span class="kw">public int</span>     Age  { <span class="kw">get</span>; <span class="kw">set</span>; }
+  <span class="kw">public void</span>    Greet() => Console.WriteLine(<span class="str">"Hi!"</span>);
+  <span class="kw">private void</span>   Secret() => Console.WriteLine(<span class="str">"Shh"</span>);
+}
+
+<span class="cm">// 3 ways to get Type</span>
+<span class="cls">Type</span> t1 = <span class="kw">typeof</span>(<span class="cls">Person</span>);           <span class="cm">// compile time</span>
+<span class="cls">Type</span> t2 = <span class="kw">new</span> <span class="cls">Person</span>().GetType();  <span class="cm">// from instance</span>
+<span class="cls">Type</span> t3 = <span class="cls">Type</span>.GetType(<span class="str">"MyApp.Person"</span>); <span class="cm">// by name</span>
+
+<span class="cm">// Type metadata</span>
+t1.Name;          <span class="cm">// "Person"</span>
+t1.FullName;      <span class="cm">// "MyApp.Person"</span>
+t1.Namespace;     <span class="cm">// "MyApp"</span>
+t1.IsClass;       <span class="cm">// true</span>
+t1.IsAbstract;    <span class="cm">// false</span>
+
+<span class="cm">// Get all public properties</span>
+<span class="kw">var</span> props = t1.GetProperties();
+<span class="kw">foreach</span> (<span class="kw">var</span> p <span class="kw">in</span> props)
+  Console.WriteLine($<span class="str">"{p.PropertyType.Name} {p.Name}"</span>);
+<span class="cm">// String Name / Int32 Age</span></div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">DYNAMIC INVOCATION</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="kw">var</span> type = <span class="kw">typeof</span>(<span class="cls">Person</span>);
+
+<span class="cm">// Create instance dynamically</span>
+<span class="kw">var</span> obj = <span class="cls">Activator</span>.CreateInstance(type);
+
+<span class="cm">// Set property value</span>
+<span class="kw">var</span> nameProp = type.GetProperty(<span class="str">"Name"</span>);
+nameProp.SetValue(obj, <span class="str">"Alice"</span>);
+nameProp.SetValue(obj, <span class="str">"Bob"</span>);
+
+<span class="cm">// Get property value</span>
+<span class="kw">string</span> name = (<span class="kw">string</span>)nameProp.GetValue(obj);
+<span class="cm">// "Bob"</span>
+
+<span class="cm">// Invoke method</span>
+<span class="kw">var</span> method = type.GetMethod(<span class="str">"Greet"</span>);
+method.Invoke(obj, <span class="kw">null</span>); <span class="cm">// "Hi!"</span>
+
+<span class="cm">// Invoke private method (with BindingFlags)</span>
+<span class="kw">var</span> secret = type.GetMethod(<span class="str">"Secret"</span>,
+  <span class="cls">BindingFlags</span>.NonPublic | <span class="cls">BindingFlags</span>.Instance);
+secret.Invoke(obj, <span class="kw">null</span>); <span class="cm">// "Shh"</span>
+
+<span class="cm">// Get methods with params</span>
+<span class="kw">var</span> methods = type.GetMethods();
+<span class="kw">foreach</span> (<span class="kw">var</span> m <span class="kw">in</span> methods)
+  Console.WriteLine($<span class="str">"{m.ReturnType.Name} {m.Name}"</span>);</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- MODULE 14: ADVANCED REFLECTION -->
+<section class="module-section" id="m14">
+  <div class="module-header">
+    <span class="module-num yellow">MODULE 14</span>
+    <span class="module-title">Advanced Reflection — Attributes &amp; Real World</span>
+    <span class="module-desc">Concepts #69–#75</span>
+  </div>
+  <div class="cols2">
+
+    <div class="card">
+      <div class="card-num">#69</div>
+      <div class="card-title">Custom Attributes &amp; Reflection</div>
+      <div class="card-body">
+        <p>Attributes are metadata markers on types/methods. Reflection reads them at runtime to drive behavior.</p>
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// 1. Define custom attribute</span>
+[<span class="cls">AttributeUsage</span>(<span class="cls">AttributeTargets</span>.Method)]
+<span class="kw">public class</span> <span class="cls">LogAttribute</span> : <span class="cls">Attribute</span>
+{
+  <span class="kw">public string</span> Level { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">"Info"</span>;
+}
+
+[<span class="cls">AttributeUsage</span>(<span class="cls">AttributeTargets</span>.Property)]
+<span class="kw">public class</span> <span class="cls">RequiredAttribute</span> : <span class="cls">Attribute</span> { }
+
+<span class="cm">// 2. Annotate class</span>
+<span class="kw">public class</span> <span class="cls">UserService</span>
+{
+  [<span class="cls">Log</span>(Level = <span class="str">"Debug"</span>)]
+  <span class="kw">public void</span> GetUser(<span class="kw">int</span> id) { ... }
+
+  [<span class="cls">Log</span>]
+  <span class="kw">public void</span> DeleteUser(<span class="kw">int</span> id) { ... }
+}
+
+<span class="cm">// 3. Read attributes at runtime</span>
+<span class="kw">var</span> type = <span class="kw">typeof</span>(<span class="cls">UserService</span>);
+<span class="kw">foreach</span> (<span class="kw">var</span> method <span class="kw">in</span> type.GetMethods())
+{
+  <span class="kw">var</span> logAttr = method.GetCustomAttribute&lt;<span class="cls">LogAttribute</span>&gt;();
+  <span class="kw">if</span> (logAttr != <span class="kw">null</span>)
+    Console.WriteLine($<span class="str">"{method.Name}: [{logAttr.Level}]"</span>);
+  <span class="cm">// GetUser: [Debug]</span>
+  <span class="cm">// DeleteUser: [Info]</span>
+}</div>
+      </div>
+    </div>
+
+    <div class="card pink">
+      <div class="card-num pink">#70</div>
+      <div class="card-title">🗄️ Real World: Simple ORM (Like EF Core)</div>
+      <div class="card-body">
+        <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// Attribute to mark table/column names</span>
+[<span class="attr">Table("users"</span>)]
+<span class="kw">public class</span> <span class="cls">User</span>
+{
+  [<span class="attr">Column("user_id"</span>)]    <span class="kw">public int</span>    Id   { <span class="kw">get</span>; <span class="kw">set</span>; }
+  [<span class="attr">Column("user_name"</span>)]  <span class="kw">public string</span> Name { <span class="kw">get</span>; <span class="kw">set</span>; }
+  [<span class="attr">Column("user_email"</span>)] <span class="kw">public string</span> Email { <span class="kw">get</span>; <span class="kw">set</span>; }
+}
+
+<span class="cm">// Micro ORM — builds SQL from reflection</span>
+<span class="kw">public static string</span> BuildInsert&lt;T&gt;(T obj)
+{
+  <span class="cm">// Inspect the runtime type so the same method can build SQL for any model.</span>
+  <span class="kw">var</span> type = <span class="kw">typeof</span>(T);
+  <span class="kw">var</span> table = type.GetCustomAttribute&lt;<span class="cls">TableAttribute</span>&gt;()?.Name ?? type.Name;
+  <span class="kw">var</span> cols = <span class="kw">new</span> <span class="cls">List</span>&lt;<span class="kw">string</span>&gt;();
+  <span class="kw">var</span> vals = <span class="kw">new</span> <span class="cls">List</span>&lt;<span class="kw">string</span>&gt;();
+
+  <span class="kw">foreach</span> (<span class="kw">var</span> prop <span class="kw">in</span> type.GetProperties())
+  {
+    <span class="cm">// Read optional [Column] metadata; if missing, fall back to the property name.</span>
+    <span class="kw">var</span> colAttr = prop.GetCustomAttribute&lt;<span class="cls">ColumnAttribute</span>&gt;();
+    <span class="kw">var</span> colName = colAttr?.Name ?? prop.Name;
+    <span class="cm">// Pull the value out of the current object instance via reflection.</span>
+    <span class="kw">var</span> value   = prop.GetValue(obj);
+    cols.Add(colName);
+    vals.Add($<span class="str">"'{value}'"</span>);
+  }
+  <span class="cm">// Stitch column names and values into one INSERT statement.</span>
+  <span class="kw">return</span> $<span class="str">"INSERT INTO {table} ({string.Join(",",cols)}) VALUES ({string.Join(",",vals)})"</span>;
+}
+
+<span class="cm">// Usage</span>
+<span class="kw">var</span> user = <span class="kw">new</span> <span class="cls">User</span> { Id=<span class="nm">1</span>, Name=<span class="str">"Alice"</span>, Email=<span class="str">"alice@x.com"</span> };
+<span class="kw">string</span> sql = BuildInsert(user);
+<span class="cm">// INSERT INTO users (user_id,user_name,user_email) VALUES ('1','Alice','alice@x.com')</span></div>
+        <div class="highlight pink" style="margin-top:8px">
+          <strong>This is exactly how Entity Framework Core, Dapper, and AutoMapper work internally!</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card blue col-span2">
+      <div class="card-num blue">#71</div>
+      <div class="card-title">🔌 Real World: Plugin System with Reflection</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">PLUGIN INTERFACE + LOADER</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// Interface all plugins must implement</span>
+<span class="kw">public interface</span> <span class="cls">IPlugin</span>
+{
+  <span class="kw">string</span> Name { <span class="kw">get</span>; }
+  <span class="kw">void</span> Execute();
+}
+
+<span class="cm">// Plugin loader using reflection</span>
+<span class="kw">public class</span> <span class="cls">PluginLoader</span>
+{
+  <span class="kw">public</span> <span class="cls">List</span>&lt;<span class="cls">IPlugin</span>&gt; LoadFromDirectory(<span class="kw">string</span> path)
+  {
+    <span class="kw">var</span> plugins = <span class="kw">new</span> <span class="cls">List</span>&lt;<span class="cls">IPlugin</span>&gt;();
+    <span class="kw">foreach</span> (<span class="kw">var</span> dll <span class="kw">in</span> <span class="cls">Directory</span>.GetFiles(path, <span class="str">"*.dll"</span>))
+    {
+      <span class="cm">// Load each assembly found in the plugin folder.</span>
+      <span class="kw">var</span> asm = <span class="cls">Assembly</span>.LoadFrom(dll);
+      <span class="cm">// Keep only concrete types that actually implement IPlugin.</span>
+      <span class="kw">var</span> pluginTypes = asm.GetTypes()
+        .Where(t => <span class="kw">typeof</span>(<span class="cls">IPlugin</span>).IsAssignableFrom(t)
+                 && !t.IsInterface && !t.IsAbstract);
+      <span class="kw">foreach</span> (<span class="kw">var</span> type <span class="kw">in</span> pluginTypes)
+      {
+        <span class="cm">// Create an instance without knowing the concrete plugin type at compile time.</span>
+        <span class="kw">var</span> plugin = (<span class="cls">IPlugin</span>)<span class="cls">Activator</span>.CreateInstance(type);
+        plugins.Add(plugin);
+      }
+    }
+    <span class="kw">return</span> plugins;
+  }
+}</div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">DI CONTAINER (SIMPLIFIED)</div>
+            <div class="code-block"><span class="code-lang">C#</span>
+<span class="cm">// Simple dependency injection container</span>
+<span class="kw">public class</span> <span class="cls">SimpleContainer</span>
+{
+  <span class="kw">private</span> <span class="cls">Dictionary</span>&lt;<span class="cls">Type</span>, <span class="cls">Type</span>&gt; _map = <span class="kw">new</span>();
+
+  <span class="kw">public void</span> Register&lt;TInterface, TImpl&gt;()
+    => _map[<span class="kw">typeof</span>(TInterface)] = <span class="kw">typeof</span>(TImpl);
+
+  <span class="kw">public</span> T Resolve&lt;T&gt;() => (T)Resolve(<span class="kw">typeof</span>(T));
+
+  <span class="kw">private object</span> Resolve(<span class="cls">Type</span> type)
+  {
+    <span class="kw">var</span> implType = _map.TryGetValue(type, <span class="kw">out var</span> t) ? t : type;
+    <span class="kw">var</span> ctor = implType.GetConstructors().First();
+    <span class="kw">var</span> ctorParams = ctor.GetParameters();
+    <span class="kw">var</span> args = ctorParams
+      .Select(p => Resolve(p.ParameterType))
+      .ToArray();
+    <span class="kw">return</span> ctor.Invoke(args); <span class="cm">// create with resolved deps</span>
+  }
+}
+
+<span class="cm">// Usage</span>
+<span class="kw">var</span> container = <span class="kw">new</span> <span class="cls">SimpleContainer</span>();
+container.Register&lt;<span class="cls">IEmailService</span>, <span class="cls">EmailService</span>&gt;();
+container.Register&lt;<span class="cls">ILogger</span>, <span class="cls">ConsoleLogger</span>&gt;();
+<span class="kw">var</span> service = container.Resolve&lt;<span class="cls">IEmailService</span>&gt;();</div>
+          </div>
+        </div>
+        <div class="highlight blue" style="margin-top:10px">
+          <strong>This is how ASP.NET Core's built-in DI, Autofac, and Unity work internally — using reflection to inspect constructors and create instances.</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card yellow col-span2">
+      <div class="card-num yellow">#72</div>
+      <div class="card-title">Reflection Quick Reference</div>
+      <div class="card-body">
+        <div class="reflect-visual">
+          <div class="reflect-box">
+            <div class="reflect-box-title">Type Discovery</div>
+            <div class="reflect-item"><code>typeof(T)</code></div>
+            <div class="reflect-item"><code>obj.GetType()</code></div>
+            <div class="reflect-item"><code>Type.GetType("name")</code></div>
+            <div class="reflect-item"><code>Assembly.GetTypes()</code></div>
+          </div>
+          <div class="reflect-box">
+            <div class="reflect-box-title">Members</div>
+            <div class="reflect-item"><code>GetMethods()</code></div>
+            <div class="reflect-item"><code>GetProperties()</code></div>
+            <div class="reflect-item"><code>GetFields()</code></div>
+            <div class="reflect-item"><code>GetConstructors()</code></div>
+          </div>
+          <div class="reflect-box">
+            <div class="reflect-box-title">Invocation</div>
+            <div class="reflect-item"><code>Activator.CreateInstance()</code></div>
+            <div class="reflect-item"><code>method.Invoke(obj, args)</code></div>
+            <div class="reflect-item"><code>prop.GetValue(obj)</code></div>
+            <div class="reflect-item"><code>prop.SetValue(obj, v)</code></div>
+          </div>
+          <div class="reflect-box">
+            <div class="reflect-box-title">Attributes</div>
+            <div class="reflect-item"><code>GetCustomAttribute&lt;T&gt;()</code></div>
+            <div class="reflect-item"><code>GetCustomAttributes()</code></div>
+            <div class="reflect-item"><code>IsDefined(typeof(Attr))</code></div>
+            <div class="reflect-item"><code>AttributeTargets.xxx</code></div>
+          </div>
+          <div class="reflect-box">
+            <div class="reflect-box-title">BindingFlags</div>
+            <div class="reflect-item"><code>Public</code></div>
+            <div class="reflect-item"><code>NonPublic</code></div>
+            <div class="reflect-item"><code>Instance</code></div>
+            <div class="reflect-item"><code>Static</code></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div><!-- end topic-reflection -->
+
+<hr class="section-divider">
+
+<!-- ══════════ Q&A MASTER SECTION ══════════ -->
+<div id="topic-qa" style="scroll-margin-top:96px">
+
+<section class="module-section">
+  <div class="module-header">
+    <span class="module-num red">Q&amp;A MASTER</span>
+    <span class="module-title">Interview Questions &amp; Answers — All Topics</span>
+    <span class="module-desc">80+ Questions</span>
+  </div>
+
+  <!-- COLLECTIONS Q&A -->
+  <div class="card col-span2" style="margin-bottom:16px">
+    <div class="card-num">#QA-01</div>
+    <div class="card-title" style="color:var(--teal)">📦 Collections &amp; Generic Collections — Q&amp;A</div>
+    <div class="card-body">
+      <div class="cols3" style="gap:14px">
+        <div>
+          <div class="qa-title" style="border-bottom:1px solid rgba(0,212,170,0.2);color:var(--teal)">Basic</div>
+          <div class="qa-item">
+            <div class="qa-q">What is the difference between Array and ArrayList?</div>
+            <div class="qa-a">Array has fixed size and is strongly typed. ArrayList is dynamically resizable and stores <code>object</code> — not type-safe. ArrayList requires boxing for value types.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is boxing and unboxing? Why is it a problem with ArrayList?</div>
+            <div class="qa-a">Boxing wraps a value type (e.g., <code>int</code>) in an <code>object</code> heap allocation. Unboxing extracts it. With ArrayList, every int stored/retrieved is boxed/unboxed — this causes GC pressure and performance loss.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is IEnumerable vs ICollection vs IList?</div>
+            <div class="qa-a"><code>IEnumerable</code> = read-only forward iteration. <code>ICollection</code> adds Count/Add/Remove. <code>IList</code> adds index-based access. They form a hierarchy: IEnumerable ⊂ ICollection ⊂ IList.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">How does Stack differ from Queue?</div>
+            <div class="qa-a">Stack = LIFO (Last In, First Out). Push adds to top, Pop removes from top. Queue = FIFO (First In, First Out). Enqueue adds to back, Dequeue removes from front.</div>
+          </div>
+        </div>
+        <div>
+          <div class="qa-title" style="border-bottom:1px solid rgba(255,107,53,0.2);color:var(--orange)">Intermediate</div>
+          <div class="qa-item">
+            <div class="qa-q">What is the time complexity of List&lt;T&gt; Add vs Insert?</div>
+            <div class="qa-a"><code>Add()</code> is O(1) amortized — appends to end. <code>Insert(i, item)</code> is O(n) — all elements after index i must shift right. For frequent mid-insertions, use LinkedList&lt;T&gt;.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">When should you use HashSet&lt;T&gt; over List&lt;T&gt;?</div>
+            <div class="qa-a">Use HashSet when uniqueness is required or when you need O(1) <code>Contains()</code>. List.Contains() is O(n). For checking "has this user already visited?", HashSet is ideal.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What happens if you add a duplicate key to Dictionary?</div>
+            <div class="qa-a">Calling <code>dict.Add(key, val)</code> throws <code>ArgumentException</code>. Using <code>dict[key] = val</code> silently overwrites. Use <code>TryAdd()</code> in .NET 5+ to add only if key doesn't exist.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is the internal data structure of Dictionary&lt;K,V&gt;?</div>
+            <div class="qa-a">A hash table. Keys are hashed to bucket indices. Collisions handled by chaining or open addressing. Average O(1) ops. Worst case O(n) if many collisions (poor hash function).</div>
+          </div>
+        </div>
+        <div>
+          <div class="qa-title" style="border-bottom:1px solid rgba(168,85,247,0.2);color:var(--purple)">Advanced</div>
+          <div class="qa-item">
+            <div class="qa-q">How does List&lt;T&gt; resize internally?</div>
+            <div class="qa-a">When Count == Capacity, a new array of double the size is allocated and all elements are copied. Initial capacity is 4 (or the provided value). Amortized O(1) per add because resize happens infrequently.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is ConcurrentDictionary and when to use it?</div>
+            <div class="qa-a"><code>ConcurrentDictionary&lt;K,V&gt;</code> is thread-safe using fine-grained locking. Use when multiple threads read/write the dictionary. Use <code>GetOrAdd(key, factory)</code> and <code>AddOrUpdate()</code> for atomic operations.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is IReadOnlyList vs IList? Why use read-only collections?</div>
+            <div class="qa-a"><code>IReadOnlyList&lt;T&gt;</code> exposes only read operations (index, Count, enumeration). Return it from APIs to prevent callers from modifying internal state. Prefer for immutability and safer APIs.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">Explain IEnumerable deferred execution with a code example.</div>
+            <div class="qa-a">LINQ queries on IEnumerable are not executed until enumerated. <code>Where()</code>, <code>Select()</code> return lazy iterators. Calling <code>ToList()</code> forces immediate execution. This means the query runs once at enumeration time, not at definition time.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELEGATES Q&A -->
+  <div class="card col-span2" style="border-color:rgba(168,85,247,0.15);margin-bottom:16px">
+    <div class="card-num purple">#QA-02</div>
+    <div class="card-title" style="color:var(--purple)">🎯 Delegates — Q&amp;A</div>
+    <div class="card-body">
+      <div class="cols3" style="gap:14px">
+        <div>
+          <div class="qa-title" style="border-bottom:1px solid rgba(168,85,247,0.2);color:var(--purple)">Basic</div>
+          <div class="qa-item">
+            <div class="qa-q">What is a delegate in C#?</div>
+            <div class="qa-a">A delegate is a type-safe function pointer — a reference type that holds a reference to a method with a specific signature. It enables passing methods as arguments and storing them in variables.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is the difference between Func, Action, and Predicate?</div>
+            <div class="qa-a"><code>Func&lt;T,R&gt;</code> takes inputs and returns a value. <code>Action&lt;T&gt;</code> takes inputs, returns void. <code>Predicate&lt;T&gt;</code> takes one input, returns bool. They eliminate needing to declare custom delegate types.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is a multicast delegate?</div>
+            <div class="qa-a">A delegate that holds references to multiple methods. Use <code>+=</code> to add and <code>-=</code> to remove. When invoked, all methods are called in order. If one throws, subsequent methods won't run.</div>
+          </div>
+        </div>
+        <div>
+          <div class="qa-title" style="border-bottom:1px solid rgba(168,85,247,0.2);color:var(--purple)">Intermediate</div>
+          <div class="qa-item">
+            <div class="qa-q">What is a closure in C#? What are the risks?</div>
+            <div class="qa-a">A closure is a lambda that captures variables from the enclosing scope by reference. Risk: if a captured variable changes, the lambda sees the new value. Common bug in loops: <code>for(int i=0;...) list.Add(()=>Print(i));</code> — all lambdas capture same <code>i</code>.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">Can a delegate point to multiple methods with different return types?</div>
+            <div class="qa-a">No. A delegate has a fixed signature (return type + parameter types). All methods in a multicast delegate must share the same signature. For multicast with non-void return, only the last method's return value is captured.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is the difference between anonymous method and lambda?</div>
+            <div class="qa-a">Anonymous methods use the <code>delegate</code> keyword: <code>delegate(int x) { return x*2; }</code>. Lambdas are syntactic sugar: <code>x => x*2</code>. Lambdas are shorter and support expression trees. Anonymous methods support discarding params.</div>
+          </div>
+        </div>
+        <div>
+          <div class="qa-title" style="border-bottom:1px solid rgba(168,85,247,0.2);color:var(--purple)">Advanced</div>
+          <div class="qa-item">
+            <div class="qa-q">What are expression trees and how do they relate to delegates?</div>
+            <div class="qa-a">Expression trees represent code as data structures. <code>Expression&lt;Func&lt;T,bool&gt;&gt;</code> stores a lambda as an AST that can be inspected. Entity Framework uses expression trees to translate C# lambdas to SQL queries.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">How do you safely invoke a multicast delegate when each handler might throw?</div>
+            <div class="qa-a">Use <code>GetInvocationList()</code> to get each handler separately, then invoke each in a try-catch: <code>foreach(var d in evt.GetInvocationList()) { try { d.DynamicInvoke(args); } catch(ex){...} }</code></div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is Func vs delegate performance difference?</div>
+            <div class="qa-a">Functionally identical at runtime. <code>Func/Action</code> are just pre-defined generic delegate types in the BCL. No performance difference. Use built-in types to avoid declaring custom delegate types for standard signatures.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVENTS Q&A -->
+  <div class="card col-span2" style="border-color:rgba(251,191,36,0.15);margin-bottom:16px">
+    <div class="card-num yellow">#QA-03</div>
+    <div class="card-title" style="color:var(--yellow)">⚡ Events — Q&amp;A</div>
+    <div class="card-body">
+      <div class="cols3" style="gap:14px">
+        <div>
+          <div class="qa-title" style="border-bottom:1px solid rgba(251,191,36,0.2);color:var(--yellow)">Basic</div>
+          <div class="qa-item">
+            <div class="qa-q">What is the difference between a delegate and an event?</div>
+            <div class="qa-a">An event is a delegate with restricted access: outsiders can only subscribe/unsubscribe (<code>+=/-=</code>), not invoke it or assign (<code>=</code>) to it. Events enforce the publisher-subscriber pattern and prevent external code from triggering them.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is EventHandler and EventHandler&lt;T&gt;?</div>
+            <div class="qa-a"><code>EventHandler</code> is a built-in delegate: <code>void (object sender, EventArgs e)</code>. <code>EventHandler&lt;TEventArgs&gt;</code> adds a generic EventArgs. Use <code>EventHandler&lt;MyArgs&gt;</code> to pass custom data with events.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">Why should you use ?.Invoke() when raising an event?</div>
+            <div class="qa-a">If no subscribers exist, the event delegate is null. <code>event?.Invoke()</code> safely skips invocation when null. Without it, you'd get a <code>NullReferenceException</code>. It's also thread-safe for the null check.</div>
+          </div>
+        </div>
+        <div>
+          <div class="qa-title" style="border-bottom:1px solid rgba(251,191,36,0.2);color:var(--yellow)">Intermediate</div>
+          <div class="qa-item">
+            <div class="qa-q">What is a memory leak caused by events?</div>
+            <div class="qa-a">When an object subscribes to an event but never unsubscribes, the publisher holds a reference preventing GC. The subscriber lives as long as the publisher. Fix: always unsubscribe in Dispose() or use WeakReference patterns.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">How do you make an event thread-safe?</div>
+            <div class="qa-a">Copy the delegate before null-check and invocation: <code>var handler = MyEvent; handler?.Invoke(this, e);</code> This prevents a race where another thread unsubscribes between the null check and invocation.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is the Observer pattern and how does it relate to C# events?</div>
+            <div class="qa-a">Observer pattern = objects (observers) subscribe to a subject's state changes. C# events are the language-level implementation. Event = subject, event handlers = observers. The <code>IObservable&lt;T&gt;/IObserver&lt;T&gt;</code> interfaces are the formal Rx version.</div>
+          </div>
+        </div>
+        <div>
+          <div class="qa-title" style="border-bottom:1px solid rgba(251,191,36,0.2);color:var(--yellow)">Advanced</div>
+          <div class="qa-item">
+            <div class="qa-q">What are custom event accessors (add/remove)?</div>
+            <div class="qa-a">You can manually control subscribe/unsubscribe with <code>add { }</code> and <code>remove { }</code> accessors — like property getters/setters. Used for thread-safe events (<code>lock</code>), filtered subscriptions, or lazy initialization of handler storage.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">How would you implement an async event handler?</div>
+            <div class="qa-a">Events don't natively support async. Options: (1) <code>async void</code> handlers (fire-and-forget, exceptions swallowed), (2) Use <code>Func&lt;Task&gt;</code> delegates instead, (3) Use <code>AsyncEventHandler</code> pattern and <code>await Task.WhenAll()</code> over invocation list.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">When would you use events over direct method calls?</div>
+            <div class="qa-a">When: (1) multiple subscribers need notification, (2) publisher shouldn't know about subscribers (decoupling), (3) behavior can be extended by external code (plugins), (4) subscribers can be added/removed at runtime. Use direct calls when one-to-one communication is sufficient.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFLECTION Q&A -->
+  <div class="card col-span2" style="border-color:rgba(236,72,153,0.15)">
+    <div class="card-num pink">#QA-04</div>
+    <div class="card-title" style="color:var(--pink)">🔍 Reflection — Q&amp;A</div>
+    <div class="card-body">
+      <div class="cols3" style="gap:14px">
+        <div>
+          <div class="qa-title" style="border-bottom:1px solid rgba(236,72,153,0.2);color:var(--pink)">Basic</div>
+          <div class="qa-item">
+            <div class="qa-q">What is Reflection in C#?</div>
+            <div class="qa-a">Reflection is the ability to inspect and manipulate type metadata at runtime using <code>System.Reflection</code> namespace. You can discover types, invoke methods, read/write properties, and read attributes without knowing the type at compile time.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What are the 3 ways to get a Type object?</div>
+            <div class="qa-a">1. <code>typeof(MyClass)</code> — compile-time, no instance needed. 2. <code>myObj.GetType()</code> — from an existing instance. 3. <code>Type.GetType("Namespace.ClassName")</code> — by fully qualified string name.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is Activator.CreateInstance()?</div>
+            <div class="qa-a"><code>Activator.CreateInstance(type)</code> creates an object of the given type at runtime without using <code>new</code>. Uses the parameterless constructor. Can also pass constructor arguments. This is how DI containers create services.</div>
+          </div>
+        </div>
+        <div>
+          <div class="qa-title" style="border-bottom:1px solid rgba(236,72,153,0.2);color:var(--pink)">Intermediate</div>
+          <div class="qa-item">
+            <div class="qa-q">What are BindingFlags and when do you need them?</div>
+            <div class="qa-a"><code>BindingFlags</code> control what members are returned by GetMethod/GetProperty etc. Without flags, only public instance members are returned. Use <code>BindingFlags.NonPublic | BindingFlags.Instance</code> to access private members (useful for unit testing).</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">Why is Reflection slow and how do you mitigate it?</div>
+            <div class="qa-a">Reflection has ~10-100x overhead from metadata lookup, security checks, and boxing. Mitigate by: (1) caching MethodInfo/PropertyInfo objects, (2) using compiled expression trees, (3) generating IL via <code>Emit</code>, (4) using source generators (compile-time reflection).</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">How are custom attributes read at runtime?</div>
+            <div class="qa-a">Call <code>member.GetCustomAttribute&lt;MyAttr&gt;()</code> on a <code>Type</code>, <code>MethodInfo</code>, or <code>PropertyInfo</code>. Returns null if not present. Use <code>GetCustomAttributes()</code> for all attributes. <code>IsDefined(typeof(MyAttr))</code> for existence check.</div>
+          </div>
+        </div>
+        <div>
+          <div class="qa-title" style="border-bottom:1px solid rgba(236,72,153,0.2);color:var(--pink)">Advanced</div>
+          <div class="qa-item">
+            <div class="qa-q">What are compiled expression trees and how do they help with reflection perf?</div>
+            <div class="qa-a">Instead of calling <code>MethodInfo.Invoke()</code> each time, compile a lambda delegate once: <code>var getter = Expression.Lambda&lt;Func&lt;T,P&gt;&gt;(...).Compile()</code>. First call is slow (compilation), subsequent calls are as fast as direct invocation. Used by EF Core, AutoMapper.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What is the difference between early binding and late binding?</div>
+            <div class="qa-a">Early binding: type resolved at compile time (normal C# code, IntelliSense, type checking). Late binding: type resolved at runtime via reflection or <code>dynamic</code>. Late binding is flexible but slower and loses compile-time safety.</div>
+          </div>
+          <hr class="qa-divider">
+          <div class="qa-item">
+            <div class="qa-q">What are Source Generators and how do they replace reflection?</div>
+            <div class="qa-a">Source generators run at compile time to generate C# code. They do what reflection does at runtime but at compile time — zero runtime overhead, full type safety. Used by <code>System.Text.Json</code> serialization, EF Core model building, AutoMapper in .NET 7+.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+</div><!-- end topic-qa -->
+
+</main>
+
+<!-- RIGHT PANEL: CONTEXTUAL Q&A -->
+<aside class="sidebar-right">
+  <div class="qa-title">⚡ Quick Reference</div>
+
+  <div class="qa-item">
+    <div class="qa-q">Most used collection?</div>
+    <div class="qa-a"><code>List&lt;T&gt;</code> for sequences, <code>Dictionary&lt;K,V&gt;</code> for lookups. 80% of cases covered by these two.</div>
+  </div>
+  <hr class="qa-divider">
+  <div class="qa-item">
+    <div class="qa-q">Fastest Contains() check?</div>
+    <div class="qa-a"><code>HashSet&lt;T&gt;</code> — O(1). Dictionary.ContainsKey() — O(1). List.Contains() — O(n). Use HashSet for membership tests.</div>
+  </div>
+  <hr class="qa-divider">
+  <div class="qa-item">
+    <div class="qa-q">Delegate vs Interface for callback?</div>
+    <div class="qa-a">Use delegate for single-method callbacks. Interface for multi-method contracts (ILogger). Delegates are lighter and more flexible for single behaviors.</div>
+  </div>
+  <hr class="qa-divider">
+  <div class="qa-item">
+    <div class="qa-q">When does event cause memory leak?</div>
+    <div class="qa-a">When short-lived object subscribes to event on long-lived object and never unsubscribes. Publisher keeps subscriber alive via event chain.</div>
+  </div>
+  <hr class="qa-divider">
+  <div class="qa-item">
+    <div class="qa-q">Reflection in production code?</div>
+    <div class="qa-a">Cache MethodInfo/PropertyInfo. Never call reflection in hot loops. Consider Expression trees or source generators for performance-critical paths.</div>
+  </div>
+  <hr class="qa-divider">
+
+  <div class="qa-title" style="margin-top:16px">🎯 Key Patterns</div>
+  <div class="qa-item">
+    <div class="qa-q">Strategy via Func</div>
+    <div class="qa-a"><code>Func&lt;decimal,bool&gt; payStrategy</code> — swap payment algorithms at runtime without interfaces.</div>
+  </div>
+  <hr class="qa-divider">
+  <div class="qa-item">
+    <div class="qa-q">Pub/Sub via Events</div>
+    <div class="qa-a">Publisher raises event. Subscribers add handlers. Zero coupling between them. Add new subscribers without touching publisher.</div>
+  </div>
+  <hr class="qa-divider">
+  <div class="qa-item">
+    <div class="qa-q">Plugin via Reflection</div>
+    <div class="qa-a">Load DLL → GetTypes() → filter IPlugin → Activator.CreateInstance(). New plugins drop in without recompiling host.</div>
+  </div>
+  <hr class="qa-divider">
+
+  <div class="qa-title" style="margin-top:16px">🚦 Complexity Quick Ref</div>
+  <div style="font-family:var(--mono);font-size:11px">
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="color:var(--text3)">List.Add</span><span style="color:var(--green)">O(1)*</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="color:var(--text3)">List.Contains</span><span style="color:var(--red)">O(n)</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="color:var(--text3)">Dict.Get</span><span style="color:var(--green)">O(1)*</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="color:var(--text3)">HashSet.Contains</span><span style="color:var(--green)">O(1)*</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="color:var(--text3)">SortedDict.Get</span><span style="color:var(--yellow)">O(log n)</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="color:var(--text3)">LinkedList.Insert</span><span style="color:var(--green)">O(1)*</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0"><span style="color:var(--text3)">List.Sort</span><span style="color:var(--yellow)">O(n log n)</span></div>
+    <div style="font-size:10px;color:var(--text3);margin-top:4px">* amortized / average</div>
+  </div>
+</aside>
+
+</div><!-- end layout3 -->
+
+<div class="page-footer">
+  <span>C# Deep Dive</span> — Collections · Generic Collections · Delegates · Events · Reflection &nbsp;·&nbsp; 75 Concepts · 60+ Code Examples · 80+ Q&amp;A &nbsp;·&nbsp; <span>C# / .NET</span>
+</div>
+
+<script>
+// Active nav on scroll
+const sections = document.querySelectorAll('.module-section[id]');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const id = e.target.id;
+      const a = document.querySelector(`.nav-item[href="#${id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { threshold: 0.2 });
+sections.forEach(s => observer.observe(s));
+
+// Topic tabs highlight on scroll
+const topicSections = document.querySelectorAll('[id^="topic-"]');
+const tabs = document.querySelectorAll('.topic-tab');
+const tabObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tabs.forEach(t => t.classList.remove('active'));
+      const id = e.target.id;
+      const t = document.querySelector(`.topic-tab[href="#${id}"]`);
+      if (t) t.classList.add('active');
+    }
+  });
+}, { threshold: 0.15 });
+topicSections.forEach(s => tabObserver.observe(s));
+</script>
+
+</body>
+</html>

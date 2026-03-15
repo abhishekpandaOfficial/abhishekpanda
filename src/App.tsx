@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Routes, Route, useParams } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { RouteScrollRestoration } from "@/components/layout/RouteScrollRestoration";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Index from "./pages/Index";
 import { RouteSeo } from "@/components/seo/RouteSeo";
@@ -178,6 +179,7 @@ const App = () => {
           <Sonner />
           <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
             <AnalyticsWrapper>
+              <RouteScrollRestoration />
               <RouteSeo />
               <AnimatePresence>{showIntro ? <BrandIntro /> : null}</AnimatePresence>
               <Suspense fallback={<RouteLoader />}>

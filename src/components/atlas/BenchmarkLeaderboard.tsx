@@ -292,7 +292,7 @@ export const BenchmarkLeaderboard = (props: {
         />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="relative z-10 w-full px-4 md:px-6 xl:px-8 2xl:px-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -308,7 +308,7 @@ export const BenchmarkLeaderboard = (props: {
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-5 leading-[0.98]">
             Full <span className="atlas-gradient-text">Leaderboard</span>
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="mx-auto max-w-4xl text-lg leading-relaxed text-muted-foreground md:text-xl">
             Latest open-source and closed-source models across reasoning, coding, latency,
             speed, and pricing.
           </p>

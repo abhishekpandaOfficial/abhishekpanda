@@ -1,16 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { useTheme } from "@/components/ThemeProvider";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { EmbeddedAtlasPageShell } from "@/components/atlas/EmbeddedAtlasPageShell";
 import { measureEmbeddedFrameHeight, syncThemeToEmbeddedFrame } from "@/lib/embeddedFrame";
 
 const ModelComparisonPage = () => {
@@ -74,28 +66,18 @@ const ModelComparisonPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main className="pt-16 md:pt-20">
-        <div className="border-b border-border/60 bg-background/95 px-4 py-3 backdrop-blur md:px-6">
-          <Breadcrumb>
-            <BreadcrumbList className="text-xs md:text-sm">
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/">Home</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/ai-ml-hub">AI / ML Hub</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>AI Model Comparison</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
+      <EmbeddedAtlasPageShell
+        title="Compare LLM Models"
+        description="Compare providers, capabilities, pricing, context windows, and benchmark posture in a dedicated full-width matrix built for side-by-side model evaluation."
+        badge="Comparison Matrix"
+        accentClassName="border-violet-500/25 bg-violet-500/10 text-violet-600 dark:text-violet-300"
+        metricItems={[
+          { label: "Mode", value: "Side-by-side analysis" },
+          { label: "Focus", value: "Capabilities, pricing, and context" },
+          { label: "Theme", value: "Light and dark aware" },
+          { label: "Layout", value: "Full-width responsive matrix" },
+        ]}
+      >
         <iframe
           ref={iframeRef}
           title="AI Model Comparison"
@@ -109,7 +91,7 @@ const ModelComparisonPage = () => {
             window.setTimeout(measureFromIframe, 500);
           }}
         />
-      </main>
+      </EmbeddedAtlasPageShell>
       <Footer />
     </div>
   );

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, Code2, Cloud, Brain, Database, Cpu, ArrowRight, Shield, FolderOpen } from "lucide-react";
+import { Sparkles, Code2, Cloud, Brain, Database, Cpu, ArrowRight, Shield, FolderOpen, Send } from "lucide-react";
 import abhishekAvatar from "@/assets/abhishek-avatar.png";
 import abhishekAvatarAlt from "@/assets/abhishek-avatar-alt.png";
 import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
@@ -76,13 +76,28 @@ const primaryCtas = [
     label: "View Projects",
     to: "/projects",
     icon: FolderOpen,
-    className: "border-border/60 bg-card/80 text-foreground hover:border-primary/35 hover:text-primary",
+    eyebrow: "Builds",
+    description: "Explore live products and engineering work",
+    className:
+      "border-sky-400/20 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.18),transparent_40%),linear-gradient(160deg,rgba(255,255,255,0.94),rgba(239,246,255,0.92))] text-slate-900 hover:border-sky-400/45 hover:shadow-[0_24px_60px_-35px_rgba(56,189,248,0.5)] dark:bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.22),transparent_38%),linear-gradient(160deg,rgba(15,23,42,0.94),rgba(8,47,73,0.94))] dark:text-white",
   },
   {
     label: "Phantom VPN",
     href: "https://phantom.origixcloud.com/",
     icon: Shield,
-    className: "border-border/60 bg-card/80 text-foreground hover:border-primary/35 hover:text-primary",
+    eyebrow: "Security",
+    description: "Open the privacy-first secure tunnel",
+    className:
+      "border-emerald-400/20 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_42%),linear-gradient(160deg,rgba(236,253,245,0.96),rgba(209,250,229,0.88))] text-emerald-950 hover:border-emerald-400/45 hover:shadow-[0_24px_60px_-35px_rgba(16,185,129,0.45)] dark:bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.22),transparent_38%),linear-gradient(160deg,rgba(6,78,59,0.95),rgba(6,95,70,0.92))] dark:text-white",
+  },
+  {
+    label: "Connect",
+    href: "https://www.linkedin.com/in/abhishekpandaofficial/",
+    icon: Send,
+    eyebrow: "Network",
+    description: "Connect with Abhishek on LinkedIn",
+    className:
+      "border-violet-400/20 bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.18),transparent_42%),linear-gradient(160deg,rgba(245,243,255,0.96),rgba(237,233,254,0.9))] text-violet-950 hover:border-violet-400/45 hover:shadow-[0_24px_60px_-35px_rgba(168,85,247,0.48)] dark:bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.22),transparent_38%),linear-gradient(160deg,rgba(59,7,100,0.94),rgba(76,29,149,0.92))] dark:text-white",
   },
 ];
 
@@ -163,7 +178,7 @@ export const HeroSection = () => {
         }}
       />
 
-      <div className="relative container mx-auto px-4 py-8 md:py-10">
+      <div className="relative w-full px-4 py-8 md:px-6 md:py-10 xl:px-8">
         <div className="pointer-events-none absolute inset-0 hidden lg:block">
           {floatingTechStacks.map((stack, index) => (
             <motion.div
@@ -187,7 +202,7 @@ export const HeroSection = () => {
           ))}
         </div>
 
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="mx-auto w-full max-w-[1120px] text-center">
           {/* Avatar with Hover Tagline */}
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
@@ -259,7 +274,7 @@ export const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-3 tracking-tight leading-[1.05]">
+            <h1 className="mb-3 text-4xl font-black leading-[1.02] tracking-tight md:text-6xl lg:text-7xl xl:text-[5.6rem]">
               <span className="text-foreground">Hi, I'm </span>
               <AnimatePresence mode="wait">
                 <motion.span
@@ -274,7 +289,7 @@ export const HeroSection = () => {
                 </motion.span>
               </AnimatePresence>
             </h1>
-            <p className="text-lg md:text-2xl text-muted-foreground mb-4 font-medium">
+            <p className="mb-4 text-lg font-medium text-muted-foreground md:text-2xl xl:text-[1.7rem]">
               Architecting production-ready .NET, Cloud, and AI systems
             </p>
           </motion.div>
@@ -284,7 +299,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-base md:text-lg text-foreground/80 mb-6 max-w-3xl mx-auto leading-relaxed"
+            className="mx-auto mb-6 max-w-4xl text-base leading-relaxed text-foreground/80 md:text-lg xl:text-[1.2rem]"
           >
             Building reliable products with clear architecture, strong execution, and measurable outcomes.
           </motion.p>
@@ -337,22 +352,36 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.58 }}
-            className="mb-5"
+            className="mx-auto mb-5 w-full max-w-5xl"
           >
             <div className="mb-3 text-xs uppercase tracking-[0.16em] text-muted-foreground">Start Here</div>
-            <div className="flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
+            <div className="flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap xl:flex-nowrap">
               {primaryCtas.map((cta) => {
                 const content = (
                   <>
-                    <cta.icon className="h-4 w-4 shrink-0 md:h-[18px] md:w-[18px]" />
-                    <span className="min-w-0">
-                      {cta.label}
+                    <div className="flex min-w-0 flex-1 items-start gap-3 text-left">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-black/10 bg-white/70 shadow-sm dark:border-white/10 dark:bg-white/10">
+                        <cta.icon className="h-5 w-5" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[10px] font-black uppercase tracking-[0.18em] opacity-70">
+                          {cta.eyebrow}
+                        </span>
+                        <span className="mt-1 block text-sm font-bold md:text-[15px]">
+                          {cta.label}
+                        </span>
+                        <span className="mt-1 block text-xs leading-5 opacity-75">
+                          {cta.description}
+                        </span>
+                      </span>
+                    </div>
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white/70 shadow-sm transition-transform duration-300 group-hover:translate-x-1 dark:border-white/10 dark:bg-white/10">
+                      <ArrowRight className="h-4 w-4" />
                     </span>
-                    <ArrowRight className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:translate-x-1" />
                   </>
                 );
 
-                const className = `group inline-flex items-center justify-center gap-2 rounded-2xl border px-5 py-3 text-sm font-semibold backdrop-blur-xl transition sm:flex-1 sm:basis-[calc(50%-0.375rem)] xl:basis-[calc(20%-0.6rem)] ${cta.className}`;
+                const className = `group inline-flex items-center justify-between gap-3 rounded-[1.6rem] border px-4 py-4 text-sm font-semibold backdrop-blur-xl transition hover:-translate-y-1 sm:flex-1 sm:basis-[calc(50%-0.375rem)] xl:min-w-[240px] xl:flex-1 ${cta.className}`;
 
                 if (cta.href) {
                   return (

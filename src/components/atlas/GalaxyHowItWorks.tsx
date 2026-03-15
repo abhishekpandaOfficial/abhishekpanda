@@ -22,12 +22,12 @@ const steps = [
 export const GalaxyHowItWorks = () => {
   return (
     <section className="py-14 bg-background">
-      <div className="container mx-auto px-4">
+      <div className="w-full px-4 md:px-6 xl:px-8 2xl:px-10">
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-6xl mx-auto"
+          className="mx-auto max-w-[1500px]"
         >
           <div className="rounded-3xl border border-primary/20 bg-card/70 backdrop-blur p-6 md:p-8">
             <div className="flex items-center gap-2 text-primary mb-4">

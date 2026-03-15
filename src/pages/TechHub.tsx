@@ -3,15 +3,19 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
+  Binary,
   BookOpen,
   ChevronRight,
+  Cloud,
   Code2,
+  Database,
   Crown,
   FileCode,
   Filter,
   Layers3,
   Lock,
   Menu,
+  Network,
   Sparkles,
   Video,
   X,
@@ -116,6 +120,31 @@ const DOMAIN_CONFIG: DomainConfig[] = [
 const DOMAIN_FEATURED_DOCS_COUNT: Partial<Record<DomainSlug, number>> = {
   "ai-ml": 1,
 };
+
+const DOMAIN_ICONS: Record<DomainSlug, typeof Code2> = {
+  dotnet: Code2,
+  microservices: Network,
+  devops: Layers3,
+  cloud: Cloud,
+  "ai-ml": Sparkles,
+  "recent-unboxing": Binary,
+  others: Database,
+};
+
+const TECHHUB_LOGOS = [
+  "/brand-logos/stacks/csharp.svg",
+  "/brand-logos/stacks/dotnet.svg",
+  "/brand-logos/stacks/docker.svg",
+  "/brand-logos/stacks/kubernetes.svg",
+  "/brand-logos/stacks/kafka.svg",
+  "/brand-logos/stacks/postgresql.svg",
+  "/brand-logos/stacks/microsoftazure.svg",
+  "/brand-logos/stacks/aws.svg",
+  "/brand-logos/stacks/github.svg",
+  "/brand-logos/stacks/terraform.svg",
+  "/brand-logos/stacks/python.svg",
+  "/brand-logos/stacks/openai.svg",
+];
 
 const FOCUS_TO_DOMAIN: Record<string, DomainSlug> = {
   "dotnet-core-api-net10": "dotnet",
@@ -347,27 +376,83 @@ const TechHub = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      <main className="container mx-auto px-4 pb-16 pt-24">
-        <section className="mb-6 rounded-2xl border border-border/60 bg-gradient-to-br from-card to-muted/30 p-5">
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">TechHub</p>
-          <h1 className="mt-1 text-3xl font-black tracking-tight">Techstacks Learning Hub</h1>
-          <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
-            Modular engineering knowledge base with modules, chapters, topics, code snippets, media previews and blog learning streams. Managed from Admin CMS Studio via Blog Manager publish controls.
-          </p>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="rounded-lg border border-border/60 px-3 py-1.5 text-xs text-muted-foreground">
-              Publish mode: Free / Premium (uses existing blog publish flags)
-            </span>
+      <main className="w-full pb-16 pt-24">
+        <section className="relative overflow-hidden border-y border-border/60 bg-card/90 px-4 py-8 shadow-[0_30px_100px_-60px_rgba(15,23,42,0.55)] md:px-6 md:py-10 lg:px-8">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(34,197,94,0.12),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.88),rgba(248,250,252,0.9))] dark:bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.18),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(34,197,94,0.14),transparent_32%),linear-gradient(135deg,rgba(15,23,42,0.94),rgba(2,6,23,0.92))]" />
+          <div className="relative grid gap-8 xl:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] xl:items-start">
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+                <Sparkles className="h-4 w-4" />
+                TechHub
+              </div>
+              <h1 className="mt-5 max-w-4xl text-4xl font-black tracking-tight text-foreground md:text-5xl lg:text-6xl">
+                Master the stacks that run modern systems.
+              </h1>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {TECHHUB_LOGOS.map((src) => (
+                  <span key={src} className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border/60 bg-white/85 p-2 shadow-sm backdrop-blur dark:bg-slate-950/70">
+                    <img src={src} alt="" className="h-full w-full object-contain" loading="lazy" />
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative min-w-0 overflow-hidden">
+              <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-card/95 to-transparent" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-card/95 to-transparent" />
+              <motion.div
+                animate={{ x: [0, -420, 0] }}
+                transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
+                className="flex gap-4 overflow-visible py-2 pr-10"
+              >
+                {DOMAIN_CONFIG.map((d, index) => {
+                  const DomainIcon = DOMAIN_ICONS[d.slug];
+                  const count = posts.filter((p) => getPublishingChannel(p.tags || []) === "techhub" && scorePostForDomain(p, d)).length + (DOMAIN_FEATURED_DOCS_COUNT[d.slug] || 0);
+                  return (
+                    <div key={d.slug} className={`w-[300px] shrink-0 ${index % 2 === 0 ? "translate-y-0" : "translate-y-8"} md:w-[340px]`}>
+                      <button
+                        onClick={() => {
+                          setActiveDomain(d.slug);
+                          setActiveSection("all");
+                          setSearchParams((prev) => {
+                            const np = new URLSearchParams(prev);
+                            np.set("domain", d.slug);
+                            return np;
+                          });
+                        }}
+                        className={`w-full rounded-[2rem] border p-5 text-left backdrop-blur-sm transition-all duration-300 ${
+                          activeDomain === d.slug
+                            ? "border-primary/40 bg-primary/10 shadow-[0_28px_80px_rgba(59,130,246,0.16)]"
+                            : "border-border/60 bg-card/80 hover:-translate-y-1 hover:border-primary/30"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+                            <DomainIcon className="h-5 w-5" />
+                          </div>
+                          <span className="rounded-full border border-border/60 bg-background/70 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
+                            {count} posts
+                          </span>
+                        </div>
+                        <h2 className="mt-4 text-xl font-black text-foreground">{d.label}</h2>
+                        <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">{d.description}</p>
+                      </button>
+                    </div>
+                  );
+                })}
+              </motion.div>
+            </div>
           </div>
         </section>
 
-        <section className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <section className="mb-6 grid grid-cols-1 gap-3 px-4 pt-8 md:grid-cols-2 md:px-6 lg:px-8 xl:grid-cols-4">
           {DOMAIN_CONFIG.map((d) => {
             const active = d.slug === activeDomain;
             const publishedTechHubCount = posts.filter(
               (p) => getPublishingChannel(p.tags || []) === "techhub" && scorePostForDomain(p, d)
             ).length;
             const count = publishedTechHubCount + (DOMAIN_FEATURED_DOCS_COUNT[d.slug] || 0);
+            const DomainIcon = DOMAIN_ICONS[d.slug];
             return (
               <button
                 key={d.slug}
@@ -386,6 +471,9 @@ const TechHub = () => {
                     : "border-border/60 bg-card/70 hover:border-primary/30"
                 }`}
               >
+                <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
+                  <DomainIcon className="h-4 w-4" />
+                </div>
                 <p className="text-sm font-black text-foreground">{d.label}</p>
                 <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{d.description}</p>
                 <p className="mt-2 text-xs font-semibold text-primary">{count} posts</p>
@@ -399,7 +487,7 @@ const TechHub = () => {
           })}
         </section>
 
-        <div className="mb-4 flex items-center gap-2 lg:hidden">
+        <div className="mb-4 flex items-center gap-2 px-4 md:px-6 lg:hidden">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -410,7 +498,15 @@ const TechHub = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <div className="mb-6 flex flex-wrap gap-2 px-4 md:px-6 lg:px-8">
+          {TECHHUB_LOGOS.map((src) => (
+            <span key={`rail-${src}`} className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-border/60 bg-white/85 p-2 shadow-sm dark:bg-slate-950/70">
+              <img src={src} alt="" className="h-full w-full object-contain" loading="lazy" />
+            </span>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 px-4 md:px-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:px-8">
           <aside className="hidden lg:block">
             <div className="sticky top-24 space-y-4 rounded-2xl border border-border/60 bg-card/70 p-4 backdrop-blur">
               <div>

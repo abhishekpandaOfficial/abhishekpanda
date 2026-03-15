@@ -33,12 +33,12 @@ export const AtlasNewsletter = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5" />
       <div className="absolute inset-0 mesh-gradient opacity-30" />
       
-      <div className="relative container mx-auto px-4">
+      <div className="relative w-full px-4 md:px-6 xl:px-8 2xl:px-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-4xl mx-auto"
+          className="mx-auto max-w-6xl"
         >
           <div className="glass-card rounded-3xl p-8 md:p-12 relative overflow-hidden">
             {/* Decorative Elements */}
@@ -60,7 +60,7 @@ export const AtlasNewsletter = () => {
                 <span className="atlas-gradient-text">AI Revolution</span>
               </h2>
               
-              <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto mb-8">
+              <p className="mx-auto mb-8 max-w-3xl text-center text-lg text-muted-foreground">
                 Get weekly updates on benchmark shifts, model launches, and research insights delivered straight to your inbox.
               </p>
 

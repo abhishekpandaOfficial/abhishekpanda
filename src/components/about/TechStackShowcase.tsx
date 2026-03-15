@@ -155,16 +155,19 @@ export function TechStackShowcase() {
 
   return (
     <section className="overflow-hidden bg-muted/30 py-12 md:py-16">
-      <div className="container mx-auto px-4">
+      <div className="w-full px-4 md:px-6 xl:px-8 2xl:px-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mb-6 text-center"
+          className="mb-8 text-center"
         >
           <h2 className="mb-2 text-2xl font-black tracking-tight md:text-3xl lg:text-4xl">
             Technical <span className="gradient-text">Expertise</span>
           </h2>
+          <p className="mx-auto mb-5 max-w-4xl text-sm leading-7 text-muted-foreground md:text-base">
+            A full-spectrum engineering stack across backend systems, cloud platforms, AI/ML workflows, frontend delivery, observability, and production-grade infrastructure.
+          </p>
 
           <div className="flex flex-wrap justify-center gap-2">
             {categories.map((category) => (
@@ -187,9 +190,11 @@ export function TechStackShowcase() {
           </div>
         </motion.div>
 
-        <div className="space-y-1">
+        <div className="rounded-[2rem] border border-border/60 bg-background/80 px-2 py-3 shadow-[0_30px_80px_-60px_rgba(15,23,42,0.55)] backdrop-blur sm:px-3 md:px-4">
+          <div className="space-y-1">
           <InfiniteScrollRow items={rowA} direction="left" speed={30} activeCategory={activeCategory} />
           <InfiniteScrollRow items={rowB} direction="right" speed={34} activeCategory={activeCategory} />
+          </div>
         </div>
       </div>
     </section>

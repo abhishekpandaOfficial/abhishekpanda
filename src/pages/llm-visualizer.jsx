@@ -577,7 +577,29 @@ export default function LLMVisualizer(){
   return(
     <>
       <Navigation />
+      <style>{`
+        @media (max-width: 1180px) {
+          .llm-visualizer-shell {
+            flex-direction: column;
+            padding-top: 4rem !important;
+            overflow-y: auto !important;
+          }
+          .llm-visualizer-sidebar,
+          .llm-visualizer-rightpanel {
+            width: 100% !important;
+            height: auto !important;
+            max-height: none !important;
+            border-left: 0 !important;
+            border-right: 0 !important;
+            box-shadow: none !important;
+          }
+          .llm-visualizer-main {
+            min-height: 68vh;
+          }
+        }
+      `}</style>
       <div
+        className="llm-visualizer-shell"
         onClick={()=>setDropOpen(false)}
         style={{
           position:"fixed",top:0,left:0,right:0,bottom:0,
@@ -592,7 +614,7 @@ export default function LLMVisualizer(){
         }}>
 
       {/* ═══ SIDEBAR ══════════════════════════════════════════════ */}
-      <div style={{width:360,height:"100%",display:"flex",flexDirection:"column",borderRight:`1.5px solid ${T.border}`,background:T.panel,flexShrink:0,overflow:"hidden",boxShadow:isDark?"4px 0 28px #00000055":"4px 0 16px #00000011",transition:"background .3s,border .3s"}}>
+      <div className="llm-visualizer-sidebar" style={{width:"clamp(300px, 24vw, 360px)",height:"100%",display:"flex",flexDirection:"column",borderRight:`1.5px solid ${T.border}`,background:T.panel,flexShrink:0,overflow:"hidden",boxShadow:isDark?"4px 0 28px #00000055":"4px 0 16px #00000011",transition:"background .3s,border .3s"}}>
 
         {/* Header */}
         <div style={{padding:"14px 20px 12px",borderBottom:`1px solid ${T.border}`,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -699,7 +721,7 @@ export default function LLMVisualizer(){
       </div>
 
       {/* ═══ MAIN AREA: 3D canvas + right panel ═══════════════════ */}
-      <div style={{flex:1,display:"flex",overflow:"hidden"}}>
+      <div className="llm-visualizer-main" style={{flex:1,display:"flex",overflow:"hidden"}}>
 
       {/* 3D VIEWPORT */}
       <div style={{flex:1,position:"relative",overflow:"hidden"}}>
@@ -794,7 +816,7 @@ export default function LLMVisualizer(){
       </div>{/* end 3D viewport */}
 
       {/* ═══ RIGHT PANEL ══════════════════════════════════════ */}
-      <div style={{width:288,display:"flex",flexDirection:"column",borderLeft:`1.5px solid ${T.border}`,background:T.panel,flexShrink:0,overflow:"hidden",boxShadow:isDark?"-4px 0 28px #00000055":"-4px 0 16px #00000011",transition:"background .3s,border .3s"}}>
+      <div className="llm-visualizer-rightpanel" style={{width:"clamp(248px, 20vw, 288px)",display:"flex",flexDirection:"column",borderLeft:`1.5px solid ${T.border}`,background:T.panel,flexShrink:0,overflow:"hidden",boxShadow:isDark?"-4px 0 28px #00000055":"-4px 0 16px #00000011",transition:"background .3s,border .3s"}}>
 
         {/* Panel header */}
         <div style={{padding:"13px 16px 11px",borderBottom:`1px solid ${T.border}`,flexShrink:0}}>

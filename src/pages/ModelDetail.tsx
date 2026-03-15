@@ -65,7 +65,7 @@ export default function ModelDetail() {
       <Navigation />
 
       <main className="pt-24 pb-20">
-        <div className="container mx-auto px-4 mb-8">
+        <div className="mb-8 w-full px-4 md:px-6 xl:px-8 2xl:px-10">
           <Link to="/llm-galaxy" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Back to LLM Galaxy
@@ -73,11 +73,11 @@ export default function ModelDetail() {
         </div>
 
         {isLoading ? (
-          <div className="container mx-auto px-4">
+          <div className="w-full px-4 md:px-6 xl:px-8 2xl:px-10">
             <div className="glass-card rounded-3xl p-10 text-muted-foreground">Loading…</div>
           </div>
         ) : !m ? (
-          <div className="container mx-auto px-4">
+          <div className="w-full px-4 md:px-6 xl:px-8 2xl:px-10">
             <div className="glass-card rounded-3xl p-10">
               <div className="text-xl font-black text-foreground">Model not found</div>
               <div className="text-muted-foreground mt-2">No model family exists for slug: {slug}</div>
@@ -85,7 +85,7 @@ export default function ModelDetail() {
           </div>
         ) : (
           <>
-            <section className="container mx-auto px-4 mb-16">
+            <section className="mb-16 w-full px-4 md:px-6 xl:px-8 2xl:px-10">
               <div className={`relative rounded-3xl bg-gradient-to-br ${color} p-8 md:p-12 overflow-hidden`}>
                 <div className="absolute inset-0 bg-black/20" />
                 <div className="relative z-10">
@@ -100,7 +100,7 @@ export default function ModelDetail() {
                     <div className="flex-1">
                       <h1 className="text-4xl md:text-5xl font-black text-white mb-2">{m.name}</h1>
                       <p className="text-xl text-white/80 mb-4">{m.company}</p>
-                      {m.description ? <p className="text-white/90 text-lg max-w-3xl">{m.description}</p> : null}
+                      {m.description ? <p className="max-w-4xl text-lg text-white/90">{m.description}</p> : null}
                       <div className="flex flex-wrap items-center gap-2 mt-4">
                         <span className="px-3 py-1 rounded-full bg-white/20 text-white text-sm font-semibold inline-flex items-center gap-2">
                           <Shield className="w-4 h-4" /> {openLabel}
@@ -153,7 +153,7 @@ export default function ModelDetail() {
               </div>
             </section>
 
-            <section className="container mx-auto px-4 mb-16">
+            <section className="mb-16 w-full px-4 md:px-6 xl:px-8 2xl:px-10">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 glass-card rounded-2xl p-6">
                   <h2 className="text-xl font-black text-foreground mb-4">Strengths, Weaknesses, Use Cases</h2>

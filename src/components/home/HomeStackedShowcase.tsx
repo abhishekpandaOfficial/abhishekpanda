@@ -146,7 +146,7 @@ function ShowcasePanel({ index, kicker, title, description, actionHref, actionLa
       <div className="relative">
         {!hideHeader ? (
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="max-w-3xl">
+            <div className="max-w-4xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-primary">
                 <Icon className="h-4 w-4" />
                 {kicker}
@@ -244,7 +244,7 @@ export function HomeStackedShowcase() {
   return (
     <section className="relative py-16 md:py-24">
       <div className="absolute inset-0 mesh-gradient opacity-20" />
-      <div ref={rootRef} className="relative container mx-auto px-4">
+      <div ref={rootRef} className="relative w-full px-4 md:px-6 xl:px-8">
         <div className="space-y-10 md:space-y-14">
           <div className="md:sticky md:top-24">
             <ShowcasePanel

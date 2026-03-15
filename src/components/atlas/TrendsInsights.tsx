@@ -126,7 +126,7 @@ export const TrendsInsights = (_props: { models: LLMModel[] }) => {
     <section id="trends" className="py-24 relative overflow-hidden">
       <div className="absolute inset-0 mesh-gradient opacity-20" />
 
-      <div className="relative container mx-auto px-4">
+      <div className="relative w-full px-4 md:px-6 xl:px-8 2xl:px-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -140,7 +140,7 @@ export const TrendsInsights = (_props: { models: LLMModel[] }) => {
           <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
             Latest <span className="atlas-gradient-text">LLM + AI News</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="mx-auto max-w-4xl text-xl text-muted-foreground">
             Derived from the Galaxy database. Treat this page as the core source of truth.
             Feed source: Google News AI/LLM queries with daily refresh.
           </p>

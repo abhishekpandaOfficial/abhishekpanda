@@ -1,16 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { useTheme } from "@/components/ThemeProvider";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { EmbeddedAtlasPageShell } from "@/components/atlas/EmbeddedAtlasPageShell";
 import { measureEmbeddedFrameHeight, syncThemeToEmbeddedFrame } from "@/lib/embeddedFrame";
 
 const ClosedSourceModels = () => {
@@ -74,28 +66,18 @@ const ClosedSourceModels = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main className="pt-16 md:pt-20">
-        <div className="border-b border-border/60 bg-background/95 px-4 py-3 backdrop-blur md:px-6">
-          <Breadcrumb>
-            <BreadcrumbList className="text-xs md:text-sm">
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/">Home</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/ai-ml-hub">AI / ML Hub</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Closed Source Models</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
+      <EmbeddedAtlasPageShell
+        title="Closed Source Models"
+        description="Review frontier proprietary models in a cleaner full-width experience built for premium comparison, provider-level scanning, and responsive benchmark reading."
+        badge="Frontier Providers"
+        accentClassName="border-sky-500/25 bg-sky-500/10 text-sky-600 dark:text-sky-300"
+        metricItems={[
+          { label: "Source", value: "Closed provider ecosystem" },
+          { label: "Focus", value: "Frontier APIs and premium stacks" },
+          { label: "Theme", value: "Light and dark aware" },
+          { label: "Layout", value: "Full-width responsive reading" },
+        ]}
+      >
         <iframe
           ref={iframeRef}
           title="Closed Source LLM Models"
@@ -109,7 +91,7 @@ const ClosedSourceModels = () => {
             window.setTimeout(measureFromIframe, 500);
           }}
         />
-      </main>
+      </EmbeddedAtlasPageShell>
       <Footer />
     </div>
   );

@@ -1244,7 +1244,7 @@ code {
   <div class="module-header">
     <span class="module-num orange">MODULE 02</span>
     <span class="module-title">Thread Basics</span>
-    <span class="module-desc">Concepts #5 – #8</span>
+    <span class="module-desc">Concepts #5 – #11</span>
   </div>
 
   <div class="cols2">
@@ -1358,6 +1358,101 @@ Console.<span class="nm">WriteLine</span>(<span class="str">"Thread finished"</s
             <div class="flow-node" style="font-size:11px;padding:5px;min-width:150px;border-color:rgba(34,197,94,0.4);color:var(--green);background:rgba(34,197,94,0.06)">"Thread finished"</div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- CARD 9: Thread Types -->
+    <div class="card blue col-span2">
+      <div class="card-num blue">#09</div>
+      <div class="card-title">Thread Types in .NET: Foreground, Background, Worker, UI</div>
+      <div class="card-body">
+        <p>Not all threads behave the same. In modern .NET, it is important to distinguish <strong>what keeps the process alive</strong> from <strong>what executes work</strong>.</p>
+        <table class="comp-table">
+          <tr><th>Type</th><th>What It Means</th><th>When To Use</th></tr>
+          <tr><td>Foreground Thread</td><td>Keeps the process alive until it finishes.</td><td>Rare in app code; only when the process must not exit before work completes.</td></tr>
+          <tr><td>Background Thread</td><td>Does not keep the process alive. Runtime can stop it when all foreground threads end.</td><td>Low-level worker-style code, but usually avoid creating these manually in business apps.</td></tr>
+          <tr><td>ThreadPool Worker</td><td>Reusable runtime-managed background threads.</td><td>Short-lived work, parallel processing, <code>Task.Run</code>, continuations.</td></tr>
+          <tr><td>UI Thread</td><td>Single thread that owns UI state in WinForms/WPF/MAUI.</td><td>UI updates, dispatching back after async work.</td></tr>
+        </table>
+        <div class="highlight blue">
+          <strong>Modern rule:</strong> application code usually works with <code>Task</code> and the <code>ThreadPool</code>, not manually managed foreground/background <code>Thread</code> objects.
+        </div>
+        <div class="code-block">
+<span class="cm">// Explicitly creating a background thread</span>
+Thread worker = <span class="kw">new</span> <span class="cls">Thread</span>(() => {
+  Console.<span class="nm">WriteLine</span>(<span class="str">"Background work started"</span>);
+  Thread.<span class="nm">Sleep</span>(<span class="nm">2000</span>);
+  Console.<span class="nm">WriteLine</span>(<span class="str">"Background work finished"</span>);
+});
+
+worker.<span class="nm">IsBackground</span> = <span class="kw">true</span>; <span class="cm">// does not keep the process alive</span>
+worker.<span class="nm">Start</span>();</div>
+      </div>
+    </div>
+
+    <!-- CARD 10: Thread vs Task -->
+    <div class="card purple">
+      <div class="card-num purple">#10</div>
+      <div class="card-title">Task vs Thread: What Is the Difference?</div>
+      <div class="card-body">
+        <p>A <strong style="color:var(--purple)">Thread</strong> is an actual OS execution unit. A <strong style="color:var(--teal)">Task</strong> is a higher-level .NET abstraction that represents a unit of work and is usually scheduled on the ThreadPool.</p>
+        <div class="compare-grid">
+          <div class="compare-col bad">
+            <div class="compare-col-title">Thread</div>
+            <ul class="concept-list">
+              <li>Real operating-system thread</li>
+              <li>Higher creation and switching cost</li>
+              <li>Manual lifetime management</li>
+              <li>Useful for specialized long-running dedicated work</li>
+            </ul>
+          </div>
+          <div class="compare-col good">
+            <div class="compare-col-title">Task</div>
+            <ul class="concept-list">
+              <li>Represents work, not a dedicated thread</li>
+              <li>Usually uses runtime-managed ThreadPool threads</li>
+              <li>Composes with <code>await</code>, cancellation, continuations</li>
+              <li>Preferred choice for modern app development</li>
+            </ul>
+          </div>
+        </div>
+        <div class="flow-diagram" style="margin-top:10px">
+          <div class="flow-node purple" style="min-width:200px">Task.Run(ProcessOrder)</div>
+          <div class="flow-arrow purple"><div class="flow-arrow-line" style="background:linear-gradient(to bottom,var(--purple),transparent)"></div><div class="flow-arrow-head" style="border-top-color:var(--purple)"></div></div>
+          <div class="flow-node teal" style="min-width:200px">Task Scheduler</div>
+          <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+          <div class="flow-node orange" style="min-width:200px">ThreadPool Thread Executes It</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 11: Modern Guidance -->
+    <div class="card orange">
+      <div class="card-num orange">#11</div>
+      <div class="card-title">Which One Should You Choose in Modern Apps?</div>
+      <div class="card-body">
+        <p>For modern ASP.NET Core, APIs, worker services, desktop apps, and cloud systems, choose <strong>Task + async/await</strong> by default. Reach for <code>Thread</code> only when you truly need a dedicated thread with explicit control.</p>
+        <table class="comp-table">
+          <tr><th>Scenario</th><th>Choose</th><th>Why</th></tr>
+          <tr><td>I/O-bound work: HTTP, DB, file, queue</td><td>Task + <code>async/await</code></td><td>Frees threads while waiting and scales far better.</td></tr>
+          <tr><td>Short CPU-bound background work</td><td><code>Task.Run</code></td><td>Uses ThreadPool efficiently without manual thread management.</td></tr>
+          <tr><td>Many concurrent requests in web apps</td><td>Async Tasks</td><td>Prevents thread starvation and improves throughput.</td></tr>
+          <tr><td>Dedicated long-running loop with strict thread affinity</td><td><code>Thread</code> or long-running Task</td><td>Only when you need explicit control over the execution thread.</td></tr>
+          <tr><td>UI apps</td><td>Task for background work + marshal back to UI thread</td><td>Keeps UI responsive while preserving thread-affine UI rules.</td></tr>
+        </table>
+        <div class="highlight orange">
+          <strong>Decision shortcut:</strong> If you are asking “should I create a thread?”, the answer in modern .NET is usually <strong>no</strong>; use <code>Task</code> unless you can clearly justify a dedicated thread.
+        </div>
+        <div class="code-block">
+<span class="cm">// Modern approach for CPU-bound background work</span>
+<span class="kw">await</span> <span class="cls">Task</span>.<span class="nm">Run</span>(() => {
+  <span class="cm">// Heavy calculation runs on a ThreadPool thread</span>
+  ProcessLargeReport();
+});
+
+<span class="cm">// Modern approach for I/O-bound work</span>
+<span class="kw">var</span> response = <span class="kw">await</span> httpClient.<span class="nm">GetAsync</span>(<span class="str">"/orders"</span>);
+<span class="cm">// No dedicated thread is blocked while waiting for network I/O</span></div>
       </div>
     </div>
 

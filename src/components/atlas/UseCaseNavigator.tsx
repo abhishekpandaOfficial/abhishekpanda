@@ -289,7 +289,7 @@ export const UseCaseNavigator = (props: { models: LLMModel[] }) => {
 
   return (
     <section className="py-24 bg-muted/30 relative overflow-hidden">
-      <div className="container mx-auto px-4">
+      <div className="w-full px-4 md:px-6 xl:px-8 2xl:px-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -303,12 +303,12 @@ export const UseCaseNavigator = (props: { models: LLMModel[] }) => {
           <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
             Find the <span className="atlas-gradient-text">Best Fit</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="mx-auto max-w-4xl text-xl text-muted-foreground">
             Navigate by category: coding, voice, STT, TTS, speech-to-speech, image/video generation, and more.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(280px,0.85fr)_minmax(0,1.15fr)_minmax(0,1.15fr)]">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}

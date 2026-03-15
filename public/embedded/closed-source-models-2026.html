@@ -185,10 +185,11 @@ img{display:block}
 }
 html[data-embedded="1"] .site-top-nav{display:none}
 .site-top-inner{
-  max-width:1220px;
+  width:100%;
+  max-width:none;
   margin:0 auto;
   min-height:var(--site-nav-h);
-  padding:0 16px;
+  padding:0 clamp(16px,2.4vw,34px);
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -291,8 +292,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
 ═══════════════════════════════════════════════════ */
 header{
   position:relative;z-index:10;
-  max-width:1220px;margin:0 auto;
-  padding:64px 28px 52px;
+  width:100%;max-width:none;margin:0 auto;
+  padding:64px clamp(18px,2.6vw,36px) 52px;
   border-bottom:1px solid var(--border);
 }
 .header-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:32px}
@@ -345,7 +346,7 @@ h1.htitle em{
 @keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
 
 .hero-sub{
-  max-width:620px;font-size:15.5px;line-height:1.75;
+  max-width:860px;font-size:15.5px;line-height:1.75;
   color:var(--text-2);font-weight:300;margin-bottom:28px;
 }
 .header-meta{
@@ -366,7 +367,7 @@ h1.htitle em{
   transition:background var(--transition);
 }
 html[data-embedded="1"] .nav-wrap{top:0}
-nav{max-width:1220px;margin:0 auto;padding:0 28px;display:flex;overflow-x:auto;scrollbar-width:none}
+nav{width:100%;max-width:none;margin:0 auto;padding:0 clamp(18px,2.6vw,36px);display:flex;overflow-x:auto;scrollbar-width:none}
 nav::-webkit-scrollbar{display:none}
 .nb{
   background:none;border:none;cursor:pointer;
@@ -391,7 +392,7 @@ nav::-webkit-scrollbar{display:none}
 .logo-ticker-track{
   display:flex;align-items:center;gap:10px;
   width:max-content;
-  padding:10px 28px;
+  padding:10px clamp(18px,2.6vw,36px);
   animation:tickerMove 36s linear infinite;
 }
 .logo-ticker-wrap:hover .logo-ticker-track{animation-play-state:paused}
@@ -421,9 +422,11 @@ nav::-webkit-scrollbar{display:none}
 /* ═══════════════════════════════════════════════════
    MAIN CONTENT
 ═══════════════════════════════════════════════════ */
-main{max-width:1220px;margin:0 auto;padding:40px 28px 80px;position:relative;z-index:10}
+main{width:100%;max-width:none;margin:0 auto;padding:40px clamp(18px,2.6vw,36px) 80px;position:relative;z-index:10}
 .tab-panel{display:none}
 .tab-panel.active{display:block;animation:fadeUp .3s ease both}
+.tab-panel.is-sparse{max-width:1080px;margin:0 auto}
+.tab-panel.is-wide{max-width:none}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
 .sec-label{
@@ -437,6 +440,7 @@ main{max-width:1220px;margin:0 auto;padding:40px 28px 80px;position:relative;z-i
    OVERVIEW GRID
 ═══════════════════════════════════════════════════ */
 .ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:48px}
+.tab-panel.is-sparse .ov-grid{grid-template-columns:repeat(auto-fit,minmax(220px,260px));justify-content:center}
 .ov-card{
   background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
   padding:18px 16px;cursor:pointer;
@@ -459,6 +463,7 @@ main{max-width:1220px;margin:0 auto;padding:40px 28px 80px;position:relative;z-i
    TREND CARDS
 ═══════════════════════════════════════════════════ */
 .trend-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.tab-panel.is-sparse .trend-grid{grid-template-columns:repeat(auto-fit,minmax(220px,260px));justify-content:center}
 .tc{
   background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:18px;
   box-shadow:var(--shadow-card);
@@ -471,7 +476,7 @@ main{max-width:1220px;margin:0 auto;padding:40px 28px 80px;position:relative;z-i
    SUMMARY TABLE
 ═══════════════════════════════════════════════════ */
 .table-wrap{border-radius:14px;border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow-card)}
-table{width:100%;border-collapse:collapse;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:1040px}
 thead tr{background:var(--bg-2);border-bottom:1px solid var(--border-md)}
 th{padding:13px 16px;text-align:left;font-size:10px;font-family:'JetBrains Mono',monospace;
    font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);white-space:nowrap}
@@ -499,6 +504,7 @@ td{padding:14px 16px;vertical-align:middle;line-height:1.5}
    PROVIDER CARDS
 ═══════════════════════════════════════════════════ */
 .prov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:36px}
+.tab-panel.is-sparse .prov-grid{grid-template-columns:repeat(auto-fit,minmax(280px,340px));justify-content:center}
 .prov-card{
   background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:22px;
   border-top:3px solid;box-shadow:var(--shadow-card);
@@ -532,6 +538,8 @@ td{padding:14px 16px;vertical-align:middle;line-height:1.5}
    MODEL CARDS
 ═══════════════════════════════════════════════════ */
 .models-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.tab-panel.is-sparse .models-grid{grid-template-columns:repeat(auto-fit,minmax(320px,380px));justify-content:center}
+.tab-panel.is-wide .models-grid{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
 .mc{
   background:var(--bg-card);border:1px solid var(--border);border-radius:16px;
   padding:22px 22px 20px;position:relative;
@@ -641,7 +649,7 @@ td{padding:14px 16px;vertical-align:middle;line-height:1.5}
    FOOTER
 ═══════════════════════════════════════════════════ */
 footer{
-  max-width:1220px;margin:0 auto;padding:28px 28px 52px;
+  width:100%;max-width:none;margin:0 auto;padding:28px clamp(18px,2.6vw,36px) 52px;
   border-top:1px solid var(--border);
   display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;
   position:relative;z-index:10;
@@ -681,6 +689,7 @@ footer{
   .logo-ticker-track{padding:8px 16px;gap:8px;animation-duration:28s}
   .logo-chip{padding:4px 8px;font-size:10px}
   .logo-chip-icon{width:20px;height:20px}
+  table{min-width:880px}
 }
 </style>
 </head>
@@ -1692,6 +1701,7 @@ function buildTab(tabId) {
   div.id = 'tab-'+tabId;
   div.className = 'tab-panel';
   div.innerHTML = TABS[tabId] || '<p style="color:var(--text-3);padding:40px 0">Coming soon.</p>';
+  applyTabDensity(div);
   mainEl.appendChild(div);
   rendered[tabId] = true;
   // animate score bars
@@ -1701,6 +1711,22 @@ function buildTab(tabId) {
       requestAnimationFrame(()=>{ el.style.width=w; });
     });
   },100);
+}
+
+function applyTabDensity(panel) {
+  if(!panel) return;
+  panel.classList.remove('is-sparse', 'is-wide');
+
+  const modelCount = panel.querySelectorAll('.models-grid .mc').length;
+  const overviewCount = panel.querySelectorAll('.ov-grid .ov-card').length;
+  const trendCount = panel.querySelectorAll('.trend-grid .tc').length;
+  const providerCount = panel.querySelectorAll('.prov-grid .prov-card').length;
+  const hasTable = !!panel.querySelector('.table-wrap');
+
+  const contentCount = Math.max(modelCount, overviewCount, trendCount, providerCount);
+  const isSparse = !hasTable && contentCount > 0 && contentCount <= 4;
+
+  panel.classList.add(isSparse ? 'is-sparse' : 'is-wide');
 }
 
 function showTab(tabId, btn) {

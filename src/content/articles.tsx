@@ -120,6 +120,17 @@ const ARTICLE_METADATA_OVERRIDES: Record<
     featuredRank: 2,
     tags: [".NET", "C#", "Multithreading", "Concurrency", "Architecture"],
   },
+  "collections-delegates-reflection-deep-dive": {
+    title: "Collections, Delegates, Events & Reflection Deep Dive",
+    eyebrow: "C# Language Internals",
+    description: "A deep C# reference covering legacy and generic collections, delegates, events, reflection, real-world usage patterns, and richly annotated code walkthroughs.",
+    heroLabel: "Deep Dive",
+    heroValue: "C# internals",
+    publishedAt: "March 15, 2026",
+    featured: false,
+    featuredRank: null,
+    tags: [".NET", "C#", "Collections", "Delegates", "Reflection", "Events"],
+  },
 };
 
 const FALLBACK_DATE = new Date("2026-03-06T00:00:00").toLocaleDateString("en-US", {

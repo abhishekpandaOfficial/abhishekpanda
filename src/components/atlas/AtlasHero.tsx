@@ -66,8 +66,8 @@ export const AtlasHero = (props: { models: LLMModel[]; lastUpdated: Date | null;
         </svg>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-20">
-        <div className="max-w-5xl mx-auto text-center">
+      <div className="relative z-10 w-full px-4 py-20 md:px-6 xl:px-8 2xl:px-10">
+        <div className="mx-auto max-w-6xl text-center">
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -95,7 +95,7 @@ export const AtlasHero = (props: { models: LLMModel[]; lastUpdated: Date | null;
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-3xl mx-auto"
+            className="mx-auto mb-4 max-w-4xl text-xl text-muted-foreground md:text-2xl"
           >
             A unified intelligence hub for every major AI model — open-source and closed-source.
           </motion.p>
@@ -161,7 +161,7 @@ export const AtlasHero = (props: { models: LLMModel[]; lastUpdated: Date | null;
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto"
+            className="mx-auto grid max-w-6xl grid-cols-2 gap-4 md:grid-cols-4"
           >
             {[
               { label: "Model Families", value: total ? `${total}+` : "—", icon: Globe },
@@ -194,7 +194,7 @@ export const AtlasHero = (props: { models: LLMModel[]; lastUpdated: Date | null;
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.8 }}
-              className="mt-6 max-w-4xl mx-auto rounded-2xl border border-primary/20 bg-card/70 backdrop-blur p-4 text-left"
+              className="mx-auto mt-6 max-w-6xl rounded-2xl border border-primary/20 bg-card/70 p-4 text-left backdrop-blur"
             >
               <div className="text-xs uppercase tracking-[0.16em] text-primary font-semibold mb-2">Latest OriginX Updates</div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

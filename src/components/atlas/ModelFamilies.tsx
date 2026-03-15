@@ -230,7 +230,7 @@ export const ModelFamilies = (props: { models: LLMModel[] }) => {
     <section id="model-families" className="py-24 relative overflow-hidden">
       <div className="absolute inset-0 mesh-gradient opacity-30" />
 
-      <div className="relative container mx-auto px-4">
+      <div className="relative w-full px-4 md:px-6 xl:px-8 2xl:px-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -244,7 +244,7 @@ export const ModelFamilies = (props: { models: LLMModel[] }) => {
           <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
             Explore <span className="atlas-gradient-text">Model Families</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
             Open-source and closed-source families with categories, details, and links.
           </p>
 
@@ -290,7 +290,7 @@ export const ModelFamilies = (props: { models: LLMModel[] }) => {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {families.map((family, index) => (
             <motion.div
               key={family.slug}

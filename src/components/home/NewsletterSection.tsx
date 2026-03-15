@@ -36,13 +36,13 @@ export const NewsletterSection = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-purple/10" />
       <div className="absolute inset-0 mesh-gradient opacity-50" />
       
-      <div className="relative container mx-auto px-4">
+      <div className="relative w-full px-4 md:px-6 xl:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="max-w-2xl mx-auto text-center"
+          className="mx-auto w-full max-w-4xl rounded-[2rem] border border-border/60 bg-card/75 px-6 py-10 text-center shadow-[0_30px_100px_-60px_rgba(15,23,42,0.55)] backdrop-blur xl:px-12"
         >
           {/* Icon */}
           <motion.div
@@ -58,7 +58,7 @@ export const NewsletterSection = () => {
           <h2 className="section-title mb-4">
             Stay in the <span className="gradient-text">Loop</span>
           </h2>
-          <p className="section-subtitle mx-auto mb-8">
+          <p className="section-subtitle mx-auto mb-8 max-w-2xl">
             Get exclusive insights, early access to courses, and curated engineering content 
             delivered straight to your inbox. No spam, ever.
           </p>
@@ -71,7 +71,7 @@ export const NewsletterSection = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
               onSubmit={handleSubmit}
-              className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+              className="mx-auto flex w-full max-w-xl flex-col gap-3 sm:flex-row"
             >
               <div className="flex-1 relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -110,7 +110,7 @@ export const NewsletterSection = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="glass-card rounded-2xl p-6 max-w-md mx-auto flex items-center gap-4"
+              className="glass-card mx-auto flex max-w-md items-center gap-4 rounded-2xl p-6"
             >
               <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
                 <Check className="w-6 h-6 text-accent-foreground" />
