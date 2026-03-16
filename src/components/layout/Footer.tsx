@@ -8,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveSocialProfiles } from "@/lib/social/resolveProfiles";
 import { OriginXAnimatedLogo } from "@/components/ui/OriginXAnimatedLogo";
 import { PrefetchLink } from "@/components/PrefetchLink";
-import { getAdminDesktopDownloadUrl } from "@/lib/adminRuntime";
 
 type FooterLink = {
   name: string;
@@ -56,7 +55,7 @@ const footerSections: FooterSection[] = [
     links: [
       { name: "LLM Galaxy", path: "/llm-galaxy" },
       { name: "LLM Visualizer", path: "/llm-visualizer" },
-      { name: "Desktop App", path: "/desktop-app" },
+      { name: "Desktop App", path: "/downloads" },
       { name: "Online Editor", path: "/dsa-mastery-csharp/practice" },
       { name: "Interview", path: "/interview" },
       { name: "Courses", path: "/courses" },
@@ -155,8 +154,6 @@ function FooterNavLink({ link }: { link: FooterLink }) {
 export const Footer = () => {
   const { data: profiles } = usePublicSocialProfiles();
   const [visitCount, setVisitCount] = useState<number | null>(null);
-  const desktopDownloadUrl = getAdminDesktopDownloadUrl();
-
   const { social, blogAndPlatforms } = useMemo(() => {
     const rows = resolveSocialProfiles((profiles ?? []) as any[]);
     const social = rows.filter((r) => r.category === "social" && r.profile_url);
@@ -280,15 +277,13 @@ export const Footer = () => {
                 {link.name}
               </PrefetchLink>
             ))}
-            <a
-              href={desktopDownloadUrl}
-              target={desktopDownloadUrl.startsWith("http") ? "_blank" : undefined}
-              rel={desktopDownloadUrl.startsWith("http") ? "noreferrer" : undefined}
+            <PrefetchLink
+              to="/downloads"
               className="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-sky-600"
             >
               <Download className="h-3.5 w-3.5" />
               Download App
-            </a>
+            </PrefetchLink>
             <PrefetchLink
               to="/contact"
               className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition hover:opacity-95"

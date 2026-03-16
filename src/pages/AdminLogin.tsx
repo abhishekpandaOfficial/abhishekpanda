@@ -18,6 +18,7 @@ import { useWebAuthn } from "@/hooks/useWebAuthn";
 import { useSecurityAlert } from "@/hooks/useSecurityAlert";
 import { useGeoBlocking } from "@/hooks/useGeoBlocking";
 import { useActiveSession } from "@/hooks/useActiveSession";
+import { isBrowserLocalhostDevelopment, isDesktopAdminRuntime } from "@/lib/adminRuntime";
 
 const emailSchema = z.string().email("Invalid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -71,13 +72,9 @@ const isMobileDevice = () => {
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 };
 
-const isLocalhost = () => {
-  const host = window.location.hostname;
-  return host === "localhost" || host === "127.0.0.1" || host === "::1";
-};
-
 const AdminLogin = () => {
   const navigate = useNavigate();
+  const desktopRuntime = isDesktopAdminRuntime();
   const [phase, setPhase] = useState<AuthPhase>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -122,17 +119,17 @@ const AdminLogin = () => {
   useEffect(() => {
     setIsMobile(isMobileDevice());
     setIsRunningAsPWA(isPWA());
-    setAllowLocalBypass(isLocalhost());
+    setAllowLocalBypass(isBrowserLocalhostDevelopment());
     
     // Show PWA prompt if on mobile but not running as PWA
-    if (isMobileDevice() && !isPWA()) {
+    if (!desktopRuntime && isMobileDevice() && !isPWA()) {
       // Don't show immediately, let user see the login page first
       const timer = setTimeout(() => {
         setShowPWAPrompt(true);
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [desktopRuntime]);
 
   // Check if returning user with passkey - redirect to biometric flow
   useEffect(() => {
@@ -1092,14 +1089,20 @@ const AdminLogin = () => {
           
           {/* Mobile Install Link */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-            <Button
-              variant="link"
-              onClick={() => navigate('/install')}
-              className="text-emerald-500/70 hover:text-emerald-400 text-xs"
-            >
-              <Smartphone className="w-3 h-3 mr-1" />
-              Install PWA for Passkeys
-            </Button>
+            {!desktopRuntime ? (
+              <Button
+                variant="link"
+                onClick={() => navigate('/install')}
+                className="text-emerald-500/70 hover:text-emerald-400 text-xs"
+              >
+                <Smartphone className="w-3 h-3 mr-1" />
+                Install PWA for Passkeys
+              </Button>
+            ) : (
+              <div className="text-xs text-emerald-500/70">
+                Desktop app installed for dedicated admin access
+              </div>
+            )}
             <Button
               variant="link"
               onClick={() => navigate('/admin/register-passkey')}
@@ -1114,7 +1117,7 @@ const AdminLogin = () => {
 
       {/* PWA Install Prompt Modal for Mobile */}
       <AnimatePresence>
-        {showPWAPrompt && isMobile && !isRunningAsPWA && (
+        {showPWAPrompt && !desktopRuntime && isMobile && !isRunningAsPWA && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

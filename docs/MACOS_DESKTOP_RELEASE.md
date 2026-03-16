@@ -54,6 +54,24 @@ Outputs are typically in:
 - `src-tauri/target/aarch64-apple-darwin/release/bundle/macos/`
 - `src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/`
 
+## 2.1 Website-hosted update feed
+
+Every build now refreshes:
+
+- `public/downloads/Abhishek-Admin.dmg`
+  You still replace this with the newly built DMG you want to publish
+- `public/downloads/latest.json`
+  This is the manifest the installed desktop app polls for update notifications
+
+For production, set:
+
+```bash
+VITE_ADMIN_DESKTOP_DOWNLOAD_URL="https://www.abhishekpanda.com/downloads/Abhishek-Admin.dmg"
+VITE_ADMIN_DESKTOP_UPDATE_MANIFEST_URL="https://www.abhishekpanda.com/downloads/latest.json"
+```
+
+Then redeploy Vercel after you replace the DMG.
+
 ## 3. Code signing
 
 You need an Apple Developer account and a `Developer ID Application` certificate for direct downloads outside the App Store.
@@ -109,3 +127,4 @@ open src-tauri/target/aarch64-apple-darwin/release/bundle/dmg
 
 - Direct download distribution on macOS requires notarization to avoid the unverified app warning.
 - A free Apple Developer account can sign for testing, but cannot notarize for smooth public distribution.
+- The current desktop app can notify you when a newer website-hosted build is available. Fully silent background install and automatic relaunch still require a signed updater pipeline.

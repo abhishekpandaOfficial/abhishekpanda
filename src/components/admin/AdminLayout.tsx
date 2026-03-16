@@ -22,6 +22,7 @@ import { AdminNotifications } from "./AdminNotifications";
 import { CommandPalette } from "./CommandPalette";
 import { SecurityAlertPanel } from "./SecurityAlertPanel";
 import { useActiveSession } from "@/hooks/useActiveSession";
+import { useDesktopAppUpdates } from "@/hooks/useDesktopAppUpdates";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { adminSidebarGroups } from "./adminNavigation";
@@ -30,6 +31,7 @@ import {
   clearBrowserAdminWorkspace,
   enableBrowserAdminWorkspace,
   hasBrowserAdminWorkspaceEnabled,
+  isBrowserLocalhostDevelopment,
   isDesktopAdminRuntime,
 } from "@/lib/adminRuntime";
 
@@ -59,11 +61,6 @@ const getBadgeClassName = (badge: string) => {
   return "bg-muted/40 text-muted-foreground border border-border/60";
 };
 
-const isLocalhost = () => {
-  const host = window.location.hostname;
-  return host === "localhost" || host === "127.0.0.1" || host === "::1";
-};
-
 const COMMAND_CENTER_SESSION_KEY = "admin_command_center_session_seen";
 const ADMIN_ACCESS_CACHE_KEY = "admin_access_verified_until";
 const ADMIN_ACCESS_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -75,6 +72,7 @@ export const AdminLayout = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [browserWorkspaceEnabled, setBrowserWorkspaceEnabled] = useState(() => desktopRuntime || hasBrowserAdminWorkspaceEnabled());
+  const desktopUpdates = useDesktopAppUpdates();
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -186,7 +184,7 @@ export const AdminLayout = () => {
 
         const validation = await validateAccess(session.user.id, hasClientFlag);
         if (!validation.ok) {
-          const allowLocalhostBypass = isLocalhost() && hasClientFlag;
+          const allowLocalhostBypass = isBrowserLocalhostDevelopment() && hasClientFlag;
           if (allowLocalhostBypass) {
             setIsAuthenticated(true);
             sessionStorage.setItem(ADMIN_ACCESS_CACHE_KEY, String(Date.now() + ADMIN_ACCESS_CACHE_TTL_MS));
@@ -589,9 +587,32 @@ export const AdminLayout = () => {
             </div>
             <div className="flex items-center gap-1.5">
               {desktopRuntime ? (
-                <div className="mr-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
-                  Desktop Session
-                </div>
+                <>
+                  <div className="mr-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
+                    Desktop Session
+                  </div>
+                  <button
+                    type="button"
+                    onClick={desktopUpdates.openDownload}
+                    className={cn(
+                      "mr-2 inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] transition",
+                      desktopUpdates.hasUpdate
+                        ? "border-cyan-500/35 bg-cyan-500/10 text-cyan-700 hover:bg-cyan-500/15 dark:text-cyan-300"
+                        : "border-border/50 bg-muted/40 text-muted-foreground hover:bg-muted/60"
+                    )}
+                    title={
+                      desktopUpdates.hasUpdate && desktopUpdates.latestVersion
+                        ? `Update ${desktopUpdates.latestVersion} is available`
+                        : `Desktop app ${desktopUpdates.currentVersion}`
+                    }
+                  >
+                    {desktopUpdates.hasUpdate && desktopUpdates.latestVersion
+                      ? `Update ${desktopUpdates.latestVersion}`
+                      : desktopUpdates.isChecking
+                        ? "Checking Updates"
+                        : `v${desktopUpdates.currentVersion}`}
+                  </button>
+                </>
               ) : (
                 <Button
                   variant="ghost"

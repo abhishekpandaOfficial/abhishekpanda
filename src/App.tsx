@@ -358,7 +358,8 @@ const App = () => {
 
                 {/* Admin Install & Login */}
                 <Route path="/install" element={<InstallPWA />} />
-                <Route path="/desktop-app" element={<DesktopApp />} />
+                <Route path="/downloads" element={<DesktopApp />} />
+                <Route path="/desktop-app" element={<Navigate to="/downloads" replace />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/register-passkey" element={<PasskeyRegistration />} />
 

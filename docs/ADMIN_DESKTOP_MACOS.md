@@ -26,6 +26,18 @@ npm run build:desktop
 
 That targets `aarch64-apple-darwin`.
 
+## Release metadata
+
+Every desktop or web build now runs `npm run sync:desktop-release` first. That keeps:
+
+- `public/downloads/latest.json` in sync with the desktop app version
+- `src/generated/desktopRelease.ts` in sync for the installed app update checker
+
 ## Optional web handoff download button
 
-Set `VITE_ADMIN_DESKTOP_DOWNLOAD_URL` in your environment if you want the web `/admin` handoff screen to show a direct macOS download link.
+Set these in your environment if you want the web `/admin` handoff screen and desktop app update checker to use your live production URLs:
+
+```bash
+VITE_ADMIN_DESKTOP_DOWNLOAD_URL="https://www.abhishekpanda.com/downloads/Abhishek-Admin.dmg"
+VITE_ADMIN_DESKTOP_UPDATE_MANIFEST_URL="https://www.abhishekpanda.com/downloads/latest.json"
+```
