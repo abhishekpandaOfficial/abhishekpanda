@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Download, ExternalLink, BookOpen, Boxes, Compass, FolderKanban, Rocket, ScrollText, Sparkles, Stars } from "lucide-react";
+import { ExternalLink, BookOpen, Boxes, Compass, FolderKanban, Rocket, ScrollText, Sparkles, Stars } from "lucide-react";
+import { FaApple } from "react-icons/fa";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { AbhishekAnimatedLogo } from "@/components/ui/AbhishekAnimatedLogo";
 import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
@@ -279,10 +280,10 @@ export const Footer = () => {
             ))}
             <PrefetchLink
               to="/downloads"
-              className="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-sky-600"
+              aria-label="Download macOS app"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-sky-500/20 bg-sky-500 text-white transition hover:bg-sky-600"
             >
-              <Download className="h-3.5 w-3.5" />
-              Download App
+              <FaApple className="h-4 w-4" />
             </PrefetchLink>
             <PrefetchLink
               to="/contact"

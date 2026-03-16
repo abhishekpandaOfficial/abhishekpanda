@@ -44,6 +44,7 @@ const StatisticsMastery = lazy(() => import("./pages/StatisticsMastery"));
 const NumpyMastery = lazy(() => import("./pages/NumpyMastery"));
 const MachineLearningCoreMastery = lazy(() => import("./pages/MachineLearningCoreMastery"));
 const NlpMastery = lazy(() => import("./pages/NlpMastery"));
+const LlmMastery = lazy(() => import("./pages/LlmMastery"));
 const ArticlesPage = lazy(() => import("./pages/Articles"));
 const CaseStudies = lazy(() => import("./pages/CaseStudies"));
 const Interview = lazy(() => import("./pages/Interview"));
@@ -263,6 +264,7 @@ const App = () => {
                 <Route path="/ai-ml-hub/numpy-mastery" element={<NumpyMastery />} />
                 <Route path="/ai-ml-hub/machine-learning-core-mastery" element={<MachineLearningCoreMastery />} />
                 <Route path="/ai-ml-hub/nlp-mastery" element={<NlpMastery />} />
+                <Route path="/ai-ml-hub/llm-mastery" element={<LlmMastery />} />
                 <Route path="/ai-ml-hub/:seriesSlug" element={<AiMlSeries />} />
                 <Route path="/blogs/dsa-mastery-csharp" element={<Navigate to="/dsa-mastery-csharp/syllabus" replace />} />
                 <Route path="/blogs/dsa-mastery-csharp/practice" element={<Navigate to="/cheatsheets/dsa-mastery-csharp/practice" replace />} />

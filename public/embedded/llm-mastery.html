@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLMs Mastery — Zero to Architect 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060A12;--bg2:#090E1A;--bg3:#0D1422;--bg4:#111829;--bg5:#162033;
+  --b1:#1A2540;--b2:#1F2D4E;
+  --V:#7C3AED;--V2:#6D28D9;--Vg:rgba(124,58,237,.15);
+  --E:#10B981;--A:#F59E0B;--R:#F43F5E;--S:#38BDF8;--L:#84CC16;
+  --text:#C9D8F0;--text2:#6D90BE;--text3:#364D6E;
+  --white:#F0F6FF;--code:#04080F;
+  --LW:262px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.shell{display:flex;height:100vh;overflow:hidden}
+.topbar{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--V),var(--E),var(--S));z-index:200}
+
+/* LEFT */
+.left{width:var(--LW);min-width:var(--LW);background:var(--bg2);border-right:1px solid var(--b1);display:flex;flex-direction:column;overflow:hidden}
+.logo{padding:16px 14px 12px;border-bottom:1px solid var(--b1)}
+.logo-row{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.logo-orb{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--V),var(--S));display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 0 14px var(--Vg)}
+.logo-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:800;color:var(--white)}
+.logo-sub{font-size:9.5px;color:var(--V);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-left:36px}
+.logo-tags{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.ltag{padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;letter-spacing:.5px}
+.lt-v{background:rgba(124,58,237,.12);color:#c4b5fd;border:1px solid rgba(124,58,237,.25)}
+.lt-e{background:rgba(16,185,129,.1);color:var(--E);border:1px solid rgba(16,185,129,.22)}
+.lt-a{background:rgba(245,158,11,.1);color:var(--A);border:1px solid rgba(245,158,11,.22)}
+.srch{position:relative;margin:9px 10px 4px}
+.srch input{width:100%;background:var(--bg3);border:1px solid var(--b1);color:var(--text);padding:6px 10px 6px 26px;border-radius:6px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;outline:none;transition:border-color .2s}
+.srch input:focus{border-color:var(--V)}.srch input::placeholder{color:var(--text3)}
+.si{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:12px}
+.lscroll{flex:1;overflow-y:auto;padding:6px 0 20px}
+.sec-sep{padding:10px 13px 3px;font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--text3);border-top:1px solid var(--b1);margin-top:4px}
+.chbtn{display:flex;align-items:center;gap:7px;width:100%;padding:7px 13px;background:none;border:none;cursor:pointer;text-align:left;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--text2);transition:all .15s;border-left:2px solid transparent}
+.chbtn:hover{color:var(--white);background:var(--Vg)}
+.chbtn.active{color:#c4b5fd;background:rgba(124,58,237,.1);border-left-color:var(--V)}
+.chnum{min-width:22px;height:22px;border-radius:4px;background:var(--bg3);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:'JetBrains Mono',monospace;flex-shrink:0;transition:all .15s}
+.chbtn.active .chnum{background:rgba(124,58,237,.2);color:#a78bfa}
+.chlabel{flex:1;font-weight:500;line-height:1.3}
+.chcount{font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+
+/* MIDDLE */
+.mid{width:285px;min-width:285px;background:var(--bg3);border-right:1px solid var(--b1);display:flex;flex-direction:column;overflow:hidden}
+.midhead{padding:13px 14px 11px;border-bottom:1px solid var(--b1);flex-shrink:0}
+.midch{font-size:9.5px;font-weight:700;color:var(--V);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px}
+.midtitle{font-size:14px;font-weight:800;color:var(--white);line-height:1.25}
+.middesc{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.5}
+.mscroll{flex:1;overflow-y:auto;padding:7px 0 20px}
+.tbtn{display:flex;align-items:flex-start;gap:8px;width:100%;padding:8px 12px;background:none;border:none;cursor:pointer;text-align:left;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;border-left:2px solid transparent}
+.tbtn:hover{background:rgba(124,58,237,.05);border-left-color:rgba(124,58,237,.3)}
+.tbtn.active{background:rgba(16,185,129,.07);border-left-color:var(--E)}
+.tico{width:26px;height:26px;border-radius:5px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:1px}
+.tbtn.active .tico{background:rgba(16,185,129,.15)}
+.tname{font-size:12px;font-weight:600;color:var(--text);line-height:1.3}
+.tbtn:hover .tname,.tbtn.active .tname{color:var(--white)}
+.ttags{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
+.ttag{padding:1px 5px;border-radius:3px;font-size:9px;font-weight:600;background:var(--bg4);color:var(--text3);border:1px solid var(--b1)}
+.tbtn.active .ttag{background:rgba(16,185,129,.08);color:var(--E);border-color:rgba(16,185,129,.2)}
+
+/* RIGHT */
+.right{flex:1;overflow:hidden;display:flex;flex-direction:column;background:var(--bg)}
+.rhead{padding:13px 22px 0;border-bottom:1px solid var(--b1);flex-shrink:0;background:var(--bg)}
+.rcrumb{font-size:10px;color:var(--text3);margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.rcrumb span{color:var(--text2)}
+.rtitle{font-size:20px;font-weight:800;color:var(--white);letter-spacing:-.4px;line-height:1.2;margin-bottom:12px}
+.rtitle em{color:var(--V);font-style:normal}
+.tabs{display:flex;gap:1px}
+.tab{padding:7px 14px;font-size:11.5px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text3);font-family:'Plus Jakarta Sans',sans-serif;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.2px}
+.tab:hover{color:var(--text)}.tab.active{color:var(--E);border-bottom-color:var(--E)}
+.rbody{flex:1;overflow-y:auto;padding:20px 24px 50px}
+.tpanel{display:none}.tpanel.active{display:block;animation:fin .18s ease}
+@keyframes fin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* WELCOME */
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center}
+.worb{width:68px;height:68px;border-radius:18px;background:linear-gradient(135deg,var(--V),var(--S));display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 16px;box-shadow:0 0 40px rgba(124,58,237,.3)}
+.welcome h2{font-size:21px;font-weight:800;color:var(--white);margin-bottom:7px}
+.welcome p{font-size:13px;color:var(--text2);max-width:400px;line-height:1.7}
+.wchips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px}
+.wchip{padding:3px 11px;border-radius:20px;font-size:10.5px;font-weight:600;background:var(--bg3);border:1px solid var(--b1);color:var(--text2)}
+
+/* CONTENT */
+.slabel{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--V);margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.slabel::after{content:'';flex:1;height:1px;background:var(--b1)}
+.prose{font-size:13px;color:var(--text);line-height:1.8;margin-bottom:12px}
+.prose strong{color:var(--white);font-weight:600}.prose em{color:var(--E);font-style:normal}
+
+.def{background:var(--bg3);border:1px solid var(--b1);border-left:3px solid var(--V);border-radius:0 7px 7px 0;padding:12px 14px;margin-bottom:12px}
+.def h4{font-size:10px;color:var(--V);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.def p{font-size:12.5px;color:var(--text);line-height:1.7}
+
+.why{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15);border-radius:7px;padding:12px 14px;margin-bottom:11px}
+.why h4{font-size:10.5px;color:var(--E);font-weight:700;margin-bottom:6px}
+
+.formula{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.15);border-radius:7px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--S);margin-bottom:12px;line-height:1.75;text-align:center}
+
+pre{background:var(--code);border:1px solid var(--b1);border-radius:7px;padding:13px 15px;overflow-x:auto;margin-bottom:12px;position:relative}
+pre code{font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.8;color:#c9d8f0}
+.clang{position:absolute;top:6px;right:7px;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);background:var(--bg3);padding:2px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace}
+.kw{color:#c792ea}.fn{color:#82aaff}.st{color:#c3e88d}.cm{color:#2a4060;font-style:italic}.nm{color:#f78c6c}.op{color:#89ddff}.cl{color:#ffcb6b}.at{color:#00c9b1}
+
+.tbl{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px}
+.tbl th{background:var(--bg4);color:var(--V);padding:7px 10px;text-align:left;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--b2)}
+.tbl td{padding:6px 10px;border-bottom:1px solid var(--b1);color:var(--text);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}.tbl tr:hover td{background:rgba(124,58,237,.02)}
+
+.steps{margin-bottom:12px}
+.step{display:flex;gap:10px;padding:9px 11px;background:var(--bg3);border:1px solid var(--b1);border-radius:6px;margin-bottom:6px;align-items:flex-start}
+.snum{min-width:24px;height:24px;border-radius:5px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.25);color:#c4b5fd;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.sc h4{font-size:12px;font-weight:600;color:var(--white);margin-bottom:2px}
+.sc p{font-size:11.5px;color:var(--text2);line-height:1.6}
+
+.scgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.sccard{background:var(--bg3);border:1px solid var(--b1);border-radius:7px;padding:11px;transition:border-color .15s}
+.sccard:hover{border-color:var(--E)}
+.sch{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.scic{font-size:16px}.sct{font-size:12px;font-weight:700;color:var(--white)}
+.sci{font-size:9px;color:var(--E);font-weight:600;letter-spacing:.8px;text-transform:uppercase}
+.scb{font-size:11.5px;color:var(--text2);line-height:1.6}
+.sco{margin-top:6px;padding:4px 8px;background:rgba(132,204,22,.07);border:1px solid rgba(132,204,22,.18);border-radius:4px;font-size:10.5px;color:var(--L);font-weight:500}
+
+.ucgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.uccard{background:var(--bg3);border:1px solid var(--b1);border-radius:7px;padding:10px;text-align:center;transition:all .15s}
+.uccard:hover{background:var(--bg4);border-color:var(--V)}
+.ucem{font-size:18px;margin-bottom:4px}
+.uct{font-size:11px;font-weight:700;color:var(--white);margin-bottom:3px}
+.ucd{font-size:10px;color:var(--text2);line-height:1.5}
+
+.pill{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;margin:2px}
+.pv{background:rgba(124,58,237,.12);color:#c4b5fd;border:1px solid rgba(124,58,237,.25)}
+.pe{background:rgba(16,185,129,.1);color:var(--E);border:1px solid rgba(16,185,129,.2)}
+.pa{background:rgba(245,158,11,.1);color:var(--A);border:1px solid rgba(245,158,11,.2)}
+.pr{background:rgba(244,63,94,.1);color:var(--R);border:1px solid rgba(244,63,94,.2)}
+.ps{background:rgba(56,189,248,.1);color:var(--S);border:1px solid rgba(56,189,248,.2)}
+.pl{background:rgba(132,204,22,.1);color:var(--L);border:1px solid rgba(132,204,22,.2)}
+
+.aflow{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.ablock{background:var(--bg4);border:1px solid var(--b2);border-radius:6px;padding:8px 12px;font-size:12px;font-weight:600;color:var(--text)}
+.ablock.v{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.25);color:#c4b5fd}
+.ablock.e{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.2);color:var(--E)}
+.ablock.a{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2);color:var(--A)}
+.ablock.s{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.2);color:var(--S)}
+.ablock.r{background:rgba(244,63,94,.08);border-color:rgba(244,63,94,.2);color:var(--R)}
+.aarr{text-align:center;color:var(--text3);font-size:14px;line-height:1}
+.arow{display:flex;gap:5px;align-items:stretch;margin-bottom:5px}
+.arow .ablock{flex:1;text-align:center;font-size:11px}
+
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cmpcard{background:var(--bg3);border:1px solid var(--b1);border-radius:7px;padding:12px}
+.cmpcard h4{font-size:11.5px;font-weight:700;margin-bottom:6px}
+.cmpcard ul{list-style:none;padding:0}
+.cmpcard ul li{font-size:11.5px;color:var(--text2);padding:2px 0 2px 12px;position:relative}
+.cmpcard ul li::before{content:'›';position:absolute;left:0;color:var(--E)}
+
+.projbox{background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(16,185,129,.05));border:1px solid rgba(124,58,237,.2);border-radius:9px;padding:14px;margin-bottom:12px}
+.projbox h3{font-size:13.5px;font-weight:800;color:var(--white);margin-bottom:5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.ptag{padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.8px}
+
+.ib{border-radius:6px;padding:10px 12px;margin-bottom:10px;font-size:12px;line-height:1.65;display:flex;gap:9px;align-items:flex-start}
+.ib.tip{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.18)}
+.ib.warn{background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.18)}
+.ib.info{background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.18)}
+.ib-ic{font-size:13px;flex-shrink:0;margin-top:1px}
+
+.archsvg{background:var(--code);border:1px solid var(--b1);border-radius:7px;padding:14px;margin-bottom:12px;text-align:center;overflow-x:auto}
+
+@media(max-width:900px){.mid{display:none}:root{--LW:240px}}
+@media(max-width:600px){.left{display:none}}
+</style>
+</head>
+<body>
+<div class="topbar"></div>
+<div class="shell">
+
+<!-- LEFT -->
+<div class="left">
+  <div class="logo">
+    <div class="logo-row"><div class="logo-orb">🧠</div><div class="logo-name">LLMs Mastery</div></div>
+    <div class="logo-sub">Zero → Architect · 2026</div>
+    <div class="logo-tags">
+      <span class="ltag lt-v">20 Modules</span>
+      <span class="ltag lt-e">🎯 SQLPilot</span>
+      <span class="ltag lt-a">🔀 Proxinex</span>
+    </div>
+  </div>
+  <div class="srch"><span class="si">⌕</span><input type="text" placeholder="Search topics…" oninput="filterTopics(this.value)"></div>
+  <div class="lscroll" id="chList"></div>
+</div>
+
+<!-- MIDDLE -->
+<div class="mid">
+  <div class="midhead">
+    <div class="midch" id="midCh">Select a Module</div>
+    <div class="midtitle" id="midTitle">LLMs Mastery</div>
+    <div class="middesc" id="midDesc">Choose a module from the left panel</div>
+  </div>
+  <div class="mscroll" id="topicList"></div>
+</div>
+
+<!-- RIGHT -->
+<div class="right">
+  <div class="rhead" id="rHead" style="display:none">
+    <div class="rcrumb" id="rCrumb"></div>
+    <div class="rtitle" id="rTitle"></div>
+    <div class="tabs" id="tabBar"></div>
+  </div>
+  <div class="rbody" id="rbody">
+    <div class="welcome">
+      <div class="worb">🧠</div>
+      <h2>LLMs Mastery — Zero to Architect</h2>
+      <p>Complete roadmap: internals, build from scratch, fine-tuning, RAG, agents, agentic AI, open & closed source models — plus two flagship projects: SQLPilot & Proxinex.</p>
+      <div class="wchips">
+        <span class="wchip">20 Modules · 120+ Topics</span>
+        <span class="wchip">Build LLM From Scratch</span>
+        <span class="wchip">Fine-tuning · LoRA · QLoRA</span>
+        <span class="wchip">HuggingFace Ecosystem</span>
+        <span class="wchip">AI Agents · Agentic AI</span>
+        <span class="wchip" style="background:rgba(16,185,129,.1);color:#10B981;border-color:rgba(16,185,129,.25)">🎯 SQLPilot: Voice→SQL+ER</span>
+        <span class="wchip" style="background:rgba(245,158,11,.1);color:#F59E0B;border-color:rgba(245,158,11,.25)">🔀 Proxinex: Multi-LLM Router</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ═══════════════════════ CURRICULUM DATA ═══════════════════════
+const C=[
+// ── MODULE 1 ──
+{id:'c1',num:'01',label:'LLM Fundamentals',emoji:'🧠',section:'FOUNDATIONS',desc:'What LLMs are, how they differ from traditional ML, scaling laws, and emergent abilities.',topics:[
+{id:'t1_1',icon:'💡',name:'What is a Large Language Model?',tags:['Definition','Foundation','Paradigm Shift'],content:{
+what:`<div class="def"><h4>Definition</h4><p>A <strong>Large Language Model (LLM)</strong> is a deep neural network trained on massive text corpora that learns to model P(x₁,x₂,…,xₙ) — the probability of a token sequence. At sufficient scale it develops emergent capabilities: reasoning, coding, math, and instruction following, without task-specific training.</p></div>
+<div class="slabel">Three Pillars</div>
+<div class="ucgrid">
+<div class="uccard"><div class="ucem">📐</div><div class="uct">Scale</div><div class="ucd">Billions of params + trillions of training tokens</div></div>
+<div class="uccard"><div class="ucem">🔄</div><div class="uct">Self-Supervision</div><div class="ucd">No labels — predict next token from raw text</div></div>
+<div class="uccard"><div class="ucem">⚡</div><div class="uct">Transfer</div><div class="ucd">One pre-trained model → fine-tune for any task</div></div>
+</div>
+<table class="tbl"><tr><th>Aspect</th><th>Traditional ML</th><th>LLM</th></tr>
+<tr><td>Training data</td><td>Labeled, task-specific</td><td>Unlabeled raw text (web-scale)</td></tr>
+<tr><td>Task handling</td><td>One model per task</td><td>One model, all tasks via prompting</td></tr>
+<tr><td>Customization</td><td>Retrain on new data</td><td>Prompt engineering or fine-tune</td></tr>
+<tr><td>Reasoning</td><td>Feature-based rules</td><td>Emergent at scale</td></tr></table>`,
+why:`<div class="why"><h4>Why LLMs Are Transformative</h4><p class="prose">LLMs collapse the barrier between problem formulation and solution. You describe what you want in natural language — the model does the rest. 90% of the world's data is unstructured text, and LLMs are the first technology that can reason over all of it.</p></div>
+<ul style="list-style:none;padding:0">
+<li style="padding:5px 0 5px 28px;position:relative;border-bottom:1px solid var(--b1);font-size:12.5px;color:var(--text)"><span style="position:absolute;left:6px;background:var(--bg4);border-radius:3px;padding:1px 5px;font-size:9px;font-weight:700;color:#a78bfa;font-family:'JetBrains Mono',monospace">01</span><strong>Unified interface</strong> — one API for NLP, coding, math, reasoning, translation</li>
+<li style="padding:5px 0 5px 28px;position:relative;border-bottom:1px solid var(--b1);font-size:12.5px;color:var(--text)"><span style="position:absolute;left:6px;background:var(--bg4);border-radius:3px;padding:1px 5px;font-size:9px;font-weight:700;color:#a78bfa;font-family:'JetBrains Mono',monospace">02</span><strong>Zero-shot generalization</strong> — describe a new task and it handles it without retraining</li>
+<li style="padding:5px 0 5px 28px;position:relative;border-bottom:1px solid var(--b1);font-size:12.5px;color:var(--text)"><span style="position:absolute;left:6px;background:var(--bg4);border-radius:3px;padding:1px 5px;font-size:9px;font-weight:700;color:#a78bfa;font-family:'JetBrains Mono',monospace">03</span><strong>World knowledge embedded</strong> — billions of facts from training, no separate KB needed</li>
+<li style="padding:5px 0 5px 28px;position:relative;font-size:12.5px;color:var(--text)"><span style="position:absolute;left:6px;background:var(--bg4);border-radius:3px;padding:1px 5px;font-size:9px;font-weight:700;color:#a78bfa;font-family:'JetBrains Mono',monospace">04</span><strong>Composable</strong> — chain with retrieval, tools, code execution → intelligent systems</li>
+</ul>`,
+when:`<div class="steps"><div class="step"><div class="snum">✅</div><div class="sc"><h4>Use LLMs when</h4><p>Any task describable in English: classify, extract, generate, translate, summarize, reason, code. If a human can solve it reading text → LLM can too.</p></div></div>
+<div class="step"><div class="snum">⚠️</div><div class="sc"><h4>Don't use LLMs when</h4><p>Real-time numeric computation, deterministic exact logic, sub-millisecond latency, or 100% accuracy requirements (use LLM + tool-calling instead).</p></div></div></div>`,
+how:`<pre><code><span class="cm"># OpenAI</span>
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+client = <span class="cl">OpenAI</span>()
+r = client.chat.completions.<span class="fn">create</span>(model=<span class="st">"gpt-4o"</span>,
+    messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:<span class="st">"Explain LLMs in 3 sentences"</span>}])
+<span class="fn">print</span>(r.choices[<span class="nm">0</span>].message.content)
+
+<span class="cm"># Anthropic Claude</span>
+<span class="kw">import</span> anthropic
+r = anthropic.<span class="cl">Anthropic</span>().messages.<span class="fn">create</span>(
+    model=<span class="st">"claude-sonnet-4-6"</span>, max_tokens=<span class="nm">512</span>,
+    messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:<span class="st">"Explain LLMs in 3 sentences"</span>}])
+<span class="fn">print</span>(r.content[<span class="nm">0</span>].text)
+
+<span class="cm"># Local via Ollama</span>
+<span class="kw">import</span> ollama
+r = ollama.<span class="fn">chat</span>(model=<span class="st">'llama3.3'</span>,
+    messages=[{<span class="st">'role'</span>:<span class="st">'user'</span>,<span class="st">'content'</span>:<span class="st">'Explain LLMs'</span>}])
+<span class="fn">print</span>(r[<span class="st">'message'</span>][<span class="st">'content'</span>])
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<div class="scgrid"><div class="sccard"><div class="sch"><span class="scic">💊</span><div><div class="sct">Drug Discovery</div><div class="sci">Pharma</div></div></div><div class="scb">LLM trained on biomedical literature predicts protein-drug interactions and generates synthesis protocols autonomously.</div><div class="sco">🎯 Insilico: $2M drug candidate in 21 days</div></div>
+<div class="sccard"><div class="sch"><span class="scic">⚖️</span><div><div class="sct">Legal Document Analysis</div><div class="sci">LegalTech</div></div></div><div class="scb">LLM reads 500-page M&A contracts, flags non-standard clauses, summarizes obligations vs precedent templates.</div><div class="sco">🎯 Harvey AI: replaces 6 weeks of associate work</div></div></div>`,
+usecases:`<div class="ucgrid">
+<div class="uccard"><div class="ucem">💬</div><div class="uct">Conversational AI</div><div class="ucd">ChatGPT, Claude — human-level dialogue</div></div>
+<div class="uccard"><div class="ucem">💻</div><div class="uct">Code Generation</div><div class="ucd">GitHub Copilot, Cursor, Devin</div></div>
+<div class="uccard"><div class="ucem">📄</div><div class="uct">Document Intelligence</div><div class="ucd">Contract review, paper summarization</div></div>
+<div class="uccard"><div class="ucem">🔍</div><div class="uct">Semantic Search</div><div class="ucd">Enterprise knowledge retrieval</div></div>
+<div class="uccard"><div class="ucem">🤖</div><div class="uct">Autonomous Agents</div><div class="ucd">Task automation, SWE-Bench</div></div>
+<div class="uccard"><div class="ucem">🧬</div><div class="uct">Science</div><div class="ucd">AlphaFold, protein design, drug discovery</div></div>
+</div>`}},
+{id:'t1_2',icon:'📈',name:'Scaling Laws & Emergent Abilities',tags:['Kaplan','Chinchilla','Power Law','Emergent'],content:{
+what:`<div class="def"><h4>Scaling Laws</h4><p>Kaplan (2020) & Hoffmann (2022): LLM loss follows <em>power laws</em> in params N, data D, and compute C. Performance improves predictably — no plateau at current scales. Chinchilla showed most models were massively undertrained relative to data.</p></div>
+<div class="formula">L(N,D) ≈ (Nc/N)^αN + (Dc/D)^αD + L∞<br>Chinchilla optimal: D ≈ 20×N tokens<br>Every 10× compute → ~2× better performance</div>
+<table class="tbl"><tr><th>Emergent Capability</th><th>Approx. Scale</th></tr>
+<tr><td>Basic arithmetic</td><td>~1B params</td></tr>
+<tr><td>Multi-step reasoning</td><td>~8B params</td></tr>
+<tr><td>Chain-of-thought</td><td>~100B params</td></tr>
+<tr><td>In-context learning (5-shot)</td><td>~13B+ params</td></tr>
+<tr><td>Tool use / code execution</td><td>~70B+ params</td></tr>
+<tr><td>Self-correction / reflection</td><td>~100B+ w/ RLHF</td></tr></table>`,
+why:`<p class="prose">Scaling laws are the <strong>strategic compass</strong> for LLM investment. They answer: "Should I train bigger or gather more data?" Without them, LLM development is guesswork. The Chinchilla insight changed how every company trains models post-2022.</p>`,
+when:`<p class="prose">Apply when: <strong>budget allocation</strong> (params vs tokens), <strong>capability prediction</strong> (will X scale to do Y?), or deciding between fine-tuning a small model vs prompting a large one.</p>`,
+how:`<pre><code><span class="fn">def</span> <span class="at">chinchilla_optimal</span>(compute_flops):
+    <span class="cm">"""C ≈ 6*N*D → N_opt=sqrt(C/12), D_opt=20*N_opt"""</span>
+    <span class="kw">import</span> math
+    N = math.<span class="fn">sqrt</span>(compute_flops / <span class="nm">12</span>)
+    D = <span class="nm">20</span> * N
+    <span class="kw">return</span> N, D
+
+N, D = <span class="fn">chinchilla_optimal</span>(<span class="nm">3.1e23</span>)  <span class="cm"># GPT-3 compute</span>
+<span class="fn">print</span>(<span class="st">f"Optimal: {N:.1e} params, {D:.1e} tokens"</span>)
+<span class="cm"># GPT-3 was 175B params on 300B tokens — very undertrained!</span>
+<span class="cm"># LLaMA-3-8B: 8B × 1875 = 15T tokens — massively overtrained = better</span>
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>Chinchilla vs Gopher:</strong> Same compute budget. Chinchilla (70B, 1.4T tokens) beats Gopher (280B, 300B tokens) on all benchmarks. Smaller + more data wins. This finding reshaped how LLaMA, Mistral, and all post-2022 models are trained.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">💰</div><div class="uct">Budget Allocation</div><div class="ucd">Optimal param/token split for fixed GPU budget</div></div>
+<div class="uccard"><div class="ucem">🔮</div><div class="uct">Capability Forecasting</div><div class="ucd">Predict benchmark scores before full training run</div></div>
+<div class="uccard"><div class="ucem">🏗️</div><div class="uct">Architecture Search</div><div class="ucd">Compare architectures at iso-compute not iso-params</div></div></div>`}}
+]},
+
+// ── MODULE 2 ──
+{id:'c2',num:'02',label:'Transformer Architecture Deep Dive',emoji:'⚡',section:'ARCHITECTURE',desc:'Every component of the modern Transformer dissected — attention, FFN, norms, positional encoding, and full decoder-only LLM.',topics:[
+{id:'t2_1',icon:'🔑',name:'Multi-Head Attention Internals',tags:['Q K V','Scaled Dot-Product','GQA','MLA','Flash Attention'],content:{
+what:`<div class="def"><h4>Scaled Dot-Product Attention</h4><p>Core operation: project input into Queries (Q), Keys (K), Values (V). Compute compatibility scores Q·Kᵀ, scale by √dₖ, softmax, weighted sum of V.</p></div>
+<div class="formula">Attention(Q,K,V) = softmax( QKᵀ / √dₖ ) · V<br>MultiHead = Concat(head₁,…,headₕ)W^O<br>headᵢ = Attention(QWᵢQ, KWᵢK, VWᵢV)</div>
+<table class="tbl"><tr><th>Variant</th><th>KV Heads</th><th>Used In</th><th>Benefit</th></tr>
+<tr><td>MHA</td><td>= Q heads h</td><td>BERT, GPT-2</td><td>Max expressiveness</td></tr>
+<tr><td>MQA</td><td>1 shared</td><td>PaLM, Gemini</td><td>Smallest KV cache</td></tr>
+<tr><td>GQA</td><td>g (1 &lt; g &lt; h)</td><td>LLaMA-3, Mistral</td><td>Best balance</td></tr>
+<tr><td>MLA</td><td>Compressed C_KV</td><td>DeepSeek-V2/V3</td><td>93% KV cache reduction</td></tr>
+<tr><td>Flash Attention 2/3</td><td>Any</td><td>All modern LLMs</td><td>O(n) memory, 4× faster</td></tr></table>`,
+why:`<p class="prose">GQA (LLaMA-3-70B: 64 Q heads, 8 KV heads) reduces KV cache 8×. At 128K context, this saves ~40GB memory per batch. MLA (DeepSeek-V3) compresses K,V into a low-rank latent — only the latent needs to be cached, not the full K,V matrices.</p>`,
+when:`<p class="prose">Choose GQA for memory-efficient production inference. Implement Flash Attention for any sequence >1024 tokens. Use MLA when designing custom architectures needing extreme KV cache efficiency.</p>`,
+how:`<pre><code><span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn, torch.nn.functional <span class="kw">as</span> F, math
+
+<span class="kw">class</span> <span class="cl">GQA</span>(nn.Module):
+    <span class="st">"""Grouped Query Attention — LLaMA-3 style"""</span>
+    <span class="fn">def</span> <span class="at">__init__</span>(self, d=<span class="nm">4096</span>, nh=<span class="nm">32</span>, nkv=<span class="nm">8</span>):
+        <span class="fn">super</span>().__init__()
+        self.nh=nh; self.nkv=nkv; self.rep=nh//nkv
+        self.hd=d//nh
+        self.wq=nn.<span class="cl">Linear</span>(d,nh*self.hd,bias=<span class="nm">False</span>)
+        self.wk=nn.<span class="cl">Linear</span>(d,nkv*self.hd,bias=<span class="nm">False</span>)
+        self.wv=nn.<span class="cl">Linear</span>(d,nkv*self.hd,bias=<span class="nm">False</span>)
+        self.wo=nn.<span class="cl">Linear</span>(nh*self.hd,d,bias=<span class="nm">False</span>)
+    <span class="fn">def</span> <span class="at">forward</span>(self,x,mask=<span class="nm">None</span>):
+        B,T,_=x.<span class="fn">shape</span>
+        q=self.wq(x).<span class="fn">view</span>(B,T,self.nh,self.hd).<span class="fn">transpose</span>(<span class="nm">1</span>,<span class="nm">2</span>)
+        k=self.wk(x).<span class="fn">view</span>(B,T,self.nkv,self.hd)
+        v=self.wv(x).<span class="fn">view</span>(B,T,self.nkv,self.hd)
+        <span class="cm"># Expand KV to match Q groups</span>
+        k=k.unsqueeze(<span class="nm">3</span>).<span class="fn">expand</span>(-<span class="nm">1</span>,-<span class="nm">1</span>,-<span class="nm">1</span>,self.rep,-<span class="nm">1</span>).<span class="fn">reshape</span>(B,T,self.nh,self.hd).<span class="fn">transpose</span>(<span class="nm">1</span>,<span class="nm">2</span>)
+        v=v.unsqueeze(<span class="nm">3</span>).<span class="fn">expand</span>(-<span class="nm">1</span>,-<span class="nm">1</span>,-<span class="nm">1</span>,self.rep,-<span class="nm">1</span>).<span class="fn">reshape</span>(B,T,self.nh,self.hd).<span class="fn">transpose</span>(<span class="nm">1</span>,<span class="nm">2</span>)
+        sc=torch.<span class="fn">matmul</span>(q,k.<span class="fn">transpose</span>(-<span class="nm">2</span>,-<span class="nm">1</span>))/math.<span class="fn">sqrt</span>(self.hd)
+        <span class="kw">if</span> mask <span class="kw">is not</span> <span class="nm">None</span>: sc=sc.<span class="fn">masked_fill</span>(mask==<span class="nm">0</span>,-<span class="nm">1e9</span>)
+        out=torch.<span class="fn">matmul</span>(F.<span class="fn">softmax</span>(sc,dim=-<span class="nm">1</span>),v)
+        <span class="kw">return</span> self.wo(out.<span class="fn">transpose</span>(<span class="nm">1</span>,<span class="nm">2</span>).<span class="fn">reshape</span>(B,T,-<span class="nm">1</span>))
+<div class="clang">PYTORCH</div></code></pre>`,
+examples:`<p class="prose"><strong>LLaMA-3-70B:</strong> d_model=8192, 64 Q heads, 8 KV heads. KV cache per token = 8 × 128 × 2 = 2048 floats vs 131,072 in MHA — 64× smaller. For 128K tokens: 256MB vs 16GB. This is why 70B fits on 2× A100 80GB.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">💾</div><div class="uct">KV Cache Reduction</div><div class="ucd">GQA serves 8× more users on same GPU memory</div></div>
+<div class="uccard"><div class="ucem">⚡</div><div class="uct">Flash Attention</div><div class="ucd">Recompute on-the-fly: O(n) memory, 4× wall-clock faster</div></div>
+<div class="uccard"><div class="ucem">🔭</div><div class="uct">Long Context</div><div class="ucd">Ring attention: distribute 1M+ tokens across GPU cluster</div></div></div>`}},
+{id:'t2_2',icon:'🏗️',name:'Full Decoder-Only LLM Architecture',tags:['RMSNorm','SwiGLU','RoPE','Residual','KV Cache'],content:{
+what:`<div class="def"><h4>Modern Decoder-Only Block</h4><p>Every modern LLM (LLaMA, Mistral, Qwen, GPT) follows: <strong>RMSNorm → GQA+RoPE → Residual → RMSNorm → SwiGLU FFN → Residual</strong>. Stacked N times (32–128 layers). Final RMSNorm → LM Head → Softmax → next token.</p></div>
+<div class="archsvg"><svg viewBox="0 0 380 480" xmlns="http://www.w3.org/2000/svg" style="max-width:100%">
+<rect width="380" height="480" fill="#04080F"/>
+<rect x="115" y="8" width="150" height="28" rx="5" fill="rgba(124,58,237,.12)" stroke="#7C3AED"/>
+<text x="190" y="26" text-anchor="middle" fill="#c4b5fd" font-size="10">Token IDs → Embedding</text>
+<line x1="190" y1="36" x2="190" y2="52" stroke="#364D6E" stroke-width="1.5"/>
+<rect x="40" y="52" width="300" height="270" rx="8" fill="none" stroke="#1A2540" stroke-dasharray="5,3" stroke-width="1.5"/>
+<text x="350" y="172" fill="#364D6E" font-size="9" font-family="JetBrains Mono">×N</text>
+<rect x="115" y="60" width="150" height="22" rx="4" fill="rgba(244,63,94,.08)" stroke="#F43F5E" stroke-width="1"/>
+<text x="190" y="75" text-anchor="middle" fill="#F43F5E" font-size="9.5">RMSNorm</text>
+<line x1="190" y1="82" x2="190" y2="96" stroke="#364D6E" stroke-width="1.5"/>
+<rect x="95" y="96" width="190" height="38" rx="5" fill="rgba(124,58,237,.12)" stroke="#7C3AED" stroke-width="1.5"/>
+<text x="190" y="113" text-anchor="middle" fill="#c4b5fd" font-size="10.5" font-weight="bold">GQA Self-Attention</text>
+<text x="190" y="127" text-anchor="middle" fill="#6D90BE" font-size="8.5">+ RoPE Positional Encoding</text>
+<path d="M85,96 Q68,96 68,134 Q68,210 85,210" fill="none" stroke="#F43F5E" stroke-width="1" stroke-dasharray="3,2"/>
+<text x="58" y="160" fill="#F43F5E" font-size="7.5" text-anchor="middle">Res</text>
+<line x1="190" y1="134" x2="190" y2="148" stroke="#364D6E" stroke-width="1.5"/>
+<rect x="145" y="148" width="90" height="20" rx="4" fill="rgba(244,63,94,.06)" stroke="#F43F5E" stroke-width="1"/>
+<text x="190" y="162" text-anchor="middle" fill="#F43F5E" font-size="9">+ Residual</text>
+<line x1="190" y1="168" x2="190" y2="182" stroke="#364D6E" stroke-width="1.5"/>
+<rect x="115" y="182" width="150" height="22" rx="4" fill="rgba(244,63,94,.08)" stroke="#F43F5E" stroke-width="1"/>
+<text x="190" y="197" text-anchor="middle" fill="#F43F5E" font-size="9.5">RMSNorm</text>
+<line x1="190" y1="204" x2="190" y2="218" stroke="#364D6E" stroke-width="1.5"/>
+<rect x="95" y="218" width="190" height="38" rx="5" fill="rgba(16,185,129,.1)" stroke="#10B981" stroke-width="1.5"/>
+<text x="190" y="235" text-anchor="middle" fill="#10B981" font-size="10.5" font-weight="bold">SwiGLU FFN</text>
+<text x="190" y="249" text-anchor="middle" fill="#6D90BE" font-size="8.5">gate_proj · up_proj → down_proj</text>
+<path d="M85,218 Q68,218 68,256 Q68,295 85,295" fill="none" stroke="#F43F5E" stroke-width="1" stroke-dasharray="3,2"/>
+<line x1="190" y1="256" x2="190" y2="272" stroke="#364D6E" stroke-width="1.5"/>
+<rect x="145" y="272" width="90" height="20" rx="4" fill="rgba(244,63,94,.06)" stroke="#F43F5E" stroke-width="1"/>
+<text x="190" y="286" text-anchor="middle" fill="#F43F5E" font-size="9">+ Residual</text>
+<line x1="190" y1="292" x2="190" y2="340" stroke="#364D6E" stroke-width="1.5"/>
+<rect x="115" y="340" width="150" height="22" rx="4" fill="rgba(244,63,94,.08)" stroke="#F43F5E" stroke-width="1"/>
+<text x="190" y="355" text-anchor="middle" fill="#F43F5E" font-size="9.5">Final RMSNorm</text>
+<line x1="190" y1="362" x2="190" y2="376" stroke="#364D6E" stroke-width="1.5"/>
+<rect x="95" y="376" width="190" height="28" rx="5" fill="rgba(245,158,11,.1)" stroke="#F59E0B" stroke-width="1.5"/>
+<text x="190" y="394" text-anchor="middle" fill="#F59E0B" font-size="10.5">LM Head → Logits [vocab_size]</text>
+<line x1="190" y1="404" x2="190" y2="418" stroke="#364D6E" stroke-width="1.5"/>
+<rect x="130" y="418" width="120" height="24" rx="4" fill="rgba(124,58,237,.1)" stroke="#7C3AED"/>
+<text x="190" y="434" text-anchor="middle" fill="#c4b5fd" font-size="9.5">Softmax → Next Token</text>
+<text x="190" y="460" text-anchor="middle" fill="#364D6E" font-size="8.5">LLaMA-3-8B: 32 layers, 4096 dim, 128K ctx</text>
+</svg></div>`,
+why:`<p class="prose"><strong>RMSNorm</strong> vs LayerNorm: removes mean centering → 7–15% faster, negligible quality loss. <strong>SwiGLU</strong>: FFN(x) = (xW₁ ⊗ SiLU(xW₃))W₂ → consistently +1–2 benchmark points at same FLOP cost. <strong>RoPE</strong>: encodes position as rotation in Q,K space → extrapolates to 4×+ longer contexts.</p>`,
+when:`<p class="prose">Critical when: building custom architectures, debugging training instabilities, optimizing inference, or evaluating whether an architecture will generalize to long contexts.</p>`,
+how:`<pre><code><span class="kw">class</span> <span class="cl">RMSNorm</span>(nn.Module):
+    <span class="fn">def</span> <span class="at">__init__</span>(self,dim,eps=<span class="nm">1e-6</span>):
+        <span class="fn">super</span>().__init__()
+        self.w=nn.<span class="cl">Parameter</span>(torch.<span class="fn">ones</span>(dim)); self.eps=eps
+    <span class="fn">def</span> <span class="at">forward</span>(self,x):
+        <span class="kw">return</span> x*x.<span class="fn">pow</span>(<span class="nm">2</span>).<span class="fn">mean</span>(-<span class="nm">1</span>,keepdim=<span class="nm">True</span>).<span class="fn">add</span>(self.eps).<span class="fn">rsqrt</span>()*self.w
+
+<span class="kw">class</span> <span class="cl">SwiGLU</span>(nn.Module):
+    <span class="fn">def</span> <span class="at">__init__</span>(self,dim,hidden):
+        <span class="fn">super</span>().__init__()
+        self.w1=nn.<span class="cl">Linear</span>(dim,hidden,bias=<span class="nm">False</span>)   <span class="cm"># gate</span>
+        self.w3=nn.<span class="cl">Linear</span>(dim,hidden,bias=<span class="nm">False</span>)   <span class="cm"># up</span>
+        self.w2=nn.<span class="cl">Linear</span>(hidden,dim,bias=<span class="nm">False</span>)   <span class="cm"># down</span>
+    <span class="fn">def</span> <span class="at">forward</span>(self,x):
+        <span class="kw">return</span> self.w2(F.<span class="fn">silu</span>(self.w1(x))*self.w3(x))
+
+<span class="kw">class</span> <span class="cl">DecoderBlock</span>(nn.Module):
+    <span class="fn">def</span> <span class="at">__init__</span>(self,cfg):
+        <span class="fn">super</span>().__init__()
+        self.n1=<span class="cl">RMSNorm</span>(cfg.dim); self.attn=<span class="cl">GQA</span>(cfg.dim,cfg.nh,cfg.nkv)
+        self.n2=<span class="cl">RMSNorm</span>(cfg.dim); self.ffn=<span class="cl">SwiGLU</span>(cfg.dim,cfg.ffn_dim)
+    <span class="fn">def</span> <span class="at">forward</span>(self,x,mask=<span class="nm">None</span>):
+        x=x+self.attn(self.n1(x),mask)   <span class="cm"># pre-norm + residual</span>
+        x=x+self.ffn(self.n2(x))          <span class="cm"># pre-norm + residual</span>
+        <span class="kw">return</span> x
+<div class="clang">PYTORCH</div></code></pre>`,
+examples:`<p class="prose"><strong>LLaMA-3-8B config:</strong> 32 layers, dim=4096, 32 Q-heads, 8 KV-heads, ffn_dim=14336, vocab=128256, max_ctx=131072, RoPE theta=500000. Total: 8.03B params. Weight tying: embedding ↔ LM head saves ~500M params.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🛠️</div><div class="uct">Custom Architectures</div><div class="ucd">Build domain models (protein, code, legal LLMs)</div></div>
+<div class="uccard"><div class="ucem">⚡</div><div class="uct">Kernel Fusion</div><div class="ucd">Fuse RMSNorm + attention in Triton for 2× speed</div></div>
+<div class="uccard"><div class="ucem">🔬</div><div class="uct">Research</div><div class="ucd">Test new activation functions, PE variants</div></div></div>`}}
+]},
+
+// ── MODULE 3 ──
+{id:'c3',num:'03',label:'Building LLM from Scratch',emoji:'🏗️',section:'BUILD',desc:'Complete GPT implementation in PyTorch — tokenizer to training loop to generation.',topics:[
+{id:'t3_1',icon:'🔨',name:'Complete GPT Implementation',tags:['GPT','From Scratch','PyTorch','Training Loop','Generation'],content:{
+what:`<div class="def"><h4>GPT from Zero</h4><p>Implementing every component: tokenizer → embedding → N decoder blocks → LM head → causal mask → training loop → generation. This is the fastest path from "I use LLMs" to "I understand LLMs".</p></div>
+<table class="tbl"><tr><th>Config</th><th>Tiny</th><th>GPT-2 Small</th><th>LLaMA-3 8B</th></tr>
+<tr><td>n_layers</td><td>6</td><td>12</td><td>32</td></tr>
+<tr><td>d_model</td><td>256</td><td>768</td><td>4096</td></tr>
+<tr><td>n_heads</td><td>8</td><td>12</td><td>32</td></tr>
+<tr><td>vocab_size</td><td>50257</td><td>50257</td><td>128256</td></tr>
+<tr><td>~Params</td><td>~10M</td><td>~117M</td><td>~8B</td></tr></table>`,
+why:`<p class="prose">Building from scratch teaches: why residual connections prevent vanishing gradients, what the embedding table actually stores, why causal masking is a lower-triangular matrix, and where each hyperparameter comes from. This is the difference between LLM user and LLM architect.</p>`,
+when:`<p class="prose">Build for: deep education, custom domain pre-training on specialized corpora, architecture research, or resource-constrained environments needing a custom-sized model.</p>`,
+how:`<pre><code><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+<span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn, torch.nn.functional <span class="kw">as</span> F, math
+
+<span class="kw">@dataclass</span>
+<span class="kw">class</span> <span class="cl">GPTConfig</span>:
+    vocab_size:<span class="fn">int</span>=<span class="nm">50257</span>; n_layer:<span class="fn">int</span>=<span class="nm">12</span>
+    n_head:<span class="fn">int</span>=<span class="nm">12</span>; n_embd:<span class="fn">int</span>=<span class="nm">768</span>; block_size:<span class="fn">int</span>=<span class="nm">1024</span>
+
+<span class="kw">class</span> <span class="cl">CausalAttn</span>(nn.Module):
+    <span class="fn">def</span> <span class="at">__init__</span>(self,cfg):
+        <span class="fn">super</span>().__init__()
+        self.c_attn=nn.<span class="cl">Linear</span>(cfg.n_embd,<span class="nm">3</span>*cfg.n_embd)
+        self.c_proj=nn.<span class="cl">Linear</span>(cfg.n_embd,cfg.n_embd)
+        self.nh=cfg.n_head; self.ne=cfg.n_embd
+        self.<span class="fn">register_buffer</span>(<span class="st">"mask"</span>,torch.<span class="fn">tril</span>(torch.<span class="fn">ones</span>(cfg.block_size,cfg.block_size)).<span class="fn">view</span>(<span class="nm">1</span>,<span class="nm">1</span>,cfg.block_size,cfg.block_size))
+    <span class="fn">def</span> <span class="at">forward</span>(self,x):
+        B,T,C=x.<span class="fn">size</span>(); hs=C//self.nh
+        q,k,v=self.c_attn(x).<span class="fn">split</span>(self.ne,dim=<span class="nm">2</span>)
+        q=q.<span class="fn">view</span>(B,T,self.nh,hs).<span class="fn">transpose</span>(<span class="nm">1</span>,<span class="nm">2</span>)
+        k=k.<span class="fn">view</span>(B,T,self.nh,hs).<span class="fn">transpose</span>(<span class="nm">1</span>,<span class="nm">2</span>)
+        v=v.<span class="fn">view</span>(B,T,self.nh,hs).<span class="fn">transpose</span>(<span class="nm">1</span>,<span class="nm">2</span>)
+        att=(q@k.<span class="fn">transpose</span>(-<span class="nm">2</span>,-<span class="nm">1</span>))/math.<span class="fn">sqrt</span>(hs)
+        att=att.<span class="fn">masked_fill</span>(self.mask[:,:,:T,:T]==<span class="nm">0</span>,<span class="fn">float</span>(<span class="st">'-inf'</span>))
+        y=(F.<span class="fn">softmax</span>(att,dim=-<span class="nm">1</span>)@v).<span class="fn">transpose</span>(<span class="nm">1</span>,<span class="nm">2</span>).<span class="fn">reshape</span>(B,T,C)
+        <span class="kw">return</span> self.c_proj(y)
+
+<span class="kw">class</span> <span class="cl">Block</span>(nn.Module):
+    <span class="fn">def</span> <span class="at">__init__</span>(self,cfg):
+        <span class="fn">super</span>().__init__()
+        self.ln1=nn.<span class="cl">LayerNorm</span>(cfg.n_embd); self.attn=<span class="cl">CausalAttn</span>(cfg)
+        self.ln2=nn.<span class="cl">LayerNorm</span>(cfg.n_embd)
+        self.mlp=nn.<span class="cl">Sequential</span>(nn.<span class="cl">Linear</span>(cfg.n_embd,<span class="nm">4</span>*cfg.n_embd),nn.<span class="cl">GELU</span>(),nn.<span class="cl">Linear</span>(<span class="nm">4</span>*cfg.n_embd,cfg.n_embd))
+    <span class="fn">def</span> <span class="at">forward</span>(self,x):
+        x=x+self.attn(self.ln1(x)); x=x+self.mlp(self.ln2(x)); <span class="kw">return</span> x
+
+<span class="kw">class</span> <span class="cl">GPT</span>(nn.Module):
+    <span class="fn">def</span> <span class="at">__init__</span>(self,cfg):
+        <span class="fn">super</span>().__init__()
+        self.wte=nn.<span class="cl">Embedding</span>(cfg.vocab_size,cfg.n_embd)
+        self.wpe=nn.<span class="cl">Embedding</span>(cfg.block_size,cfg.n_embd)
+        self.blocks=nn.<span class="cl">ModuleList</span>([<span class="cl">Block</span>(cfg) <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(cfg.n_layer)])
+        self.ln_f=nn.<span class="cl">LayerNorm</span>(cfg.n_embd)
+        self.lm_head=nn.<span class="cl">Linear</span>(cfg.n_embd,cfg.vocab_size,bias=<span class="nm">False</span>)
+        self.wte.weight=self.lm_head.weight  <span class="cm"># weight tying</span>
+    <span class="fn">def</span> <span class="at">forward</span>(self,idx,targets=<span class="nm">None</span>):
+        B,T=idx.<span class="fn">shape</span>; pos=torch.<span class="fn">arange</span>(T,device=idx.device)
+        x=self.wte(idx)+self.wpe(pos)
+        <span class="kw">for</span> b <span class="kw">in</span> self.blocks: x=<span class="fn">b</span>(x)
+        logits=self.lm_head(self.ln_f(x))
+        loss=F.<span class="fn">cross_entropy</span>(logits.<span class="fn">view</span>(-<span class="nm">1</span>,logits.size(-<span class="nm">1</span>)),targets.<span class="fn">view</span>(-<span class="nm">1</span>)) <span class="kw">if</span> targets <span class="kw">is not</span> <span class="nm">None</span> <span class="kw">else</span> <span class="nm">None</span>
+        <span class="kw">return</span> logits, loss
+
+<span class="cm"># Training</span>
+cfg=<span class="cl">GPTConfig</span>(n_layer=<span class="nm">6</span>,n_head=<span class="nm">8</span>,n_embd=<span class="nm">256</span>)
+model=<span class="cl">GPT</span>(cfg).<span class="fn">to</span>(<span class="st">"cuda"</span>)
+opt=torch.optim.<span class="cl">AdamW</span>(model.<span class="fn">parameters</span>(),lr=<span class="nm">3e-4</span>,weight_decay=<span class="nm">0.1</span>)
+<span class="kw">for</span> step <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">10000</span>):
+    xb,yb=<span class="fn">get_batch</span>()
+    _,loss=<span class="fn">model</span>(xb,yb); opt.<span class="fn">zero_grad</span>(); loss.<span class="fn">backward</span>()
+    torch.nn.utils.<span class="fn">clip_grad_norm_</span>(model.<span class="fn">parameters</span>(),<span class="nm">1.0</span>)
+    opt.<span class="fn">step</span>()
+    <span class="kw">if</span> step%<span class="nm">500</span>==<span class="nm">0</span>: <span class="fn">print</span>(<span class="st">f"step {step}: loss={loss.item():.4f}"</span>)
+<div class="clang">PYTORCH</div></code></pre>`,
+examples:`<p class="prose"><strong>nanoGPT by Karpathy</strong> is the gold-standard from-scratch implementation. Follow it to: reproduce GPT-2 in <200 lines, train on Shakespeare in minutes, understand every line of code. It's the best way to transition from LLM user to LLM architect.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">📚</div><div class="uct">Deep Education</div><div class="ucd">Karpathy's nanoGPT — learn everything from first principles</div></div>
+<div class="uccard"><div class="ucem">🧬</div><div class="uct">Domain Pre-training</div><div class="ucd">Train on protein sequences, SMILES, legal text</div></div>
+<div class="uccard"><div class="ucem">🔬</div><div class="uct">Architecture Research</div><div class="ucd">Test new attention types, activations, PE methods</div></div></div>`}}
+]},
+
+// ── MODULE 4 ──
+{id:'c4',num:'04',label:'Open-Source LLMs (HuggingFace)',emoji:'🔓',section:'MODELS',desc:'Complete HuggingFace ecosystem — model categories, downloading, running, and the full open-weight leaderboard.',topics:[
+{id:'t4_1',icon:'🗺️',name:'HuggingFace Ecosystem & Model Zoo',tags:['Hub','Transformers','Model Cards','Categories','Leaderboard'],content:{
+what:`<div class="def"><h4>HuggingFace Hub</h4><p>World's largest AI model repository: 900K+ models, 200K+ datasets, 500K+ Spaces. One standardized API (AutoModel, AutoTokenizer) loads any model. The de-facto distribution platform for open-source LLMs.</p></div>
+<table class="tbl"><tr><th>Category</th><th>Purpose</th><th>Top Models (2026)</th></tr>
+<tr><td>Base / Foundation</td><td>Raw pre-trained, no alignment</td><td>LLaMA-3-8B, Mistral-7B-v0.1</td></tr>
+<tr><td>Instruct / Chat</td><td>SFT+RLHF aligned</td><td>LLaMA-3.3-70B-Instruct, Qwen2.5-72B</td></tr>
+<tr><td>Code</td><td>Code generation</td><td>DeepSeek-Coder-V2, Codestral-22B</td></tr>
+<tr><td>Math / Reasoning</td><td>Math, logic</td><td>DeepSeek-R1, QwQ-32B, Qwen2.5-Math</td></tr>
+<tr><td>Embedding</td><td>Semantic vectors</td><td>BGE-M3, E5-Mistral-7B, GTE-Qwen2-7B</td></tr>
+<tr><td>Vision-Language</td><td>Image+text</td><td>LLaVA-1.6, InternVL2.5, Qwen2-VL</td></tr>
+<tr><td>Reward Models</td><td>RLHF scoring</td><td>Eurus-RM, Skywork-Reward</td></tr>
+<tr><td>Multilingual</td><td>100+ languages</td><td>Aya-23, BLOOM, mT5-XXL</td></tr></table>
+<div class="slabel">Open LLM Leaderboard March 2026</div>
+<table class="tbl"><tr><th>Model</th><th>Params</th><th>License</th><th>MMLU</th><th>Best For</th></tr>
+<tr><td>DeepSeek-R1</td><td>671B MoE</td><td>MIT</td><td>90.8</td><td>Reasoning, math, coding</td></tr>
+<tr><td>LLaMA-3.1-405B-Instruct</td><td>405B</td><td>LLaMA</td><td>88.6</td><td>General, tool use</td></tr>
+<tr><td>DeepSeek-V3</td><td>671B MoE</td><td>MIT</td><td>88.5</td><td>General, code, math</td></tr>
+<tr><td>Qwen2.5-72B-Instruct</td><td>72B</td><td>Qwen</td><td>86.0</td><td>Multilingual, coding</td></tr>
+<tr><td>LLaMA-3.3-70B-Instruct</td><td>70B</td><td>LLaMA</td><td>86.0</td><td>Best 70B general</td></tr>
+<tr><td>Phi-4</td><td>14B</td><td>MIT</td><td>84.8</td><td>Best 14B quality</td></tr>
+<tr><td>Gemma-3-27B-Instruct</td><td>27B</td><td>Gemma</td><td>83.2</td><td>Vision + long context</td></tr>
+<tr><td>Mistral-Large-2</td><td>123B</td><td>Mistral</td><td>84.0</td><td>Commercial, Apache 2.0</td></tr>
+<tr><td>Mixtral-8x22B-Instruct</td><td>141B MoE</td><td>Apache 2.0</td><td>77.8</td><td>Cost-effective MoE</td></tr></table>`,
+why:`<p class="prose">HuggingFace standardizes the entire ML workflow. One AutoModel API loads any architecture. Model cards document training, biases, and evaluation. Datasets hub provides training data. This ecosystem cuts time-to-model from weeks to hours.</p>`,
+when:`<p class="prose">Always start on HuggingFace when exploring models, finding training datasets, sharing fine-tuned models, or benchmarking alternatives. Even if you use closed-source APIs in production, know the open landscape for cost alternatives.</p>`,
+how:`<pre><code><span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, AutoTokenizer, pipeline
+<span class="kw">from</span> huggingface_hub <span class="kw">import</span> login, HfApi
+<span class="kw">import</span> torch
+
+login(token=<span class="st">"hf_..."</span>)  <span class="cm"># required for gated models (LLaMA)</span>
+
+<span class="cm"># Load any model with one line</span>
+model=<span class="cl">AutoModelForCausalLM</span>.<span class="fn">from_pretrained</span>(
+    <span class="st">"meta-llama/Llama-3.3-70B-Instruct"</span>,
+    torch_dtype=torch.bfloat16, device_map=<span class="st">"auto"</span>)
+tok=<span class="cl">AutoTokenizer</span>.<span class="fn">from_pretrained</span>(<span class="st">"meta-llama/Llama-3.3-70B-Instruct"</span>)
+
+<span class="cm"># Even simpler — Pipeline API</span>
+gen=<span class="fn">pipeline</span>(<span class="st">"text-generation"</span>,model=<span class="st">"microsoft/Phi-4"</span>,
+             device_map=<span class="st">"auto"</span>,torch_dtype=<span class="st">"auto"</span>)
+out=gen(<span class="st">"Explain attention mechanisms:"</span>,max_new_tokens=<span class="nm">200</span>)
+
+<span class="cm"># Discover top models</span>
+api=<span class="cl">HfApi</span>()
+models=api.<span class="fn">list_models</span>(task=<span class="st">"text-generation"</span>,sort=<span class="st">"downloads"</span>,limit=<span class="nm">20</span>)
+<span class="kw">for</span> m <span class="kw">in</span> models: <span class="fn">print</span>(m.id, m.downloads)
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>GGUF Format (llama.cpp):</strong> Download quantized models from "TheBloke" or "bartowski" on HuggingFace. Q4_K_M quantization: 7B model = 4.1GB, runs on 8GB RAM CPU-only laptop. No GPU required.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🔒</div><div class="uct">Privacy-First</div><div class="ucd">Run locally — no data leaves your infrastructure</div></div>
+<div class="uccard"><div class="ucem">💰</div><div class="uct">Zero API Cost</div><div class="ucd">$0/token vs $5/1M for GPT-4o at scale</div></div>
+<div class="uccard"><div class="ucem">🎯</div><div class="uct">Fine-tuning</div><div class="ucd">Base weights available for domain adaptation</div></div></div>`}},
+{id:'t4_2',icon:'⬇️',name:'Running Models: Ollama · vLLM · llama.cpp',tags:['Ollama','vLLM','GGUF','Quantization','Serving'],content:{
+what:`<div class="def"><h4>Model Serving Options</h4><p>From simplest to most production-ready: Ollama (local dev), llama.cpp (CPU/edge), HF Transformers (research), vLLM (production high-throughput).</p></div>
+<table class="tbl"><tr><th>Tool</th><th>Format</th><th>Best For</th><th>Throughput</th></tr>
+<tr><td>Ollama</td><td>GGUF</td><td>Local dev, MacBook</td><td>Low</td></tr>
+<tr><td>llama.cpp</td><td>GGUF</td><td>CPU / edge / embedded</td><td>Low-Med</td></tr>
+<tr><td>HF Transformers</td><td>safetensors</td><td>Research, fine-tuning</td><td>Med</td></tr>
+<tr><td>vLLM</td><td>safetensors</td><td>Production API</td><td>Very High</td></tr>
+<tr><td>TGI</td><td>safetensors</td><td>HuggingFace cloud</td><td>High</td></tr></table>`,
+why:`<p class="prose">Wrong serving stack = 10× worse throughput. vLLM's PagedAttention achieves 3–4× more concurrent requests than HF Transformers on same GPU by treating KV cache like OS virtual memory — no fragmentation.</p>`,
+when:`<p class="prose">Ollama: local development and demos. vLLM: >10 concurrent requests in production. llama.cpp: CPU-only or very memory-constrained. HF Transformers: fine-tuning and research.</p>`,
+how:`<pre><code><span class="cm">### Ollama ###</span>
+$ ollama pull llama3.3:70b
+$ ollama pull deepseek-r1:7b
+$ ollama run llama3.3         <span class="cm"># interactive REPL</span>
+
+<span class="kw">import</span> ollama
+r=ollama.<span class="fn">chat</span>(model=<span class="st">'llama3.3'</span>,messages=[{<span class="st">'role'</span>:<span class="st">'user'</span>,<span class="st">'content'</span>:<span class="st">'What is GQA?'</span>}])
+
+<span class="cm">### vLLM Production Server ###</span>
+$ pip install vllm
+$ python -m vllm.entrypoints.openai.api_server \
+    --model meta-llama/Llama-3.3-70B-Instruct \
+    --tensor-parallel-size <span class="nm">4</span> --max-model-len <span class="nm">32768</span>
+
+<span class="cm"># OpenAI-compatible client</span>
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+client=<span class="cl">OpenAI</span>(base_url=<span class="st">"http://localhost:8000/v1"</span>,api_key=<span class="st">"none"</span>)
+r=client.chat.completions.<span class="fn">create</span>(model=<span class="st">"meta-llama/Llama-3.3-70B-Instruct"</span>,
+    messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:<span class="st">"Explain MoE"</span>}])
+
+<span class="cm">### 4-bit quantization with bitsandbytes ###</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> BitsAndBytesConfig
+bnb=<span class="cl">BitsAndBytesConfig</span>(load_in_4bit=<span class="nm">True</span>,bnb_4bit_quant_type=<span class="st">"nf4"</span>,
+                       bnb_4bit_compute_dtype=torch.bfloat16)
+model=<span class="cl">AutoModelForCausalLM</span>.<span class="fn">from_pretrained</span>(
+    <span class="st">"meta-llama/Meta-Llama-3-70B-Instruct"</span>,
+    quantization_config=bnb,device_map=<span class="st">"auto"</span>)
+<span class="cm"># 70B: 140GB → ~35GB — fits on single A100!</span>
+<div class="clang">BASH + PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>Quantization formats:</strong> GGUF Q4_K_M (4-bit): 7B = 4.1GB RAM, Q8_0 (8-bit): 7B = 7.7GB. NF4 (bitsandbytes): best quality at 4-bit. GPTQ: fastest GPU quantized inference. AWQ: activation-aware, better than GPTQ at same bit-width.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🏠</div><div class="uct">MacBook M3/M4</div><div class="ucd">Ollama: 7B–70B models via Metal GPU offload</div></div>
+<div class="uccard"><div class="ucem">🏭</div><div class="uct">Production</div><div class="ucd">vLLM: 20K tok/sec on 4×A100, PagedAttention</div></div>
+<div class="uccard"><div class="ucem">🔋</div><div class="uct">Edge/CPU</div><div class="ucd">llama.cpp Q4: 7B on 8GB RAM, 20 tok/sec</div></div></div>`}}
+]},
+
+// ── MODULE 5 ──
+{id:'c5',num:'05',label:'Closed-Source LLMs',emoji:'🔐',section:'MODELS',desc:'GPT-4o, Claude 4, Gemini 2, Grok-3 — capabilities, APIs, pricing, and selection framework.',topics:[
+{id:'t5_1',icon:'🌐',name:'Frontier Model Comparison',tags:['GPT-4o','Claude 4','Gemini 2','Grok-3','o-series'],content:{
+what:`<div class="def"><h4>Closed-Source Frontier Models 2026</h4><p>Proprietary models from major AI labs. Lead on capability benchmarks, require no infrastructure, have per-token costs, and limited customization. Enterprise SLAs and compliance certifications available.</p></div>
+<table class="tbl"><tr><th>Model</th><th>Company</th><th>Strengths</th><th>Context</th><th>Input $/1M</th></tr>
+<tr><td>GPT-4o</td><td>OpenAI</td><td>Multimodal, speed, ecosystem</td><td>128K</td><td>$5.00</td></tr>
+<tr><td>o3 / o4-mini</td><td>OpenAI</td><td>Best math/logic, reasoning</td><td>200K</td><td>$10/$1.10</td></tr>
+<tr><td>Claude 4 Sonnet</td><td>Anthropic</td><td>Coding champion, long ctx</td><td>200K</td><td>$3.00</td></tr>
+<tr><td>Claude 4 Opus</td><td>Anthropic</td><td>Top reasoning + writing</td><td>200K</td><td>$15.00</td></tr>
+<tr><td>Gemini 2.0 Flash</td><td>Google</td><td>Fast, cheap, tool use</td><td>1M</td><td>$0.10</td></tr>
+<tr><td>Gemini 2.0 Pro</td><td>Google</td><td>1M context, multimodal</td><td>1M</td><td>$3.50</td></tr>
+<tr><td>Grok-3</td><td>xAI</td><td>Real-time X data, unfiltered</td><td>131K</td><td>$3.00</td></tr></table>`,
+why:`<p class="prose">Closed models offer: maximum capability without infrastructure, enterprise SLAs, automatic updates, and compliance certs (SOC2, HIPAA). Trade-off: cost, data privacy, vendor lock-in, no fine-tuning access.</p>`,
+when:`<p class="prose">Use closed when: highest capability needed, no sensitive data constraints, rapid prototyping, or fine-tuned open models don't meet quality bar. Use open-source for privacy, cost at scale, or custom fine-tuning needs.</p>`,
+how:`<pre><code><span class="cm"># LiteLLM — unified API for all providers</span>
+<span class="kw">import</span> litellm
+
+<span class="cm"># Same interface, any provider</span>
+<span class="kw">for</span> model <span class="kw">in</span> [<span class="st">"gpt-4o"</span>,<span class="st">"claude-sonnet-4-6"</span>,<span class="st">"gemini/gemini-2.0-flash"</span>]:
+    r=litellm.<span class="fn">completion</span>(model=model,
+        messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:<span class="st">"Summarize LLM scaling laws"</span>}])
+    <span class="fn">print</span>(model, r.choices[<span class="nm">0</span>].message.content[:100])
+
+<span class="cm"># Cost tracking with LiteLLM</span>
+r=litellm.<span class="fn">completion</span>(model=<span class="st">"gpt-4o"</span>,
+    messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:<span class="st">"Hello!"</span>}])
+cost=litellm.<span class="fn">completion_cost</span>(r)
+<span class="fn">print</span>(<span class="st">f"Cost: \${cost:.6f}"</span>)
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>Cost optimization strategy:</strong> Route simple Q&A to GPT-4o-mini ($0.15/1M), medium complexity to GPT-4o ($5/1M), hard reasoning to o3 ($10/1M). With smart routing: average cost approaches GPT-4o-mini but quality approaches o3. This is exactly what Proxinex (Module 17) automates.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🚀</div><div class="uct">Rapid Prototyping</div><div class="ucd">API in 5 minutes, no infra setup</div></div>
+<div class="uccard"><div class="ucem">🛡️</div><div class="uct">Enterprise Compliance</div><div class="ucd">Azure OpenAI, AWS Bedrock for regulated industries</div></div>
+<div class="uccard"><div class="ucem">🏆</div><div class="uct">Max Quality</div><div class="ucd">When accuracy matters more than cost</div></div></div>`}}
+]},
+
+// ── MODULE 6 ──
+{id:'c6',num:'06',label:'SFT, RLHF & Alignment',emoji:'🎓',section:'TRAINING',desc:'Supervised fine-tuning, RLHF, DPO, GRPO — the complete alignment training stack.',topics:[
+{id:'t6_1',icon:'🎓',name:'Supervised Fine-Tuning (SFT)',tags:['SFT','Instruction Tuning','Chat Templates','LIMA'],content:{
+what:`<div class="def"><h4>Supervised Fine-Tuning</h4><p>Train a pre-trained base LLM on curated (instruction, response) pairs. Transforms a raw text predictor into an instruction-following assistant. LIMA showed 1000 high-quality examples ≈ 50000 low-quality ones — quality dominates quantity.</p></div>
+<table class="tbl"><tr><th>Format</th><th>Structure</th><th>Used By</th></tr>
+<tr><td>Alpaca</td><td>{instruction, input, output}</td><td>Stanford Alpaca, Vicuna</td></tr>
+<tr><td>ShareGPT</td><td>[{role, content}] multi-turn</td><td>Most instruct models</td></tr>
+<tr><td>ORCA</td><td>system+user+rationale+response</td><td>Orca, WizardLM</td></tr>
+<tr><td>OpenAI Chat</td><td>[{role:system/user/assistant}]</td><td>All modern chat models</td></tr></table>`,
+why:`<p class="prose">Base models complete text but don't follow instructions. SFT teaches: respond helpfully to questions, format output as JSON or SQL, adopt a domain persona, explain reasoning step by step. It's the difference between a text predictor and a useful assistant.</p>`,
+when:`<p class="prose">SFT when: adapting model to specific domain/tone, teaching output format (JSON, SQL, markdown), enforcing brand voice, or improving performance on a specific task class.</p>`,
+how:`<pre><code><span class="kw">from</span> datasets <span class="kw">import</span> load_dataset
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, AutoTokenizer
+<span class="kw">from</span> trl <span class="kw">import</span> SFTTrainer, SFTConfig
+
+dataset=<span class="fn">load_dataset</span>(<span class="st">"HuggingFaceH4/ultrachat_200k"</span>,split=<span class="st">"train_sft"</span>)
+tok=<span class="cl">AutoTokenizer</span>.<span class="fn">from_pretrained</span>(<span class="st">"mistralai/Mistral-7B-v0.3"</span>)
+model=<span class="cl">AutoModelForCausalLM</span>.<span class="fn">from_pretrained</span>(<span class="st">"mistralai/Mistral-7B-v0.3"</span>,
+    torch_dtype=torch.bfloat16,device_map=<span class="st">"auto"</span>)
+
+<span class="kw">def</span> <span class="at">fmt</span>(ex): <span class="kw">return</span> tok.<span class="fn">apply_chat_template</span>(ex[<span class="st">"messages"</span>],tokenize=<span class="nm">False</span>)
+
+trainer=<span class="cl">SFTTrainer</span>(model=model,tokenizer=tok,train_dataset=dataset,
+    args=<span class="cl">SFTConfig</span>(output_dir=<span class="st">"./sft"</span>,num_train_epochs=<span class="nm">3</span>,
+        per_device_train_batch_size=<span class="nm">4</span>,gradient_accumulation_steps=<span class="nm">4</span>,
+        learning_rate=<span class="nm">2e-5</span>,lr_scheduler_type=<span class="st">"cosine"</span>,
+        warmup_ratio=<span class="nm">0.05</span>,max_seq_length=<span class="nm">2048</span>,fp16=<span class="nm">True</span>),
+    formatting_func=fmt)
+trainer.<span class="fn">train</span>()
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>SQLPilot SFT:</strong> Fine-tune on 10K Text2SQL examples from Spider + WikiSQL. Model learns to always output valid SQL given schema + question, include explanations, and handle JOINs. 3 epochs on RTX 4090: 2 hours. Accuracy: 67% → 84%.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🏢</div><div class="uct">Enterprise Assistants</div><div class="ucd">Company-specific knowledge, tone, and format</div></div>
+<div class="uccard"><div class="ucem">💻</div><div class="uct">Code Specialization</div><div class="ucd">SFT on company codebase → understands internal APIs</div></div>
+<div class="uccard"><div class="ucem">🌐</div><div class="uct">Language Tuning</div><div class="ucd">SFT on target language improves non-English quality</div></div></div>`}},
+{id:'t6_2',icon:'🏆',name:'RLHF, DPO & GRPO',tags:['PPO','Reward Model','DPO','GRPO','Constitutional AI'],content:{
+what:`<div class="def"><h4>Alignment Training</h4><p>Post-SFT training aligns model with human preferences: helpful, harmless, honest. RLHF trains a separate reward model (RM) then optimizes with PPO. DPO directly optimizes preference pairs — no RM needed. GRPO (DeepSeek-R1) uses RL with verifiable rewards for reasoning.</p></div>
+<div class="aflow">
+<div class="ablock v">1. SFT: Fine-tune base on demonstrations</div>
+<div class="aarr">↓</div>
+<div class="ablock a">2. RM: Train reward model on human preference rankings</div>
+<div class="aarr">↓</div>
+<div class="ablock e">3. PPO: Maximize E[r(x,y)] − β·KL(π‖π_ref)</div>
+<div class="aarr">OR</div>
+<div class="ablock s">DPO: Directly optimize log-odds of chosen over rejected (no RM)</div>
+</div>
+<div class="formula">DPO: L = −E[log σ(β log π(y_w|x)/π_ref(y_w|x) − β log π(y_l|x)/π_ref(y_l|x))]<br>GRPO: Group relative policy optimization with verifiable rewards</div>`,
+why:`<p class="prose">Without alignment: models generate toxic content, refuse nothing, hallucinate confidently. InstructGPT proved: 1.3B SFT+RLHF beats raw 175B GPT-3 on human preference ratings. Alignment quality > raw scale.</p>`,
+when:`<p class="prose">DPO: simpler, most cases. RLHF/PPO: complex iterative behaviors needing RM. GRPO: math/coding reasoning improvements without human annotations (just a correctness function).</p>`,
+how:`<pre><code><span class="cm"># DPO — simplest alignment</span>
+<span class="kw">from</span> trl <span class="kw">import</span> DPOTrainer, DPOConfig
+dataset=<span class="fn">load_dataset</span>(<span class="st">"HuggingFaceH4/ultrafeedback_binarized"</span>,split=<span class="st">"train_prefs"</span>)
+<span class="cm"># Each row: {prompt, chosen:[{role,content}], rejected:[{role,content}]}</span>
+trainer=<span class="cl">DPOTrainer</span>(model=model,ref_model=ref,
+    args=<span class="cl">DPOConfig</span>(beta=<span class="nm">0.1</span>,learning_rate=<span class="nm">5e-7</span>,
+                   per_device_train_batch_size=<span class="nm">2</span>,
+                   gradient_accumulation_steps=<span class="nm">8</span>,num_train_epochs=<span class="nm">1</span>),
+    train_dataset=dataset)
+trainer.<span class="fn">train</span>()
+
+<span class="cm"># GRPO for math reasoning (DeepSeek-R1 style)</span>
+<span class="kw">from</span> trl <span class="kw">import</span> GRPOTrainer, GRPOConfig
+<span class="kw">def</span> <span class="at">reward_fn</span>(completions,prompts):
+    <span class="kw">return</span> [<span class="nm">1.0</span> <span class="kw">if</span> <span class="fn">extract_answer</span>(c)==<span class="fn">extract_answer</span>(p[<span class="st">"answer"</span>]) <span class="kw">else</span> <span class="nm">0.0</span>
+            <span class="kw">for</span> c,p <span class="kw">in</span> <span class="fn">zip</span>(completions,prompts)]
+grpo=<span class="cl">GRPOTrainer</span>(model=model,reward_funcs=[reward_fn],
+    args=<span class="cl">GRPOConfig</span>(output_dir=<span class="st">"./grpo-math"</span>),
+    train_dataset=math_dataset)
+grpo.<span class="fn">train</span>()
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>DeepSeek-R1:</strong> Trained reasoning via pure GRPO — no supervised CoT data. Model spontaneously developed self-reflection ("wait, let me reconsider…"), error-correction, and strategy exploration. Matches o1 on AIME math at 5% of estimated cost.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🤝</div><div class="uct">Helpful Assistants</div><div class="ucd">DPO: improve helpfulness and reduce refusals</div></div>
+<div class="uccard"><div class="ucem">🔢</div><div class="uct">Math Reasoning</div><div class="ucd">GRPO: train step-by-step reasoning on GSM8K/MATH</div></div>
+<div class="uccard"><div class="ucem">🛡️</div><div class="uct">Safety Alignment</div><div class="ucd">Constitutional AI: RLAIF with AI-generated preferences</div></div></div>`}}
+]},
+
+// ── MODULE 7 ──
+{id:'c7',num:'07',label:'LoRA, QLoRA & PEFT',emoji:'⚗️',section:'TRAINING',desc:'Parameter-efficient fine-tuning — adapt LLMs on consumer hardware.',topics:[
+{id:'t7_1',icon:'🧬',name:'LoRA & QLoRA Complete Guide',tags:['LoRA','QLoRA','NF4','Rank','Alpha','DoRA','GaLore'],content:{
+what:`<div class="def"><h4>LoRA — Low-Rank Adaptation</h4><p>Freeze W, inject trainable ΔW = BA where B∈ℝ^{d×r}, A∈ℝ^{r×k}. Only A and B train. Merge at inference: W' = W + (α/r)·BA. No overhead after merging.</p></div>
+<div class="formula">4096×4096 params → 4096×16 + 16×4096 = 131K (0.78%!)<br>QLoRA: 4-bit base (NF4) + 16-bit LoRA adapters<br>70B model: 140GB → ~35GB on single A100 80GB</div>
+<table class="tbl"><tr><th>Method</th><th>Trainable %</th><th>VRAM</th><th>Quality</th></tr>
+<tr><td>Full fine-tune</td><td>100%</td><td>Max</td><td>Best</td></tr>
+<tr><td>LoRA r=16</td><td>~0.1%</td><td>Med</td><td>Near-full</td></tr>
+<tr><td>QLoRA r=16</td><td>~0.1%</td><td>Low (4-bit base)</td><td>Near-LoRA</td></tr>
+<tr><td>DoRA</td><td>~0.1%</td><td>Med</td><td>&gt;LoRA</td></tr>
+<tr><td>IA³</td><td>~0.01%</td><td>Very low</td><td>Good for classification</td></tr></table>`,
+why:`<p class="prose">LoRA enables: fine-tuning 70B on 1× A100, distributing 10MB adapters instead of 140GB models, hot-swapping adapters per customer at inference (multi-tenant LLM SaaS), and versioning models without storing full copies.</p>`,
+when:`<p class="prose">Use LoRA for all fine-tuning unless you have 4+ high-end GPUs and need maximum performance. QLoRA when GPU memory is the constraint. DoRA when you need better accuracy. Increase rank r for more capacity, decrease for efficiency.</p>`,
+how:`<pre><code><span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, BitsAndBytesConfig
+<span class="kw">from</span> peft <span class="kw">import</span> LoraConfig, get_peft_model, prepare_model_for_kbit_training, TaskType
+<span class="kw">from</span> trl <span class="kw">import</span> SFTTrainer, SFTConfig
+<span class="kw">import</span> torch
+
+<span class="cm">## Step 1: Load in 4-bit (QLoRA)</span>
+bnb=<span class="cl">BitsAndBytesConfig</span>(
+    load_in_4bit=<span class="nm">True</span>,
+    bnb_4bit_use_double_quant=<span class="nm">True</span>,    <span class="cm"># quantize quant constants too</span>
+    bnb_4bit_quant_type=<span class="st">"nf4"</span>,          <span class="cm"># NormalFloat4</span>
+    bnb_4bit_compute_dtype=torch.bfloat16
+)
+model=<span class="cl">AutoModelForCausalLM</span>.<span class="fn">from_pretrained</span>(
+    <span class="st">"meta-llama/Meta-Llama-3-8B"</span>,quantization_config=bnb,device_map=<span class="st">"auto"</span>)
+model=<span class="fn">prepare_model_for_kbit_training</span>(model)
+
+<span class="cm">## Step 2: Add LoRA</span>
+lora=<span class="cl">LoraConfig</span>(
+    r=<span class="nm">16</span>,lora_alpha=<span class="nm">32</span>,
+    target_modules=[<span class="st">"q_proj"</span>,<span class="st">"k_proj"</span>,<span class="st">"v_proj"</span>,<span class="st">"o_proj"</span>,
+                    <span class="st">"gate_proj"</span>,<span class="st">"up_proj"</span>,<span class="st">"down_proj"</span>],
+    lora_dropout=<span class="nm">0.05</span>,bias=<span class="st">"none"</span>,task_type=<span class="cl">TaskType</span>.CAUSAL_LM)
+model=<span class="fn">get_peft_model</span>(model,lora)
+model.<span class="fn">print_trainable_parameters</span>()
+<span class="cm"># trainable: 41,943,040 / 8,030,261,248 = 0.0052%</span>
+
+<span class="cm">## Step 3: Train</span>
+trainer=<span class="cl">SFTTrainer</span>(model=model,train_dataset=dataset,
+    args=<span class="cl">SFTConfig</span>(output_dir=<span class="st">"./qlora"</span>,num_train_epochs=<span class="nm">3</span>,
+                   per_device_train_batch_size=<span class="nm">4</span>,
+                   gradient_accumulation_steps=<span class="nm">4</span>,
+                   learning_rate=<span class="nm">1e-4</span>,max_seq_length=<span class="nm">2048</span>))
+trainer.<span class="fn">train</span>()
+
+<span class="cm">## Step 4: Merge for zero-overhead inference</span>
+<span class="kw">from</span> peft <span class="kw">import</span> PeftModel
+merged=<span class="cl">PeftModel</span>.<span class="fn">from_pretrained</span>(base_model,<span class="st">"./qlora"</span>).<span class="fn">merge_and_unload</span>()
+merged.<span class="fn">save_pretrained</span>(<span class="st">"./merged-sqlpilot-8b"</span>)
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<div class="scgrid"><div class="sccard"><div class="sch"><span class="scic">🎭</span><div><div class="sct">Multi-Tenant SaaS</div><div class="sci">Architecture</div></div></div><div class="scb">1 base LLaMA-3-70B + 100 customer LoRA adapters (10MB each). Load adapter per request. 1GB total vs 14TB for 100 separate models.</div><div class="sco">🎯 99% storage saving, per-customer personalization</div></div>
+<div class="sccard"><div class="sch"><span class="scic">📊</span><div><div class="sct">SQLPilot QLoRA</div><div class="sci">SQLPilot Project</div></div></div><div class="scb">QLoRA-fine-tune LLaMA-3-8B on Text2SQL. 2 hours on RTX 4090. SQL accuracy: 67% → 84%. Adapter size: 18MB.</div><div class="sco">🎯 Production accuracy on single GPU</div></div></div>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">💾</div><div class="uct">Memory Efficient</div><div class="ucd">70B on 1×A100 80GB with QLoRA (4-bit base)</div></div>
+<div class="uccard"><div class="ucem">🔀</div><div class="uct">Adapter Swapping</div><div class="ucd">Hot-swap LoRA per user/task at inference</div></div>
+<div class="uccard"><div class="ucem">📤</div><div class="uct">Share Adapters</div><div class="ucd">Distribute 10MB adapter, not 140GB full model</div></div></div>`}}
+]},
+
+// ── MODULE 8 ──
+{id:'c8',num:'08',label:'RAG Systems',emoji:'📚',section:'APPLICATIONS',desc:'Retrieval-Augmented Generation — architecture, vector databases, chunking, advanced techniques.',topics:[
+{id:'t8_1',icon:'🔍',name:'RAG Architecture & Implementation',tags:['Chunking','Embedding','Reranking','HyDE','GraphRAG','RAGAS'],content:{
+what:`<div class="def"><h4>RAG — Retrieval-Augmented Generation</h4><p>Ground LLM responses in retrieved external knowledge. Fixes hallucination + knowledge cutoff. The dominant architecture for enterprise LLM applications. Well-tuned RAG reduces hallucination from ~30% to &lt;2%.</p></div>
+<div class="aflow">
+<div class="arow"><div class="ablock v">1. Ingest Docs</div><div class="ablock a">2. Chunk (500-1000 tok)</div><div class="ablock s">3. Embed (BGE-M3)</div><div class="ablock e">4. Store (Vector DB)</div></div>
+<div class="aarr">↓ Query Time</div>
+<div class="arow"><div class="ablock v">5. Embed Query</div><div class="ablock s">6. ANN Search Top-K=20</div><div class="ablock a">7. Rerank Top-4</div><div class="ablock e">8. LLM Generate</div></div>
+</div>
+<table class="tbl"><tr><th>Vector DB</th><th>Best For</th><th>License</th></tr>
+<tr><td>Qdrant</td><td>Production, Rust, high perf</td><td>Open-source</td></tr>
+<tr><td>Pinecone</td><td>Managed, enterprise SLA</td><td>Commercial</td></tr>
+<tr><td>Weaviate</td><td>Multimodal, hybrid search</td><td>Open-source</td></tr>
+<tr><td>ChromaDB</td><td>Local dev, easy Python</td><td>Open-source</td></tr>
+<tr><td>pgvector</td><td>PostgreSQL extension</td><td>Open-source</td></tr>
+<tr><td>FAISS</td><td>Research, GPU ANN</td><td>MIT</td></tr></table>`,
+why:`<p class="prose">RAG fixes LLM's biggest production problems: <strong>hallucination</strong>, <strong>knowledge cutoff</strong>, and <strong>lack of citations</strong>. Unlike fine-tuning, RAG knowledge is updatable in real-time by updating the vector store — no retraining required.</p>`,
+when:`<p class="prose">RAG for: enterprise knowledge bases, document Q&A, compliance applications, real-time knowledge. Fine-tuning for: fixed format, style, tone, domain vocabulary. Often combine both.</p>`,
+how:`<pre><code><span class="kw">from</span> langchain.text_splitter <span class="kw">import</span> RecursiveCharacterTextSplitter
+<span class="kw">from</span> langchain_community.vectorstores <span class="kw">import</span> Qdrant
+<span class="kw">from</span> langchain_openai <span class="kw">import</span> OpenAIEmbeddings, ChatOpenAI
+<span class="kw">from</span> langchain.chains <span class="kw">import</span> RetrievalQA
+<span class="kw">from</span> langchain.retrievers.document_compressors <span class="kw">import</span> CrossEncoderReranker
+<span class="kw">from</span> langchain_community.cross_encoders <span class="kw">import</span> HuggingFaceCrossEncoder
+<span class="kw">from</span> langchain.retrievers <span class="kw">import</span> ContextualCompressionRetriever
+
+<span class="cm"># 1. Chunk documents</span>
+splitter=<span class="cl">RecursiveCharacterTextSplitter</span>(chunk_size=<span class="nm">1000</span>,chunk_overlap=<span class="nm">200</span>)
+chunks=splitter.<span class="fn">split_documents</span>(docs)
+
+<span class="cm"># 2. Embed + store</span>
+embeddings=<span class="cl">OpenAIEmbeddings</span>(model=<span class="st">"text-embedding-3-large"</span>)
+db=<span class="cl">Qdrant</span>.<span class="fn">from_documents</span>(chunks,embeddings,location=<span class="st">":memory:"</span>)
+
+<span class="cm"># 3. Add cross-encoder reranker</span>
+reranker=<span class="cl">CrossEncoderReranker</span>(
+    model=<span class="cl">HuggingFaceCrossEncoder</span>(model_name=<span class="st">"BAAI/bge-reranker-v2-m3"</span>),top_n=<span class="nm">4</span>)
+retriever=<span class="cl">ContextualCompressionRetriever</span>(base_compressor=reranker,
+    base_retriever=db.<span class="fn">as_retriever</span>(search_kwargs={<span class="st">"k"</span>:<span class="nm">20</span>}))
+
+<span class="cm"># 4. RAG chain</span>
+qa=<span class="cl">RetrievalQA</span>.<span class="fn">from_chain_type</span>(llm=<span class="cl">ChatOpenAI</span>(model=<span class="st">"gpt-4o"</span>),
+    retriever=retriever,return_source_documents=<span class="nm">True</span>)
+result=qa.<span class="fn">invoke</span>(<span class="st">"What is our refund policy?"</span>)
+
+<span class="cm"># 5. Evaluate with RAGAS</span>
+<span class="kw">from</span> ragas <span class="kw">import</span> evaluate
+<span class="kw">from</span> ragas.metrics <span class="kw">import</span> faithfulness,answer_relevancy,context_recall
+result=<span class="fn">evaluate</span>(dataset=eval_ds,
+    metrics=[faithfulness,answer_relevancy,context_recall])
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>Advanced RAG techniques:</strong> HyDE (Hypothetical Document Embeddings): generate a hypothetical answer first, embed it, search — better recall for abstract queries. GraphRAG (Microsoft): build knowledge graph, community summaries enable global reasoning across documents. Parent-child chunking: retrieve small chunks but send parent context to LLM.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🏢</div><div class="uct">Enterprise KB</div><div class="ucd">Company-wide Q&A with citations, updatable daily</div></div>
+<div class="uccard"><div class="ucem">⚖️</div><div class="uct">Legal Research</div><div class="ucd">Case law retrieval with jurisdiction filtering</div></div>
+<div class="uccard"><div class="ucem">💻</div><div class="uct">Code Assistant</div><div class="ucd">Codebase-aware: Cursor, Copilot Enterprise</div></div></div>`}}
+]},
+
+// ── MODULE 9 ──
+{id:'c9',num:'09',label:'AI Agents & Tool Use',emoji:'🤖',section:'AGENTS',desc:'ReAct framework, function calling, agent memory, planning — building autonomous LLM agents.',topics:[
+{id:'t9_1',icon:'⚙️',name:'Agent Architecture, ReAct & Tool Calling',tags:['ReAct','Function Calling','Tools','Memory','Planning','LangChain'],content:{
+what:`<div class="def"><h4>AI Agent</h4><p>LLM + perception + action loop. Agent perceives (reads context/observations), reasons (thinks what to do next), acts (calls tools), observes (reads tool results), repeats until goal achieved. Goes far beyond single-inference LLM calls.</p></div>
+<div class="aflow">
+<div class="ablock v">👤 User Goal / Task</div>
+<div class="aarr">↓</div>
+<div class="ablock a">🧠 LLM: Thought → What do I need to do next?</div>
+<div class="aarr">↓</div>
+<div class="arow"><div class="ablock s">🔍 Search</div><div class="ablock e">💻 Code REPL</div><div class="ablock r">🌐 Browser</div><div class="ablock v">🗄️ Database</div></div>
+<div class="aarr">↓ Observation → Loop back to Thought</div>
+<div class="ablock e">✅ Goal Achieved → Return Result</div>
+</div>`,
+why:`<p class="prose">Single LLM call = static snapshot. Agents = dynamic world interaction. Real tasks require: browsing current websites, running code, querying databases, sending emails. Agents give LLMs "hands" — enabling tasks that take humans hours to complete in minutes.</p>`,
+when:`<p class="prose">Use agents when: task requires current data (web search), code execution, multi-step workflows, tool integration (CRM, email, calendar), or when a single inference can't solve the problem.</p>`,
+how:`<pre><code><span class="kw">from</span> langchain.agents <span class="kw">import</span> AgentExecutor, create_tool_calling_agent
+<span class="kw">from</span> langchain_core.tools <span class="kw">import</span> tool
+<span class="kw">from</span> langchain_openai <span class="kw">import</span> ChatOpenAI
+<span class="kw">from</span> langchain_core.prompts <span class="kw">import</span> ChatPromptTemplate
+
+<span class="kw">@tool</span>
+<span class="fn">def</span> <span class="at">execute_sql</span>(query:<span class="fn">str</span>)-><span class="fn">str</span>:
+    <span class="st">"""Execute SQL against the database. Returns result rows."""</span>
+    <span class="kw">import</span> sqlite3
+    conn=sqlite3.<span class="fn">connect</span>(<span class="st">"db.sqlite"</span>)
+    <span class="kw">try</span>:
+        rows=conn.<span class="fn">execute</span>(query).<span class="fn">fetchall</span>()
+        <span class="kw">return</span> <span class="fn">str</span>(rows[:20])  <span class="cm"># limit output</span>
+    <span class="kw">except</span> <span class="cl">Exception</span> <span class="kw">as</span> e: <span class="kw">return</span> f<span class="st">"Error: {e}"</span>
+
+<span class="kw">@tool</span>
+<span class="fn">def</span> <span class="at">run_python</span>(code:<span class="fn">str</span>)-><span class="fn">str</span>:
+    <span class="st">"""Execute Python code and return stdout output."""</span>
+    <span class="kw">import</span> io,contextlib
+    f=io.<span class="cl">StringIO</span>()
+    <span class="kw">with</span> contextlib.<span class="fn">redirect_stdout</span>(f): <span class="fn">exec</span>(code,{})
+    <span class="kw">return</span> f.<span class="fn">getvalue</span>()
+
+llm=<span class="cl">ChatOpenAI</span>(model=<span class="st">"gpt-4o"</span>,temperature=<span class="nm">0</span>)
+tools=[execute_sql,run_python]
+prompt=<span class="cl">ChatPromptTemplate</span>.<span class="fn">from_messages</span>([
+    (<span class="st">"system"</span>,<span class="st">"You are a data analyst. Use tools to answer accurately."</span>),
+    (<span class="st">"human"</span>,<span class="st">"{input}"</span>),(<span class="st">"placeholder"</span>,<span class="st">"{agent_scratchpad}"</span>)])
+executor=<span class="cl">AgentExecutor</span>(agent=<span class="fn">create_tool_calling_agent</span>(llm,tools,prompt),
+    tools=tools,verbose=<span class="nm">True</span>,max_iterations=<span class="nm">10</span>)
+result=executor.<span class="fn">invoke</span>({<span class="st">"input"</span>:<span class="st">"What was revenue last month? Show trend chart."</span>})
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<div class="scgrid"><div class="sccard"><div class="sch"><span class="scic">🔬</span><div><div class="sct">Research Agent</div><div class="sci">Academia</div></div></div><div class="scb">Goal: "Summarize top 5 RAG papers from 2024." Searches arXiv → downloads PDFs → extracts abstracts → synthesizes comparison. 2-hour task in 8 min.</div><div class="sco">🎯 Literature review automated end-to-end</div></div>
+<div class="sccard"><div class="sch"><span class="scic">📊</span><div><div class="sct">Data Analyst Agent</div><div class="sci">BI</div></div></div><div class="scb">Goal: "Why did sales drop in Q3?" Runs SQL → analyzes trends → Python charts → correlates external data → root-cause report.</div><div class="sco">🎯 No data scientist needed for ad-hoc analysis</div></div></div>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🌐</div><div class="uct">Web Research</div><div class="ucd">Autonomous browsing and information synthesis</div></div>
+<div class="uccard"><div class="ucem">💻</div><div class="uct">Code Execution</div><div class="ucd">Write → Run → Debug → Iterate autonomously</div></div>
+<div class="uccard"><div class="ucem">📅</div><div class="uct">Workflow Automation</div><div class="ucd">Calendar, email, CRM, Slack integrations</div></div></div>`}}
+]},
+
+// ── MODULE 10 ──
+{id:'c10',num:'10',label:'Agentic AI & Multi-Agent Systems',emoji:'🌐',section:'AGENTS',desc:'Orchestrator patterns, LangGraph state machines, CrewAI roles, and production agentic workflows.',topics:[
+{id:'t10_1',icon:'🏙️',name:'Multi-Agent Orchestration (LangGraph · CrewAI · AutoGen)',tags:['Orchestrator','LangGraph','CrewAI','AutoGen','State Machines'],content:{
+what:`<div class="def"><h4>Multi-Agent Systems</h4><p>Networks of specialized LLM agents: Orchestrator plans+delegates, Specialists execute, Shared Memory maintains state. Enables tasks too complex for single-agent context windows or requiring parallel specialized processing.</p></div>
+<div class="aflow">
+<div class="ablock v">🧠 Orchestrator (Planner LLM) — decompose goal → assign subtasks</div>
+<div class="aarr">↓</div>
+<div class="arow"><div class="ablock s">🔍 Researcher</div><div class="ablock a">💻 Coder</div><div class="ablock e">✍️ Writer</div><div class="ablock r">🧪 Critic</div></div>
+<div class="aarr">↓ Shared Memory / Message Bus</div>
+<div class="ablock e">📋 Final Result → User</div>
+</div>`,
+why:`<p class="prose">Complex tasks require: parallel execution, specialized knowledge per domain, context exceeding single model, independent validation. Multi-agent enables all of these with modular, debuggable architecture.</p>`,
+when:`<p class="prose">Multi-agent when: tasks need parallel workstreams, different expertise per step, task requires longer context than single model supports, or quality benefits from independent review.</p>`,
+how:`<pre><code><span class="cm">## LangGraph — Stateful Agent Workflows ##</span>
+<span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph, END
+<span class="kw">from</span> langchain_openai <span class="kw">import</span> ChatOpenAI
+<span class="kw">from</span> typing <span class="kw">import</span> TypedDict,List
+
+<span class="kw">class</span> <span class="cl">State</span>(TypedDict):
+    messages:List[<span class="fn">dict</span>]; research:str; code:str; score:<span class="fn">int</span>
+
+llm=<span class="cl">ChatOpenAI</span>(model=<span class="st">"gpt-4o"</span>,temperature=<span class="nm">0</span>)
+
+<span class="fn">def</span> <span class="at">researcher</span>(s):
+    r=llm.<span class="fn">invoke</span>(s[<span class="st">"messages"</span>]+[{<span class="st">"role"</span>:<span class="st">"system"</span>,<span class="st">"content"</span>:<span class="st">"Research the topic thoroughly."</span>}])
+    <span class="kw">return</span> {<span class="st">"research"</span>:r.content}
+
+<span class="fn">def</span> <span class="at">coder</span>(s):
+    r=llm.<span class="fn">invoke</span>([{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:f<span class="st">"Based on: {s['research']}\nWrite Python code:"</span>}])
+    <span class="kw">return</span> {<span class="st">"code"</span>:r.content}
+
+<span class="fn">def</span> <span class="at">critic</span>(s):
+    r=llm.<span class="fn">invoke</span>([{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:f<span class="st">"Review code:\n{s['code']}\nScore 1-10:"</span>}])
+    score=<span class="nm">8</span>  <span class="cm"># parse from response</span>
+    <span class="kw">return</span> {<span class="st">"score"</span>:score}
+
+g=<span class="cl">StateGraph</span>(<span class="cl">State</span>)
+g.<span class="fn">add_node</span>(<span class="st">"researcher"</span>,researcher)
+g.<span class="fn">add_node</span>(<span class="st">"coder"</span>,coder)
+g.<span class="fn">add_node</span>(<span class="st">"critic"</span>,critic)
+g.<span class="fn">add_edge</span>(<span class="st">"researcher"</span>,<span class="st">"coder"</span>); g.<span class="fn">add_edge</span>(<span class="st">"coder"</span>,<span class="st">"critic"</span>)
+g.<span class="fn">add_conditional_edges</span>(<span class="st">"critic"</span>,<span class="kw">lambda</span> s:<span class="st">"done"</span> <span class="kw">if</span> s[<span class="st">"score"</span>]>=<span class="nm">8</span> <span class="kw">else</span> <span class="st">"coder"</span>,
+    {<span class="st">"coder"</span>:<span class="st">"coder"</span>,<span class="st">"done"</span>:END})
+g.<span class="fn">set_entry_point</span>(<span class="st">"researcher"</span>)
+app=g.<span class="fn">compile</span>()
+
+<span class="cm">## CrewAI — Role-Based Agents ##</span>
+<span class="kw">from</span> crewai <span class="kw">import</span> Agent,Task,Crew,Process
+researcher_agent=<span class="cl">Agent</span>(role=<span class="st">"Research Analyst"</span>,goal=<span class="st">"Find cutting-edge info"</span>,
+    tools=[search_tool],backstory=<span class="st">"Expert researcher"</span>)
+writer_agent=<span class="cl">Agent</span>(role=<span class="st">"Technical Writer"</span>,goal=<span class="st">"Write clear reports"</span>)
+crew=<span class="cl">Crew</span>(agents=[researcher_agent,writer_agent],
+    tasks=[<span class="cl">Task</span>(description=<span class="st">"Research LLMs"</span>,agent=researcher_agent),
+           <span class="cl">Task</span>(description=<span class="st">"Write blog post"</span>,agent=writer_agent)],
+    process=Process.sequential)
+result=crew.<span class="fn">kickoff</span>()
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<div class="scgrid"><div class="sccard"><div class="sch"><span class="scic">💼</span><div><div class="sct">Investment Memo Agent</div><div class="sci">Finance</div></div></div><div class="scb">5 agents: News + SEC Parser + Sentiment + Financial Model + Writer. PE-quality memo in 10 min vs 2 analyst-weeks.</div><div class="sco">🎯 3 hedge funds use this in production</div></div>
+<div class="sccard"><div class="sch"><span class="scic">🚀</span><div><div class="sct">SWE-Agent</div><div class="sci">Engineering</div></div></div><div class="scb">Planner → Coder → Tester → Reviewer → PR Creator. Resolves real GitHub issues. Claude 3.5: 49% SWE-Bench resolution.</div><div class="sco">🎯 SOTA autonomous software engineering</div></div></div>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🏭</div><div class="uct">Software Engineering</div><div class="ucd">Autonomous issue resolution, PR review, testing</div></div>
+<div class="uccard"><div class="ucem">🧪</div><div class="uct">Drug Discovery</div><div class="ucd">Literature mining + hypothesis + experiment design</div></div>
+<div class="uccard"><div class="ucem">📊</div><div class="uct">Financial Analysis</div><div class="ucd">Multi-source gathering + synthesis + reporting</div></div></div>`}}
+]},
+
+// ── MODULE 11 ──
+{id:'c11',num:'11',label:'MoE, Mamba & Novel Architectures',emoji:'🔬',section:'ARCHITECTURE',desc:'Mixture of Experts, State Space Models, hybrid architectures, and next-generation designs.',topics:[
+{id:'t11_1',icon:'🧩',name:'Mixture of Experts (MoE)',tags:['Router','Expert Selection','DeepSeek-V3','Mixtral','Load Balancing'],content:{
+what:`<div class="def"><h4>Mixture of Experts</h4><p>Replace each dense FFN with N "expert" networks + a learned router. Each token activates top-k experts only. Total capacity × N, compute cost × k/N. DeepSeek-V3: 671B params, 37B active — costs less to run than LLaMA-3-70B dense.</p></div>
+<div class="formula">h(x) = Σᵢ G(x)ᵢ · Eᵢ(x)<br>G(x) = softmax(TopK(W_g·x, k=2))<br>Mixtral 8×7B: 8 experts, 2 active → 46.7B total, 12.9B active per token</div>`,
+why:`<p class="prose">MoE is the most efficient scaling path: capacity × 8 experts at only 2× compute cost per token. Router automatically specializes experts: some learn code, others math, others languages. DeepSeek-V3 (MIT license, 671B) matches GPT-4o quality at fraction of inference cost.</p>`,
+when:`<p class="prose">Use MoE when: need frontier quality at lower inference cost, building very large custom models, or when serving multilingual workloads that benefit from language-specialized experts.</p>`,
+how:`<pre><code><span class="kw">class</span> <span class="cl">MoEFFN</span>(nn.Module):
+    <span class="fn">def</span> <span class="at">__init__</span>(self,dim=<span class="nm">4096</span>,n=<span class="nm">8</span>,k=<span class="nm">2</span>):
+        <span class="fn">super</span>().__init__()
+        self.router=nn.<span class="cl">Linear</span>(dim,n,bias=<span class="nm">False</span>)
+        self.experts=nn.<span class="cl">ModuleList</span>([<span class="cl">SwiGLU</span>(dim,dim*<span class="nm">4</span>) <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n)])
+        self.k=k
+    <span class="fn">def</span> <span class="at">forward</span>(self,x):
+        B,T,D=x.<span class="fn">shape</span>; xf=x.<span class="fn">reshape</span>(-<span class="nm">1</span>,D)
+        w,idx=torch.<span class="fn">topk</span>(F.<span class="fn">softmax</span>(self.router(xf),dim=-<span class="nm">1</span>),self.k,dim=-<span class="nm">1</span>)
+        w=w/w.<span class="fn">sum</span>(-<span class="nm">1</span>,keepdim=<span class="nm">True</span>)
+        out=torch.<span class="fn">zeros_like</span>(xf)
+        <span class="kw">for</span> i,expert <span class="kw">in</span> <span class="fn">enumerate</span>(self.experts):
+            mask=(idx==i).<span class="fn">any</span>(-<span class="nm">1</span>)
+            <span class="kw">if</span> mask.<span class="fn">any</span>():
+                pos=(idx[mask]==i).<span class="fn">float</span>().<span class="fn">argmax</span>(-<span class="nm">1</span>)
+                out[mask]+=w[mask].<span class="fn">gather</span>(<span class="nm">1</span>,pos.unsqueeze(-<span class="nm">1</span>)).squeeze(-<span class="nm">1</span>,)<span class="nm">.</span>unsqueeze(-<span class="nm">1</span>)*<span class="fn">expert</span>(xf[mask])
+        <span class="kw">return</span> out.<span class="fn">reshape</span>(B,T,D)
+<div class="clang">PYTORCH</div></code></pre>`,
+examples:`<p class="prose"><strong>DeepSeek-V3 MLA:</strong> Beyond MoE, DeepSeek-V3 uses Multi-head Latent Attention — compresses K,V into low-rank latent C_KV. Only C_KV cached (not full K,V). 93% KV cache reduction. Combined with MoE: serves frontier quality at commodity inference cost.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">💰</div><div class="uct">Cost Efficiency</div><div class="ucd">Frontier quality at 60–70% lower inference cost</div></div>
+<div class="uccard"><div class="ucem">🌐</div><div class="uct">Multilingual</div><div class="ucd">Automatic language-expert specialization</div></div>
+<div class="uccard"><div class="ucem">🔬</div><div class="uct">Scale</div><div class="ucd">Train 671B with compute of 67B dense model</div></div></div>`}},
+{id:'t11_2',icon:'🌊',name:'Mamba & State Space Models',tags:['SSM','Linear Complexity','S6','Hybrid','Long Context'],content:{
+what:`<div class="def"><h4>Mamba — Selective State Space Models</h4><p>Gu & Dao, 2023. O(n) complexity alternative to Transformers. Selective SSM: A, B, C, Δ matrices are input-dependent (unlike fixed SSMs). Processes 1M+ token sequences at linear cost. Constant inference state size.</p></div>
+<div class="formula">h'(t) = A(x)h(t) + B(x)x(t)<br>y(t) = C(x)h(t)<br>Complexity: O(n) vs O(n²) for attention<br>Inference: O(d_state) constant vs O(n·d) for KV cache</div>
+<div class="cmp"><div class="cmpcard"><h4 style="color:var(--V)">Transformer</h4><ul><li>O(n²) attention complexity</li><li>Strong in-context recall</li><li>Parallel training</li><li>KV cache grows with n</li><li>Best for reasoning tasks</li></ul></div>
+<div class="cmpcard"><h4 style="color:var(--E)">Mamba</h4><ul><li>O(n) complexity</li><li>Better for 1M+ token sequences</li><li>Recurrent inference O(1)</li><li>Constant state size</li><li>Best for long sequences</li></ul></div></div>`,
+why:`<p class="prose">Transformers quadruple cost when doubling sequence length. Mamba processes a million-token genomic sequence at the same cost per token as a 1K sequence. Hybrid models (Jamba: Mamba + Transformer layers) get best of both: efficiency + recall.</p>`,
+when:`<p class="prose">Mamba for: very long sequences (>100K tokens), genomics (DNA = millions of bases), audio (44KHz waveforms), time series. Hybrid (Jamba, Hymba) for: when you need long context efficiency but also transformer-level retrieval quality.</p>`,
+how:`<pre><code><span class="cm"># Using Mamba via HuggingFace</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> MambaForCausalLM, AutoTokenizer
+model=<span class="cl">MambaForCausalLM</span>.<span class="fn">from_pretrained</span>(<span class="st">"state-spaces/mamba-2.8b-hf"</span>)
+tok=<span class="cl">AutoTokenizer</span>.<span class="fn">from_pretrained</span>(<span class="st">"state-spaces/mamba-2.8b-hf"</span>)
+
+<span class="cm"># Hybrid Models (2025) — best of both worlds</span>
+<span class="cm"># Jamba (AI21): alternating Mamba + Transformer layers</span>
+<span class="cm"># Hymba (NVIDIA): parallel Mamba + attention in each block</span>
+<span class="cm"># Zamba2: Mamba-2 + shared transformer blocks</span>
+
+<span class="cm"># Inference advantage: Mamba processes 1M tokens</span>
+<span class="cm"># with same memory as 1K token transformer</span>
+ids=tok(<span class="st">"A"</span>*<span class="nm">100000</span>,return_tensors=<span class="st">"pt"</span>).input_ids
+out=model.<span class="fn">generate</span>(ids,max_new_tokens=<span class="nm">100</span>)  <span class="cm"># works!</span>
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>HyenaDNA (Mamba-like):</strong> Processes entire chromosomes (millions of base pairs) for genomic variant classification. Standard Transformers can only handle ~4K tokens. Mamba enables whole-genome language models — impossible before.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🧬</div><div class="uct">Genomics</div><div class="ucd">Whole genome sequence modeling</div></div>
+<div class="uccard"><div class="ucem">🎵</div><div class="uct">Audio</div><div class="ucd">Raw waveform modeling at 44KHz</div></div>
+<div class="uccard"><div class="ucem">📡</div><div class="uct">Time Series</div><div class="ucd">Years of sensor data, financial tick data</div></div></div>`}}
+]},
+
+// ── MODULE 12 ──
+{id:'c12',num:'12',label:'LLM Evaluation & Benchmarks',emoji:'📐',section:'DEPLOY',desc:'MMLU, HumanEval, MT-Bench, RAGAS, LLM-as-judge — comprehensive evaluation frameworks.',topics:[
+{id:'t12_1',icon:'📊',name:'Evaluation Frameworks',tags:['MMLU','HumanEval','MT-Bench','RAGAS','LLM-as-Judge','Evals in CI/CD'],content:{
+what:`<div class="def"><h4>LLM Evaluation</h4><p>Systematic measurement of LLM capabilities. Two families: <em>benchmark-based</em> (standardized test sets, reproducible, cheap) and <em>LLM-as-judge</em> (GPT-4/Claude evaluates quality — flexible but expensive). Always build task-specific evals.</p></div>
+<table class="tbl"><tr><th>Benchmark</th><th>Tests</th><th>Format</th></tr>
+<tr><td>MMLU</td><td>57-subject knowledge breadth</td><td>Multiple choice</td></tr>
+<tr><td>HumanEval / MBPP</td><td>Python code generation</td><td>Unit test pass@k</td></tr>
+<tr><td>GSM8K / MATH</td><td>Math reasoning</td><td>Exact answer match</td></tr>
+<tr><td>GPQA Diamond</td><td>PhD-level science</td><td>Multiple choice</td></tr>
+<tr><td>MT-Bench</td><td>Multi-turn dialogue quality</td><td>GPT-4 judge 1-10</td></tr>
+<tr><td>SWE-Bench</td><td>Real GitHub issue resolution</td><td>Test suite pass rate</td></tr>
+<tr><td>LiveBench</td><td>Contamination-free fresh Qs</td><td>Various</td></tr>
+<tr><td>RAGAS</td><td>RAG system quality</td><td>Faithfulness+relevance</td></tr></table>`,
+why:`<p class="prose">Without evaluation, LLM development is guesswork. Benchmarks enable: objective model comparison, regression testing after fine-tuning (block deployment if score drops), capability-specific diagnostics, and customer SLA validation.</p>`,
+when:`<p class="prose">Evaluate before and after every training run. Build task-specific evals for your application — generic benchmarks (MMLU) don't predict production performance on your specific data and use case.</p>`,
+how:`<pre><code><span class="cm"># Task-specific LLM-as-Judge evaluation</span>
+<span class="kw">import</span> json
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+
+<span class="fn">def</span> <span class="at">llm_judge</span>(question,reference,model_answer,judge=<span class="st">"gpt-4o"</span>):
+    client=<span class="cl">OpenAI</span>()
+    r=client.chat.completions.<span class="fn">create</span>(model=judge,
+        response_format={<span class="st">"type"</span>:<span class="st">"json_object"</span>},
+        messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:f<span class="st">"""Evaluate this AI response.
+Q: {question}\nReference: {reference}\nModel Answer: {model_answer}
+Score 1-10. JSON: {{"score":X,"reasoning":"...","issues":[]}}"""</span>}])
+    <span class="kw">return</span> json.<span class="fn">loads</span>(r.choices[<span class="nm">0</span>].message.content)
+
+<span class="cm"># RAGAS for RAG evaluation</span>
+<span class="kw">from</span> ragas <span class="kw">import</span> evaluate
+<span class="kw">from</span> ragas.metrics <span class="kw">import</span> faithfulness,answer_relevancy,context_recall
+result=<span class="fn">evaluate</span>(dataset=eval_ds,
+    metrics=[faithfulness,answer_relevancy,context_recall])
+<span class="fn">print</span>(result.to_pandas())
+<span class="cm"># faithfulness: 0.91 | answer_relevancy: 0.87 | context_recall: 0.79</span>
+
+<span class="cm"># Evals in CI/CD — prevent regressions</span>
+<span class="kw">def</span> <span class="at">ci_eval</span>(model_path,threshold=<span class="nm">0.80</span>):
+    score=<span class="fn">run_task_evals</span>(model_path)
+    <span class="kw">assert</span> score >= threshold, f<span class="st">f"Score {score:.2f} below threshold {threshold}. Block deploy!"</span>
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>Evals in CI/CD:</strong> Every model update runs automated eval suite. If MT-Bench drops >0.5 or SQL accuracy drops >3%, block deployment and alert. Prevents silent regressions from seemingly harmless fine-tuning runs — a common production failure mode.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🔄</div><div class="uct">CI/CD for ML</div><div class="ucd">Automated regression tests on every model update</div></div>
+<div class="uccard"><div class="ucem">🏆</div><div class="uct">Model Selection</div><div class="ucd">Task-specific evals to pick best model for use case</div></div>
+<div class="uccard"><div class="ucem">🛡️</div><div class="uct">Red Teaming</div><div class="ucd">Systematic adversarial probing for safety failures</div></div></div>`}}
+]},
+
+// ── MODULE 13 ──
+{id:'c13',num:'13',label:'LLM Inference & Production',emoji:'⚡',section:'DEPLOY',desc:'KV cache, speculative decoding, quantization, vLLM PagedAttention, and production serving.',topics:[
+{id:'t13_1',icon:'🚀',name:'Inference Optimization',tags:['KV Cache','Speculative Decoding','PagedAttention','GPTQ','AWQ','INT4'],content:{
+what:`<div class="def"><h4>LLM Inference Phases</h4><p><em>Prefill</em>: process full prompt in parallel (compute-bound). <em>Decode</em>: generate tokens one-by-one (memory-bandwidth-bound). Optimizations target both differently.</p></div>
+<table class="tbl"><tr><th>Technique</th><th>Speedup</th><th>Memory</th><th>Quality</th></tr>
+<tr><td>KV Cache</td><td>10-100× decode</td><td>Uses memory</td><td>None lost</td></tr>
+<tr><td>FlashAttention-3</td><td>2-4× attention</td><td>10×+ savings</td><td>None lost</td></tr>
+<tr><td>INT4/NF4 quant</td><td>2-4×</td><td>75% saving</td><td>1-3% loss</td></tr>
+<tr><td>Speculative decoding</td><td>2-4× decode</td><td>+draft model</td><td>None lost (exact)</td></tr>
+<tr><td>Continuous batching</td><td>10-20× throughput</td><td>Shared pages</td><td>None lost</td></tr>
+<tr><td>PagedAttention</td><td>Throughput</td><td>KV efficiency</td><td>None lost</td></tr></table>`,
+why:`<p class="prose">At scale: 1M daily users × $0.02/query = $7.3M/year. 4× speedup = $5.5M/year saved. Continuous batching (vLLM) achieves 10-20× throughput over naive HF serving by replacing static batching with dynamic request scheduling.</p>`,
+when:`<p class="prose">Always enable: FlashAttention, KV cache. Production: vLLM + continuous batching. Edge: INT4 quantization. Latency-critical: speculative decoding. Large batch: tensor parallelism.</p>`,
+how:`<pre><code><span class="cm"># Speculative Decoding</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM
+draft=<span class="cl">AutoModelForCausalLM</span>.<span class="fn">from_pretrained</span>(<span class="st">"Llama-3.2-1B"</span>)  <span class="cm"># fast draft</span>
+target=<span class="cl">AutoModelForCausalLM</span>.<span class="fn">from_pretrained</span>(<span class="st">"Llama-3.1-70B"</span>)  <span class="cm"># accurate target</span>
+<span class="cm"># draft proposes k tokens → target verifies all in one pass → 3-4× faster</span>
+out=target.<span class="fn">generate</span>(**inputs,assistant_model=draft,max_new_tokens=<span class="nm">200</span>)
+
+<span class="cm"># vLLM Production</span>
+$ python -m vllm.entrypoints.openai.api_server \
+    --model meta-llama/Llama-3.3-70B-Instruct \
+    --tensor-parallel-size <span class="nm">4</span> --max-model-len <span class="nm">32768</span> \
+    --enable-prefix-caching   <span class="cm"># cache common system prompts</span>
+
+<span class="cm"># AWQ quantization (best quality at 4-bit)</span>
+$ pip install autoawq
+<span class="kw">from</span> awq <span class="kw">import</span> AutoAWQForCausalLM
+model=<span class="cl">AutoAWQForCausalLM</span>.<span class="fn">from_pretrained</span>(<span class="st">"meta-llama/Meta-Llama-3-70B"</span>)
+model.<span class="fn">quantize</span>(tokenizer,quant_config={<span class="st">"zero_point"</span>:<span class="nm">True</span>,<span class="st">"q_group_size"</span>:<span class="nm">128</span>,<span class="st">"w_bit"</span>:<span class="nm">4</span>})
+<div class="clang">BASH + PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>Continuous batching deep dive:</strong> Static batching: 8 requests, all must finish before new requests enter. Continuous batching: as sequence finishes, new request immediately fills that slot in the batch. GPU utilization: 40% → 95%. This single innovation enabled vLLM's 10-20× throughput advantage.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🏭</div><div class="uct">High Throughput</div><div class="ucd">vLLM: serve 10K req/min on 4×A100</div></div>
+<div class="uccard"><div class="ucem">📱</div><div class="uct">On-Device</div><div class="ucd">INT4 GGUF: 7B on 8GB RAM CPU-only</div></div>
+<div class="uccard"><div class="ucem">⚡</div><div class="uct">Low Latency</div><div class="ucd">Speculative: 200ms → 70ms TTFT</div></div></div>`}}
+]},
+
+// ── MODULE 14 ──
+{id:'c14',num:'14',label:'Prompt Engineering',emoji:'✍️',section:'APPLICATIONS',desc:'Systematic prompting techniques — CoT, few-shot, structured output, DSPy, and advanced patterns.',topics:[
+{id:'t14_1',icon:'🎨',name:'Advanced Prompt Engineering',tags:['CoT','Few-shot','System Prompt','XML','DSPy','Self-Consistency'],content:{
+what:`<div class="def"><h4>Prompt Engineering</h4><p>Systematic design of LLM inputs to reliably produce high-quality outputs. The highest ROI intervention for LLM applications — often doubles quality before touching model weights.</p></div>
+<table class="tbl"><tr><th>Technique</th><th>When</th><th>Quality Gain</th></tr>
+<tr><td>Zero-shot</td><td>General tasks, strong models</td><td>Baseline</td></tr>
+<tr><td>Few-shot (3-5 examples)</td><td>Specific format required</td><td>+20–30%</td></tr>
+<tr><td>Chain-of-Thought</td><td>Math, logic, multi-step</td><td>+50–60%</td></tr>
+<tr><td>System prompt + role</td><td>Consistent behavior</td><td>+15–25%</td></tr>
+<tr><td>XML structured output</td><td>JSON, SQL, lists</td><td>+30–40%</td></tr>
+<tr><td>Self-consistency</td><td>High-stakes reasoning</td><td>+10–15%</td></tr>
+<tr><td>Reflexion / critique</td><td>Quality refinement</td><td>+15–20%</td></tr></table>`,
+why:`<p class="prose">CoT prompting on GSM8K: GPT-3 direct answer = 17% accuracy. GPT-3 + "Let's think step by step" = 56% accuracy. Same model, 3× better performance from 6 words. Prompting should always be exhausted before considering fine-tuning.</p>`,
+when:`<p class="prose">Always try prompting before fine-tuning. If a well-engineered prompt achieves your quality bar: ship it. Only fine-tune when prompting plateaus and you have quality + quantity of labeled data.</p>`,
+how:`<pre><code><span class="cm"># Bad prompt</span>
+bad=<span class="st">"Summarize this article: {text}"</span>
+
+<span class="cm"># Good structured prompt (for SQLPilot)</span>
+system=<span class="st">"""You are an expert SQL developer with 15 years experience.
+RULES:
+- Always write optimized, production-ready SQL
+- Include comments explaining complex logic
+- Use explicit JOINs, never implicit
+- Add LIMIT clause when result could be large
+- Format output as JSON with keys: sql, explanation, performance_tips"""</span>
+
+user_template=<span class="st">"""DATABASE SCHEMA:
+{schema}
+
+USER REQUEST: {query}
+
+Think step by step:
+1. Identify tables needed
+2. Determine join conditions
+3. Apply filters
+4. Write the SQL"""</span>
+
+<span class="cm"># Few-shot for SQL generation</span>
+few_shot=<span class="st">"""Example 1:
+Schema: users(id,name,email), orders(id,user_id,amount,date)
+Request: total revenue per user last 30 days
+SQL: SELECT u.name, SUM(o.amount) as revenue
+     FROM users u JOIN orders o ON u.id=o.user_id
+     WHERE o.date >= DATE('now','-30 days')
+     GROUP BY u.id, u.name ORDER BY revenue DESC
+
+Now for your request:"""</span>
+
+<span class="cm"># DSPy — program LLMs, not prompt them</span>
+<span class="kw">import</span> dspy
+lm=dspy.<span class="cl">OpenAI</span>(model=<span class="st">"gpt-4o"</span>)
+dspy.<span class="fn">settings</span>.<span class="fn">configure</span>(lm=lm)
+
+<span class="kw">class</span> <span class="cl">SQLGenerator</span>(dspy.Signature):
+    <span class="st">"""Generate SQL from natural language given database schema"""</span>
+    schema=dspy.<span class="cl">InputField</span>(); question=dspy.<span class="cl">InputField</span>()
+    sql=dspy.<span class="cl">OutputField</span>(); explanation=dspy.<span class="cl">OutputField</span>()
+
+gen=dspy.<span class="cl">ChainOfThought</span>(<span class="cl">SQLGenerator</span>)
+<span class="cm"># DSPy auto-optimizes prompts using your eval data</span>
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>Real prompting wins:</strong> Amazon uses XML tags extensively: &lt;products&gt;, &lt;customer_query&gt;, &lt;instructions&gt;. Claude's documentation shows XML tags improve structured extraction by 40%. Anthropic's own research: role prompting + XML = best results on Claude models.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🧮</div><div class="uct">Math Tutoring</div><div class="ucd">CoT shows working — students see steps not just answers</div></div>
+<div class="uccard"><div class="ucem">🤖</div><div class="uct">System Prompts</div><div class="ucd">Define persona, constraints, format once for all turns</div></div>
+<div class="uccard"><div class="ucem">📊</div><div class="uct">Structured Output</div><div class="ucd">Force JSON/SQL output reliably with XML templates</div></div></div>`}}
+]},
+
+// ── MODULE 15 ──
+{id:'c15',num:'15',label:'LLM Pre-training & Data Pipeline',emoji:'📊',section:'BUILD',desc:'Data collection, quality filtering, deduplication, tokenization, distributed training with FSDP/DeepSpeed.',topics:[
+{id:'t15_1',icon:'🗄️',name:'Pre-training Data Pipeline',tags:['Common Crawl','FineWeb','Dedup','Quality Filter','FSDP','DeepSpeed'],content:{
+what:`<div class="def"><h4>Pre-training Pipeline</h4><p>Train from scratch on trillions of tokens. Quality data is the #1 factor — "garbage in, garbage out" at 100× scale. Pipeline: collect → deduplicate → quality filter → domain mix → tokenize → shard → train with distributed infrastructure.</p></div>
+<table class="tbl"><tr><th>Data Source</th><th>Share</th><th>Contribution</th></tr>
+<tr><td>Common Crawl / FineWeb</td><td>45-70%</td><td>General knowledge, diversity</td></tr>
+<tr><td>GitHub / StackOverflow</td><td>5-20%</td><td>Code, logical reasoning</td></tr>
+<tr><td>Books / Project Gutenberg</td><td>10-15%</td><td>Long-form coherence, style</td></tr>
+<tr><td>Wikipedia / Wikidata</td><td>3-5%</td><td>Factual knowledge</td></tr>
+<tr><td>arXiv / PubMed</td><td>2-5%</td><td>Scientific reasoning</td></tr>
+<tr><td>Synthetic (GPT-4 generated)</td><td>5-15%</td><td>Quality uplift, diverse tasks</td></tr></table>`,
+why:`<p class="prose"><strong>FineWeb-Edu (HuggingFace 2024):</strong> Filtered ~15T Common Crawl tokens → 1.3T "educational quality" using BERT classifier trained on GPT-4 ratings. Models trained on FineWeb-Edu score significantly higher on knowledge benchmarks with smaller training set. Quality filter > data volume.</p>`,
+when:`<p class="prose">Build from scratch only with unique domain data (clinical notes, legal corpus, scientific papers) and $10M+ compute budget. Otherwise: start from existing open-source base models and domain-continue train.</p>`,
+how:`<pre><code><span class="cm"># Data pipeline with quality filtering</span>
+<span class="kw">from</span> datasets <span class="kw">import</span> load_dataset, interleave_datasets
+
+web=<span class="fn">load_dataset</span>(<span class="st">"HuggingFaceFW/fineweb-edu"</span>,split=<span class="st">"train"</span>,streaming=<span class="nm">True</span>)
+code=<span class="fn">load_dataset</span>(<span class="st">"bigcode/starcoderdata"</span>,split=<span class="st">"train"</span>,streaming=<span class="nm">True</span>)
+wiki=<span class="fn">load_dataset</span>(<span class="st">"wikipedia"</span>,<span class="st">"20220301.en"</span>,split=<span class="st">"train"</span>,streaming=<span class="nm">True</span>)
+ds=<span class="fn">interleave_datasets</span>([web,code,wiki],probabilities=[<span class="nm">0.70</span>,<span class="nm">0.20</span>,<span class="nm">0.10</span>])
+
+<span class="kw">def</span> <span class="at">quality_filter</span>(ex):
+    t=ex[<span class="st">"text"</span>]
+    <span class="kw">if</span> <span class="fn">len</span>(t)<<span class="nm">100</span> <span class="kw">or</span> t.<span class="fn">count</span>(<span class="st">' '</span>)/<span class="fn">len</span>(t)<<span class="nm">0.1</span>: <span class="kw">return</span> <span class="nm">False</span>
+    <span class="kw">if</span> <span class="fn">len</span>(<span class="fn">set</span>(t))<<span class="nm">20</span>: <span class="kw">return</span> <span class="nm">False</span>
+    <span class="kw">return</span> <span class="nm">True</span>
+
+<span class="cm"># FSDP training (PyTorch native)</span>
+<span class="kw">from</span> torch.distributed.fsdp <span class="kw">import</span> FullyShardedDataParallel <span class="kw">as</span> FSDP
+model=<span class="cl">FSDP</span>(model,auto_wrap_policy=auto_wrap,
+          mixed_precision=<span class="cl">MixedPrecision</span>(param_dtype=torch.bfloat16))
+<span class="cm"># Launch: torchrun --nproc_per_node=8 train.py</span>
+
+<span class="cm"># DeepSpeed ZeRO-3 (maximum memory efficiency)</span>
+<span class="cm"># ds_config.json: "zero_optimization": {"stage": 3}</span>
+<span class="cm"># Launch: deepspeed --num_gpus=8 train.py --deepspeed ds_config.json</span>
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>Domain pre-training economics:</strong> Medical LLM: collect 50B tokens of PubMed+clinical notes, continue-train LLaMA-3-8B for 10B tokens. Cost: ~$50K on H100s. Result: 15-20% improvement on medical benchmarks vs general LLaMA-3. Much cheaper than training from scratch ($5-10M).</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🏥</div><div class="uct">Medical LLM</div><div class="ucd">Continue-train on PubMed+clinical notes, $50K</div></div>
+<div class="uccard"><div class="ucem">⚖️</div><div class="uct">Legal LLM</div><div class="ucd">Case law + regulations + legal commentary corpus</div></div>
+<div class="uccard"><div class="ucem">💻</div><div class="uct">Code LLM</div><div class="ucd">60% GitHub + 25% StackOverflow + 15% docs</div></div></div>`}}
+]},
+
+// ── MODULE 16 ── PROJECT SQLPILOT
+{id:'c16',num:'16',label:'🎯 PROJECT: SQLPilot',emoji:'🛢️',section:'PROJECTS',desc:'Build SQLPilot — voice+text input, intent understanding, SQL generation, ER diagrams, agentic loop.',topics:[
+{id:'t16_1',icon:'🏗️',name:'SQLPilot — Full Architecture & Implementation',tags:['Voice','Text2SQL','ER Diagram','Intent','QLoRA','Agentic Loop'],content:{
+what:`<div class="projbox"><h3>🎯 SQLPilot <span class="ptag" style="background:rgba(16,185,129,.18);color:#10B981;border:1px solid rgba(16,185,129,.35)">OPEN SOURCE PROJECT</span></h3><p class="prose">An AI-powered database copilot that accepts <em>voice or text queries</em>, understands intent, generates optimized SQL, draws ER diagrams, explains every step — and can execute + self-correct in an agentic loop. Built entirely on open-source LLMs.</p></div>
+<div class="aflow">
+<div class="arow"><div class="ablock v">🎤 Voice (Whisper)</div><div style="color:var(--text3);padding:5px">OR</div><div class="ablock v">⌨️ Text Input</div></div>
+<div class="aarr">↓</div>
+<div class="ablock a">Intent Classifier → sql_gen | er_diagram | schema_explain | analysis</div>
+<div class="aarr">↓</div>
+<div class="ablock s">Schema RAG (BGE-M3 over DDL) + Query Decomposer</div>
+<div class="aarr">↓</div>
+<div class="ablock e">SQL LLM (QLoRA-tuned LLaMA-3-8B) + Validator + Agentic Self-Correction</div>
+<div class="aarr">↓</div>
+<div class="arow"><div class="ablock v">📊 SQL + Steps</div><div class="ablock a">🗺️ ER (Mermaid)</div><div class="ablock s">💡 Explanation</div></div>
+</div>
+<table class="tbl"><tr><th>Component</th><th>Technology</th><th>Model/Tool</th></tr>
+<tr><td>Speech-to-Text</td><td>OpenAI Whisper</td><td>whisper-large-v3</td></tr>
+<tr><td>Intent Classification</td><td>LLM JSON output</td><td>Mistral-7B or GPT-4o-mini</td></tr>
+<tr><td>Schema RAG</td><td>BGE-M3 + Qdrant</td><td>BAAI/bge-m3</td></tr>
+<tr><td>SQL Generation</td><td>QLoRA fine-tuned</td><td>LLaMA-3-8B / Mistral-7B</td></tr>
+<tr><td>ER Diagram</td><td>Mermaid.js codegen</td><td>GPT-4o / Codestral</td></tr>
+<tr><td>Agentic Loop</td><td>Execute→Analyze→Retry</td><td>LangGraph</td></tr>
+<tr><td>Frontend</td><td>Streamlit</td><td>Python</td></tr></table>`,
+why:`<p class="prose">Every non-technical business user needs data but can't write SQL. SQLPilot democratizes data access: describe what you need in plain English or speech → production-quality SQL instantly. Agentic loop adds self-correction for near-human accuracy.</p>`,
+when:`<p class="prose">Deploy SQLPilot when: non-technical users need database access, SQL bottleneck exists in data teams, multi-table join queries are error-prone, or you need auto-generated schema documentation.</p>`,
+how:`<pre><code><span class="kw">import</span> whisper, sqlite3, json
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+<span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+
+<span class="kw">@dataclass</span>
+<span class="kw">class</span> <span class="cl">SQLPilotConfig</span>:
+    db_path:<span class="fn">str</span>=<span class="st">"production.db"</span>
+    llm_model:<span class="fn">str</span>=<span class="st">"gpt-4o"</span>  <span class="cm"># or "ollama/llama3.3" for local</span>
+
+<span class="kw">class</span> <span class="cl">SQLPilot</span>:
+    <span class="fn">def</span> <span class="at">__init__</span>(self,cfg:<span class="cl">SQLPilotConfig</span>):
+        self.cfg=cfg; self.client=<span class="cl">OpenAI</span>()
+        self.whisper=whisper.<span class="fn">load_model</span>(<span class="st">"large-v3"</span>)
+        self.schema=self.<span class="fn">_get_schema</span>()
+
+    <span class="fn">def</span> <span class="at">_get_schema</span>(self):
+        conn=sqlite3.<span class="fn">connect</span>(self.cfg.db_path)
+        rows=conn.<span class="fn">execute</span>(<span class="st">"SELECT name,sql FROM sqlite_master WHERE type='table'"</span>).<span class="fn">fetchall</span>()
+        conn.<span class="fn">close</span>()
+        <span class="kw">return</span> <span class="st">"\n"</span>.<span class="fn">join</span>([f<span class="st">"-- {r[0]}\n{r[1]}"</span> <span class="kw">for</span> r <span class="kw">in</span> rows])
+
+    <span class="fn">def</span> <span class="at">voice_to_text</span>(self,audio_path:<span class="fn">str</span>)-><span class="fn">str</span>:
+        <span class="kw">return</span> self.whisper.<span class="fn">transcribe</span>(audio_path)[<span class="st">"text"</span>]
+
+    <span class="fn">def</span> <span class="at">classify_intent</span>(self,query:<span class="fn">str</span>)-><span class="fn">dict</span>:
+        r=self.client.chat.completions.<span class="fn">create</span>(
+            model=self.cfg.llm_model,
+            response_format={<span class="st">"type"</span>:<span class="st">"json_object"</span>},
+            messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:
+                f<span class="st">"""Classify this database query. Schema: {self.schema[:1000]}
+Query: "{query}"
+Return: {{"intent":"sql_generation|er_diagram|schema_explain|analysis",
+          "tables":["t1","t2"],"complexity":"simple|medium|complex"}}"""</span>}])
+        <span class="kw">return</span> json.<span class="fn">loads</span>(r.choices[<span class="nm">0</span>].message.content)
+
+    <span class="fn">def</span> <span class="at">generate_sql</span>(self,query:<span class="fn">str</span>,intent:<span class="fn">dict</span>)-><span class="fn">dict</span>:
+        r=self.client.chat.completions.<span class="fn">create</span>(
+            model=self.cfg.llm_model,
+            response_format={<span class="st">"type"</span>:<span class="st">"json_object"</span>},
+            messages=[
+                {<span class="st">"role"</span>:<span class="st">"system"</span>,<span class="st">"content"</span>:<span class="st">"Expert SQL developer. Return valid JSON only."</span>},
+                {<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:f<span class="st">"""Schema:\n{self.schema}
+Request: {query}\nIntent: {json.dumps(intent)}
+Return: {{"sql":"SELECT...","explanation":["Step 1:..."],"tips":["..."]}}}"""</span>}])
+        <span class="kw">return</span> json.<span class="fn">loads</span>(r.choices[<span class="nm">0</span>].message.content)
+
+    <span class="fn">def</span> <span class="at">generate_er_diagram</span>(self)-><span class="fn">str</span>:
+        r=self.client.chat.completions.<span class="fn">create</span>(model=self.cfg.llm_model,
+            messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:f<span class="st">"Generate Mermaid.js erDiagram for:\n{self.schema}\nReturn ONLY mermaid code."</span>}])
+        <span class="kw">return</span> r.choices[<span class="nm">0</span>].message.content
+
+    <span class="fn">def</span> <span class="at">agentic_execute</span>(self,sql:<span class="fn">str</span>,max_retries=<span class="nm">3</span>)-><span class="fn">dict</span>:
+        <span class="st">"""Execute SQL with self-correction loop"""</span>
+        conn=sqlite3.<span class="fn">connect</span>(self.cfg.db_path)
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(max_retries):
+            <span class="kw">try</span>:
+                rows=conn.<span class="fn">execute</span>(sql).<span class="fn">fetchall</span>()
+                <span class="kw">return</span> {<span class="st">"sql"</span>:sql,<span class="st">"rows"</span>:rows,<span class="st">"attempts"</span>:i+<span class="nm">1</span>,<span class="st">"success"</span>:<span class="nm">True</span>}
+            <span class="kw">except</span> <span class="cl">Exception</span> <span class="kw">as</span> e:
+                fix=self.client.chat.completions.<span class="fn">create</span>(model=self.cfg.llm_model,
+                    messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:f<span class="st">"Fix SQL:\n{sql}\nError: {e}\nSchema:\n{self.schema}\nReturn corrected SQL only."</span>}])
+                sql=fix.choices[<span class="nm">0</span>].message.content.<span class="fn">strip</span>()
+        <span class="kw">return</span> {<span class="st">"success"</span>:<span class="nm">False</span>,<span class="st">"error"</span>:<span class="st">"Max retries exceeded"</span>}
+
+    <span class="fn">def</span> <span class="at">process</span>(self,text:<span class="fn">str</span>=<span class="nm">None</span>,audio:<span class="fn">str</span>=<span class="nm">None</span>)-><span class="fn">dict</span>:
+        <span class="kw">if</span> audio: text=self.<span class="fn">voice_to_text</span>(audio)
+        intent=self.<span class="fn">classify_intent</span>(text)
+        <span class="kw">if</span> intent[<span class="st">"intent"</span>]==<span class="st">"er_diagram"</span>:
+            <span class="kw">return</span> {<span class="st">"type"</span>:<span class="st">"er"</span>,<span class="st">"mermaid"</span>:self.<span class="fn">generate_er_diagram</span>()}
+        result=self.<span class="fn">generate_sql</span>(text,intent)
+        exec_result=self.<span class="fn">agentic_execute</span>(result[<span class="st">"sql"</span>])
+        <span class="kw">return</span> {<span class="st">"type"</span>:<span class="st">"sql"</span>,<span class="st">"intent"</span>:intent,<span class="st">"sql_result"</span>:result,<span class="st">"exec"</span>:exec_result}
+
+<span class="cm">## Fine-tuning LLaMA-3-8B for Text2SQL with QLoRA ##</span>
+<span class="kw">from</span> datasets <span class="kw">import</span> load_dataset
+spider=<span class="fn">load_dataset</span>(<span class="st">"spider"</span>,split=<span class="st">"train"</span>)
+<span class="kw">def</span> <span class="at">fmt_spider</span>(ex):
+    <span class="kw">return</span> {<span class="st">"text"</span>:f<span class="st">"&lt;|system|&gt;You are an SQL expert.&lt;|user|&gt;Schema:{ex['db_id']}\nQuestion:{ex['question']}&lt;|assistant|&gt;{ex['query']}&lt;|end|&gt;"</span>}
+train_data=spider.<span class="fn">map</span>(fmt_spider)
+<span class="cm"># Then QLoRA fine-tune as shown in Module 7</span>
+<span class="cm"># Result: 67% → 84% SQL accuracy. With agentic loop: → 93%</span>
+
+<span class="cm">## Streamlit Frontend ##</span>
+<span class="kw">import</span> streamlit <span class="kw">as</span> st
+st.<span class="fn">title</span>(<span class="st">"🎯 SQLPilot — AI Database Copilot"</span>)
+db=st.<span class="fn">file_uploader</span>(<span class="st">"Upload SQLite DB"</span>,type=[<span class="st">"db"</span>,<span class="st">"sqlite"</span>])
+query=st.<span class="fn">text_area</span>(<span class="st">"Describe what you need"</span>)
+audio=st.<span class="fn">file_uploader</span>(<span class="st">"Or upload voice (mp3/wav)"</span>)
+<span class="kw">if</span> st.<span class="fn">button</span>(<span class="st">"Generate SQL"</span>,type=<span class="st">"primary"</span>):
+    pilot=<span class="cl">SQLPilot</span>(<span class="cl">SQLPilotConfig</span>())
+    r=pilot.<span class="fn">process</span>(text=query)
+    st.<span class="fn">code</span>(r[<span class="st">"sql_result"</span>][<span class="st">"sql"</span>],language=<span class="st">"sql"</span>)
+    <span class="kw">for</span> i,step <span class="kw">in</span> <span class="fn">enumerate</span>(r[<span class="st">"sql_result"</span>][<span class="st">"explanation"</span>],<span class="nm">1</span>):
+        st.<span class="fn">write</span>(f<span class="st">f"**Step {i}:** {step}"</span>)
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<table class="tbl"><tr><th>Model</th><th>Spider Accuracy</th><th>Complex JOINs</th></tr>
+<tr><td>GPT-3.5 zero-shot</td><td>67%</td><td>45%</td></tr>
+<tr><td>LLaMA-3-8B zero-shot</td><td>61%</td><td>38%</td></tr>
+<tr><td>LLaMA-3-8B + QLoRA SQLPilot</td><td>84%</td><td>76%</td></tr>
+<tr><td>SQLPilot + Agentic Loop</td><td>93%</td><td>89%</td></tr>
+<tr><td>GPT-4o zero-shot</td><td>83%</td><td>72%</td></tr></table>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">📊</div><div class="uct">Business Analytics</div><div class="ucd">Non-technical users query databases naturally</div></div>
+<div class="uccard"><div class="ucem">🗺️</div><div class="uct">Schema Documentation</div><div class="ucd">Auto-generate ER diagrams from any database</div></div>
+<div class="uccard"><div class="ucem">🎤</div><div class="uct">Voice Queries</div><div class="ucd">"Show me top products this week" → SQL</div></div>
+<div class="uccard"><div class="ucem">🔌</div><div class="uct">Multi-DB</div><div class="ucd">SQLite, PostgreSQL, MySQL, Snowflake, BigQuery</div></div>
+<div class="uccard"><div class="ucem">🤖</div><div class="uct">Agentic Mode</div><div class="ucd">Execute → analyze results → iterate automatically</div></div>
+<div class="uccard"><div class="ucem">🎓</div><div class="uct">SQL Learning</div><div class="ucd">Step-by-step explanations help learn SQL</div></div></div>`}}
+]},
+
+// ── MODULE 17 ── PROJECT PROXINEX
+{id:'c17',num:'17',label:'🔀 PROJECT: Proxinex',emoji:'🌐',section:'PROJECTS',desc:'Build Proxinex — proprietary multi-LLM router, Copilot-style UI, intelligent model selection across open + closed source.',topics:[
+{id:'t17_1',icon:'🔀',name:'Proxinex — Multi-LLM Router Architecture',tags:['Router','Cost Optimization','LiteLLM','Fallback','Task Classification','OpenAI-Compatible API'],content:{
+what:`<div class="projbox"><h3>🔀 Proxinex <span class="ptag" style="background:rgba(245,158,11,.18);color:#F59E0B;border:1px solid rgba(245,158,11,.35)">PROPRIETARY PRODUCT</span></h3><p class="prose">A multi-LLM routing platform that intelligently proxies requests to the optimal model (open or closed source) based on task complexity, cost budget, latency, and privacy requirements. Copilot-style UI. OpenAI-compatible API. Enterprise-ready.</p></div>
+<div class="aflow">
+<div class="ablock v">Incoming Request (any OpenAI-compatible client)</div>
+<div class="aarr">↓</div>
+<div class="ablock a">Task Classifier → simple_qa | creative | coding | reasoning | math | private</div>
+<div class="aarr">↓</div>
+<div class="ablock s">Policy Engine (cost budget + latency SLA + privacy tier)</div>
+<div class="aarr">↓</div>
+<div class="arow"><div class="ablock e">GPT-4o-mini (simple)</div><div class="ablock v">GPT-4o (medium)</div><div class="ablock a">o4-mini (reasoning)</div><div class="ablock s">LLaMA local (private)</div></div>
+<div class="aarr">↓ Fallback chain on error/timeout</div>
+<div class="ablock e">Unified Response → Client (OpenAI format)</div>
+</div>
+<table class="tbl"><tr><th>Component</th><th>Role</th><th>Technology</th></tr>
+<tr><td>Task Classifier</td><td>Detect query type/complexity</td><td>Fine-tuned BERT / GPT-4o-mini</td></tr>
+<tr><td>Policy Engine</td><td>Map task → optimal model</td><td>Rules + cost optimizer</td></tr>
+<tr><td>LLM Router</td><td>Call correct provider API</td><td>LiteLLM async</td></tr>
+<tr><td>Fallback Manager</td><td>Handle failures, retries</td><td>Circuit breaker</td></tr>
+<tr><td>Cost Tracker</td><td>Token usage + billing</td><td>Redis + PostgreSQL</td></tr>
+<tr><td>API Gateway</td><td>OpenAI-compatible endpoint</td><td>FastAPI + async</td></tr>
+<tr><td>Copilot UI</td><td>Chat interface, model viz</td><td>React / Streamlit</td></tr></table>`,
+why:`<p class="prose">GPT-4o is overkill for "what's the weather?" ($5/1M tokens). GPT-4o-mini is insufficient for complex multi-step reasoning. o3 is too slow for chatbots. Proxinex routes intelligently: GPT-4o quality at GPT-4o-mini average prices. Enterprises save 60-80% on LLM costs while maintaining quality.</p>`,
+when:`<p class="prose">Proxinex for: enterprises with high-volume diverse LLM workloads, products needing multiple LLM capabilities in one API, applications with mixed simple/complex queries, or compliance requirements routing sensitive queries to private models.</p>`,
+how:`<pre><code><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel
+<span class="kw">from</span> typing <span class="kw">import</span> List,Dict,Optional
+<span class="kw">from</span> enum <span class="kw">import</span> Enum
+<span class="kw">import</span> asyncio,time,litellm
+
+<span class="kw">class</span> <span class="cl">TaskType</span>(Enum):
+    SIMPLE_QA=<span class="st">"simple_qa"</span>; CREATIVE=<span class="st">"creative"</span>
+    COMPLEX_REASONING=<span class="st">"complex_reasoning"</span>; CODING=<span class="st">"coding"</span>
+    MATH=<span class="st">"math"</span>; PRIVATE=<span class="st">"private"</span>
+
+ROUTING_TABLE={
+    <span class="cl">TaskType</span>.SIMPLE_QA:   {<span class="st">"primary"</span>:<span class="st">"gpt-4o-mini"</span>, <span class="st">"fallback"</span>:<span class="st">"gemini/gemini-2.0-flash"</span>},
+    <span class="cl">TaskType</span>.CREATIVE:    {<span class="st">"primary"</span>:<span class="st">"claude-sonnet-4-6"</span>, <span class="st">"fallback"</span>:<span class="st">"gpt-4o"</span>},
+    <span class="cl">TaskType</span>.CODING:      {<span class="st">"primary"</span>:<span class="st">"claude-sonnet-4-6"</span>, <span class="st">"fallback"</span>:<span class="st">"gpt-4o"</span>},
+    <span class="cl">TaskType</span>.COMPLEX_REASONING:{<span class="st">"primary"</span>:<span class="st">"o4-mini"</span>, <span class="st">"fallback"</span>:<span class="st">"gpt-4o"</span>},
+    <span class="cl">TaskType</span>.MATH:        {<span class="st">"primary"</span>:<span class="st">"o4-mini"</span>, <span class="st">"fallback"</span>:<span class="st">"gpt-4o"</span>},
+    <span class="cl">TaskType</span>.PRIVATE:     {<span class="st">"primary"</span>:<span class="st">"ollama/llama3.3:70b"</span>, <span class="st">"fallback"</span>:<span class="st">"ollama/mistral"</span>},
+}
+
+<span class="kw">class</span> <span class="cl">TaskClassifier</span>:
+    <span class="kw">async</span> <span class="fn">def</span> <span class="at">classify</span>(self,messages,metadata={})-><span class="cl">TaskType</span>:
+        <span class="kw">if</span> metadata.<span class="fn">get</span>(<span class="st">"private"</span>): <span class="kw">return</span> <span class="cl">TaskType</span>.PRIVATE
+        msg=<span class="st">" "</span>.<span class="fn">join</span>([m[<span class="st">"content"</span>] <span class="kw">for</span> m <span class="kw">in</span> messages <span class="kw">if</span> m[<span class="st">"role"</span>]==<span class="st">"user"</span>])[:<span class="nm">500</span>]
+        r=<span class="kw">await</span> litellm.<span class="fn">acompletion</span>(model=<span class="st">"gpt-4o-mini"</span>,max_tokens=<span class="nm">10</span>,
+            messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:
+                f<span class="st">f"Classify: '{msg}'\nChoose ONE: simple_qa creative complex_reasoning coding math private"</span>}])
+        label=r.choices[<span class="nm">0</span>].message.content.<span class="fn">strip</span>().<span class="fn">lower</span>()
+        mapping={<span class="st">"simple_qa"</span>:<span class="cl">TaskType</span>.SIMPLE_QA,<span class="st">"creative"</span>:<span class="cl">TaskType</span>.CREATIVE,
+                 <span class="st">"complex_reasoning"</span>:<span class="cl">TaskType</span>.COMPLEX_REASONING,<span class="st">"coding"</span>:<span class="cl">TaskType</span>.CODING,
+                 <span class="st">"math"</span>:<span class="cl">TaskType</span>.MATH,<span class="st">"private"</span>:<span class="cl">TaskType</span>.PRIVATE}
+        <span class="kw">return</span> mapping.<span class="fn">get</span>(label,<span class="cl">TaskType</span>.SIMPLE_QA)
+
+<span class="kw">class</span> <span class="cl">ProxinexRouter</span>:
+    <span class="fn">def</span> <span class="at">__init__</span>(self):
+        self.classifier=<span class="cl">TaskClassifier</span>()
+        self.cost_log=[]  <span class="cm"># production: use Redis/PostgreSQL</span>
+
+    <span class="kw">async</span> <span class="fn">def</span> <span class="at">route</span>(self,messages,metadata={},**kwargs):
+        task=<span class="kw">await</span> self.classifier.<span class="fn">classify</span>(messages,metadata)
+        route=<span class="cl">ROUTING_TABLE</span>[task]
+        start=time.<span class="fn">time</span>()
+        <span class="kw">try</span>:
+            r=<span class="kw">await</span> litellm.<span class="fn">acompletion</span>(
+                model=route[<span class="st">"primary"</span>],messages=messages,**kwargs)
+            cost=litellm.<span class="fn">completion_cost</span>(r)
+            self.cost_log.<span class="fn">append</span>({<span class="st">"model"</span>:route[<span class="st">"primary"</span>],<span class="st">"cost"</span>:cost,<span class="st">"task"</span>:task.value})
+            <span class="kw">return</span> {<span class="st">"response"</span>:r,<span class="st">"model"</span>:route[<span class="st">"primary"</span>],
+                    <span class="st">"task"</span>:task.value,<span class="st">"cost"</span>:cost,
+                    <span class="st">"latency_ms"</span>:<span class="fn">round</span>((time.<span class="fn">time</span>()-start)*<span class="nm">1000</span>)}
+        <span class="kw">except</span> <span class="cl">Exception</span> <span class="kw">as</span> e:
+            r=<span class="kw">await</span> litellm.<span class="fn">acompletion</span>(
+                model=route[<span class="st">"fallback"</span>],messages=messages,**kwargs)
+            <span class="kw">return</span> {<span class="st">"response"</span>:r,<span class="st">"model"</span>:route[<span class="st">"fallback"</span>],
+                    <span class="st">"task"</span>:task.value,<span class="st">"fallback_reason"</span>:<span class="fn">str</span>(e)}
+
+<span class="cm">## FastAPI — OpenAI-Compatible Server ##</span>
+app=<span class="cl">FastAPI</span>(title=<span class="st">"Proxinex API v1"</span>)
+router=<span class="cl">ProxinexRouter</span>()
+
+<span class="kw">class</span> <span class="cl">ChatRequest</span>(BaseModel):
+    model:<span class="fn">str</span>=<span class="st">"proxinex-auto"</span>
+    messages:List[Dict]
+    stream:bool=<span class="nm">False</span>; max_tokens:Optional[<span class="fn">int</span>]=<span class="nm">None</span>
+    temperature:Optional[<span class="fn">float</span>]=<span class="nm">None</span>
+    metadata:Optional[Dict]={} <span class="cm"># {private:True, budget:"low"}</span>
+
+<span class="kw">@app</span>.<span class="fn">post</span>(<span class="st">"/v1/chat/completions"</span>)
+<span class="kw">async</span> <span class="fn">def</span> <span class="at">chat</span>(req:<span class="cl">ChatRequest</span>):
+    result=<span class="kw">await</span> router.<span class="fn">route</span>(req.messages,req.metadata,
+        max_tokens=req.max_tokens,temperature=req.temperature)
+    <span class="cm"># Returns OpenAI-format response — drop-in replacement!</span>
+    <span class="kw">return</span> result[<span class="st">"response"</span>]
+
+<span class="kw">@app</span>.<span class="fn">get</span>(<span class="st">"/v1/cost-analytics"</span>)
+<span class="kw">async</span> <span class="fn">def</span> <span class="at">analytics</span>():
+    total=<span class="fn">sum</span>(x[<span class="st">"cost"</span>] <span class="kw">for</span> x <span class="kw">in</span> router.cost_log)
+    by_model={m:<span class="fn">sum</span>(x[<span class="st">"cost"</span>] <span class="kw">for</span> x <span class="kw">in</span> router.cost_log <span class="kw">if</span> x[<span class="st">"model"</span>]==m)
+              <span class="kw">for</span> m <span class="kw">in</span> <span class="fn">set</span>(x[<span class="st">"model"</span>] <span class="kw">for</span> x <span class="kw">in</span> router.cost_log)}
+    <span class="kw">return</span> {<span class="st">"total_cost"</span>:total,<span class="st">"by_model"</span>:by_model,
+            <span class="st">"total_requests"</span>:<span class="fn">len</span>(router.cost_log)}
+
+<span class="cm"># Start: uvicorn proxinex:app --host 0.0.0.0 --port 8000</span>
+<span class="cm"># Any OpenAI client → base_url="http://localhost:8000/v1" → works!</span>
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>Cost savings at scale:</strong></p>
+<table class="tbl"><tr><th>Scenario</th><th>Naive (all GPT-4o)</th><th>Proxinex Routed</th><th>Saving</th></tr>
+<tr><td>10K queries/day mix</td><td>$50/day</td><td>$8/day</td><td>84%</td></tr>
+<tr><td>Enterprise 1M queries/day</td><td>$5000/day</td><td>$800/day</td><td>84%</td></tr>
+<tr><td>Annual enterprise cost</td><td>$1.83M</td><td>$292K</td><td>$1.54M saved</td></tr></table>
+<p class="prose"><strong>Copilot UI extensions:</strong> Add React/Streamlit frontend showing: real-time model selected, cost per query, cumulative savings, latency histogram. Users see "Routed to: GPT-4o-mini | Cost: $0.0003 | Latency: 312ms | Saved vs GPT-4o: $0.0047"</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">💰</div><div class="uct">Cost Optimization</div><div class="ucd">80%+ savings routing to right-sized models</div></div>
+<div class="uccard"><div class="ucem">🔒</div><div class="uct">Privacy Compliance</div><div class="ucd">Route sensitive data to local models automatically</div></div>
+<div class="uccard"><div class="ucem">⚡</div><div class="uct">SLA Management</div><div class="ucd">Route to faster models when latency SLA is tight</div></div>
+<div class="uccard"><div class="ucem">🔌</div><div class="uct">Drop-In Replacement</div><div class="ucd">OpenAI-compatible API — no client code changes</div></div>
+<div class="uccard"><div class="ucem">📊</div><div class="uct">Cost Analytics</div><div class="ucd">Real-time cost dashboard, per-team billing</div></div>
+<div class="uccard"><div class="ucem">🏢</div><div class="uct">Enterprise SaaS</div><div class="ucd">Resell as proprietary AI gateway product</div></div></div>`}}
+]},
+
+// ── MODULE 18 ──
+{id:'c18',num:'18',label:'Multimodal LLMs',emoji:'🖼️',section:'ARCHITECTURE',desc:'Vision-language models, audio LLMs, code models, and cross-modal architectures.',topics:[
+{id:'t18_1',icon:'👁️',name:'Vision-Language Models (VLMs)',tags:['CLIP','ViT','LLaVA','GPT-4V','InternVL2','Qwen2-VL'],content:{
+what:`<div class="def"><h4>Vision-Language Models</h4><p>Joint understanding of images and text. Architecture: Vision Encoder (ViT/CLIP) → Linear Projection → Visual Tokens → Concatenate with text tokens → LLM Decoder → generate text about image.</p></div>
+<div class="steps"><div class="step"><div class="snum">1</div><div class="sc"><h4>Image Encoder (ViT)</h4><p>Split image into 14×14 patches → embed each → process with Transformer encoder → 196-2048 visual tokens (varies by resolution).</p></div></div>
+<div class="step"><div class="snum">2</div><div class="sc"><h4>Projection Layer (MLP)</h4><p>Maps visual features to same dimension as text embeddings. LLaVA: simple linear layer. InternVL: cross-attention. Qwen2-VL: native resolution dynamic patching.</p></div></div>
+<div class="step"><div class="snum">3</div><div class="sc"><h4>LLM Decoder</h4><p>Visual tokens + text tokens → standard autoregressive generation. Model attends to both modalities simultaneously for grounded answers.</p></div></div></div>
+<table class="tbl"><tr><th>Model</th><th>License</th><th>Resolution</th><th>Strengths</th></tr>
+<tr><td>InternVL2.5-78B</td><td>MIT</td><td>Dynamic</td><td>Best open VLM, OCR</td></tr>
+<tr><td>Qwen2-VL-72B</td><td>Qwen</td><td>Dynamic any-res</td><td>Video, documents</td></tr>
+<tr><td>LLaVA-1.6-34B</td><td>Apache 2.0</td><td>672×672</td><td>Easy to fine-tune</td></tr>
+<tr><td>Gemma-3-27B-IT</td><td>Gemma</td><td>128K ctx</td><td>Google ecosystem</td></tr>
+<tr><td>GPT-4o</td><td>Closed</td><td>High res</td><td>Best overall</td></tr>
+<tr><td>Claude 4</td><td>Closed</td><td>High res</td><td>Best OCR, docs</td></tr></table>`,
+why:`<p class="prose">Real-world data is multimodal: medical images + reports, product photos + descriptions, charts + analysis. Text-only LLMs are blind to 80% of information in documents. VLMs unlock: visual QA, OCR, chart understanding, UI automation, medical imaging.</p>`,
+when:`<p class="prose">Use VLMs when: application involves images+text together — document analysis with charts, medical imaging, UI testing, content moderation, e-commerce, accessibility tools.</p>`,
+how:`<pre><code><span class="cm"># GPT-4o with image (vision)</span>
+<span class="kw">import</span> base64
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+<span class="kw">with</span> <span class="fn">open</span>(<span class="st">"chart.png"</span>,<span class="st">"rb"</span>) <span class="kw">as</span> f:
+    b64=base64.<span class="fn">b64encode</span>(f.<span class="fn">read</span>()).<span class="fn">decode</span>()
+r=<span class="cl">OpenAI</span>().chat.completions.<span class="fn">create</span>(model=<span class="st">"gpt-4o"</span>,
+    messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:[
+        {<span class="st">"type"</span>:<span class="st">"image_url"</span>,<span class="st">"image_url"</span>:{<span class="st">"url"</span>:f<span class="st">f"data:image/png;base64,{b64}"</span>}},
+        {<span class="st">"type"</span>:<span class="st">"text"</span>,<span class="st">"text"</span>:<span class="st">"Analyze this chart and extract all data points as JSON"</span>}]}])
+
+<span class="cm"># Open VLM with HuggingFace</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoProcessor, LlavaNextForConditionalGeneration
+<span class="kw">from</span> PIL <span class="kw">import</span> Image
+model=<span class="cl">LlavaNextForConditionalGeneration</span>.<span class="fn">from_pretrained</span>(
+    <span class="st">"llava-hf/llava-v1.6-34b-hf"</span>,torch_dtype=torch.bfloat16,device_map=<span class="st">"auto"</span>)
+proc=<span class="cl">AutoProcessor</span>.<span class="fn">from_pretrained</span>(<span class="st">"llava-hf/llava-v1.6-34b-hf"</span>)
+img=Image.<span class="fn">open</span>(<span class="st">"invoice.png"</span>)
+prompt=<span class="st">"&lt;image&gt;\nExtract all line items and totals from this invoice as JSON"</span>
+inputs=<span class="fn">proc</span>(text=prompt,images=img,return_tensors=<span class="st">"pt"</span>).<span class="fn">to</span>(<span class="st">"cuda"</span>)
+out=model.<span class="fn">generate</span>(**inputs,max_new_tokens=<span class="nm">500</span>)
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<div class="scgrid"><div class="sccard"><div class="sch"><span class="scic">🏥</span><div><div class="sct">Radiology AI</div><div class="sci">Healthcare</div></div></div><div class="scb">VLM analyzes chest X-ray → structured radiology report. Near-radiologist accuracy on pneumonia detection + auto-report generation.</div><div class="sco">🎯 3× faster reporting, 24/7 coverage</div></div>
+<div class="sccard"><div class="sch"><span class="scic">🏭</span><div><div class="sct">Manufacturing QA</div><div class="sci">Industry</div></div></div><div class="scb">VLM inspects product photos vs spec sheet. Flags defects, generates deviation reports. Zero-shot for new product lines.</div><div class="sco">🎯 95% defect detection, no custom CV needed</div></div></div>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">📄</div><div class="uct">Document AI</div><div class="ucd">OCR + understanding: invoices, forms, contracts</div></div>
+<div class="uccard"><div class="ucem">🛒</div><div class="uct">E-Commerce</div><div class="ucd">Product image → description, category, attributes</div></div>
+<div class="uccard"><div class="ucem">🏗️</div><div class="uct">UI Automation</div><div class="ucd">VLM sees screen → clicks/types to automate tasks</div></div></div>`}}
+]},
+
+// ── MODULE 19 ──
+{id:'c19',num:'19',label:'LLM Safety & Alignment',emoji:'🛡️',section:'DEPLOY',desc:'Jailbreaks, hallucination mitigation, toxicity, Constitutional AI, and responsible deployment.',topics:[
+{id:'t19_1',icon:'🛡️',name:'Safety, Hallucination & Responsible AI',tags:['Hallucination','Jailbreak','Constitutional AI','Guardrails','Red Teaming'],content:{
+what:`<div class="def"><h4>LLM Safety Categories</h4><p>LLM failures fall into: <em>hallucination</em> (confident falsehoods), <em>jailbreaks</em> (bypassing safety), <em>prompt injection</em> (malicious instructions in data), <em>biases</em> (unfair outputs), <em>PII leakage</em> (memorized private data).</p></div>
+<table class="tbl"><tr><th>Risk</th><th>Mitigation</th><th>Tool/Method</th></tr>
+<tr><td>Hallucination</td><td>RAG + source citations</td><td>RAGAS faithfulness metric</td></tr>
+<tr><td>Jailbreaks</td><td>RLHF, Constitutional AI</td><td>Llama Guard, Moderation API</td></tr>
+<tr><td>Prompt injection</td><td>Input sanitization, delimiters</td><td>Guardrails AI, NeMo</td></tr>
+<tr><td>PII leakage</td><td>Training data scrubbing</td><td>Microsoft Presidio</td></tr>
+<tr><td>Bias</td><td>Diverse training data</td><td>Fairness metrics, red teaming</td></tr>
+<tr><td>Toxic outputs</td><td>RLHF + output filtering</td><td>Perspective API, Llama Guard</td></tr></table>`,
+why:`<p class="prose">Safety failures in production are expensive: reputational damage, legal liability, user harm. A finance chatbot that hallucinates stock prices causes real financial harm. A medical assistant giving wrong dosages is dangerous. Safety is not optional.</p>`,
+when:`<p class="prose">Implement safety guardrails from day one. Validate with red teaming before launch. Monitor continuously — models degrade with fine-tuning. Build defense in depth: training-time + inference-time + output validation.</p>`,
+how:`<pre><code><span class="cm"># Llama Guard — safety classifier for LLM outputs</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, AutoTokenizer
+guard=<span class="cl">AutoModelForCausalLM</span>.<span class="fn">from_pretrained</span>(<span class="st">"meta-llama/Llama-Guard-3-8B"</span>)
+guard_tok=<span class="cl">AutoTokenizer</span>.<span class="fn">from_pretrained</span>(<span class="st">"meta-llama/Llama-Guard-3-8B"</span>)
+
+<span class="fn">def</span> <span class="at">is_safe</span>(user_msg,assistant_response=<span class="nm">None</span>):
+    chat=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:user_msg}]
+    <span class="kw">if</span> assistant_response:
+        chat.<span class="fn">append</span>({<span class="st">"role"</span>:<span class="st">"assistant"</span>,<span class="st">"content"</span>:assistant_response})
+    inp=guard_tok.<span class="fn">apply_chat_template</span>(chat,return_tensors=<span class="st">"pt"</span>)
+    out=guard.<span class="fn">generate</span>(inp,max_new_tokens=<span class="nm">5</span>)
+    verdict=guard_tok.<span class="fn">decode</span>(out[<span class="nm">0</span>])
+    <span class="kw">return</span> <span class="st">"safe"</span> <span class="kw">in</span> verdict.<span class="fn">lower</span>()
+
+<span class="cm"># Hallucination detection with self-consistency</span>
+<span class="fn">def</span> <span class="at">check_hallucination</span>(query,answer,context,llm):
+    r=llm.<span class="fn">invoke</span>(f<span class="st">"""Is this answer supported ONLY by the given context?
+Context: {context}
+Question: {query}
+Answer: {answer}
+Reply: SUPPORTED or HALLUCINATED with reason."""</span>)
+    <span class="kw">return</span> <span class="st">"SUPPORTED"</span> <span class="kw">in</span> r.content
+
+<span class="cm"># Guardrails AI</span>
+$ pip install guardrails-ai
+<span class="kw">from</span> guardrails <span class="kw">import</span> Guard
+<span class="kw">from</span> guardrails.hub <span class="kw">import</span> ToxicLanguage, CompetitorCheck
+guard=<span class="cl">Guard</span>().<span class="fn">use</span>(<span class="cl">ToxicLanguage</span>).<span class="fn">use</span>(<span class="cl">CompetitorCheck</span>(competitors=[<span class="st">"OpenAI"</span>]))
+result=guard(<span class="fn">generate</span>,prompt=<span class="st">"..."</span>)
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>Constitutional AI (Anthropic):</strong> Instead of human-labeling every output, define a "constitution" (list of principles). Use AI to: (1) critique its own outputs against principles, (2) revise outputs to comply. RLAIF (AI feedback) scales alignment without expensive human annotation.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🏥</div><div class="uct">Medical AI</div><div class="ucd">Double-check medical claims against verified sources</div></div>
+<div class="uccard"><div class="ucem">💰</div><div class="uct">Finance</div><div class="ucd">Block confident wrong financial advice</div></div>
+<div class="uccard"><div class="ucem">🔴</div><div class="uct">Red Teaming</div><div class="ucd">Systematic adversarial testing before deployment</div></div></div>`}}
+]},
+
+// ── MODULE 20 ──
+{id:'c20',num:'20',label:'LLM Future & Advanced Topics',emoji:'🔭',section:'ADVANCED',desc:'Reasoning models, long-context future, test-time compute, multimodal frontier, and what comes after Transformers.',topics:[
+{id:'t20_1',icon:'🚀',name:'Reasoning Models & Test-Time Compute',tags:['o3','DeepSeek-R1','Chain-of-Thought','MCTS','Test-Time Scaling'],content:{
+what:`<div class="def"><h4>The Reasoning Era (2024–2026)</h4><p>A new scaling axis: <em>test-time compute</em>. Instead of only scaling training (bigger models), scale inference (more compute per answer). o1/o3 models "think" for seconds/minutes before answering, generating internal chain-of-thought. DeepSeek-R1 proved RL alone can develop sophisticated reasoning.</p></div>
+<table class="tbl"><tr><th>Model</th><th>Method</th><th>Thinking</th><th>AIME 2024</th></tr>
+<tr><td>GPT-4o</td><td>Standard LLM</td><td>None</td><td>9.3%</td></tr>
+<tr><td>o1</td><td>Internal CoT</td><td>~20 sec</td><td>83.3%</td></tr>
+<tr><td>o3</td><td>Extended thinking</td><td>Up to 10 min</td><td>96.7%</td></tr>
+<tr><td>DeepSeek-R1</td><td>GRPO RL</td><td>Visible CoT</td><td>79.8%</td></tr>
+<tr><td>QwQ-32B</td><td>RL + distillation</td><td>Visible CoT</td><td>71.4%</td></tr></table>`,
+why:`<p class="prose">Test-time compute scaling opens a new dimension: even a fixed-size model gets significantly smarter if allowed to reason longer. This is analogous to humans: given more time to think, people make better decisions. The implication: model size may matter less than compute budget per query.</p>`,
+when:`<p class="prose">Use reasoning models for: math/logic problems, complex coding, scientific reasoning, any task where accuracy matters more than speed. Use standard models for: conversational tasks, creative writing, simple Q&A where latency matters.</p>`,
+how:`<pre><code><span class="cm"># o3 / o4-mini reasoning (OpenAI)</span>
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+client=<span class="cl">OpenAI</span>()
+r=client.chat.completions.<span class="fn">create</span>(
+    model=<span class="st">"o4-mini"</span>,
+    messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:<span class="st">"Prove that sqrt(2) is irrational"</span>}],
+    <span class="cm"># o-series models think internally before responding</span>
+    <span class="cm"># Budget tokens control thinking duration</span>
+)
+<span class="fn">print</span>(r.choices[<span class="nm">0</span>].message.content)
+
+<span class="cm"># DeepSeek-R1 — visible chain-of-thought</span>
+<span class="kw">import</span> ollama
+r=ollama.<span class="fn">chat</span>(model=<span class="st">'deepseek-r1:7b'</span>,
+    messages=[{<span class="st">'role'</span>:<span class="st">'user'</span>,<span class="st">'content'</span>:<span class="st">'Solve: 5 × 17 + 3² - 8 ÷ 2'</span>}])
+<span class="cm"># Response includes &lt;think&gt; block with visible reasoning</span>
+<span class="fn">print</span>(r[<span class="st">'message'</span>][<span class="st">'content'</span>])
+
+<span class="cm"># Self-consistency sampling (poor man's test-time compute)</span>
+<span class="fn">def</span> <span class="at">self_consistent_answer</span>(question,n=<span class="nm">5</span>,model=<span class="st">"gpt-4o"</span>):
+    <span class="kw">from</span> collections <span class="kw">import</span> Counter
+    client=<span class="cl">OpenAI</span>()
+    answers=[]
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n):
+        r=client.chat.completions.<span class="fn">create</span>(model=model,temperature=<span class="nm">0.7</span>,
+            messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:f<span class="st">"Solve step by step: {question}"</span>}])
+        answers.<span class="fn">append</span>(<span class="fn">extract_answer</span>(r.choices[<span class="nm">0</span>].message.content))
+    <span class="kw">return</span> <span class="cl">Counter</span>(answers).<span class="fn">most_common</span>(<span class="nm">1</span>)[<span class="nm">0</span>][<span class="nm">0</span>]
+<div class="clang">PYTHON</div></code></pre>`,
+examples:`<p class="prose"><strong>What's coming next:</strong> <em>Multimodal reasoning</em> — o1-style thinking over images/video/code simultaneously. <em>AI Scientists</em> — LLM agents that autonomously run experiments, write papers. <em>World models</em> — LLMs with physical simulation built in. <em>Personal AI</em> — models that learn your preferences over months via memory systems. <em>Efficient small reasoning models</em> — 7B models with o1-level capabilities via distillation.</p>`,
+usecases:`<div class="ucgrid"><div class="uccard"><div class="ucem">🧮</div><div class="uct">Math Competition</div><div class="ucd">o3: IMO bronze medalist-level performance (2025)</div></div>
+<div class="uccard"><div class="ucem">💊</div><div class="uct">Drug Discovery</div><div class="ucd">Reasoning over molecular structures + literature</div></div>
+<div class="uccard"><div class="ucem">🔬</div><div class="uct">AI Scientists</div><div class="ucd">Autonomous hypothesis → experiment → paper pipeline</div></div></div>`}}
+]}
+];
+
+// ═══════════════════ STATE + RENDER ═══════════════════
+let aCh=null,aTopic=null,aTab='what';
+
+function renderLeft(filter=''){
+  const list=document.getElementById('chList');
+  const f=filter.toLowerCase();
+  list.innerHTML='';
+  let lastSec='';
+  C.forEach(ch=>{
+    const matched=f?ch.topics.filter(t=>t.name.toLowerCase().includes(f)||t.tags.some(tg=>tg.toLowerCase().includes(f))):ch.topics;
+    if(f&&!matched.length) return;
+    if(ch.section!==lastSec){
+      const sep=document.createElement('div');
+      sep.className='sec-sep'; sep.textContent=ch.section;
+      list.appendChild(sep); lastSec=ch.section;
+    }
+    const btn=document.createElement('button');
+    btn.className='chbtn'+(aCh===ch.id?' active':'');
+    btn.innerHTML=`<span class="chnum">${ch.num}</span><span class="chlabel">${ch.emoji} ${ch.label}</span><span class="chcount">${f?matched.length:ch.topics.length}</span>`;
+    btn.onclick=()=>selectChapter(ch);
+    list.appendChild(btn);
+  });
+}
+
+function selectChapter(ch){
+  aCh=ch.id; aTopic=null;
+  renderLeft();
+  document.getElementById('midCh').textContent=`Module ${ch.num}`;
+  document.getElementById('midTitle').textContent=`${ch.emoji} ${ch.label}`;
+  document.getElementById('midDesc').textContent=ch.desc;
+  const tl=document.getElementById('topicList');
+  tl.innerHTML='';
+  ch.topics.forEach((t,i)=>{
+    const btn=document.createElement('button');
+    btn.className='tbtn';
+    btn.style.animationDelay=`${i*0.04}s`;
+    btn.innerHTML=`<div class="tico">${t.icon}</div><div style="flex:1;min-width:0"><div class="tname">${t.name}</div><div class="ttags">${t.tags.map(tg=>`<span class="ttag">${tg}</span>`).join('')}</div></div>`;
+    btn.onclick=(e)=>selectTopic(ch,t,btn);
+    tl.appendChild(btn);
+  });
+  document.getElementById('rHead').style.display='none';
+  document.getElementById('rbody').innerHTML=`<div class="welcome"><div class="worb">${ch.emoji}</div><h2>${ch.label}</h2><p>${ch.desc}</p><div class="wchips">${ch.topics.map(t=>`<span class="wchip">${t.icon} ${t.name}</span>`).join('')}</div></div>`;
+}
+
+function selectTopic(ch,topic,btnEl){
+  aTopic=topic.id; aTab='what';
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
+  btnEl.classList.add('active');
+  const rh=document.getElementById('rHead');
+  rh.style.display='block';
+  document.getElementById('rCrumb').innerHTML=`<span>${ch.emoji} ${ch.label}</span><span style="color:var(--text3)"> › </span><span>${topic.name}</span>`;
+  document.getElementById('rTitle').innerHTML=`${topic.icon} ${topic.name}`;
+  const tabs=[{id:'what',label:'📖 What'},{id:'why',label:'💡 Why'},{id:'when',label:'⏰ When'},{id:'how',label:'⚙️ How'},{id:'examples',label:'💻 Examples'},{id:'usecases',label:'🌍 Use Cases'}];
+  document.getElementById('tabBar').innerHTML=tabs.map(t=>`<button class="tab ${t.id===aTab?'active':''}" onclick="switchTab('${t.id}',this)">${t.label}</button>`).join('');
+  renderTab(topic,aTab);
+}
+
+function switchTab(tabId,el){
+  aTab=tabId;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const ch=C.find(c=>c.id===aCh);
+  if(!ch) return;
+  const topic=ch.topics.find(t=>t.id===aTopic);
+  if(!topic) return;
+  renderTab(topic,tabId);
+}
+
+function renderTab(topic,tabId){
+  const body=document.getElementById('rbody');
+  const content=topic.content[tabId]||`<p class="prose" style="color:var(--text3);margin-top:20px">Content for this section coming soon.</p>`;
+  body.innerHTML=`<div class="tpanel active">${content}</div>`;
+  body.scrollTop=0;
+}
+
+function filterTopics(val){
+  const f=val.toLowerCase().trim();
+  if(!f){renderLeft();return;}
+  const list=document.getElementById('chList');
+  list.innerHTML='';
+  C.forEach(ch=>{
+    const matched=ch.topics.filter(t=>t.name.toLowerCase().includes(f)||t.tags.some(tg=>tg.toLowerCase().includes(f)));
+    if(!matched.length) return;
+    const grp=document.createElement('div');
+    const lbl=document.createElement('div');
+    lbl.style.cssText='padding:7px 12px 3px;font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:1.5px';
+    lbl.textContent=`${ch.emoji} ${ch.label}`;
+    grp.appendChild(lbl);
+    matched.forEach(t=>{
+      const btn=document.createElement('button');
+      btn.className='chbtn'; btn.style.paddingLeft='24px';
+      btn.innerHTML=`<span style="font-size:13px">${t.icon}</span><span class="chlabel" style="font-size:11.5px">${t.name}</span>`;
+      btn.onclick=()=>{
+        selectChapter(ch);
+        setTimeout(()=>{
+          const btns=document.querySelectorAll('.tbtn');
+          const idx=ch.topics.findIndex(tt=>tt.id===t.id);
+          if(btns[idx]) btns[idx].click();
+        },100);
+      };
+      grp.appendChild(btn);
+    });
+    list.appendChild(grp);
+  });
+}
+
+renderLeft();
+</script>
+</body>
+</html>

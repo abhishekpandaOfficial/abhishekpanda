@@ -33,6 +33,9 @@ export const getAdminDesktopDeepLink = () => ADMIN_DEEP_LINK;
 
 export const getAdminDesktopDownloadUrl = () => {
   const value = import.meta.env.VITE_ADMIN_DESKTOP_DOWNLOAD_URL as string | undefined;
+  if (isBrowserLocalhostDevelopment()) {
+    return "/downloads/Abhishek-Admin.dmg";
+  }
   return value?.trim() || DEFAULT_DESKTOP_DOWNLOAD_URL;
 };
 
