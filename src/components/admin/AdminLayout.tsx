@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { ActiveSessionIndicator } from "./ActiveSessionIndicator";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,6 +25,13 @@ import { useActiveSession } from "@/hooks/useActiveSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { adminSidebarGroups } from "./adminNavigation";
+import { AdminDesktopHandoff } from "./AdminDesktopHandoff";
+import {
+  clearBrowserAdminWorkspace,
+  enableBrowserAdminWorkspace,
+  hasBrowserAdminWorkspaceEnabled,
+  isDesktopAdminRuntime,
+} from "@/lib/adminRuntime";
 
 const getBadgeClassName = (badge: string) => {
   const key = badge.toLowerCase();
@@ -62,10 +69,12 @@ const ADMIN_ACCESS_CACHE_KEY = "admin_access_verified_until";
 const ADMIN_ACCESS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 export const AdminLayout = () => {
+  const desktopRuntime = useMemo(() => isDesktopAdminRuntime(), []);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [browserWorkspaceEnabled, setBrowserWorkspaceEnabled] = useState(() => desktopRuntime || hasBrowserAdminWorkspaceEnabled());
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -218,6 +227,7 @@ export const AdminLayout = () => {
   }, [navigate, registerSession]);
 
   const handleSignOut = async () => {
+    clearBrowserAdminWorkspace();
     sessionStorage.removeItem('admin_2fa_verified');
     sessionStorage.removeItem('admin_2fa_timestamp');
     sessionStorage.removeItem(COMMAND_CENTER_SESSION_KEY);
@@ -231,6 +241,22 @@ export const AdminLayout = () => {
     if (path === "/admin") return location.pathname === path;
     return location.pathname.startsWith(path);
   };
+
+  useEffect(() => {
+    if (desktopRuntime) {
+      setBrowserWorkspaceEnabled(true);
+      return;
+    }
+
+    const params = new URLSearchParams(location.search);
+    if (params.get("mode") === "web") {
+      enableBrowserAdminWorkspace();
+      setBrowserWorkspaceEnabled(true);
+      return;
+    }
+
+    setBrowserWorkspaceEnabled(hasBrowserAdminWorkspaceEnabled());
+  }, [desktopRuntime, location.search]);
 
   useEffect(() => {
     const desktopScroll = Number(sessionStorage.getItem(SIDEBAR_SCROLL_KEY_DESKTOP) || "0");
@@ -292,6 +318,17 @@ export const AdminLayout = () => {
   // Not authenticated
   if (!isAuthenticated) {
     return null;
+  }
+
+  if (!desktopRuntime && !browserWorkspaceEnabled) {
+    return (
+      <AdminDesktopHandoff
+        onContinueInBrowser={() => {
+          enableBrowserAdminWorkspace();
+          setBrowserWorkspaceEnabled(true);
+        }}
+      />
+    );
   }
 
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
@@ -445,13 +482,20 @@ export const AdminLayout = () => {
       <div
         className={cn(
           "admin-shell relative flex h-screen w-full overflow-hidden bg-background text-foreground",
+          desktopRuntime &&
+            "bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.16),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(52,211,153,0.16),transparent_22%),linear-gradient(180deg,rgba(248,250,252,0.98),rgba(241,245,249,0.98))] dark:bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.16),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(52,211,153,0.16),transparent_20%),linear-gradient(180deg,rgba(2,6,23,0.98),rgba(15,23,42,0.98))]",
           collapsed ? "lg:pl-[76px]" : "lg:pl-[248px]"
         )}
       >
+        {desktopRuntime ? (
+          <div className="pointer-events-none absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(148,163,184,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.12)_1px,transparent_1px)] [background-size:32px_32px]" />
+        ) : null}
+
         {/* Desktop Sidebar - ensure it's always clickable */}
         <aside
           className={cn(
             "pointer-events-auto fixed left-0 top-0 z-40 hidden h-screen shrink-0 flex-col border-r border-border/40 bg-card/75 backdrop-blur-xl transition-[width] duration-300 ease-in-out lg:flex",
+            desktopRuntime && "bg-card/70 shadow-[0_24px_70px_-40px_rgba(15,23,42,0.45)]",
             collapsed ? "w-[76px]" : "w-[248px]"
           )}
         >
@@ -514,8 +558,20 @@ export const AdminLayout = () => {
         {/* Main Content */}
         <main className="flex-1 min-w-0 flex h-screen flex-col relative z-10">
           {/* Top Bar */}
-          <header className="z-20 hidden h-14 items-center justify-between border-b border-border/40 bg-card/45 px-4 backdrop-blur-xl lg:flex">
+          <header
+            className={cn(
+              "z-20 hidden h-14 items-center justify-between border-b border-border/40 bg-card/45 px-4 backdrop-blur-xl lg:flex",
+              desktopRuntime && "bg-card/55 supports-[backdrop-filter]:bg-card/45"
+            )}
+          >
             <div className="flex items-center gap-4">
+              {desktopRuntime ? (
+                <div className="flex items-center gap-2 pr-1">
+                  <span className="h-3 w-3 rounded-full bg-[#ff5f57] shadow-[0_0_0_1px_rgba(0,0,0,0.18)]" />
+                  <span className="h-3 w-3 rounded-full bg-[#febc2e] shadow-[0_0_0_1px_rgba(0,0,0,0.18)]" />
+                  <span className="h-3 w-3 rounded-full bg-[#28c840] shadow-[0_0_0_1px_rgba(0,0,0,0.18)]" />
+                </div>
+              ) : null}
               <Button
                 variant="outline"
                 className="h-9 w-[320px] justify-start rounded-xl border-border/40 bg-muted/30 pl-3 text-muted-foreground hover:border-primary/40 hover:bg-muted/50"
@@ -532,6 +588,23 @@ export const AdminLayout = () => {
               </Button>
             </div>
             <div className="flex items-center gap-1.5">
+              {desktopRuntime ? (
+                <div className="mr-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
+                  Desktop Session
+                </div>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    clearBrowserAdminWorkspace();
+                    setBrowserWorkspaceEnabled(false);
+                  }}
+                  className="mr-2 rounded-full px-3 text-xs text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                >
+                  Desktop Mode
+                </Button>
+              )}
               <ActiveSessionIndicator
                 activeSessions={activeSessions}
                 onKillSession={killSession}

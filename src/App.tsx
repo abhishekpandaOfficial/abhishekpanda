@@ -4,12 +4,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Routes, Route, useParams } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route, useLocation, useParams } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { RouteScrollRestoration } from "@/components/layout/RouteScrollRestoration";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Index from "./pages/Index";
 import { RouteSeo } from "@/components/seo/RouteSeo";
+import { isDesktopAdminRuntime } from "@/lib/adminRuntime";
 const BrandIntro = lazy(() => import("@/components/BrandIntro").then((m) => ({ default: m.BrandIntro })));
 const AdminWebVault = lazy(() => import("@/components/admin/AdminWebVault"));
 
@@ -49,6 +50,7 @@ const Interview = lazy(() => import("./pages/Interview"));
 const Projects = lazy(() => import("./pages/Projects"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const InstallPWA = lazy(() => import("./pages/InstallPWA"));
+const DesktopApp = lazy(() => import("./pages/DesktopApp"));
 const PasskeyRegistration = lazy(() => import("./pages/PasskeyRegistration"));
 const Login = lazy(() => import("./pages/Login"));
 const Account = lazy(() => import("./pages/Account"));
@@ -147,6 +149,21 @@ const LegacyAiMlSeriesRedirect = () => {
   return <Navigate to={seriesSlug ? `/ai-ml-hub/${seriesSlug}` : "/ai-ml-hub"} replace />;
 };
 
+const DesktopAdminRouteGuard = () => {
+  const location = useLocation();
+  if (!isDesktopAdminRuntime()) return null;
+
+  const { pathname } = location;
+  const isAdminRoute =
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/") ||
+    pathname === "/openowl/admin" ||
+    pathname.startsWith("/openowl/admin/");
+
+  if (isAdminRoute) return null;
+  return <Navigate to="/admin" replace />;
+};
+
 const App = () => {
   const [showIntro, setShowIntro] = useState(false);
 
@@ -180,6 +197,7 @@ const App = () => {
           <Sonner />
           <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
             <AnalyticsWrapper>
+              <DesktopAdminRouteGuard />
               <RouteScrollRestoration />
               <RouteSeo />
               <AnimatePresence>
@@ -340,6 +358,7 @@ const App = () => {
 
                 {/* Admin Install & Login */}
                 <Route path="/install" element={<InstallPWA />} />
+                <Route path="/desktop-app" element={<DesktopApp />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/register-passkey" element={<PasskeyRegistration />} />
 
