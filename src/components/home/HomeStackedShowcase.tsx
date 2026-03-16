@@ -52,46 +52,64 @@ function ProjectShowcaseCard({
   const isStackCraft = title === "StackCraft";
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const isLive = statusLabel?.toLowerCase() === "live";
+  const accentClass = isStackCraft
+    ? "from-sky-500 via-cyan-400 to-blue-500"
+    : isLive
+      ? "from-emerald-500 via-teal-400 to-cyan-500"
+      : disabled
+        ? "from-slate-400 via-slate-300 to-slate-200 dark:from-slate-600 dark:via-slate-500 dark:to-slate-400"
+        : "from-violet-500 via-fuchsia-400 to-sky-500";
   const cardBody = (
     <>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={cn(
-                "rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]",
-                isStackCraft
-                  ? "border-sky-400/30 bg-sky-500/12 text-sky-700 dark:text-sky-300"
-                  : "border-primary/20 bg-primary/10 text-primary",
-              )}
-            >
-              {eyebrow || "Project"}
-            </span>
-            {statusLabel ? (
-              <span className="rounded-full border border-border/60 bg-background/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                {statusLabel}
+      <div className="relative overflow-hidden rounded-[1.35rem] border border-border/55 bg-background/55 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.3)] dark:bg-white/[0.03]">
+        <div className={cn("absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r", accentClass)} />
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={cn(
+                  "rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]",
+                  isStackCraft
+                    ? "border-sky-400/30 bg-sky-500/12 text-sky-700 dark:text-sky-300"
+                    : "border-primary/20 bg-primary/10 text-primary",
+                )}
+              >
+                {eyebrow || "Project"}
               </span>
-            ) : null}
+              {statusLabel ? (
+                <span
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]",
+                    isLive
+                      ? "border-emerald-300/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                      : "border-border/60 bg-background/80 text-muted-foreground",
+                  )}
+                >
+                  {statusLabel}
+                </span>
+              ) : null}
+            </div>
+            <h3 className="mt-4 text-2xl font-black tracking-tight text-foreground">{title}</h3>
+            <p className="mt-3 max-w-[26rem] text-sm leading-7 text-muted-foreground">{description}</p>
           </div>
-          <h3 className="mt-4 text-2xl font-black tracking-tight text-foreground">{title}</h3>
-        </div>
-        <div
-          className={cn(
-            "flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border p-2 text-primary",
-            isStackCraft
-              ? "border-sky-400/30 bg-gradient-to-br from-sky-500/18 via-cyan-400/10 to-white/90 shadow-[0_18px_34px_rgba(59,109,240,0.14)] dark:from-sky-500/20 dark:via-blue-500/12 dark:to-cyan-400/18 dark:shadow-[0_18px_34px_rgba(59,109,240,0.20)]"
-              : "border-border/60 bg-background/95",
-          )}
-        >
-          {logoSrc ? (
-            <img src={logoSrc} alt={logoAlt || `${title} logo`} className="h-8 w-8 object-contain" loading="lazy" />
-          ) : (
-            <Icon className="h-5 w-5" />
-          )}
+          <div
+            className={cn(
+              "relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[1.15rem] border p-2.5 text-primary shadow-[0_18px_34px_rgba(15,23,42,0.08)]",
+              isStackCraft
+                ? "border-sky-400/30 bg-gradient-to-br from-sky-500/18 via-cyan-400/10 to-white/90 dark:from-sky-500/20 dark:via-blue-500/12 dark:to-cyan-400/18"
+                : "border-border/60 bg-background/95",
+            )}
+          >
+            <div className={cn("absolute inset-x-2 top-0 h-px bg-gradient-to-r opacity-80", accentClass)} />
+            {logoSrc ? (
+              <img src={logoSrc} alt={logoAlt || `${title} logo`} className="relative h-8 w-8 object-contain" loading="lazy" />
+            ) : (
+              <Icon className="relative h-5 w-5" />
+            )}
+          </div>
         </div>
       </div>
-
-      <p className="mt-4 text-sm leading-7 text-muted-foreground">{description}</p>
 
       <div className="mt-5 flex flex-wrap gap-2">
         {tags.map((tag, tagIndex) => (
@@ -104,9 +122,14 @@ function ProjectShowcaseCard({
         ))}
       </div>
 
-      <div className={`mt-6 inline-flex items-center gap-2 text-sm font-semibold ${disabled ? "text-muted-foreground" : "text-primary"}`}>
-        {ctaLabel || (disabled ? "Coming soon" : "Open")}
-        {!disabled ? <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" /> : null}
+      <div className="mt-6 flex items-center justify-between gap-3 rounded-[1.1rem] border border-border/50 bg-background/55 px-4 py-3 dark:bg-white/[0.03]">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          {disabled ? "Product roadmap" : "Explore route"}
+        </div>
+        <div className={`inline-flex items-center gap-2 text-sm font-semibold ${disabled ? "text-muted-foreground" : "text-primary"}`}>
+          {ctaLabel || (disabled ? "Coming soon" : "Open")}
+          {!disabled ? <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" /> : null}
+        </div>
       </div>
     </>
   );
@@ -116,12 +139,12 @@ function ProjectShowcaseCard({
       <Link
         to={to}
         className={cn(
-          "group rounded-[1.75rem] border p-6 transition",
+          "group block rounded-[1.75rem] border p-5 transition duration-300 md:p-6",
           isStackCraft
             ? isDark
-              ? "border-sky-400/20 bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.18),transparent_32%),linear-gradient(160deg,rgba(8,17,31,0.98),rgba(12,26,46,0.94))] hover:border-sky-300/40 hover:bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.22),transparent_34%),linear-gradient(160deg,rgba(8,17,31,1),rgba(12,26,46,0.98))] hover:shadow-[0_28px_70px_rgba(59,109,240,0.16)]"
-              : "border-sky-300/45 bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.18),transparent_32%),linear-gradient(160deg,rgba(255,255,255,0.98),rgba(240,249,255,0.98))] hover:border-sky-400/55 hover:bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.22),transparent_34%),linear-gradient(160deg,rgba(255,255,255,1),rgba(232,245,255,1))] hover:shadow-[0_28px_70px_rgba(56,189,248,0.14)]"
-            : "border-border/60 bg-background/85 hover:border-primary/30 hover:bg-background",
+              ? "border-sky-400/20 bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.18),transparent_32%),linear-gradient(160deg,rgba(8,17,31,0.98),rgba(12,26,46,0.94))] hover:-translate-y-1 hover:border-sky-300/40 hover:bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.22),transparent_34%),linear-gradient(160deg,rgba(8,17,31,1),rgba(12,26,46,0.98))] hover:shadow-[0_28px_70px_rgba(59,109,240,0.16)]"
+              : "border-sky-300/45 bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.18),transparent_32%),linear-gradient(160deg,rgba(255,255,255,0.98),rgba(240,249,255,0.98))] hover:-translate-y-1 hover:border-sky-400/55 hover:bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.22),transparent_34%),linear-gradient(160deg,rgba(255,255,255,1),rgba(232,245,255,1))] hover:shadow-[0_28px_70px_rgba(56,189,248,0.14)]"
+            : "border-border/60 bg-[linear-gradient(160deg,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] hover:-translate-y-1 hover:border-primary/30 hover:bg-background hover:shadow-[0_28px_70px_rgba(15,23,42,0.10)] dark:bg-[linear-gradient(160deg,rgba(15,23,42,0.88),rgba(15,23,42,0.72))]",
         )}
       >
         {cardBody}
@@ -129,7 +152,7 @@ function ProjectShowcaseCard({
     );
   }
 
-  return <div className="rounded-[1.75rem] border border-dashed border-border/60 bg-background/70 p-6">{cardBody}</div>;
+  return <div className="rounded-[1.75rem] border border-dashed border-border/60 bg-background/70 p-5 md:p-6">{cardBody}</div>;
 }
 
 function ShowcasePanel({ index, kicker, title, description, actionHref, actionLabel, icon: Icon, children, hideHeader = false }: PanelProps) {
@@ -552,11 +575,15 @@ export function HomeStackedShowcase() {
               actionLabel="Open projects"
               icon={FolderOpen}
             >
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                {PROJECT_CARDS.map((card) => (
+              <GsapInfiniteCardSlider
+                items={PROJECT_CARDS}
+                speed={40}
+                autoPlay={false}
+                itemClassName="w-[300px] shrink-0 md:w-[360px] xl:w-[380px]"
+                renderItem={(card) => (
                   <ProjectShowcaseCard key={`${card.title}-${card.to || "local"}`} {...card} />
-                ))}
-              </div>
+                )}
+              />
             </ShowcasePanel>
           </div>
         </div>
