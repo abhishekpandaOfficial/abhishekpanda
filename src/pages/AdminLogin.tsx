@@ -18,7 +18,7 @@ import { useWebAuthn } from "@/hooks/useWebAuthn";
 import { useSecurityAlert } from "@/hooks/useSecurityAlert";
 import { useGeoBlocking } from "@/hooks/useGeoBlocking";
 import { useActiveSession } from "@/hooks/useActiveSession";
-import { isAdminLocalBypassEnabled, isDesktopAdminRuntime } from "@/lib/adminRuntime";
+import { isDesktopAdminRuntime } from "@/lib/adminRuntime";
 
 const emailSchema = z.string().email("Invalid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -113,13 +113,11 @@ const AdminLogin = () => {
   const [isGeoBlocked, setIsGeoBlocked] = useState(false);
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [pendingLoginAction, setPendingLoginAction] = useState<(() => void) | null>(null);
-  const [allowLocalBypass, setAllowLocalBypass] = useState(false);
 
   // Check platform and PWA status on mount
   useEffect(() => {
     setIsMobile(isMobileDevice());
     setIsRunningAsPWA(isPWA());
-    setAllowLocalBypass(isAdminLocalBypassEnabled());
     
     // Show PWA prompt if on mobile but not running as PWA
     if (!desktopRuntime && isMobileDevice() && !isPWA()) {
@@ -456,15 +454,6 @@ const AdminLogin = () => {
     navigate('/admin');
   };
 
-  const handleLocalBypass = async () => {
-    if (!allowLocalBypass) return;
-    sessionStorage.setItem('admin_2fa_verified', 'true');
-    sessionStorage.setItem('admin_2fa_timestamp', Date.now().toString());
-    sessionStorage.setItem('biometric_verified', Date.now().toString());
-    toast.success("Localhost bypass active. Passkey skipped.");
-    setPhase("success");
-  };
-
   const handleSessionContinue = () => {
     setShowSessionModal(false);
     if (pendingLoginAction) {
@@ -786,16 +775,6 @@ const AdminLogin = () => {
                     >
                       Reset Passkey State
                     </Button>
-                    {allowLocalBypass ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleLocalBypass}
-                        className="w-full border-amber-500/40 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20"
-                      >
-                        Bypass Passkey (Localhost Only)
-                      </Button>
-                    ) : null}
                   </div>
 
                 </motion.div>
@@ -932,16 +911,6 @@ const AdminLogin = () => {
                       Use Passkey
                     </Button>
                   )}
-                  {fingerprintStatus === 'idle' && allowLocalBypass ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleLocalBypass}
-                      className="w-full border-amber-500/40 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20"
-                    >
-                      Bypass Passkey (Localhost Only)
-                    </Button>
-                  ) : null}
 
                   {fingerprintStatus === 'error' && (
                     <Button
