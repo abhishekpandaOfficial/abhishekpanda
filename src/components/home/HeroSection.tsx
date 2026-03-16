@@ -443,17 +443,17 @@ export const HeroSection = () => {
               <AnimatePresence>
                 {isHovered && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                    initial={{ opacity: 0, y: -8, scale: 0.94 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                    className="absolute -top-16 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap"
+                    exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                    className="absolute left-1/2 top-[calc(100%+1rem)] z-[70] w-[min(88vw,26rem)] -translate-x-1/2"
                   >
-                    <div className="bg-gradient-to-r from-primary via-secondary to-purple px-4 py-2 rounded-full shadow-glow">
-                      <p className="text-sm font-medium text-primary-foreground">
+                    <div className="rounded-[1.4rem] border border-white/20 bg-[linear-gradient(135deg,rgba(14,165,233,0.96),rgba(99,102,241,0.94),rgba(168,85,247,0.94))] px-4 py-3 text-center shadow-[0_24px_80px_-24px_rgba(59,130,246,0.65)] backdrop-blur-xl">
+                      <p className="text-sm font-semibold leading-6 text-white md:text-[15px]">
                         {taglines[taglineIndex]}
                       </p>
                     </div>
-                    <div className="w-3 h-3 bg-secondary rotate-45 absolute -bottom-1.5 left-1/2 -translate-x-1/2" />
+                    <div className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 rounded-[2px] bg-sky-500 shadow-[0_10px_24px_rgba(59,130,246,0.35)]" />
                   </motion.div>
                 )}
               </AnimatePresence>

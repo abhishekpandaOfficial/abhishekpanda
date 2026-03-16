@@ -109,6 +109,7 @@ export const Navigation = () => {
   const landingShadow = `0 ${14 + scrollProgress * 18}px ${34 + scrollProgress * 26}px -${24 - scrollProgress * 8}px rgba(15,23,42,${0.08 + scrollProgress * 0.18})`;
   const landingBorderOpacity = 0.08 + scrollProgress * 0.16;
   const landingBackgroundOpacity = 0.38 + scrollProgress * 0.42;
+  const navShellClass = "mx-auto w-full max-w-[1600px] px-4 md:px-6 xl:px-8";
 
   return (
     <>
@@ -133,7 +134,7 @@ export const Navigation = () => {
         }
       >
         <div
-          className={cn("mx-auto w-full px-4 md:px-6 xl:px-8", isHomePage ? "max-w-none" : "container")}
+          className={navShellClass}
           style={
             isHomePage
               ? {
@@ -144,7 +145,7 @@ export const Navigation = () => {
           }
         >
           <div
-            className="grid grid-cols-[auto_1fr_auto] items-center gap-4"
+            className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 lg:gap-4"
             style={
               isHomePage
                 ? {
@@ -170,7 +171,7 @@ export const Navigation = () => {
             </PrefetchLink>
 
             {/* Desktop Navigation */}
-            <nav className="hidden xl:flex items-center justify-center gap-0 flex-nowrap 2xl:gap-0.5">
+            <nav className="hidden min-[1180px]:flex min-w-0 items-center justify-center gap-0 overflow-hidden flex-nowrap 2xl:gap-0.5">
               {/* About */}
               {navLinks.slice(0, 1).map((link) => (
                 <PrefetchLink
@@ -262,8 +263,8 @@ export const Navigation = () => {
               </PrefetchLink>
 
               {/* LLM Galaxy Dropdown */}
-              <div className="hidden min-[1560px]:block">
-              <NavigationMenu>
+              <div className="hidden min-[1420px]:block">
+              <NavigationMenu className="min-w-0">
                 <NavigationMenuList>
                   <NavigationMenuItem>
                     <NavigationMenuTrigger
@@ -282,13 +283,13 @@ export const Navigation = () => {
                       </span>
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <div className="w-[320px] p-4 bg-card/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-xl">
+                      <div className="w-[min(92vw,360px)] rounded-2xl border border-border/60 bg-card/95 p-4 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.35)] backdrop-blur-xl">
                         <div className="space-y-1">
                           {galaxySubLinks.map((subLink) => (
                             <PrefetchLink
                               key={subLink.path}
                               to={subLink.path}
-                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+                              className="flex items-center gap-3 rounded-xl p-3 transition-colors hover:bg-muted"
                             >
                               <subLink.icon className="w-5 h-5 text-primary" />
                               <div className="font-medium text-foreground text-sm">{subLink.name}</div>
@@ -306,7 +307,7 @@ export const Navigation = () => {
                 to="/scriptures"
                 className={cn(
                   desktopNavItemClass,
-                  "hidden min-[1620px]:flex",
+                  "hidden min-[1320px]:flex",
                   isScripturesActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground"
@@ -326,7 +327,7 @@ export const Navigation = () => {
                   to={link.path}
                   className={cn(
                     desktopNavItemClass,
-                    "hidden min-[1680px]:flex",
+                    "hidden min-[1500px]:flex",
                     location.pathname === link.path
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground"
@@ -349,7 +350,7 @@ export const Navigation = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 min-[1680px]:hidden"
+                className="h-10 w-10 min-[1500px]:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 {isMobileMenuOpen ? <X /> : <Menu />}
@@ -366,10 +367,10 @@ export const Navigation = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 min-[1680px]:hidden pt-20"
+            className="fixed inset-0 z-40 min-[1500px]:hidden pt-20"
           >
             <div className="absolute inset-0 bg-background/95 backdrop-blur-xl" />
-            <nav className="relative container mx-auto px-4 py-8 flex flex-col gap-2 max-h-[calc(100vh-5rem)] overflow-y-auto">
+            <nav className={cn(navShellClass, "relative flex max-h-[calc(100vh-5rem)] flex-col gap-2 overflow-y-auto py-8")}>
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
