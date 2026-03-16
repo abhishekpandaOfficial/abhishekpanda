@@ -166,6 +166,17 @@ const ARTICLE_METADATA_OVERRIDES: Record<
     featuredRank: null,
     tags: [".NET", "C#", "Collections", "Delegates", "Reflection", "Events"],
   },
+  "microservices-patterns-dotnet": {
+    title: "Microservice Architecture PDF",
+    eyebrow: "Embedded Blueprint",
+    description: "The original Microservice Architecture PDF rendered directly on the website with a clean embedded viewer and full-screen access.",
+    heroLabel: "Format",
+    heroValue: "PDF",
+    publishedAt: "March 16, 2026",
+    featured: true,
+    featuredRank: 6,
+    tags: [".NET", "Microservices", "PDF", "Architecture", "Distributed Systems"],
+  },
 };
 
 const FALLBACK_DATE = new Date("2026-03-06T00:00:00").toLocaleDateString("en-US", {

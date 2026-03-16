@@ -18,7 +18,7 @@ import { useWebAuthn } from "@/hooks/useWebAuthn";
 import { useSecurityAlert } from "@/hooks/useSecurityAlert";
 import { useGeoBlocking } from "@/hooks/useGeoBlocking";
 import { useActiveSession } from "@/hooks/useActiveSession";
-import { isBrowserLocalhostDevelopment, isDesktopAdminRuntime } from "@/lib/adminRuntime";
+import { isAdminLocalBypassEnabled, isDesktopAdminRuntime } from "@/lib/adminRuntime";
 
 const emailSchema = z.string().email("Invalid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -119,7 +119,7 @@ const AdminLogin = () => {
   useEffect(() => {
     setIsMobile(isMobileDevice());
     setIsRunningAsPWA(isPWA());
-    setAllowLocalBypass(isBrowserLocalhostDevelopment());
+    setAllowLocalBypass(isAdminLocalBypassEnabled());
     
     // Show PWA prompt if on mobile but not running as PWA
     if (!desktopRuntime && isMobileDevice() && !isPWA()) {

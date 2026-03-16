@@ -22,6 +22,11 @@ export const isBrowserLocalhostDevelopment = () => {
   return isLocalHost && import.meta.env.DEV;
 };
 
+export const isAdminLocalBypassEnabled = () => {
+  const value = import.meta.env.VITE_ENABLE_ADMIN_LOCAL_BYPASS as string | undefined;
+  return value === "true" && isBrowserLocalhostDevelopment();
+};
+
 export const isMacDesktopClient = () => {
   if (typeof navigator === "undefined") return false;
   const platform = navigator.platform || "";

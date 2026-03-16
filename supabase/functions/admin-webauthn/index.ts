@@ -40,8 +40,53 @@ const uint8ToBase64url = (bytes: Uint8Array) => {
 };
 
 const stringToUint8 = (v: string) => new TextEncoder().encode(v);
-const ENFORCED_RP_ID = "www.abhishekpanda.com";
-const ENFORCED_ORIGIN = "https://www.abhishekpanda.com";
+
+const ALLOWED_HOSTS = new Set([
+  "www.abhishekpanda.com",
+  "abhishekpanda.com",
+  "localhost",
+  "127.0.0.1",
+  "::1",
+  "tauri.localhost",
+]);
+
+const normalizeLocalOrigin = (origin: string) => {
+  try {
+    const url = new URL(origin);
+    if (url.hostname === "::1") {
+      return `${url.protocol}//[::1]${url.port ? `:${url.port}` : ""}`;
+    }
+    return url.origin;
+  } catch {
+    return origin;
+  }
+};
+
+const resolveRuntimeContext = (req: Request, runtimeOrigin?: string | null, runtimeHost?: string | null) => {
+  const headerOrigin = req.headers.get("origin")?.trim() || "";
+  const candidateOrigin = runtimeOrigin?.trim() || headerOrigin;
+  if (!candidateOrigin) {
+    return { error: "Missing origin." } as const;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(candidateOrigin);
+  } catch {
+    return { error: "Invalid origin." } as const;
+  }
+
+  const candidateHost = (runtimeHost?.trim() || parsed.hostname || "").replace(/^\[|\]$/g, "");
+  if (!candidateHost || !ALLOWED_HOSTS.has(candidateHost)) {
+    return { error: "Origin not allowed." } as const;
+  }
+
+  const normalizedOrigin = normalizeLocalOrigin(parsed.origin);
+  return {
+    origin: normalizedOrigin,
+    rpID: candidateHost,
+  } as const;
+};
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -71,16 +116,14 @@ const handler = async (req: Request): Promise<Response> => {
       .maybeSingle();
     if (!roleRow) return json(403, { error: "Admin role required." });
 
-    const origin = req.headers.get("origin") || "";
-    if (!origin) return json(400, { error: "Missing Origin header." });
-    if (origin !== ENFORCED_ORIGIN) {
-      return json(403, { error: "Origin not allowed." });
-    }
-    const rpID = ENFORCED_RP_ID;
-    const expectedOrigin = ENFORCED_ORIGIN;
-
-    const { action, step, response, passkeyOnly } = await req.json().catch(() => ({}));
+    const { action, step, response, passkeyOnly, runtimeOrigin, runtimeHost } = await req.json().catch(() => ({}));
     if (!action) return json(400, { error: "Missing action." });
+
+    const runtime = resolveRuntimeContext(req, runtimeOrigin, runtimeHost);
+    if ("error" in runtime) return json(403, { error: runtime.error });
+
+    const rpID = runtime.rpID;
+    const expectedOrigin = runtime.origin;
 
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 5 * 60 * 1000); // 5 min

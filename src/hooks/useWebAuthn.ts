@@ -2,6 +2,30 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+const getRuntimeWebAuthnContext = () => {
+  if (typeof window === "undefined") {
+    return { origin: null, host: null };
+  }
+
+  return {
+    origin: window.location.origin || null,
+    host: window.location.hostname || null,
+  };
+};
+
+const extractErrorMessage = (err: any, fallback: string) => {
+  const bodyMessage =
+    err?.context &&
+    typeof err.context === "object" &&
+    "error" in err.context &&
+    typeof err.context.error === "string"
+      ? err.context.error
+      : null;
+
+  if (bodyMessage) return bodyMessage;
+  return err?.message || fallback;
+};
+
 const base64urlToBuffer = (base64url: string): ArrayBuffer => {
   const pad = "=".repeat((4 - (base64url.length % 4)) % 4);
   const base64 = (base64url + pad).replace(/-/g, "+").replace(/_/g, "/");
@@ -222,8 +246,13 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
     setError(null);
 
     try {
+      const runtime = getRuntimeWebAuthnContext();
       const { data, error: optErr } = await supabase.functions.invoke("admin-webauthn", {
-        body: { action: "registration_options" },
+        body: {
+          action: "registration_options",
+          runtimeOrigin: runtime.origin,
+          runtimeHost: runtime.host,
+        },
       });
       recordEdge("registration_options", data, optErr);
       if (optErr) throw optErr;
@@ -236,7 +265,13 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
       if (!cred) throw new Error("No credential returned.");
 
       const { data: verifyData, error: verifyErr } = await supabase.functions.invoke("admin-webauthn", {
-        body: { action: "registration_verify", response: credentialToJSON(cred), passkeyOnly: opts?.passkeyOnly },
+        body: {
+          action: "registration_verify",
+          response: credentialToJSON(cred),
+          passkeyOnly: opts?.passkeyOnly,
+          runtimeOrigin: runtime.origin,
+          runtimeHost: runtime.host,
+        },
       });
       recordEdge("registration_verify", verifyData, verifyErr);
       if (verifyErr) throw verifyErr;
@@ -247,7 +282,7 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
       return true;
     } catch (err: any) {
       recordWebAuthnError(err);
-      setError(err?.message || "Failed to register passkey");
+      setError(extractErrorMessage(err, "Failed to register passkey"));
       return false;
     } finally {
       setIsLoading(false);
@@ -265,8 +300,13 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
       setError(null);
 
       try {
+        const runtime = getRuntimeWebAuthnContext();
         const { data, error: optErr } = await supabase.functions.invoke("admin-webauthn", {
-          body: { action: "authentication_options" },
+          body: {
+            action: "authentication_options",
+            runtimeOrigin: runtime.origin,
+            runtimeHost: runtime.host,
+          },
         });
         recordEdge("authentication_options", data, optErr);
         if (optErr) throw optErr;
@@ -301,6 +341,8 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
             step: opts?.step ?? null,
             response: credentialToJSON(assertion),
             passkeyOnly: opts?.passkeyOnly,
+            runtimeOrigin: runtime.origin,
+            runtimeHost: runtime.host,
           },
         });
         recordEdge("authentication_verify", verifyData, verifyErr);
@@ -311,7 +353,7 @@ export const useWebAuthn = (): UseWebAuthnReturn => {
         return true;
       } catch (err: any) {
         recordWebAuthnError(err);
-        setError(err?.message || "Authentication failed");
+        setError(extractErrorMessage(err, "Authentication failed"));
         return false;
       } finally {
         setIsLoading(false);

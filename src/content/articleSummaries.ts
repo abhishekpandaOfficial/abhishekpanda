@@ -84,13 +84,13 @@ export const FEATURED_HOME_ARTICLES: ArticleSummary[] = [
   },
   {
     slug: "microservices-patterns-dotnet",
-    title: "Microservices Patterns in .NET",
+    title: "Microservice Architecture PDF",
     eyebrow: "Distributed Systems",
     description:
-      "A practical microservices guide covering resilience patterns, messaging, observability, and production architecture decisions in .NET.",
-    publishedAt: "March 10, 2026",
-    readMinutes: 26,
-    tags: [".NET", "Microservices", "Messaging", "Architecture"],
+      "The original Microservice Architecture PDF embedded directly into the website for full-fidelity viewing.",
+    publishedAt: "March 16, 2026",
+    readMinutes: 6,
+    tags: [".NET", "Microservices", "PDF", "Architecture"],
     heroImage: "/article-heroes/microservices-patterns-dotnet.svg",
   },
   {
