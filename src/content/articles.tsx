@@ -87,6 +87,7 @@ const CUSTOM_ARTICLE_HERO_IMAGES: Record<string, string> = {
   "digital-privacy-dashboard": "/article-heroes/digital-privacy-dashboard.svg",
   "dotnet-mastery-2026": "/article-heroes/dotnet-mastery-2026.svg",
   "microservices-patterns-dotnet": "/article-heroes/microservices-patterns-dotnet.svg",
+  "notebooklm-architecture": "/article-heroes/notebooklm-architecture.svg",
   "solid-principles-guide": "/article-heroes/solid-principles-guide.svg",
 };
 
@@ -98,6 +99,17 @@ const ARTICLE_METADATA_OVERRIDES: Record<
     tags?: string[];
   }
 > = {
+  "notebooklm-architecture": {
+    title: "NotebookLM Internal Architecture Deep Dive",
+    eyebrow: "Featured Analysis",
+    description: "A technical breakdown of how NotebookLM ingests sources, builds embeddings, retrieves context, constructs grounded prompts, and generates cited outputs.",
+    heroLabel: "Architecture",
+    heroValue: "6 core layers",
+    publishedAt: "March 16, 2026",
+    featured: true,
+    featuredRank: 1,
+    tags: ["NotebookLM", "AI", "RAG", "Google", "Gemini", "Architecture"],
+  },
   "system-design-10m-users-dotnet": {
     title: "How to Design a System Handling 10M Users in .NET",
     eyebrow: "Scale Blueprint",
@@ -106,7 +118,7 @@ const ARTICLE_METADATA_OVERRIDES: Record<
     heroValue: "10M users",
     publishedAt: "March 15, 2026",
     featured: true,
-    featuredRank: 2,
+    featuredRank: 3,
     tags: [".NET", "System Design", "Scalability", "Architecture", "Cloud Native"],
   },
   "csharp-multithreading-zero-to-hero": {
@@ -117,7 +129,7 @@ const ARTICLE_METADATA_OVERRIDES: Record<
     heroValue: "Zero to Hero",
     publishedAt: "March 14, 2026",
     featured: true,
-    featuredRank: 3,
+    featuredRank: 4,
     tags: [".NET", "C#", "Multithreading", "Concurrency", "Architecture"],
   },
   "csharp-evolution-modern-reference": {
@@ -128,7 +140,7 @@ const ARTICLE_METADATA_OVERRIDES: Record<
     heroValue: "C# 12 to 14",
     publishedAt: "March 15, 2026",
     featured: true,
-    featuredRank: 1,
+    featuredRank: 2,
     tags: [".NET", "C#", "Language Evolution", ".NET 10", "Architecture", "Modern C#"],
   },
   "collections-delegates-reflection-deep-dive": {
@@ -173,6 +185,13 @@ const COMPANY_LOGO_RULES: Array<{
   colorClass?: string;
   bgClass: string;
 }> = [
+  {
+    match: /\bnotebooklm\b/i,
+    name: "NotebookLM",
+    imageSrc: "/brand-logos/stacks/notebooklm.svg",
+    colorClass: "text-[#34D399]",
+    bgClass: "bg-[#34D399]/12 border-[#34D399]/30",
+  },
   {
     match: /\bwhatsapp\b/i,
     name: "WhatsApp",

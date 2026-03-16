@@ -12,6 +12,18 @@ export type ArticleSummary = {
 
 export const FEATURED_HOME_ARTICLES: ArticleSummary[] = [
   {
+    slug: "notebooklm-architecture",
+    title: "NotebookLM Internal Architecture Deep Dive",
+    eyebrow: "Featured Analysis",
+    description:
+      "A technical breakdown of how NotebookLM ingests sources, builds embeddings, retrieves context, constructs grounded prompts, and generates cited outputs.",
+    publishedAt: "March 16, 2026",
+    readMinutes: 18,
+    tags: ["NotebookLM", "AI", "RAG", "Google"],
+    heroImage: "/article-heroes/notebooklm-architecture.svg",
+    featured: true,
+  },
+  {
     slug: "csharp-evolution-modern-reference",
     title: "C# 12, 13, 14 and .NET 8, 9, 10 - Complete Modern Reference",
     eyebrow: "C# Evolution",
