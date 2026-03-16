@@ -43,19 +43,73 @@ export const DashboardHero = ({ searchQuery, onSearchChange }: HeroProps) => (
   <motion.section
     initial={{ opacity: 0, y: -16 }}
     animate={{ opacity: 1, y: 0 }}
-    className="relative overflow-hidden rounded-[28px] border border-border/50 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.16),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.14),transparent_28%)] bg-card/95 p-6 shadow-sm md:p-8"
+    className="relative overflow-hidden rounded-[32px] border border-border/60 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.2),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.14),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.94),rgba(248,250,252,0.9))] p-6 shadow-[0_28px_80px_-48px_rgba(15,23,42,0.45)] dark:bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.24),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.16),transparent_28%),linear-gradient(135deg,rgba(15,23,42,0.96),rgba(2,6,23,0.92))] md:p-8"
   >
-    <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent,rgba(255,255,255,0.04),transparent)]" />
-    <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-end">
-      <label className="relative block w-full max-w-xl lg:max-w-md">
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search active modules"
-          className="h-12 rounded-2xl border-border/50 bg-background/80 pl-11 shadow-sm"
-        />
-      </label>
+    <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent,rgba(255,255,255,0.06),transparent)] dark:bg-[linear-gradient(135deg,transparent,rgba(255,255,255,0.04),transparent)]" />
+    <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(360px,0.75fr)] xl:items-end">
+      <div className="min-w-0">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-[28px] bg-cyan-400/25 blur-2xl dark:bg-cyan-300/12" />
+            <img
+              src="/Abhishek.PNG"
+              alt="Abhishek Panda"
+              className="relative h-20 w-20 rounded-[24px] border border-white/50 object-cover shadow-xl ring-1 ring-slate-950/5 dark:border-white/10 dark:ring-white/10"
+            />
+          </div>
+          <div className="min-w-0">
+            <div className="inline-flex items-center rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">
+              Admin Command Center
+            </div>
+            <h1 className="mt-3 text-3xl font-black tracking-tight text-foreground md:text-4xl">
+              Abhishek Admin Panel
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
+              A polished control surface for publishing, security, analytics, and operations. Everything important stays fast to reach, easy to scan, and calm under load.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Badge className="rounded-full border-0 bg-emerald-500/12 px-3 py-1 text-emerald-700 dark:text-emerald-300">
+            Security-first
+          </Badge>
+          <Badge className="rounded-full border-0 bg-sky-500/12 px-3 py-1 text-sky-700 dark:text-sky-300">
+            Publishing ready
+          </Badge>
+          <Badge className="rounded-full border-0 bg-fuchsia-500/12 px-3 py-1 text-fuchsia-700 dark:text-fuchsia-300">
+            Research + Ops
+          </Badge>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="rounded-[28px] border border-border/60 bg-background/75 p-4 shadow-sm backdrop-blur">
+          <label className="relative block">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Search analytics, publishing, security, sessions..."
+              className="h-12 rounded-2xl border-border/50 bg-background/80 pl-11 shadow-sm"
+            />
+          </label>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-border/50 bg-card/80 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Mode</p>
+              <p className="mt-2 text-sm font-semibold text-foreground">Executive view</p>
+            </div>
+            <div className="rounded-2xl border border-border/50 bg-card/80 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Focus</p>
+              <p className="mt-2 text-sm font-semibold text-foreground">Fast triage</p>
+            </div>
+            <div className="rounded-2xl border border-border/50 bg-card/80 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Surface</p>
+              <p className="mt-2 text-sm font-semibold text-foreground">Desktop-first</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </motion.section>
 );
@@ -75,7 +129,7 @@ export const StatCard = ({ title, value, note, icon: Icon, path, tone }: StatCar
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -3 }}
-      className="flex h-full items-start gap-4 rounded-3xl border border-border/50 bg-card/90 p-5 shadow-sm transition-colors group-hover:border-primary/35"
+      className="flex h-full items-start gap-4 rounded-3xl border border-border/50 bg-card/90 p-5 shadow-[0_18px_50px_-36px_rgba(15,23,42,0.35)] transition-colors group-hover:border-primary/35"
     >
       <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm", tone)}>
         <Icon className="h-5 w-5" />
@@ -112,7 +166,7 @@ export const QuickActions = ({ actions }: { actions: QuickAction[] }) => (
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.04 }}
-            className="flex h-full flex-col rounded-3xl border border-border/50 bg-card/85 p-5 shadow-sm transition-colors group-hover:border-primary/35"
+            className="flex h-full flex-col rounded-3xl border border-border/50 bg-card/85 p-5 shadow-[0_18px_50px_-36px_rgba(15,23,42,0.35)] transition-colors group-hover:border-primary/35"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <action.icon className="h-5 w-5" />
@@ -143,7 +197,7 @@ export const ModulesGrid = ({ title, description, modules }: { title: string; de
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.04 }}
-          className="group relative overflow-hidden rounded-3xl border border-border/50 bg-card/90 p-5 shadow-sm"
+          className="group relative overflow-hidden rounded-3xl border border-border/50 bg-card/90 p-5 shadow-[0_18px_50px_-36px_rgba(15,23,42,0.35)]"
         >
           <div className={cn("absolute inset-x-0 top-0 h-1 bg-gradient-to-r", module.gradient)} />
           <div className="flex items-start justify-between gap-3">

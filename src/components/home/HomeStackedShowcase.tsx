@@ -50,6 +50,8 @@ function ProjectShowcaseCard({
   icon: Icon,
 }: (typeof PROJECT_CARDS)[number]) {
   const isStackCraft = title === "StackCraft";
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const cardBody = (
     <>
       <div className="flex items-start justify-between gap-4">
@@ -59,7 +61,7 @@ function ProjectShowcaseCard({
               className={cn(
                 "rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em]",
                 isStackCraft
-                  ? "border-sky-400/30 bg-sky-500/12 text-sky-300"
+                  ? "border-sky-400/30 bg-sky-500/12 text-sky-700 dark:text-sky-300"
                   : "border-primary/20 bg-primary/10 text-primary",
               )}
             >
@@ -77,7 +79,7 @@ function ProjectShowcaseCard({
           className={cn(
             "flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border p-2 text-primary",
             isStackCraft
-              ? "border-sky-400/30 bg-gradient-to-br from-sky-500/20 via-blue-500/12 to-cyan-400/18 shadow-[0_18px_34px_rgba(59,109,240,0.20)]"
+              ? "border-sky-400/30 bg-gradient-to-br from-sky-500/18 via-cyan-400/10 to-white/90 shadow-[0_18px_34px_rgba(59,109,240,0.14)] dark:from-sky-500/20 dark:via-blue-500/12 dark:to-cyan-400/18 dark:shadow-[0_18px_34px_rgba(59,109,240,0.20)]"
               : "border-border/60 bg-background/95",
           )}
         >
@@ -116,7 +118,9 @@ function ProjectShowcaseCard({
         className={cn(
           "group rounded-[1.75rem] border p-6 transition",
           isStackCraft
-            ? "border-sky-400/20 bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.18),transparent_32%),linear-gradient(160deg,rgba(8,17,31,0.98),rgba(12,26,46,0.94))] hover:border-sky-300/40 hover:bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.22),transparent_34%),linear-gradient(160deg,rgba(8,17,31,1),rgba(12,26,46,0.98))] hover:shadow-[0_28px_70px_rgba(59,109,240,0.16)]"
+            ? isDark
+              ? "border-sky-400/20 bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.18),transparent_32%),linear-gradient(160deg,rgba(8,17,31,0.98),rgba(12,26,46,0.94))] hover:border-sky-300/40 hover:bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.22),transparent_34%),linear-gradient(160deg,rgba(8,17,31,1),rgba(12,26,46,0.98))] hover:shadow-[0_28px_70px_rgba(59,109,240,0.16)]"
+              : "border-sky-300/45 bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.18),transparent_32%),linear-gradient(160deg,rgba(255,255,255,0.98),rgba(240,249,255,0.98))] hover:border-sky-400/55 hover:bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.22),transparent_34%),linear-gradient(160deg,rgba(255,255,255,1),rgba(232,245,255,1))] hover:shadow-[0_28px_70px_rgba(56,189,248,0.14)]"
             : "border-border/60 bg-background/85 hover:border-primary/30 hover:bg-background",
         )}
       >

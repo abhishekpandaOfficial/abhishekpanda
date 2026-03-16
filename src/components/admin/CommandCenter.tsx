@@ -9,7 +9,6 @@ import {
   Rocket,
   Settings,
   Shield,
-  Sparkles,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -177,8 +176,13 @@ export const CommandCenter = () => {
                 <X className="h-4 w-4" />
               </button>
               <div className="flex items-start gap-4">
-                <div className="admin-logo-surface flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 via-blue-500 to-indigo-600 shadow-lg shadow-blue-500/20">
-                  <Sparkles className="h-5 w-5 text-white" />
+                <div className="relative shrink-0">
+                  <div className="absolute inset-0 rounded-[22px] bg-sky-400/25 blur-xl dark:bg-sky-300/10" />
+                  <img
+                    src="/Abhishek.PNG"
+                    alt="Abhishek Panda"
+                    className="relative h-14 w-14 rounded-[18px] border border-white/40 object-cover shadow-xl ring-1 ring-slate-950/5 dark:border-white/10 dark:ring-white/10"
+                  />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Command Center</div>
@@ -279,34 +283,34 @@ export const CommandCenter = () => {
         )}
 
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.9fr)]">
-          <div className="rounded-3xl border border-border/50 bg-card/85 p-6 shadow-sm">
+          <div className="rounded-3xl border border-border/50 bg-card/85 p-6 shadow-[0_18px_50px_-36px_rgba(15,23,42,0.35)]">
             <h2 className="text-xl font-semibold text-foreground">System focus</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Publishing, web operations, and security remain first-class. Retired admin modules have been removed from the primary flow.
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-border/50 bg-background/70 p-4">
+              <div className="rounded-2xl border border-border/50 bg-background/70 p-4 shadow-sm">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <Brain className="h-4 w-4 text-fuchsia-500" />
                   Research and AI
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">LLM Galaxy, Argus VIII, and OmniFlow stay grouped for faster navigation.</p>
               </div>
-              <div className="rounded-2xl border border-border/50 bg-background/70 p-4">
+              <div className="rounded-2xl border border-border/50 bg-background/70 p-4 shadow-sm">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <Globe className="h-4 w-4 text-sky-500" />
                   Web operations
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">WebVault, analytics, and integrations remain close to the dashboard entry point.</p>
               </div>
-              <div className="rounded-2xl border border-border/50 bg-background/70 p-4">
+              <div className="rounded-2xl border border-border/50 bg-background/70 p-4 shadow-sm">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <BookOpen className="h-4 w-4 text-emerald-500" />
                   Publishing
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">Courses and ebooks now sit in a single publishing lane instead of a crowded creator suite.</p>
               </div>
-              <div className="rounded-2xl border border-border/50 bg-background/70 p-4">
+              <div className="rounded-2xl border border-border/50 bg-background/70 p-4 shadow-sm">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <Settings className="h-4 w-4 text-amber-500" />
                   System control
