@@ -12,6 +12,18 @@ export type ArticleSummary = {
 
 export const FEATURED_HOME_ARTICLES: ArticleSummary[] = [
   {
+    slug: "rag-internal-flow-architecture",
+    title: "How RAG Works with Internal Flow: Deep Technical Breakdown",
+    eyebrow: "Features Article",
+    description:
+      "A detailed RAG article covering the internal flow from user query to embeddings, semantic retrieval, context enrichment, prompt assembly, and grounded response generation.",
+    publishedAt: "March 16, 2026",
+    readMinutes: 18,
+    tags: ["RAG", "AI", "LLM", "Vector Search"],
+    heroImage: "/article-heroes/rag-internal-flow-architecture.svg",
+    featured: true,
+  },
+  {
     slug: "notebooklm-architecture",
     title: "NotebookLM Internal Architecture Deep Dive",
     eyebrow: "Featured Analysis",

@@ -88,6 +88,7 @@ const CUSTOM_ARTICLE_HERO_IMAGES: Record<string, string> = {
   "dotnet-mastery-2026": "/article-heroes/dotnet-mastery-2026.svg",
   "microservices-patterns-dotnet": "/article-heroes/microservices-patterns-dotnet.svg",
   "notebooklm-architecture": "/article-heroes/notebooklm-architecture.svg",
+  "rag-internal-flow-architecture": "/article-heroes/rag-internal-flow-architecture.svg",
   "solid-principles-guide": "/article-heroes/solid-principles-guide.svg",
 };
 
@@ -99,6 +100,17 @@ const ARTICLE_METADATA_OVERRIDES: Record<
     tags?: string[];
   }
 > = {
+  "rag-internal-flow-architecture": {
+    title: "How RAG Works with Internal Flow: Deep Technical Breakdown",
+    eyebrow: "Features Article",
+    description: "A detailed RAG article covering the internal flow from user query to embeddings, semantic retrieval, context enrichment, prompt assembly, and grounded response generation.",
+    heroLabel: "Pipeline",
+    heroValue: "6 stages",
+    publishedAt: "March 16, 2026",
+    featured: true,
+    featuredRank: 2,
+    tags: ["RAG", "AI", "LLM", "Vector Search", "Embeddings", "Architecture"],
+  },
   "notebooklm-architecture": {
     title: "NotebookLM Internal Architecture Deep Dive",
     eyebrow: "Featured Analysis",
@@ -118,7 +130,7 @@ const ARTICLE_METADATA_OVERRIDES: Record<
     heroValue: "10M users",
     publishedAt: "March 15, 2026",
     featured: true,
-    featuredRank: 3,
+    featuredRank: 4,
     tags: [".NET", "System Design", "Scalability", "Architecture", "Cloud Native"],
   },
   "csharp-multithreading-zero-to-hero": {
@@ -129,7 +141,7 @@ const ARTICLE_METADATA_OVERRIDES: Record<
     heroValue: "Zero to Hero",
     publishedAt: "March 14, 2026",
     featured: true,
-    featuredRank: 4,
+    featuredRank: 5,
     tags: [".NET", "C#", "Multithreading", "Concurrency", "Architecture"],
   },
   "csharp-evolution-modern-reference": {
@@ -140,7 +152,7 @@ const ARTICLE_METADATA_OVERRIDES: Record<
     heroValue: "C# 12 to 14",
     publishedAt: "March 15, 2026",
     featured: true,
-    featuredRank: 2,
+    featuredRank: 3,
     tags: [".NET", "C#", "Language Evolution", ".NET 10", "Architecture", "Modern C#"],
   },
   "collections-delegates-reflection-deep-dive": {
