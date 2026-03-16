@@ -3,7 +3,8 @@ import App from "./App.tsx";
 import "./index.css";
 import { HelmetProvider } from "react-helmet-async";
 
-const swResetKey = "ap-sw-reset-2026-03-11-openowl-cache-reset-v1";
+// Bump this when a deployed service worker or hashed asset set needs a one-time cache reset.
+const swResetKey = "ap-sw-reset-2026-03-16-asset-mime-fix-v1";
 
 const resetLegacyServiceWorkers = async () => {
   if (!("serviceWorker" in navigator)) return;
