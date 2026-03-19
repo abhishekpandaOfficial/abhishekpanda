@@ -121,7 +121,7 @@ export default function Articles() {
       const dateB = parseArticleDate(b.publishedAt)?.getTime() ?? 0;
       if (filter === "top") return b.readMinutes - a.readMinutes || dateB - dateA;
       if (filter === "title") return a.title.localeCompare(b.title);
-      if (filter === "latest") return featuredSort;
+      if (filter === "latest") return dateB - dateA || featuredSort || a.title.localeCompare(b.title);
       return featuredSort || dateB - dateA;
     });
   }, [filter, search, selectedDate, selectedTag]);

@@ -323,6 +323,15 @@ export const applyEmbeddedThemeBridge = (doc: Document, theme: ReaderTheme) => {
       --bg: ${palette.bg} !important;
       --bg2: ${palette.bg2} !important;
       --bg3: ${palette.bg3} !important;
+      --wh: ${palette.bg2} !important;
+      --sf: ${theme === "dark" ? "#0f172a" : "#f1f5f9"} !important;
+      --sf2: ${theme === "dark" ? "#111827" : "#e2e8f0"} !important;
+      --th: ${palette.text} !important;
+      --tb: ${palette.text2} !important;
+      --td: ${palette.text3} !important;
+      --tm: ${theme === "dark" ? "#94a3b8" : "#94a3b8"} !important;
+      --br: ${palette.border} !important;
+      --br2: ${palette.borderStrong} !important;
       --surface: ${palette.bg2} !important;
       --surface2: ${palette.bg3} !important;
       --card: ${palette.bg2} !important;

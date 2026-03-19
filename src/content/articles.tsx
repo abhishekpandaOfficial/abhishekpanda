@@ -90,6 +90,7 @@ const CUSTOM_ARTICLE_HERO_IMAGES: Record<string, string> = {
   "notebooklm-architecture": "/article-heroes/notebooklm-architecture.svg",
   "rag-internal-flow-architecture": "/article-heroes/rag-internal-flow-architecture.svg",
   "solid-principles-guide": "/article-heroes/solid-principles-guide.svg",
+  "azure-cost-management-article": "/article-heroes/azure-cost-management-article.svg",
 };
 
 const ARTICLE_METADATA_OVERRIDES: Record<
@@ -176,6 +177,17 @@ const ARTICLE_METADATA_OVERRIDES: Record<
     featured: true,
     featuredRank: 6,
     tags: [".NET", "Microservices", "PDF", "Architecture", "Distributed Systems"],
+  },
+  "azure-cost-management-article": {
+    title: "Azure Cost Management: Stop Paying for What You Don't Use",
+    eyebrow: "FinOps Guide",
+    description: "A practical Azure cost optimization guide covering tagging, right-sizing, autoscaling, reserved instances, storage lifecycle policies, and FinOps operating rhythms.",
+    heroLabel: "Framework",
+    heroValue: "9 steps",
+    publishedAt: "March 19, 2026",
+    featured: true,
+    featuredRank: 7,
+    tags: ["Azure", "FinOps", "Cloud Cost", "Architecture", "Cost Optimization", "Cloud"],
   },
 };
 

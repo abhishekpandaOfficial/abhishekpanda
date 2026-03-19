@@ -11,6 +11,7 @@ export type SliderPhotoItem = {
   borderGradient: string;
   badgeColor: string;
   icon: LucideIcon;
+  imageClassName?: string;
 };
 
 type GsapInfinitePhotoSliderProps = {
@@ -109,7 +110,12 @@ export function GsapInfinitePhotoSlider({ items, className }: GsapInfinitePhotoS
                   style={{ backgroundImage: item.borderGradient }}
                 />
 
-                <img src={item.src} alt={item.alt} className="h-full w-full object-cover object-top" draggable={false} />
+                <img
+                  src={item.src}
+                  alt={item.alt}
+                  className={cn("h-full w-full object-cover object-top", item.imageClassName)}
+                  draggable={false}
+                />
 
                 <div className={cn("absolute left-3 top-3 z-20 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold shadow-lg", item.badgeColor)}>
                   <Icon className="h-3.5 w-3.5" />

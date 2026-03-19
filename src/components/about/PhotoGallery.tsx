@@ -4,15 +4,17 @@ import { motion, AnimatePresence } from "framer-motion";
 // Import images
 import professional from "@/assets/about/professional.jpg";
 import traditional from "@/assets/about/traditional.jpg";
-import casual from "@/assets/about/casual.jpg";
 import lifestyle from "@/assets/about/lifestyle.jpg";
 import artistic from "@/assets/about/artistic.jpg";
 import family from "@/assets/about/family.jpg";
+import aboutPortraitPrimary from "@/assets/about/myimage2.png";
+import aboutPortraitSecondary from "@/assets/about/IMG_2863.jpg";
 
 const images = [
-  { src: professional, label: "Professional", caption: "Corporate Excellence" },
+  { src: aboutPortraitPrimary, label: "Signature", caption: "Corporate Excellence" },
+  { src: aboutPortraitSecondary, label: "Formal", caption: "Presence & Confidence" },
+  { src: professional, label: "Professional", caption: "Studio Portrait" },
   { src: traditional, label: "Traditional", caption: "Cultural Roots" },
-  { src: casual, label: "Explorer", caption: "Mountain Serenity" },
   { src: lifestyle, label: "Lifestyle", caption: "Bold & Confident" },
   { src: artistic, label: "Artistic", caption: "Creative Vision" },
   { src: family, label: "Family", caption: "Moments That Matter" },

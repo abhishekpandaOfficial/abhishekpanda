@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Sparkles, Code2, Cloud, Brain, Database, Cpu, ArrowRight, Shield, FolderOpen, Send, Building2, BookOpenText } from "lucide-react";
-import abhishekAvatar from "@/assets/abhishek-avatar.png";
-import abhishekAvatarAlt from "@/assets/abhishek-avatar-alt.png";
+import aboutPortraitPrimary from "@/assets/about/myimage2.png";
+import aboutPortraitSecondary from "@/assets/about/IMG_2863.jpg";
 import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
 
 const badges = [
@@ -127,29 +127,6 @@ const primaryCtas = [
     className:
       "border-rose-400/20 bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.16),transparent_40%),linear-gradient(160deg,rgba(255,241,242,0.96),rgba(255,228,230,0.9))] text-rose-950 hover:border-rose-400/45 hover:shadow-[0_24px_60px_-35px_rgba(244,63,94,0.42)] dark:bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.2),transparent_38%),linear-gradient(160deg,rgba(76,5,25,0.94),rgba(136,19,55,0.9))] dark:text-white",
   },
-];
-
-const greetingEmojis = [
-  "👋",
-  "😎",
-  "🤩",
-  "🥳",
-  "🤖",
-  "✨",
-  "🎉",
-  "🚀",
-  "🌈",
-  "💫",
-  "⚡",
-  "🔥",
-  "🌟",
-  "🪄",
-  "💎",
-  "🎈",
-  "🛸",
-  "🎯",
-  "🤓",
-  "😺",
 ];
 
 const RotatingEmojiBadge = ({
@@ -329,8 +306,7 @@ export const HeroSection = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [taglineIndex, setTaglineIndex] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [currentAvatar, setCurrentAvatar] = useState(abhishekAvatarAlt);
-  const [emojiCycleIndex, setEmojiCycleIndex] = useState(0);
+  const [currentAvatar, setCurrentAvatar] = useState(aboutPortraitPrimary);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -342,30 +318,22 @@ export const HeroSection = () => {
 
   useEffect(() => {
     if (hasScrolled) {
-      setCurrentAvatar(abhishekAvatar);
+      setCurrentAvatar(aboutPortraitSecondary);
     } else if (!isHovered) {
-      setCurrentAvatar(abhishekAvatarAlt);
+      setCurrentAvatar(aboutPortraitPrimary);
     }
   }, [hasScrolled, isHovered]);
-
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setEmojiCycleIndex((prev) => (prev + 1) % greetingEmojis.length);
-    }, 200);
-
-    return () => window.clearInterval(interval);
-  }, []);
 
   const handleHover = () => {
     setIsHovered(true);
     setTaglineIndex(Math.floor(Math.random() * taglines.length));
-    setCurrentAvatar(abhishekAvatar);
+    setCurrentAvatar(aboutPortraitSecondary);
   };
 
   const handleHoverEnd = () => {
     setIsHovered(false);
     if (!hasScrolled) {
-      setCurrentAvatar(abhishekAvatarAlt);
+      setCurrentAvatar(aboutPortraitPrimary);
     }
   };
 
@@ -471,7 +439,7 @@ export const HeroSection = () => {
                       key={currentAvatar}
                       src={currentAvatar}
                       alt="Abhishek Panda - CEO & Architect" 
-                      className="w-full h-full object-cover absolute inset-0"
+                      className="w-full h-full object-cover object-[center_14%] absolute inset-0"
                       initial={{ opacity: 0, scale: 1.1 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
@@ -480,10 +448,23 @@ export const HeroSection = () => {
                   </AnimatePresence>
                 </div>
               </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, x: 8, y: 8 }}
+                animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.15 }}
+                className="absolute -bottom-3 left-[calc(100%-1.5rem)] h-14 w-14 overflow-hidden rounded-2xl border-2 border-white/70 bg-background shadow-[0_18px_40px_-24px_rgba(15,23,42,0.55)] dark:border-slate-800/80 md:h-16 md:w-16"
+              >
+                <img
+                  src={currentAvatar === aboutPortraitPrimary ? aboutPortraitSecondary : aboutPortraitPrimary}
+                  alt="Abhishek Panda alternate portrait"
+                  className="h-full w-full object-cover object-[center_12%]"
+                />
+              </motion.div>
               
               {/* Sparkle Badge */}
               <motion.div
-                className="absolute -bottom-2 -right-2 w-10 h-10 bg-accent rounded-full flex items-center justify-center shadow-lg"
+                className="absolute -top-2 -right-2 w-10 h-10 bg-accent rounded-full flex items-center justify-center shadow-lg"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
               >
@@ -501,14 +482,14 @@ export const HeroSection = () => {
             <h1 className="audiowide-regular mb-2 text-balance text-4xl leading-[1.02] tracking-[0.01em] text-foreground md:text-6xl lg:text-7xl xl:text-[5rem]">
               <RotatingEmojiBadge
                 className="mr-3 md:mr-4"
-                emoji={greetingEmojis[emojiCycleIndex]}
+                emoji="🐯"
               />
               <span className="inline-block bg-gradient-to-r from-slate-950 via-sky-700 to-cyan-600 bg-clip-text tracking-[0.02em] text-transparent dark:from-white dark:via-sky-200 dark:to-cyan-300">
                 Abhishek Panda
               </span>
               <RotatingEmojiBadge
                 className="ml-3 md:ml-4"
-                emoji={greetingEmojis[(emojiCycleIndex + 10) % greetingEmojis.length]}
+                emoji="🦁"
               />
             </h1>
             <p className="mb-3 text-base font-medium tracking-[-0.02em] text-muted-foreground md:text-xl xl:text-[1.4rem]">

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Clock3 } from "lucide-react";
+import { ArrowRight, CalendarDays, Clock3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FEATURED_ARTICLE_ICON, type ArticleLogo, type ArticleRecord } from "@/content/articles";
 
@@ -27,10 +27,10 @@ const CARD_THEMES = [
     glow: "shadow-[0_28px_70px_-42px_rgba(34,211,238,0.52)]",
     heroTint: "from-cyan-500/30 via-sky-500/18 to-slate-950/80",
     surface: "from-cyan-500/10 via-transparent to-transparent",
-    tag: "border-cyan-400/30 bg-cyan-400/10 text-cyan-100",
-    meta: "border-cyan-300/25 bg-cyan-400/12 text-cyan-50",
+    tag: "border-cyan-500/25 bg-cyan-500/10 text-cyan-700 dark:border-cyan-400/30 dark:bg-cyan-400/10 dark:text-cyan-100",
+    meta: "border-white/30 bg-slate-950/40 text-white shadow-sm dark:border-cyan-300/25 dark:bg-cyan-400/12 dark:text-cyan-50",
     button: "bg-cyan-300 text-slate-950",
-    badge: "border-cyan-200/30 bg-cyan-300/18 text-white",
+    badge: "border-white/30 bg-slate-950/50 text-white shadow-sm dark:border-cyan-200/30 dark:bg-cyan-300/18 dark:text-white",
     pattern: "bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.24),transparent_34%),linear-gradient(135deg,transparent,rgba(34,211,238,0.08))]",
   },
   {
@@ -38,10 +38,10 @@ const CARD_THEMES = [
     glow: "shadow-[0_28px_70px_-42px_rgba(251,191,36,0.48)]",
     heroTint: "from-amber-500/28 via-orange-500/16 to-slate-950/80",
     surface: "from-amber-500/10 via-transparent to-transparent",
-    tag: "border-amber-400/30 bg-amber-400/10 text-amber-50",
-    meta: "border-amber-200/25 bg-amber-300/12 text-amber-50",
+    tag: "border-amber-500/25 bg-amber-500/10 text-amber-700 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-50",
+    meta: "border-white/30 bg-slate-950/40 text-white shadow-sm dark:border-amber-200/25 dark:bg-amber-300/12 dark:text-amber-50",
     button: "bg-amber-300 text-slate-950",
-    badge: "border-amber-200/35 bg-amber-400/20 text-white",
+    badge: "border-white/30 bg-slate-950/50 text-white shadow-sm dark:border-amber-200/35 dark:bg-amber-400/20 dark:text-white",
     pattern: "bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.22),transparent_34%),linear-gradient(135deg,transparent,rgba(249,115,22,0.08))]",
   },
   {
@@ -49,10 +49,10 @@ const CARD_THEMES = [
     glow: "shadow-[0_28px_70px_-42px_rgba(232,121,249,0.48)]",
     heroTint: "from-fuchsia-500/28 via-violet-500/18 to-slate-950/82",
     surface: "from-fuchsia-500/10 via-transparent to-transparent",
-    tag: "border-fuchsia-400/30 bg-fuchsia-400/10 text-fuchsia-50",
-    meta: "border-fuchsia-200/25 bg-fuchsia-300/12 text-fuchsia-50",
+    tag: "border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-700 dark:border-fuchsia-400/30 dark:bg-fuchsia-400/10 dark:text-fuchsia-50",
+    meta: "border-white/30 bg-slate-950/40 text-white shadow-sm dark:border-fuchsia-200/25 dark:bg-fuchsia-300/12 dark:text-fuchsia-50",
     button: "bg-fuchsia-300 text-slate-950",
-    badge: "border-fuchsia-200/30 bg-fuchsia-300/18 text-white",
+    badge: "border-white/30 bg-slate-950/50 text-white shadow-sm dark:border-fuchsia-200/30 dark:bg-fuchsia-300/18 dark:text-white",
     pattern: "bg-[radial-gradient(circle_at_bottom_left,rgba(232,121,249,0.22),transparent_34%),linear-gradient(135deg,transparent,rgba(168,85,247,0.10))]",
   },
   {
@@ -60,10 +60,10 @@ const CARD_THEMES = [
     glow: "shadow-[0_28px_70px_-42px_rgba(52,211,153,0.45)]",
     heroTint: "from-emerald-500/26 via-teal-500/16 to-slate-950/82",
     surface: "from-emerald-500/10 via-transparent to-transparent",
-    tag: "border-emerald-400/30 bg-emerald-400/10 text-emerald-50",
-    meta: "border-emerald-200/25 bg-emerald-300/12 text-emerald-50",
+    tag: "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-50",
+    meta: "border-white/30 bg-slate-950/40 text-white shadow-sm dark:border-emerald-200/25 dark:bg-emerald-300/12 dark:text-emerald-50",
     button: "bg-emerald-300 text-slate-950",
-    badge: "border-emerald-200/30 bg-emerald-300/18 text-white",
+    badge: "border-white/30 bg-slate-950/50 text-white shadow-sm dark:border-emerald-200/30 dark:bg-emerald-300/18 dark:text-white",
     pattern: "bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.20),transparent_36%),linear-gradient(135deg,transparent,rgba(45,212,191,0.08))]",
   },
   {
@@ -71,10 +71,10 @@ const CARD_THEMES = [
     glow: "shadow-[0_28px_70px_-42px_rgba(251,113,133,0.48)]",
     heroTint: "from-rose-500/28 via-pink-500/18 to-slate-950/82",
     surface: "from-rose-500/10 via-transparent to-transparent",
-    tag: "border-rose-400/30 bg-rose-400/10 text-rose-50",
-    meta: "border-rose-200/25 bg-rose-300/12 text-rose-50",
+    tag: "border-rose-500/25 bg-rose-500/10 text-rose-700 dark:border-rose-400/30 dark:bg-rose-400/10 dark:text-rose-50",
+    meta: "border-white/30 bg-slate-950/40 text-white shadow-sm dark:border-rose-200/25 dark:bg-rose-300/12 dark:text-rose-50",
     button: "bg-rose-300 text-slate-950",
-    badge: "border-rose-200/30 bg-rose-300/18 text-white",
+    badge: "border-white/30 bg-slate-950/50 text-white shadow-sm dark:border-rose-200/30 dark:bg-rose-300/18 dark:text-white",
     pattern: "bg-[radial-gradient(circle_at_top_center,rgba(251,113,133,0.22),transparent_34%),linear-gradient(135deg,transparent,rgba(244,114,182,0.08))]",
   },
   {
@@ -82,10 +82,10 @@ const CARD_THEMES = [
     glow: "shadow-[0_28px_70px_-42px_rgba(129,140,248,0.5)]",
     heroTint: "from-indigo-500/28 via-blue-500/18 to-slate-950/82",
     surface: "from-indigo-500/10 via-transparent to-transparent",
-    tag: "border-indigo-400/30 bg-indigo-400/10 text-indigo-50",
-    meta: "border-indigo-200/25 bg-indigo-300/12 text-indigo-50",
+    tag: "border-indigo-500/25 bg-indigo-500/10 text-indigo-700 dark:border-indigo-400/30 dark:bg-indigo-400/10 dark:text-indigo-50",
+    meta: "border-white/30 bg-slate-950/40 text-white shadow-sm dark:border-indigo-200/25 dark:bg-indigo-300/12 dark:text-indigo-50",
     button: "bg-indigo-300 text-slate-950",
-    badge: "border-indigo-200/30 bg-indigo-300/18 text-white",
+    badge: "border-white/30 bg-slate-950/50 text-white shadow-sm dark:border-indigo-200/30 dark:bg-indigo-300/18 dark:text-white",
     pattern: "bg-[radial-gradient(circle_at_bottom_right,rgba(129,140,248,0.22),transparent_34%),linear-gradient(135deg,transparent,rgba(59,130,246,0.08))]",
   },
 ];
@@ -94,6 +94,17 @@ const hashSlug = (value: string) =>
   value.split("").reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0);
 
 const formatReadTime = (minutes: number) => `${minutes} min read`;
+
+const formatPublishedDate = (value: string) => {
+  const parsed = parsePublishedAt(value);
+  return parsed
+    ? parsed.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : value;
+};
 
 const renderLogo = (logo: ArticleLogo, index: number) => {
   const Icon = logo.icon;
@@ -128,11 +139,11 @@ export default function ArticleCard({ article, featured = false, variant }: Arti
     <motion.article initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28 }} className="h-full">
       <Link
         to={`/articles/${article.slug}`}
-        className={`group relative flex h-full w-full flex-col overflow-hidden rounded-[30px] border bg-card/95 transition duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
+        className={`group relative flex h-full w-full flex-col overflow-hidden rounded-[30px] border bg-white/95 transition duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 dark:bg-slate-950/90 ${
           theme.border
         } ${theme.glow} ${isSpotlight ? "min-h-[430px]" : "min-h-[420px]"}`}
       >
-        <div className={`absolute inset-0 opacity-90 ${theme.pattern}`} />
+        <div className={`absolute inset-0 opacity-70 dark:opacity-90 ${theme.pattern}`} />
         <div className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${theme.surface}`} />
 
         <div className={`relative aspect-[16/10] w-full overflow-hidden ${isSpotlight ? "min-h-[240px]" : "min-h-[220px]"}`}>
@@ -156,7 +167,7 @@ export default function ArticleCard({ article, featured = false, variant }: Arti
                 </span>
               ) : null}
               {isNew ? (
-                <span className="rounded-full border border-white/25 bg-white/12 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-md">
+                <span className="rounded-full border border-white/40 bg-white/88 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-900 shadow-sm backdrop-blur-md dark:border-cyan-200/30 dark:bg-slate-950/72 dark:text-cyan-50">
                   New
                 </span>
               ) : null}
@@ -192,9 +203,15 @@ export default function ArticleCard({ article, featured = false, variant }: Arti
           </div>
 
           <div className="mt-auto flex items-center justify-between gap-4 pt-5">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock3 className="h-4 w-4" />
-              <span>{formatReadTime(article.readMinutes)}</span>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-2">
+                <CalendarDays className="h-4 w-4" />
+                {formatPublishedDate(article.publishedAt)}
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <Clock3 className="h-4 w-4" />
+                {formatReadTime(article.readMinutes)}
+              </span>
             </div>
             <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition group-hover:scale-[1.02] ${theme.button}`}>
               Open article

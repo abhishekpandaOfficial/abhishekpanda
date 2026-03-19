@@ -18,9 +18,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import professional from "@/assets/about/professional.jpg";
-import casual from "@/assets/about/casual.jpg";
 import lifestyle from "@/assets/about/lifestyle.jpg";
 import artistic from "@/assets/about/artistic.jpg";
+import aboutPortraitPrimary from "@/assets/about/myimage2.png";
+import aboutPortraitSecondary from "@/assets/about/IMG_2863.jpg";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -137,9 +138,9 @@ const InstallPWA = () => {
   ];
 
   const previewScreens = [
-    { src: professional, label: "Profile & Identity" },
-    { src: casual, label: "Timeline & Highlights" },
-    { src: lifestyle, label: "Workflows & Insights" },
+    { src: aboutPortraitPrimary, label: "Profile & Identity" },
+    { src: aboutPortraitSecondary, label: "Timeline & Highlights" },
+    { src: professional, label: "Workflows & Insights" },
     { src: artistic, label: "Brand & Portfolio" },
   ];
 

@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Cost Management: Stop Paying for What You Don't Use</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;0,700;1,600&family=Source+Sans+3:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+:root{
+  --az:#0078D4;--az-dk:#005A9E;--az-bg:#EBF4FF;--az-bd:#C7E0F4;
+  --cy:#0099BC;--gn:#107C10;--gn-bg:#E8F5E8;--gn-bd:#BBF7D0;
+  --or:#B45309;--or-bg:#FFF8F0;--or-bd:#FED7AA;
+  --rd:#B91C1C;--rd-bg:#FFF1F1;--rd-bd:#FECACA;
+  --pu:#5C2D91;--pu-bg:#F5F3FF;--pu-bd:#DDD6FE;
+  --bg:#F9FAFB;--wh:#FFFFFF;--sf:#F3F4F6;--sf2:#E9EDF2;
+  --th:#111827;--tb:#374151;--td:#6B7280;--tm:#9CA3AF;
+  --br:#E5E7EB;--br2:#D1D5DB;
+  --sh0:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --sh1:0 4px 14px rgba(0,0,0,.08),0 1px 4px rgba(0,0,0,.04);
+  --sh2:0 10px 32px rgba(0,0,0,.10),0 2px 8px rgba(0,0,0,.05);
+}
+body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--tb);line-height:1.75;-webkit-font-smoothing:antialiased}
+
+/* PROGRESS */
+#pb{position:fixed;top:0;left:0;height:3px;z-index:999;background:linear-gradient(90deg,var(--az),var(--cy));width:0;transition:width .1s linear}
+
+/* NAV */
+.snav{position:fixed;top:0;left:0;right:0;z-index:900;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--br);height:58px;display:flex;align-items:center;padding:0 2rem;justify-content:space-between}
+.nlogo{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:500;color:var(--az);letter-spacing:.08em}
+.ndot{width:8px;height:8px;border-radius:50%;background:var(--az);animation:blink 2.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.ntags{display:flex;gap:7px}
+.npill{font-size:.68rem;font-weight:600;padding:3px 11px;border-radius:100px;background:var(--az-bg);color:var(--az-dk)}
+
+/* HERO */
+.hero{margin-top:58px;background:linear-gradient(140deg,#EBF4FF 0%,#F9FCFF 45%,#EDF5FF 100%);border-bottom:1px solid var(--az-bd);padding:5rem 2rem 4rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-140px;right:-100px;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(0,120,212,.07) 0%,transparent 70%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(0,153,188,.05) 0%,transparent 70%);pointer-events:none}
+.hi{max-width:760px;margin:0 auto;position:relative}
+.hlbl{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:.67rem;font-weight:500;letter-spacing:.12em;color:var(--az);text-transform:uppercase;background:rgba(0,120,212,.09);border:1px solid rgba(0,120,212,.22);padding:5px 14px;border-radius:100px;margin-bottom:1.4rem;animation:fsu .7s ease both}
+.hlbl::before{content:'●';font-size:.45rem}
+.htitle{font-family:'Lora',serif;font-size:clamp(2rem,5vw,3.6rem);font-weight:700;line-height:1.15;color:var(--th);animation:fsu .7s ease .08s both;margin-bottom:1.2rem}
+.htitle em{color:var(--az);font-style:italic}
+.hsub{font-size:1.05rem;color:var(--td);font-weight:400;max-width:600px;line-height:1.8;animation:fsu .7s ease .16s both;margin-bottom:1.8rem}
+.hmeta{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;font-size:.8rem;color:var(--td);animation:fsu .7s ease .24s both;margin-bottom:2.2rem}
+.hmsep{color:var(--br2)}
+.hstats{display:flex;gap:.9rem;flex-wrap:wrap;animation:fsu .7s ease .32s both}
+.sc{background:var(--wh);border:1px solid var(--br);border-radius:13px;padding:.9rem 1.3rem;box-shadow:var(--sh0)}
+.sv{font-family:'Lora',serif;font-size:1.9rem;font-weight:700;color:var(--az);line-height:1}
+.sl{font-size:.7rem;color:var(--td);margin-top:4px;font-weight:500}
+@keyframes fsu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* LAYOUT */
+.pw{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:220px 1fr;gap:0;padding:0 2rem}
+
+/* TOC */
+.tw{padding:2.8rem 1.4rem 2.8rem 0}
+.toc{position:sticky;top:78px}
+.toch{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:500;letter-spacing:.14em;color:var(--tm);text-transform:uppercase;margin-bottom:.9rem;padding-bottom:.5rem;border-bottom:1px solid var(--br)}
+.toc ul{list-style:none}
+.toc ul li{margin-bottom:1px}
+.toc ul li a{display:flex;align-items:center;gap:7px;padding:5px 9px;border-radius:7px;font-size:.76rem;color:var(--td);text-decoration:none;font-weight:400;transition:all .16s;border-left:2px solid transparent}
+.toc ul li a:hover{color:var(--az);background:var(--az-bg)}
+.toc ul li a.act{color:var(--az);background:var(--az-bg);border-left-color:var(--az);font-weight:600}
+.tn{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--tm);min-width:15px}
+.toc ul li a.act .tn{color:var(--az)}
+
+/* ARTICLE */
+.ab{padding:2.8rem 0 6rem 2.8rem;border-left:1px solid var(--br)}
+
+/* SECTIONS */
+.as{margin-bottom:4rem;opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease}
+.as.in{opacity:1;transform:none}
+.ey{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.13em;color:var(--az);text-transform:uppercase;margin-bottom:.6rem}
+.ey::before{content:'//';color:var(--tm)}
+h2.st{font-family:'Lora',serif;font-size:clamp(1.55rem,2.7vw,2rem);font-weight:700;color:var(--th);line-height:1.25;margin-bottom:.75rem}
+h3.ss{font-family:'Lora',serif;font-size:1.15rem;font-weight:700;color:var(--th);margin:1.6rem 0 .55rem}
+.sr{width:44px;height:3px;border-radius:2px;background:var(--az);margin-bottom:1.1rem}
+p.bt{font-size:.96rem;color:var(--tb);line-height:1.8;margin-bottom:.9rem}
+p.bt strong{color:var(--th);font-weight:600}
+
+/* CALLOUT */
+.cl{background:var(--az-bg);border:1px solid var(--az-bd);border-left:4px solid var(--az);border-radius:11px;padding:1.1rem 1.4rem;margin:1.4rem 0}
+.clt{font-size:.77rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--az-dk);letter-spacing:.05em;margin-bottom:.35rem}
+.cl p{font-size:.91rem;color:var(--tb);line-height:1.7;margin:0}
+.cl p strong{color:var(--az-dk);font-weight:600}
+
+/* MYTH VS REALITY */
+.tcol{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin:1.4rem 0}
+.mc{border-radius:11px;padding:1.2rem 1.3rem;border:1px solid}
+.mc.bad{background:var(--rd-bg);border-color:var(--rd-bd)}
+.mc.good{background:var(--gn-bg);border-color:var(--gn-bd)}
+.mbg{display:inline-flex;align-items:center;gap:5px;font-size:.68rem;font-weight:700;letter-spacing:.05em;padding:3px 9px;border-radius:100px;margin-bottom:.8rem}
+.mc.bad .mbg{background:#FEE2E2;color:var(--rd)}
+.mc.good .mbg{background:#D1FAE5;color:var(--gn)}
+.ml{list-style:none}
+.ml li{font-size:.87rem;color:var(--tb);padding:6px 0;border-bottom:1px solid rgba(0,0,0,.05);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.ml li:last-child{border-bottom:none;padding-bottom:0}
+
+/* COST CARDS */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin:1.4rem 0}
+.cc{background:var(--wh);border-radius:13px;border:1px solid var(--br);padding:1.3rem;box-shadow:var(--sh0);overflow:hidden;position:relative;transition:box-shadow .2s,transform .2s}
+.cc:hover{box-shadow:var(--sh1);transform:translateY(-2px)}
+.cc::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.cc.c1::before{background:linear-gradient(90deg,#DC2626,#EF4444)}
+.cc.c2::before{background:linear-gradient(90deg,#D97706,#F59E0B)}
+.cc.c3::before{background:linear-gradient(90deg,#0078D4,#00BCF2)}
+.cc.c4::before{background:linear-gradient(90deg,#059669,#10B981)}
+.cci{font-size:1.7rem;margin-bottom:.55rem;display:block}
+.ccn{font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:500;color:var(--tm);letter-spacing:.1em;margin-bottom:.25rem}
+.cc h3{font-family:'Lora',serif;font-size:1.05rem;font-weight:700;color:var(--th);margin-bottom:.2rem}
+.ccs{font-size:.73rem;color:var(--td);font-style:italic;margin-bottom:.8rem}
+.ccl{list-style:none;margin-bottom:.8rem}
+.ccl li{font-size:.82rem;color:var(--tb);padding:3px 0;display:flex;align-items:flex-start;gap:6px}
+.ccl li::before{content:'›';color:var(--az);font-weight:700;flex-shrink:0}
+.pb2{display:inline-flex;align-items:center;gap:4px;font-size:.71rem;font-weight:600;background:var(--rd-bg);color:var(--rd);border:1px solid var(--rd-bd);border-radius:6px;padding:3px 9px}
+
+/* STEP CARDS */
+.spcd{background:var(--wh);border:1px solid var(--br);border-radius:15px;margin:1.4rem 0;box-shadow:var(--sh0);overflow:hidden}
+.sph{display:flex;align-items:center;gap:.9rem;padding:1.1rem 1.4rem;border-bottom:1px solid var(--br);background:var(--sf)}
+.spnb{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.78rem;flex-shrink:0}
+.sphi{flex:1}
+.sphi h3{font-family:'Lora',serif;font-size:1rem;font-weight:700;color:var(--th);margin:0}
+.spbp{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:500;letter-spacing:.08em;padding:2px 9px;border-radius:100px;margin-top:3px}
+.spb{padding:1.2rem 1.4rem}
+.spd{font-size:.92rem;color:var(--tb);line-height:1.78;margin-bottom:.9rem}
+.spd strong{color:var(--th);font-weight:600}
+.spc{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.9rem}
+.scl{background:var(--sf);border:1px solid var(--br);border-radius:9px;padding:.9rem 1rem}
+.scll{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:500;letter-spacing:.1em;color:var(--tm);text-transform:uppercase;margin-bottom:.65rem;padding-bottom:.45rem;border-bottom:1px solid var(--br)}
+.scl ul{list-style:none}
+.scl ul li{font-size:.82rem;color:var(--tb);padding:3px 0;display:flex;align-items:flex-start;gap:7px;line-height:1.5}
+.ica{color:var(--az);font-size:.72rem;flex-shrink:0;margin-top:3px}
+.icg{color:var(--gn);font-size:.72rem;flex-shrink:0;margin-top:3px}
+.ar{display:flex;align-items:flex-start;gap:9px;background:var(--az-bg);border:1px solid var(--az-bd);border-radius:8px;padding:9px 13px;font-size:.82rem;color:var(--az-dk);font-weight:500}
+.ar .ai{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--az);flex-shrink:0;font-size:.82rem}
+
+/* Step themes */
+.saz .spnb{background:var(--az-bg);color:var(--az-dk)}
+.saz .spbp{background:var(--az-bg);color:var(--az-dk)}
+.sor .spnb{background:var(--or-bg);color:var(--or)}
+.sor .spbp{background:var(--or-bg);color:var(--or)}
+.sgn .spnb{background:var(--gn-bg);color:var(--gn)}
+.sgn .spbp{background:var(--gn-bg);color:var(--gn)}
+.srd .spnb{background:var(--rd-bg);color:var(--rd)}
+.srd .spbp{background:var(--rd-bg);color:var(--rd)}
+.spu .spnb{background:var(--pu-bg);color:var(--pu)}
+.spu .spbp{background:var(--pu-bg);color:var(--pu)}
+.scy .spnb{background:#E0F4F8;color:var(--cy)}
+.scy .spbp{background:#E0F4F8;color:var(--cy)}
+.sgr .spnb{background:var(--sf2);color:var(--tb)}
+.sgr .spbp{background:var(--sf2);color:var(--tb)}
+
+/* DIAGRAMS */
+.dw{background:var(--wh);border:1px solid var(--br);border-radius:15px;padding:1.8rem;box-shadow:var(--sh1);margin:1.4rem 0}
+.dtt{font-family:'Lora',serif;font-size:.98rem;font-weight:700;color:var(--th);margin-bottom:.2rem}
+.dts{font-size:.76rem;color:var(--td);margin-bottom:1.4rem}
+.dw svg{width:100%;height:auto;display:block}
+
+/* ARCH GRID */
+.agrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin:1.1rem 0}
+.acard{background:var(--wh);border:1px solid var(--br);border-radius:12px;padding:1.2rem;text-align:center;box-shadow:var(--sh0);transition:box-shadow .2s,transform .2s}
+.acard:hover{box-shadow:var(--sh1);transform:translateY(-3px)}
+.acico{font-size:1.8rem;margin-bottom:.55rem}
+.albl{display:inline-block;font-size:.63rem;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.07em;padding:2px 9px;border-radius:100px;margin-bottom:.55rem}
+.acard h3{font-family:'Lora',serif;font-size:.92rem;font-weight:700;color:var(--th);margin-bottom:.35rem}
+.acard p{font-size:.76rem;color:var(--td);line-height:1.6;margin:0}
+.lag{background:var(--az-bg);color:var(--az-dk)}
+.lgn{background:var(--gn-bg);color:var(--gn)}
+.lcy{background:#E0F4F8;color:var(--cy)}
+.lor{background:var(--or-bg);color:var(--or)}
+.lpu{background:var(--pu-bg);color:var(--pu)}
+
+/* IMPACT TABLE */
+.itbl{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--br);border-radius:12px;overflow:hidden;margin:1.4rem 0;box-shadow:var(--sh0);font-size:.87rem}
+.itbl thead tr{background:var(--sf)}
+.itbl th{padding:11px 15px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.09em;color:var(--td);text-transform:uppercase;border-bottom:1px solid var(--br)}
+.itbl td{padding:12px 15px;color:var(--tb);border-bottom:1px solid var(--br);vertical-align:top}
+.itbl td strong{color:var(--th);font-weight:600;display:block}
+.itbl td small{font-size:.75rem;color:var(--td)}
+.itbl tbody tr:last-child td{border-bottom:none}
+.itbl tbody tr:hover td{background:var(--az-bg)}
+.st{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;padding:2px 9px;border-radius:6px}
+.sg{background:var(--gn-bg);color:var(--gn)}
+.saz2{background:var(--az-bg);color:var(--az-dk)}
+.sor2{background:var(--or-bg);color:var(--or)}
+.spu2{background:var(--pu-bg);color:var(--pu)}
+
+/* QUOTES */
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin:1.4rem 0}
+.qcard{background:var(--wh);border:1px solid var(--br);border-left:4px solid var(--az);border-radius:10px;padding:1.1rem 1.2rem;box-shadow:var(--sh0)}
+.qcard p{font-family:'Lora',serif;font-style:italic;font-size:.9rem;color:var(--th);line-height:1.65;margin:0}
+.qcard p::before{content:'\201C';font-size:1.5rem;color:var(--az);line-height:0;vertical-align:-.38em;margin-right:3px}
+
+/* CHECKLIST */
+.chg{margin-bottom:1.6rem}
+.chgl{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:500;letter-spacing:.12em;color:var(--tm);text-transform:uppercase;padding-bottom:5px;border-bottom:1px solid var(--br);margin-bottom:.55rem}
+.chr{display:flex;align-items:flex-start;gap:11px;padding:9px 13px;border-radius:9px;margin-bottom:3px;background:var(--wh);border:1px solid var(--br);cursor:pointer;transition:all .15s;user-select:none}
+.chr:hover{border-color:var(--az-bd);background:var(--az-bg)}
+.chr.done{background:var(--gn-bg);border-color:var(--gn-bd)}
+.chb{width:19px;height:19px;border-radius:5px;flex-shrink:0;border:2px solid var(--br2);margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:.67rem;color:white;transition:all .15s}
+.chr.done .chb{background:var(--gn);border-color:var(--gn)}
+.chr.done .chb::after{content:'✓'}
+.cht{font-size:.84rem;color:var(--tb);line-height:1.55}
+.chr.done .cht{color:var(--gn)}
+
+/* CLOSING */
+.clo{background:linear-gradient(140deg,var(--az-bg),#F0F7FF);border:1px solid var(--az-bd);border-radius:18px;padding:2.8rem;text-align:center;margin-top:2.5rem}
+.clo blockquote{font-family:'Lora',serif;font-style:italic;font-size:clamp(1.15rem,2.5vw,1.6rem);color:var(--th);line-height:1.5;max-width:520px;margin:0 auto 1.2rem}
+.clo blockquote em{color:var(--az);font-style:italic}
+.clos{font-size:.85rem;color:var(--td);max-width:480px;margin:0 auto;line-height:1.75}
+
+/* RESPONSIVE */
+@media(max-width:850px){
+  .pw{grid-template-columns:1fr;padding:0 1.2rem}
+  .tw{display:none}
+  .ab{border-left:none;padding:2rem 0 4rem}
+  .tcol,.cgrid,.spc,.agrid,.qgrid{grid-template-columns:1fr}
+  .hero{padding:3.5rem 1.2rem 2.5rem}
+  .snav .ntags{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="pb"></div>
+
+<nav class="snav">
+  <div class="nlogo"><div class="ndot"></div>AZURE COST GUIDE</div>
+  <div class="ntags"><span class="npill">FinOps</span><span class="npill">Architecture</span><span class="npill">2025</span></div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hi">
+    <div class="hlbl">Cloud Architecture Guide · Cost Optimization</div>
+    <h1 class="htitle">Azure Cost Management:<br><em>Stop Paying</em> for What<br>You Don't Use</h1>
+    <p class="hsub">Most teams don't have a cloud cost problem — they have a cloud discipline problem. Azure doesn't overcharge you. You over-provision, under-monitor, and forget to optimize.</p>
+    <div class="hmeta">
+      <span>📖 12 min read</span><span class="hmsep">·</span>
+      <span>⚙️ 9-Step Framework</span><span class="hmsep">·</span>
+      <span>✅ Interactive Checklist</span><span class="hmsep">·</span>
+      <span>📊 3 Inline Diagrams</span>
+    </div>
+    <div class="hstats">
+      <div class="sc"><div class="sv">72%</div><div class="sl">Reserved Instance Savings</div></div>
+      <div class="sc"><div class="sv">90%</div><div class="sl">Spot Instance Reduction</div></div>
+      <div class="sc"><div class="sv">60%</div><div class="sl">Typical Cost Reduction</div></div>
+      <div class="sc"><div class="sv">9</div><div class="sl">Actionable Steps</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="pw">
+  <!-- TOC SIDEBAR -->
+  <aside class="tw">
+    <nav class="toc">
+      <div class="toch">On This Page</div>
+      <ul>
+        <li><a href="#reality"><span class="tn">01</span>The Reality</a></li>
+        <li><a href="#drivers"><span class="tn">02</span>Cost Drivers</a></li>
+        <li><a href="#chart"><span class="tn">03</span>Cost Breakdown Chart</a></li>
+        <li><a href="#s1"><span class="tn">04</span>Tagging Strategy</a></li>
+        <li><a href="#s2"><span class="tn">05</span>Right-Sizing</a></li>
+        <li><a href="#s3"><span class="tn">06</span>Auto Scaling</a></li>
+        <li><a href="#s4"><span class="tn">07</span>Reserved Instances</a></li>
+        <li><a href="#s5"><span class="tn">08</span>Spot Instances</a></li>
+        <li><a href="#s6"><span class="tn">09</span>Storage Lifecycle</a></li>
+        <li><a href="#storagechart"><span class="tn">10</span>Storage Tiers Diagram</a></li>
+        <li><a href="#s7"><span class="tn">11</span>Kill Zombies</a></li>
+        <li><a href="#s8"><span class="tn">12</span>Budget Alerts</a></li>
+        <li><a href="#s9"><span class="tn">13</span>FinOps Culture</a></li>
+        <li><a href="#arch"><span class="tn">14</span>Architecture</a></li>
+        <li><a href="#impact"><span class="tn">15</span>Real Impact</a></li>
+        <li><a href="#loop"><span class="tn">16</span>FinOps Loop</a></li>
+        <li><a href="#checklist"><span class="tn">17</span>Checklist</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="ab">
+
+    <!-- 01: REALITY -->
+    <section class="as" id="reality">
+      <div class="ey">The Cloud Cost Reality</div>
+      <h2 class="st">Why You're Paying 3× More Than Expected</h2>
+      <div class="sr"></div>
+      <p class="bt">The cloud was sold as a cost-saving revolution. For many teams, it became a cost-multiplying one. The reason isn't Azure — the reason is <strong>cloud discipline, or the lack of it</strong>. Resources are provisioned in seconds, but almost never automatically cleaned up.</p>
+      <div class="tcol">
+        <div class="mc bad">
+          <span class="mbg">❌ The Myth</span>
+          <ul class="ml">
+            <li><span>💬</span> We moved to cloud to save cost</li>
+            <li><span>💬</span> Cloud is always cheaper than on-prem</li>
+            <li><span>💬</span> We'll optimize later, once we're stable</li>
+          </ul>
+        </div>
+        <div class="mc good">
+          <span class="mbg">✅ The Reality</span>
+          <ul class="ml">
+            <li><span>📊</span> Teams pay 3× more than expected</li>
+            <li><span>🗑️</span> Resources created but rarely deleted</li>
+            <li><span>⏰</span> There is no "later" — cost compounds daily</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cl">
+        <div class="clt">💡 Core Principle</div>
+        <p><strong>Cloud cost is not a finance problem — it is an architecture problem.</strong> Engineers who understand cost make better design decisions every single day.</p>
+      </div>
+    </section>
+
+    <!-- 02: COST DRIVERS -->
+    <section class="as" id="drivers">
+      <div class="ey">Understanding Spend</div>
+      <h2 class="st">The 4 Major Azure Cost Drivers</h2>
+      <div class="sr"></div>
+      <p class="bt">These four categories account for the overwhelming majority of Azure bills. Understanding them is the first step to controlling them.</p>
+      <div class="cgrid">
+        <div class="cc c1">
+          <span class="cci">🖥️</span>
+          <div class="ccn">COST DRIVER 01</div>
+          <h3>Compute</h3>
+          <div class="ccs">The Biggest Culprit · 40–60% of most bills</div>
+          <ul class="ccl">
+            <li>Virtual Machines (VMs)</li>
+            <li>Azure App Services</li>
+            <li>AKS Kubernetes Clusters</li>
+            <li>Azure Container Instances</li>
+          </ul>
+          <span class="pb2">⚠ Running 24/7 at near-zero traffic</span>
+        </div>
+        <div class="cc c2">
+          <span class="cci">💾</span>
+          <div class="ccn">COST DRIVER 02</div>
+          <h3>Storage</h3>
+          <div class="ccs">The Silent Accumulator</div>
+          <ul class="ccl">
+            <li>Azure Blob Storage (Hot tier)</li>
+            <li>Managed Disks (unattached)</li>
+            <li>Backup vaults &amp; snapshots</li>
+            <li>Azure Files shares</li>
+          </ul>
+          <span class="pb2">⚠ Old logs &amp; orphaned disks pile up</span>
+        </div>
+        <div class="cc c3">
+          <span class="cci">🌐</span>
+          <div class="ccn">COST DRIVER 03</div>
+          <h3>Networking</h3>
+          <div class="ccs">The Hidden Cost</div>
+          <ul class="ccl">
+            <li>Load Balancers</li>
+            <li>Public IP Addresses</li>
+            <li>Egress data transfer fees</li>
+            <li>VPN / ExpressRoute circuits</li>
+          </ul>
+          <span class="pb2">⚠ Cross-region traffic = silent drain</span>
+        </div>
+        <div class="cc c4">
+          <span class="cci">⚙️</span>
+          <div class="ccn">COST DRIVER 04</div>
+          <h3>Managed Services</h3>
+          <div class="ccs">Over-Provisioned PaaS</div>
+          <ul class="ccl">
+            <li>Azure SQL (excess DTUs)</li>
+            <li>Cosmos DB (excess RU/s)</li>
+            <li>Azure Service Bus</li>
+            <li>Event Grid / Event Hubs</li>
+          </ul>
+          <span class="pb2">⚠ Throughput set for peak, never revisited</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 1: COST BREAKDOWN BAR CHART -->
+    <section class="as" id="chart">
+      <div class="dw">
+        <div class="dtt">📊 Typical Azure Bill Breakdown</div>
+        <div class="dts">Where the money goes in a standard enterprise workload — use this to prioritise your optimization effort</div>
+        <svg viewBox="0 0 660 280" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#DC2626"/><stop offset="100%" stop-color="#F87171"/></linearGradient>
+            <linearGradient id="g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#D97706"/><stop offset="100%" stop-color="#FBBF24"/></linearGradient>
+            <linearGradient id="g3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#0078D4"/><stop offset="100%" stop-color="#38BDF8"/></linearGradient>
+            <linearGradient id="g4" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#059669"/><stop offset="100%" stop-color="#34D399"/></linearGradient>
+            <linearGradient id="g5" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#7C3AED"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient>
+          </defs>
+
+          <!-- Header labels -->
+          <text x="14" y="18" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9CA3AF" font-weight="500" letter-spacing="0.5">CATEGORY</text>
+          <text x="210" y="18" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9CA3AF" font-weight="500" letter-spacing="0.5">SHARE OF TOTAL AZURE BILL</text>
+          <text x="618" y="18" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9CA3AF" font-weight="500" letter-spacing="0.5">%</text>
+          <line x1="0" y1="26" x2="660" y2="26" stroke="#E5E7EB" stroke-width="1"/>
+
+          <!-- Row 1: Compute 50% — bar max width = 380 -->
+          <rect x="210" y="42" width="380" height="20" rx="5" fill="#F3F4F6"/>
+          <rect x="210" y="42" width="190" height="20" rx="5" fill="url(#g1)"/>
+          <text x="14" y="55" font-family="'Lora',serif" font-size="13" fill="#111827" font-weight="700">🖥️  Compute</text>
+          <text x="14" y="70" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#9CA3AF">VMs · App Services · AKS</text>
+          <text x="618" y="57" font-family="'JetBrains Mono',monospace" font-size="14" fill="#DC2626" font-weight="700">50%</text>
+          <line x1="0" y1="84" x2="660" y2="84" stroke="#F3F4F6" stroke-width="1"/>
+
+          <!-- Row 2: Storage 20% -->
+          <rect x="210" y="96" width="380" height="20" rx="5" fill="#F3F4F6"/>
+          <rect x="210" y="96" width="76" height="20" rx="5" fill="url(#g2)"/>
+          <text x="14" y="109" font-family="'Lora',serif" font-size="13" fill="#111827" font-weight="700">💾  Storage</text>
+          <text x="14" y="124" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#9CA3AF">Blobs · Disks · Snapshots</text>
+          <text x="618" y="111" font-family="'JetBrains Mono',monospace" font-size="14" fill="#D97706" font-weight="700">20%</text>
+          <line x1="0" y1="138" x2="660" y2="138" stroke="#F3F4F6" stroke-width="1"/>
+
+          <!-- Row 3: Networking 15% -->
+          <rect x="210" y="150" width="380" height="20" rx="5" fill="#F3F4F6"/>
+          <rect x="210" y="150" width="57" height="20" rx="5" fill="url(#g3)"/>
+          <text x="14" y="163" font-family="'Lora',serif" font-size="13" fill="#111827" font-weight="700">🌐  Networking</text>
+          <text x="14" y="178" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#9CA3AF">Load Balancers · Egress · IPs</text>
+          <text x="618" y="165" font-family="'JetBrains Mono',monospace" font-size="14" fill="#0078D4" font-weight="700">15%</text>
+          <line x1="0" y1="192" x2="660" y2="192" stroke="#F3F4F6" stroke-width="1"/>
+
+          <!-- Row 4: Managed Services 10% -->
+          <rect x="210" y="204" width="380" height="20" rx="5" fill="#F3F4F6"/>
+          <rect x="210" y="204" width="38" height="20" rx="5" fill="url(#g4)"/>
+          <text x="14" y="217" font-family="'Lora',serif" font-size="13" fill="#111827" font-weight="700">⚙️  Managed Services</text>
+          <text x="14" y="232" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#9CA3AF">SQL · Cosmos DB · Service Bus</text>
+          <text x="618" y="219" font-family="'JetBrains Mono',monospace" font-size="14" fill="#059669" font-weight="700">10%</text>
+          <line x1="0" y1="246" x2="660" y2="246" stroke="#F3F4F6" stroke-width="1"/>
+
+          <!-- Row 5: Other 5% -->
+          <rect x="210" y="258" width="380" height="20" rx="5" fill="#F3F4F6"/>
+          <rect x="210" y="258" width="19" height="20" rx="5" fill="url(#g5)"/>
+          <text x="14" y="271" font-family="'Source Sans 3',sans-serif" font-size="11" fill="#9CA3AF">Other (DNS, Monitor, etc.)</text>
+          <text x="618" y="273" font-family="'JetBrains Mono',monospace" font-size="13" fill="#7C3AED" font-weight="700">5%</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- STRATEGY INTRO -->
+    <section class="as" id="strategy">
+      <div class="ey">9-Step Strategy</div>
+      <h2 class="st">Production-Ready Cost Optimization</h2>
+      <div class="sr"></div>
+      <p class="bt">These are not theoretical suggestions — each step delivers measurable savings when implemented correctly. Start with Step 1: tagging is the foundation without which everything else collapses.</p>
+    </section>
+
+    <!-- STEP 1 -->
+    <section class="as" id="s1">
+      <div class="spcd saz">
+        <div class="sph">
+          <div class="spnb">01</div>
+          <div class="sphi"><h3>🏷️ Tagging Strategy — Non-Negotiable</h3><span class="spbp">FOUNDATION LAYER</span></div>
+        </div>
+        <div class="spb">
+          <p class="spd">Without tagging, there is <strong>zero visibility into who owns what</strong>. You cannot optimize what you cannot see. Tags are the foundation of every other optimization step. Enforce them via Azure Policy.</p>
+          <div class="spc">
+            <div class="scl">
+              <div class="scll">Must-Have Tags</div>
+              <ul>
+                <li><span class="ica">›</span> <code>Environment</code> — Dev / QA / Prod</li>
+                <li><span class="ica">›</span> <code>Owner</code> — team or individual</li>
+                <li><span class="ica">›</span> <code>Project</code> — product name</li>
+                <li><span class="ica">›</span> <code>CostCenter</code> — finance mapping</li>
+              </ul>
+            </div>
+            <div class="scl">
+              <div class="scll">What This Enables</div>
+              <ul>
+                <li><span class="icg">✓</span> Cost tracking per team &amp; project</li>
+                <li><span class="icg">✓</span> Engineering accountability</li>
+                <li><span class="icg">✓</span> Automated budget alerts</li>
+                <li><span class="icg">✓</span> Policy-driven governance</li>
+              </ul>
+            </div>
+          </div>
+          <div class="ar"><span class="ai">→</span> Enforce via Azure Policy: deny resource creation if required tags are missing.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section class="as" id="s2">
+      <div class="spcd sor">
+        <div class="sph">
+          <div class="spnb">02</div>
+          <div class="sphi"><h3>📐 Right-Sizing — Quick Wins</h3><span class="spbp">IMMEDIATE SAVINGS</span></div>
+        </div>
+        <div class="spb">
+          <p class="spd">Most VMs run at <strong>under 20% CPU utilization</strong>. You are paying for muscle you never flex. Azure Advisor surfaces underutilized resources automatically — act on recommendations weekly.</p>
+          <div class="spc">
+            <div class="scl">
+              <div class="scll">Signals to Check</div>
+              <ul>
+                <li><span class="ica">›</span> CPU utilization consistently below 20%</li>
+                <li><span class="ica">›</span> Memory well below provisioned amount</li>
+                <li><span class="ica">›</span> Average vs. peak traffic ratio is high</li>
+                <li><span class="ica">›</span> Azure Advisor shows "resize" signal</li>
+              </ul>
+            </div>
+            <div class="scl">
+              <div class="scll">Actions to Take</div>
+              <ul>
+                <li><span class="icg">✓</span> Downgrade VM SKU (e.g. D8s → D4s)</li>
+                <li><span class="icg">✓</span> Switch to B-series burstable VMs</li>
+                <li><span class="icg">✓</span> Consolidate workloads onto fewer VMs</li>
+                <li><span class="icg">✓</span> Use Spot for non-critical batch jobs</li>
+              </ul>
+            </div>
+          </div>
+          <div class="ar"><span class="ai">→</span> Review Azure Advisor → Cost recommendations weekly. Target top 10 VMs first.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section class="as" id="s3">
+      <div class="spcd sgn">
+        <div class="sph">
+          <div class="spnb">03</div>
+          <div class="sphi"><h3>📈 Auto Scaling — Stop Paying for Idle Time</h3><span class="spbp">ELASTIC ARCHITECTURE</span></div>
+        </div>
+        <div class="spb">
+          <p class="spd">Fixed capacity means you pay for <strong>peak load 24 hours a day</strong>. Auto scaling matches cost to actual demand — you pay for what you use, not what you provision.</p>
+          <div class="spc">
+            <div class="scl">
+              <div class="scll">Scale Triggers</div>
+              <ul>
+                <li><span class="ica">›</span> CPU usage thresholds (e.g. 70%)</li>
+                <li><span class="ica">›</span> Queue length (Service Bus, Storage)</li>
+                <li><span class="ica">›</span> HTTP requests per second</li>
+                <li><span class="ica">›</span> Custom application metrics</li>
+              </ul>
+            </div>
+            <div class="scl">
+              <div class="scll">Tools &amp; Services</div>
+              <ul>
+                <li><span class="icg">✓</span> Azure Autoscale (VMSS)</li>
+                <li><span class="icg">✓</span> AKS Horizontal Pod Autoscaler</li>
+                <li><span class="icg">✓</span> App Service auto-scale rules</li>
+                <li><span class="icg">✓</span> KEDA for event-driven scaling</li>
+              </ul>
+            </div>
+          </div>
+          <div class="ar"><span class="ai">→</span> Set min/max instance counts. Define scale-in cool-down periods to prevent thrashing.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4 -->
+    <section class="as" id="s4">
+      <div class="spcd saz">
+        <div class="sph">
+          <div class="spnb">04</div>
+          <div class="sphi"><h3>📅 Reserved Instances — Save up to 72%</h3><span class="spbp">COMMITMENT DISCOUNT</span></div>
+        </div>
+        <div class="spb">
+          <p class="spd">If your workload is predictable, paying upfront for capacity is the <strong>single highest-ROI action</strong> you can take. Analyse 30 days of usage history before committing.</p>
+          <div class="spc">
+            <div class="scl">
+              <div class="scll">Applicable Services</div>
+              <ul>
+                <li><span class="ica">›</span> Virtual Machines</li>
+                <li><span class="ica">›</span> Azure SQL Database</li>
+                <li><span class="ica">›</span> Cosmos DB</li>
+                <li><span class="ica">›</span> App Service Plans</li>
+                <li><span class="ica">›</span> Azure Synapse Analytics</li>
+              </ul>
+            </div>
+            <div class="scl">
+              <div class="scll">Saving Tiers</div>
+              <ul>
+                <li><span class="icg">✓</span> 1-year reserved — up to 40% off</li>
+                <li><span class="icg">✓</span> 3-year reserved — up to 72% off</li>
+                <li><span class="icg">✓</span> Azure Hybrid Benefit — +20–30%</li>
+                <li><span class="icg">✓</span> Dev/Test pricing for non-prod</li>
+              </ul>
+            </div>
+          </div>
+          <div class="ar"><span class="ai">→</span> Analyse 30-day usage. Start with top 5 stable VMs. Enable auto-renew.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 5 -->
+    <section class="as" id="s5">
+      <div class="spcd scy">
+        <div class="sph">
+          <div class="spnb">05</div>
+          <div class="sphi"><h3>⚡ Spot Instances — Up to 90% Cheaper</h3><span class="spbp">INTERRUPTIBLE WORKLOADS</span></div>
+        </div>
+        <div class="spb">
+          <p class="spd">Azure sells spare capacity at up to <strong>90% discount</strong>. Workloads can be evicted with 30 seconds notice. For anything restartable or retryable, Spot is a game-changer.</p>
+          <div class="spc">
+            <div class="scl">
+              <div class="scll">Ideal Use Cases</div>
+              <ul>
+                <li><span class="ica">›</span> Batch data processing jobs</li>
+                <li><span class="ica">›</span> ML model training workloads</li>
+                <li><span class="ica">›</span> CI/CD pipeline build runners</li>
+                <li><span class="ica">›</span> Rendering &amp; media processing</li>
+              </ul>
+            </div>
+            <div class="scl">
+              <div class="scll">Best Practices</div>
+              <ul>
+                <li><span class="icg">✓</span> Always design for eviction &amp; restart</li>
+                <li><span class="icg">✓</span> Handle Azure Spot eviction alerts</li>
+                <li><span class="icg">✓</span> Combine with on-demand nodes</li>
+                <li><span class="icg">✓</span> Set a maximum price threshold</li>
+              </ul>
+            </div>
+          </div>
+          <div class="ar"><span class="ai">→</span> Add a spot node pool to AKS today. Use Azure Batch for large workloads.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 6 -->
+    <section class="as" id="s6">
+      <div class="spcd sor">
+        <div class="sph">
+          <div class="spnb">06</div>
+          <div class="sphi"><h3>♻️ Storage Lifecycle Management</h3><span class="spbp">SET IT AND FORGET IT</span></div>
+        </div>
+        <div class="spb">
+          <p class="spd">Teams store everything in Hot tier forever. <strong>Lifecycle policies automatically move data</strong> to progressively cheaper tiers based on last-access date — zero manual effort required.</p>
+          <div class="spc">
+            <div class="scl">
+              <div class="scll">Storage Tiers (by cost)</div>
+              <ul>
+                <li><span class="ica">›</span> 🔥 Hot — frequent access (highest cost)</li>
+                <li><span class="ica">›</span> ❄️ Cool — infrequent — ~40% cheaper</li>
+                <li><span class="ica">›</span> 🧊 Cold — rare access — ~60% cheaper</li>
+                <li><span class="ica">›</span> 📦 Archive — long-term — ~90% cheaper</li>
+              </ul>
+            </div>
+            <div class="scl">
+              <div class="scll">Automation Rules</div>
+              <ul>
+                <li><span class="icg">✓</span> Move to Cool after 30 days</li>
+                <li><span class="icg">✓</span> Move to Cold after 90 days</li>
+                <li><span class="icg">✓</span> Move to Archive after 180 days</li>
+                <li><span class="icg">✓</span> Delete after 365 days if applicable</li>
+              </ul>
+            </div>
+          </div>
+          <div class="ar"><span class="ai">→</span> Create Blob Lifecycle Management policies in Azure Portal. Takes under 10 minutes.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAM 2: STORAGE TIERS -->
+    <section class="as" id="storagechart">
+      <div class="dw">
+        <div class="dtt">📦 Azure Storage Lifecycle: Cost vs. Access Age</div>
+        <div class="dts">As data ages and is accessed less frequently, automatically move it through tiers to save up to 90%</div>
+        <svg viewBox="0 0 660 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+              <polygon points="0 0, 7 2.5, 0 5" fill="#D1D5DB"/>
+            </marker>
+          </defs>
+
+          <!-- Connecting line behind boxes -->
+          <line x1="80" y1="100" x2="580" y2="100" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="5,4"/>
+
+          <!-- HOT -->
+          <rect x="10" y="58" width="132" height="84" rx="12" fill="#FEF2F2" stroke="#FECACA" stroke-width="1.5"/>
+          <text x="76" y="83" font-size="20" font-family="'Source Sans 3',sans-serif" text-anchor="middle">🔥</text>
+          <text x="76" y="100" font-family="'Lora',serif" font-size="13" fill="#DC2626" font-weight="700" text-anchor="middle">Hot</text>
+          <text x="76" y="116" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">Days 0–30</text>
+          <text x="76" y="131" font-family="'JetBrains Mono',monospace" font-size="10" fill="#DC2626" font-weight="600" text-anchor="middle">Baseline</text>
+
+          <!-- Arrow 1 -->
+          <line x1="145" y1="100" x2="163" y2="100" stroke="#D1D5DB" stroke-width="1.5" marker-end="url(#arr)"/>
+          <text x="154" y="92" font-family="'JetBrains Mono',monospace" font-size="9" fill="#9CA3AF" text-anchor="middle">30d</text>
+
+          <!-- COOL -->
+          <rect x="166" y="58" width="132" height="84" rx="12" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+          <text x="232" y="83" font-size="20" font-family="'Source Sans 3',sans-serif" text-anchor="middle">❄️</text>
+          <text x="232" y="100" font-family="'Lora',serif" font-size="13" fill="#1D4ED8" font-weight="700" text-anchor="middle">Cool</text>
+          <text x="232" y="116" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">Days 30–90</text>
+          <text x="232" y="131" font-family="'JetBrains Mono',monospace" font-size="10" fill="#1D4ED8" font-weight="600" text-anchor="middle">~40% cheaper</text>
+
+          <!-- Arrow 2 -->
+          <line x1="301" y1="100" x2="319" y2="100" stroke="#D1D5DB" stroke-width="1.5" marker-end="url(#arr)"/>
+          <text x="310" y="92" font-family="'JetBrains Mono',monospace" font-size="9" fill="#9CA3AF" text-anchor="middle">90d</text>
+
+          <!-- COLD -->
+          <rect x="322" y="58" width="132" height="84" rx="12" fill="#EEF2FF" stroke="#C7D2FE" stroke-width="1.5"/>
+          <text x="388" y="83" font-size="20" font-family="'Source Sans 3',sans-serif" text-anchor="middle">🧊</text>
+          <text x="388" y="100" font-family="'Lora',serif" font-size="13" fill="#4338CA" font-weight="700" text-anchor="middle">Cold</text>
+          <text x="388" y="116" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">Days 90–180</text>
+          <text x="388" y="131" font-family="'JetBrains Mono',monospace" font-size="10" fill="#4338CA" font-weight="600" text-anchor="middle">~60% cheaper</text>
+
+          <!-- Arrow 3 -->
+          <line x1="457" y1="100" x2="475" y2="100" stroke="#D1D5DB" stroke-width="1.5" marker-end="url(#arr)"/>
+          <text x="466" y="92" font-family="'JetBrains Mono',monospace" font-size="9" fill="#9CA3AF" text-anchor="middle">180d</text>
+
+          <!-- ARCHIVE -->
+          <rect x="478" y="58" width="172" height="84" rx="12" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
+          <text x="564" y="83" font-size="20" font-family="'Source Sans 3',sans-serif" text-anchor="middle">📦</text>
+          <text x="564" y="100" font-family="'Lora',serif" font-size="13" fill="#15803D" font-weight="700" text-anchor="middle">Archive</text>
+          <text x="564" y="116" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">Day 180+</text>
+          <text x="564" y="131" font-family="'JetBrains Mono',monospace" font-size="10" fill="#15803D" font-weight="600" text-anchor="middle">~90% cheaper</text>
+
+          <!-- Footer label -->
+          <text x="330" y="178" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#9CA3AF" text-anchor="middle">Automate with Azure Blob Storage Lifecycle Management Policies — 0 manual effort</text>
+          <text x="330" y="193" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#9CA3AF" text-anchor="middle">Retrieval fees apply for Cool/Cold/Archive — plan access patterns before tiering</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- STEP 7 -->
+    <section class="as" id="s7">
+      <div class="spcd srd">
+        <div class="sph">
+          <div class="spnb">07</div>
+          <div class="sphi"><h3>🧟 Kill Zombie Resources</h3><span class="spbp">IMMEDIATE WINS</span></div>
+        </div>
+        <div class="spb">
+          <p class="spd">Every Azure subscription has forgotten resources <strong>silently billing every second</strong>. Zombie resources are the easiest savings — nothing is more wasteful than paying for something nobody uses.</p>
+          <div class="spc">
+            <div class="scl">
+              <div class="scll">Zombie Resource Types</div>
+              <ul>
+                <li><span class="ica">›</span> Unattached managed disks</li>
+                <li><span class="ica">›</span> Orphaned public IP addresses</li>
+                <li><span class="ica">›</span> Unused load balancers</li>
+                <li><span class="ica">›</span> Stopped-but-not-deleted VMs</li>
+                <li><span class="ica">›</span> Old snapshots from deleted VMs</li>
+              </ul>
+            </div>
+            <div class="scl">
+              <div class="scll">Tools to Find Them</div>
+              <ul>
+                <li><span class="icg">✓</span> Azure Advisor (free, built-in)</li>
+                <li><span class="icg">✓</span> Azure Cost Analysis reports</li>
+                <li><span class="icg">✓</span> Azure Resource Graph queries</li>
+                <li><span class="icg">✓</span> PowerShell / Azure CLI scripts</li>
+                <li><span class="icg">✓</span> Cloudability / Apptio (3rd party)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="ar"><span class="ai">→</span> Run Azure Advisor weekly. Declare a Zombie Cleanup Day monthly. Target: 0 unattached disks.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 8 -->
+    <section class="as" id="s8">
+      <div class="spcd sgr">
+        <div class="sph">
+          <div class="spnb">08</div>
+          <div class="sphi"><h3>🚨 Budget Alerts — No Month-End Surprises</h3><span class="spbp">FINANCIAL GUARDRAILS</span></div>
+        </div>
+        <div class="spb">
+          <p class="spd">Without alerts, teams discover overspend at month-end. <strong>By then, the money is gone.</strong> Budget alerts give you time to react. Set them at multiple thresholds — not just at 100%.</p>
+          <div class="spc">
+            <div class="scl">
+              <div class="scll">Alert Thresholds</div>
+              <ul>
+                <li><span class="ica">›</span> 50% — early warning</li>
+                <li><span class="ica">›</span> 75% — attention needed</li>
+                <li><span class="ica">›</span> 90% — act now</li>
+                <li><span class="ica">›</span> 100% forecast (before month-end)</li>
+                <li><span class="ica">›</span> Anomaly detection for sudden spikes</li>
+              </ul>
+            </div>
+            <div class="scl">
+              <div class="scll">Governance Tools</div>
+              <ul>
+                <li><span class="icg">✓</span> Azure Cost Management Budgets</li>
+                <li><span class="icg">✓</span> Action Groups (email / SMS / webhook)</li>
+                <li><span class="icg">✓</span> Azure Policy (deny expensive SKUs)</li>
+                <li><span class="icg">✓</span> Management Group scope budgets</li>
+              </ul>
+            </div>
+          </div>
+          <div class="ar"><span class="ai">→</span> Set budgets in Azure Cost Management. Link to email + Teams webhook. Done in 10 minutes.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 9 -->
+    <section class="as" id="s9">
+      <div class="spcd spu">
+        <div class="sph">
+          <div class="spnb">09</div>
+          <div class="sphi"><h3>🏆 FinOps Culture — The Most Important Step</h3><span class="spbp">TRANSFORMATIONAL</span></div>
+        </div>
+        <div class="spb">
+          <p class="spd"><strong>Tools save 10%. Culture saves 60%.</strong> Engineers who own cost metrics make better architecture decisions daily. FinOps is not a finance function — it is an engineering discipline.</p>
+          <div class="spc">
+            <div class="scl">
+              <div class="scll">Build These Habits</div>
+              <ul>
+                <li><span class="ica">›</span> Weekly team cost reviews</li>
+                <li><span class="ica">›</span> Cost KPIs in sprint demos</li>
+                <li><span class="ica">›</span> Per-team cost dashboards</li>
+                <li><span class="ica">›</span> Cost optimization as an OKR</li>
+                <li><span class="ica">›</span> Recognition for engineers who save</li>
+              </ul>
+            </div>
+            <div class="scl">
+              <div class="scll">FinOps Framework (3 Phases)</div>
+              <ul>
+                <li><span class="icg">✓</span> <strong>Inform:</strong> Give every team visibility</li>
+                <li><span class="icg">✓</span> <strong>Optimize:</strong> Enable them to act</li>
+                <li><span class="icg">✓</span> <strong>Operate:</strong> Drive accountability</li>
+                <li><span class="icg">✓</span> Track unit cost — cost per active user</li>
+              </ul>
+            </div>
+          </div>
+          <div class="ar"><span class="ai">→</span> Schedule your first cost review this week. Assign one FinOps champion per team.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARCHITECTURE -->
+    <section class="as" id="arch">
+      <div class="ey">Architecture Patterns</div>
+      <h2 class="st">Production Architecture Best Practices</h2>
+      <div class="sr"></div>
+      <p class="bt">Architecture decisions made at project start have the biggest long-term cost impact. Here are the patterns that structurally reduce your bill.</p>
+
+      <h3 class="ss">1. Prefer PaaS over IaaS</h3>
+      <p class="bt">Managed services often cost less in total because they eliminate maintenance overhead and include built-in high availability.</p>
+      <div class="agrid">
+        <div class="acard"><div class="acico">🚀</div><span class="albl lgn">PREFER THIS</span><h3>Azure App Service</h3><p>Managed runtime, auto-patching, built-in scaling. No OS maintenance required.</p></div>
+        <div class="acard"><div class="acico">🗄️</div><span class="albl lag">PREFER THIS</span><h3>Azure SQL Database</h3><p>Fully managed, built-in HA, automatic backups and geo-replication included.</p></div>
+        <div class="acard"><div class="acico">⚡</div><span class="albl lcy">PREFER THIS</span><h3>Azure Functions</h3><p>Consumption plan: pay per execution only. Zero cost when idle.</p></div>
+      </div>
+
+      <h3 class="ss">2. Event-Driven Architecture</h3>
+      <p class="bt">Event-driven designs replace always-on polling. Services wake up when there's work, and cost nothing when idle.</p>
+      <div class="agrid">
+        <div class="acard"><div class="acico">📨</div><span class="albl lor">MESSAGE BUS</span><h3>Azure Service Bus</h3><p>Decouple producers and consumers. Scale receivers based on queue depth.</p></div>
+        <div class="acard"><div class="acico">📢</div><span class="albl lpu">EVENT ROUTING</span><h3>Azure Event Grid</h3><p>React to Azure resource events without polling. Near-zero idle cost.</p></div>
+        <div class="acard"><div class="acico">🔄</div><span class="albl lgn">STREAMING</span><h3>Azure Event Hubs</h3><p>Ingest millions of events/second. Tiered pricing — pay for what you ingest.</p></div>
+      </div>
+
+      <h3 class="ss">3. Multi-Environment Cost Strategy</h3>
+      <div class="cl">
+        <div class="clt">🏭 Stop Running Non-Production at Production Cost</div>
+        <p>Production runs 24/7 — justified. Dev and QA absolutely should not. <strong>Schedule auto-shutdown for Dev at 8 PM, auto-start at 8 AM on weekdays only.</strong> This single change typically saves 65% of Dev/QA compute spend with no other changes. Use Azure Dev Box for developer machines to eliminate always-on VMs entirely.</p>
+      </div>
+    </section>
+
+    <!-- IMPACT -->
+    <section class="as" id="impact">
+      <div class="ey">Real-World Results</div>
+      <h2 class="st">Real Optimization Impact</h2>
+      <div class="sr"></div>
+      <p class="bt">Representative results from applying this framework to real production environments. Compute-heavy environments typically see the highest impact.</p>
+      <table class="itbl">
+        <thead>
+          <tr>
+            <th>Optimization</th>
+            <th>Before</th>
+            <th>After</th>
+            <th>Saved</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>VM Scheduling</strong><small>Auto-shutdown Dev/QA 8 PM–8 AM + weekends</small></td>
+            <td>₹1,00,000 / mo</td>
+            <td>₹40,000 / mo</td>
+            <td><span class="st sg">60%</span></td>
+          </tr>
+          <tr>
+            <td><strong>VM Right-Sizing</strong><small>D8s v3 × 32 → D4s v3 × 18 (avg CPU was 15%)</small></td>
+            <td>D8s v3 × 32</td>
+            <td>D4s v3 × 18</td>
+            <td><span class="st saz2">55%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Reserved Instances</strong><small>20 stable prod VMs running 24/7 for 12+ months</small></td>
+            <td>Pay-as-you-go</td>
+            <td>3-year reserved</td>
+            <td><span class="st sg">72%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Spot for ML Training</strong><small>Training workloads redesigned to handle eviction</small></td>
+            <td>On-demand compute</td>
+            <td>Spot + retry logic</td>
+            <td><span class="st sor2">88%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Storage Lifecycle</strong><small>All data was in Hot tier; automated lifecycle applied</small></td>
+            <td>All Hot tier</td>
+            <td>Auto-tiered policy</td>
+            <td><span class="st spu2">68%</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- FINOPS LOOP DIAGRAM -->
+    <section class="as" id="loop">
+      <div class="ey">Governance Framework</div>
+      <h2 class="st">The FinOps Continuous Improvement Loop</h2>
+      <div class="sr"></div>
+      <p class="bt">Cost optimization is not a one-time project. It is a continuous operational discipline. Follow this loop every week — savings compound over time.</p>
+
+      <div class="dw">
+        <div class="dtt">♻️ The 5-Step FinOps Loop</div>
+        <div class="dts">Repeat every week — this is how you build a culture of cost discipline over time</div>
+        <svg viewBox="0 0 660 230" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="a2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+              <polygon points="0 0, 7 2.5, 0 5" fill="#CBD5E1"/>
+            </marker>
+          </defs>
+
+          <!-- Step 1: Monitor -->
+          <rect x="10" y="55" width="110" height="105" rx="12" fill="#EBF4FF" stroke="#BFDBFE" stroke-width="1.5"/>
+          <text x="65" y="82" font-size="24" text-anchor="middle" font-family="sans-serif">📊</text>
+          <text x="65" y="101" font-family="'JetBrains Mono',monospace" font-size="9" fill="#0078D4" font-weight="600" text-anchor="middle" letter-spacing="0.5">STEP 1</text>
+          <text x="65" y="118" font-family="'Lora',serif" font-size="13" fill="#1E3A5F" font-weight="700" text-anchor="middle">Monitor</text>
+          <text x="65" y="133" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">Cost Analysis</text>
+          <text x="65" y="148" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">dashboards daily</text>
+
+          <line x1="122" y1="107" x2="140" y2="107" stroke="#CBD5E1" stroke-width="1.5" marker-end="url(#a2)"/>
+
+          <!-- Step 2: Analyze -->
+          <rect x="142" y="55" width="110" height="105" rx="12" fill="#FFF8F0" stroke="#FED7AA" stroke-width="1.5"/>
+          <text x="197" y="82" font-size="24" text-anchor="middle" font-family="sans-serif">🔍</text>
+          <text x="197" y="101" font-family="'JetBrains Mono',monospace" font-size="9" fill="#B45309" font-weight="600" text-anchor="middle" letter-spacing="0.5">STEP 2</text>
+          <text x="197" y="118" font-family="'Lora',serif" font-size="13" fill="#7C2D12" font-weight="700" text-anchor="middle">Analyze</text>
+          <text x="197" y="133" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">Find top drivers</text>
+          <text x="197" y="148" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">&amp; anomalies</text>
+
+          <line x1="254" y1="107" x2="272" y2="107" stroke="#CBD5E1" stroke-width="1.5" marker-end="url(#a2)"/>
+
+          <!-- Step 3: Optimize -->
+          <rect x="274" y="55" width="110" height="105" rx="12" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
+          <text x="329" y="82" font-size="24" text-anchor="middle" font-family="sans-serif">⚙️</text>
+          <text x="329" y="101" font-family="'JetBrains Mono',monospace" font-size="9" fill="#107C10" font-weight="600" text-anchor="middle" letter-spacing="0.5">STEP 3</text>
+          <text x="329" y="118" font-family="'Lora',serif" font-size="13" fill="#14532D" font-weight="700" text-anchor="middle">Optimize</text>
+          <text x="329" y="133" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">Right-size, scale</text>
+          <text x="329" y="148" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">&amp; reserve</text>
+
+          <line x1="386" y1="107" x2="404" y2="107" stroke="#CBD5E1" stroke-width="1.5" marker-end="url(#a2)"/>
+
+          <!-- Step 4: Govern -->
+          <rect x="406" y="55" width="110" height="105" rx="12" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1.5"/>
+          <text x="461" y="82" font-size="24" text-anchor="middle" font-family="sans-serif">🛡️</text>
+          <text x="461" y="101" font-family="'JetBrains Mono',monospace" font-size="9" fill="#5C2D91" font-weight="600" text-anchor="middle" letter-spacing="0.5">STEP 4</text>
+          <text x="461" y="118" font-family="'Lora',serif" font-size="13" fill="#2E1065" font-weight="700" text-anchor="middle">Govern</text>
+          <text x="461" y="133" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">Budgets, policies</text>
+          <text x="461" y="148" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">&amp; alerts</text>
+
+          <line x1="518" y1="107" x2="536" y2="107" stroke="#CBD5E1" stroke-width="1.5" marker-end="url(#a2)"/>
+
+          <!-- Step 5: Repeat -->
+          <rect x="538" y="55" width="110" height="105" rx="12" fill="#F0F9FF" stroke="#BAE6FD" stroke-width="1.5"/>
+          <text x="593" y="82" font-size="24" text-anchor="middle" font-family="sans-serif">🔁</text>
+          <text x="593" y="101" font-family="'JetBrains Mono',monospace" font-size="9" fill="#0099BC" font-weight="600" text-anchor="middle" letter-spacing="0.5">STEP 5</text>
+          <text x="593" y="118" font-family="'Lora',serif" font-size="13" fill="#0C4A6E" font-weight="700" text-anchor="middle">Repeat</text>
+          <text x="593" y="133" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">Weekly review</text>
+          <text x="593" y="148" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#6B7280" text-anchor="middle">cadence</text>
+
+          <!-- Return arrow below -->
+          <path d="M593,162 Q593,195 330,195 Q67,195 65,162" fill="none" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#a2)"/>
+          <text x="330" y="215" font-family="'Source Sans 3',sans-serif" font-size="10" fill="#9CA3AF" text-anchor="middle">← Continuous cycle — run every sprint, every week →</text>
+        </svg>
+      </div>
+
+      <div class="qgrid">
+        <div class="qcard"><p>Cloud doesn't make you efficient. It exposes your inefficiency.</p></div>
+        <div class="qcard"><p>If you don't track cost daily, you'll regret it monthly.</p></div>
+        <div class="qcard"><p>Every unused VM is silently billing you right now.</p></div>
+        <div class="qcard"><p>Scaling without monitoring is just expensive guessing.</p></div>
+      </div>
+    </section>
+
+    <!-- CHECKLIST -->
+    <section class="as" id="checklist">
+      <div class="ey">Action Checklist</div>
+      <h2 class="st">Your Azure Cost Optimization Checklist</h2>
+      <div class="sr"></div>
+      <p class="bt">Click each item to track your progress. These 12 actions, when completed, typically yield a 50–70% total cost reduction.</p>
+
+      <div class="chg">
+        <div class="chgl">Foundation</div>
+        <div class="chr" onclick="tick(this)"><div class="chb"></div><span class="cht">Tagging policy enforced via Azure Policy — no resource creation without required tags</span></div>
+        <div class="chr" onclick="tick(this)"><div class="chb"></div><span class="cht">Azure Advisor reviewed and top cost recommendations actioned this week</span></div>
+      </div>
+      <div class="chg">
+        <div class="chgl">Compute Optimization</div>
+        <div class="chr" onclick="tick(this)"><div class="chb"></div><span class="cht">Right-sizing analysis completed for top 10 VMs — target average CPU below 20%</span></div>
+        <div class="chr" onclick="tick(this)"><div class="chb"></div><span class="cht">Auto-shutdown configured for Dev and QA environments (8 PM–8 AM + weekends)</span></div>
+        <div class="chr" onclick="tick(this)"><div class="chb"></div><span class="cht">Autoscale enabled on App Services and AKS node pools with defined min/max limits</span></div>
+      </div>
+      <div class="chg">
+        <div class="chgl">Smart Purchasing</div>
+        <div class="chr" onclick="tick(this)"><div class="chb"></div><span class="cht">Reserved Instances purchased for stable production VMs running 24/7 for 12+ months</span></div>
+        <div class="chr" onclick="tick(this)"><div class="chb"></div><span class="cht">Spot instances configured for batch processing and ML training workloads</span></div>
+        <div class="chr" onclick="tick(this)"><div class="chb"></div><span class="cht">Azure Hybrid Benefit enabled for Windows VMs and SQL Server workloads</span></div>
+      </div>
+      <div class="chg">
+        <div class="chgl">Storage &amp; Cleanup</div>
+        <div class="chr" onclick="tick(this)"><div class="chb"></div><span class="cht">Blob Storage lifecycle policies created (Hot → Cool → Cold → Archive)</span></div>
+        <div class="chr" onclick="tick(this)"><div class="chb"></div><span class="cht">All zombie resources identified and deleted — unattached disks, orphaned IPs, stopped VMs</span></div>
+      </div>
+      <div class="chg">
+        <div class="chgl">Governance &amp; Culture</div>
+        <div class="chr" onclick="tick(this)"><div class="chb"></div><span class="cht">Monthly budget alerts set at 50%, 75%, and 90% with email and Teams webhook</span></div>
+        <div class="chr" onclick="tick(this)"><div class="chb"></div><span class="cht">Weekly cost reviews scheduled and a FinOps champion assigned per product team</span></div>
+      </div>
+    </section>
+
+    <!-- CLOSING -->
+    <div class="clo">
+      <blockquote>"The goal is not to <em>spend less</em> on cloud.<br>The goal is to <em>spend correctly</em>."</blockquote>
+      <p class="clos">Cloud cost discipline is an architecture discipline. Build it into your engineering culture, your sprint reviews, and your design decisions — not just your monthly invoice reviews.</p>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // Progress bar
+  const pb = document.getElementById('pb');
+  window.addEventListener('scroll', () => {
+    const d = document.documentElement;
+    pb.style.width = (d.scrollTop / (d.scrollHeight - window.innerHeight) * 100) + '%';
+  }, {passive:true});
+
+  // Scroll-reveal
+  const io = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting) x.target.classList.add('in'); }), {threshold:.06});
+  document.querySelectorAll('.as').forEach(s => io.observe(s));
+
+  // Active TOC
+  const links = document.querySelectorAll('.toc a');
+  const secIO = new IntersectionObserver(e => {
+    e.forEach(x => {
+      if(x.isIntersecting){
+        links.forEach(a => a.classList.remove('act'));
+        const m = document.querySelector(`.toc a[href="#${x.target.id}"]`);
+        if(m) m.classList.add('act');
+      }
+    });
+  }, {rootMargin:'-12% 0px -78% 0px'});
+  document.querySelectorAll('[id]').forEach(s => secIO.observe(s));
+
+  // Checklist
+  function tick(el){ el.classList.toggle('done'); }
+</script>
+</body>
+</html>

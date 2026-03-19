@@ -30,22 +30,43 @@ import {
 // Import hero images
 import professional from "@/assets/about/professional.jpg";
 import traditional from "@/assets/about/traditional.jpg";
-import casual from "@/assets/about/casual.jpg";
 import lifestyle from "@/assets/about/lifestyle.jpg";
 import artistic from "@/assets/about/artistic.jpg";
 import family from "@/assets/about/family.jpg";
+import aboutPortraitPrimary from "@/assets/about/myimage2.png";
+import aboutPortraitSecondary from "@/assets/about/IMG_2863.jpg";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const heroImages = [
   {
-    src: professional,
-    alt: "Professional",
-    title: "Professional",
+    src: aboutPortraitPrimary,
+    alt: "Abhishek Panda portrait",
+    title: "Signature",
     caption: "Leadership & Architecture",
     borderGradient: "linear-gradient(135deg, #22d3ee, #3b82f6, #6366f1)",
     badgeColor: "bg-cyan-500/85 text-white",
     icon: Briefcase,
+    imageClassName: "object-[center_14%]",
+  },
+  {
+    src: aboutPortraitSecondary,
+    alt: "Abhishek Panda formal portrait",
+    title: "Formal",
+    caption: "Presence & Professionalism",
+    borderGradient: "linear-gradient(135deg, #0ea5e9, #2563eb, #4f46e5)",
+    badgeColor: "bg-blue-500/85 text-white",
+    icon: Briefcase,
+    imageClassName: "object-[center_12%]",
+  },
+  {
+    src: professional,
+    alt: "Professional",
+    title: "Professional",
+    caption: "Studio Portrait",
+    borderGradient: "linear-gradient(135deg, #f59e0b, #f97316, #ef4444)",
+    badgeColor: "bg-amber-500/85 text-white",
+    icon: Landmark,
   },
   {
     src: traditional,
@@ -55,15 +76,6 @@ const heroImages = [
     borderGradient: "linear-gradient(135deg, #f59e0b, #f97316, #ef4444)",
     badgeColor: "bg-amber-500/85 text-white",
     icon: Landmark,
-  },
-  {
-    src: casual,
-    alt: "Explorer",
-    title: "Explorer",
-    caption: "Curious & Grounded",
-    borderGradient: "linear-gradient(135deg, #10b981, #14b8a6, #06b6d4)",
-    badgeColor: "bg-emerald-500/85 text-white",
-    icon: Compass,
   },
   {
     src: lifestyle,
