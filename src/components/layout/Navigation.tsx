@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AbhishekAnimatedLogo } from "@/components/ui/AbhishekAnimatedLogo";
 import { PublicSearch } from "@/components/layout/PublicSearch";
 import { PrefetchLink } from "@/components/PrefetchLink";
 
@@ -26,6 +25,12 @@ export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const logoBasePath = import.meta.env.BASE_URL || "/";
+  const primaryHeaderLogo = `${logoBasePath}panda-bamboo-trimmed.png`;
+  const secondaryHeaderLogo = `${logoBasePath}pandalogo-transparent.png`;
+  const tertiaryHeaderLogo = `${logoBasePath}panda.svg`;
+  const quaternaryHeaderLogo = `${logoBasePath}Pandalogo.png`;
+  const [headerLogoSrc, setHeaderLogoSrc] = useState(primaryHeaderLogo);
   const location = useLocation();
   const isHomePage = location.pathname === "/";
 
@@ -92,6 +97,14 @@ export const Navigation = () => {
   const landingBorderOpacity = 0.08 + scrollProgress * 0.16;
   const landingBackgroundOpacity = 0.38 + scrollProgress * 0.42;
   const navShellClass = "mx-auto w-full max-w-[1600px] px-4 md:px-6 xl:px-8";
+  const handleHeaderLogoError = () => {
+    setHeaderLogoSrc((prev) => {
+      if (prev === primaryHeaderLogo) return secondaryHeaderLogo;
+      if (prev === secondaryHeaderLogo) return tertiaryHeaderLogo;
+      if (prev === tertiaryHeaderLogo) return quaternaryHeaderLogo;
+      return prev;
+    });
+  };
 
   return (
     <>
@@ -147,8 +160,18 @@ export const Navigation = () => {
               className="flex items-center gap-2 group justify-self-start"
               style={isHomePage ? { transform: `scale(${landingLogoScale})`, transformOrigin: "left center" } : undefined}
             >
-              <div className="group-hover:scale-110 transition-transform duration-300">
-                <AbhishekAnimatedLogo size="md" animate />
+              <div className="relative transition-transform duration-300 group-hover:scale-110">
+                <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.28),rgba(255,255,255,0))] blur-md" />
+                <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-sky-300/45 bg-gradient-to-br from-white/95 via-slate-100/95 to-sky-100/90 p-0.5 shadow-[0_16px_34px_-20px_rgba(34,211,238,0.7)] ring-1 ring-white/70 dark:border-sky-200/35 dark:bg-gradient-to-br dark:from-slate-900/95 dark:via-slate-800/95 dark:to-cyan-900/75 dark:ring-white/20 md:h-14 md:w-14">
+                  <img
+                    src={headerLogoSrc}
+                    alt="Abhishek Panda panda logo"
+                    className="h-full w-full scale-[1.12] object-contain brightness-[1.28] contrast-[1.34] saturate-[1.2] drop-shadow-[0_0_10px_rgba(125,211,252,0.55)]"
+                    loading="eager"
+                    decoding="async"
+                    onError={handleHeaderLogoError}
+                  />
+                </div>
               </div>
             </PrefetchLink>
 

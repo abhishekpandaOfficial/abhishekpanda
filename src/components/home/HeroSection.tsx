@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Sparkles, Code2, Cloud, Brain, BookOpenCheck, Download, Briefcase } from "lucide-react";
-import aboutPortraitPrimary from "@/assets/about/myimage2.png";
-import aboutPortraitSecondary from "@/assets/about/IMG_2863.jpg";
+import heroAvatarDefault from "@/assets/about/hero-avatar-default.png";
+import heroAvatarHover from "@/assets/about/hero-avatar-hover.png";
 import { Button } from "@/components/ui/button";
 import { CVDownloadModal } from "@/components/cv/CVDownloadModal";
 
@@ -140,11 +140,13 @@ const floatingRightTechStacks = [
 ];
 
 const taglines = [
-  "Designing systems that stay reliable as teams and traffic grow.",
-  "Turning product goals into maintainable engineering architecture.",
-  "Architecture-first thinking for cloud, data, and AI platforms.",
-  "Building practical software that ships and scales.",
-  "Engineering clarity from idea to production.",
+  "\"Discipline beats motivation when motivation fades.\"",
+  "\"Small consistent actions compound into massive outcomes.\"",
+  "\"Build with purpose, ship with courage, improve with humility.\"",
+  "\"Your future is created by what you do today, not tomorrow.\"",
+  "\"Stay focused, stay kind, and let your work speak loudly.\"",
+  "\"Excellence is a habit, not a one-time event.\"",
+  "\"Dream big, execute daily, and never stop learning.\"",
 ];
 
 const RotatingEmojiBadge = ({
@@ -321,11 +323,12 @@ const MagicalLocalClock = () => {
 };
 
 export const HeroSection = () => {
+  const logoBasePath = import.meta.env.BASE_URL || "/";
   const [isHovered, setIsHovered] = useState(false);
   const [taglineIndex, setTaglineIndex] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [currentAvatar, setCurrentAvatar] = useState(aboutPortraitPrimary);
-  const [pandaLogoSrc, setPandaLogoSrc] = useState("/panda.svg");
+  const [currentAvatar, setCurrentAvatar] = useState(heroAvatarDefault);
+  const [pandaLogoSrc, setPandaLogoSrc] = useState(`${logoBasePath}panda-bamboo-trimmed.png`);
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
   useEffect(() => {
@@ -338,22 +341,22 @@ export const HeroSection = () => {
 
   useEffect(() => {
     if (hasScrolled) {
-      setCurrentAvatar(aboutPortraitSecondary);
+      setCurrentAvatar(heroAvatarHover);
     } else if (!isHovered) {
-      setCurrentAvatar(aboutPortraitPrimary);
+      setCurrentAvatar(heroAvatarDefault);
     }
   }, [hasScrolled, isHovered]);
 
   const handleHover = () => {
     setIsHovered(true);
     setTaglineIndex(Math.floor(Math.random() * taglines.length));
-    setCurrentAvatar(aboutPortraitSecondary);
+    setCurrentAvatar(heroAvatarHover);
   };
 
   const handleHoverEnd = () => {
     setIsHovered(false);
     if (!hasScrolled) {
-      setCurrentAvatar(aboutPortraitPrimary);
+      setCurrentAvatar(heroAvatarDefault);
     }
   };
 
@@ -362,6 +365,7 @@ export const HeroSection = () => {
       {/* Background Effects */}
       <div className="absolute inset-0 hero-reference-bg" />
       <div className="absolute inset-0 hero-grid-overlay" />
+      <div className="absolute inset-0 hero-diagram-overlay" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/35 to-background/80" />
       
       {/* Animated Orbs */}
@@ -466,6 +470,9 @@ export const HeroSection = () => {
                     className="absolute left-1/2 top-[calc(100%+1rem)] z-[70] w-[min(88vw,26rem)] -translate-x-1/2"
                   >
                     <div className="rounded-[1.4rem] border border-white/20 bg-[linear-gradient(135deg,rgba(14,165,233,0.96),rgba(99,102,241,0.94),rgba(168,85,247,0.94))] px-4 py-3 text-center shadow-[0_24px_80px_-24px_rgba(59,130,246,0.65)] backdrop-blur-xl">
+                      <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-100/85">
+                        Motivational Quote
+                      </p>
                       <p className="text-sm font-semibold leading-6 text-white md:text-[15px]">
                         {taglines[taglineIndex]}
                       </p>
@@ -488,7 +495,7 @@ export const HeroSection = () => {
                       key={currentAvatar}
                       src={currentAvatar}
                       alt="Abhishek Panda - CEO & Architect" 
-                      className="w-full h-full object-cover object-[center_14%] absolute inset-0"
+                      className="absolute inset-0 h-full w-full object-cover object-[center_22%]"
                       initial={{ opacity: 0, scale: 1.1 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
@@ -505,9 +512,9 @@ export const HeroSection = () => {
                 className="absolute -bottom-3 left-[calc(100%-1.5rem)] h-14 w-14 overflow-hidden rounded-2xl border-2 border-white/70 bg-background shadow-[0_18px_40px_-24px_rgba(15,23,42,0.55)] dark:border-slate-800/80 md:h-16 md:w-16"
               >
                 <img
-                  src={currentAvatar === aboutPortraitPrimary ? aboutPortraitSecondary : aboutPortraitPrimary}
+                  src={currentAvatar === heroAvatarDefault ? heroAvatarHover : heroAvatarDefault}
                   alt="Abhishek Panda alternate portrait"
-                  className="h-full w-full object-cover object-[center_12%]"
+                  className="h-full w-full object-cover object-[center_18%]"
                 />
               </motion.div>
               
@@ -536,13 +543,15 @@ export const HeroSection = () => {
                 transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
               >
                 <span className="pointer-events-none absolute -top-8 left-1/2 h-8 w-px -translate-x-1/2 bg-gradient-to-b from-slate-400/80 to-slate-300/10 dark:from-slate-300/70" />
-                <img
-                  src={pandaLogoSrc}
-                  alt="Panda logo"
-                  className="relative h-full w-full object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.32)]"
-                  loading="lazy"
-                  onError={() => setPandaLogoSrc("/abhishek.png")}
-                />
+                <div className="relative flex h-full w-full items-center justify-center rounded-2xl border border-sky-300/35 bg-gradient-to-br from-white/95 via-slate-100/95 to-sky-100/90 p-2 shadow-[0_20px_40px_-24px_rgba(34,211,238,0.8)] ring-1 ring-white/75 dark:border-sky-200/30 dark:bg-gradient-to-br dark:from-slate-900/95 dark:via-slate-800/95 dark:to-cyan-950/80 dark:ring-white/20">
+                  <img
+                    src={pandaLogoSrc}
+                    alt="Panda with bamboo logo"
+                    className="relative h-full w-full object-contain brightness-[1.24] contrast-[1.34] saturate-[1.2] drop-shadow-[0_0_14px_rgba(125,211,252,0.55)]"
+                    loading="lazy"
+                    onError={() => setPandaLogoSrc(`${logoBasePath}pandalogo-transparent.png`)}
+                  />
+                </div>
               </motion.div>
             </div>
           </motion.div>
