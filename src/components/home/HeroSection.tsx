@@ -1,75 +1,141 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, Code2, Cloud, Brain, Database, Cpu, ArrowRight, Shield, FolderOpen, Send, Building2, BookOpenText } from "lucide-react";
+import { Sparkles, Code2, Cloud, Brain, BookOpenCheck, Download, Briefcase } from "lucide-react";
 import aboutPortraitPrimary from "@/assets/about/myimage2.png";
 import aboutPortraitSecondary from "@/assets/about/IMG_2863.jpg";
-import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
+import { Button } from "@/components/ui/button";
+import { CVDownloadModal } from "@/components/cv/CVDownloadModal";
 
 const badges = [
-  { icon: Code2, label: ".NET Architect", color: "from-primary to-secondary", to: "/dotnet-mastery" },
-  { icon: Brain, label: "AI/ML Architect", color: "from-secondary to-purple", to: "/ai-ml-hub" },
-  { icon: Cloud, label: "Cloud Architect", color: "from-sky to-primary", to: "/techhub" },
-  { icon: Building2, label: "Founder", color: "from-amber-500 to-orange-500", to: "/about" },
-  { icon: BookOpenText, label: "Author", color: "from-fuchsia-500 to-rose-500", to: "/articles" },
+  { icon: Brain, label: "Lead AI/ML Architect", color: "from-secondary to-purple" },
+  { icon: Code2, label: "Technical Architect", color: "from-primary to-secondary" },
+  { icon: Cloud, label: "Cloud Solution Architect", color: "from-sky to-primary" },
+  { icon: BookOpenCheck, label: "Author & Mentor", color: "from-amber-500 to-orange-500" },
 ];
 
-const floatingTechStacks = [
+const floatingLeftTechStacks = [
   {
-    icon: Code2,
-    title: ".NET Core",
-    subtitle: "Microservices",
-    position: "top-[10%] left-[2%] xl:left-[4%]",
+    src: "/brand-logos/stacks/dotnet.svg",
+    label: "C#/.NET",
+    position: "top-[9%] left-[2%] xl:left-[4%]",
     delay: 0,
+    accent: "from-indigo-500/30 to-blue-500/20",
   },
   {
-    icon: Database,
-    title: "Data APIs",
-    subtitle: "Realtime Layer",
-    position: "top-[29%] left-[4%] xl:left-[7%]",
-    delay: 0.16,
+    src: "/brand-logos/stacks/microsoftazure.svg",
+    label: "Azure",
+    position: "top-[21%] left-[6%] xl:left-[8%]",
+    delay: 0.12,
+    accent: "from-sky-500/30 to-cyan-500/20",
   },
   {
-    icon: Brain,
-    title: "AI/ML",
-    subtitle: "Agentic Flows",
-    position: "bottom-[31%] left-[3%] xl:left-[6%]",
-    delay: 0.32,
+    src: "/brand-logos/stacks/aws.svg",
+    label: "AWS",
+    position: "top-[33%] left-[2%] xl:left-[4%]",
+    delay: 0.24,
+    accent: "from-amber-500/30 to-orange-500/20",
   },
   {
-    icon: Shield,
-    title: "Platform Sec",
-    subtitle: "Zero Trust",
-    position: "bottom-[10%] left-[2%] xl:left-[4%]",
+    src: "/brand-logos/stacks/angular.svg",
+    label: "Angular",
+    position: "top-[45%] left-[6%] xl:left-[8%]",
+    delay: 0.36,
+    accent: "from-rose-500/30 to-red-500/20",
+  },
+  {
+    src: "/brand-logos/stacks/python.svg",
+    label: "Python",
+    position: "top-[57%] left-[2%] xl:left-[4%]",
     delay: 0.48,
+    accent: "from-blue-500/30 to-amber-500/20",
   },
   {
-    icon: Cloud,
-    title: "Azure · AWS",
-    subtitle: "Cloud Native",
-    position: "top-[12%] right-[2%] xl:right-[4%]",
-    delay: 0.64,
+    src: "/brand-logos/stacks/devops-pipeline-custom.png",
+    label: "GitHub Actions",
+    position: "top-[69%] left-[6%] xl:left-[8%]",
+    delay: 0.6,
+    accent: "from-orange-500/30 to-amber-500/20",
   },
   {
-    icon: Cpu,
-    title: "LLM Systems",
-    subtitle: "Inference & Ops",
-    position: "top-[31%] right-[4%] xl:right-[7%]",
-    delay: 0.8,
+    src: "/brand-logos/stacks/github.svg",
+    label: "DevOps Pipeline",
+    position: "top-[15%] left-[10%] xl:left-[12%]",
+    delay: 0.72,
+    accent: "from-cyan-500/30 to-blue-500/20",
   },
   {
-    icon: FolderOpen,
-    title: "Product Ships",
-    subtitle: "Execution First",
-    position: "bottom-[29%] right-[3%] xl:right-[6%]",
+    src: "/brand-logos/stacks/octopus-custom.png",
+    label: "Octopus Deploy",
+    position: "top-[39%] left-[10%] xl:left-[12%]",
+    delay: 0.84,
+    accent: "from-orange-500/30 to-rose-500/20",
+  },
+  {
+    src: "/brand-logos/stacks/docker.svg",
+    label: "Docker",
+    position: "top-[63%] left-[10%] xl:left-[12%]",
     delay: 0.96,
+    accent: "from-blue-500/30 to-cyan-500/20",
   },
   {
-    icon: Send,
-    title: "Founder Mode",
-    subtitle: "Ideas to Launch",
-    position: "bottom-[9%] right-[2%] xl:right-[4%]",
-    delay: 1.12,
+    src: "/brand-logos/stacks/kubernetes-custom.png",
+    label: "Kubernetes",
+    position: "top-[81%] left-[2%] xl:left-[4%]",
+    delay: 1.08,
+    accent: "from-indigo-500/30 to-sky-500/20",
+  },
+];
+
+const floatingRightTechStacks = [
+  {
+    src: "/brand-logos/stacks/langchain.svg",
+    label: "LangChain",
+    position: "top-[12%] right-[11%] xl:right-[13%]",
+    delay: 0.08,
+    accent: "from-emerald-500/30 to-teal-500/20",
+  },
+  {
+    src: "/llm-logos/mistral.svg",
+    label: "LangGraph",
+    position: "top-[24%] right-[13%] xl:right-[15%]",
+    delay: 0.2,
+    accent: "from-cyan-500/30 to-teal-500/20",
+  },
+  {
+    src: "/llm-logos/claude-custom.png",
+    label: "Claude",
+    position: "top-[36%] right-[11%] xl:right-[13%]",
+    delay: 0.32,
+    accent: "from-violet-500/30 to-fuchsia-500/20",
+  },
+  {
+    src: "/llm-logos/codex-custom.png",
+    label: "Codex",
+    position: "top-[48%] right-[13%] xl:right-[15%]",
+    delay: 0.44,
+    accent: "from-emerald-500/30 to-sky-500/20",
+  },
+  {
+    src: "/llm-logos/kimi-custom.png",
+    label: "Kimi",
+    position: "top-[60%] right-[11%] xl:right-[13%]",
+    delay: 0.56,
+    accent: "from-blue-500/30 to-cyan-500/20",
+  },
+  {
+    src: "/llm-logos/qwen-custom.png",
+    label: "QWEN",
+    position: "top-[72%] right-[13%] xl:right-[15%]",
+    delay: 0.68,
+    accent: "from-amber-500/30 to-orange-500/20",
+  },
+  {
+    src: "/llm-logos/meta.svg",
+    label: "Llama",
+    position: "top-[84%] right-[11%] xl:right-[13%]",
+    delay: 0.8,
+    accent: "from-indigo-500/30 to-blue-500/20",
   },
 ];
 
@@ -79,54 +145,6 @@ const taglines = [
   "Architecture-first thinking for cloud, data, and AI platforms.",
   "Building practical software that ships and scales.",
   "Engineering clarity from idea to production.",
-];
-
-const primaryCtas = [
-  {
-    label: "View Projects",
-    to: "/projects",
-    icon: FolderOpen,
-    eyebrow: "Builds",
-    description: "Explore live products and engineering work",
-    className:
-      "border-sky-400/20 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.18),transparent_40%),linear-gradient(160deg,rgba(255,255,255,0.94),rgba(239,246,255,0.92))] text-slate-900 hover:border-sky-400/45 hover:shadow-[0_24px_60px_-35px_rgba(56,189,248,0.5)] dark:bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.22),transparent_38%),linear-gradient(160deg,rgba(15,23,42,0.94),rgba(8,47,73,0.94))] dark:text-white",
-  },
-  {
-    label: "Phantom VPN",
-    href: "https://phantom.origixcloud.com/",
-    icon: Shield,
-    eyebrow: "Security",
-    description: "Open the privacy-first secure tunnel",
-    className:
-      "border-emerald-400/20 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_42%),linear-gradient(160deg,rgba(236,253,245,0.96),rgba(209,250,229,0.88))] text-emerald-950 hover:border-emerald-400/45 hover:shadow-[0_24px_60px_-35px_rgba(16,185,129,0.45)] dark:bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.22),transparent_38%),linear-gradient(160deg,rgba(6,78,59,0.95),rgba(6,95,70,0.92))] dark:text-white",
-  },
-  {
-    label: "Connect",
-    href: "https://www.linkedin.com/in/abhishekpandaofficial/",
-    icon: Send,
-    eyebrow: "Network",
-    description: "Connect with Abhishek on LinkedIn",
-    className:
-      "border-violet-400/20 bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.18),transparent_42%),linear-gradient(160deg,rgba(245,243,255,0.96),rgba(237,233,254,0.9))] text-violet-950 hover:border-violet-400/45 hover:shadow-[0_24px_60px_-35px_rgba(168,85,247,0.48)] dark:bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.22),transparent_38%),linear-gradient(160deg,rgba(59,7,100,0.94),rgba(76,29,149,0.92))] dark:text-white",
-  },
-  {
-    label: "Enter Tech Hub",
-    to: "/techhub",
-    icon: Cpu,
-    eyebrow: "Mastery",
-    description: "Jump into deep technical learning tracks",
-    className:
-      "border-amber-400/20 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.16),transparent_40%),linear-gradient(160deg,rgba(255,251,235,0.96),rgba(254,243,199,0.9))] text-amber-950 hover:border-amber-400/45 hover:shadow-[0_24px_60px_-35px_rgba(245,158,11,0.42)] dark:bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.2),transparent_38%),linear-gradient(160deg,rgba(69,26,3,0.94),rgba(120,53,15,0.9))] dark:text-white",
-  },
-  {
-    label: "Read Deep Dives",
-    to: "/articles",
-    icon: BookOpenText,
-    eyebrow: "Writing",
-    description: "Open long-form architecture and engineering articles",
-    className:
-      "border-rose-400/20 bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.16),transparent_40%),linear-gradient(160deg,rgba(255,241,242,0.96),rgba(255,228,230,0.9))] text-rose-950 hover:border-rose-400/45 hover:shadow-[0_24px_60px_-35px_rgba(244,63,94,0.42)] dark:bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.2),transparent_38%),linear-gradient(160deg,rgba(76,5,25,0.94),rgba(136,19,55,0.9))] dark:text-white",
-  },
 ];
 
 const RotatingEmojiBadge = ({
@@ -307,6 +325,8 @@ export const HeroSection = () => {
   const [taglineIndex, setTaglineIndex] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [currentAvatar, setCurrentAvatar] = useState(aboutPortraitPrimary);
+  const [pandaLogoSrc, setPandaLogoSrc] = useState("/panda.svg");
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -340,13 +360,13 @@ export const HeroSection = () => {
   return (
     <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-24 md:pt-28">
       {/* Background Effects */}
-      <div className="absolute inset-0 mesh-gradient" />
+      <div className="absolute inset-0 hero-reference-bg" />
       <div className="absolute inset-0 hero-grid-overlay" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/35 to-background/80" />
       
       {/* Animated Orbs */}
       <motion.div
-        className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
+        className="absolute left-[10%] top-[18%] h-64 w-64 rounded-full bg-primary/20 blur-3xl md:left-1/4 md:top-1/4 md:h-96 md:w-96"
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.3, 0.5, 0.3],
@@ -358,7 +378,7 @@ export const HeroSection = () => {
         }}
       />
       <motion.div
-        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-3xl"
+        className="absolute bottom-[14%] right-[8%] h-64 w-64 rounded-full bg-secondary/20 blur-3xl md:bottom-1/4 md:right-1/4 md:h-96 md:w-96"
         animate={{
           scale: [1.2, 1, 1.2],
           opacity: [0.5, 0.3, 0.5],
@@ -372,22 +392,51 @@ export const HeroSection = () => {
 
       <div className="relative w-full px-4 py-4 md:px-6 md:py-6 xl:px-8">
         <div className="pointer-events-none absolute inset-0 hidden lg:block">
-          {floatingTechStacks.map((stack, index) => (
+          {floatingLeftTechStacks.map((stack, index) => (
             <motion.div
-              key={stack.title}
+              key={`${stack.label}-${index}`}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 + stack.delay }}
-              className={`float-soft absolute ${stack.position} rounded-xl border border-border/60 bg-background/70 backdrop-blur-xl px-3 py-2 shadow-sm`}
-              style={{ animationDelay: `${index * 0.25}s` }}
+              className={`float-wave absolute ${stack.position}`}
+              style={{
+                animationDelay: `${index * 0.12}s`,
+                animationDuration: `${4.8 + (index % 4) * 0.6}s`,
+              }}
             >
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
-                  <stack.icon className="h-4 w-4" />
+              <div
+                className={`group flex h-12 w-12 items-center justify-center rounded-2xl border border-border/60 bg-gradient-to-br ${stack.accent} shadow-[0_22px_40px_-28px_rgba(15,23,42,0.65)] backdrop-blur-xl transition-transform duration-300 group-hover:scale-110`}
+                title={stack.label}
+                aria-label={stack.label}
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white ring-2 ring-slate-200/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] dark:bg-white dark:ring-slate-200/90">
+                  {stack.src ? (
+                    <img src={stack.src} alt={stack.label} className="h-6 w-6 object-contain saturate-125 contrast-125 drop-shadow-[0_2px_2px_rgba(15,23,42,0.18)]" loading="lazy" />
+                  ) : stack.icon ? (
+                    <stack.icon className="h-5 w-5 text-primary" />
+                  ) : null}
                 </div>
-                <div>
-                  <div className="text-[11px] font-semibold text-foreground">{stack.title}</div>
-                  <div className="text-[10px] text-muted-foreground">{stack.subtitle}</div>
+              </div>
+            </motion.div>
+          ))}
+
+          {/* Keep right-side icons inward so they do not collide with the fixed social sidebar. */}
+          {floatingRightTechStacks.map((stack, index) => (
+            <motion.div
+              key={`${stack.label}-right-${index}`}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.65 + stack.delay }}
+              className={`float-soft absolute ${stack.position}`}
+              style={{ animationDelay: `${(index + 6) * 0.2}s` }}
+            >
+              <div
+                className={`group flex h-12 w-12 items-center justify-center rounded-2xl border border-border/60 bg-gradient-to-br ${stack.accent} shadow-[0_22px_40px_-28px_rgba(15,23,42,0.65)] backdrop-blur-xl transition-transform duration-300 group-hover:scale-110`}
+                title={stack.label}
+                aria-label={stack.label}
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white ring-2 ring-slate-200/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] dark:bg-white dark:ring-slate-200/90">
+                  <img src={stack.src} alt={stack.label} className="h-6 w-6 object-contain saturate-125 contrast-125 drop-shadow-[0_2px_2px_rgba(15,23,42,0.18)]" loading="lazy" />
                 </div>
               </div>
             </motion.div>
@@ -462,14 +511,6 @@ export const HeroSection = () => {
                 />
               </motion.div>
               
-              {/* Sparkle Badge */}
-              <motion.div
-                className="absolute -top-2 -right-2 w-10 h-10 bg-accent rounded-full flex items-center justify-center shadow-lg"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              >
-                <Sparkles className="w-5 h-5 text-accent-foreground" />
-              </motion.div>
             </div>
           </motion.div>
 
@@ -479,33 +520,32 @@ export const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h1 className="audiowide-regular mb-2 text-balance text-4xl leading-[1.02] tracking-[0.01em] text-foreground md:text-6xl lg:text-7xl xl:text-[5rem]">
-              <RotatingEmojiBadge
-                className="mr-3 md:mr-4"
-                emoji="🐯"
-              />
-              <span className="inline-block bg-gradient-to-r from-slate-950 via-sky-700 to-cyan-600 bg-clip-text tracking-[0.02em] text-transparent dark:from-white dark:via-sky-200 dark:to-cyan-300">
-                Abhishek Panda
-              </span>
-              <RotatingEmojiBadge
-                className="ml-3 md:ml-4"
-                emoji="🦁"
-              />
-            </h1>
-            <p className="mb-3 text-base font-medium tracking-[-0.02em] text-muted-foreground md:text-xl xl:text-[1.4rem]">
-              Architecting production-ready .NET, Cloud, and AI systems
-            </p>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs font-semibold tracking-[0.06em] text-primary">
+              <Sparkles className="h-4 w-4" />
+              @the_abhishekpanda
+            </div>
+            <div className="mb-2 flex items-center justify-center gap-3 md:gap-5">
+              <h1 className="ap-name-display text-4xl text-foreground md:text-6xl lg:text-7xl xl:text-[5rem]">
+                <span className="ap-name-gradient inline-block">
+                  Abhishek Panda
+                </span>
+              </h1>
+              <motion.div
+                className="relative h-20 w-20 shrink-0 md:h-24 md:w-24 lg:h-28 lg:w-28"
+                animate={{ y: [0, 5, 0], rotate: [1.4, -1.4, 1.4] }}
+                transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span className="pointer-events-none absolute -top-8 left-1/2 h-8 w-px -translate-x-1/2 bg-gradient-to-b from-slate-400/80 to-slate-300/10 dark:from-slate-300/70" />
+                <img
+                  src={pandaLogoSrc}
+                  alt="Panda logo"
+                  className="relative h-full w-full object-contain drop-shadow-[0_20px_30px_rgba(15,23,42,0.32)]"
+                  loading="lazy"
+                  onError={() => setPandaLogoSrc("/abhishek.png")}
+                />
+              </motion.div>
+            </div>
           </motion.div>
-
-          {/* Tagline */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mx-auto mb-4 max-w-3xl text-sm leading-relaxed text-foreground/80 md:text-base xl:text-[1.05rem]"
-          >
-            Building reliable products with clear architecture, strong execution, and measurable outcomes.
-          </motion.p>
 
           {/* Identity Badges */}
           <motion.div
@@ -522,77 +562,54 @@ export const HeroSection = () => {
                 transition={{ duration: 0.3, delay: 0.5 + index * 0.1 }}
                 className="px-0"
               >
-                {badge.to ? (
-                  <Link to={badge.to} className="glass-card-hover px-4 py-2 rounded-full flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${badge.color} flex items-center justify-center`}>
-                      <badge.icon className="w-4 h-4 text-primary-foreground" />
-                    </div>
-                    <span className="font-semibold text-foreground">{badge.label}</span>
-                  </Link>
-                ) : (
-                  <div className="glass-card-hover px-4 py-2 rounded-full flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${badge.color} flex items-center justify-center`}>
-                      <badge.icon className="w-4 h-4 text-primary-foreground" />
-                    </div>
-                    <span className="font-semibold text-foreground">{badge.label}</span>
+                <div className="glass-card-hover px-4 py-2 rounded-full flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${badge.color} flex items-center justify-center`}>
+                    <badge.icon className="w-4 h-4 text-primary-foreground" />
                   </div>
-                )}
+                  <span className="font-semibold text-foreground">{badge.label}</span>
+                </div>
               </motion.div>
             ))}
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.52 }}
-            className="mb-3"
-          >
-            <HeroSocialIcons className="justify-center" />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.58 }}
-            className="mx-auto mb-2 w-full max-w-3xl"
-          >
-            <div className="flex flex-wrap justify-center gap-2.5">
-              {primaryCtas.map((cta) => {
-                const content = (
-                  <>
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white/70 shadow-sm dark:border-white/10 dark:bg-white/10">
-                      <cta.icon className="h-4 w-4" />
-                    </span>
-                    <span className="text-sm font-semibold md:text-[15px]">{cta.label}</span>
-                  </>
-                );
-
-                const className = `group inline-flex items-center justify-center gap-2.5 rounded-full border px-4 py-3 text-sm font-semibold backdrop-blur-xl transition hover:-translate-y-0.5 ${cta.className}`;
-
-                if (cta.href) {
-                  return (
-                    <a
-                      key={cta.label}
-                      href={cta.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={className}
-                    >
-                      {content}
-                    </a>
-                  );
-                }
-
-                return (
-                  <Link key={cta.label} to={cta.to} className={className}>
-                    {content}
-                  </Link>
-                );
-              })}
-            </div>
-          </motion.div>
-
           <MagicalLocalClock />
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.55 }}
+            className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          >
+            <Button
+              size="lg"
+              onClick={() => setIsDownloadModalOpen(true)}
+              className="group relative overflow-hidden rounded-lg border-0 bg-transparent p-0 text-white shadow-none hover:bg-transparent"
+            >
+              <span className="relative inline-flex items-center gap-2 rounded-lg border border-sky-300/35 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 px-6 py-3 font-semibold text-white shadow-[0_16px_36px_-22px_rgba(59,130,246,0.9)] transition-all duration-300 hover:-translate-y-0.5 hover:from-blue-400 hover:via-indigo-400 hover:to-violet-400 hover:shadow-[0_22px_46px_-22px_rgba(79,70,229,0.95)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                <span className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35),transparent_45%)] opacity-80 transition-opacity duration-300 group-hover:opacity-100" />
+                <span className="relative inline-flex h-6 w-6 items-center justify-center rounded-md bg-white/20 ring-1 ring-white/35">
+                  <Download className="h-4 w-4" />
+                </span>
+                <span className="relative">Download CV</span>
+              </span>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              className="group relative overflow-hidden rounded-lg border-0 bg-transparent p-0 text-white shadow-none hover:bg-transparent"
+            >
+              <Link
+                to="/mentorship"
+                className="relative inline-flex items-center gap-2 rounded-lg border border-emerald-300/35 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-6 py-3 font-semibold text-white shadow-[0_16px_36px_-22px_rgba(16,185,129,0.9)] transition-all duration-300 hover:-translate-y-0.5 hover:from-emerald-400 hover:via-teal-400 hover:to-cyan-400 hover:shadow-[0_22px_46px_-22px_rgba(20,184,166,0.95)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                <span className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35),transparent_45%)] opacity-80 transition-opacity duration-300 group-hover:opacity-100" />
+                <span className="relative inline-flex h-6 w-6 items-center justify-center rounded-md bg-white/20 ring-1 ring-white/35">
+                  <Briefcase className="h-4 w-4" />
+                </span>
+                <span className="relative">Mentorship</span>
+              </Link>
+            </Button>
+          </motion.div>
 
         </div>
       </div>
@@ -611,6 +628,8 @@ export const HeroSection = () => {
           />
         </div>
       </motion.div>
+
+      <CVDownloadModal isOpen={isDownloadModalOpen} onClose={() => setIsDownloadModalOpen(false)} />
     </section>
   );
 };

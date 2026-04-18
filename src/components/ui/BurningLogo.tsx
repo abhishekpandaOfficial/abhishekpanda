@@ -41,7 +41,7 @@ export const BurningLogo = ({ size = 'md', className, animate = true }: BurningL
 
       <div className="relative w-full h-full rounded-xl overflow-hidden border border-border/60 bg-[#0b1220] shadow-sm dark:border-slate-500/60 dark:bg-slate-900">
         <img
-          src="/Abhishek.PNG"
+          src="/abhishek.png"
           alt="Abhishek Panda"
           className="w-full h-full object-cover dark:brightness-110 dark:contrast-110"
           loading="eager"

@@ -44,7 +44,7 @@ create policy "Public can read published originx updates"
 
 insert into public.site_knowledge_base (category, title, summary, route, priority)
 values
-  ('website', 'OriginX Website Overview', 'Official portal for OriginX Labs ecosystem: products, academy, mentorship, blogs, and enterprise collaboration.', '/', 100),
+  ('website', 'Website Overview', 'Official portal for Abhishek Panda ecosystem: products, academy, mentorship, blogs, and enterprise collaboration.', '/', 100),
   ('chronyx', 'CHRONYX', 'Personal system of record for planning, notes, finance tracking, and life management workflows.', '/chronyx', 98),
   ('llm-galaxy', 'LLM Galaxy', 'Database-backed map for model families, benchmarks, trend signals, and use-case guidance.', '/llm-galaxy', 98),
   ('academy', 'Academy', 'Learning catalog with architecture, AI, and engineering tracks curated by Abhishek Panda.', '/academy', 85),

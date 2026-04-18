@@ -23,7 +23,7 @@ export function OriginXAnimatedLogo({ className, size = "md" }: OriginXAnimatedL
   const [src, setSrc] = useState("/Logo+word-OX-1.png");
 
   return (
-    <span className={cn("relative inline-flex items-center justify-center", frameSize[size], className)} aria-label="OriginX Labs logo">
+    <span className={cn("relative inline-flex items-center justify-center", frameSize[size], className)} aria-label="Brand logo">
       <motion.span
         className="pointer-events-none absolute inset-0 rounded-full border border-primary/50"
         animate={{ rotate: 360 }}
@@ -37,7 +37,7 @@ export function OriginXAnimatedLogo({ className, size = "md" }: OriginXAnimatedL
 
       <img
         src={src}
-        alt="OriginX Labs"
+        alt="Brand logo"
         onError={() => setSrc("/OriginXLabs-Logo-Final.png")}
         className="relative h-[68%] w-[68%] object-contain"
         loading="lazy"

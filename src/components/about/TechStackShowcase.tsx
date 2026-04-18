@@ -10,6 +10,7 @@ type TechLogo = {
   src: string;
   categories: Exclude<CategoryId, "all">[];
   imgClassName?: string;
+  darkInvert?: boolean;
 };
 
 const categories: { id: CategoryId; label: string }[] = [
@@ -32,7 +33,13 @@ const techLogos: TechLogo[] = [
   { id: "react", name: "React", src: "/brand-logos/stacks/react.svg", categories: ["frontend"] },
   { id: "angular", name: "Angular", src: "/brand-logos/stacks/angular.svg", categories: ["frontend"] },
   { id: "vue", name: "Vue", src: "/brand-logos/stacks/vue.svg", categories: ["frontend"] },
-  { id: "nextjs", name: "Next.js", src: "/brand-logos/stacks/nextjs.svg", categories: ["frontend"] },
+  {
+    id: "nextjs",
+    name: "Next.js",
+    src: "/brand-logos/stacks/nextjs.svg",
+    categories: ["frontend"],
+    darkInvert: true,
+  },
   {
     id: "aws",
     name: "AWS",
@@ -47,7 +54,13 @@ const techLogos: TechLogo[] = [
   { id: "terraform", name: "Terraform", src: "/brand-logos/stacks/terraform.svg", categories: ["cloud", "devops"] },
   { id: "jenkins", name: "Jenkins", src: "/brand-logos/stacks/jenkins.svg", categories: ["devops"] },
   { id: "git", name: "Git", src: "/brand-logos/stacks/git.svg", categories: ["devops"] },
-  { id: "github", name: "GitHub", src: "/brand-logos/stacks/github.svg", categories: ["devops"] },
+  {
+    id: "github",
+    name: "GitHub",
+    src: "/brand-logos/stacks/github.svg",
+    categories: ["devops"],
+    darkInvert: true,
+  },
   { id: "postgresql", name: "PostgreSQL", src: "/brand-logos/stacks/postgresql.svg", categories: ["database"] },
   { id: "mongodb", name: "MongoDB", src: "/brand-logos/stacks/mongodb.svg", categories: ["database"] },
   { id: "redis", name: "Redis", src: "/brand-logos/stacks/redis.svg", categories: ["database"] },
@@ -81,13 +94,14 @@ function TechLogoCard({ tech, isDimmed }: { tech: TechLogo; isDimmed: boolean })
       )}
       aria-label={`${tech.name} technology`}
     >
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 bg-background/85 sm:h-9 sm:w-9 md:h-10 md:w-10">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 bg-white/90 shadow-sm dark:border-slate-600/80 dark:bg-slate-100 sm:h-9 sm:w-9 md:h-10 md:w-10">
         <img
           src={tech.src}
           alt={`${tech.name} logo`}
           loading="lazy"
           className={cn(
             "h-6 w-6 object-contain drop-shadow-[0_2px_6px_rgba(15,23,42,0.18)] transition-transform duration-300 group-hover:scale-110 sm:h-7 sm:w-7",
+            tech.darkInvert && "dark:invert",
             tech.imgClassName,
           )}
           onError={(event) => {
@@ -96,7 +110,7 @@ function TechLogoCard({ tech, isDimmed }: { tech: TechLogo; isDimmed: boolean })
           }}
         />
       </div>
-      <p className="mt-1 line-clamp-1 text-[9px] font-medium text-foreground/90 sm:text-[10px]">{tech.name}</p>
+      <p className="mt-1 line-clamp-1 text-[9px] font-medium text-foreground/95 dark:text-slate-100 sm:text-[10px]">{tech.name}</p>
     </motion.article>
   );
 }
@@ -154,7 +168,7 @@ export function TechStackShowcase() {
   }, [visibleTechs]);
 
   return (
-    <section className="overflow-hidden bg-muted/30 py-12 md:py-16">
+    <section className="overflow-hidden bg-muted/30 dark:bg-slate-950/70 py-12 md:py-16">
       <div className="w-full px-4 md:px-6 xl:px-8 2xl:px-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -181,7 +195,7 @@ export function TechStackShowcase() {
                   "rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-200 md:text-sm",
                   activeCategory === category.id
                     ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                    : "border-border/60 bg-background/70 text-muted-foreground hover:text-foreground",
+                    : "border-border/60 bg-background/70 text-muted-foreground hover:text-foreground dark:bg-slate-900/70 dark:text-slate-300 dark:hover:text-slate-100",
                 )}
               >
                 {category.label}
@@ -190,7 +204,7 @@ export function TechStackShowcase() {
           </div>
         </motion.div>
 
-        <div className="rounded-[2rem] border border-border/60 bg-background/80 px-2 py-3 shadow-[0_30px_80px_-60px_rgba(15,23,42,0.55)] backdrop-blur sm:px-3 md:px-4">
+        <div className="rounded-[2rem] border border-border/60 bg-background/85 dark:border-slate-700/80 dark:bg-slate-900/80 px-2 py-3 shadow-[0_30px_80px_-60px_rgba(15,23,42,0.55)] backdrop-blur sm:px-3 md:px-4">
           <div className="space-y-1">
           <InfiniteScrollRow items={rowA} direction="left" speed={30} activeCategory={activeCategory} />
           <InfiniteScrollRow items={rowB} direction="right" speed={34} activeCategory={activeCategory} />

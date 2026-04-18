@@ -370,7 +370,7 @@ export default function Courses() {
 
           <div className="mt-12 rounded-[2rem] border border-amber-400/35 bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 p-6 md:p-8 shadow-[0_20px_60px_rgba(180,83,9,0.15)] dark:from-amber-950/40 dark:via-yellow-950/30 dark:to-amber-900/40">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-300">Certificate Preview</p>
-            <h2 className="mt-2 text-3xl font-black tracking-tight text-amber-950 dark:text-amber-100">OriginX Labs L&amp;D Completion Certificate</h2>
+            <h2 className="mt-2 text-3xl font-black tracking-tight text-amber-950 dark:text-amber-100">Abhishek Panda L&amp;D Completion Certificate</h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-amber-900/80 dark:text-amber-100/80">
               Showcase a premium signed completion certificate after course completion. This demo is used for marketing and enrollment trust.
             </p>
@@ -383,12 +383,12 @@ export default function Courses() {
                 </div>
                 <div className="mt-4 flex justify-center">
                   <BrandLogo
-                    variant="originx"
+                    variant="abhishek"
                     size="lg"
                     className="rounded-2xl border border-amber-300/70 bg-white p-3 shadow-sm dark:border-amber-400/30 dark:bg-slate-900"
                   />
                 </div>
-                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">OriginX Labs · Learning &amp; Development Division</p>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">Abhishek Panda · Learning &amp; Development</p>
                 <h3 className="mt-2 text-3xl font-black tracking-tight text-amber-950 dark:text-amber-100">Certificate of Completion</h3>
                 <p className="mt-2 text-sm text-amber-900/80 dark:text-amber-100/80">
                   Awarded to <span className="font-bold">Alejandro Rossi</span> for successful completion of the selected video course track and session assessments.
@@ -400,7 +400,7 @@ export default function Courses() {
                   Course: <span className="font-semibold">.NET Web API Zero to Hero</span>
                 </div>
                 <div className="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm text-amber-900 dark:border-amber-400/30 dark:bg-amber-950/30 dark:text-amber-100">
-                  Certificate ID: <span className="font-semibold">ORX-LND-2026-00128</span>
+                  Certificate ID: <span className="font-semibold">ABP-LND-2026-00128</span>
                 </div>
                 <div className="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm text-amber-900 dark:border-amber-400/30 dark:bg-amber-950/30 dark:text-amber-100">
                   Completion: <span className="font-semibold">March 07, 2026</span>
@@ -409,7 +409,7 @@ export default function Courses() {
 
               <div className="mt-8 flex flex-col gap-4 border-t border-amber-300/60 pt-6 md:flex-row md:items-end md:justify-between">
                 <div className="space-y-3">
-                  <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">Verified by OriginX Labs L&amp;D</p>
+                  <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">Verified by Abhishek Panda L&amp;D</p>
                   <p className="text-xs text-amber-800/80 dark:text-amber-200/80">Digitally verifiable and issued after completion milestone.</p>
                   <div className="flex items-center gap-2 pt-1">
                     <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Collaboration</span>
@@ -426,11 +426,11 @@ export default function Courses() {
                 <div className="grid gap-3 text-right">
                   <div>
                     <p className="font-serif text-2xl italic text-amber-900 dark:text-amber-100">Abhishek Panda</p>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">CEO, OriginX Labs</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Lead AI/ML Architect</p>
                   </div>
                   <div>
                     <p className="font-serif text-xl italic text-amber-900 dark:text-amber-100">Namrata Sahoo</p>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Director, OriginX Labs</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Director</p>
                   </div>
                 </div>
               </div>

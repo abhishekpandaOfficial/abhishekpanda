@@ -3,8 +3,8 @@
 create table if not exists public.business_companies (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  legal_name text not null default 'OriginX Labs',
-  brand_name text not null default 'OriginX Labs',
+  legal_name text not null default 'Abhishek Panda',
+  brand_name text not null default 'Abhishek Panda',
   website text,
   website_urls text[] not null default '{}',
   registered_date date,

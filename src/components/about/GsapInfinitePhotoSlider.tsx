@@ -83,17 +83,16 @@ export function GsapInfinitePhotoSlider({ items, className }: GsapInfinitePhotoS
   }, [items]);
 
   return (
-    <div ref={rootRef} className={cn("relative mx-auto w-full max-w-[840px]", className)}>
+    <div ref={rootRef} className={cn("relative left-1/2 w-screen max-w-none -translate-x-1/2", className)}>
       <div
         ref={viewportRef}
-        className="relative overflow-hidden rounded-[2rem] border border-border/50 bg-card/60 p-3 shadow-[0_16px_50px_rgba(2,6,23,0.3)]"
+        className="relative overflow-hidden rounded-none border-y border-border/50 bg-card/60 p-3 shadow-[0_16px_50px_rgba(2,6,23,0.3)] md:rounded-[2rem] md:border"
       >
         <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-12 bg-gradient-to-r from-background to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-12 bg-gradient-to-l from-background to-transparent" />
 
         <div ref={trackRef} className="flex w-max gap-4">
           {loopItems.map((item, index) => {
-            const Icon = item.icon;
             const original = index % items.length;
             const isActive = original === activeIndex;
             return (
@@ -116,11 +115,6 @@ export function GsapInfinitePhotoSlider({ items, className }: GsapInfinitePhotoS
                   className={cn("h-full w-full object-cover object-top", item.imageClassName)}
                   draggable={false}
                 />
-
-                <div className={cn("absolute left-3 top-3 z-20 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold shadow-lg", item.badgeColor)}>
-                  <Icon className="h-3.5 w-3.5" />
-                  {item.title}
-                </div>
 
                 <div className="absolute bottom-3 right-3 z-20 rounded-full bg-black/55 px-3 py-1.5 text-[11px] text-white backdrop-blur-sm md:text-xs">
                   {item.caption}

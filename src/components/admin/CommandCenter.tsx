@@ -179,7 +179,7 @@ export const CommandCenter = () => {
                 <div className="relative shrink-0">
                   <div className="absolute inset-0 rounded-[22px] bg-sky-400/25 blur-xl dark:bg-sky-300/10" />
                   <img
-                    src="/Abhishek.PNG"
+                    src="/abhishek.png"
                     alt="Abhishek Panda"
                     className="relative h-14 w-14 rounded-[18px] border border-white/40 object-cover shadow-xl ring-1 ring-slate-950/5 dark:border-white/10 dark:ring-white/10"
                   />

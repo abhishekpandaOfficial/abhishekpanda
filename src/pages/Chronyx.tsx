@@ -13,7 +13,7 @@ export default function Chronyx() {
   const canonical = `${SITE_URL.replace(/\/$/, "")}/chronyx`;
   const title = "CHRONYX | A Quiet Space for Your Life (Personal System of Record)";
   const description =
-    "CHRONYX is a calm, private personal space for notes, planning, finance tracking, and life organization. Built under OriginX Labs with an obsession for clarity and speed.";
+    "CHRONYX is a calm, private personal space for notes, planning, finance tracking, and life organization. Built with an obsession for clarity and speed.";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -24,9 +24,9 @@ export default function Chronyx() {
     description,
     url: "https://www.getchronyx.com",
     publisher: {
-      "@type": "Organization",
-      name: "OriginX Labs Pvt. Ltd.",
-      url: "https://www.originxlabs.com",
+      "@type": "Person",
+      name: "Abhishek Panda",
+      url: "https://www.abhishekpanda.com",
     },
   };
 
@@ -59,7 +59,7 @@ export default function Chronyx() {
                 </div>
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/70 backdrop-blur border border-border/50">
                   <ChronyxLogo compact size="sm" imageClassName="h-5 w-5" />
-                  <span className="text-sm font-semibold text-foreground">by OriginX Labs</span>
+                  <span className="text-sm font-semibold text-foreground">by Abhishek Panda</span>
                 </div>
 
                 <h1 className="mt-6 text-4xl md:text-6xl font-black tracking-tight">
@@ -145,17 +145,17 @@ export default function Chronyx() {
             <div className="glass-card rounded-2xl p-8 relative overflow-hidden">
               <div className="absolute inset-0 opacity-30 bg-[conic-gradient(from_180deg_at_50%_50%,rgba(59,130,246,0.6),rgba(45,212,191,0.45),rgba(168,85,247,0.55),rgba(59,130,246,0.6))]" />
               <div className="relative">
-                <h2 className="text-2xl md:text-3xl font-black tracking-tight">Built with OriginX Labs</h2>
+                <h2 className="text-2xl md:text-3xl font-black tracking-tight">Built by Abhishek Panda</h2>
                 <p className="mt-3 text-muted-foreground leading-relaxed">
-                  CHRONYX is a flagship collaboration between Abhishek Panda and OriginX Labs Pvt. Ltd. The mission is simple:
+                  CHRONYX is a flagship product initiative by Abhishek Panda. The mission is simple:
                   a personal, quiet space where you can plan, write, track, and build your life system.
                 </p>
                 <div className="mt-6">
                   <Button variant="glass" size="lg" asChild>
-                    <a href="https://www.originxlabs.com" target="_blank" rel="noopener noreferrer">
-                      Explore OriginX Labs
+                    <Link to="/contact">
+                      Connect with Abhishek
                       <ArrowRight className="w-5 h-5" />
-                    </a>
+                    </Link>
                   </Button>
                 </div>
               </div>

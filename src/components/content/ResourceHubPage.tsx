@@ -1,4 +1,5 @@
 import { ArrowRight, type LucideIcon } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/layout/Footer";
 import { Navigation } from "@/components/layout/Navigation";
@@ -55,6 +56,16 @@ export function ResourceHubPage({
   sectionTitle,
   sectionDescription,
 }: ResourceHubPageProps) {
+  const [layoutMode, setLayoutMode] = useState<"grid" | "list">("grid");
+
+  const tagPalette = [
+    "border-sky-300/40 bg-sky-500/10 text-sky-700 dark:text-sky-300",
+    "border-emerald-300/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    "border-amber-300/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+    "border-violet-300/40 bg-violet-500/10 text-violet-700 dark:text-violet-300",
+    "border-rose-300/40 bg-rose-500/10 text-rose-700 dark:text-rose-300",
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -110,26 +121,51 @@ export function ResourceHubPage({
           </div>
 
           <section className="mt-10">
-            <div className="mb-6 max-w-5xl">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Explore</p>
-              <h2 className="mt-2 text-3xl font-black tracking-tight text-foreground">{sectionTitle}</h2>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground md:text-base">{sectionDescription}</p>
+            <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-5xl">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-primary">Explore</p>
+                <h2 className="mt-2 text-3xl font-black tracking-tight text-foreground">{sectionTitle}</h2>
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground md:text-base">{sectionDescription}</p>
+              </div>
+
+              <div className="inline-flex w-fit items-center gap-1 rounded-xl border border-border/60 bg-card/85 p-1.5 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.32)]">
+                <button
+                  type="button"
+                  onClick={() => setLayoutMode("grid")}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] transition",
+                    layoutMode === "grid"
+                      ? "bg-primary/15 text-primary"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                  aria-pressed={layoutMode === "grid"}
+                >
+                  Grid
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLayoutMode("list")}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] transition",
+                    layoutMode === "list"
+                      ? "bg-primary/15 text-primary"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                  aria-pressed={layoutMode === "list"}
+                >
+                  List
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 2xl:grid-cols-3">
+            <div className={cn("gap-6", layoutMode === "grid" ? "grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3" : "flex flex-col")}>
               {cards.map((card) => {
                 const Icon = card.icon;
                 const isStackCraft = card.title === "StackCraft";
                 const cardKey = `${card.to || card.title}-${card.title}`;
-                const tagPalette = [
-                  "border-sky-300/40 bg-sky-500/10 text-sky-700 dark:text-sky-300",
-                  "border-emerald-300/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-                  "border-amber-300/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
-                  "border-violet-300/40 bg-violet-500/10 text-violet-700 dark:text-violet-300",
-                  "border-rose-300/40 bg-rose-500/10 text-rose-700 dark:text-rose-300",
-                ];
                 const cardContent = (
-                  <>
+                  <div className={cn(layoutMode === "list" ? "grid gap-5 md:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] md:items-start" : "") }>
+                    <div>
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
@@ -184,7 +220,18 @@ export function ResourceHubPage({
                       {card.ctaLabel || (card.disabled ? "Coming soon" : "Open")}
                       {!card.disabled ? <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" /> : null}
                     </div>
-                  </>
+                    </div>
+
+                    {layoutMode === "list" ? (
+                      <div className="rounded-[1.35rem] border border-border/60 bg-background/70 p-4">
+                        <div className="text-[11px] font-black uppercase tracking-[0.14em] text-primary">Quick Snapshot</div>
+                        <div className="mt-3 text-sm leading-7 text-muted-foreground">
+                          {card.statusLabel ? `${card.statusLabel} · ` : ""}
+                          {card.tags.join(" · ")}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
                 );
 
                 if (card.to && !card.disabled) {
@@ -193,10 +240,11 @@ export function ResourceHubPage({
                       key={cardKey}
                       to={card.to}
                       className={cn(
-                        "group h-full rounded-[1.75rem] border p-6 transition",
+                          "group h-full rounded-[1.75rem] border p-6 transition",
                         isStackCraft
                           ? "border-sky-400/20 bg-[radial-gradient(circle_at_top_right,rgba(59,109,240,0.16),transparent_32%),linear-gradient(160deg,rgba(10,18,34,0.96),rgba(14,27,48,0.9))] hover:border-sky-300/40 hover:shadow-[0_30px_68px_rgba(59,109,240,0.14)]"
                           : "border-border/60 bg-card/80 hover:border-primary/30 hover:bg-card",
+                          layoutMode === "list" ? "w-full" : "",
                       )}
                     >
                       {cardContent}

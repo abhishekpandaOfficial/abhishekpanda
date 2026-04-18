@@ -14,91 +14,54 @@ type ThemeProviderState = {
 };
 
 const initialState: ThemeProviderState = {
-  theme: "light",
+  theme: "dark",
   setTheme: () => null,
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
-function resolveInitialTheme(stored: string | null, defaultTheme: Theme): Theme {
-  if (stored === "dark" || stored === "light") return stored;
-
-  // Backward compatibility for previous 'system' value.
-  if (stored === "system") {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-
-  return defaultTheme;
-}
-
 export function ThemeProvider({
   children,
-  defaultTheme = "light",
+  defaultTheme = "dark",
   storageKey = "abhishekpanda-theme",
   ...props
 }: ThemeProviderProps) {
-  const resetKey = "abhishekpanda-theme-reset-2026-03-12-light";
-  const [theme, setTheme] = useState<Theme>(() =>
-    resolveInitialTheme(localStorage.getItem(storageKey), defaultTheme),
-  );
+  const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
-    try {
-      if (defaultTheme !== "light") return;
-      if (localStorage.getItem(resetKey) === "done") return;
-      localStorage.setItem(storageKey, "light");
-      localStorage.setItem(resetKey, "done");
-      setTheme("light");
-    } catch {
-      return;
-    }
-  }, [defaultTheme, storageKey]);
+    setTheme("dark");
+  }, [defaultTheme]);
 
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
-    root.classList.add(theme);
-    root.style.colorScheme = theme;
+    root.classList.add("dark");
+    root.style.colorScheme = "dark";
   }, [theme]);
 
   useEffect(() => {
-    const onStorage = (event: StorageEvent) => {
-      if (event.key !== storageKey) return;
-      setTheme(resolveInitialTheme(event.newValue, defaultTheme));
-    };
-
     let channel: BroadcastChannel | null = null;
-    const onBroadcastMessage = (event: MessageEvent<{ type?: string; theme?: Theme }>) => {
-      if (event.data?.type !== "theme-change") return;
-      if (event.data.theme === "dark" || event.data.theme === "light") {
-        setTheme(event.data.theme);
-      }
-    };
-
-    window.addEventListener("storage", onStorage);
     try {
       channel = new BroadcastChannel("abhishekpanda-theme");
-      channel.addEventListener("message", onBroadcastMessage);
+      channel.addEventListener("message", () => setTheme("dark"));
     } catch {}
 
     return () => {
-      window.removeEventListener("storage", onStorage);
-      channel?.removeEventListener("message", onBroadcastMessage);
       channel?.close();
     };
-  }, [defaultTheme, storageKey]);
+  }, [defaultTheme]);
 
   const value = {
     theme,
-    setTheme: (nextTheme: Theme) => {
-      localStorage.setItem(storageKey, nextTheme);
+    setTheme: (_nextTheme: Theme) => {
+      localStorage.setItem(storageKey, "dark");
       // Broadcast to embedded iframes via BroadcastChannel (same-origin, any tab)
       try {
         const bc = new BroadcastChannel("abhishekpanda-theme");
-        bc.postMessage({ type: "theme-change", theme: nextTheme });
+        bc.postMessage({ type: "theme-change", theme: "dark" });
         bc.close();
       } catch {}
-      setTheme(nextTheme);
+      setTheme("dark");
     },
   };
 

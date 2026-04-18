@@ -159,7 +159,7 @@ const contactBorder: Record<string, string> = {
 
 const emptyCompanyForm = {
   legal_name: "CodeXIntel Technologies Pvt. Ltd.",
-  brand_name: "OriginX Labs",
+  brand_name: "Abhishek Panda",
   website: "",
   website_urls: "",
   registered_date: "2025-10-16",

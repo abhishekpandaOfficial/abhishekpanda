@@ -13,7 +13,7 @@ export type OriginXUpdate = {
 const fallbackUpdates: OriginXUpdate[] = [
   {
     id: "fallback-1",
-    title: "OriginX Labs: CHRONYX lifecycle dashboard released",
+    title: "CHRONYX lifecycle dashboard released",
     summary: "CHRONYX now includes planning, finance insights, and knowledge memory in one personal workspace.",
     url: "https://www.getchronyx.com",
     tag: "Product",

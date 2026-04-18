@@ -52,7 +52,7 @@ export const DashboardHero = ({ searchQuery, onSearchChange }: HeroProps) => (
           <div className="relative">
             <div className="absolute inset-0 rounded-[28px] bg-cyan-400/25 blur-2xl dark:bg-cyan-300/12" />
             <img
-              src="/Abhishek.PNG"
+              src="/abhishek.png"
               alt="Abhishek Panda"
               className="relative h-20 w-20 rounded-[24px] border border-white/50 object-cover shadow-xl ring-1 ring-slate-950/5 dark:border-white/10 dark:ring-white/10"
             />

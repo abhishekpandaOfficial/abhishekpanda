@@ -18,7 +18,7 @@ type Message = {
 };
 
 const welcomeText =
-  "I am OpenOwl. Ask me anything about this website, CHRONYX, OpenOwl, OriginX updates, or LLM Galaxy models.";
+  "I am OpenOwl. Ask me anything about this website, CHRONYX, OpenOwl, latest updates, or LLM Galaxy models.";
 
 export const OpenOwlBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,7 +34,7 @@ export const OpenOwlBot = () => {
   const quickReplies = useMemo(
     () => [
       "What is this website about?",
-      "Give me latest OriginX Labs updates",
+      "Give me latest updates",
       "Show open source models",
       "Show closed source models",
       "Tell me about CHRONYX",
@@ -57,7 +57,7 @@ export const OpenOwlBot = () => {
     }
 
     if (q.includes("update") || q.includes("latest") || q.includes("originx")) {
-      if (!updates.length) return "No OriginX updates were found right now.";
+      if (!updates.length) return "No recent updates were found right now.";
       return updates
         .slice(0, 3)
         .map((u, i) => `${i + 1}. ${u.title} (${new Date(u.published_at).toLocaleDateString("en-US")})`)
@@ -79,7 +79,7 @@ export const OpenOwlBot = () => {
     }
 
     if (q.includes("openowl") || q.includes("open owl")) {
-      return "OpenOwl is your AI assistant layer for this website. It can answer context-aware questions, summarize latest OriginX updates, and guide model discovery in LLM Galaxy.";
+      return "OpenOwl is your AI assistant layer for this website. It can answer context-aware questions, summarize latest updates, and guide model discovery in LLM Galaxy.";
     }
 
     if (q.includes("website") || q.includes("site") || q.includes("about")) {
@@ -89,7 +89,7 @@ export const OpenOwlBot = () => {
         .join("\n");
     }
 
-    return "I can answer website info, CHRONYX, OpenOwl details, OriginX latest updates, and LLM Galaxy open/closed model details.";
+    return "I can answer website info, CHRONYX, OpenOwl details, latest updates, and LLM Galaxy open/closed model details.";
   };
 
   const sendPrompt = async (prompt: string) => {

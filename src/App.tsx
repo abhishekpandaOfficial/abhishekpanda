@@ -7,12 +7,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Routes, Route, useLocation, useParams } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { RouteScrollRestoration } from "@/components/layout/RouteScrollRestoration";
+import { SocialSidebar } from "@/components/layout/SocialSidebar";
+import { WhatsAppChatButton } from "@/components/layout/WhatsAppChatButton";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Index from "./pages/Index";
 import { RouteSeo } from "@/components/seo/RouteSeo";
-import { isDesktopAdminRuntime } from "@/lib/adminRuntime";
 const BrandIntro = lazy(() => import("@/components/BrandIntro").then((m) => ({ default: m.BrandIntro })));
-const AdminWebVault = lazy(() => import("@/components/admin/AdminWebVault"));
 
 const About = lazy(() => import("./pages/About"));
 const Blog = lazy(() => import("./pages/Blog"));
@@ -39,6 +39,7 @@ const BlogAggregator = lazy(() => import("./pages/BlogAggregator"));
 const BlogSeries = lazy(() => import("./pages/BlogSeries"));
 const AiMlBlogsHub = lazy(() => import("./pages/AiMlBlogsHub"));
 const AiMlSeries = lazy(() => import("./pages/AiMlSeries"));
+const Insights = lazy(() => import("./pages/Insights"));
 const MathematicsMastery = lazy(() => import("./pages/MathematicsMastery"));
 const StatisticsMastery = lazy(() => import("./pages/StatisticsMastery"));
 const NumpyMastery = lazy(() => import("./pages/NumpyMastery"));
@@ -84,29 +85,6 @@ const SolidPrinciplesGuide = lazy(() => import("./pages/SolidPrinciplesGuide"));
 const Classified = lazy(() => import("./pages/Classified"));
 const Scriptures = lazy(() => import("./pages/Scriptures"));
 
-const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
-const AdminDashboard = lazy(() => import("@/components/admin/AdminDashboard"));
-const AdminCoursesManager = lazy(() => import("@/components/admin/AdminCoursesManager").then((m) => ({ default: m.AdminCoursesManager })));
-const AdminContactRequests = lazy(() => import("@/components/admin/AdminContactRequests"));
-const AdminLLMAtlasManager = lazy(() => import("@/components/admin/AdminLLMAtlasManager"));
-const AdminSocialHub = lazy(() => import("@/components/admin/AdminSocialHub").then((m) => ({ default: m.AdminSocialHub })));
-const AdminArgusControl = lazy(() => import("@/components/admin/AdminArgusControl"));
-const AdminAnalytics = lazy(() => import("@/components/admin/AdminAnalytics"));
-const AdminSettings = lazy(() => import("@/components/admin/AdminSettings"));
-const AdminSecurity = lazy(() => import("@/components/admin/AdminSecurity").then((m) => ({ default: m.AdminSecurity })));
-const AdminIntegrations = lazy(() => import("@/components/admin/AdminIntegrations"));
-const AdminAuditLogs = lazy(() => import("@/components/admin/AdminAuditLogs"));
-const AdminMentorshipBookings = lazy(() => import("@/components/admin/AdminMentorshipBookings"));
-const AdminOpsDocs = lazy(() => import("@/components/admin/AdminOpsDocs"));
-const AdminEbooksManager = lazy(() => import("@/components/admin/AdminEbooksManager"));
-const OpenOwlAdminLayout = lazy(() => import("./pages/openowl-admin/OpenOwlAdminLayout"));
-const OpenOwlAdminOverview = lazy(() => import("./pages/openowl-admin/OverviewPage"));
-const OpenOwlAdminStudio = lazy(() => import("./pages/openowl-admin/StudioPage"));
-const OpenOwlAdminPublish = lazy(() => import("./pages/openowl-admin/PublishPage"));
-const OpenOwlAdminDelivery = lazy(() => import("./pages/openowl-admin/DeliveryPage"));
-const OpenOwlAdminRuns = lazy(() => import("./pages/openowl-admin/RunsPage"));
-const OpenOwlAdminSettings = lazy(() => import("./pages/openowl-admin/SettingsPage"));
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -150,21 +128,6 @@ const LegacyAiMlSeriesRedirect = () => {
   return <Navigate to={seriesSlug ? `/ai-ml-hub/${seriesSlug}` : "/ai-ml-hub"} replace />;
 };
 
-const DesktopAdminRouteGuard = () => {
-  const location = useLocation();
-  if (!isDesktopAdminRuntime()) return null;
-
-  const { pathname } = location;
-  const isAdminRoute =
-    pathname === "/admin" ||
-    pathname.startsWith("/admin/") ||
-    pathname === "/openowl/admin" ||
-    pathname.startsWith("/openowl/admin/");
-
-  if (isAdminRoute) return null;
-  return <Navigate to="/admin" replace />;
-};
-
 const App = () => {
   const [showIntro, setShowIntro] = useState(false);
 
@@ -197,8 +160,9 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+            <SocialSidebar />
+            <WhatsAppChatButton />
             <AnalyticsWrapper>
-              <DesktopAdminRouteGuard />
               <RouteScrollRestoration />
               <RouteSeo />
               <AnimatePresence>
@@ -285,6 +249,7 @@ const App = () => {
                 <Route path="/blogs/linux-mastery" element={<Navigate to="/cheatsheets/linux-mastery" replace />} />
                 <Route path="/blogs/:seriesSlug" element={<LegacyCheatsheetSeriesRedirect />} />
                 <Route path="/blog/techhub" element={<Navigate to="/techhub" replace />} />
+                <Route path="/insights" element={<Insights />} />
                 <Route path="/articles" element={<Suspense fallback={<DelayedRouteLoader />}><ArticlesPage /></Suspense>} />
                 <Route path="/articles/:slug" element={<Suspense fallback={<DelayedRouteLoader />}><ArticlesPage /></Suspense>} />
                 <Route path="/scriptures" element={<Suspense fallback={<DelayedRouteLoader />}><Scriptures /></Suspense>} />
@@ -293,6 +258,8 @@ const App = () => {
                 <Route path="/case-studies/:slug" element={<CaseStudies />} />
                 <Route path="/interview" element={<Interview />} />
                 <Route path="/projects" element={<Projects />} />
+                <Route path="/projects/llm-galaxy" element={<Navigate to="/llm-galaxy" replace />} />
+                <Route path="/projects/scriptures" element={<Navigate to="/scriptures" replace />} />
                 <Route path="/blog/techstacks" element={<Navigate to="/techhub" replace />} />
                 <Route path="/chronyx" element={<Chronyx />} />
                 <Route path="/tech" element={<Navigate to="/techhub" replace />} />
@@ -358,56 +325,18 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/account" element={<Account />} />
 
-                {/* Admin Install & Login */}
                 <Route path="/install" element={<InstallPWA />} />
                 <Route path="/downloads" element={<DesktopApp />} />
                 <Route path="/desktop-app" element={<Navigate to="/downloads" replace />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/register-passkey" element={<PasskeyRegistration />} />
-
-                {/* Admin Routes - Protected */}
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="business" element={<Navigate to="/admin" replace />} />
-                  <Route path="ip-management" element={<Navigate to="/admin" replace />} />
-                  <Route path="cv-downloads" element={<Navigate to="/admin" replace />} />
-                  <Route path="contacts" element={<AdminContactRequests />} />
-                  <Route path="mentorship" element={<AdminMentorshipBookings />} />
-                  <Route path="blog" element={<Navigate to="/admin" replace />} />
-                  <Route path="cms" element={<Navigate to="/admin" replace />} />
-                  <Route path="nimbus" element={<Navigate to="/admin" replace />} />
-                  <Route path="courses" element={<AdminCoursesManager />} />
-                  <Route path="products" element={<Navigate to="/admin" replace />} />
-                  <Route path="ebooks" element={<AdminEbooksManager />} />
-                  <Route path="llm-galaxy" element={<AdminLLMAtlasManager />} />
-                  <Route path="workflows" element={<Navigate to="/admin" replace />} />
-                  <Route path="social" element={<AdminSocialHub />} />
-                  <Route path="jobs" element={<Navigate to="/admin" replace />} />
-                  <Route path="analytics" element={<AdminAnalytics />} />
-                  <Route path="argus" element={<AdminArgusControl />} />
-                  <Route path="payments" element={<Navigate to="/admin" replace />} />
-                  <Route path="drive" element={<Navigate to="/admin" replace />} />
-                  <Route path="webvault" element={<AdminWebVault />} />
-                  <Route path="lifemap" element={<Navigate to="/admin" replace />} />
-                  <Route path="open-owl" element={<Navigate to="/openowl/admin" replace />} />
-                  <Route path="integrations" element={<AdminIntegrations />} />
-                  <Route path="ops" element={<AdminOpsDocs />} />
-                  <Route path="settings" element={<AdminSettings />} />
-                  <Route path="security" element={<AdminSecurity />} />
-                  <Route path="audit-logs" element={<AdminAuditLogs />} />
-                </Route>
-
-                <Route path="/openowl/admin" element={<OpenOwlAdminLayout />}>
-                  <Route index element={<OpenOwlAdminOverview />} />
-                  <Route path="studio" element={<OpenOwlAdminStudio />} />
-                  <Route path="publish" element={<OpenOwlAdminPublish />} />
-                  <Route path="delivery" element={<OpenOwlAdminDelivery />} />
-                  <Route path="runs" element={<OpenOwlAdminRuns />} />
-                  <Route path="settings" element={<OpenOwlAdminSettings />} />
-                </Route>
+                <Route path="/admin/login" element={<Navigate to="/" replace />} />
+                <Route path="/admin/register-passkey" element={<Navigate to="/" replace />} />
+                <Route path="/admin" element={<Navigate to="/" replace />} />
+                <Route path="/admin/*" element={<Navigate to="/" replace />} />
+                <Route path="/openowl/admin" element={<Navigate to="/openowl" replace />} />
+                <Route path="/openowl/admin/*" element={<Navigate to="/openowl" replace />} />
 
                 <Route path="*" element={<NotFound />} />
-              </Routes>
+                </Routes>
               </Suspense>
             </AnalyticsWrapper>
           </BrowserRouter>

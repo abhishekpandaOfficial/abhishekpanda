@@ -16,6 +16,7 @@ import {
   SiTelegram,
   SiThreads,
   SiTiktok,
+  SiWhatsapp,
   SiX,
   SiYoutube,
 } from "react-icons/si";
@@ -39,7 +40,8 @@ export type SocialIconKey =
   | "telegram"
   | "discord"
   | "tiktok"
-  | "pinterest";
+  | "pinterest"
+  | "whatsapp";
 
 export function iconForKey(key: string) {
   const normalized = key?.toLowerCase().replace(/\s+/g, "").replace(/[_-]/g, "") || "";
@@ -81,6 +83,8 @@ export function iconForKey(key: string) {
       return SiTiktok;
     case "pinterest":
       return SiPinterest;
+    case "whatsapp":
+      return SiWhatsapp;
     default:
       return LinkFallback;
   }

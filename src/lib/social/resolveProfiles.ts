@@ -29,9 +29,12 @@ function normalizePlatform(value?: string | null): string {
 export function resolveSocialProfiles(rows?: SocialProfileRow[] | null): ResolvedSocialProfile[] {
   const remote = (rows || []).filter((r) => isHttpUrl(r.profile_url));
   const merged = new Map<string, ResolvedSocialProfile>();
+  const allowedPlatforms = new Set<string>();
 
   for (const fallback of FALLBACK_SOCIAL_LINKS) {
-    merged.set(normalizePlatform(fallback.platform), {
+    const key = normalizePlatform(fallback.platform);
+    allowedPlatforms.add(key);
+    merged.set(key, {
       platform: fallback.platform,
       display_name: fallback.display_name,
       category: fallback.category,
@@ -52,13 +55,17 @@ export function resolveSocialProfiles(rows?: SocialProfileRow[] | null): Resolve
       platform: key,
       display_name: row.display_name || base?.display_name || row.platform || "Profile",
       category: (row.category as ResolvedSocialProfile["category"]) || base?.category || "social",
-      profile_url: row.profile_url,
+      // Keep curated public URLs from fallback links to prevent accidental stale admin overrides.
+      profile_url: base?.profile_url || row.profile_url,
       icon_key: row.icon_key || base?.icon_key || "website",
       brand_color: row.brand_color || base?.brand_color || null,
       brand_bg: row.brand_bg || null,
-      sort_order: row.sort_order ?? base?.sort_order ?? 99,
+      // Keep curated order from fallback links to preserve requested public icon sequence.
+      sort_order: base?.sort_order ?? row.sort_order ?? 99,
     });
   }
 
-  return Array.from(merged.values()).sort((a, b) => a.sort_order - b.sort_order || a.display_name.localeCompare(b.display_name));
+  return Array.from(merged.values())
+    .filter((profile) => allowedPlatforms.has(normalizePlatform(profile.platform)))
+    .sort((a, b) => a.sort_order - b.sort_order || a.display_name.localeCompare(b.display_name));
 }

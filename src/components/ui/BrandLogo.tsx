@@ -13,7 +13,7 @@ type BrandLogoProps = {
 };
 
 const sources: Record<BrandVariant, string> = {
-  abhishek: "/Abhishek.PNG",
+  abhishek: "/logo.png",
   openowl: "/openOwl-logo.PNG",
   originx: "/OriginXLabs-Logo-Final.png",
   proxinex: "/proxinex-logo.svg",

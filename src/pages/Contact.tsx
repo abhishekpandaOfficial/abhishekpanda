@@ -9,8 +9,7 @@ import {
   Mail, 
   MapPin, 
   Send,
-  MessageSquare,
-  ExternalLink
+  MessageSquare
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
@@ -170,23 +169,15 @@ const Contact = () => {
                   {/* Attribution */}
                   <div className="p-4 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl border border-primary/10">
                     <div className="flex items-center gap-2 mb-2">
-                      <BrandLogo variant="originx" size="sm" />
-                      <span className="text-sm font-medium text-foreground">OriginX Labs</span>
+                      <BrandLogo variant="abhishek" size="sm" />
+                      <span className="text-sm font-medium text-foreground">Abhishek Panda</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Created & Maintained by <span className="text-foreground font-medium">Abhishek Panda</span>
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      OriginX Labs R&amp;D Division
+                      Independent R&amp;D and Product Engineering
                     </p>
-                    <a 
-                      href="https://www.originxlabs.com/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-2"
-                    >
-                      Visit OriginX Labs <ExternalLink className="w-3 h-3" />
-                    </a>
                   </div>
 
                   {/* Map Placeholder */}

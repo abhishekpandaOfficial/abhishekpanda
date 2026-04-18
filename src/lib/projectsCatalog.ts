@@ -1,4 +1,4 @@
-import { Brain, Briefcase, Code2, FileText, Flame, FolderOpen, Server, Sparkles } from "lucide-react";
+import { Brain, Briefcase, BookOpen, Code2, FileText, Flame, FolderOpen, Server, Sparkles } from "lucide-react";
 import type { ResourceHubCard, ResourceHubMetric } from "@/components/content/ResourceHubPage";
 
 import openowlLogo from "@/assets/openowl-dark.svg";
@@ -24,7 +24,7 @@ const productRoute = (slug: string) => `/products/${slug}`;
 export const PROJECT_METRICS: ResourceHubMetric[] = [
   {
     label: "Live Destinations",
-    value: "11",
+    value: "13",
     description: "Project-facing products, platforms, and upcoming apps across your public ecosystem.",
     icon: FolderOpen,
   },
@@ -49,6 +49,70 @@ export const PROJECT_METRICS: ResourceHubMetric[] = [
 ];
 
 export const PROJECT_CARDS: ProjectCard[] = [
+  {
+    title: "LLM Galaxy",
+    description: "The AI model intelligence hub for browsing open and closed source models, comparisons, and capability layers.",
+    to: "/llm-galaxy",
+    icon: Brain,
+    tags: ["AI", "Models", "Comparison"],
+    eyebrow: "Project",
+    statusLabel: "Live",
+    ctaLabel: "Open Galaxy",
+    slug: "llm-galaxy",
+    launchTo: "/llm-galaxy",
+    launchLabel: "Open LLM Galaxy",
+    detailTitle: "LLM Galaxy Overview",
+    detailDescription: "LLM Galaxy is the model intelligence surface for comparing providers, categories, and capability context across the AI stack.",
+    longDescription:
+      "LLM Galaxy groups AI model discovery into a focused project destination so the site can surface comparisons, model families, and practical intelligence in one place instead of scattering it across unrelated pages.",
+    highlights: ["AI model intelligence hub", "Open/closed source comparisons", "Single project destination"],
+    detailSections: [
+      {
+        title: "Purpose",
+        description: "Provides a structured model discovery layer for comparing providers and understanding model capabilities from a project-first lens.",
+      },
+      {
+        title: "Experience",
+        description: "Acts as a standalone project surface rather than a general blog category so AI model research has a dedicated entry point.",
+      },
+      {
+        title: "Context",
+        description: "Linked from the Projects area to keep the AI model intelligence surface together with other portfolio destinations.",
+      },
+    ],
+  },
+  {
+    title: "Scriptures",
+    description: "A guided reading project that organizes spiritual and philosophical HTML guides into a focused project destination.",
+    to: "/scriptures",
+    icon: BookOpen,
+    tags: ["Reading", "Guides", "Wisdom"],
+    eyebrow: "Project",
+    statusLabel: "Live",
+    ctaLabel: "Open Scriptures",
+    slug: "scriptures",
+    launchTo: "/scriptures",
+    launchLabel: "Open Scriptures",
+    detailTitle: "Scriptures Overview",
+    detailDescription: "Scriptures is the project destination for long-form spiritual and philosophical reading experiences.",
+    longDescription:
+      "Scriptures collects the long-form HTML guides into a project-shaped reading destination so they feel intentionally placed under Projects rather than treated as a standalone menu item.",
+    highlights: ["Guided reading destination", "Long-form HTML guides", "Project-aligned structure"],
+    detailSections: [
+      {
+        title: "Purpose",
+        description: "Organizes the scriptures content into a dedicated destination with a project framing instead of a generic content bucket.",
+      },
+      {
+        title: "Reading Flow",
+        description: "Keeps the long-form guides accessible as a structured destination that can be surfaced from Projects and footer links.",
+      },
+      {
+        title: "Placement",
+        description: "Lives alongside the other project cards to keep the site hierarchy consistent and easy to scan.",
+      },
+    ],
+  },
   {
     title: "OpenOwl",
     description: "The assistant experience and product shell for contextual guidance, ecosystem discovery, and knowledge interaction.",

@@ -13,6 +13,19 @@ type HeroSocialIconsProps = {
   className?: string;
 };
 
+const OFFICIAL_BRAND_COLORS: Record<string, string> = {
+  x: "#111111",
+  linkedin: "#0a66c2",
+  instagram: "#e1306c",
+  youtube: "#ff0000",
+  github: "#181717",
+  medium: "#12100e",
+  substack: "#ff6719",
+  hashnode: "#2962ff",
+};
+
+const normalize = (value: string) => value.trim().toLowerCase().replace(/\s+/g, "");
+
 export const HeroSocialIcons = ({ profiles: providedProfiles, className }: HeroSocialIconsProps) => {
   const { data: queriedProfiles } = usePublicSocialProfiles();
   const { theme } = useTheme();
@@ -22,18 +35,20 @@ export const HeroSocialIcons = ({ profiles: providedProfiles, className }: HeroS
     return resolveSocialProfiles(rows);
   }, [providedProfiles, queriedProfiles]);
 
-  const resolvedIconColor = (brandColor?: string | null) => {
-    if (!brandColor) return "hsl(var(--foreground))";
-    if (theme === "dark" && isVeryDark(brandColor)) return "#e2e8f0";
-    if (theme === "light" && isVeryLight(brandColor)) return "#0f172a";
-    return brandColor;
+  const resolvedIconColor = (platform: string, brandColor?: string | null) => {
+    const effectiveColor = OFFICIAL_BRAND_COLORS[normalize(platform)] || brandColor;
+    if (!effectiveColor) return "hsl(var(--foreground))";
+    const color = effectiveColor.toLowerCase();
+    if (theme === "dark" && isVeryDark(color)) return "#e2e8f0";
+    if (theme === "light" && isVeryLight(color)) return "#0f172a";
+    return color;
   };
 
   return (
     <div className={cn("flex flex-wrap items-center justify-start gap-2.5 sm:gap-3", className)}>
       {visible.map((p, index: number) => {
         const Icon: any = iconForKey(p.icon_key);
-        const iconColor = resolvedIconColor(p.brand_color);
+        const iconColor = resolvedIconColor(p.platform, p.brand_color);
         const distance = hoveredIndex === null ? 99 : Math.abs(hoveredIndex - index);
         const scale = hoveredIndex === null ? 1 : distance === 0 ? 1.42 : distance === 1 ? 1.2 : distance === 2 ? 1.09 : 1;
         const y = hoveredIndex === null ? 0 : distance === 0 ? -16 : distance === 1 ? -9 : distance === 2 ? -4 : 0;

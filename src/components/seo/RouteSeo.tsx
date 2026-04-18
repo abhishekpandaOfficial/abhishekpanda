@@ -21,7 +21,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
       description:
         "Official website of Abhishek Panda featuring engineering blog posts, Stackcraft learning tracks, CHRONYX, mentorship, and LLM Galaxy insights.",
       keywords:
-        "Abhishek Panda, Abhishek, AI Architect, Technical Architect, OriginX Labs, OpenOwl, Chronyx, LLM Galaxy, software architecture blog",
+        "Abhishek Panda, Abhishek, AI Architect, Technical Architect, OpenOwl, Chronyx, LLM Galaxy, software architecture blog",
       pageType: "ProfilePage",
     },
   },
@@ -30,7 +30,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     data: {
       title: "About Abhishek Panda | Technical Architect & AI Leader",
       description:
-        "Learn about Abhishek Panda’s background, architecture experience, AI work, leadership journey, and OriginX Labs mission.",
+        "Learn about Abhishek Panda’s background, architecture experience, AI work, leadership journey, and product vision.",
       keywords: "about Abhishek Panda, Abhishek Panda profile, AI leader, Technical Architect India",
       pageType: "AboutPage",
     },
@@ -277,7 +277,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     pattern: "/products",
     data: {
       title: "Products | Abhishek Panda",
-      description: "Explore products, tools, and digital offerings by Abhishek Panda and OriginX Labs.",
+      description: "Explore products, tools, and digital offerings by Abhishek Panda.",
     },
   },
   {
@@ -322,7 +322,7 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
   {
     pattern: "/llm-galaxy",
     data: {
-      title: "LLM Galaxy | AI Model Intelligence Hub by OriginX",
+      title: "LLM Galaxy | AI Model Intelligence Hub by Abhishek Panda",
       description:
         "Explore LLM Galaxy for model discovery, categories, capabilities, comparisons, and AI model insights across open and closed ecosystems.",
       keywords: "LLM Galaxy, AI models, OpenAI, Anthropic, Gemini, model routing, LLM comparison",
@@ -516,7 +516,7 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
     },
     logo: {
       "@type": "ImageObject",
-      url: "https://www.abhishekpanda.com/favicon.png",
+      url: "https://www.abhishekpanda.com/abhishek.png",
     },
   };
 

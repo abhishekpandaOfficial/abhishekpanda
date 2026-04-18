@@ -69,7 +69,7 @@ values
   ('github', 'GitHub', 'social', 'abhishekpandaOfficial', 'https://github.com/abhishekpandaOfficial', 'github', '#111827', 'bg-[#333]', 'Open source & code', 40, true, true),
   ('x', 'X (Twitter)', 'social', 'Panda_Abhishek8', 'https://x.com/Panda_Abhishek8', 'x', '#000000', 'bg-black', 'Tweets & threads', 50, true, true),
 
-  ('stackcraft', 'Stackcraft', 'blog', 'abhishekpanda', 'https://stackcraft.io/abhishekpanda', 'stackcraft', '#111827', 'bg-black', 'Main engineering blog (OriginX Labs)', 60, true, true),
+  ('stackcraft', 'Stackcraft', 'blog', 'abhishekpanda', 'https://stackcraft.io/abhishekpanda', 'stackcraft', '#111827', 'bg-black', 'Main engineering blog (Abhishek Panda)', 60, true, true),
   ('medium', 'Medium', 'blog', 'official.abhishekpanda', 'https://medium.com/@official.abhishekpanda', 'medium', '#00AB6C', 'bg-black', 'Blog articles', 70, true, true),
   ('substack', 'Substack', 'blog', 'abhishekpanda08', 'https://substack.com/@abhishekpanda08', 'substack', '#FF6719', 'bg-[#FF6719]', 'Newsletter', 80, true, true),
   ('hashnode', 'Hashnode', 'blog', 'abhishekpanda', 'https://hashnode.com/@abhishekpanda', 'hashnode', '#2962FF', 'bg-[#2962FF]', 'Developer blog', 90, true, true),
@@ -89,4 +89,3 @@ set
   sort_order = excluded.sort_order,
   connected = excluded.connected,
   is_visible = excluded.is_visible;
-

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -20,10 +21,19 @@ const dotSizes: Record<NonNullable<AbhishekAnimatedLogoProps["size"]>, string> =
 };
 
 export function AbhishekAnimatedLogo({ className, size = "md", animate = true }: AbhishekAnimatedLogoProps) {
+  const [src, setSrc] = useState("/logo.png");
+
   return (
     <span className={cn("relative inline-flex items-center justify-center", frameSizes[size], className)} aria-label="Abhishek Panda logo">
-      <span className={cn("overflow-hidden border border-border/60 bg-[#0d1220] shadow-sm", frameSizes[size])}>
-        <img src="/Abhishek.PNG" alt="Abhishek Panda" className="h-full w-full object-cover" loading="eager" decoding="async" />
+      <span className={cn("overflow-hidden border border-border/60 bg-white shadow-sm dark:bg-slate-900", frameSizes[size])}>
+        <img
+          src={src}
+          alt="Abhishek Panda"
+          className="h-full w-full object-contain"
+          loading="eager"
+          decoding="async"
+          onError={() => setSrc("/panda.svg")}
+        />
       </span>
 
       {animate ? (

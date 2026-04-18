@@ -160,7 +160,7 @@ const InstallPWA = () => {
           className="text-center mb-8"
         >
           <div className="w-24 h-24 mx-auto mb-6 rounded-3xl border border-slate-500/40 bg-[#0b1220] flex items-center justify-center shadow-2xl shadow-slate-950/50 overflow-hidden">
-            <img src="/favicon.png" alt="Abhishek Panda" className="w-16 h-16 object-cover rounded-2xl" />
+            <img src="/abhishek.png" alt="Abhishek Panda" className="w-16 h-16 object-cover rounded-2xl" />
           </div>
           <h1 className="text-3xl font-black mb-2 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
             Abhishek Panda App
@@ -365,7 +365,7 @@ const InstallPWA = () => {
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              <img src="/favicon.png" alt="Abhishek Panda" className="h-8 w-8 object-cover rounded-md border border-border/50 bg-[#0b1220]" />
+              <img src="/abhishek.png" alt="Abhishek Panda" className="h-8 w-8 object-cover rounded-md border border-border/50 bg-[#0b1220]" />
               Preview the App
             </DialogTitle>
           </DialogHeader>

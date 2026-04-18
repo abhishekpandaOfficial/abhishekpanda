@@ -15,7 +15,7 @@ const fallbackKnowledge: SiteKnowledgeItem[] = [
     id: "k-home",
     category: "website",
     title: "About this website",
-    summary: "Official OriginX Labs ecosystem portal for products, academy, mentorship, blogs, and enterprise contact.",
+    summary: "Official Abhishek Panda ecosystem portal for products, academy, mentorship, blogs, and enterprise contact.",
     route: "/",
     priority: 100,
   },

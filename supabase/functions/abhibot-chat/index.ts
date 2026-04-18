@@ -79,7 +79,7 @@ function fallbackAnswer(prompt: string, context: ReqBody["context"]): string {
     ].join(" ");
   }
 
-  return "ABHIBOT can help with open/closed model selection, rankings, website details, and latest OriginX updates.";
+  return "ABHIBOT can help with open/closed model selection, rankings, website details, and latest updates.";
 }
 
 serve(async (req) => {
@@ -100,7 +100,7 @@ serve(async (req) => {
     }
 
     const system = [
-      "You are ABHIBOT, CHRONYX assistant for OriginX Labs website.",
+      "You are ABHIBOT, CHRONYX assistant for Abhishek Panda website.",
       "Answer clearly and concisely.",
       "Prefer website facts from provided context.",
       "If asked about open-source vs closed-source models, separate them and include links if available.",

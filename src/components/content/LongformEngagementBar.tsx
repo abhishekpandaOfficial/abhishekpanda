@@ -2,6 +2,7 @@ import { type ComponentType, useCallback, useEffect, useMemo, useRef, useState }
 import { Copy, MessageCircle, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
 import { SiLinkedin, SiX } from "react-icons/si";
 import { AbhishekAnimatedLogo } from "@/components/ui/AbhishekAnimatedLogo";
+import { PrefetchLink } from "@/components/PrefetchLink";
 import { Button } from "@/components/ui/button";
 import { FALLBACK_SOCIAL_LINKS } from "@/constants/socialLinks";
 import { iconForKey } from "@/lib/social/iconMap";
@@ -277,7 +278,9 @@ export function LongformEngagementBar({
       <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0 space-y-3">
           <div className="flex items-center gap-3">
-            <AbhishekAnimatedLogo size="md" animate={false} />
+            <PrefetchLink to="/" aria-label="Go to home page" className="inline-flex">
+              <AbhishekAnimatedLogo size="md" animate={false} />
+            </PrefetchLink>
             <div className="min-w-0">
               <p className="text-sm font-black tracking-tight text-foreground">
                 {compactFooter ? "Share" : "Abhishek Panda"}

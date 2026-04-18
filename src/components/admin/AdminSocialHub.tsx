@@ -135,7 +135,7 @@ const OMNIFLOW_CORE_PLATFORMS = [
   "pinterest",
 ] as const;
 
-const BRAND_SIGNATURE = "Abhishek Panda | OriginX Labs Pvt. Ltd.";
+const BRAND_SIGNATURE = "Abhishek Panda";
 const BRAND_DOMAIN = "www.originxlabs.com";
 
 const stripTrackingParams = (url: string) => {
@@ -161,7 +161,7 @@ const extractHashtags = (input: string) => {
 };
 
 const buildBrandHashtags = (platform: string) => {
-  const base = ["#AbhishekPanda", "#OriginXLabs", "#OriginXLabsPvtLtd", "#CloudAI", "#EngineeringLeadership"];
+  const base = ["#AbhishekPanda", "#LeadAIMLArchitect", "#CloudArchitecture", "#CloudAI", "#EngineeringLeadership"];
   return platform === "x" || platform === "threads" ? base.slice(0, 3) : base;
 };
 
@@ -193,11 +193,11 @@ const qualityChecks = (content: string, hashtags: string[], hasLink: boolean) =>
   } else {
     notes.push("Add a clear CTA (learn/read/build/explore).");
   }
-  if (/originx labs|originxlabs/i.test(content)) {
+  if (/abhishek panda|abhishekpanda/i.test(content)) {
     seo += 5;
     ai += 5;
   } else {
-    notes.push("Branding missing: include OriginX Labs mention.");
+    notes.push("Branding missing: include Abhishek Panda mention.");
   }
   return { seo: Math.min(100, seo), ai: Math.min(100, ai), notes };
 };
@@ -210,22 +210,22 @@ const generatePlatformVariant = (base: { title: string; content: string; url?: s
   );
 
   const hooks: Record<string, string> = {
-    x: "Shipping update from OriginX Labs:",
-    linkedin: "Professional update from OriginX Labs:",
-    instagram: "Creator update from OriginX Labs:",
-    facebook: "Community update from OriginX Labs:",
-    threads: "Thread drop from OriginX Labs:",
-    reddit: "Engineering breakdown from OriginX Labs:",
-    telegram: "Quick community drop from OriginX Labs:",
-    discord: "Builder update from OriginX Labs:",
-    tiktok: "Short-form update from OriginX Labs:",
-    pinterest: "Pinned insight from OriginX Labs:",
-    youtube: "New release from OriginX Labs:",
-    medium: "New article from OriginX Labs:",
-    substack: "Newsletter update from OriginX Labs:",
-    hashnode: "Dev write-up from OriginX Labs:",
-    github: "Engineering note from OriginX Labs:",
-    website: "From OriginX Labs:",
+    x: "Shipping update from Abhishek Panda:",
+    linkedin: "Professional update from Abhishek Panda:",
+    instagram: "Creator update from Abhishek Panda:",
+    facebook: "Community update from Abhishek Panda:",
+    threads: "Thread drop from Abhishek Panda:",
+    reddit: "Engineering breakdown from Abhishek Panda:",
+    telegram: "Quick community drop from Abhishek Panda:",
+    discord: "Builder update from Abhishek Panda:",
+    tiktok: "Short-form update from Abhishek Panda:",
+    pinterest: "Pinned insight from Abhishek Panda:",
+    youtube: "New release from Abhishek Panda:",
+    medium: "New article from Abhishek Panda:",
+    substack: "Newsletter update from Abhishek Panda:",
+    hashnode: "Dev write-up from Abhishek Panda:",
+    github: "Engineering note from Abhishek Panda:",
+    website: "From Abhishek Panda:",
   };
 
   const ctaByPlatform: Record<string, string> = {
@@ -266,7 +266,7 @@ const generatePlatformVariant = (base: { title: string; content: string; url?: s
     website: `${base.title}\n\n${base.content}`,
   };
 
-  const prefix = hooks[platform] || "Update from OriginX Labs:";
+  const prefix = hooks[platform] || "Update from Abhishek Panda:";
   const hashLimit = platform === "x" ? 2 : platform === "threads" ? 3 : 5;
   const suffix = [
     `${BRAND_SIGNATURE} | ${BRAND_DOMAIN}`,
@@ -772,7 +772,7 @@ export const AdminSocialHub = () => {
           <DialogHeader>
             <DialogTitle>Create OmniFlow Campaign Post</DialogTitle>
             <DialogDescription>
-              Write once, preview per platform, run approval checks, then publish all or selected channels with OriginX Labs branding.
+              Write once, preview per platform, run approval checks, then publish all or selected channels with Abhishek Panda branding.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">

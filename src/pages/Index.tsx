@@ -1,37 +1,21 @@
-import { lazy, Suspense, memo } from "react";
+import { lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
 import { HeroSection } from "@/components/home/HeroSection";
-import { DeferredSection } from "@/components/performance/DeferredSection";
+import { GsapInfinitePhotoSlider } from "@/components/about/GsapInfinitePhotoSlider";
+import { TechStackShowcase } from "@/components/about/TechStackShowcase";
+import { CareerTimeline } from "@/components/about/CareerTimeline";
+import { CertificatesSection } from "@/components/about/CertificatesSection";
+import { BooksSection } from "@/components/products/BooksSection";
+import { BookNewsletterPopup } from "@/components/BookNewsletterPopup";
+import { heroImages } from "@/data/heroImages";
 
-// Lazy load below-the-fold components for faster initial render
-const HomeStackedShowcase = lazy(() => import("@/components/home/HomeStackedShowcase"));
-const NewsletterSection = lazy(() => import("@/components/home/NewsletterSection").then(m => ({ default: m.NewsletterSection })));
-const NewsletterPopup = lazy(() => import("@/components/NewsletterPopup").then(m => ({ default: m.NewsletterPopup })));
 const Footer = lazy(() => import("@/components/layout/Footer").then((m) => ({ default: m.Footer })));
-
-// Minimal loading placeholder
-const SectionLoader = memo(() => (
-  <div className="min-h-[200px] flex items-center justify-center">
-    <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-  </div>
-));
-SectionLoader.displayName = 'SectionLoader';
-
-const sectionReveal = {
-  hidden: { opacity: 0, y: 28, filter: "blur(6px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
-  },
-} as const;
 
 const Index = () => {
   return (
     <motion.div
-      className="landing-open-source-typo min-h-screen bg-background"
+      className="landing-open-source-typo dark min-h-screen bg-slate-950 text-slate-100"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
@@ -42,51 +26,25 @@ const Index = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, delay: 0.08, ease: "easeOut" }}
       >
-        {/* Hero loads immediately - critical for LCP */}
-        <motion.div
-          variants={sectionReveal}
-          initial="hidden"
-          animate="visible"
-        >
-          <HeroSection />
-        </motion.div>
-        
-        {/* Below-the-fold content loads lazily */}
-        <DeferredSection minHeight={720} fallback={<SectionLoader />}>
-          <motion.div
-            variants={sectionReveal}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-4% 0px -4% 0px" }}
-          >
-            <Suspense fallback={<SectionLoader />}>
-              <HomeStackedShowcase />
-            </Suspense>
-          </motion.div>
-        </DeferredSection>
+        <HeroSection />
+        <section className="relative overflow-hidden border-y border-border/60 bg-muted/20 px-4 py-10 md:px-6 md:py-14 xl:px-8">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.10),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(245,158,11,0.12),transparent_24%)]" />
+          <div className="relative mx-auto w-full max-w-[1120px]">
+            <GsapInfinitePhotoSlider items={heroImages} />
+          </div>
+        </section>
 
-        <DeferredSection minHeight={280} fallback={<SectionLoader />}>
-          <motion.section
-            variants={sectionReveal}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-8% 0px -8% 0px" }}
-          >
-            <Suspense fallback={<SectionLoader />}>
-              <NewsletterSection />
-            </Suspense>
-          </motion.section>
-        </DeferredSection>
-
-        <DeferredSection minHeight={320} fallback={<SectionLoader />}>
-          <Suspense fallback={<SectionLoader />}>
-            <Footer />
-          </Suspense>
-        </DeferredSection>
+        <TechStackShowcase />
+        <CareerTimeline />
+        <CertificatesSection />
+        <section id="mybooks" className="scroll-mt-24">
+          <BooksSection />
+        </section>
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </motion.main>
-      <Suspense fallback={null}>
-        <NewsletterPopup delay={8000} />
-      </Suspense>
+      <BookNewsletterPopup />
     </motion.div>
   );
 };

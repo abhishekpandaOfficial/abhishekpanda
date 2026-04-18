@@ -2,110 +2,22 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Link } from "react-router-dom";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
-import { Button } from "@/components/ui/button";
-import { CVDownloadModal } from "@/components/cv/CVDownloadModal";
 import { CareerTimeline } from "@/components/about/CareerTimeline";
 import { TechStackShowcase } from "@/components/about/TechStackShowcase";
 import { GsapInfinitePhotoSlider } from "@/components/about/GsapInfinitePhotoSlider";
 
 import { HeroSocialIcons } from "@/components/about/HeroSocialIcons";
 import { ContactIntentModal } from "@/components/about/ContactIntentModal";
-import { BooksSection } from "@/components/products/BooksSection";
-import { BookNewsletterPopup } from "@/components/BookNewsletterPopup";
+import { heroImages } from "@/data/heroImages";
 import {
-  Download, 
   Award,
   Phone,
-  Briefcase,
-  Landmark,
   Compass,
-  Sun,
-  Palette,
-  Heart,
 } from "lucide-react";
 
-// Import hero images
-import professional from "@/assets/about/professional.jpg";
-import traditional from "@/assets/about/traditional.jpg";
-import lifestyle from "@/assets/about/lifestyle.jpg";
-import artistic from "@/assets/about/artistic.jpg";
-import family from "@/assets/about/family.jpg";
-import aboutPortraitPrimary from "@/assets/about/myimage2.png";
-import aboutPortraitSecondary from "@/assets/about/IMG_2863.jpg";
-
 gsap.registerPlugin(ScrollTrigger);
-
-const heroImages = [
-  {
-    src: aboutPortraitPrimary,
-    alt: "Abhishek Panda portrait",
-    title: "Signature",
-    caption: "Leadership & Architecture",
-    borderGradient: "linear-gradient(135deg, #22d3ee, #3b82f6, #6366f1)",
-    badgeColor: "bg-cyan-500/85 text-white",
-    icon: Briefcase,
-    imageClassName: "object-[center_14%]",
-  },
-  {
-    src: aboutPortraitSecondary,
-    alt: "Abhishek Panda formal portrait",
-    title: "Formal",
-    caption: "Presence & Professionalism",
-    borderGradient: "linear-gradient(135deg, #0ea5e9, #2563eb, #4f46e5)",
-    badgeColor: "bg-blue-500/85 text-white",
-    icon: Briefcase,
-    imageClassName: "object-[center_12%]",
-  },
-  {
-    src: professional,
-    alt: "Professional",
-    title: "Professional",
-    caption: "Studio Portrait",
-    borderGradient: "linear-gradient(135deg, #f59e0b, #f97316, #ef4444)",
-    badgeColor: "bg-amber-500/85 text-white",
-    icon: Landmark,
-  },
-  {
-    src: traditional,
-    alt: "Traditional",
-    title: "Traditional",
-    caption: "Culture & Roots",
-    borderGradient: "linear-gradient(135deg, #f59e0b, #f97316, #ef4444)",
-    badgeColor: "bg-amber-500/85 text-white",
-    icon: Landmark,
-  },
-  {
-    src: lifestyle,
-    alt: "Lifestyle",
-    title: "Lifestyle",
-    caption: "Balanced Momentum",
-    borderGradient: "linear-gradient(135deg, #f43f5e, #ec4899, #a855f7)",
-    badgeColor: "bg-pink-500/85 text-white",
-    icon: Sun,
-  },
-  {
-    src: artistic,
-    alt: "Artistic",
-    title: "Artistic",
-    caption: "Creativity in Motion",
-    borderGradient: "linear-gradient(135deg, #8b5cf6, #6366f1, #3b82f6)",
-    badgeColor: "bg-violet-500/85 text-white",
-    icon: Palette,
-  },
-  {
-    src: family,
-    alt: "Family",
-    title: "Family",
-    caption: "Values First",
-    borderGradient: "linear-gradient(135deg, #ef4444, #f97316, #f59e0b)",
-    badgeColor: "bg-rose-500/85 text-white",
-    icon: Heart,
-  },
-];
-
 
 const certifications = [
   "Azure Solutions Architect (AZ-305) – Pursuing",
@@ -119,7 +31,6 @@ const certifications = [
 ];
 
 const About = () => {
-  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const heroRef = useRef<HTMLElement | null>(null);
   const heroCopyRef = useRef<HTMLDivElement | null>(null);
@@ -189,7 +100,7 @@ const About = () => {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_24%),radial-gradient(circle_at_top_right,rgba(244,114,182,0.16),transparent_26%),linear-gradient(135deg,rgba(255,255,255,0.88),rgba(248,250,252,0.92))] dark:bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.18),transparent_24%),radial-gradient(circle_at_top_right,rgba(244,114,182,0.18),transparent_26%),linear-gradient(135deg,rgba(15,23,42,0.96),rgba(2,6,23,0.94))]" />
           <div className="pointer-events-none absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] [background-size:30px_30px]" />
           <div className="relative w-full px-4 py-12 md:px-6 md:py-20 xl:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div className="grid grid-cols-1 gap-8 md:gap-12 items-center">
               <div ref={heroCopyRef} className="relative rounded-[2rem] border border-border/60 bg-background/70 p-6 shadow-[0_30px_100px_-60px_rgba(15,23,42,0.55)] backdrop-blur md:p-8 xl:p-10">
                 <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
                   <Compass className="h-4 w-4" />
@@ -216,34 +127,16 @@ const About = () => {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <Button variant="hero" size="lg" onClick={() => setIsDownloadModalOpen(true)} className="relative group">
-                    <span className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-primary via-secondary to-primary opacity-75 blur-sm group-hover:opacity-100 transition-opacity" />
-                    <span className="relative flex items-center gap-2 bg-gradient-to-r from-primary to-secondary px-6 py-3 rounded-lg">
-                      <Download className="w-5 h-5" />
-                      Download CV
-                    </span>
-                  </Button>
-                  <Button asChild variant="hero" size="lg" className="relative group">
-                    <Link to="/mentorship">
-                      <span className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500 opacity-70 blur-sm group-hover:opacity-100 transition-opacity" />
-                      <span className="relative flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 rounded-lg text-white">
-                        <Briefcase className="w-5 h-5" />
-                        Mentorship
-                      </span>
-                    </Link>
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
+                  <button
                     onClick={() => setIsContactModalOpen(true)}
-                    className="group relative overflow-hidden border-primary/30 hover:border-primary/50"
+                    className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg border border-primary/30 px-6 py-3 font-semibold hover:border-primary/50"
                   >
-                    <span className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <span className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-0 transition-opacity group-hover:opacity-100" />
                     <span className="relative flex items-center gap-2">
                       <Phone className="w-5 h-5" />
                       Contact Me
                     </span>
-                  </Button>
+                  </button>
                 </div>
 
                 {/* Masked Phone Number */}
@@ -307,18 +200,9 @@ const About = () => {
             </div>
           </div>
         </section>
-
-        {/* MyBooks Section */}
-        <section id="mybooks" className="scroll-mt-24">
-          <BooksSection />
-        </section>
-
       </main>
 
       <Footer />
-      <BookNewsletterPopup />
-      
-      <CVDownloadModal isOpen={isDownloadModalOpen} onClose={() => setIsDownloadModalOpen(false)} />
       <ContactIntentModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
     </div>
   );
