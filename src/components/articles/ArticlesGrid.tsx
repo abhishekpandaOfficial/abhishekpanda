@@ -16,7 +16,7 @@ export default function ArticlesGrid({ articles }: ArticlesGridProps) {
   }
 
   return (
-    <div className="grid auto-rows-fr grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6">
+    <div className="grid auto-rows-fr grid-cols-1 gap-6 sm:grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
       {articles.map((article) => (
         <ArticleCard key={article.slug} article={article} variant="grid" />
       ))}

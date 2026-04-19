@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, BookOpen, FileText, Home, Menu, Newspaper, PanelsTopLeft, Printer, Sparkles } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, BookOpen, ChevronLeft, ChevronRight, FileText, Home, Menu, Newspaper, PanelsTopLeft, Printer, Sparkles } from "lucide-react";
 import { GiscusComments } from "@/components/blog/GiscusComments";
 import { LongformEngagementBar, useLongformEngagement } from "@/components/content/LongformEngagementBar";
 import { LongformSidebar } from "@/components/content/LongformSidebar";
@@ -8,6 +8,14 @@ import { LongformSummaryDialog } from "@/components/content/LongformSummaryDialo
 import { getRelatedArticles, type ArticleRecord } from "@/content/articles";
 import { usePublishedPersonalBlogs } from "@/hooks/usePublishedPersonalBlogs";
 import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useTheme } from "@/components/ThemeProvider";
@@ -35,15 +43,18 @@ const SITE_URL =
 
 export default function ArticleDetail({ article }: ArticleDetailProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme } = useTheme();
   const { personalPosts } = usePublishedPersonalBlogs();
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const iframeCleanupRef = useRef<(() => void) | null>(null);
+  const maxHistoryIndexRef = useRef(0);
 
   const [toc, setToc] = useState<LongformTocItem[]>([]);
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
+  const [historyIndex, setHistoryIndex] = useState(0);
   const commentsSectionId = `article-comments-${article.slug}`;
   const canonical = `${SITE_URL}${location.pathname}`;
   const engagement = useLongformEngagement({
@@ -82,6 +93,23 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
       iframeCleanupRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const getHistoryIndex = () => {
+      if (typeof window === "undefined") return 0;
+      return typeof window.history.state?.idx === "number" ? window.history.state.idx : 0;
+    };
+
+    const syncHistoryIndex = () => {
+      const next = getHistoryIndex();
+      setHistoryIndex(next);
+      maxHistoryIndexRef.current = Math.max(maxHistoryIndexRef.current, next);
+    };
+
+    syncHistoryIndex();
+    window.addEventListener("popstate", syncHistoryIndex);
+    return () => window.removeEventListener("popstate", syncHistoryIndex);
+  }, [location.key]);
 
   useEffect(() => {
     const doc = iframeRef.current?.contentDocument;
@@ -230,6 +258,8 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
       onClick: () => void handleDownloadEpub(),
     },
   ];
+  const canGoBack = historyIndex > 0;
+  const canGoForward = historyIndex < maxHistoryIndexRef.current;
 
   return (
     <div className="relative grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-8">
@@ -352,6 +382,61 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
       </Sheet>
 
       <article className="min-w-0 space-y-6">
+        <section className="rounded-[1.4rem] border border-border/70 bg-card/80 px-4 py-3 shadow-sm backdrop-blur md:px-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <Breadcrumb>
+              <BreadcrumbList className="text-xs md:text-sm">
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/" className="inline-flex items-center gap-1.5">
+                      <Home className="h-3.5 w-3.5" />
+                      Home
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/articles" className="inline-flex items-center gap-1.5">
+                      <Newspaper className="h-3.5 w-3.5" />
+                      Articles
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="line-clamp-1 max-w-[46vw] md:max-w-[28rem]">{article.title}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={!canGoBack}
+                onClick={() => navigate(-1)}
+                className="inline-flex items-center gap-1.5 rounded-full"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Back
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={!canGoForward}
+                onClick={() => navigate(1)}
+                className="inline-flex items-center gap-1.5 rounded-full"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </section>
+
         <section className="relative overflow-hidden rounded-[2rem] border border-border/70 bg-card/90 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.45)]">
           <div className="relative aspect-[16/8] min-h-[280px] w-full md:min-h-[360px]">
             <img

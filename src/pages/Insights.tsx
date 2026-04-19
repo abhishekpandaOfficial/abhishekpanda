@@ -166,7 +166,7 @@ export default function Insights() {
               <p className="mt-3 text-muted-foreground">Try a different keyword or switch to another tag.</p>
             </div>
           ) : viewMode === "grid" ? (
-            <div className="grid auto-rows-fr grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6">
+            <div className="grid auto-rows-fr grid-cols-1 gap-6 sm:grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
               {filtered.map((article) => (
                 <ArticleCard key={article.slug} article={article} variant="grid" />
               ))}
@@ -194,7 +194,7 @@ function InsightListItem({ article }: InsightListItemProps) {
   return (
     <Link
       to={`/articles/${article.slug}`}
-      className="group block rounded-3xl border border-border/70 bg-card/80 p-5 transition hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-[0_20px_45px_-35px_rgba(15,23,42,0.6)]"
+      className="group block rounded-3xl border border-border/70 bg-card/80 p-5 font-sans transition hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-[0_20px_45px_-35px_rgba(15,23,42,0.6)]"
     >
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
@@ -212,8 +212,8 @@ function InsightListItem({ article }: InsightListItemProps) {
         </div>
 
         <div className="shrink-0">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1.5 text-xs font-semibold text-foreground">
-            Open
+          <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-border/70 bg-background/80 px-3 py-1.5 text-xs font-semibold text-foreground">
+            Read More
             <ArrowUpRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </span>
         </div>

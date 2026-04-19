@@ -126,6 +126,20 @@ const renderLogo = (logo: ArticleLogo, index: number) => {
   );
 };
 
+const renderInlineLogo = (logo: ArticleLogo) => {
+  const Icon = logo.icon;
+
+  if (logo.imageSrc) {
+    return <img src={logo.imageSrc} alt={logo.name} className="h-4 w-4 object-contain" loading="lazy" decoding="async" />;
+  }
+
+  if (Icon) {
+    return <Icon className={`h-3.5 w-3.5 ${logo.colorClass || "text-foreground"}`} />;
+  }
+
+  return <span className={`text-[10px] font-bold ${logo.colorClass || "text-foreground"}`}>{logo.name.slice(0, 1)}</span>;
+};
+
 export default function ArticleCard({ article, featured = false, variant }: ArticleCardProps) {
   const cardVariant = variant ?? (featured ? "spotlight" : "grid");
   const isSpotlight = cardVariant === "spotlight";
@@ -139,9 +153,9 @@ export default function ArticleCard({ article, featured = false, variant }: Arti
     <motion.article initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28 }} className="h-full">
       <Link
         to={`/articles/${article.slug}`}
-        className={`group relative flex h-full w-full flex-col overflow-hidden rounded-[30px] border bg-white/95 transition duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 dark:bg-slate-950/90 ${
+        className={`group relative flex h-full w-full flex-col overflow-hidden rounded-[30px] border bg-white/95 font-sans transition duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 dark:bg-slate-950/90 ${
           theme.border
-        } ${theme.glow} ${isSpotlight ? "min-h-[430px]" : "min-h-[420px]"}`}
+        } ${theme.glow} ${isSpotlight ? "min-h-[390px] md:min-h-[430px]" : "min-h-[370px] md:min-h-[420px]"}`}
       >
         <div className={`absolute inset-0 opacity-70 dark:opacity-90 ${theme.pattern}`} />
         <div className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${theme.surface}`} />
@@ -178,7 +192,7 @@ export default function ArticleCard({ article, featured = false, variant }: Arti
             <div className="flex flex-wrap gap-2">
               {visibleLogos.map(renderLogo)}
             </div>
-            <div className={`hidden rounded-full border px-3 py-1 text-[11px] font-semibold md:inline-flex ${theme.meta}`}>
+            <div className={`hidden whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-semibold md:inline-flex ${theme.meta}`}>
               {article.heroLabel}: {article.heroValue}
             </div>
           </div>
@@ -202,6 +216,20 @@ export default function ArticleCard({ article, featured = false, variant }: Arti
             ))}
           </div>
 
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {visibleLogos.map((logo, index) => (
+              <span
+                key={`${logo.name}-chip-${index}`}
+                className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/85 px-3 py-1.5 text-[11px] font-semibold text-foreground/90"
+              >
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-border/70 bg-card/90">
+                  {renderInlineLogo(logo)}
+                </span>
+                <span className="whitespace-nowrap">{logo.name}</span>
+              </span>
+            ))}
+          </div>
+
           <div className="mt-auto flex items-center justify-between gap-4 pt-5">
             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-2">
@@ -213,8 +241,8 @@ export default function ArticleCard({ article, featured = false, variant }: Arti
                 {formatReadTime(article.readMinutes)}
               </span>
             </div>
-            <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition group-hover:scale-[1.02] ${theme.button}`}>
-              Open article
+            <div className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition group-hover:scale-[1.02] ${theme.button}`}>
+              Read More
               <ArrowRight className="h-4 w-4" />
             </div>
           </div>
