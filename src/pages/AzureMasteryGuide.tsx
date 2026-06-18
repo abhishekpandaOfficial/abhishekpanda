@@ -1,6 +1,6 @@
 import { MasteryEmbedPage } from "@/components/blog/MasteryEmbedPage";
 
-const STATIC_HTML_VERSION = "2026-03-10-azure-html-v5";
+const STATIC_HTML_VERSION = "2026-06-18-azure-escape-html-fix-v3";
 
 const AzureMasteryGuide = () => {
   return (

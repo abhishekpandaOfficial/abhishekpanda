@@ -14,7 +14,8 @@ import {
   Terminal,
   Database,
   Infinity as InfinityIcon,
-  Globe
+  Globe,
+  Cloud
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -56,6 +57,20 @@ const roadmapItems = [
     isExternal: false, 
     isComingSoon: true,
     icon: InfinityIcon 
+  },
+  { 
+    name: "Azure Mastery", 
+    path: "/azure-mastery", 
+    isExternal: false, 
+    isComingSoon: false,
+    icon: Cloud
+  },
+  { 
+    name: "AWS Mastery", 
+    path: "#", 
+    isExternal: false, 
+    isComingSoon: true,
+    icon: Cloud
   },
   { 
     name: "FullStack Mastery", 
@@ -322,7 +337,7 @@ export const Navigation = () => {
                               Soon
                             </span>
                           </div>
-                        ) : (
+                        ) : item.isExternal ? (
                           <a
                             key={item.name}
                             href={item.path}
@@ -338,6 +353,20 @@ export const Navigation = () => {
                               Active
                             </span>
                           </a>
+                        ) : (
+                          <PrefetchLink
+                            key={item.name}
+                            to={item.path}
+                            className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 hover:bg-primary/10 text-muted-foreground hover:text-foreground group/item"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <item.icon className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover/item:scale-110 text-primary animate-pulse" />
+                              <span>{item.name}</span>
+                            </div>
+                            <span className="text-[9px] font-semibold tracking-wide uppercase px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-500 border border-violet-500/20">
+                              Active
+                            </span>
+                          </PrefetchLink>
                         )
                       ))}
                     </motion.div>
@@ -510,7 +539,7 @@ export const Navigation = () => {
                               Soon
                             </span>
                           </div>
-                        ) : (
+                        ) : item.isExternal ? (
                           <a
                             key={item.name}
                             href={item.path}
@@ -526,6 +555,20 @@ export const Navigation = () => {
                               Active
                             </span>
                           </a>
+                        ) : (
+                          <Link
+                            key={item.name}
+                            to={item.path}
+                            className="flex items-center justify-between py-2 text-[14px] font-medium text-muted-foreground hover:text-foreground transition-colors group/item"
+                          >
+                            <span className="flex items-center gap-2.5">
+                              <item.icon className="h-4 w-4 text-primary transition-transform duration-200 group-hover/item:scale-110" />
+                              {item.name}
+                            </span>
+                            <span className="text-[9px] font-semibold tracking-wide uppercase px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-500 border border-violet-500/20">
+                              Active
+                            </span>
+                          </Link>
                         )
                       ))}
                     </motion.div>
