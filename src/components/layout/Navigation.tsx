@@ -7,7 +7,14 @@ import {
   Send,
   FolderOpen,
   ScrollText,
-  MessageCircle
+  MessageCircle,
+  Map,
+  ChevronDown,
+  Sparkles,
+  Terminal,
+  Database,
+  Infinity as InfinityIcon,
+  Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -21,10 +28,50 @@ const navLinks = [
   { name: "Contact", path: "/contact", icon: Send },
 ];
 
+const roadmapItems = [
+  { 
+    name: "AI Mastery", 
+    path: "https://ai-mastery-peach.vercel.app/", 
+    isExternal: true, 
+    isComingSoon: false,
+    icon: Sparkles
+  },
+  { 
+    name: "Dotnet Mastery", 
+    path: "#", 
+    isExternal: false, 
+    isComingSoon: true,
+    icon: Terminal 
+  },
+  { 
+    name: "Data Mastery", 
+    path: "#", 
+    isExternal: false, 
+    isComingSoon: true,
+    icon: Database 
+  },
+  { 
+    name: "DevOps Mastery", 
+    path: "#", 
+    isExternal: false, 
+    isComingSoon: true,
+    icon: InfinityIcon 
+  },
+  { 
+    name: "FullStack Mastery", 
+    path: "#", 
+    isExternal: false, 
+    isComingSoon: true,
+    icon: Globe 
+  },
+];
+
 export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isRoadmapsHovered, setIsRoadmapsHovered] = useState(false);
+  const [isRoadmapsMobileOpen, setIsRoadmapsMobileOpen] = useState(false);
   const logoBasePath = import.meta.env.BASE_URL || "/";
   const primaryHeaderLogo = `${logoBasePath}panda-bamboo-trimmed.png`;
   const secondaryHeaderLogo = `${logoBasePath}pandalogo-transparent.png`;
@@ -176,7 +223,7 @@ export const Navigation = () => {
             </PrefetchLink>
 
             {/* Desktop Navigation */}
-            <nav className="hidden min-[1180px]:flex min-w-0 items-center justify-center gap-0 overflow-hidden flex-nowrap 2xl:gap-0.5">
+            <nav className="hidden min-[1180px]:flex min-w-0 items-center justify-center gap-0 flex-nowrap 2xl:gap-0.5">
               {/* Contact */}
               {navLinks.slice(0, 1).map((link) => (
                 <PrefetchLink
@@ -231,6 +278,72 @@ export const Navigation = () => {
                   Projects
                 </span>
               </PrefetchLink>
+
+              {/* Roadmaps Dropdown */}
+              <div 
+                className="relative"
+                onMouseEnter={() => setIsRoadmapsHovered(true)}
+                onMouseLeave={() => setIsRoadmapsHovered(false)}
+              >
+                <button
+                  className={cn(
+                    desktopNavItemClass,
+                    "text-muted-foreground hover:text-foreground cursor-pointer focus:outline-none bg-transparent border-none"
+                  )}
+                >
+                  <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                  <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                  <span className="relative flex items-center gap-2">
+                    <Map className={desktopNavIconClass} />
+                    RoadMaps
+                    <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-300", isRoadmapsHovered && "rotate-180")} />
+                  </span>
+                </button>
+                <AnimatePresence>
+                  {isRoadmapsHovered && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute left-0 top-full mt-1 w-60 rounded-xl border border-border/50 bg-background/90 backdrop-blur-xl p-2 shadow-xl z-50 flex flex-col gap-1 whitespace-nowrap"
+                    >
+                      {roadmapItems.map((item) => (
+                        item.isComingSoon ? (
+                          <div
+                            key={item.name}
+                            className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-[13px] font-medium opacity-65 cursor-not-allowed select-none text-muted-foreground hover:bg-muted/30 transition-colors"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <item.icon className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+                              <span>{item.name}</span>
+                            </div>
+                            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground/75 border border-border/60">
+                              Soon
+                            </span>
+                          </div>
+                        ) : (
+                          <a
+                            key={item.name}
+                            href={item.path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 hover:bg-primary/10 text-muted-foreground hover:text-foreground group/item"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <item.icon className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover/item:scale-110 text-primary animate-pulse" />
+                              <span>{item.name}</span>
+                            </div>
+                            <span className="text-[9px] font-semibold tracking-wide uppercase px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-500 border border-violet-500/20">
+                              Active
+                            </span>
+                          </a>
+                        )
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
             </nav>
 
@@ -352,6 +465,72 @@ export const Navigation = () => {
                   <ScrollText className={mobileNavIconClass} />
                   Insights
                 </Link>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.24 }}
+                className="flex flex-col"
+              >
+                <button
+                  onClick={() => setIsRoadmapsMobileOpen(!isRoadmapsMobileOpen)}
+                  className={cn(
+                    mobileNavItemClass,
+                    "w-full flex items-center justify-between text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <span className="flex items-center gap-3.5">
+                    <Map className={mobileNavIconClass} />
+                    RoadMaps
+                  </span>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform duration-300", isRoadmapsMobileOpen && "rotate-180")} />
+                </button>
+                
+                <AnimatePresence initial={false}>
+                  {isRoadmapsMobileOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden pl-10 pr-4 flex flex-col gap-1.5 mt-1 border-l border-border/45 ml-[26px]"
+                    >
+                      {roadmapItems.map((item) => (
+                        item.isComingSoon ? (
+                          <div
+                            key={item.name}
+                            className="flex items-center justify-between py-2 text-[14px] font-medium text-muted-foreground/60 cursor-not-allowed"
+                          >
+                            <span className="flex items-center gap-2.5">
+                              <item.icon className="h-4 w-4 text-muted-foreground/45" />
+                              {item.name}
+                            </span>
+                            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground/60 border border-border/50">
+                              Soon
+                            </span>
+                          </div>
+                        ) : (
+                          <a
+                            key={item.name}
+                            href={item.path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between py-2 text-[14px] font-medium text-muted-foreground hover:text-foreground transition-colors group/item"
+                          >
+                            <span className="flex items-center gap-2.5">
+                              <item.icon className="h-4 w-4 text-primary transition-transform duration-200 group-hover/item:scale-110" />
+                              {item.name}
+                            </span>
+                            <span className="text-[9px] font-semibold tracking-wide uppercase px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-500 border border-violet-500/20">
+                              Active
+                            </span>
+                          </a>
+                        )
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
 
             </nav>
