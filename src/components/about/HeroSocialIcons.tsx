@@ -17,6 +17,7 @@ const OFFICIAL_BRAND_COLORS: Record<string, string> = {
   x: "#111111",
   linkedin: "#0a66c2",
   instagram: "#e1306c",
+  threads: "#000000",
   youtube: "#ff0000",
   github: "#181717",
   medium: "#12100e",

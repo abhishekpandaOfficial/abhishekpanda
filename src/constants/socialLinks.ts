@@ -33,10 +33,19 @@ export const FALLBACK_SOCIAL_LINKS: FallbackSocialLink[] = [
     platform: "instagram",
     display_name: "Instagram",
     category: "social",
-    profile_url: "https://www.instagram.com/official_abhishekpanda",
+    profile_url: "https://www.instagram.com/i_m_abhishekpanda",
     icon_key: "instagram",
     brand_color: "#e1306c",
     sort_order: 3,
+  },
+  {
+    platform: "threads",
+    display_name: "Threads",
+    category: "social",
+    profile_url: "https://www.threads.com/@i_m_abhishekpanda",
+    icon_key: "threads",
+    brand_color: "#000000",
+    sort_order: 4,
   },
   {
     platform: "youtube",
@@ -45,7 +54,7 @@ export const FALLBACK_SOCIAL_LINKS: FallbackSocialLink[] = [
     profile_url: "https://www.youtube.com/@the_abhishekpanda",
     icon_key: "youtube",
     brand_color: "#ff0000",
-    sort_order: 4,
+    sort_order: 5,
   },
   {
     platform: "x",
@@ -54,7 +63,7 @@ export const FALLBACK_SOCIAL_LINKS: FallbackSocialLink[] = [
     profile_url: "https://x.com/Panda_Abhishek8",
     icon_key: "x",
     brand_color: "#111111",
-    sort_order: 5,
+    sort_order: 6,
   },
   {
     platform: "whatsapp",
@@ -63,7 +72,7 @@ export const FALLBACK_SOCIAL_LINKS: FallbackSocialLink[] = [
     profile_url: "https://chat.whatsapp.com/BIz1l1qK9lu1oZEIJOBmDS?mode=gi_t",
     icon_key: "whatsapp",
     brand_color: "#25d366",
-    sort_order: 6,
+    sort_order: 7,
   },
   {
     platform: "substack",
@@ -72,7 +81,7 @@ export const FALLBACK_SOCIAL_LINKS: FallbackSocialLink[] = [
     profile_url: "https://pandaabhishek.substack.com/",
     icon_key: "substack",
     brand_color: "#ff6719",
-    sort_order: 7,
+    sort_order: 8,
   },
   {
     platform: "hashnode",
@@ -81,7 +90,7 @@ export const FALLBACK_SOCIAL_LINKS: FallbackSocialLink[] = [
     profile_url: "https://abhishekpanda.hashnode.dev/",
     icon_key: "hashnode",
     brand_color: "#2962ff",
-    sort_order: 8,
+    sort_order: 9,
   },
   {
     platform: "medium",
@@ -90,6 +99,6 @@ export const FALLBACK_SOCIAL_LINKS: FallbackSocialLink[] = [
     profile_url: "https://medium.com/@official.abhishekpanda",
     icon_key: "medium",
     brand_color: "#12100e",
-    sort_order: 9,
+    sort_order: 10,
   },
 ];

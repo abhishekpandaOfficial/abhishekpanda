@@ -10,6 +10,7 @@ const OFFICIAL_BRAND_COLORS: Record<string, string> = {
   whatsapp: "#25d366",
   linkedin: "#0a66c2",
   instagram: "#e1306c",
+  threads: "#000000",
   youtube: "#ff0000",
   github: "#181717",
   medium: "#12100e",
@@ -19,6 +20,7 @@ const OFFICIAL_BRAND_COLORS: Record<string, string> = {
 
 const DARK_THEME_VISIBLE_COLORS: Record<string, string> = {
   x: "#f5f5f5",
+  threads: "#f5f5f5",
   whatsapp: "#25d366",
   github: "#f0f6fc",
   medium: "#fafafa",

@@ -19,6 +19,7 @@ import { iconForKey } from "@/lib/social/iconMap";
 
 const ICON_KEYS = [
   "instagram",
+  "threads",
   "facebook",
   "youtube",
   "linkedin",
