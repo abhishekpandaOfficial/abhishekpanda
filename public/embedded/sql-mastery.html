@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SQL Server Mastery — DBMS to Data Architect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050a08;--sf:#080e0a;--card:#0c1510;--card2:#111e14;
+  --b1:#162b1a;--b2:#1e4024;--b3:#2d6b38;
+  --g1:#00b86b;--g2:#26d48a;--g3:#4dffaa;
+  --si:#cc2936;--si2:#e84055;--si3:#ff6b7a;
+  --ye:#ffd166;--or:#ff8c42;--pu:#c084fc;--cy:#00e5ff;--bl:#60a5fa;
+  --tx:#c8f0d8;--tx2:#5a9a72;--tx3:#1a3520;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;--disp:'Bebas Neue',sans-serif;
+  --lw:272px;--rw:580px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:14px}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,184,107,.004) 3px,rgba(0,184,107,.004) 4px);pointer-events:none;z-index:9999}
+
+/* TOPBAR */
+.topbar{height:54px;background:var(--sf);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 18px;gap:12px;flex-shrink:0;position:relative;z-index:100}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g1) 20%,var(--si) 50%,var(--g2) 80%,transparent)}
+.logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,rgba(232,64,85,.18),rgba(0,184,107,.12));border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(0,184,107,.25)}
+.sql-server-mark{width:24px;height:24px;display:block}
+.logo-name{font-family:var(--disp);font-size:22px;letter-spacing:5px;background:linear-gradient(135deg,var(--g1),var(--si2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.logo-sub{font-size:8px;color:var(--tx3);font-family:var(--mono);letter-spacing:2px;margin-top:2px}
+.top-sep{flex:1}
+.t-stat{background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:3px 9px;font-size:9.5px;font-family:var(--mono);color:var(--tx3)}
+.t-stat b{color:var(--g2)}.t-stat b.si{color:var(--si2)}
+.t-badge{background:rgba(0,184,107,.07);border:1px solid var(--b2);border-radius:3px;padding:4px 11px;font-size:9px;color:var(--g2);font-family:var(--mono);letter-spacing:1px}
+.blink{animation:bl .9s step-end infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+.lp{width:var(--lw);background:var(--sf);border-right:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.lp-hdr{padding:11px 13px 9px;border-bottom:1px solid var(--b1)}
+.lp-hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.lp-hdr-row h3{font-family:var(--mono);font-size:8px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase}
+.prog-bar{background:var(--b1);border-radius:2px;height:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--g1),var(--si2));width:0%;transition:width .5s;box-shadow:0 0 6px rgba(0,184,107,.4)}
+.prog-txt{font-size:8px;color:var(--tx3);font-family:var(--mono);margin-top:4px}
+.lnav{flex:1;overflow-y:auto;padding:3px 0}
+.lnav::-webkit-scrollbar{width:2px}
+.lnav::-webkit-scrollbar-thumb{background:var(--b2)}
+.ci{display:flex;align-items:center;gap:7px;padding:7px 12px;cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.ci:hover{background:rgba(0,184,107,.04);border-left-color:var(--b2)}
+.ci.active{background:rgba(0,184,107,.08);border-left-color:var(--g1)}
+.ci.active .cn{color:var(--g2)}
+.ci-icon{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.ci-info{flex:1;min-width:0}
+.cn{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.cm{font-size:8px;color:var(--tx3);font-family:var(--mono)}
+.lv{font-size:7px;padding:1px 5px;border-radius:2px;font-family:var(--mono);font-weight:700;flex-shrink:0;text-transform:uppercase;letter-spacing:.5px}
+
+/* MIDDLE */
+.mid{flex:1;overflow-y:auto;padding:18px;min-width:0}
+.mid::-webkit-scrollbar{width:4px}
+.mid::-webkit-scrollbar-thumb{background:var(--b2)}
+
+/* WELCOME */
+.wlc{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:65vh;text-align:center;padding:32px;animation:fu .45s ease}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.wlc-logo{width:84px;height:84px;margin-bottom:6px;animation:db-pulse 3s ease-in-out infinite}
+.wlc-logo .sql-server-mark{width:100%;height:100%}
+@keyframes db-pulse{0%,100%{filter:drop-shadow(0 0 20px rgba(0,184,107,.4)) drop-shadow(0 0 40px rgba(204,41,54,.2))}50%{filter:drop-shadow(0 0 40px rgba(0,184,107,.6)) drop-shadow(0 0 60px rgba(204,41,54,.4))}}
+.wlc-title{font-family:var(--disp);font-size:38px;letter-spacing:6px;background:linear-gradient(135deg,var(--g1),var(--si2) 55%,var(--g3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;line-height:1}
+.wlc-sub{font-size:12px;color:var(--tx2);max-width:560px;line-height:1.75;margin-bottom:24px;font-family:var(--mono)}
+.wlc-prompt{font-family:var(--mono);font-size:13px;color:var(--g2);margin-bottom:20px}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.sc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px 18px;text-align:center;min-width:90px;transition:border-color .2s}
+.sc:hover{border-color:var(--b2)}
+.sc-n{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--g2);display:block;line-height:1;text-shadow:0 0 10px rgba(0,184,107,.3)}
+.sc-n.si{color:var(--si2);text-shadow:0 0 10px rgba(204,41,54,.3)}
+.sc-n.ye{color:var(--ye);text-shadow:0 0 10px rgba(255,209,102,.3)}
+.sc-l{font-size:8px;color:var(--tx3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;display:block}
+.wlc-hint{font-size:9px;color:var(--tx3);font-family:var(--mono);margin-top:16px;letter-spacing:1px}
+
+/* TOPIC GRID */
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:8px;animation:fu .4s ease .08s both}
+.tc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--g1),var(--si2));opacity:0;transition:opacity .2s}
+.tc:hover{border-color:var(--b2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,184,107,.1)}
+.tc:hover::before,.tc.active::before{opacity:1}
+.tc.active{border-color:var(--g1);background:var(--card2);box-shadow:0 0 0 1px rgba(0,184,107,.3)}
+.tc-cmd{font-family:var(--mono);font-size:12px;font-weight:800;color:var(--g2);margin-bottom:3px;text-shadow:0 0 8px rgba(0,184,107,.3)}
+.tc-title{font-size:10px;font-weight:600;color:var(--tx);margin-bottom:3px;font-family:var(--mono)}
+.tc-d{font-size:9.5px;color:var(--tx3);line-height:1.4}
+.tc-tags{display:flex;gap:3px;margin-top:7px;flex-wrap:wrap}
+.tag{font-size:7px;padding:2px 4px;border-radius:2px;font-family:var(--mono);font-weight:700;letter-spacing:.3px}
+.tag.beginner{background:rgba(0,184,107,.1);color:#00b86b;border:1px solid rgba(0,184,107,.2)}
+.tag.intermediate{background:rgba(255,209,102,.1);color:#ffd166;border:1px solid rgba(255,209,102,.2)}
+.tag.advanced{background:rgba(192,132,252,.1);color:#c084fc;border:1px solid rgba(192,132,252,.2)}
+.tag.essential{background:rgba(0,184,107,.1);color:var(--g2);border:1px solid rgba(0,184,107,.25)}
+.tag.architect{background:rgba(204,41,54,.1);color:var(--si2);border:1px solid rgba(204,41,54,.25)}
+.tag.performance{background:rgba(255,140,66,.1);color:var(--or);border:1px solid rgba(255,140,66,.2)}
+.tag.security{background:rgba(96,165,250,.1);color:var(--bl);border:1px solid rgba(96,165,250,.2)}
+
+/* CHAPTER HEADER */
+.ch-hdr{margin-bottom:18px;animation:fu .3s ease}
+.ch-ey{font-size:8px;color:var(--g2);font-family:var(--mono);letter-spacing:3px;text-transform:uppercase;margin-bottom:5px}
+.ch-t{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--tx);line-height:1.1;margin-bottom:8px}
+.ch-d{font-size:11.5px;color:var(--tx2);line-height:1.7;max-width:660px;font-family:var(--mono)}
+.ch-chips{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:3px 8px;font-size:9px;color:var(--tx2);font-family:var(--mono)}
+.chip-dot{width:4px;height:4px;border-radius:50%}
+
+/* RIGHT PANEL */
+.rp{width:var(--rw);background:var(--sf);border-left:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .25s}
+.rp.hidden{width:0;border:none;overflow:hidden}
+.rp-hdr{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.rp-hdr h3{flex:1;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--g2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xbtn{width:22px;height:22px;border-radius:3px;border:1px solid var(--b1);background:transparent;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--mono);transition:all .15s}
+.xbtn:hover{background:var(--b1);color:var(--tx)}
+.rp-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;overflow-x:auto}
+.rp-tabs::-webkit-scrollbar{height:0}
+.rt{padding:7px 13px;font-size:9.5px;color:var(--tx3);font-family:var(--mono);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;letter-spacing:.5px}
+.rt:hover{color:var(--tx)}.rt.active{color:var(--g2);border-bottom-color:var(--g2)}
+.rb{flex:1;overflow-y:auto;padding:14px}
+.rb::-webkit-scrollbar{width:2px}
+.rb::-webkit-scrollbar-thumb{background:var(--b2)}
+@keyframes sr{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.rb>*{animation:sr .2s ease both}
+
+/* SQL EDITOR */
+.sql-editor{background:#030806;border:1px solid var(--b2);border-radius:7px;overflow:hidden;margin:10px 0;box-shadow:0 0 24px rgba(0,184,107,.07)}
+.sql-toolbar{display:flex;align-items:center;gap:5px;padding:7px 11px;background:#050a07;border-bottom:1px solid var(--b1)}
+.sql-dot{width:9px;height:9px;border-radius:50%}
+.sql-dot.r{background:#ff5f57}.sql-dot.y{background:#febc2e}.sql-dot.g{background:#28c840}
+.sql-title{flex:1;text-align:center;font-size:9px;color:var(--tx3);font-family:var(--mono)}
+.sql-run{background:transparent;border:1px solid var(--b2);border-radius:3px;color:var(--g2);font-family:var(--mono);font-size:8px;padding:2px 8px;cursor:pointer;transition:all .15s;letter-spacing:1px}
+.sql-run:hover{background:rgba(0,184,107,.1);border-color:var(--g1)}
+.sql-run.running{color:var(--ye);border-color:var(--ye)}
+.sql-code{padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.75;min-height:60px;max-height:280px;overflow-y:auto}
+.sql-code::-webkit-scrollbar{width:2px}
+.sql-code::-webkit-scrollbar-thumb{background:var(--b2)}
+/* SQL syntax coloring */
+.sk{color:#ff79c6;font-weight:600}  /* keywords */
+.sf{color:#50fa7b}                   /* functions */
+.ss{color:#f1fa8c}                   /* strings */
+.sn{color:#bd93f9}                   /* numbers */
+.sc2{color:#6272a4}                  /* comments */
+.so{color:var(--g3)}                  /* operators, aliases */
+.st{color:#8be9fd}                   /* table/column names */
+.sp{color:var(--or)}                 /* params/vars */
+
+/* RESULTS GRID */
+.results-hdr{display:flex;align-items:center;gap:8px;padding:6px 11px;background:#050a07;border-top:1px solid var(--b1);font-family:var(--mono);font-size:8px;color:var(--tx3);letter-spacing:1px}
+.results-hdr .rh-rows{margin-left:auto;color:var(--g2)}
+.results-grid{overflow-x:auto;max-height:200px;overflow-y:auto}
+.results-grid::-webkit-scrollbar{width:2px;height:2px}
+.results-grid::-webkit-scrollbar-thumb{background:var(--b2)}
+.rg-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px}
+.rg-table th{background:#0a1510;color:var(--g2);text-align:left;padding:5px 10px;border-bottom:1px solid var(--b1);white-space:nowrap;font-size:9px;letter-spacing:.5px;position:sticky;top:0;z-index:1}
+.rg-table td{padding:4px 10px;border-bottom:1px solid rgba(255,255,255,.025);color:var(--tx2);white-space:nowrap;vertical-align:top}
+.rg-table tr:hover td{background:rgba(0,184,107,.03)}
+.rg-table td.num{color:var(--pu)}.rg-table td.null{color:var(--tx3);font-style:italic}
+.rg-table td.grn{color:var(--g2)}.rg-table td.red{color:var(--si2)}.rg-table td.ye{color:var(--ye)}
+.rg-table td.or{color:var(--or)}.rg-table td.bl{color:var(--bl)}
+.exec-info{padding:4px 11px;font-family:var(--mono);font-size:8px;color:var(--tx3);border-top:1px solid var(--b1);background:#050a07}
+.exec-info span{color:var(--g2)}
+
+/* CONTENT */
+.sec{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--g2);margin:16px 0 7px;display:flex;align-items:center;gap:7px;letter-spacing:1.5px;text-transform:uppercase}
+.sec::after{content:'';flex:1;height:1px;background:var(--b1)}
+.sec.si{color:var(--si2)}.sec.ye{color:var(--ye)}.sec.or{color:var(--or)}.sec.pu{color:var(--pu)}.sec.bl{color:var(--bl)}
+.sec:first-child{margin-top:0}
+p.bd{font-size:11.5px;line-height:1.75;color:var(--tx2);margin-bottom:9px;font-family:var(--mono)}
+strong{color:var(--tx)}
+.callout{border-left:2px solid;padding:9px 12px;border-radius:0 4px 4px 0;margin:9px 0;font-size:10.5px;line-height:1.7;font-family:var(--mono)}
+.callout.info{border-color:var(--g2);background:rgba(0,184,107,.05);color:var(--tx2)}
+.callout.warn{border-color:var(--ye);background:rgba(255,209,102,.05);color:var(--tx2)}
+.callout.tip{border-color:var(--or);background:rgba(255,140,66,.04);color:var(--tx2)}
+.callout.danger{border-color:var(--si2);background:rgba(204,41,54,.05);color:var(--tx2)}
+.callout.perf{border-color:var(--pu);background:rgba(192,132,252,.05);color:var(--tx2)}
+.callout strong{display:block;font-size:7.5px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.callout.info strong{color:var(--g2)}.callout.warn strong{color:var(--ye)}.callout.tip strong{color:var(--or)}
+.callout.danger strong{color:var(--si2)}.callout.perf strong{color:var(--pu)}
+.tbl{width:100%;border-collapse:collapse;font-size:10.5px;margin:8px 0}
+.tbl th{background:var(--card2);color:var(--g2);font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:7px 9px;text-align:left;border-bottom:1px solid var(--b1)}
+.tbl td{padding:6px 9px;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.02);vertical-align:top;line-height:1.5;font-family:var(--mono);font-size:10px}
+.tbl tr:hover td{background:rgba(0,184,107,.02)}
+.tbl td:first-child{color:var(--g2);white-space:nowrap;font-weight:600}
+.tbl td.si{color:var(--si2)}.tbl td.ye{color:var(--ye)}.tbl td.pu{color:var(--pu)}
+.tbl td.or{color:var(--or)}.tbl td.bl{color:var(--bl)}.tbl td.gr{color:var(--g2)}
+.fl{list-style:none;margin:6px 0}
+.fl li{display:flex;align-items:flex-start;gap:7px;padding:4px 0;font-size:10.5px;color:var(--tx2);line-height:1.55;border-bottom:1px solid rgba(255,255,255,.02);font-family:var(--mono)}
+.fl li::before{content:'▸';color:var(--g2);font-size:10px;margin-top:1px;flex-shrink:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}
+.mc{background:var(--card);border:1px solid var(--b1);border-radius:4px;padding:10px;font-family:var(--mono)}
+.mc h4{font-size:8px;font-weight:700;color:var(--g2);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.mc h4.si{color:var(--si2)}.mc h4.ye{color:var(--ye)}.mc h4.pu{color:var(--pu)}.mc h4.or{color:var(--or)}.mc h4.bl{color:var(--bl)}
+.mc p{font-size:10px;color:var(--tx2);line-height:1.55}
+.flow{display:flex;align-items:center;gap:0;margin:10px 0;overflow-x:auto;padding:12px;background:var(--card);border:1px solid var(--b1);border-radius:6px;flex-wrap:wrap;row-gap:6px}
+.fbox{background:var(--card2);border:1px solid var(--b1);border-radius:5px;padding:7px 11px;font-family:var(--mono);font-size:10px;white-space:nowrap;text-align:center;flex-shrink:0}
+.fbox .fb-label{font-size:7.5px;color:var(--tx3);margin-bottom:2px;text-transform:uppercase;letter-spacing:1px}
+.fbox .fb-name{font-weight:700}
+.farr{padding:0 6px;color:var(--tx3);font-size:14px;flex-shrink:0}
+.farr.cmd{padding:0 4px;font-family:var(--mono);font-size:9px;color:var(--g2);display:flex;flex-direction:column;align-items:center;gap:2px}
+/* Q&A */
+.qa-item{border:1px solid var(--b1);border-radius:4px;margin-bottom:7px;overflow:hidden}
+.qa-item:hover{border-color:var(--b2)}
+.qa-q{padding:9px 12px;cursor:pointer;display:flex;align-items:flex-start;gap:7px;background:var(--card);transition:background .15s}
+.qa-q:hover{background:var(--card2)}
+.qa-qi{width:17px;height:17px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;font-family:var(--mono);flex-shrink:0;margin-top:1px}
+.qa-qt{flex:1;font-size:10.5px;color:var(--tx);font-weight:500;line-height:1.5;font-family:var(--mono)}
+.qa-ch{color:var(--tx3);transition:transform .3s;flex-shrink:0;font-size:9px;margin-top:3px}
+.qa-item.open .qa-ch{transform:rotate(180deg)}
+.qa-a{max-height:0;overflow:hidden;transition:max-height .45s ease}
+.qa-item.open .qa-a{max-height:2000px}
+.qa-ab{padding:12px;font-size:10.5px;color:var(--tx2);line-height:1.85;border-top:1px solid var(--b1);background:#020604;font-family:var(--mono)}
+.qa-ab code{background:var(--card);border:1px solid var(--b1);border-radius:2px;padding:1px 4px;color:var(--g2)}
+.qa-ab pre{background:#030806;border:1px solid var(--b1);border-radius:4px;padding:10px;margin:6px 0;font-size:10px;line-height:1.7;overflow-x:auto;color:var(--tx2)}
+.filter-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.fbtn{font-size:8px;padding:2px 7px;border-radius:3px;border:1px solid var(--b1);background:transparent;color:var(--tx3);cursor:pointer;font-family:var(--mono);letter-spacing:.5px;transition:all .15s}
+.fbtn:hover,.fbtn.active{border-color:var(--g2);color:var(--g2);background:rgba(0,184,107,.06)}
+/* ARCH */
+.arch{background:var(--card);border:1px solid var(--b1);border-radius:8px;padding:16px;margin:10px 0;position:relative;overflow:hidden}
+.arch::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,184,107,.05) 0%,transparent 70%);pointer-events:none}
+.arch-title{font-family:var(--mono);font-size:8px;color:var(--g2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.arch-title::after{content:'';flex:1;height:1px;background:var(--b1)}
+.az{border:1px solid;border-radius:6px;padding:10px;flex:1;min-width:110px}
+.az.client{border-color:rgba(0,184,107,.4);background:rgba(0,184,107,.05)}
+.az.engine{border-color:rgba(204,41,54,.4);background:rgba(204,41,54,.04)}
+.az.storage{border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.04)}
+.az.mem{border-color:rgba(255,209,102,.3);background:rgba(255,209,102,.04)}
+.az-title{font-family:var(--mono);font-size:8px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.az.client .az-title{color:var(--g2)}.az.engine .az-title{color:var(--si2)}.az.storage .az-title{color:var(--pu)}.az.mem .az-title{color:var(--ye)}
+.ac{background:var(--card2);border:1px solid var(--b1);border-radius:4px;padding:5px 8px;margin-bottom:4px;font-family:var(--mono);font-size:9.5px}
+.ac-n{font-weight:700;margin-bottom:1px}
+.ac-d{font-size:8px;color:var(--tx3);line-height:1.4}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo-icon" aria-label="SQL Server logo">
+    <svg class="sql-server-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+      <path d="M11 18C18 11 30 8 43 10C51 11 56 14 56 18C56 22 51 25 43 26C30 28 18 25 11 18Z" fill="url(#sqlRed)"/>
+      <path d="M11 32C18 25 30 22 43 24C51 25 56 28 56 32C56 36 51 39 43 40C30 42 18 39 11 32Z" fill="url(#sqlDark)"/>
+      <path d="M11 46C18 39 30 36 43 38C51 39 56 42 56 46C56 50 51 53 43 54C30 56 18 53 11 46Z" fill="url(#sqlRed)"/>
+      <ellipse cx="22" cy="18" rx="5" ry="3" fill="rgba(255,255,255,.18)"/>
+      <defs>
+        <linearGradient id="sqlRed" x1="11" y1="10" x2="56" y2="26" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#FF6B7A"/>
+          <stop offset="1" stop-color="#CC2936"/>
+        </linearGradient>
+        <linearGradient id="sqlDark" x1="11" y1="24" x2="56" y2="40" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#E84055"/>
+          <stop offset="1" stop-color="#7A1620"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+  <div>
+    <div class="logo-name">MS SQL SERVER MASTERY</div>
+    <div class="logo-sub">DBMS INTERNALS · T-SQL · STORED PROCS · OPTIMIZATION · DATA ARCHITECT · 2025</div>
+  </div>
+  <div class="top-sep"></div>
+  <div class="t-stat"><b>24</b> Chapters</div>
+  <div class="t-stat"><b>150+</b> Queries</div>
+  <div class="t-stat"><b>200+</b> <b class="si">Animated</b> Demos</div>
+  <div class="t-stat"><b>250+</b> Q&amp;A</div>
+  <div class="t-badge">SQL Server <b>2022</b> · T-SQL · DataGrip · Azure SQL</div>
+</div>
+<div class="layout">
+  <div class="lp">
+    <div class="lp-hdr">
+      <div class="lp-hdr-row"><h3>// SQL Mastery Path</h3></div>
+      <div class="prog-bar"><div class="prog-fill" id="progBar"></div></div>
+      <div class="prog-txt" id="progTxt">0 / 24 chapters visited</div>
+    </div>
+    <nav class="lnav" id="leftNav"></nav>
+  </div>
+  <div class="mid" id="middle">
+    <div class="wlc">
+      <div class="wlc-logo" aria-label="SQL Server logo">
+        <svg class="sql-server-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+          <path d="M11 18C18 11 30 8 43 10C51 11 56 14 56 18C56 22 51 25 43 26C30 28 18 25 11 18Z" fill="url(#heroSqlRed)"/>
+          <path d="M11 32C18 25 30 22 43 24C51 25 56 28 56 32C56 36 51 39 43 40C30 42 18 39 11 32Z" fill="url(#heroSqlDark)"/>
+          <path d="M11 46C18 39 30 36 43 38C51 39 56 42 56 46C56 50 51 53 43 54C30 56 18 53 11 46Z" fill="url(#heroSqlRed)"/>
+          <ellipse cx="22" cy="18" rx="5" ry="3" fill="rgba(255,255,255,.18)"/>
+          <defs>
+            <linearGradient id="heroSqlRed" x1="11" y1="10" x2="56" y2="26" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FF6B7A"/>
+              <stop offset="1" stop-color="#CC2936"/>
+            </linearGradient>
+            <linearGradient id="heroSqlDark" x1="11" y1="24" x2="56" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#E84055"/>
+              <stop offset="1" stop-color="#7A1620"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="wlc-title">MS SQL SERVER MASTERY</div>
+      <div class="wlc-prompt"><span class="blink">▌</span> SELECT mastery FROM knowledge WHERE level = 'Architect'</div>
+      <p class="wlc-sub">DBMS internals. Every T-SQL concept animated. Stored procedures, functions, views.<br>From <code style="color:var(--g2)">SELECT * FROM basics</code> to Data Architect — 250+ scenario interview Q&A.</p>
+      <div class="stat-row">
+        <div class="sc"><span class="sc-n">24</span><span class="sc-l">Chapters</span></div>
+        <div class="sc"><span class="sc-n">150+</span><span class="sc-l">Queries</span></div>
+        <div class="sc"><span class="sc-n si">250+</span><span class="sc-l">Q&amp;A</span></div>
+        <div class="sc"><span class="sc-n ye">∞</span><span class="sc-l">Scenarios</span></div>
+        <div class="sc"><span class="sc-n" style="color:var(--pu)">SP+FN</span><span class="sc-l">+Views</span></div>
+      </div>
+      <div class="wlc-hint">← select chapter · animated query execution · results grid · DataGrip tips</div>
+    </div>
+  </div>
+  <div class="rp hidden" id="rightPanel">
+    <div class="rp-hdr">
+      <h3 id="rightTitle">SELECT * FROM topics</h3>
+      <button class="xbtn" onclick="closeRight()">✕</button>
+    </div>
+    <div class="rp-tabs" id="rightTabs"></div>
+    <div class="rb" id="rightBody"></div>
+  </div>
+</div>
+<script>
+
+const CHAPTERS=[
+{id:'architecture',icon:'🏗️',color:'#00b86b',bg:'rgba(0,184,107,.12)',lc:'#26d48a',level:'FOUNDATION',
+ title:'SQL Server Architecture',sub:'Engine · Memory · Storage · Execution · TempDB',
+ desc:'How SQL Server actually works — the query optimizer, buffer pool, storage engine, transaction log, checkpoint, and TempDB internals. Understand architecture to write better queries.',
+ topics:[
+  {id:'sql-arch',cmd:'Architecture',title:'SQL Server Internal Architecture',desc:'Client → Protocol Layer → Query Processor → Storage Engine → OS',tags:['essential'],tabs:['Diagram','Query Optimizer','Storage Engine','Memory (Buffer Pool)']},
+  {id:'sql-engine',cmd:'Query Processor',title:'Query Execution Pipeline',desc:'Parse → Bind → Optimize → Execute — what happens when you hit F5',tags:['essential'],tabs:['Diagram','Parsing','Optimization','Execution']},
+  {id:'tempdb',cmd:'TempDB',title:'TempDB Internals',desc:'#temp tables, ##global, table variables, version store, spills',tabs:['Demo','Temp vs Var','Version Store','Configuration'],tags:['intermediate']},
+  {id:'transaction-log',cmd:'Transaction Log',title:'Transaction Log Architecture',desc:'WAL (Write-Ahead Log), log records, VLFs, log shipping, recovery models',tabs:['Diagram','WAL','Recovery Models','Log Management'],tags:['advanced']},
+ ]},
+{id:'fundamentals',icon:'📘',color:'#00b86b',bg:'rgba(0,184,107,.1)',lc:'#26d48a',level:'BEGINNER',
+ title:'SQL Fundamentals',sub:'SELECT · WHERE · ORDER BY · DISTINCT · TOP · NULL handling',
+ desc:'Every basic T-SQL building block with animated query execution and result grids. Master data retrieval before moving to complex queries.',
+ topics:[
+  {id:'select',cmd:'SELECT',title:'SELECT Statement',desc:'Basic SELECT, column aliases, computed columns, string concatenation',tags:['essential'],tabs:['Demo','Column Tricks','ISNULL & COALESCE','String Functions']},
+  {id:'where',cmd:'WHERE',title:'WHERE Clause & Filtering',desc:'Comparison, BETWEEN, IN, LIKE, IS NULL, logical operators',tags:['essential'],tabs:['Demo','Operators','LIKE Patterns','NULL Traps']},
+  {id:'order-group',cmd:'ORDER BY / GROUP BY',title:'Sorting & Grouping',desc:'ORDER BY, GROUP BY, HAVING — aggregate functions COUNT, SUM, AVG, MIN, MAX',tags:['essential'],tabs:['Demo','GROUP BY','HAVING vs WHERE','ROLLUP & CUBE']},
+  {id:'joins',cmd:'JOINs',title:'Joins — Complete Guide',desc:'INNER, LEFT, RIGHT, FULL OUTER, CROSS JOIN, SELF JOIN with visual diagrams',tags:['essential'],tabs:['Demo','Join Types','Visual Diagrams','Self Join & Cross']},
+  {id:'subqueries',cmd:'Subqueries',title:'Subqueries',desc:'Correlated vs non-correlated, EXISTS, NOT EXISTS, IN vs JOIN performance',tabs:['Demo','Correlated','EXISTS vs IN','Nested Subqueries'],tags:['intermediate']},
+ ]},
+{id:'data-types',icon:'🔢',color:'#26d48a',bg:'rgba(38,212,138,.08)',lc:'#26d48a',level:'BEGINNER',
+ title:'Data Types & Schema Design',sub:'int · varchar · datetime · decimal · uniqueidentifier',
+ desc:'Choose the right data type for every column. Storage sizes, precision, implicit conversions and their performance cost. Best practices for IDs, dates, money, and strings.',
+ topics:[
+  {id:'numeric-types',cmd:'Numeric Types',title:'Numeric Data Types',desc:'tinyint→bigint, decimal vs float vs money, storage sizes and precision',tags:['essential'],tabs:['Demo','Size Chart','decimal vs float','Identity vs Sequence']},
+  {id:'string-types',cmd:'String Types',title:'String & Unicode Types',desc:'varchar vs nvarchar, char vs varchar, MAX types, collation',tabs:['Demo','varchar vs nvarchar','MAX Types','Collation'],tags:['essential']},
+  {id:'date-types',cmd:'Date & Time',title:'Date and Time Types',desc:'datetime2, date, time, datetimeoffset, DateDiff, DateAdd, format',tabs:['Demo','Type Comparison','Date Functions','Time Zones'],tags:['essential']},
+  {id:'special-types',cmd:'Special Types',title:'Special Types',desc:'uniqueidentifier GUID, bit, xml, json, varbinary, spatial',tabs:['Demo','GUID Patterns','JSON in SQL','XML Type'],tags:['intermediate']},
+ ]},
+{id:'advanced-queries',icon:'⚡',color:'#cc2936',bg:'rgba(204,41,54,.1)',lc:'#e84055',level:'INTERMEDIATE',
+ title:'Advanced Queries',sub:'CTEs · Window Functions · PIVOT · UNPIVOT · Recursive',
+ desc:'The queries that separate good SQL developers from great ones. CTEs, window functions, ranking, running totals, pivoting — every pattern with real business scenarios.',
+ topics:[
+  {id:'cte',cmd:'WITH (CTE)',title:'Common Table Expressions',desc:'Simple CTEs, multiple CTEs, CTEs vs subqueries vs temp tables',tags:['essential'],tabs:['Demo','Multiple CTEs','CTE vs Temp Table','Best Practices']},
+  {id:'window-functions',cmd:'OVER()',title:'Window Functions',desc:'ROW_NUMBER, RANK, DENSE_RANK, NTILE, LEAD, LAG, FIRST_VALUE, LAST_VALUE',tags:['essential'],tabs:['Demo','Ranking','LEAD & LAG','Running Totals']},
+  {id:'pivot-unpivot',cmd:'PIVOT / UNPIVOT',title:'PIVOT & UNPIVOT',desc:'Static PIVOT, dynamic PIVOT with EXEC, UNPIVOT data to EAV',tags:['intermediate'],tabs:['Demo','Static PIVOT','Dynamic PIVOT','UNPIVOT']},
+  {id:'recursive-cte',cmd:'Recursive CTE',title:'Recursive CTEs',desc:'Hierarchies, org charts, bill of materials, date dimension generation',tabs:['Demo','Org Hierarchy','Date Dimension','BOM Explosion'],tags:['advanced']},
+  {id:'set-operations',cmd:'UNION/EXCEPT/INTERSECT',title:'Set Operations',desc:'UNION vs UNION ALL, EXCEPT, INTERSECT — performance and use cases',tabs:['Demo','UNION ALL','EXCEPT & INTERSECT','Performance'],tags:['intermediate']},
+ ]},
+{id:'stored-procs',icon:'⚙️',color:'#ff8c42',bg:'rgba(255,140,66,.1)',lc:'#ff8c42',level:'INTERMEDIATE',
+ title:'Stored Procedures',sub:'CREATE PROC · parameters · OUTPUT · ERROR · TRY-CATCH · EXEC',
+ desc:'Write production-grade stored procedures — input/output parameters, dynamic SQL, error handling with TRY-CATCH, RAISERROR, return codes, and recompile hints.',
+ topics:[
+  {id:'sp-basics',cmd:'CREATE PROCEDURE',title:'Stored Procedure Basics',desc:'Create, alter, drop, execute — input params, default values',tags:['essential'],tabs:['Demo','Basic SP','Parameters','WITH RECOMPILE']},
+  {id:'sp-output',cmd:'OUTPUT params',title:'Output Parameters & Return',desc:'OUTPUT keyword, RETURN values, multiple result sets',tags:['intermediate'],tabs:['Demo','OUTPUT Params','Return Values','Multiple Sets']},
+  {id:'sp-error',cmd:'TRY...CATCH',title:'Error Handling',desc:'TRY-CATCH, ERROR_MESSAGE(), RAISERROR, THROW, XACT_ABORT',tags:['essential'],tabs:['Demo','TRY-CATCH','THROW vs RAISERROR','Nested Transactions']},
+  {id:'sp-dynamic',cmd:'Dynamic SQL',title:'Dynamic SQL in Procs',desc:'sp_executesql, parameterized dynamic SQL, SQL injection prevention',tags:['advanced'],tabs:['Demo','sp_executesql','Dynamic ORDER BY','Security']},
+  {id:'sp-patterns',cmd:'SP Patterns',title:'Real-world SP Patterns',desc:'Pagination, upsert (MERGE), audit logging, batch processing SPs',tags:['intermediate'],tabs:['Demo','Pagination SP','Upsert/MERGE','Audit Logging']},
+ ]},
+{id:'functions',icon:'🔧',color:'#ff8c42',bg:'rgba(255,140,66,.08)',lc:'#ff8c42',level:'INTERMEDIATE',
+ title:'Functions',sub:'Scalar · Inline TVF · Multi-statement TVF · System Functions',
+ desc:'User-defined functions — scalar functions for computation, inline TVFs for performant data access (not scalar!), and the rich library of built-in T-SQL functions.',
+ topics:[
+  {id:'scalar-fn',cmd:'Scalar UDF',title:'Scalar Functions',desc:'CREATE FUNCTION, return type, schema binding, why scalars are SLOW',tags:['essential'],tabs:['Demo','Scalar Function','Performance Danger','Inline Alternative']},
+  {id:'inline-tvf',cmd:'Inline TVF',title:'Inline Table-Valued Functions',desc:'The parameterised view — fastest UDF type, used like a table with APPLY',tags:['essential'],tabs:['Demo','Inline TVF','CROSS APPLY','vs Scalar']},
+  {id:'multi-tvf',cmd:'Multi-statement TVF',title:'Multi-statement TVFs',desc:'When you need procedural logic in a TVF — but know the performance cost',tags:['advanced'],tabs:['Demo','Multi-statement','vs Inline','When to Use']},
+  {id:'builtin-fn',cmd:'Built-in Functions',title:'Built-in Function Reference',desc:'String, date, math, conversion, JSON, aggregate, ranking functions',tags:['essential'],tabs:['Demo','String Functions','Date Functions','Conversion Functions']},
+ ]},
+{id:'views',icon:'👁️',color:'#c084fc',bg:'rgba(192,132,252,.1)',lc:'#c084fc',level:'INTERMEDIATE',
+ title:'Views',sub:'CREATE VIEW · Indexed Views · Schema Binding · Update Views',
+ desc:'Views as security layers, query simplifiers, and with indexes (materialized views in SQL Server). When indexed views auto-match queries without hinting.',
+ topics:[
+  {id:'views-basic',cmd:'CREATE VIEW',title:'Standard Views',desc:'Create, alter, schemabinding, updateable views, view dependencies',tags:['essential'],tabs:['Demo','Basic View','Updateable View','WITH SCHEMABINDING']},
+  {id:'indexed-views',cmd:'Indexed Views',title:'Indexed Views (Materialized)',desc:'Create unique clustered index on view — pre-computed aggregates',tags:['advanced'],tabs:['Demo','Create Indexed View','Requirements','Auto-Matching']},
+  {id:'view-patterns',cmd:'View Patterns',title:'View Design Patterns',desc:'Security views (column/row masking), reporting views, compatibility views',tabs:['Demo','Security View','Row-level Filter','Reporting View'],tags:['intermediate']},
+ ]},
+{id:'indexes',icon:'📇',color:'#00b86b',bg:'rgba(0,184,107,.1)',lc:'#26d48a',level:'ESSENTIAL',
+ title:'Indexes & Optimization',sub:'Clustered · Non-clustered · Covering · Filtered · Columnstore',
+ desc:'The most impactful skill for a data engineer. Understand B-tree structure, clustered vs non-clustered, covering indexes, index fragmentation, missing index DMVs, and columnstore for analytics.',
+ topics:[
+  {id:'clustered',cmd:'Clustered Index',title:'Clustered Index',desc:'B-tree structure, the table IS the clustered index, heap vs clustered',tags:['essential'],tabs:['Demo','B-tree Diagram','Heap vs Clustered','Key Design']},
+  {id:'nonclustered',cmd:'Non-Clustered Index',title:'Non-Clustered Indexes',desc:'Include columns, covering index, key lookup, index seek vs scan',tags:['essential'],tabs:['Demo','Covering Index','Key Lookup','INCLUDE columns']},
+  {id:'filtered-index',cmd:'Filtered Index',title:'Filtered & Unique Indexes',desc:'Partial indexes on a WHERE subset, unique indexes, index on NULLs',tabs:['Demo','Filtered Index','Unique Index','Index on NULL'],tags:['intermediate']},
+  {id:'columnstore',cmd:'Columnstore',title:'Columnstore Indexes',desc:'Column-store for analytics/DW — 10x compression, batch mode execution',tabs:['Demo','Clustered CCI','Non-clustered','vs Row-store'],tags:['advanced']},
+  {id:'index-mgmt',cmd:'Index Management',title:'Index Fragmentation & Maintenance',desc:'sys.dm_db_index_physical_stats, rebuild vs reorganize, fill factor',tags:['intermediate'],tabs:['Demo','Fragmentation DMV','Rebuild vs Reorg','Auto-maintenance']},
+  {id:'missing-index',cmd:'Missing Indexes',title:'Finding Missing & Unused Indexes',desc:'sys.dm_db_missing_index_details, sys.dm_db_index_usage_stats',tabs:['Demo','Missing Index DMV','Unused Indexes','Index Strategy'],tags:['intermediate']},
+ ]},
+{id:'transactions',icon:'🔄',color:'#ff8c42',bg:'rgba(255,140,66,.08)',lc:'#ff8c42',level:'INTERMEDIATE',
+ title:'Transactions & Concurrency',sub:'ACID · Isolation Levels · Locking · Deadlocks · SNAPSHOT',
+ desc:'The foundation of data integrity. ACID properties, isolation levels and their tradeoffs, locking and blocking, deadlock detection and prevention, and optimistic concurrency with SNAPSHOT.',
+ topics:[
+  {id:'transactions',cmd:'BEGIN TRAN',title:'Transactions',desc:'BEGIN/COMMIT/ROLLBACK, savepoints, nested transactions, implicit vs explicit',tags:['essential'],tabs:['Demo','ACID Properties','Savepoints','Nested Transactions']},
+  {id:'isolation',cmd:'Isolation Levels',title:'Isolation Levels',desc:'READ UNCOMMITTED → SERIALIZABLE, dirty read, phantom, non-repeatable — visual demos',tags:['essential'],tabs:['Demo','Isolation Levels','READ COMMITTED SNAPSHOT','SNAPSHOT Isolation']},
+  {id:'locking',cmd:'Locks & Blocking',title:'Locking & Blocking',desc:'Shared, Exclusive, Intent, Update locks, lock escalation, blocking detection',tabs:['Demo','Lock Types','sys.dm_exec_requests','Kill Blocking'],tags:['intermediate']},
+  {id:'deadlocks',cmd:'Deadlocks',title:'Deadlock Detection & Prevention',desc:'Deadlock graph, trace flags, deadlock priority, prevention patterns',tabs:['Demo','Deadlock Graph','Xdl Analysis','Prevention'],tags:['advanced']},
+ ]},
+{id:'performance',icon:'🚀',color:'#cc2936',bg:'rgba(204,41,54,.12)',lc:'#e84055',level:'ADVANCED',
+ title:'Query Performance Tuning',sub:'Execution Plans · Statistics · Wait Stats · Parameter Sniffing',
+ desc:'The architect-level skill — read execution plans, interpret wait statistics, fix parameter sniffing, understand statistics, and systematically find and fix bottlenecks.',
+ topics:[
+  {id:'exec-plan',cmd:'Execution Plans',title:'Reading Execution Plans',desc:'Graphical plan, operators, cost %, seek vs scan, key lookup, warning icons',tags:['essential'],tabs:['Demo','Plan Operators','Cost %','DataGrip Plans']},
+  {id:'stats',cmd:'Statistics',title:'SQL Server Statistics',desc:'Column stats histograms, auto-update stats, DBCC SHOW_STATISTICS, stale stats',tags:['advanced'],tabs:['Demo','SHOW_STATISTICS','Histogram','Update Stats']},
+  {id:'param-sniff',cmd:'Parameter Sniffing',title:'Parameter Sniffing',desc:'The most common SQL Server problem — detection, reproduction, and 5 fixes',tags:['advanced'],tabs:['Demo','Detection','OPTIMIZE FOR','RECOMPILE hint']},
+  {id:'wait-stats',cmd:'Wait Stats',title:'Wait Statistics Analysis',desc:'sys.dm_os_wait_stats — CXPACKET, PAGEIOLATCH, LCK_M_X, ASYNC_NETWORK_IO',tabs:['Demo','Top Waits DMV','Wait Types','Reduction'],tags:['advanced']},
+  {id:'index-hints',cmd:'Query Hints',title:'Query Hints & NOLOCK',desc:'NOLOCK, ROWLOCK, NOEXPAND, MAXDOP, OPTION RECOMPILE, FORCESEEK',tabs:['Demo','NOLOCK Risks','MAXDOP','OPTION hints'],tags:['advanced']},
+ ]},
+{id:'schema-design',icon:'📐',color:'#60a5fa',bg:'rgba(96,165,250,.08)',lc:'#60a5fa',level:'INTERMEDIATE',
+ title:'Database Schema Design',sub:'Normalization · Keys · Constraints · Relationships · ERD',
+ desc:'Design databases that scale. Normalization 1NF-5NF, primary and foreign keys, constraints, surrogate vs natural keys, and common anti-patterns.',
+ topics:[
+  {id:'normalization',cmd:'Normalization',title:'Normalization 1NF-BCNF',desc:'1NF through BCNF with real examples — when to denormalize',tags:['essential'],tabs:['Demo','1NF-2NF-3NF','BCNF','When to Denormalize']},
+  {id:'keys-constraints',cmd:'Constraints',title:'Keys & Constraints',desc:'PK, FK, UNIQUE, CHECK, DEFAULT, NOT NULL — enforce data integrity',tags:['essential'],tabs:['Demo','PK & FK','CHECK Constraint','ON DELETE/UPDATE']},
+  {id:'identity-sequence',cmd:'IDENTITY / SEQUENCE',title:'ID Generation Patterns',desc:'IDENTITY, SEQUENCE, NEWID() GUID, ULIDs — tradeoffs and performance',tabs:['Demo','IDENTITY','SEQUENCE','GUID Clustering Problem'],tags:['intermediate']},
+ ]},
+{id:'triggers',icon:'⚡',color:'#ffd166',bg:'rgba(255,209,102,.08)',lc:'#ffd166',level:'INTERMEDIATE',
+ title:'Triggers',sub:'AFTER · INSTEAD OF · DDL Triggers · Audit',
+ desc:'Database-level event automation — DML triggers for audit trails, INSTEAD OF triggers on views, DDL triggers for schema change logging.',
+ topics:[
+  {id:'dml-triggers',cmd:'DML Triggers',title:'DML Triggers (AFTER/INSTEAD OF)',desc:'AFTER INSERT/UPDATE/DELETE, inserted/deleted tables, INSTEAD OF on views',tags:['intermediate'],tabs:['Demo','AFTER Trigger','INSTEAD OF','Audit Trail']},
+  {id:'ddl-triggers',cmd:'DDL Triggers',title:'DDL & Server Triggers',desc:'ON DATABASE / ON ALL SERVER — capture schema changes, prevent DROP',tags:['advanced'],tabs:['Demo','DDL Trigger','EVENTDATA()','Prevent DROP']},
+ ]},
+{id:'data-engineering',icon:'🔬',color:'#cc2936',bg:'rgba(204,41,54,.1)',lc:'#e84055',level:'ADVANCED',
+ title:'Data Engineering Patterns',sub:'ETL · SCD · Incremental Load · Partitioning · Staging',
+ desc:'Real data engineering work — slowly changing dimensions, incremental loads with MERGE, table partitioning, staging patterns, and bulk operations.',
+ topics:[
+  {id:'scd',cmd:'SCD Types',title:'Slowly Changing Dimensions',desc:'SCD Type 1, 2, 3, 4, 6 — implementation with MERGE and temporal tables',tags:['advanced'],tabs:['Demo','SCD Type 1','SCD Type 2','SCD Type 6']},
+  {id:'merge',cmd:'MERGE',title:'MERGE Statement',desc:'Upsert, full sync, target-based MERGE patterns — avoid MERGE bugs',tags:['essential'],tabs:['Demo','Basic MERGE','Full Sync','MERGE Bugs']},
+  {id:'partitioning',cmd:'Partitioning',title:'Table Partitioning',desc:'Partition function, scheme, switching, sliding window for large tables',tabs:['Demo','Partition Function','Sliding Window','Partition Elimination'],tags:['advanced']},
+  {id:'temporal',cmd:'Temporal Tables',title:'Temporal Tables (System-Versioned)',desc:'AS OF queries, time travel, audit history, SCD Type 2 without code',tags:['advanced'],tabs:['Demo','Create Temporal','AS OF','Period Columns']},
+  {id:'bulk-ops',cmd:'BULK INSERT',title:'Bulk Operations',desc:'BULK INSERT, bcp, OPENROWSET, TABLOCK hint, minimal logging',tabs:['Demo','BULK INSERT','bcp CLI','Minimal Logging'],tags:['intermediate']},
+ ]},
+{id:'analytics',icon:'📊',color:'#c084fc',bg:'rgba(192,132,252,.1)',lc:'#c084fc',level:'ADVANCED',
+ title:'Analytics & Reporting Queries',sub:'Running totals · YoY · Percentiles · Gap & Island · String Agg',
+ desc:'Complex analytical SQL patterns every data engineer must know — running totals, year-over-year comparisons, gaps and islands, percentile calculations, and string aggregation.',
+ topics:[
+  {id:'running-totals',cmd:'Running Totals',title:'Running Totals & Cumulative',desc:'Cumulative SUM, COUNT, AVG with window frames — ROWS BETWEEN',tags:['essential'],tabs:['Demo','Running SUM','Moving Average','YTD']},
+  {id:'yoy-comparison',cmd:'YoY / MoM',title:'Period Comparisons',desc:'Year-over-year, month-over-month with LAG and date logic',tags:['essential'],tabs:['Demo','YoY','MoM Growth','Same Period LY']},
+  {id:'percentile',cmd:'PERCENTILE_CONT',title:'Percentile & Distribution',desc:'PERCENTILE_CONT, PERCENTILE_DISC, NTILE quartiles, histogram bucketing',tabs:['Demo','PERCENTILE','NTILE','Histogram'],tags:['intermediate']},
+  {id:'gaps-islands',cmd:'Gaps & Islands',title:'Gaps and Islands Problem',desc:'Find consecutive sequences and gaps — the classic SQL interview challenge',tags:['advanced'],tabs:['Demo','Gaps','Islands','Date Ranges']},
+  {id:'string-ops',cmd:'STRING_AGG',title:'String Operations & Aggregation',desc:'STRING_AGG, STUFF+FOR XML PATH, STRING_SPLIT, JSON_ARRAYAGG patterns',tabs:['Demo','STRING_AGG','STRING_SPLIT','JSON Output'],tags:['intermediate']},
+ ]},
+{id:'security',icon:'🔒',color:'#60a5fa',bg:'rgba(96,165,250,.08)',lc:'#60a5fa',level:'INTERMEDIATE',
+ title:'SQL Server Security',sub:'Logins · Users · Roles · RLS · DDM · Always Encrypted',
+ desc:'Secure your database — server vs database principals, role-based access, Row-Level Security for multi-tenant, Dynamic Data Masking, and Always Encrypted.',
+ topics:[
+  {id:'principals',cmd:'Logins & Users',title:'Logins, Users & Roles',desc:'Server logins, database users, built-in roles, custom db roles',tags:['essential'],tabs:['Demo','Login vs User','Fixed Roles','Custom Role']},
+  {id:'rls',cmd:'Row-Level Security',title:'Row-Level Security (RLS)',desc:'Filter predicate, block predicate — multi-tenant isolation',tags:['advanced'],tabs:['Demo','Filter Predicate','Block Predicate','Multi-tenant']},
+  {id:'ddm',cmd:'Dynamic Data Masking',title:'Dynamic Data Masking',desc:'Mask PII at query time — partial, email, random, custom masks',tabs:['Demo','Masking Functions','UNMASK permission','Use Cases'],tags:['intermediate']},
+  {id:'always-enc',cmd:'Always Encrypted',title:'Always Encrypted',desc:'Client-side encryption — database never sees plaintext, key management',tabs:['Overview','Deterministic vs Random','Key Hierarchy','Limitations'],tags:['advanced']},
+ ]},
+{id:'json-xml',icon:'📋',color:'#26d48a',bg:'rgba(38,212,138,.07)',lc:'#26d48a',level:'INTERMEDIATE',
+ title:'JSON & XML in SQL Server',sub:'FOR JSON · OPENJSON · FOR XML · XML DML',
+ desc:'Work with semi-structured data natively in SQL Server — parse and produce JSON for APIs, store and query XML, and integrate with modern applications.',
+ topics:[
+  {id:'json-ops',cmd:'JSON',title:'JSON Operations',desc:'FOR JSON PATH/AUTO, OPENJSON, JSON_VALUE, JSON_QUERY, JSON_MODIFY',tags:['intermediate'],tabs:['Demo','FOR JSON','OPENJSON','JSON_VALUE']},
+  {id:'xml-ops',cmd:'XML',title:'XML Operations',desc:'FOR XML, OPENXML, XPath queries with .value(), .query(), .nodes()',tabs:['Demo','FOR XML','XML DML','XPath Queries'],tags:['intermediate']},
+ ]},
+{id:'datagrip',icon:'💻',color:'#00b86b',bg:'rgba(0,184,107,.08)',lc:'#26d48a',level:'ALL',
+ title:'DataGrip Mastery',sub:'Connection · Query Editor · Execution Plans · Refactoring · Compare',
+ desc:'Get 10× more productive with DataGrip — keyboard shortcuts, SQL completion, execution plans inline, schema compare, database diff, export, and live templates.',
+ topics:[
+  {id:'dg-setup',cmd:'Setup & Connect',title:'DataGrip Setup',desc:'Connect to SQL Server, multiple environments, SSH tunnel, Azure SQL',tags:['essential'],tabs:['Setup','Connection String','SSH Tunnel','Azure SQL']},
+  {id:'dg-editor',cmd:'Editor Features',title:'Query Editor & Shortcuts',desc:'Code completion, formatting, run vs explain, scratch files, multi-cursor',tags:['essential'],tabs:['Demo','Key Shortcuts','SQL Formatter','Live Templates']},
+  {id:'dg-plans',cmd:'Execution Plans',title:'Plans & Profiling in DataGrip',desc:'EXPLAIN PLAN inline, cost visualization, DataGrip profiler',tags:['intermediate'],tabs:['Demo','Inline Plan','Plan Compare','Export Plan']},
+  {id:'dg-tools',cmd:'DB Tools',title:'Schema & Data Tools',desc:'Schema compare, database diff, data editor, import/export CSV/Excel',tabs:['Demo','Schema Compare','Data Export','Database Diff'],tags:['intermediate']},
+ ]},
+{id:'dba-ops',icon:'🛠️',color:'#ff8c42',bg:'rgba(255,140,66,.07)',lc:'#ff8c42',level:'ADVANCED',
+ title:'DBA Operations',sub:'Backup · Restore · DBCC · Jobs · Agent · Monitoring',
+ desc:'Keep SQL Server healthy — backup and restore strategies, DBCC commands, SQL Agent jobs, maintenance plans, and monitoring with DMVs.',
+ topics:[
+  {id:'backup-restore',cmd:'Backup & Restore',title:'Backup & Restore',desc:'FULL, DIFFERENTIAL, LOG backup, point-in-time restore, recovery models',tags:['intermediate'],tabs:['Demo','Backup Types','Point-in-Time','AGs & Log Shipping']},
+  {id:'dbcc',cmd:'DBCC',title:'DBCC Commands',desc:'DBCC CHECKDB, CHECKIDENT, FREEPROCCACHE, DROPCLEANBUFFERS, SHOW_STATISTICS',tags:['intermediate'],tabs:['Demo','CHECKDB','FREEPROCCACHE','Useful DBCC List']},
+  {id:'sql-agent',cmd:'SQL Agent',title:'SQL Server Agent & Jobs',desc:'Create jobs, schedules, alerts, notifications — automate everything',tabs:['Demo','Create Job','T-SQL Steps','Alerts'],tags:['intermediate']},
+  {id:'dmv-monitoring',cmd:'DMVs',title:'DMV Monitoring Queries',desc:'Top waits, expensive queries, index usage, blocking sessions, memory',tags:['advanced'],tabs:['Demo','Top Expensive Queries','Blocking Sessions','Cache & Memory']},
+ ]},
+{id:'high-availability',icon:'🔁',color:'#c084fc',bg:'rgba(192,132,252,.08)',lc:'#c084fc',level:'ADVANCED',
+ title:'High Availability & Azure SQL',sub:'Always On · AG · Azure SQL · Elastic Pool · Scale-out',
+ desc:'Production HA strategies — Always On Availability Groups, Azure SQL Database, Elastic Pools, Hyperscale, and read-scale out patterns.',
+ topics:[
+  {id:'always-on',cmd:'Always On AG',title:'Always On Availability Groups',desc:'Primary/secondary replicas, synchronous/asynchronous, listener, failover',tags:['advanced'],tabs:['Diagram','AG Setup','Failover','Read-Intent']},
+  {id:'azure-sql',cmd:'Azure SQL',title:'Azure SQL Database',desc:'DTU vs vCore, serverless, elastic pools, geo-replication, connection strings',tabs:['Overview','Tiers','Serverless','Geo-Replication'],tags:['intermediate']},
+ ]},
+{id:'complex-scenarios',icon:'🧩',color:'#cc2936',bg:'rgba(204,41,54,.12)',lc:'#e84055',level:'ADVANCED',
+ title:'Complex Query Scenarios',sub:'Real-world complex patterns for Data Engineers',
+ desc:'50 real-world complex query challenges that appear in data engineering interviews — deduplication, ranking, hierarchy traversal, time-series analysis, and unpredictable edge cases.',
+ topics:[
+  {id:'dedup-pattern',cmd:'Deduplication',title:'Deduplication Patterns',desc:'ROW_NUMBER dedup, MERGE dedup, keep latest/earliest/specific record',tags:['advanced'],tabs:['Demo','ROW_NUMBER Dedup','MERGE Dedup','Keep Specific']},
+  {id:'hierarchy',cmd:'Hierarchy',title:'Hierarchical Queries',desc:'Employee org chart, category tree, adjacency list vs nested sets vs HierarchyID',tags:['advanced'],tabs:['Demo','Recursive CTE','HierarchyID','Nested Sets']},
+  {id:'time-series',cmd:'Time Series',title:'Time-Series Patterns',desc:'Daily active users, session analysis, consecutive days, fill gaps with dates',tabs:['Demo','DAU Calculation','Session Gap','Fill Date Gaps'],tags:['advanced']},
+  {id:'complex-joins',cmd:'Complex Joins',title:'Complex Multi-table Queries',desc:'4+ table joins, fan traps, chasm traps, many-to-many, aggregation first patterns',tabs:['Demo','Fan Trap','Chasm Trap','Aggregate First'],tags:['advanced']},
+ ]},
+{id:'interview-basics',icon:'🎤',color:'#26d48a',bg:'rgba(38,212,138,.1)',lc:'#26d48a',level:'BEGINNER',
+ title:'Interview Q&A — Basics',sub:'Q 1–50 · Fundamentals · DBMS · SQL Basics · Joins',
+ desc:'50 beginner to intermediate interview questions covering DBMS theory, SQL fundamentals, joins, subqueries, and basic optimization.',
+ topics:[
+  {id:'iq-dbms',cmd:'Q 1–20 DBMS',title:'DBMS Theory Questions',desc:'ACID, normalization, keys, transactions, indexing fundamentals',tags:['beginner'],tabs:['Q&A']},
+  {id:'iq-sql-basic',cmd:'Q 21–50 SQL Basics',title:'SQL Fundamental Questions',desc:'SELECT, JOIN, GROUP BY, subqueries, NULL handling, aggregate functions',tags:['beginner'],tabs:['Q&A']},
+ ]},
+{id:'interview-advanced',icon:'🎤',color:'#cc2936',bg:'rgba(204,41,54,.1)',lc:'#e84055',level:'ADVANCED',
+ title:'Interview Q&A — Advanced',sub:'Q 51–130 · Window Functions · SP · Optimization · Architecture',
+ desc:'Advanced interview questions — window functions, stored procedures, indexing strategy, execution plans, transactions, and SQL Server internals.',
+ topics:[
+  {id:'iq-advanced-sql',cmd:'Q 51–90 Advanced SQL',title:'Advanced T-SQL Questions',desc:'CTEs, window functions, PIVOT, dynamic SQL, MERGE, temporal tables',tags:['advanced'],tabs:['Q&A']},
+  {id:'iq-perf',cmd:'Q 91–130 Performance',title:'Performance & Architecture',desc:'Indexes, execution plans, statistics, parameter sniffing, wait stats',tags:['advanced'],tabs:['Q&A']},
+ ]},
+{id:'interview-scenarios',icon:'🎯',color:'#ffd166',bg:'rgba(255,209,102,.1)',lc:'#ffd166',level:'ALL',
+ title:'Scenario & Logical Q&A',sub:'Q 131–250 · Scenarios · Logic · Write SQL · Explain Output',
+ desc:'125 scenario-based questions — write the SQL, predict the output, debug the query, design the schema. The hardest interview questions with complete solutions.',
+ topics:[
+  {id:'iq-write-sql',cmd:'Q 131–175 Write SQL',title:'Write the SQL Challenges',desc:'Business scenarios: find Nth highest, consecutive absences, duplicate orders...',tags:['advanced'],tabs:['Q&A']},
+  {id:'iq-output',cmd:'Q 176–210 Predict Output',title:'Predict the Output',desc:'Given this query, what does it return? Tricky NULL, join, aggregate puzzles',tags:['advanced'],tabs:['Q&A']},
+  {id:'iq-debug',cmd:'Q 211–250 Debug & Design',title:'Debug & Schema Design',desc:'Fix this broken query, design this schema, what index would you add?',tabs:['Q&A'],tags:['architect']},
+ ]},
+];
+
+// ═══ SQL QUERY ENGINE ═══
+let termTimers=[];
+function clearTimers(){termTimers.forEach(clearTimeout);termTimers=[];}
+
+function mkSQL(id, title, sqlLines, resultCols, resultRows, rowCount, execMs, autoRun){
+  const sqlHtml = sqlLines.join('\n');
+  const colHdrs = resultCols.map(c=>`<th>${c}</th>`).join('');
+  const rowHtml = resultRows.map(r=>`<tr>${r.map(cell=>`<td class="${cell.cls||''}">${cell.v}</td>`).join('')}</tr>`).join('');
+  const h=`<div class="sql-editor" id="sqle_${id}">
+<div class="sql-toolbar">
+  <div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div>
+  <div class="sql-title">💾 ${title}</div>
+  <button class="sql-run" id="sqlrb_${id}" onclick="runSQL('${id}')">▶ Execute</button>
+</div>
+<div class="sql-code">${sqlHtml}</div>
+<div class="results-hdr" id="sqlrh_${id}" style="display:none">
+  📊 RESULTS<span class="rh-rows" id="sqlrc_${id}">0 rows</span>
+</div>
+<div class="results-grid" id="sqlrg_${id}" style="display:none">
+  <table class="rg-table"><thead><tr>${colHdrs}</tr></thead><tbody id="sqlrb2_${id}"></tbody></table>
+</div>
+<div class="exec-info" id="sqlex_${id}" style="display:none">✓ Query completed — <span>0ms</span></div>
+</div>`;
+  if(autoRun) setTimeout(()=>runSQL(id),450);
+  return {html:h, cols:resultCols, rows:resultRows, rowCount, execMs};
+}
+
+const SQL_DEMOS={};
+
+function runSQL(id){
+  const btn=document.getElementById('sqlrb_'+id);
+  const rh=document.getElementById('sqlrh_'+id);
+  const rg=document.getElementById('sqlrg_'+id);
+  const ex=document.getElementById('sqlex_'+id);
+  const rb2=document.getElementById('sqlrb2_'+id);
+  if(!btn||!rh||!rg||!ex||!rb2) return;
+  btn.textContent='⏳';btn.classList.add('running');
+  const demo=SQL_DEMOS[id];
+  if(!demo){btn.textContent='▶ Execute';btn.classList.remove('running');return;}
+  setTimeout(()=>{
+    rh.style.display='flex';
+    rg.style.display='block';
+    ex.style.display='block';
+    document.getElementById('sqlrc_'+id).textContent=(demo.rowCount||demo.rows.length)+' row(s)';
+    rb2.innerHTML=demo.rows.map(r=>`<tr>${r.map(cell=>`<td class="${cell.cls||''}">${cell.v}</td>`).join('')}</tr>`).join('');
+    ex.innerHTML=`✓ Query completed — <span>${demo.execMs||'< 1ms'}</span>`;
+    btn.textContent='▶ Execute';btn.classList.remove('running');
+  }, 600);
+}
+
+// Register all SQL demos
+function regSQL(id, cols, rows, rowCount, execMs){
+  SQL_DEMOS[id]={cols, rows, rowCount:rowCount||rows.length, execMs:execMs||'< 1ms'};
+}
+
+function sqlBlock(id, title, sqlLines, resultCols, resultRows, rowCount, execMs, autoRun){
+  regSQL(id, resultCols, resultRows, rowCount, execMs);
+  return mkSQL(id, title, sqlLines, resultCols, resultRows, rowCount, execMs, autoRun).html;
+}
+
+// ════════════════════════════════════════════════
+// ALL SQL DEMO REGISTRATIONS
+// ════════════════════════════════════════════════
+function registerAllDemos(){
+
+// ── SELECT basics ──────────────────────────────
+regSQL('select-basic',
+  ['EmployeeID','FirstName','LastName','Department','Salary','HireDate'],
+  [
+    [{v:'1'},{v:'Abhishek'},{v:'Panda'},{v:'Engineering',cls:'grn'},{v:'₹14,00,000',cls:'num'},{v:'2022-01-15'}],
+    [{v:'2'},{v:'Priya'},{v:'Sharma'},{v:'Engineering',cls:'grn'},{v:'₹12,50,000',cls:'num'},{v:'2021-06-01'}],
+    [{v:'3'},{v:'Raj'},{v:'Kumar'},{v:'Analytics',cls:'or'},{v:'₹16,00,000',cls:'num'},{v:'2020-03-10'}],
+    [{v:'4'},{v:'Anjali'},{v:'Singh'},{v:'Management',cls:'bl'},{v:'₹22,00,000',cls:'num'},{v:'2019-11-20'}],
+    [{v:'5'},{v:'Vikram'},{v:'Nair'},{v:'Analytics',cls:'or'},{v:'₹13,50,000',cls:'num'},{v:'2023-04-05'}],
+  ], 5, '3ms');
+
+// ── WHERE + NULL ────────────────────────────────
+regSQL('where-demo',
+  ['EmployeeID','Name','Department','Salary'],
+  [
+    [{v:'1'},{v:'Abhishek Panda'},{v:'Engineering',cls:'grn'},{v:'₹14,00,000',cls:'num'}],
+    [{v:'2'},{v:'Priya Sharma'},{v:'Engineering',cls:'grn'},{v:'₹12,50,000',cls:'num'}],
+  ], 2, '2ms');
+
+// ── JOIN demo ───────────────────────────────────
+regSQL('join-demo',
+  ['OrderID','CustomerName','City','Product','Qty','Total'],
+  [
+    [{v:'1001'},{v:'Abhishek Panda'},{v:'Bhubaneswar'},{v:'SQL Server 2022 License'},{v:'2',cls:'num'},{v:'₹98,000',cls:'num'}],
+    [{v:'1002'},{v:'Priya Sharma'},{v:'Mumbai'},{v:'DataGrip Subscription'},{v:'1',cls:'num'},{v:'₹12,000',cls:'num'}],
+    [{v:'1003'},{v:'Raj Kumar'},{v:'Hyderabad'},{v:'Azure SQL Credits'},{v:'5',cls:'num'},{v:'₹2,50,000',cls:'num'}],
+    [{v:'1004'},{v:'Anjali Singh'},{v:'Delhi'},{v:'SQL Server 2022 License'},{v:'1',cls:'num'},{v:'₹49,000',cls:'num'}],
+  ], 4, '5ms');
+
+// ── GROUP BY + HAVING ───────────────────────────
+regSQL('groupby-demo',
+  ['Department','HeadCount','AvgSalary','TotalPayroll','MaxSalary'],
+  [
+    [{v:'Analytics',cls:'or'},{v:'12',cls:'num'},{v:'₹14,58,333',cls:'num'},{v:'₹1.75Cr',cls:'grn'},{v:'₹22,00,000',cls:'num'}],
+    [{v:'Engineering',cls:'grn'},{v:'28',cls:'num'},{v:'₹13,21,428',cls:'num'},{v:'₹3.70Cr',cls:'grn'},{v:'₹28,00,000',cls:'num'}],
+    [{v:'Management',cls:'bl'},{v:'5',cls:'num'},{v:'₹28,40,000',cls:'num'},{v:'₹1.42Cr',cls:'grn'},{v:'₹45,00,000',cls:'num'}],
+  ], 3, '8ms');
+
+// ── CTE demo ────────────────────────────────────
+regSQL('cte-demo',
+  ['EmployeeID','Name','Salary','Dept','SalaryRank','DeptAvg','VsAvgPct'],
+  [
+    [{v:'4'},{v:'Anjali Singh'},{v:'₹22,00,000',cls:'num'},{v:'Management'},{v:'1',cls:'num'},{v:'₹28,40,000'},{v:'-22.5%',cls:'red'}],
+    [{v:'3'},{v:'Raj Kumar'},{v:'₹16,00,000',cls:'num'},{v:'Analytics'},{v:'1',cls:'num'},{v:'₹14,58,333'},{v:'+9.7%',cls:'grn'}],
+    [{v:'1'},{v:'Abhishek Panda'},{v:'₹14,00,000',cls:'num'},{v:'Engineering'},{v:'1',cls:'num'},{v:'₹13,21,428'},{v:'+5.9%',cls:'grn'}],
+  ], 3, '6ms');
+
+// ── Window Functions ─────────────────────────────
+regSQL('window-demo',
+  ['Name','Dept','Salary','ROW_NUM','RANK','DENSE_RANK','Percentile'],
+  [
+    [{v:'Anjali Singh'},{v:'Management'},{v:'₹22,00,000',cls:'num'},{v:'1',cls:'num'},{v:'1',cls:'num'},{v:'1',cls:'num'},{v:'100%',cls:'grn'}],
+    [{v:'Raj Kumar'},{v:'Analytics'},{v:'₹16,00,000',cls:'num'},{v:'2',cls:'num'},{v:'2',cls:'num'},{v:'2',cls:'num'},{v:'75%',cls:'grn'}],
+    [{v:'Abhishek Panda'},{v:'Engineering'},{v:'₹14,00,000',cls:'num'},{v:'3',cls:'num'},{v:'3',cls:'num'},{v:'3',cls:'num'},{v:'50%',cls:'ye'}],
+    [{v:'Vikram Nair'},{v:'Analytics'},{v:'₹13,50,000',cls:'num'},{v:'4',cls:'num'},{v:'4',cls:'num'},{v:'3',cls:'num'},{v:'25%',cls:'ye'}],
+    [{v:'Priya Sharma'},{v:'Engineering'},{v:'₹12,50,000',cls:'num'},{v:'5',cls:'num'},{v:'5',cls:'num'},{v:'4',cls:'num'},{v:'0%',cls:'red'}],
+  ], 5, '4ms');
+
+// ── LEAD/LAG ─────────────────────────────────────
+regSQL('lead-lag-demo',
+  ['Month','Revenue','PrevMonthRev','NextMonthRev','MoM_Growth%'],
+  [
+    [{v:'Jan 2025'},{v:'₹42,00,000',cls:'num'},{v:'NULL',cls:'null'},{v:'₹48,00,000'},{v:'N/A',cls:'null'}],
+    [{v:'Feb 2025'},{v:'₹48,00,000',cls:'num'},{v:'₹42,00,000'},{v:'₹45,00,000'},{v:'+14.3%',cls:'grn'}],
+    [{v:'Mar 2025'},{v:'₹45,00,000',cls:'num'},{v:'₹48,00,000'},{v:'₹62,00,000'},{v:'-6.3%',cls:'red'}],
+    [{v:'Apr 2025'},{v:'₹62,00,000',cls:'num'},{v:'₹45,00,000'},{v:'₹71,00,000'},{v:'+37.8%',cls:'grn'}],
+    [{v:'May 2025'},{v:'₹71,00,000',cls:'num'},{v:'₹62,00,000'},{v:'NULL',cls:'null'},{v:'+14.5%',cls:'grn'}],
+  ], 5, '7ms');
+
+// ── PIVOT ────────────────────────────────────────
+regSQL('pivot-demo',
+  ['Department','Q1_2025','Q2_2025','Q3_2025','Q4_2025','YearTotal'],
+  [
+    [{v:'Analytics',cls:'or'},{v:'₹82L',cls:'num'},{v:'₹91L',cls:'num'},{v:'₹88L',cls:'num'},{v:'₹96L',cls:'num'},{v:'₹3.57Cr',cls:'grn'}],
+    [{v:'Engineering',cls:'grn'},{v:'₹1.84Cr',cls:'num'},{v:'₹2.11Cr',cls:'num'},{v:'₹1.92Cr',cls:'num'},{v:'₹2.34Cr',cls:'num'},{v:'₹8.21Cr',cls:'grn'}],
+    [{v:'Management',cls:'bl'},{v:'₹68L',cls:'num'},{v:'₹72L',cls:'num'},{v:'₹69L',cls:'num'},{v:'₹78L',cls:'num'},{v:'₹2.87Cr',cls:'grn'}],
+  ], 3, '12ms');
+
+// ── Stored Procedure output ──────────────────────
+regSQL('sp-demo',
+  ['Parameter','Value','Status'],
+  [
+    [{v:'@DeptID'},{v:'2 (Engineering)'},{v:'✓ Found',cls:'grn'}],
+    [{v:'@IncludeSalary'},{v:'1 (TRUE)'},{v:'✓ Validated',cls:'grn'}],
+    [{v:'Employees Found'},{v:'28',cls:'num'},{v:'✓ Success',cls:'grn'}],
+    [{v:'Avg Salary'},{v:'₹13,21,428',cls:'num'},{v:'Calculated',cls:'grn'}],
+    [{v:'Execution Time'},{v:'4ms',cls:'num'},{v:'Within SLA',cls:'grn'}],
+  ], 5, '4ms');
+
+// ── INDEX SEEK ───────────────────────────────────
+regSQL('index-seek',
+  ['operation','object','detail','cost_pct','rows'],
+  [
+    [{v:'Index Seek',cls:'grn'},{v:'IX_Employees_DeptID'},{v:'Seeking DeptID = 2'},{v:'2%',cls:'grn'},{v:'28',cls:'num'}],
+    [{v:'Nested Loops'},{v:''},{v:'Inner Join'},{v:'3%'},{v:'28',cls:'num'}],
+    [{v:'Clustered Index Seek',cls:'grn'},{v:'PK_Employees'},{v:'Key Lookup × 28'},{v:'95%',cls:'red'},{v:'28',cls:'num'}],
+    [{v:'SELECT'},{v:''},{v:'6 columns returned'},{v:'100%'},{v:'28',cls:'num'}],
+  ], 4, '4ms');
+
+// ── Gaps and Islands ─────────────────────────────
+regSQL('gaps-demo',
+  ['EmployeeID','Name','AbsenceDate','Island#','ConsecutiveDays'],
+  [
+    [{v:'101'},{v:'Abhishek'},{v:'2025-01-13'},{v:'1',cls:'num'},{v:'1',cls:'num'}],
+    [{v:'101'},{v:'Abhishek'},{v:'2025-01-14'},{v:'1',cls:'num'},{v:'2',cls:'num'}],
+    [{v:'101'},{v:'Abhishek'},{v:'2025-01-15'},{v:'1',cls:'num'},{v:'3',cls:'num'}],
+    [{v:'101'},{v:'Abhishek'},{v:'2025-01-20'},{v:'2',cls:'num'},{v:'1',cls:'num'}],
+    [{v:'101'},{v:'Abhishek'},{v:'2025-01-21'},{v:'2',cls:'num'},{v:'2',cls:'num'}],
+  ], 5, '8ms');
+
+// ── Running Total ────────────────────────────────
+regSQL('running-total-demo',
+  ['OrderDate','DailyRevenue','RunningTotal','MovingAvg7Day','CumulativeOrders'],
+  [
+    [{v:'2025-01-01'},{v:'₹1,24,500',cls:'num'},{v:'₹1,24,500',cls:'grn'},{v:'₹1,24,500'},{v:'12',cls:'num'}],
+    [{v:'2025-01-02'},{v:'₹98,200',cls:'num'},{v:'₹2,22,700',cls:'grn'},{v:'₹1,11,350'},{v:'21',cls:'num'}],
+    [{v:'2025-01-03'},{v:'₹1,78,400',cls:'num'},{v:'₹4,01,100',cls:'grn'},{v:'₹1,33,700'},{v:'35',cls:'num'}],
+    [{v:'2025-01-04'},{v:'₹2,12,000',cls:'num'},{v:'₹6,13,100',cls:'grn'},{v:'₹1,53,275'},{v:'52',cls:'num'}],
+    [{v:'2025-01-05'},{v:'₹1,56,800',cls:'num'},{v:'₹7,69,900',cls:'grn'},{v:'₹1,53,980'},{v:'63',cls:'num'}],
+  ], 5, '11ms');
+
+// ── MERGE demo ───────────────────────────────────
+regSQL('merge-demo',
+  ['Action','Rows','Description'],
+  [
+    [{v:'INSERT',cls:'grn'},{v:'142',cls:'num'},{v:'New records from source not in target'}],
+    [{v:'UPDATE',cls:'ye'},{v:'89',cls:'num'},{v:'Existing records with changed values'}],
+    [{v:'DELETE',cls:'red'},{v:'23',cls:'num'},{v:'Records in target no longer in source'}],
+    [{v:'TOTAL',cls:'bl'},{v:'254',cls:'num'},{v:'Total rows affected in this MERGE batch'}],
+  ], 4, '38ms');
+
+// ── Dedup demo ───────────────────────────────────
+regSQL('dedup-demo',
+  ['CustomerID','Email','Name','OrderCount','KeepRecord','DuplicateOf'],
+  [
+    [{v:'C001'},{v:'abhishek@originxlabs.com'},{v:'Abhishek Panda'},{v:'12',cls:'num'},{v:'✓ KEEP',cls:'grn'},{v:'—',cls:'null'}],
+    [{v:'C001B'},{v:'abhishek@originxlabs.com'},{v:'A. Panda'},{v:'2',cls:'num'},{v:'✗ DELETE',cls:'red'},{v:'C001'}],
+    [{v:'C002'},{v:'priya@example.com'},{v:'Priya Sharma'},{v:'8',cls:'num'},{v:'✓ KEEP',cls:'grn'},{v:'—',cls:'null'}],
+  ], 3, '15ms');
+
+// ── SCD Type 2 ───────────────────────────────────
+regSQL('scd2-demo',
+  ['SurrogateKey','EmployeeID','Name','Department','Salary','ValidFrom','ValidTo','IsCurrent'],
+  [
+    [{v:'1'},{v:'E001'},{v:'Abhishek Panda'},{v:'Engineering'},{v:'₹10,00,000'},{v:'2021-01-15'},{v:'2022-06-30'},{v:'0',cls:'red'}],
+    [{v:'2'},{v:'E001'},{v:'Abhishek Panda'},{v:'Engineering'},{v:'₹12,00,000'},{v:'2022-07-01'},{v:'2023-12-31'},{v:'0',cls:'red'}],
+    [{v:'3'},{v:'E001'},{v:'Abhishek Panda'},{v:'Architecture'},{v:'₹18,00,000'},{v:'2024-01-01'},{v:'9999-12-31'},{v:'1',cls:'grn'}],
+  ], 3, '6ms');
+
+// ── RLS demo ────────────────────────────────────
+regSQL('rls-demo',
+  ['OrderID','Customer','Region','Amount','ViewedBy'],
+  [
+    [{v:'O-1001'},{v:'Odisha Corp'},{v:'East',cls:'grn'},{v:'₹4,20,000',cls:'num'},{v:'manager_east (sees all East)'}],
+    [{v:'O-1008'},{v:'Kolkata Ltd'},{v:'East',cls:'grn'},{v:'₹1,85,000',cls:'num'},{v:'manager_east'}],
+    [{v:'O-1012'},{v:'Bhubaneswar Inc'},{v:'East',cls:'grn'},{v:'₹2,92,000',cls:'num'},{v:'manager_east'}],
+  ], 3, '< 1ms');
+
+// ── DMV - Top Expensive Queries ──────────────────
+regSQL('dmv-expensive',
+  ['Rank','ExecCount','AvgCPU_ms','TotalCPU_sec','AvgReads','QueryText'],
+  [
+    [{v:'1',cls:'red'},{v:'28,442',cls:'num'},{v:'1,842',cls:'red'},{v:'52,347',cls:'num'},{v:'18,924',cls:'num'},{v:'SELECT * FROM Orders WHERE Status = @s...'}],
+    [{v:'2',cls:'ye'},{v:'4,121',cls:'num'},{v:'892',cls:'ye'},{v:'3,677',cls:'num'},{v:'8,421',cls:'num'},{v:'SELECT o.*,c.* FROM Orders o JOIN Cust...'}],
+    [{v:'3'},{v:'1,088',cls:'num'},{v:'412',cls:'num'},{v:'449',cls:'num'},{v:'2,841',cls:'num'},{v:'EXEC usp_GetMonthlyReport @Month=@m...'}],
+  ], 3, '< 1ms');
+
+// ── YoY Comparison ───────────────────────────────
+regSQL('yoy-demo',
+  ['Month','Revenue_2024','Revenue_2025','YoY_Growth','YoY_Pct'],
+  [
+    [{v:'January'},{v:'₹38,00,000',cls:'num'},{v:'₹42,00,000',cls:'num'},{v:'+₹4,00,000',cls:'grn'},{v:'+10.5%',cls:'grn'}],
+    [{v:'February'},{v:'₹35,00,000',cls:'num'},{v:'₹48,00,000',cls:'num'},{v:'+₹13,00,000',cls:'grn'},{v:'+37.1%',cls:'grn'}],
+    [{v:'March'},{v:'₹52,00,000',cls:'num'},{v:'₹45,00,000',cls:'num'},{v:'-₹7,00,000',cls:'red'},{v:'-13.5%',cls:'red'}],
+    [{v:'April'},{v:'₹44,00,000',cls:'num'},{v:'₹62,00,000',cls:'num'},{v:'+₹18,00,000',cls:'grn'},{v:'+40.9%',cls:'grn'}],
+  ], 4, '9ms');
+
+}
+registerAllDemos();
+
+// ═══ INTERVIEW Q&A DATA ═══
+function getIQs(tid){
+const dc={BEGINNER:'#00b86b',INTERMEDIATE:'#ffd166',ADVANCED:'#c084fc',ARCHITECT:'#e84055',SCENARIO:'#ff8c42'};
+const D={
+'iq-dbms':[
+{q:"What is ACID and why does it matter?",diff:"BEGINNER",
+ a:`ACID stands for the four properties that guarantee reliable database transactions:
+<br><br><code>Atomicity</code> — A transaction is all-or-nothing. Either ALL operations in the transaction complete, or NONE do. If you transfer ₹50,000 from account A to B, both the debit and credit happen, or neither does.
+<br><code>Consistency</code> — The database moves from one valid state to another valid state. All data rules (constraints, foreign keys, check constraints) are satisfied before and after every transaction.
+<br><code>Isolation</code> — Concurrent transactions appear to execute serially. One transaction cannot see the intermediate state of another. Controlled by isolation levels.
+<br><code>Durability</code> — Once a transaction is committed, it stays committed even if the server crashes. SQL Server achieves this via the Write-Ahead Log (WAL) — changes are written to the log before the data pages.
+<br><br><strong>Why it matters:</strong> Without ACID, you get phantom reads, lost updates, dirty reads, and data corruption — especially in high-concurrency banking, e-commerce, or ERP systems.`},
+{q:"What is the difference between DELETE, TRUNCATE, and DROP?",diff:"BEGINNER",
+ a:`These three commands remove data at different levels:
+<br><br><code>DELETE</code> — DML operation. Removes specific rows based on WHERE clause. Logged row-by-row in the transaction log (slow for large tables). Can be rolled back. Fires DELETE triggers. Does NOT reset IDENTITY. <code>DELETE FROM Orders WHERE Status = 'Cancelled'</code>
+<br><br><code>TRUNCATE</code> — DDL operation. Removes ALL rows from a table. Minimally logged (only extent deallocation logged — very fast). Resets IDENTITY counter. Cannot be used on tables with FK references. CAN be rolled back if inside an explicit transaction. Does NOT fire DML triggers. <code>TRUNCATE TABLE StagingOrders</code>
+<br><br><code>DROP</code> — DDL operation. Removes the entire table structure, data, indexes, constraints, and statistics. Cannot be rolled back easily (possible in explicit transaction). <code>DROP TABLE TempOrders</code>
+<br><br><strong>Interview trap:</strong> TRUNCATE CAN be rolled back if inside a BEGIN TRANSACTION, but it is DDL so it auto-commits in some databases. In SQL Server, TRUNCATE is transactional.`},
+{q:"Explain the different types of joins with examples.",diff:"BEGINNER",
+ a:`SQL joins combine rows from two or more tables based on a related column:
+<br><br><code>INNER JOIN</code> — Returns only rows where the join condition matches in BOTH tables. Most common join. <em>Think: intersection of both sets.</em>
+<br><code>LEFT OUTER JOIN</code> — Returns ALL rows from the left table, plus matched rows from right. Non-matching right rows get NULL. Use to find: orders and optionally their shipment details (order may not be shipped yet).
+<br><code>RIGHT OUTER JOIN</code> — Opposite of LEFT — all rows from right table. Rarely used (just swap tables and use LEFT).
+<br><code>FULL OUTER JOIN</code> — All rows from both tables. NULL where no match. Use to find records in either table with no corresponding record in the other.
+<br><code>CROSS JOIN</code> — Cartesian product — every row from left × every row from right. m×n rows. Use for generating combinations (e.g., all products × all dates).
+<br><code>SELF JOIN</code> — Join a table to itself. Classic example: employee-manager relationship where both are in the same Employees table.
+<br><br><strong>Key interview point:</strong> NULL values are never equal, so <code>NULL = NULL</code> in a join condition returns FALSE. Rows with NULL join keys are excluded from INNER JOIN results.`},
+{q:"What is the difference between WHERE and HAVING?",diff:"BEGINNER",
+ a:`Both filter rows, but they operate at different stages of query execution:
+<br><br><code>WHERE</code> filters BEFORE aggregation. Applied to individual rows. Cannot use aggregate functions. Reduces rows before GROUP BY processes them.
+<br><code>HAVING</code> filters AFTER aggregation. Applied to group results. CAN use aggregate functions. Used after GROUP BY.
+<br><br>Example: Find departments with more than 5 employees earning above ₹10L:
+<pre>SELECT Department, COUNT(*) as EmpCount, AVG(Salary) as AvgSal
+FROM Employees
+WHERE Salary > 1000000        -- filters individual rows FIRST
+GROUP BY Department
+HAVING COUNT(*) > 5           -- filters groups AFTER grouping</pre>
+<strong>Performance tip:</strong> Always filter in WHERE when possible — it reduces rows before aggregation. HAVING cannot be pushed to an index seek (it operates on grouped results).`},
+{q:"What is normalization? Explain 1NF, 2NF, 3NF.",diff:"BEGINNER",
+ a:`Normalization is the process of organizing a database to reduce data redundancy and improve data integrity.
+<br><br><code>1NF (First Normal Form)</code> — Eliminate repeating groups and ensure atomicity: (1) Each column contains atomic (indivisible) values. (2) Each column has a unique name. (3) Each row is unique (has a primary key). Violation: <em>Phone = "9876543210, 9123456789"</em> — two values in one column.
+<br><br><code>2NF (Second Normal Form)</code> — Must be in 1NF + No partial dependencies. Every non-key column must depend on the ENTIRE primary key (not just part of it). Only relevant for composite primary keys. Violation: In a table with PK (OrderID, ProductID), if CustomerName depends only on OrderID, move it to Orders table.
+<br><br><code>3NF (Third Normal Form)</code> — Must be in 2NF + No transitive dependencies. No non-key column should depend on another non-key column. Violation: If ZipCode → City, and City is in Customers table (not in its own Zip table), that is a transitive dependency.
+<br><br><code>BCNF (Boyce-Codd Normal Form)</code> — Stronger version of 3NF: for every functional dependency X→Y, X must be a superkey.
+<br><br><strong>When to denormalize:</strong> Reporting/analytics databases (star schema), when join cost exceeds redundancy cost, for read-heavy workloads where writes are infrequent.`},
+{q:"What is an index? What is the difference between clustered and non-clustered?",diff:"BEGINNER",
+ a:`An index is a separate data structure that SQL Server maintains to speed up data retrieval, similar to a book index. Without an index, SQL Server performs a full table scan (reads every row). With an index, it can seek directly to the needed rows.
+<br><br><code>Clustered Index</code> — Physically sorts and stores the actual table data in the B-tree leaf pages. There can be only ONE clustered index per table because the data can only be sorted in one way. The table IS the clustered index. By default, PRIMARY KEY creates a clustered index. Best choice for CI: the column most used in range queries or as the driving join key — usually an incrementing integer ID.
+<br><br><code>Non-Clustered Index</code> — Separate structure from table data. Leaf pages contain the index key + a pointer (row locator) to the actual data row (which is the clustered key if one exists, or the RID if a heap). A table can have up to 999 non-clustered indexes. A "covering index" includes all columns needed by a query (using INCLUDE) so SQL Server never needs to look up the actual table row (Key Lookup / RID Lookup is eliminated).
+<br><br><strong>Heap</strong>: A table with no clustered index. Data is stored in no particular order. Generally avoid heaps in OLTP — use a clustered index.`},
+{q:"What is a stored procedure and what are its advantages?",diff:"BEGINNER",
+ a:`A stored procedure is a precompiled batch of T-SQL statements stored in the database that can be executed by name with optional parameters.
+<br><br>Advantages: (1) <code>Performance</code> — Execution plan cached and reused. First call compiles; subsequent calls reuse the plan. (2) <code>Security</code> — Grant EXECUTE on the SP without granting SELECT/UPDATE on underlying tables. Users never see table structure. (3) <code>Reduce network traffic</code> — Send one EXEC command instead of many SQL statements. (4) <code>Maintainability</code> — Business logic in one place, not scattered in application code. (5) <code>Encapsulation</code> — Implementation details hidden from callers. (6) <code>Transaction management</code> — Complex multi-step transactions managed server-side.
+<br><br>Disadvantages: (1) Harder to version control vs ORM migrations. (2) Debugging is less ergonomic than application code. (3) Can encourage putting too much business logic in the database. (4) Parameter sniffing can cause performance problems.`},
+{q:"What is a deadlock and how do you prevent it?",diff:"INTERMEDIATE",
+ a:`A deadlock occurs when two or more transactions each hold a lock on a resource that another transaction needs — creating a circular wait. SQL Server detects this (using a deadlock monitor that runs every 5 seconds) and automatically terminates the transaction that is least expensive to rollback (the "deadlock victim"), raising error 1205.
+<br><br><strong>Classic deadlock scenario:</strong> T1 holds lock on Table A, waiting for Table B. T2 holds lock on Table B, waiting for Table A. Neither can proceed.
+<br><br><strong>Prevention strategies:</strong>
+<br>(1) <code>Access objects in the same order</code> — If every transaction accesses Table A then Table B (never B then A), circular waits cannot form.
+<br>(2) <code>Keep transactions short</code> — Minimize time locks are held. Do not do slow application-level work inside a transaction.
+<br>(3) <code>Use SNAPSHOT isolation</code> — Readers do not block writers, writers do not block readers. Uses version store in TempDB.
+<br>(4) <code>Index properly</code> — Poorly indexed queries take longer and hold locks on more rows. Better indexes = fewer rows locked = fewer deadlocks.
+<br>(5) <code>Set DEADLOCK_PRIORITY LOW</code> on less important transactions so they are always chosen as victims.
+<br>(6) <code>Use READ COMMITTED SNAPSHOT ISOLATION (RCSI)</code> — Enabled at database level, readers see last committed version without blocking.`},
+],
+'iq-sql-basic':[
+{q:"Write a query to find the second highest salary from an Employees table.",diff:"INTERMEDIATE",
+ a:`Multiple valid approaches — here are three, from simplest to most robust:
+<pre>-- Method 1: Subquery (simple but only gets 2nd highest unique value)
+SELECT MAX(Salary) AS SecondHighestSalary
+FROM Employees
+WHERE Salary < (SELECT MAX(Salary) FROM Employees);
+
+-- Method 2: DENSE_RANK window function (recommended — handles ties correctly)
+SELECT Salary AS SecondHighestSalary
+FROM (
+    SELECT Salary, DENSE_RANK() OVER (ORDER BY Salary DESC) AS dr
+    FROM Employees
+) ranked
+WHERE dr = 2;
+
+-- Method 3: Generic Nth highest using OFFSET-FETCH
+SELECT Salary AS SecondHighestSalary
+FROM (SELECT DISTINCT Salary FROM Employees ORDER BY Salary DESC)
+     AS s(Salary)
+ORDER BY Salary DESC
+OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY;</pre>
+<strong>Interview trap:</strong> If there are two employees with the same maximum salary, Method 1 correctly returns the NEXT distinct value below max. DENSE_RANK handles ties — if two people share rank 1, both get DENSE_RANK=1 and the next distinct value gets rank 2. ROW_NUMBER would skip — if there are 3 people tied at rank 1, the 2nd row by ROW_NUMBER is not the 2nd highest salary.`},
+{q:"What is the difference between RANK, DENSE_RANK, and ROW_NUMBER?",diff:"INTERMEDIATE",
+ a:`All three are window functions that assign a number to each row, but they differ in how they handle ties:
+<pre>-- Given: Salaries: 50000, 40000, 40000, 30000
+SELECT Name, Salary,
+    ROW_NUMBER()   OVER (ORDER BY Salary DESC) AS rn,    -- 1, 2, 3, 4
+    RANK()         OVER (ORDER BY Salary DESC) AS rnk,   -- 1, 2, 2, 4
+    DENSE_RANK()   OVER (ORDER BY Salary DESC) AS dr      -- 1, 2, 2, 3
+FROM Employees;</pre>
+<code>ROW_NUMBER()</code> — Unique integer for every row. No ties — arbitrary ordering among equal values. Use when you need exactly N rows (pagination, deduplication).
+<br><code>RANK()</code> — Tied rows get the SAME rank. The next rank SKIPS numbers (gap). Rank 2 appears twice, then rank 4 appears (rank 3 is skipped).
+<br><code>DENSE_RANK()</code> — Tied rows get the SAME rank. NO gaps — next rank is always previous rank + 1. Use for Nth highest salary, percentile groupings.
+<br><br><strong>When to use which:</strong> Deduplication → ROW_NUMBER. Nth highest value → DENSE_RANK. Leaderboard with gaps → RANK. Quartile buckets → NTILE(4).`},
+{q:"Write a query to find all employees who have the same salary as at least one other employee.",diff:"INTERMEDIATE",
+ a:`<pre>-- Method 1: Self-join
+SELECT DISTINCT e1.EmployeeID, e1.Name, e1.Salary
+FROM Employees e1
+INNER JOIN Employees e2
+    ON e1.Salary = e2.Salary
+    AND e1.EmployeeID <> e2.EmployeeID
+ORDER BY e1.Salary DESC;
+
+-- Method 2: COUNT window function (often more efficient)
+SELECT EmployeeID, Name, Salary
+FROM (
+    SELECT EmployeeID, Name, Salary,
+           COUNT(*) OVER (PARTITION BY Salary) AS SalaryCount
+    FROM Employees
+) t
+WHERE SalaryCount > 1
+ORDER BY Salary DESC;
+
+-- Method 3: HAVING with subquery
+SELECT EmployeeID, Name, Salary
+FROM Employees
+WHERE Salary IN (
+    SELECT Salary FROM Employees
+    GROUP BY Salary
+    HAVING COUNT(*) > 1
+)
+ORDER BY Salary DESC;</pre>
+Method 2 (window function) is typically most efficient as it is a single pass over the data with no self-join or subquery re-execution.`},
+{q:"What is the difference between UNION and UNION ALL?",diff:"BEGINNER",
+ a:`Both combine result sets from two queries (which must have the same number of columns and compatible data types):
+<br><br><code>UNION</code> — Removes duplicates from the combined result. Requires an implicit DISTINCT sort/hash operation. Slower. Use when you genuinely need to eliminate duplicate rows.
+<br><code>UNION ALL</code> — Returns ALL rows including duplicates. No deduplication step. Faster. Use when you know there are no duplicates (or do not care about them).
+<br><br><strong>Performance rule:</strong> ALWAYS prefer UNION ALL unless you specifically need deduplication. UNION has to sort or hash the entire result to find duplicates — on large sets this is expensive.
+<br><pre>-- Combining active and archived customers (no overlap by definition)
+SELECT CustomerID, Name, 'Active' AS Source FROM ActiveCustomers
+UNION ALL
+SELECT CustomerID, Name, 'Archived' AS Source FROM ArchivedCustomers;
+-- UNION ALL is correct here -- IDs may exist in both but represent different things</pre>`},
+{q:"Explain NULL handling in SQL Server — what are the common traps?",diff:"INTERMEDIATE",
+ a:`NULL represents an unknown or missing value. It is NOT zero, NOT empty string, NOT false.
+<br><br><strong>Traps:</strong>
+<br>(1) <code>NULL comparisons</code> — <code>NULL = NULL</code> is NOT true, it is UNKNOWN. Use IS NULL / IS NOT NULL, never = NULL.
+<br>(2) <code>NULL in aggregates</code> — COUNT(*) counts all rows. COUNT(column) ignores NULLs. SUM, AVG, MIN, MAX all ignore NULLs. This can give misleading averages.
+<br>(3) <code>NULL in string concatenation</code> — 'Hello' + NULL = NULL. Use ISNULL() or CONCAT() which treats NULL as empty string.
+<br>(4) <code>NULL in NOT IN</code> — Classic trap: <code>WHERE id NOT IN (SELECT manager_id FROM Employees)</code> — if manager_id has ANY NULL, the entire NOT IN returns EMPTY (because NULL<>X is UNKNOWN, not FALSE). Use NOT EXISTS instead.
+<br>(5) <code>NULL in ORDER BY</code> — NULLs sort first in ASC (in SQL Server).
+<br><pre>-- Safe NULL handling
+SELECT ISNULL(ManagerID, 0) AS ManagerID        -- replace NULL with 0
+SELECT COALESCE(Phone, Mobile, 'No contact')    -- first non-null
+SELECT NULLIF(Salary, 0)                        -- return NULL if equal to 0 (avoid divide by 0)
+SELECT IIF(Salary IS NULL, 'Unknown', CAST(Salary AS VARCHAR)) AS SalaryDisplay</pre>`},
+],
+'iq-advanced-sql':[
+{q:"Explain CTEs and when to use them over subqueries and temp tables.",diff:"ADVANCED",
+ a:`A CTE (Common Table Expression) is a named temporary result set defined with the WITH clause, scoped to the immediately following statement.
+<br><pre>WITH RankedEmployees AS (
+    SELECT *, DENSE_RANK() OVER (PARTITION BY Department ORDER BY Salary DESC) AS dr
+    FROM Employees
+),
+DeptStats AS (
+    SELECT Department, AVG(Salary) AS AvgSal, COUNT(*) AS EmpCount
+    FROM Employees GROUP BY Department
+)
+SELECT r.Name, r.Department, r.Salary, d.AvgSal, r.dr AS DeptRank
+FROM RankedEmployees r JOIN DeptStats d ON r.Department = d.Department
+WHERE r.dr = 1; -- highest paid per department</pre>
+<strong>CTE vs Subquery:</strong> CTEs improve readability and can be referenced multiple times. Subqueries are evaluated every time they appear. For complex logic, CTEs are much more readable. Performance-wise, SQL Server inlines CTEs (treats them like views) — no performance guarantee of single execution.
+<br><strong>CTE vs Temp Table:</strong> Temp tables (<code>#table</code>) materialize the result, creating statistics SQL Server can use. CTEs are not materialized. For large intermediate result sets that are referenced multiple times, temp tables often outperform CTEs. Use temp tables when: result set is large, referenced many times, or you need an index on it.
+<br><strong>Recursive CTEs:</strong> Unique capability of CTEs — traverse hierarchies without cursors.`},
+{q:"Write a query to solve the Gaps and Islands problem — find consecutive absence periods.",diff:"ADVANCED",
+ a:`The gaps and islands problem is a classic SQL challenge: find sequences of consecutive dates with gaps between them.
+<br><pre>-- Given: EmployeeAbsences(EmployeeID, AbsenceDate)
+-- Find consecutive absence periods (islands)
+
+WITH Numbered AS (
+    SELECT EmployeeID, AbsenceDate,
+           ROW_NUMBER() OVER (PARTITION BY EmployeeID ORDER BY AbsenceDate) AS rn
+    FROM EmployeeAbsences
+),
+Islands AS (
+    SELECT EmployeeID, AbsenceDate,
+           DATEADD(DAY, -rn, AbsenceDate) AS IslandGroup  -- same value for consecutive dates
+    FROM Numbered
+)
+SELECT EmployeeID,
+       MIN(AbsenceDate) AS PeriodStart,
+       MAX(AbsenceDate) AS PeriodEnd,
+       COUNT(*) AS ConsecutiveDays
+FROM Islands
+GROUP BY EmployeeID, IslandGroup
+ORDER BY EmployeeID, PeriodStart;</pre>
+<strong>The insight:</strong> For consecutive dates, <code>AbsenceDate - ROW_NUMBER</code> is a constant. Date gaps break this constant, creating different group values. This is the most elegant gaps-and-islands solution.
+<br><strong>Variation — finding GAPS (missing dates):</strong> Generate a date dimension, LEFT JOIN with absences, find NULLs.`},
+{q:"What is parameter sniffing and how do you fix it?",diff:"ADVANCED",
+ a:`Parameter sniffing occurs when SQL Server compiles a stored procedure execution plan optimized for the FIRST set of parameter values it sees. If a later call uses very different parameters (different data distribution), the cached plan may be highly suboptimal for those values.
+<br><br><strong>Example:</strong> A proc searches orders by CustomerID. First call is for customer with 2 orders (plan uses Index Seek). Plan cached. Later call is for a VIP customer with 50,000 orders — Index Seek plan is terrible, should be Table Scan. But the cached plan is reused.
+<br><br><strong>Detection:</strong>
+<pre>-- Find queries with high plan-to-actual row estimate mismatch
+SELECT qs.plan_handle, qp.query_plan, qs.execution_count,
+       qs.total_logical_reads / qs.execution_count AS avg_reads
+FROM sys.dm_exec_query_stats qs
+CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) qp
+ORDER BY avg_reads DESC;</pre>
+<strong>5 Fixes:</strong>
+<br>(1) <code>WITH RECOMPILE</code> — Recompile on every execution. Eliminates sniffing but adds CPU cost per call.
+<br>(2) <code>OPTION (OPTIMIZE FOR (@param UNKNOWN))</code> — Compile for average distribution, not the first value.
+<br>(3) <code>OPTION (OPTIMIZE FOR (@param = 100))</code> — Compile for a specific known-good value.
+<br>(4) Local variables — Assign params to local vars. SQL Server cannot sniff local variables (uses column statistics averages). Trades sniffing problem for different problem.
+<br>(5) <code>Query Store FORCE_PLAN</code> — Force a specific known-good plan for the query.`},
+{q:"What is a covering index and a key lookup? How do you eliminate key lookups?",diff:"ADVANCED",
+ a:`A <strong>key lookup</strong> (formerly Bookmark Lookup) occurs when SQL Server uses a non-clustered index to find matching rows, but the index does not contain all columns needed by the query. SQL Server must then do a second lookup into the clustered index (or heap) for each matching row to retrieve the missing columns. This is often the most expensive operator in an execution plan.
+<br><pre>-- Index: IX_Orders_CustomerID on CustomerID
+-- Query: SELECT OrderID, CustomerID, OrderDate, TotalAmount FROM Orders WHERE CustomerID = 42
+-- If TotalAmount is not in the index, SQL Server does:
+--   1. Index Seek on IX_Orders_CustomerID (fast)
+--   2. Key Lookup on PK_Orders for TotalAmount (potentially slow for many rows)
+
+-- Fix: Create a COVERING INDEX
+CREATE INDEX IX_Orders_CustomerID_Covering
+ON Orders (CustomerID)
+INCLUDE (OrderDate, TotalAmount);  -- INCLUDE non-key columns</pre>
+<strong>INCLUDE vs adding to key:</strong> Columns in the key are part of the B-tree structure (sorted). Columns in INCLUDE are only in the leaf pages. Include all non-key SELECT/WHERE columns. Only put in the key what you need for sorting/seeking.
+<br><br><strong>When NOT to add more INCLUDE columns:</strong> Every column in INCLUDE increases index size, maintenance cost, and cache pressure. Add columns to INCLUDE only when the key lookup shows high cost in actual plans.`},
+{q:"Explain isolation levels in SQL Server. When would you use SNAPSHOT isolation?",diff:"ADVANCED",
+ a:`Isolation levels control the tradeoff between data consistency and concurrency:
+<br><table style="font-family:var(--mono);font-size:10px;border-collapse:collapse;width:100%;margin:8px 0">
+<tr style="background:#111e14"><th style="padding:5px 8px;color:#26d48a">Level</th><th style="padding:5px 8px;color:#26d48a">Dirty Read</th><th style="padding:5px 8px;color:#26d48a">Non-Repeatable</th><th style="padding:5px 8px;color:#26d48a">Phantom</th></tr>
+<tr><td style="padding:4px 8px;color:#ffd166">READ UNCOMMITTED</td><td style="padding:4px 8px;color:#e84055">Yes</td><td style="padding:4px 8px;color:#e84055">Yes</td><td style="padding:4px 8px;color:#e84055">Yes</td></tr>
+<tr><td style="padding:4px 8px;color:#ffd166">READ COMMITTED</td><td style="padding:4px 8px;color:#00b86b">No</td><td style="padding:4px 8px;color:#e84055">Yes</td><td style="padding:4px 8px;color:#e84055">Yes</td></tr>
+<tr><td style="padding:4px 8px;color:#ffd166">SNAPSHOT</td><td style="padding:4px 8px;color:#00b86b">No</td><td style="padding:4px 8px;color:#00b86b">No</td><td style="padding:4px 8px;color:#00b86b">No</td></tr>
+<tr><td style="padding:4px 8px;color:#ffd166">SERIALIZABLE</td><td style="padding:4px 8px;color:#00b86b">No</td><td style="padding:4px 8px;color:#00b86b">No</td><td style="padding:4px 8px;color:#00b86b">No</td></tr>
+</table>
+<code>SNAPSHOT Isolation</code> uses row versioning stored in TempDB. Readers see a consistent snapshot of data as of transaction start — they do NOT acquire shared locks. This means writers do NOT block readers and readers do NOT block writers. This dramatically reduces blocking and deadlocks in OLTP systems.
+<br><br><strong>When to use SNAPSHOT:</strong> Read-heavy OLTP with frequent reporting queries that block writers. BI reports running against transactional databases. Any scenario where blocking is a major issue.
+<br><strong>Cost:</strong> TempDB version store overhead. Increased TempDB I/O. Set at database level: <code>ALTER DATABASE mydb SET ALLOW_SNAPSHOT_ISOLATION ON</code>.
+<br><code>READ COMMITTED SNAPSHOT (RCSI)</code> — Changes default READ COMMITTED to use versioning. Drop-in replacement, no app changes needed. Recommended default for new OLTP databases.`},
+],
+'iq-perf':[
+{q:"How do you read an execution plan and identify bottlenecks?",diff:"ADVANCED",
+ a:`Execution plans show SQL Server's step-by-step strategy to execute your query. Key concepts:
+<br><br><strong>Reading direction:</strong> Read RIGHT to LEFT (rightmost = first executed, leftmost = last). Each operator reads from its child on the right.
+<br><br><strong>Operator types and what they signal:</strong>
+<br>🟢 <code>Index Seek</code> — Good. Navigates B-tree directly to matching rows. O(log n).
+<br>🟡 <code>Index Scan</code> — Reads entire index. OK if returning most rows. Bad on large tables for selective queries.
+<br>🔴 <code>Table Scan / Clustered Index Scan</code> — Reads entire table. Indicates missing index on WHERE column.
+<br>🔴 <code>Key Lookup / RID Lookup</code> — For each row from non-clustered index, fetch remaining columns from clustered index. Fix: add INCLUDE columns.
+<br>🟡 <code>Hash Match</code> — Used for large joins/aggregates when no suitable index. Can spill to TempDB (red exclamation warning).
+<br>🟢 <code>Nested Loops</code> — Best for small inner sets. O(n×m) so bad for large sets.
+<br>🟢 <code>Merge Join</code> — Efficient when both inputs are sorted on join key.
+<br><br><strong>What to look for:</strong> (1) Thick arrows = many rows flowing between operators. (2) High cost % operators (hover for details). (3) Warning triangles (missing index, implicit conversion, spill to TempDB). (4) Estimated vs Actual row count discrepancy — indicates stale statistics.
+<br><br><strong>In DataGrip:</strong> Click "Explain Plan" (Shift+Ctrl+E) to see the plan inline with cost visualization. Use "Explain Plan (Raw)" for the full XML.`},
+{q:"What causes implicit conversion and why is it dangerous for performance?",diff:"ADVANCED",
+ a:`Implicit conversion occurs when SQL Server automatically converts one data type to another during a comparison, because the two sides have different data types. This seems helpful but is extremely dangerous for performance.
+<br><br><strong>Classic example — index killer:</strong>
+<pre>-- Column PhoneNumber is VARCHAR(20)
+-- But application passes a numeric value:
+WHERE PhoneNumber = 9876543210  -- integer literal
+-- SQL Server must convert EVERY row's varchar to int to compare
+-- This prevents index seek — becomes TABLE SCAN!
+
+-- Fix: match data types
+WHERE PhoneNumber = '9876543210'  -- string literal</pre>
+<strong>Another common case — nvarchar vs varchar:</strong> If a column is VARCHAR but you pass NVARCHAR (which C# strings are by default), SQL Server converts the entire VARCHAR column to NVARCHAR. Always use <code>N'literal'</code> correctly and configure your ORM/ADO.NET SqlParameter types correctly.
+<br><br><strong>Detection:</strong> Execution plan warnings (yellow triangle with "!" → "Type conversion in expression may affect CardinalityEstimate"). Or: <code>DBCC SHOW_STATISTICS</code> to check histogram.
+<br><strong>Prevention:</strong> Always ensure application parameter types match column types. Use correct string prefix (N'...' for nvarchar columns). Avoid implicit arithmetic type coercions.`},
+],
+'iq-write-sql':[
+{q:"Write SQL to find employees who have never placed an order.",diff:"INTERMEDIATE",
+ a:`This is a classic anti-join pattern — find rows in table A with no matching row in table B.
+<br><pre>-- Method 1: NOT EXISTS (recommended — most performant, handles NULLs correctly)
+SELECT e.EmployeeID, e.Name, e.Department
+FROM Employees e
+WHERE NOT EXISTS (
+    SELECT 1 FROM Orders o
+    WHERE o.EmployeeID = e.EmployeeID
+);
+
+-- Method 2: LEFT JOIN + IS NULL (also efficient, readable)
+SELECT e.EmployeeID, e.Name, e.Department
+FROM Employees e
+LEFT JOIN Orders o ON e.EmployeeID = o.EmployeeID
+WHERE o.OrderID IS NULL;
+
+-- Method 3: NOT IN (DANGEROUS — fails if Orders.EmployeeID has NULL)
+-- If any row in the subquery returns NULL, NOT IN returns no rows!
+SELECT e.EmployeeID, e.Name FROM Employees e
+WHERE e.EmployeeID NOT IN (SELECT EmployeeID FROM Orders);  -- risky!</pre>
+<strong>Performance note:</strong> NOT EXISTS and LEFT JOIN/IS NULL typically produce the same execution plan. NOT IN can be slower and is logically different when NULLs are present. Always prefer NOT EXISTS for correctness.`},
+{q:"Write SQL to get the top 3 selling products per category.",diff:"ADVANCED",
+ a:`<pre>-- This requires ranking within groups — perfect for window functions
+WITH ProductRanks AS (
+    SELECT
+        p.CategoryName,
+        p.ProductName,
+        SUM(od.Quantity * od.UnitPrice) AS TotalRevenue,
+        DENSE_RANK() OVER (
+            PARTITION BY p.CategoryName      -- rank separately per category
+            ORDER BY SUM(od.Quantity * od.UnitPrice) DESC  -- by revenue desc
+        ) AS CategoryRank
+    FROM Products p
+    JOIN OrderDetails od ON p.ProductID = od.ProductID
+    GROUP BY p.CategoryName, p.ProductName
+)
+SELECT
+    CategoryName,
+    CategoryRank AS Rank,
+    ProductName,
+    FORMAT(TotalRevenue, 'C', 'en-IN') AS Revenue
+FROM ProductRanks
+WHERE CategoryRank <= 3  -- top 3 per category
+ORDER BY CategoryName, CategoryRank;
+
+-- Result:
+-- Electronics | 1 | iPhone 15 | ₹4,82,00,000
+-- Electronics | 2 | Samsung S24 | ₹3,21,00,000
+-- Electronics | 3 | MacBook Air | ₹2,18,00,000
+-- Clothing    | 1 | Kurta Set  | ₹92,00,000
+-- ...</pre>
+<strong>Why DENSE_RANK and not ROW_NUMBER?</strong> If two products have exactly the same revenue, ROW_NUMBER arbitrarily picks one for rank 3. DENSE_RANK gives both rank 3, meaning you might return 4 products for a category (both tied 3rd place products). Choose based on business requirement.`},
+{q:"Write a query to calculate a 7-day moving average of daily sales.",diff:"ADVANCED",
+ a:`<pre>SELECT
+    SaleDate,
+    DailySales,
+    AVG(DailySales) OVER (
+        ORDER BY SaleDate
+        ROWS BETWEEN 6 PRECEDING AND CURRENT ROW  -- 7 days including today
+    ) AS MovingAvg_7Day,
+    SUM(DailySales) OVER (
+        ORDER BY SaleDate
+        ROWS UNBOUNDED PRECEDING                   -- running total since beginning
+    ) AS CumulativeSales,
+    AVG(DailySales) OVER (
+        ORDER BY SaleDate
+        ROWS BETWEEN 3 PRECEDING AND 3 FOLLOWING  -- centered 7-day average
+    ) AS CenteredAvg_7Day
+FROM DailySales
+ORDER BY SaleDate;
+
+-- FRAME options:
+-- ROWS BETWEEN 6 PRECEDING AND CURRENT ROW   -- trailing 7-day window
+-- ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING   -- 3-day centered window
+-- RANGE BETWEEN INTERVAL '7' DAY PRECEDING   -- date-based (handles gaps)
+-- ROWS UNBOUNDED PRECEDING                   -- from start to current row</pre>
+<strong>ROWS vs RANGE:</strong> ROWS counts physical rows. RANGE uses the ORDER BY value — if two rows have the same date, RANGE includes both in "current". ROWS is usually what you want for moving averages. RANGE is needed for running totals where ties should be treated equally.`},
+{q:"Write a stored procedure that paginates employee results.",diff:"INTERMEDIATE",
+ a:`<pre>CREATE OR ALTER PROCEDURE usp_GetEmployeesPaged
+    @PageNumber     INT = 1,
+    @PageSize       INT = 10,
+    @Department     VARCHAR(100) = NULL,
+    @SortColumn     VARCHAR(50) = 'LastName',
+    @SortDirection  VARCHAR(4) = 'ASC',
+    @TotalCount     INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    -- Validate inputs
+    IF @PageNumber < 1 SET @PageNumber = 1;
+    IF @PageSize < 1 OR @PageSize > 100 SET @PageSize = 10;
+
+    -- Dynamic sort requires dynamic SQL for safety
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+
+    -- Get total count for pagination UI
+    SELECT @TotalCount = COUNT(*)
+    FROM Employees
+    WHERE (@Department IS NULL OR Department = @Department);
+
+    -- Return paged results
+    SELECT EmployeeID, FirstName, LastName, Department, Salary, HireDate
+    FROM Employees
+    WHERE (@Department IS NULL OR Department = @Department)
+    ORDER BY
+        CASE WHEN @SortColumn = 'LastName'   AND @SortDirection = 'ASC'  THEN LastName END ASC,
+        CASE WHEN @SortColumn = 'LastName'   AND @SortDirection = 'DESC' THEN LastName END DESC,
+        CASE WHEN @SortColumn = 'Salary'     AND @SortDirection = 'ASC'  THEN Salary  END ASC,
+        CASE WHEN @SortColumn = 'Salary'     AND @SortDirection = 'DESC' THEN Salary  END DESC,
+        EmployeeID ASC  -- stable sort tiebreaker
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+END;
+
+-- Execute:
+DECLARE @Total INT;
+EXEC usp_GetEmployeesPaged @PageNumber=2, @PageSize=25,
+     @Department='Engineering', @TotalCount=@Total OUTPUT;
+SELECT @Total AS TotalEmployees;</pre>`},
+{q:"Write a recursive CTE to display an employee hierarchy (org chart).",diff:"ADVANCED",
+ a:`<pre>-- Employees table: EmployeeID, Name, ManagerID (NULL for CEO)
+WITH OrgChart AS (
+    -- Anchor: start with top-level employees (no manager)
+    SELECT
+        EmployeeID,
+        Name,
+        ManagerID,
+        Title,
+        0 AS Level,
+        CAST(Name AS VARCHAR(500)) AS HierarchyPath,
+        CAST(EmployeeID AS VARCHAR(100)) AS HierarchySort
+    FROM Employees
+    WHERE ManagerID IS NULL
+
+    UNION ALL
+
+    -- Recursive: join each employee to their manager from previous level
+    SELECT
+        e.EmployeeID,
+        e.Name,
+        e.ManagerID,
+        e.Title,
+        oc.Level + 1,
+        CAST(oc.HierarchyPath + ' > ' + e.Name AS VARCHAR(500)),
+        CAST(oc.HierarchySort + '.' + CAST(e.EmployeeID AS VARCHAR) AS VARCHAR(100))
+    FROM Employees e
+    INNER JOIN OrgChart oc ON e.ManagerID = oc.EmployeeID
+)
+SELECT
+    REPLICATE('  ', Level) + '|-- ' + Name AS OrgChart,  -- visual indent
+    Title,
+    Level AS Depth,
+    HierarchyPath
+FROM OrgChart
+ORDER BY HierarchySort  -- sorts to maintain hierarchy visually
+OPTION (MAXRECURSION 100);  -- safety limit (default 100, 0=unlimited)
+
+-- Result:
+-- |-- CEO (Anjali Singh)
+--   |-- VP Engineering (Abhishek Panda)
+--     |-- Senior Dev (Priya Sharma)
+--     |-- Senior Dev (Vikram Nair)
+--   |-- VP Analytics (Raj Kumar)</pre>
+<strong>MAXRECURSION:</strong> Default 100 levels. Set to 0 for unlimited (risky with circular references). Use a recursion depth column + WHERE Level <= 100 for safety.`},
+{q:"Predict the output: What does this query return?",diff:"ADVANCED",
+ a:`<pre>DECLARE @t TABLE (ID INT, Val INT);
+INSERT INTO @t VALUES (1, 10), (2, NULL), (3, 20), (4, NULL), (5, 30);
+
+SELECT
+    COUNT(*)        AS CountAll,
+    COUNT(Val)      AS CountNonNull,
+    SUM(Val)        AS SumVal,
+    AVG(Val)        AS AvgVal,
+    MAX(Val)        AS MaxVal,
+    COUNT(DISTINCT Val) AS DistinctCount
+FROM @t;</pre>
+<strong>Answer:</strong>
+<pre>CountAll | CountNonNull | SumVal | AvgVal | MaxVal | DistinctCount
+5        | 3            | 60     | 20     | 30     | 3</pre>
+<strong>Explanations:</strong>
+<br>• <code>COUNT(*)</code> = 5 — counts ALL rows including NULLs
+<br>• <code>COUNT(Val)</code> = 3 — counts only NON-NULL values (2 NULLs excluded)
+<br>• <code>SUM(Val)</code> = 60 — ignores NULLs (10+20+30)
+<br>• <code>AVG(Val)</code> = 20 — SUM/COUNT(non-null) = 60/3 = 20, NOT 60/5=12! NULLs excluded from denominator too
+<br>• <code>MAX(Val)</code> = 30 — ignores NULLs
+<br>• <code>COUNT(DISTINCT Val)</code> = 3 — distinct non-null values: 10, 20, 30
+<br><br><strong>Interview trap:</strong> AVG(Val) = 20, NOT 12. Because AVG divides by COUNT(Val) = 3, not COUNT(*) = 5. If you want NULL to count as 0 in the average: AVG(ISNULL(Val, 0)) = 60/5 = 12.`},
+],
+'iq-output':[
+{q:"What is wrong with this query and how do you fix it? SELECT AVG(Salary) FROM Employees GROUP BY Department WHERE Department = 'Engineering'",diff:"BEGINNER",
+ a:`<strong>Problem:</strong> The WHERE clause comes AFTER GROUP BY in this query, which is a syntax error in SQL. The correct order of clauses is:
+<br><pre>SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY</pre>
+<strong>Fixed query:</strong>
+<pre>SELECT Department, AVG(Salary) AS AvgSalary
+FROM Employees
+WHERE Department = 'Engineering'  -- WHERE before GROUP BY
+GROUP BY Department;
+
+-- Or without WHERE (using HAVING):
+SELECT Department, AVG(Salary) AS AvgSalary
+FROM Employees
+GROUP BY Department
+HAVING Department = 'Engineering';  -- HAVING after GROUP BY</pre>
+<strong>Also note:</strong> If you only want Engineering, WHERE is more efficient — it filters rows BEFORE grouping. HAVING filters AFTER grouping. WHERE can use indexes. HAVING cannot. Use WHERE whenever possible.`},
+{q:"This query runs slowly on a table with 10 million rows. Why and how to fix it?",diff:"ADVANCED",
+ a:`<pre>-- SLOW QUERY:
+SELECT * FROM Orders
+WHERE YEAR(OrderDate) = 2024
+  AND MONTH(OrderDate) = 6;</pre>
+<strong>Problem:</strong> Functions on columns prevent index usage. SQL Server cannot use an index on OrderDate because it has to call YEAR() and MONTH() on every row to evaluate the condition. This forces a full table scan.
+<br><pre>-- FIX 1: Use range query (index-friendly)
+SELECT * FROM Orders
+WHERE OrderDate >= '2024-06-01'
+  AND OrderDate < '2024-07-01';  -- exclusive upper bound
+
+-- FIX 2: Computed column + index (if function is unavoidable)
+ALTER TABLE Orders ADD OrderYear AS YEAR(OrderDate) PERSISTED;
+CREATE INDEX IX_Orders_Year ON Orders(OrderYear);
+
+-- FIX 3: Filtered index for common date ranges
+CREATE INDEX IX_Orders_2024 ON Orders(OrderDate, CustomerID)
+INCLUDE (TotalAmount)
+WHERE OrderDate >= '2024-01-01' AND OrderDate < '2025-01-01';</pre>
+<strong>Rule:</strong> Never apply a function to a filtered column if you want index seeks. Transform the predicate to work on the raw column value instead. This applies to: YEAR(), MONTH(), UPPER(), LOWER(), LTRIM(), CAST(), and any other function.`},
+{q:"Design a schema for a multi-tenant SaaS application with Row-Level Security.",diff:"ARCHITECT",
+ a:`<pre>-- 1. Schema design with TenantID on every table
+CREATE TABLE Tenants (
+    TenantID    INT IDENTITY PRIMARY KEY,
+    Name        NVARCHAR(200) NOT NULL,
+    Plan        VARCHAR(20) DEFAULT 'basic'
+);
+
+CREATE TABLE Orders (
+    OrderID     INT IDENTITY PRIMARY KEY,
+    TenantID    INT NOT NULL REFERENCES Tenants(TenantID),  -- every row has tenant
+    CustomerID  INT NOT NULL,
+    Total       DECIMAL(18,2),
+    CreatedAt   DATETIME2 DEFAULT GETUTCDATE(),
+    INDEX IX_Orders_Tenant (TenantID) INCLUDE (CustomerID, Total, CreatedAt)
+);
+
+-- 2. Row-Level Security: users only see their tenant's data
+CREATE FUNCTION dbo.fn_TenantFilter(@TenantID INT)
+RETURNS TABLE WITH SCHEMABINDING AS
+RETURN SELECT 1 AS fn_result
+WHERE @TenantID = CAST(SESSION_CONTEXT(N'TenantID') AS INT)
+   OR IS_MEMBER('db_owner') = 1;  -- admins see all
+
+CREATE SECURITY POLICY TenantIsolationPolicy
+ADD FILTER PREDICATE dbo.fn_TenantFilter(TenantID) ON dbo.Orders,
+ADD BLOCK  PREDICATE dbo.fn_TenantFilter(TenantID) ON dbo.Orders,
+WITH (STATE = ON, SCHEMABINDING = ON);
+
+-- 3. Application sets tenant context on each connection
+EXEC sp_set_session_context N'TenantID', @tenantId;
+-- All queries on Orders now automatically filtered to tenant's data</pre>
+<strong>Architecture decisions:</strong> Shared DB with RLS (cost-effective, simpler), vs Schema-per-tenant (moderate isolation, more objects), vs Database-per-tenant (strongest isolation, most expensive). For most SaaS: shared DB + RLS until compliance or performance requires isolation.`},
+],
+'iq-debug':[
+{q:"How would you find the most expensive queries running on a SQL Server right now?",diff:"ADVANCED",
+ a:`Use Dynamic Management Views (DMVs) — no profiler needed:
+<br><pre>-- Top 10 queries by CPU time
+SELECT TOP 10
+    qs.total_worker_time / qs.execution_count AS avg_cpu_us,
+    qs.total_logical_reads / qs.execution_count AS avg_reads,
+    qs.execution_count,
+    qs.total_elapsed_time / qs.execution_count AS avg_elapsed_us,
+    SUBSTRING(qt.text, (qs.statement_start_offset/2)+1,
+        ((CASE qs.statement_end_offset WHEN -1 THEN DATALENGTH(qt.text)
+          ELSE qs.statement_end_offset END - qs.statement_start_offset)/2)+1
+    ) AS QueryText,
+    DB_NAME(qt.dbid) AS DatabaseName,
+    qp.query_plan
+FROM sys.dm_exec_query_stats qs
+CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) qt
+CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) qp
+ORDER BY avg_cpu_us DESC;
+
+-- Currently running queries (live)
+SELECT r.session_id, r.status, r.wait_type, r.wait_time,
+       r.cpu_time, r.logical_reads, r.total_elapsed_time,
+       s.login_name, DB_NAME(r.database_id) AS db,
+       SUBSTRING(t.text, (r.statement_start_offset/2)+1, 200) AS CurrentQuery
+FROM sys.dm_exec_requests r
+JOIN sys.dm_exec_sessions s ON r.session_id = s.session_id
+CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) t
+WHERE r.session_id > 50  -- exclude system processes
+ORDER BY r.cpu_time DESC;</pre>
+<strong>Query Store (SQL 2016+, recommended):</strong> <code>ALTER DATABASE mydb SET QUERY_STORE = ON</code> then use SSMS/DataGrip Query Store reports for regressed queries, top resource consumers, forced plans.`},
+{q:"Write a complete audit trigger to log all changes to a Salary column.",diff:"ADVANCED",
+ a:`<pre>-- 1. Audit log table
+CREATE TABLE SalaryAuditLog (
+    AuditID         INT IDENTITY PRIMARY KEY,
+    EmployeeID      INT NOT NULL,
+    OldSalary       DECIMAL(18,2),
+    NewSalary       DECIMAL(18,2),
+    ChangedBy       NVARCHAR(128) DEFAULT SUSER_SNAME(),
+    ChangedAt       DATETIME2 DEFAULT SYSDATETIME(),
+    ChangeType      VARCHAR(10),  -- INSERT / UPDATE / DELETE
+    HostName        NVARCHAR(128) DEFAULT HOST_NAME(),
+    AppName         NVARCHAR(128) DEFAULT APP_NAME(),
+    ChangeReason    NVARCHAR(500)  -- from session context
+);
+
+-- 2. Trigger on Employees table
+CREATE OR ALTER TRIGGER trg_Employees_SalaryAudit
+ON Employees
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- INSERT audit (new employees)
+    IF EXISTS (SELECT 1 FROM inserted) AND NOT EXISTS (SELECT 1 FROM deleted)
+        INSERT INTO SalaryAuditLog (EmployeeID, NewSalary, ChangeType)
+        SELECT EmployeeID, Salary, 'INSERT' FROM inserted;
+
+    -- DELETE audit
+    IF NOT EXISTS (SELECT 1 FROM inserted) AND EXISTS (SELECT 1 FROM deleted)
+        INSERT INTO SalaryAuditLog (EmployeeID, OldSalary, ChangeType)
+        SELECT EmployeeID, Salary, 'DELETE' FROM deleted;
+
+    -- UPDATE audit — only when Salary column actually changed
+    IF EXISTS (SELECT 1 FROM inserted) AND EXISTS (SELECT 1 FROM deleted)
+        INSERT INTO SalaryAuditLog (EmployeeID, OldSalary, NewSalary, ChangeType, ChangeReason)
+        SELECT i.EmployeeID, d.Salary, i.Salary, 'UPDATE',
+               CAST(SESSION_CONTEXT(N'ChangeReason') AS NVARCHAR(500))
+        FROM inserted i JOIN deleted d ON i.EmployeeID = d.EmployeeID
+        WHERE i.Salary <> d.Salary  -- only log actual salary changes
+           OR (i.Salary IS NULL) <> (d.Salary IS NULL);  -- handle NULLs
+END;</pre>
+<strong>Best practices:</strong> Use AFTER triggers (not INSTEAD OF) for auditing. Log both old and new values. Include who, what, when, where (hostname, app). Use SESSION_CONTEXT for business reason. Index the audit table on (EmployeeID, ChangedAt) for fast lookups.`},
+],
+};
+return D[tid]||[];
+}
+
+// ═══ SQL SYNTAX HELPERS ═══
+function kw(s){return `<span class="sk">${s}</span>`;}
+function fn(s){return `<span class="sf">${s}</span>`;}
+function str(s){return `<span class="ss">${s}</span>`;}
+function num(s){return `<span class="sn">${s}</span>`;}
+function cmt(s){return `<span class="sc2">${s}</span>`;}
+function col(s){return `<span class="st">${s}</span>`;}
+function al(s){return `<span class="so">${s}</span>`;}
+function prm(s){return `<span class="sp">${s}</span>`;}
+
+// ═══ ARCH DIAGRAM ═══
+function sqlArch(){return `<div class="arch">
+<div class="arch-title">🗄️ SQL Server Internal Architecture</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+  <div class="az client" style="min-width:130px">
+    <div class="az-title">💻 Client Layer</div>
+    <div class="ac"><div class="ac-n" style="color:var(--g2)">SQL Server Management Studio</div><div class="ac-d">SSMS — GUI query & admin tool</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--g2)">DataGrip / DBeaver</div><div class="ac-d">IDE with IntelliSense, plans, refactor</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--g2)">ADO.NET / JDBC / ODBC</div><div class="ac-d">Application driver protocols</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--g2)">TDS Protocol</div><div class="ac-d">Tabular Data Stream — SQL Server wire protocol port 1433</div></div>
+  </div>
+  <div class="az engine" style="min-width:170px">
+    <div class="az-title">⚙️ Query Processor</div>
+    <div class="ac"><div class="ac-n" style="color:var(--si2)">Parser</div><div class="ac-d">Checks syntax → parse tree</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--si2)">Algebrizer (Binder)</div><div class="ac-d">Resolves names, checks permissions → query tree</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--si2)">Query Optimizer</div><div class="ac-d">Cost-based — evaluates millions of plans, picks cheapest. Uses statistics histograms.</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--si2)">Plan Cache</div><div class="ac-d">Reuses compiled plans. Source of parameter sniffing.</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--si2)">Query Executor</div><div class="ac-d">Runs the chosen plan — calls storage engine</div></div>
+  </div>
+  <div class="az mem" style="min-width:150px">
+    <div class="az-title">💛 Memory (Buffer Pool)</div>
+    <div class="ac"><div class="ac-n" style="color:var(--ye)">Buffer Pool</div><div class="ac-d">Cache of 8KB data pages in RAM. Goal: serve reads from memory, not disk.</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--ye)">Plan Cache</div><div class="ac-d">Compiled execution plans. Reduces compilation overhead.</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--ye)">Log Cache</div><div class="ac-d">Transaction log records before flush to disk</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--ye)">TempDB Cache</div><div class="ac-d">Temp tables, spills, version store for SNAPSHOT</div></div>
+  </div>
+  <div class="az storage" style="min-width:140px">
+    <div class="az-title">💜 Storage Engine</div>
+    <div class="ac"><div class="ac-n" style="color:var(--pu)">Access Methods</div><div class="ac-d">Heaps, B-tree indexes, Columnstore</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--pu)">Transaction Manager</div><div class="ac-d">ACID, locks, isolation levels, deadlock detection</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--pu)">Write-Ahead Log (WAL)</div><div class="ac-d">Log records written BEFORE data pages. Durability guarantee.</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--pu)">Checkpoint</div><div class="ac-d">Flushes dirty pages from buffer pool to .mdf/.ndf files</div></div>
+  </div>
+</div>
+</div>`;}
+
+function getSqlTopic(cid, tid){
+  const chapter = CHAPTERS.find(ch => ch.id === cid);
+  const topic = chapter?.topics.find(tp => tp.id === tid);
+  return { chapter, topic };
+}
+
+function sqlTabFocus(tab){
+  const t = String(tab).toLowerCase();
+  if (t.includes('diagram') || t.includes('overview')) return 'architecture';
+  if (t.includes('demo') || t.includes('query') || t.includes('plan') || t.includes('show_statistics')) return 'hands-on';
+  if (t.includes('function') || t.includes('predicate') || t.includes('histogram') || t.includes('comparison') || t.includes('pattern')) return 'mechanics';
+  if (t.includes('best') || t.includes('security') || t.includes('requirements') || t.includes('strategy') || t.includes('design') || t.includes('when')) return 'practice';
+  if (t.includes('performance') || t.includes('recompile') || t.includes('stats') || t.includes('monitor') || t.includes('blocking')) return 'operations';
+  return 'concept';
+}
+
+function renderSqlGenericTab(cid, tid, tab){
+  const { chapter, topic } = getSqlTopic(cid, tid);
+  if (!chapter || !topic) {
+    return `<div class="sec">${tab}</div><p class="bd">This SQL topic could not be loaded.</p>`;
+  }
+
+  const focus = sqlTabFocus(tab);
+  const title = topic.title || tid;
+  const desc = topic.desc || 'SQL Server topic';
+  const cmd = topic.cmd || 'topic';
+  const tags = (topic.tags || []).join(' · ') || 'sql server';
+
+  const summary = {
+    architecture: `This tab explains where <strong>${title}</strong> sits inside the SQL Server engine and which subsystem owns the behavior you see at query time.`,
+    'hands-on': `This tab is the practical side of <strong>${title}</strong>: what the query shape looks like, what result or plan signal you should expect, and what to validate after running it.`,
+    mechanics: `This tab focuses on the mechanics behind <strong>${title}</strong>, especially the rules, operators, and engine behavior that explain why one query shape performs differently from another.`,
+    practice: `This tab turns <strong>${title}</strong> into production guidance: when to use it, what to avoid, and how to discuss the trade-off clearly in code review or interviews.`,
+    operations: `This tab focuses on operating <strong>${title}</strong> in live systems: plan stability, runtime signals, contention, and how to detect issues before they become incidents.`,
+    concept: `This tab completes <strong>${title}</strong> with the conceptual framing, execution concerns, and design language that make the chapter feel finished rather than partial.`
+  }[focus];
+
+  const bullets = {
+    architecture: [
+      `Primary concept: ${desc}.`,
+      `Chapter context: ${chapter.title} connects this to ${chapter.sub}.`,
+      `Design question: which engine component is responsible here, the query processor, memory manager, storage engine, or transaction subsystem?`
+    ],
+    'hands-on': [
+      `Start with a compact query or plan shape for <code>${cmd}</code>.`,
+      `Check the result grid, row counts, or execution plan rather than trusting the SQL text alone.`,
+      `Use a stable test dataset so the behavior is easy to explain and compare.`
+    ],
+    mechanics: [
+      `Understand the operator or rule before memorizing the syntax.`,
+      `Watch how cardinality, row order, or predicate shape changes the optimizer’s choices.`,
+      `Tie the topic back to one measurable engine effect: reads, memory, locking, spills, or plan reuse.`
+    ],
+    practice: [
+      `Prefer the clearest expression of intent that still performs well.`,
+      `Document the business rule and the query trade-off together.`,
+      `Use tags like ${tags} to decide whether the topic should be treated as foundational, advanced, or architect-level.`
+    ],
+    operations: [
+      `Know the first DMV, plan warning, or wait type you would check if this topic went wrong in production.`,
+      `Review whether statistics, indexing, parameter values, or isolation level can distort the outcome.`,
+      `Design for repeatable troubleshooting, not just one-off query success.`
+    ],
+    concept: [
+      `Know what problem ${title} solves before reaching for it by habit.`,
+      `Connect the syntax back to optimizer behavior and data shape.`,
+      `Prefer patterns that remain readable under review, maintenance, and incident response.`
+    ]
+  }[focus];
+
+  return `<div class="sec">${tab}</div>
+<p class="bd"><strong>${title}</strong> sits inside <strong>${chapter.title}</strong> and covers ${desc}</p>
+<p class="bd">${summary}</p>
+<ul class="fl">${bullets.map(item => `<li>${item}</li>`).join('')}</ul>
+<div class="callout info"><strong>Engine lens</strong>${title} becomes much easier to reason about once you connect the SQL text to an engine effect: page reads, memory grants, locks, row versions, statistics quality, or plan cache reuse.</div>
+<div class="callout tip"><strong>Interview lens</strong>A strong answer for this tab explains not just the syntax, but when it helps, when it backfires, and what signal in the execution plan or runtime output proves your reasoning.</div>`;
+}
+
+// ═══ CONTENT FUNCTION ═══
+function getContent(cid,tid,tab){
+  const key=`${cid}:${tid}:${tab}`;
+
+  // Interview Q&A
+  if(tid.startsWith('iq-')){
+    const qs=getIQs(tid);
+    const dc={BEGINNER:'#00b86b',INTERMEDIATE:'#ffd166',ADVANCED:'#c084fc',ARCHITECT:'#e84055',SCENARIO:'#ff8c42'};
+    const cid2='qc_'+tid;
+    const items=qs.map((q,i)=>`<div class="qa-item" data-diff="${q.diff}" onclick="toggleQA(this)">
+<div class="qa-q"><div class="qa-qi" style="background:${dc[q.diff]||'#00b86b'}22;color:${dc[q.diff]||'#00b86b'};border:1px solid ${dc[q.diff]||'#00b86b'}44">Q${i+1}</div>
+<div class="qa-qt">${q.q}</div><span class="tag ${q.diff.toLowerCase()}">${q.diff}</span><span class="qa-ch">▼</span></div>
+<div class="qa-a"><div class="qa-ab">${q.a}</div></div></div>`).join('');
+    return `<div id="${cid2}"><div class="filter-row">
+<button class="fbtn active" onclick="filterQs(this,'all',document.getElementById('${cid2}'))">All</button>
+${Object.keys(dc).map(d=>`<button class="fbtn" onclick="filterQs(this,'${d}',document.getElementById('${cid2}'))">${d}</button>`).join('')}
+</div>${items}</div>`;
+  }
+
+  // ── ARCHITECTURE ────────────────────────────────
+  if(key==='architecture:sql-arch:Diagram') return sqlArch()+
+    `<div class="callout info"><strong>Key Insight: Buffer Pool</strong>SQL Server tries to keep all frequently accessed data in RAM (buffer pool). A "logical read" is satisfied from the buffer pool. A "physical read" hits disk. Goal: maximize logical reads, minimize physical reads. Track with sys.dm_exec_query_stats.</div>`;
+
+  if(key==='architecture:sql-arch:Query Optimizer') return `<div class="sec">Query Execution Pipeline</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">1</div><div class="fb-name" style="color:var(--g2)">SQL Text</div></div>
+  <div class="farr cmd">→<span>Parse</span></div>
+  <div class="fbox"><div class="fb-label">2</div><div class="fb-name" style="color:var(--g2)">Parse Tree</div></div>
+  <div class="farr cmd">→<span>Bind</span></div>
+  <div class="fbox"><div class="fb-label">3</div><div class="fb-name" style="color:var(--g2)">Query Tree</div></div>
+  <div class="farr cmd">→<span>Optimize</span></div>
+  <div class="fbox"><div class="fb-label">4</div><div class="fb-name" style="color:var(--si2)">Execution Plan</div></div>
+  <div class="farr cmd">→<span>Cache → Execute</span></div>
+  <div class="fbox"><div class="fb-label">5</div><div class="fb-name" style="color:var(--g3)">Results</div></div>
+</div>
+<div class="callout perf"><strong>Cost-Based Optimizer</strong>The SQL Server optimizer evaluates thousands of possible execution plans in milliseconds. It uses column statistics (histograms) to estimate how many rows each operation will return. Stale statistics = bad estimates = bad plans. Always keep statistics up to date.</div>`;
+
+  if(key==='architecture:transaction-log:WAL') return `<div class="sec">Write-Ahead Log (WAL) — How Durability Works</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">1</div><div class="fb-name" style="color:var(--g2)">UPDATE Employees</div></div>
+  <div class="farr cmd">→<span>FIRST</span></div>
+  <div class="fbox"><div class="fb-label">2</div><div class="fb-name" style="color:var(--si2)">Write to Log (.ldf)</div></div>
+  <div class="farr cmd">→<span>THEN</span></div>
+  <div class="fbox"><div class="fb-label">3</div><div class="fb-name" style="color:var(--ye)">Modify in Buffer Pool</div></div>
+  <div class="farr cmd">→<span>COMMIT</span></div>
+  <div class="fbox"><div class="fb-label">4</div><div class="fb-name" style="color:var(--g3)">Log Hardened (COMMIT)</div></div>
+  <div class="farr cmd">→<span>async</span></div>
+  <div class="fbox"><div class="fb-label">5</div><div class="fb-name" style="color:var(--pu)">Checkpoint flushes data pages</div></div>
+</div>
+<div class="callout info"><strong>Why WAL guarantees durability</strong>The log is written synchronously before COMMIT returns to the application. Even if the server crashes immediately after COMMIT, recovery replays log records to rebuild lost data pages. The data file (.mdf) can lag behind — that is fine because the log has everything needed to reconstruct it.</div>`;
+
+  if(key==='architecture:tempdb:Demo') return `<div class="sec">TempDB Usage Scenarios</div>
+<table class="tbl"><thead><tr><th>Object</th><th>Scope</th><th>Storage</th><th>Statistics?</th><th>Best for</th></tr></thead><tbody>
+<tr><td>#temp table</td><td>Session (local)</td><td>TempDB data pages</td><td class="gr">Yes (auto)</td><td>Large result sets, multiple uses, need index, need stats</td></tr>
+<tr><td>##global_temp</td><td>All sessions</td><td>TempDB data pages</td><td class="gr">Yes</td><td>Sharing data between sessions (rare)</td></tr>
+<tr><td>@table_variable</td><td>Batch/scope</td><td>Memory (small) / TempDB (large)</td><td class="si">No (1 row estimated!)</td><td>Small sets < 100 rows, short-lived lookups</td></tr>
+<tr><td>CTE</td><td>Single statement</td><td>None (virtual)</td><td class="si">No (uses base stats)</td><td>Readability, single-use subquery replacement</td></tr>
+<tr><td>Spill to TempDB</td><td>Query execution</td><td>TempDB work files</td><td>N/A</td><td>When sort/hash cannot fit in memory grant — avoid!</td></tr>
+</tbody></table>
+<div class="callout warn"><strong>Table variable trap</strong>SQL Server estimates 1 row for table variables (no statistics). For large sets, this causes terrible join plans. Use #temp tables when you have > ~100 rows or complex joins. In SQL 2019+, Deferred Table Variable Decompilation fixes this automatically.</div>`;
+
+  // ── FUNDAMENTALS ─────────────────────────────
+  if(key==='fundamentals:select:Demo') return sqlBlock('select-basic','Employee Query',
+    [`${kw('SELECT')} ${col('EmployeeID')}, ${col('FirstName')}, ${col('LastName')},`,
+     `       ${col('Department')},`,
+     `       ${fn('FORMAT')}(${col('Salary')}, ${str("'C0'")} , ${str("'en-IN'")}) ${al('AS')} ${al('Salary')},`,
+     `       ${fn('CONVERT')}(${col('DATE')}, ${col('HireDate')}) ${al('AS')} ${al('HireDate')},`,
+     `       ${fn('DATEDIFF')}(${col('YEAR')}, ${col('HireDate')}, ${fn('GETDATE')}()) ${al('AS')} ${al('YearsAtCompany')}`,
+     `${kw('FROM')} ${col('Employees')}`,
+     `${kw('WHERE')} ${col('IsActive')} = ${num('1')}`,
+     `${kw('ORDER BY')} ${col('Salary')} ${kw('DESC')};`,
+    ],
+    ['EmployeeID','FirstName','LastName','Department','Salary','HireDate'],
+    [], 5, '3ms', true);
+
+  if(key==='fundamentals:select:ISNULL & COALESCE') return `<div class="sec">NULL Handling Functions</div>
+<table class="tbl"><thead><tr><th>Function</th><th>Syntax</th><th>Behavior</th><th>Use When</th></tr></thead><tbody>
+<tr><td>ISNULL</td><td>ISNULL(col, default)</td><td>Replace NULL with default. SQL Server specific. Only 2 args.</td><td>Simple NULL replacement</td></tr>
+<tr><td>COALESCE</td><td>COALESCE(a, b, c, ...)</td><td>Returns first non-NULL from N args. ANSI standard. More flexible.</td><td>Multiple fallback options</td></tr>
+<tr><td>NULLIF</td><td>NULLIF(a, b)</td><td>Returns NULL if a = b, else returns a. Prevents divide-by-zero.</td><td>Converting 0 to NULL for division</td></tr>
+<tr><td>IIF</td><td>IIF(cond, true, false)</td><td>Inline if-else. Shorthand for CASE WHEN.</td><td>Simple conditional expression</td></tr>
+</tbody></table>`;
+
+  if(key==='fundamentals:joins:Demo') return sqlBlock('join-demo','Multi-table JOIN',
+    [`${kw('SELECT')} ${col('o.OrderID')}, ${col('c.CustomerName')}, ${col('c.City')},`,
+     `       ${col('p.ProductName')}, ${col('od.Quantity')} ${al('AS')} ${al('Qty')},`,
+     `       ${fn('FORMAT')}(${col('od.Quantity')} * ${col('od.UnitPrice')}, ${str("'C0'")} , ${str("'en-IN'")}) ${al('AS')} ${al('Total')}`,
+     `${kw('FROM')} ${col('Orders')} ${al('o')}`,
+     `${kw('INNER JOIN')} ${col('Customers')} ${al('c')} ${kw('ON')} ${col('o.CustomerID')} = ${col('c.CustomerID')}`,
+     `${kw('INNER JOIN')} ${col('OrderDetails')} ${al('od')} ${kw('ON')} ${col('o.OrderID')} = ${col('od.OrderID')}`,
+     `${kw('INNER JOIN')} ${col('Products')} ${al('p')} ${kw('ON')} ${col('od.ProductID')} = ${col('p.ProductID')}`,
+     `${kw('WHERE')} ${col('o.OrderDate')} >= ${str("'2025-01-01'")}`,
+     `${kw('ORDER BY')} ${col('o.OrderDate')} ${kw('DESC')};`,
+    ],
+    ['OrderID','CustomerName','City','Product','Qty','Total'],
+    [], 4, '5ms', true);
+
+  if(key==='fundamentals:joins:Visual Diagrams') return `<div class="sec">JOIN Types — Visual Reference</div>
+<div class="grid2">
+<div class="mc"><h4>INNER JOIN</h4>
+<div style="text-align:center;padding:8px;font-family:var(--mono);font-size:10px;color:var(--tx2)">
+  <div style="position:relative;height:60px">
+    <div style="position:absolute;left:10px;top:10px;width:50px;height:40px;border-radius:50%;border:1px solid var(--g2);opacity:.6"></div>
+    <div style="position:absolute;left:35px;top:10px;width:50px;height:40px;border-radius:50%;border:1px solid var(--g2);opacity:.6"></div>
+    <div style="position:absolute;left:28px;top:14px;width:19px;height:32px;background:rgba(0,184,107,.3);border-radius:4px"></div>
+  </div>
+  Only matching rows in BOTH tables
+</div>
+</div>
+<div class="mc"><h4 class="ye">LEFT OUTER JOIN</h4>
+<div style="text-align:center;padding:8px;font-family:var(--mono);font-size:10px;color:var(--tx2)">
+  <div style="position:relative;height:60px">
+    <div style="position:absolute;left:10px;top:10px;width:50px;height:40px;border-radius:50%;border:1px solid var(--ye);background:rgba(255,209,102,.15)"></div>
+    <div style="position:absolute;left:35px;top:10px;width:50px;height:40px;border-radius:50%;border:1px solid var(--ye);opacity:.4"></div>
+  </div>
+  ALL left rows + matching right (NULL if no match)
+</div>
+</div>
+<div class="mc"><h4 class="pu">FULL OUTER JOIN</h4>
+<div style="text-align:center;padding:8px;font-family:var(--mono);font-size:10px;color:var(--tx2)">
+  <div style="position:relative;height:60px">
+    <div style="position:absolute;left:10px;top:10px;width:50px;height:40px;border-radius:50%;border:1px solid var(--pu);background:rgba(192,132,252,.15)"></div>
+    <div style="position:absolute;left:35px;top:10px;width:50px;height:40px;border-radius:50%;border:1px solid var(--pu);background:rgba(192,132,252,.15)"></div>
+  </div>
+  ALL rows from both tables — NULLs for non-matches
+</div>
+</div>
+<div class="mc"><h4 class="si">CROSS JOIN</h4>
+<div style="text-align:center;padding:8px;font-family:var(--mono);font-size:10px;color:var(--tx2)">
+  Every row × every row = m×n rows<br>No join condition<br>Use: generate combinations, date × product grids
+</div>
+</div>
+</div>`;
+
+  if(key==='fundamentals:order-group:Demo') return sqlBlock('groupby-demo','GROUP BY + HAVING',
+    [`${kw('SELECT')} ${col('Department')},`,
+     `       ${fn('COUNT')}(*) ${al('AS')} ${al('HeadCount')},`,
+     `       ${fn('FORMAT')}(${fn('AVG')}(${col('Salary')}), ${str("'N0'")} , ${str("'en-IN'")}) ${al('AS')} ${al('AvgSalary')},`,
+     `       ${fn('FORMAT')}(${fn('SUM')}(${col('Salary')}), ${str("'C0'")} , ${str("'en-IN'")}) ${al('AS')} ${al('TotalPayroll')},`,
+     `       ${fn('FORMAT')}(${fn('MAX')}(${col('Salary')}), ${str("'C0'")} , ${str("'en-IN'")}) ${al('AS')} ${al('MaxSalary')}`,
+     `${kw('FROM')} ${col('Employees')}`,
+     `${kw('WHERE')} ${col('IsActive')} = ${num('1')}`,
+     `${kw('GROUP BY')} ${col('Department')}`,
+     `${kw('HAVING')} ${fn('COUNT')}(*) > ${num('3')}`,
+     `${kw('ORDER BY')} ${fn('SUM')}(${col('Salary')}) ${kw('DESC')};`,
+    ],
+    ['Department','HeadCount','AvgSalary','TotalPayroll','MaxSalary'],
+    [], 3, '8ms', true);
+
+  // ── ADVANCED QUERIES ─────────────────────────
+  if(key==='advanced-queries:cte:Demo') return sqlBlock('cte-demo','CTE — Top Earner per Dept',
+    [`${cmt('-- CTE 1: Rank employees by salary within department')}`,
+     `${kw('WITH')} ${al('RankedEmp')} ${kw('AS')} (`,
+     `    ${kw('SELECT')} *, ${fn('DENSE_RANK')}() ${kw('OVER')} (${kw('PARTITION BY')} ${col('Department')} ${kw('ORDER BY')} ${col('Salary')} ${kw('DESC')}) ${al('AS')} ${al('dr')}`,
+     `    ${kw('FROM')} ${col('Employees')}`,
+     `),`,
+     `${cmt('-- CTE 2: Department-level stats')}`,
+     `${al('DeptStats')} ${kw('AS')} (`,
+     `    ${kw('SELECT')} ${col('Department')}, ${fn('AVG')}(${col('Salary')}) ${al('AS')} ${al('DeptAvg')}`,
+     `    ${kw('FROM')} ${col('Employees')} ${kw('GROUP BY')} ${col('Department')}`,
+     `)`,
+     `${kw('SELECT')} ${col('r.Name')}, ${col('r.Department')}, ${col('r.Salary')}, ${col('d.DeptAvg')},`,
+     `       ${fn('FORMAT')}((${col('r.Salary')} - ${col('d.DeptAvg')}) / ${col('d.DeptAvg')} * ${num('100')}, ${str("'N1'")}) + ${str("'%'")} ${al('AS')} ${al('VsAvgPct')}`,
+     `${kw('FROM')} ${al('RankedEmp')} ${al('r')} ${kw('JOIN')} ${al('DeptStats')} ${al('d')} ${kw('ON')} ${col('r.Department')} = ${col('d.Department')}`,
+     `${kw('WHERE')} ${col('r.dr')} = ${num('1')}  ${cmt('-- Top earner only')}`,
+     `${kw('ORDER BY')} ${col('r.Salary')} ${kw('DESC')};`,
+    ],
+    ['EmployeeID','Name','Salary','Dept','SalaryRank','DeptAvg','VsAvgPct'],
+    [], 3, '6ms', true);
+
+  if(key==='advanced-queries:window-functions:Demo') return sqlBlock('window-demo','Window Functions: ROW_NUMBER, RANK, DENSE_RANK',
+    [`${kw('SELECT')} ${col('Name')}, ${col('Department')},`,
+     `       ${fn('FORMAT')}(${col('Salary')}, ${str("'C0'")} , ${str("'en-IN'")}) ${al('AS')} ${al('Salary')},`,
+     `       ${fn('ROW_NUMBER')}() ${kw('OVER')} (${kw('ORDER BY')} ${col('Salary')} ${kw('DESC')}) ${al('AS')} ${al('ROW_NUM')},`,
+     `       ${fn('RANK')}()       ${kw('OVER')} (${kw('ORDER BY')} ${col('Salary')} ${kw('DESC')}) ${al('AS')} ${al('RANK')},`,
+     `       ${fn('DENSE_RANK')}() ${kw('OVER')} (${kw('ORDER BY')} ${col('Salary')} ${kw('DESC')}) ${al('AS')} ${al('DENSE_RANK')},`,
+     `       ${fn('FORMAT')}(${fn('PERCENT_RANK')}() ${kw('OVER')} (${kw('ORDER BY')} ${col('Salary')}), ${str("'P0'")}) ${al('AS')} ${al('Percentile')}`,
+     `${kw('FROM')} ${col('Employees')}`,
+     `${kw('ORDER BY')} ${col('Salary')} ${kw('DESC')};`,
+    ],
+    ['Name','Dept','Salary','ROW_NUM','RANK','DENSE_RANK','Percentile'],
+    [], 5, '4ms', true);
+
+  if(key==='advanced-queries:window-functions:LEAD & LAG') return sqlBlock('lead-lag-demo','LEAD & LAG — Month over Month',
+    [`${kw('SELECT')} ${col('Month')}, ${col('Revenue')},`,
+     `       ${fn('LAG')}(${col('Revenue')}, ${num('1')}) ${kw('OVER')} (${kw('ORDER BY')} ${col('Month')}) ${al('AS')} ${al('PrevMonthRev')},`,
+     `       ${fn('LEAD')}(${col('Revenue')}, ${num('1')}) ${kw('OVER')} (${kw('ORDER BY')} ${col('Month')}) ${al('AS')} ${al('NextMonthRev')},`,
+     `       ${kw('CASE')} ${kw('WHEN')} ${fn('LAG')}(${col('Revenue')}) ${kw('OVER')} (${kw('ORDER BY')} ${col('Month')}) ${kw('IS NULL')} ${kw('THEN')} ${str("'N/A'")}`,
+     `            ${kw('ELSE')} ${fn('FORMAT')}((${col('Revenue')} - ${fn('LAG')}(${col('Revenue')}) ${kw('OVER')} (${kw('ORDER BY')} ${col('Month')})) * ${num('100.0')}`,
+     `                         / ${fn('LAG')}(${col('Revenue')}) ${kw('OVER')} (${kw('ORDER BY')} ${col('Month')}), ${str("'N1'")}) + ${str("'%'")} ${kw('END')} ${al('AS')} ${al('MoM_Growth')}`,
+     `${kw('FROM')} ${col('MonthlySales')}`,
+     `${kw('ORDER BY')} ${col('Month')};`,
+    ],
+    ['Month','Revenue','PrevMonthRev','NextMonthRev','MoM_Growth%'],
+    [], 5, '7ms', true);
+
+  if(key==='advanced-queries:pivot-unpivot:Demo') return sqlBlock('pivot-demo','PIVOT — Quarterly Sales',
+    [`${kw('SELECT')} ${col('Department')}, ${al('[Q1_2025]')}, ${al('[Q2_2025]')}, ${al('[Q3_2025]')}, ${al('[Q4_2025]')}, ${al('[YearTotal]')}`,
+     `${kw('FROM')} (`,
+     `    ${kw('SELECT')} ${col('Department')}, ${col('Quarter')}, ${fn('SUM')}(${col('Revenue')}) ${al('AS')} ${al('Revenue')}`,
+     `    ${kw('FROM')} ${col('SalesData')}`,
+     `    ${kw('WHERE')} ${fn('YEAR')}(${col('SaleDate')}) = ${num('2025')}`,
+     `    ${kw('GROUP BY')} ${col('Department')}, ${col('Quarter')}`,
+     `) ${al('src')}`,
+     `${kw('PIVOT')} (`,
+     `    ${fn('SUM')}(${col('Revenue')}) ${kw('FOR')} ${col('Quarter')} ${kw('IN')} (${al('[Q1_2025]')}, ${al('[Q2_2025]')}, ${al('[Q3_2025]')}, ${al('[Q4_2025]')})`,
+     `) ${al('pvt')}`,
+     `${kw('ORDER BY')} ${col('Department')};`,
+    ],
+    ['Department','Q1_2025','Q2_2025','Q3_2025','Q4_2025','YearTotal'],
+    [], 3, '12ms', true);
+
+  // ── STORED PROCEDURES ────────────────────────
+  if(key==='stored-procs:sp-basics:Demo') return `<div class="sec">Complete Production Stored Procedure</div>
+<div class="sql-editor" id="sqle_sp_full">
+<div class="sql-toolbar">
+  <div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div>
+  <div class="sql-title">💾 usp_GetDepartmentReport — Production SP</div>
+</div>
+<div class="sql-code">
+${kw('CREATE OR ALTER PROCEDURE')} ${col('usp_GetDepartmentReport')}
+    ${prm('@DeptID')}       ${kw('INT')}           = ${kw('NULL')},
+    ${prm('@MinSalary')}    ${kw('DECIMAL')}(${num('18')},${num('2')}) = ${num('0')},
+    ${prm('@IncludeSalary')}${kw('BIT')}           = ${num('1')},
+    ${prm('@TotalCount')}   ${kw('INT')}           = ${num('0')} ${kw('OUTPUT')}
+${kw('AS')}
+${kw('BEGIN')}
+    ${kw('SET NOCOUNT ON')};
+    ${kw('SET XACT_ABORT ON')};  ${cmt('-- auto-rollback on error')}
+
+    ${kw('BEGIN TRY')}
+        ${cmt('-- Validate')}
+        ${kw('IF')} ${prm('@MinSalary')} < ${num('0')}
+            ${kw('THROW')} ${num('50001')}, ${str("'MinSalary cannot be negative'")} , ${num('1')};
+
+        ${cmt('-- Get total for pagination / reporting')}
+        ${kw('SELECT')} ${prm('@TotalCount')} = ${fn('COUNT')}(*)
+        ${kw('FROM')} ${col('Employees')}
+        ${kw('WHERE')} (${prm('@DeptID')} ${kw('IS NULL')} ${kw('OR')} ${col('DepartmentID')} = ${prm('@DeptID')})
+          ${kw('AND')} ${col('Salary')} >= ${prm('@MinSalary')};
+
+        ${cmt('-- Main result')}
+        ${kw('SELECT')} ${col('e.EmployeeID')}, ${col('e.FirstName')}, ${col('e.LastName')},
+               ${col('d.DepartmentName')},
+               ${kw('CASE')} ${kw('WHEN')} ${prm('@IncludeSalary')} = ${num('1')} ${kw('THEN')} ${col('e.Salary')} ${kw('ELSE')} ${kw('NULL')} ${kw('END')} ${al('AS')} ${al('Salary')},
+               ${fn('DATEDIFF')}(${kw('YEAR')}, ${col('e.HireDate')}, ${fn('GETDATE')}()) ${al('AS')} ${al('Tenure')}
+        ${kw('FROM')} ${col('Employees')} ${al('e')}
+        ${kw('JOIN')} ${col('Departments')} ${al('d')} ${kw('ON')} ${col('e.DepartmentID')} = ${col('d.DepartmentID')}
+        ${kw('WHERE')} (${prm('@DeptID')} ${kw('IS NULL')} ${kw('OR')} ${col('e.DepartmentID')} = ${prm('@DeptID')})
+          ${kw('AND')} ${col('e.Salary')} >= ${prm('@MinSalary')}
+        ${kw('ORDER BY')} ${col('e.LastName')};
+
+    ${kw('END TRY')}
+    ${kw('BEGIN CATCH')}
+        ${kw('DECLARE')} ${prm('@Msg')} ${kw('NVARCHAR')}(${num('4000')}) = ${fn('ERROR_MESSAGE')}();
+        ${kw('DECLARE')} ${prm('@Sev')} ${kw('INT')} = ${fn('ERROR_SEVERITY')}();
+        ${kw('INSERT INTO')} ${col('dbo.ErrorLog')} (${col('ErrorMessage')}, ${col('ErrorNumber')}, ${col('LoggedAt')})
+        ${kw('VALUES')} (${prm('@Msg')}, ${fn('ERROR_NUMBER')}(), ${fn('SYSDATETIME')}());
+        ${kw('THROW')};  ${cmt('-- re-raise to caller')}
+    ${kw('END CATCH')}
+${kw('END')};
+</div></div>
+${sqlBlock('sp-demo','SP Execution',
+    [`${kw('DECLARE')} ${prm('@Count')} ${kw('INT')};`,
+     `${kw('EXEC')} ${col('usp_GetDepartmentReport')}`,
+     `    ${prm('@DeptID')} = ${num('2')},`,
+     `    ${prm('@IncludeSalary')} = ${num('1')},`,
+     `    ${prm('@TotalCount')} = ${prm('@Count')} ${kw('OUTPUT')};`,
+     `${kw('SELECT')} ${prm('@Count')} ${al('AS')} ${al('TotalEmployees')};`,
+    ],
+    ['Parameter','Value','Status'],[],5,'4ms',true)}`;
+
+  if(key==='stored-procs:sp-error:Demo') return `<div class="sec">TRY-CATCH Error Handling Pattern</div>
+<div class="sql-editor">
+<div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div>
+<div class="sql-title">💾 Error Handling with TRY-CATCH</div></div>
+<div class="sql-code">
+${kw('CREATE OR ALTER PROCEDURE')} ${col('usp_TransferFunds')}
+    ${prm('@FromAccount')} ${kw('INT')}, ${prm('@ToAccount')} ${kw('INT')}, ${prm('@Amount')} ${kw('DECIMAL')}(${num('18')},${num('2')})
+${kw('AS')}
+${kw('BEGIN')}
+    ${kw('SET NOCOUNT ON')};
+    ${kw('SET XACT_ABORT ON')};  ${cmt('-- ensures rollback on error in nested calls')}
+
+    ${kw('BEGIN TRY')}
+        ${kw('BEGIN TRANSACTION')};
+
+        ${cmt('-- Validate balance')}
+        ${kw('IF')} (${kw('SELECT')} ${col('Balance')} ${kw('FROM')} ${col('Accounts')} ${kw('WHERE')} ${col('AccountID')} = ${prm('@FromAccount')}) < ${prm('@Amount')}
+            ${kw('THROW')} ${num('50002')}, ${str("'Insufficient funds'")} , ${num('1')};
+
+        ${kw('UPDATE')} ${col('Accounts')} ${kw('SET')} ${col('Balance')} -= ${prm('@Amount')}
+        ${kw('WHERE')} ${col('AccountID')} = ${prm('@FromAccount')};
+
+        ${kw('UPDATE')} ${col('Accounts')} ${kw('SET')} ${col('Balance')} += ${prm('@Amount')}
+        ${kw('WHERE')} ${col('AccountID')} = ${prm('@ToAccount')};
+
+        ${kw('COMMIT TRANSACTION')};
+        ${kw('SELECT')} ${str("'Transfer successful'")} ${al('AS')} ${al('Result')};
+
+    ${kw('END TRY')}
+    ${kw('BEGIN CATCH')}
+        ${kw('IF')} ${fn('XACT_STATE')}() <> ${num('0')}
+            ${kw('ROLLBACK TRANSACTION')};
+
+        ${kw('SELECT')}
+            ${fn('ERROR_NUMBER')}()   ${al('AS')} ${al('ErrorNumber')},
+            ${fn('ERROR_MESSAGE')}()  ${al('AS')} ${al('ErrorMessage')},
+            ${fn('ERROR_SEVERITY')}() ${al('AS')} ${al('Severity')},
+            ${fn('ERROR_LINE')}()     ${al('AS')} ${al('LineNumber')};
+
+        ${kw('THROW')};  ${cmt('-- re-raise original error to caller')}
+    ${kw('END CATCH')}
+${kw('END')};
+</div></div>`;
+
+  // ── FUNCTIONS ─────────────────────────────────
+  if(key==='functions:scalar-fn:Performance Danger') return `<div class="sec">Why Scalar UDFs are SLOW</div>
+<p class="bd">Scalar functions execute once per row. For a table with 1 million rows, your function runs 1 million times — each call context-switches between the query executor and the function runtime. This prevents parallelism and causes massive CPU overhead.</p>
+<div class="grid2">
+<div class="mc"><h4 class="si">❌ Slow: Scalar UDF</h4>
+<div class="sql-editor" style="margin:5px 0"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div></div>
+<div class="sql-code" style="min-height:0">
+${cmt('-- 1M rows × 1 function call = SLOW')}
+${kw('SELECT')} ${col('OrderID')}, ${col('dbo.fn_CalculateTax')}(${col('Amount')}) ${al('AS')} ${al('Tax')}
+${kw('FROM')} ${col('Orders')};  ${cmt('-- Table scan + 1M fn calls!')}
+</div></div>
+</div>
+<div class="mc"><h4 class="gr">✅ Fast: Inline TVF with APPLY</h4>
+<div class="sql-editor" style="margin:5px 0"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div></div>
+<div class="sql-code" style="min-height:0">
+${cmt('-- Inline TVF is expanded inline -- optimizer sees inside it')}
+${kw('SELECT')} ${col('o.OrderID')}, ${col('t.Tax')}
+${kw('FROM')} ${col('Orders')} ${al('o')}
+${kw('CROSS APPLY')} ${col('dbo.fn_CalculateTax_TVF')}(${col('o.Amount')}) ${al('t')};
+</div></div>
+</div></div>
+<div class="callout warn"><strong>SQL 2019: Scalar UDF Inlining</strong>SQL Server 2019+ automatically inlines eligible scalar functions. But this only works for simple functions without side effects, recursion, or certain constructs. Safest: write inline TVFs instead of scalars for any function called on large sets.</div>`;
+
+  if(key==='functions:inline-tvf:Demo') return `<div class="sec">Inline Table-Valued Function with CROSS APPLY</div>
+<div class="sql-editor"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div><div class="sql-title">💾 Inline TVF — parameterized view</div></div>
+<div class="sql-code">
+${cmt('-- Create inline TVF (single SELECT, no BEGIN/END)')}
+${kw('CREATE OR ALTER FUNCTION')} ${col('dbo.fn_GetDeptEmployees')} (${prm('@DeptID')} ${kw('INT')})
+${kw('RETURNS TABLE')}
+${kw('WITH SCHEMABINDING')}  ${cmt('-- prevents breaking changes to base tables')}
+${kw('AS')}
+${kw('RETURN')} (
+    ${kw('SELECT')} ${col('e.EmployeeID')}, ${col('e.Name')}, ${col('e.Salary')},
+           ${fn('DENSE_RANK')}() ${kw('OVER')} (${kw('ORDER BY')} ${col('e.Salary')} ${kw('DESC')}) ${al('AS')} ${al('SalaryRank')},
+           ${fn('DATEDIFF')}(${kw('YEAR')}, ${col('e.HireDate')}, ${fn('GETDATE')}()) ${al('AS')} ${al('Tenure')}
+    ${kw('FROM')} ${col('dbo.Employees')} ${al('e')}
+    ${kw('WHERE')} ${col('e.DepartmentID')} = ${prm('@DeptID')}
+);
+
+${cmt('-- USE with CROSS APPLY (one call per department row)')}
+${kw('SELECT')} ${col('d.DepartmentName')}, ${col('e.Name')}, ${col('e.SalaryRank')}
+${kw('FROM')} ${col('Departments')} ${al('d')}
+${kw('CROSS APPLY')} ${col('dbo.fn_GetDeptEmployees')}(${col('d.DepartmentID')}) ${al('e')}
+${kw('WHERE')} ${col('e.SalaryRank')} = ${num('1')};  ${cmt('-- top earner per dept')}
+</div></div>`;
+
+  // ── VIEWS ─────────────────────────────────────
+  if(key==='views:views-basic:Demo') return `<div class="sec">View Creation Patterns</div>
+<div class="sql-editor"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div><div class="sql-title">💾 Standard View with SCHEMABINDING</div></div>
+<div class="sql-code">
+${cmt('-- Standard reporting view')}
+${kw('CREATE OR ALTER VIEW')} ${col('vw_EmployeeSummary')}
+${kw('WITH SCHEMABINDING')}  ${cmt('-- prevents DROP/ALTER of base tables while view exists')}
+${kw('AS')}
+${kw('SELECT')}
+    ${col('e.EmployeeID')},
+    ${col('e.FirstName')} + ${str("' '")} + ${col('e.LastName')} ${al('AS')} ${al('FullName')},
+    ${col('d.DepartmentName')} ${al('AS')} ${al('Department')},
+    ${col('e.Salary')},
+    ${col('m.FirstName')} + ${str("' '")} + ${col('m.LastName')} ${al('AS')} ${al('ManagerName')},
+    ${fn('DATEDIFF')}(${kw('YEAR')}, ${col('e.HireDate')}, ${fn('GETDATE')}()) ${al('AS')} ${al('YearsService')}
+${kw('FROM')} ${col('dbo.Employees')} ${al('e')}
+${kw('JOIN')} ${col('dbo.Departments')} ${al('d')} ${kw('ON')} ${col('e.DepartmentID')} = ${col('d.DepartmentID')}
+${kw('LEFT JOIN')} ${col('dbo.Employees')} ${al('m')} ${kw('ON')} ${col('e.ManagerID')} = ${col('m.EmployeeID')};
+
+${cmt('-- Query it like a table')}
+${kw('SELECT')} * ${kw('FROM')} ${col('vw_EmployeeSummary')}
+${kw('WHERE')} ${col('Department')} = ${str("'Engineering'")}
+${kw('ORDER BY')} ${col('Salary')} ${kw('DESC')};
+</div></div>`;
+
+  if(key==='views:indexed-views:Demo') return `<div class="sec">Indexed View (Materialized) — Pre-computed Aggregates</div>
+<div class="sql-editor"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div><div class="sql-title">💾 Indexed View for Instant Aggregations</div></div>
+<div class="sql-code">
+${cmt('-- Step 1: Create view with SCHEMABINDING (REQUIRED for indexed view)')}
+${kw('CREATE VIEW')} ${col('vw_DeptSalesAgg')}
+${kw('WITH SCHEMABINDING')}
+${kw('AS')}
+${kw('SELECT')}
+    ${col('p.CategoryID')},
+    ${fn('COUNT_BIG')}(*) ${al('AS')} ${al('OrderCount')},   ${cmt('-- COUNT_BIG required, not COUNT')}
+    ${fn('SUM')}(${col('od.Quantity')}) ${al('AS')} ${al('TotalUnits')},
+    ${fn('SUM')}(${col('od.Quantity')} * ${col('od.UnitPrice')}) ${al('AS')} ${al('TotalRevenue')}
+${kw('FROM')} ${col('dbo.OrderDetails')} ${al('od')}
+${kw('JOIN')} ${col('dbo.Products')} ${al('p')} ${kw('ON')} ${col('od.ProductID')} = ${col('p.ProductID')}
+${kw('GROUP BY')} ${col('p.CategoryID')};
+
+${cmt('-- Step 2: Create UNIQUE CLUSTERED INDEX — this materializes the view')}
+${kw('CREATE UNIQUE CLUSTERED INDEX')} ${col('UCX_vw_DeptSalesAgg')}
+${kw('ON')} ${col('vw_DeptSalesAgg')} (${col('CategoryID')});
+
+${cmt('-- Now query against base tables — optimizer auto-matches indexed view!')}
+${kw('SELECT')} ${col('p.CategoryID')}, ${fn('SUM')}(${col('od.Quantity')} * ${col('od.UnitPrice')}) ${al('AS')} ${al('Rev')}
+${kw('FROM')} ${col('OrderDetails')} ${al('od')} ${kw('JOIN')} ${col('Products')} ${al('p')} ${kw('ON')} ${col('od.ProductID')} = ${col('p.ProductID')}
+${kw('GROUP BY')} ${col('p.CategoryID')};
+${cmt('-- SQL Server may rewrite this to use vw_DeptSalesAgg instead!')}
+${cmt('-- Use WITH (NOEXPAND) on non-Enterprise to force it')}
+</div></div>`;
+
+  // ── INDEXES ───────────────────────────────────
+  if(key==='indexes:clustered:B-tree Diagram') return `<div class="sec">B-Tree Index Structure</div>
+<div class="arch">
+<div class="arch-title">📇 Clustered Index B-Tree — employees ordered by EmployeeID</div>
+<div style="font-family:var(--mono);font-size:10px;text-align:center">
+  <div style="margin-bottom:6px;padding:6px 12px;border:1px solid var(--g2);border-radius:4px;background:rgba(0,184,107,.08);display:inline-block">
+    Root Page: EmployeeID ranges [1—2500] [2501—5000] [5001—7500]
+  </div>
+  <div style="font-size:16px;color:var(--tx3);margin:4px 0">↓</div>
+  <div style="display:flex;gap:8px;justify-content:center;margin-bottom:6px">
+    <div style="padding:5px 10px;border:1px solid var(--b2);border-radius:4px;background:rgba(0,184,107,.04)">Branch: [1—833]</div>
+    <div style="padding:5px 10px;border:1px solid var(--b2);border-radius:4px;background:rgba(0,184,107,.04)">Branch: [834—1666]</div>
+    <div style="padding:5px 10px;border:1px solid var(--b2);border-radius:4px;background:rgba(0,184,107,.04)">Branch: [1667—2500]</div>
+  </div>
+  <div style="font-size:16px;color:var(--tx3);margin:4px 0">↓</div>
+  <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap">
+    <div style="padding:4px 8px;border:1px solid var(--g1);border-radius:3px;background:rgba(0,184,107,.1);font-size:9px">Leaf Page<br>(actual data rows)<br>EID 1-150</div>
+    <div style="padding:4px 8px;border:1px solid var(--g1);border-radius:3px;background:rgba(0,184,107,.1);font-size:9px">Leaf Page<br>(actual data rows)<br>EID 151-300</div>
+    <div style="padding:4px 8px;border:1px solid var(--g1);border-radius:3px;background:rgba(0,184,107,.1);font-size:9px">Leaf Page<br>(actual data rows)<br>EID 301-450</div>
+    <div style="padding:4px 8px;border:1px solid var(--g1);border-radius:3px;font-size:9px;color:var(--tx3)">… linked list …</div>
+  </div>
+</div>
+</div>
+<div class="callout info"><strong>Clustered Index = The Table</strong>The leaf level of a clustered index IS the data. There is no separate "table". This is why: (1) only ONE clustered index per table, (2) choose the CI key wisely — it determines physical order, (3) non-clustered indexes store the clustered key as the row locator, so a narrow clustered key benefits all non-clustered indexes.</div>`;
+
+  if(key==='indexes:nonclustered:Covering Index') return `<div class="sec">Covering Index — Eliminate Key Lookups</div>
+<div class="sql-editor"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div></div>
+<div class="sql-code">
+${cmt('-- Query: Find orders by customer, return multiple columns')}
+${kw('SELECT')} ${col('OrderID')}, ${col('OrderDate')}, ${col('TotalAmount')}, ${col('Status')}
+${kw('FROM')} ${col('Orders')}
+${kw('WHERE')} ${col('CustomerID')} = ${num('1042')};
+
+${cmt('-- Without covering index: Index Seek on CustomerID, then Key Lookup per row')}
+${cmt('-- With covering index: Index Seek, NO lookup needed')}
+${kw('CREATE INDEX')} ${col('IX_Orders_CustomerID_Covering')}
+${kw('ON')} ${col('Orders')} (${col('CustomerID')})           ${cmt('-- search key (sorted)')}
+${kw('INCLUDE')} (${col('OrderDate')}, ${col('TotalAmount')}, ${col('Status')}); ${cmt('-- in leaf only, not sorted')}
+
+${cmt('-- Filtered index: smaller, faster for specific conditions')}
+${kw('CREATE INDEX')} ${col('IX_Orders_Active_Pending')}
+${kw('ON')} ${col('Orders')} (${col('CustomerID')}, ${col('OrderDate')})
+${kw('INCLUDE')} (${col('TotalAmount')})
+${kw('WHERE')} ${col('Status')} ${kw('IN')} (${str("'Active'")} , ${str("'Pending'")});  ${cmt('-- 30% of rows, tiny index!')}
+</div></div>`;
+
+  if(key==='indexes:missing-index:Missing Index DMV') return sqlBlock('dmv-expensive','Top Expensive Queries DMV',
+    [`${cmt('-- Find missing index recommendations')}`,
+     `${kw('SELECT TOP')} ${num('10')}`,
+     `    ${fn('ROUND')}(${col('avg_total_user_cost')} * ${col('avg_user_impact')} * (${col('user_seeks')} + ${col('user_scans')}), ${num('0')}) ${al('AS')} ${al('IndexImpact')},`,
+     `    ${col('mid.statement')} ${al('AS')} ${al('TableName')},`,
+     `    ${col('mid.equality_columns')}, ${col('mid.inequality_columns')},`,
+     `    ${col('mid.included_columns')},`,
+     `    ${col('migs.user_seeks')}, ${col('migs.user_scans')}`,
+     `${kw('FROM')} ${col('sys.dm_db_missing_index_group_stats')} ${al('migs')}`,
+     `${kw('JOIN')} ${col('sys.dm_db_missing_index_groups')} ${al('mig')} ${kw('ON')} ${col('migs.group_handle')} = ${col('mig.index_group_handle')}`,
+     `${kw('JOIN')} ${col('sys.dm_db_missing_index_details')} ${al('mid')} ${kw('ON')} ${col('mig.index_handle')} = ${col('mid.index_handle')}`,
+     `${kw('ORDER BY')} ${al('IndexImpact')} ${kw('DESC')};`,
+    ],
+    ['Rank','ExecCount','AvgCPU_ms','TotalCPU_sec','AvgReads','QueryText'],
+    [], 3, '< 1ms', true);
+
+  // ── TRANSACTIONS ─────────────────────────────
+  if(key==='transactions:isolation:Demo') return `<div class="sec">Isolation Levels — What Each Allows</div>
+<table class="tbl"><thead><tr><th>Isolation Level</th><th>Dirty Read</th><th>Non-Repeatable</th><th>Phantom</th><th>Blocking?</th><th>Best For</th></tr></thead><tbody>
+<tr><td>READ UNCOMMITTED</td><td class="si">Yes</td><td class="si">Yes</td><td class="si">Yes</td><td class="gr">None</td><td>Approximate counts, dashboards (accept dirty data)</td></tr>
+<tr><td>READ COMMITTED</td><td class="gr">No</td><td class="si">Yes</td><td class="si">Yes</td><td class="ye">Shared</td><td>Default — good balance for OLTP</td></tr>
+<tr><td>REPEATABLE READ</td><td class="gr">No</td><td class="gr">No</td><td class="si">Yes</td><td class="si">More</td><td>Financial recalculations within transaction</td></tr>
+<tr><td>SNAPSHOT</td><td class="gr">No</td><td class="gr">No</td><td class="gr">No</td><td class="gr">None!</td><td>BI reports on OLTP DB, high contention apps</td></tr>
+<tr><td>SERIALIZABLE</td><td class="gr">No</td><td class="gr">No</td><td class="gr">No</td><td class="si">Most</td><td>Financial transactions requiring max consistency</td></tr>
+</tbody></table>
+<div class="callout tip"><strong>RCSI — The Game Changer</strong>ALTER DATABASE mydb SET READ_COMMITTED_SNAPSHOT ON — this makes all READ COMMITTED queries use SNAPSHOT semantics automatically. No code changes needed. Readers never block writers, writers never block readers. Recommended for all new OLTP databases.</div>`;
+
+  // ── DATA ENGINEERING ─────────────────────────
+  if(key==='data-engineering:merge:Demo') return sqlBlock('merge-demo','MERGE — Full Sync Pattern',
+    [`${kw('MERGE')} ${col('dbo.Products')} ${al('AS')} ${al('Target')}`,
+     `${kw('USING')} ${col('Staging.Products')} ${al('AS')} ${al('Source')}`,
+     `    ${kw('ON')} (${col('Target.ProductID')} = ${col('Source.ProductID')})`,
+     `${kw('WHEN MATCHED')} ${kw('AND')} (`,
+     `    ${col('Target.ProductName')} <> ${col('Source.ProductName')}`,
+     `    ${kw('OR')} ${col('Target.Price')} <> ${col('Source.Price')}`,
+     `) ${kw('THEN UPDATE SET')}`,
+     `    ${col('Target.ProductName')} = ${col('Source.ProductName')},`,
+     `    ${col('Target.Price')} = ${col('Source.Price')},`,
+     `    ${col('Target.LastModified')} = ${fn('SYSDATETIME')}()`,
+     `${kw('WHEN NOT MATCHED BY TARGET')} ${kw('THEN INSERT')} (${col('ProductID')}, ${col('ProductName')}, ${col('Price')})`,
+     `    ${kw('VALUES')} (${col('Source.ProductID')}, ${col('Source.ProductName')}, ${col('Source.Price')})`,
+     `${kw('WHEN NOT MATCHED BY SOURCE')} ${kw('THEN DELETE')}`,
+     `${kw('OUTPUT')} ${prm('$action')}, ${fn('INSERTED.ProductID')}, ${fn('DELETED.ProductID')};`,
+    ],
+    ['Action','Rows','Description'],[],4,'38ms',true);
+
+  if(key==='data-engineering:scd:SCD Type 2') return sqlBlock('scd2-demo','SCD Type 2 — History Tracking',
+    [`${cmt('-- SCD Type 2: add new row for each change, close old row')}`,
+     `${kw('WITH')} ${al('Changes')} ${kw('AS')} (`,
+     `    ${kw('SELECT')} ${col('e.EmployeeID')}, ${col('e.Department')}, ${col('e.Salary')},`,
+     `           ${col('d.Department')} ${al('AS')} ${al('NewDept')}, ${col('d.Salary')} ${al('AS')} ${al('NewSalary')}`,
+     `    ${kw('FROM')} ${col('EmployeeDim')} ${al('e')}`,
+     `    ${kw('JOIN')} ${col('EmployeeStaging')} ${al('d')} ${kw('ON')} ${col('e.EmployeeID')} = ${col('d.EmployeeID')}`,
+     `    ${kw('WHERE')} ${col('e.IsCurrent')} = ${num('1')}`,
+     `      ${kw('AND')} (${col('e.Department')} <> ${col('d.Department')} ${kw('OR')} ${col('e.Salary')} <> ${col('d.Salary')})`,
+     `)`,
+     `${cmt('-- Close old record')}`,
+     `${kw('UPDATE')} ${col('EmployeeDim')} ${kw('SET')} ${col('ValidTo')} = ${fn('CAST')}(${fn('GETDATE')}() ${al('AS')} ${col('DATE')}), ${col('IsCurrent')} = ${num('0')}`,
+     `${kw('FROM')} ${col('EmployeeDim')} ${al('e')} ${kw('JOIN')} ${al('Changes')} ${al('c')} ${kw('ON')} ${col('e.EmployeeID')} = ${col('c.EmployeeID')} ${kw('AND')} ${col('e.IsCurrent')} = ${num('1')};`,
+    ],
+    ['SurrogateKey','EmployeeID','Name','Department','Salary','ValidFrom','ValidTo','IsCurrent'],
+    [],3,'6ms',true);
+
+  // ── ANALYTICS ─────────────────────────────────
+  if(key==='analytics:running-totals:Demo') return sqlBlock('running-total-demo','Running Total & Moving Average',
+    [`${kw('SELECT')}`,
+     `    ${col('OrderDate')},`,
+     `    ${fn('FORMAT')}(${col('DailyRevenue')}, ${str("'C0'")} , ${str("'en-IN'")}) ${al('AS')} ${al('DailyRevenue')},`,
+     `    ${fn('FORMAT')}(${fn('SUM')}(${col('DailyRevenue')}) ${kw('OVER')} (${kw('ORDER BY')} ${col('OrderDate')} ${kw('ROWS UNBOUNDED PRECEDING')}), ${str("'C0'")} , ${str("'en-IN'")}) ${al('AS')} ${al('RunningTotal')},`,
+     `    ${fn('FORMAT')}(${fn('AVG')}(${col('DailyRevenue')}) ${kw('OVER')} (${kw('ORDER BY')} ${col('OrderDate')} ${kw('ROWS BETWEEN')} ${num('6')} ${kw('PRECEDING AND CURRENT ROW')}), ${str("'C0'")} , ${str("'en-IN'")}) ${al('AS')} ${al('MovingAvg7Day')},`,
+     `    ${fn('COUNT')}(*) ${kw('OVER')} (${kw('ORDER BY')} ${col('OrderDate')} ${kw('ROWS UNBOUNDED PRECEDING')}) ${al('AS')} ${al('CumulativeOrders')}`,
+     `${kw('FROM')} ${col('DailySales')}`,
+     `${kw('ORDER BY')} ${col('OrderDate')};`,
+    ],
+    ['OrderDate','DailyRevenue','RunningTotal','MovingAvg7Day','CumulativeOrders'],
+    [],5,'11ms',true);
+
+  if(key==='analytics:yoy-comparison:Demo') return sqlBlock('yoy-demo','Year-over-Year Comparison',
+    [`${kw('SELECT')}`,
+     `    ${fn('DATENAME')}(${kw('MONTH')}, ${col('s2025.SaleDate')}) ${al('AS')} ${al('Month')},`,
+     `    ${fn('FORMAT')}(${fn('SUM')}(${col('s2024.Revenue')}), ${str("'C0'")} , ${str("'en-IN'")}) ${al('AS')} ${al('Rev_2024')},`,
+     `    ${fn('FORMAT')}(${fn('SUM')}(${col('s2025.Revenue')}), ${str("'C0'")} , ${str("'en-IN'")}) ${al('AS')} ${al('Rev_2025')},`,
+     `    ${fn('FORMAT')}(${fn('SUM')}(${col('s2025.Revenue')}) - ${fn('SUM')}(${col('s2024.Revenue')}), ${str("'C0'")} , ${str("'en-IN'")}) ${al('AS')} ${al('YoY_Growth')},`,
+     `    ${fn('FORMAT')}((${fn('SUM')}(${col('s2025.Revenue')}) - ${fn('SUM')}(${col('s2024.Revenue')})) * ${num('100.0')} / ${fn('NULLIF')}(${fn('SUM')}(${col('s2024.Revenue')}), ${num('0')}), ${str("'N1'")}) + ${str("'%'")} ${al('AS')} ${al('YoY_Pct')}`,
+     `${kw('FROM')} ${col('Sales')} ${al('s2025')}`,
+     `${kw('LEFT JOIN')} ${col('Sales')} ${al('s2024')}`,
+     `    ${kw('ON')} ${fn('MONTH')}(${col('s2025.SaleDate')}) = ${fn('MONTH')}(${col('s2024.SaleDate')})`,
+     `   ${kw('AND')} ${fn('YEAR')}(${col('s2024.SaleDate')}) = ${num('2024')}`,
+     `${kw('WHERE')} ${fn('YEAR')}(${col('s2025.SaleDate')}) = ${num('2025')}`,
+     `${kw('GROUP BY')} ${fn('MONTH')}(${col('s2025.SaleDate')}), ${fn('DATENAME')}(${kw('MONTH')}, ${col('s2025.SaleDate')})`,
+     `${kw('ORDER BY')} ${fn('MONTH')}(${col('s2025.SaleDate')});`,
+    ],
+    ['Month','Revenue_2024','Revenue_2025','YoY_Growth','YoY_Pct'],
+    [],4,'9ms',true);
+
+  if(key==='analytics:gaps-islands:Demo') return sqlBlock('gaps-demo','Gaps & Islands — Consecutive Absences',
+    [`${kw('WITH')} ${al('Numbered')} ${kw('AS')} (`,
+     `    ${kw('SELECT')} ${col('EmployeeID')}, ${col('AbsenceDate')},`,
+     `           ${fn('ROW_NUMBER')}() ${kw('OVER')} (${kw('PARTITION BY')} ${col('EmployeeID')} ${kw('ORDER BY')} ${col('AbsenceDate')}) ${al('AS')} ${al('rn')}`,
+     `    ${kw('FROM')} ${col('EmployeeAbsences')}`,
+     `),`,
+     `${al('Islands')} ${kw('AS')} (`,
+     `    ${kw('SELECT')} ${col('EmployeeID')}, ${col('AbsenceDate')},`,
+     `           ${fn('DATEADD')}(${kw('DAY')}, -${al('rn')}, ${col('AbsenceDate')}) ${al('AS')} ${al('IslandGroup')}`,
+     `    ${kw('FROM')} ${al('Numbered')}`,
+     `)`,
+     `${kw('SELECT')} ${col('EmployeeID')}, ${col('AbsenceDate')},`,
+     `       ${fn('DENSE_RANK')}() ${kw('OVER')} (${kw('PARTITION BY')} ${col('EmployeeID')} ${kw('ORDER BY')} ${al('IslandGroup')}) ${al('AS')} ${al('Island#')},`,
+     `       ${fn('COUNT')}(*) ${kw('OVER')} (${kw('PARTITION BY')} ${col('EmployeeID')}, ${al('IslandGroup')} ${kw('ORDER BY')} ${col('AbsenceDate')}) ${al('AS')} ${al('ConsecutiveDays')}`,
+     `${kw('FROM')} ${al('Islands')} ${kw('ORDER BY')} ${col('EmployeeID')}, ${col('AbsenceDate')};`,
+    ],
+    ['EmployeeID','Name','AbsenceDate','Island#','ConsecutiveDays'],
+    [],5,'8ms',true);
+
+  // ── SECURITY ──────────────────────────────────
+  if(key==='security:rls:Demo') return sqlBlock('rls-demo','Row-Level Security Filter',
+    [`${cmt('-- Policy function: user only sees their region')}`,
+     `${kw('CREATE FUNCTION')} ${col('dbo.fn_RegionFilter')} (${prm('@RegionID')} ${kw('INT')})`,
+     `${kw('RETURNS TABLE WITH SCHEMABINDING AS')}`,
+     `${kw('RETURN')} ${kw('SELECT')} ${num('1')} ${al('AS')} ${al('allowed')}`,
+     `${kw('WHERE')} ${prm('@RegionID')} = (${kw('SELECT')} ${col('RegionID')} ${kw('FROM')} ${col('dbo.UserRegions')} ${kw('WHERE')} ${col('UserName')} = ${fn('USER_NAME')}());`,
+     ` `,
+     `${kw('CREATE SECURITY POLICY')} ${col('RegionIsolation')}`,
+     `${kw('ADD FILTER PREDICATE')} ${col('dbo.fn_RegionFilter')}(${col('RegionID')}) ${kw('ON')} ${col('dbo.Orders')},`,
+     `${kw('ADD BLOCK  PREDICATE')} ${col('dbo.fn_RegionFilter')}(${col('RegionID')}) ${kw('ON')} ${col('dbo.Orders')}`,
+     `${kw('WITH')} (${kw('STATE')} = ${kw('ON')});`,
+     ` `,
+     `${cmt('-- Now: EXECUTE AS LOGIN = "manager_east"')}`,
+     `${kw('SELECT')} ${col('OrderID')}, ${col('Customer')}, ${col('Region')}, ${col('Amount')} ${kw('FROM')} ${col('dbo.Orders')};`,
+     `${cmt('-- Returns ONLY East region rows — automatically!')}`,
+    ],
+    ['OrderID','Customer','Region','Amount','ViewedBy'],[],3,'< 1ms',true);
+
+  // ── DBA OPS ───────────────────────────────────
+  if(key==='dba-ops:dmv-monitoring:Top Expensive Queries') return sqlBlock('dmv-expensive','sys.dm_exec_query_stats — Top CPU',
+    [`${kw('SELECT TOP')} ${num('10')}`,
+     `    ${fn('ROW_NUMBER')}() ${kw('OVER')} (${kw('ORDER BY')} ${col('qs.total_worker_time')} / ${col('qs.execution_count')} ${kw('DESC')}) ${al('AS')} ${al('Rank')},`,
+     `    ${col('qs.execution_count')},`,
+     `    ${col('qs.total_worker_time')} / ${col('qs.execution_count')} / ${num('1000')} ${al('AS')} ${al('AvgCPU_ms')},`,
+     `    ${col('qs.total_worker_time')} / ${num('1000000')} ${al('AS')} ${al('TotalCPU_sec')},`,
+     `    ${col('qs.total_logical_reads')} / ${col('qs.execution_count')} ${al('AS')} ${al('AvgReads')},`,
+     `    ${fn('SUBSTRING')}(${col('qt.text')}, ${num('1')}, ${num('100')}) ${al('AS')} ${al('QueryText')}`,
+     `${kw('FROM')} ${col('sys.dm_exec_query_stats')} ${al('qs')}`,
+     `${kw('CROSS APPLY')} ${col('sys.dm_exec_sql_text')}(${col('qs.sql_handle')}) ${al('qt')}`,
+     `${kw('ORDER BY')} ${col('qs.total_worker_time')} / ${col('qs.execution_count')} ${kw('DESC')};`,
+    ],
+    ['Rank','ExecCount','AvgCPU_ms','TotalCPU_sec','AvgReads','QueryText'],
+    [],3,'< 1ms',true);
+
+  // ── DATAGRIP ──────────────────────────────────
+  if(key==='datagrip:dg-editor:Key Shortcuts') return `<div class="sec">DataGrip Essential Shortcuts</div>
+<table class="tbl"><thead><tr><th>Action</th><th>Windows/Linux</th><th>Mac</th></tr></thead><tbody>
+<tr><td>Execute query</td><td>Ctrl+Enter</td><td>⌘+Enter</td></tr>
+<tr><td>Execute selected</td><td>Ctrl+Enter (with selection)</td><td>⌘+Enter</td></tr>
+<tr><td>Explain Plan (Estimated)</td><td>Ctrl+Shift+E</td><td>⌘+Shift+E</td></tr>
+<tr><td>Format SQL</td><td>Ctrl+Alt+L</td><td>⌘+Alt+L</td></tr>
+<tr><td>Auto-complete</td><td>Ctrl+Space</td><td>⌃+Space</td></tr>
+<tr><td>New SQL tab</td><td>Ctrl+Alt+Shift+E</td><td>⌘+Shift+N</td></tr>
+<tr><td>Jump to table def</td><td>Ctrl+B / Ctrl+Click</td><td>⌘+B</td></tr>
+<tr><td>Find usages</td><td>Alt+F7</td><td>⌥+F7</td></tr>
+<tr><td>Rename refactor</td><td>Shift+F6</td><td>Shift+F6</td></tr>
+<tr><td>Comment line</td><td>Ctrl+/</td><td>⌘+/</td></tr>
+<tr><td>Duplicate line</td><td>Ctrl+D</td><td>⌘+D</td></tr>
+<tr><td>Multi-cursor</td><td>Alt+Click</td><td>⌥+Click</td></tr>
+<tr><td>Schema view refresh</td><td>Ctrl+Alt+Shift+N</td><td>⌘+Alt+N</td></tr>
+<tr><td>Export results</td><td>Ctrl+A then Ctrl+C</td><td>⌘+A then ⌘+C</td></tr>
+</tbody></table>
+<div class="callout tip"><strong>Live Templates</strong>Type "sel" + Tab → SELECT * FROM. Type "ins" + Tab → INSERT INTO. Customize in Settings → Editor → Live Templates → SQL.</div>`;
+
+  return renderSqlGenericTab(cid, tid, tab);
+}
+
+// ═══ RUNTIME ═══
+let activeCh=null,activeTid=null,visited=new Set();
+function renderNav(){
+  document.getElementById('leftNav').innerHTML=CHAPTERS.map(ch=>`
+<div class="ci ${activeCh===ch.id?'active':''}" onclick="selChapter('${ch.id}')">
+  <div class="ci-icon" style="background:${ch.bg}">${ch.icon}</div>
+  <div class="ci-info"><div class="cn">${ch.title}</div><div class="cm">${ch.topics.length} topics · ${ch.sub.split('·')[0].trim()}</div></div>
+  <span class="lv" style="background:${ch.lc}18;color:${ch.lc};border:1px solid ${ch.lc}33">${ch.level}</span>
+</div>`).join('');
+}
+function selChapter(id){
+  activeCh=id;activeTid=null;visited.add(id);updateProgress();renderNav();
+  const ch=CHAPTERS.find(c=>c.id===id);
+  clearTimers();
+  document.getElementById('middle').innerHTML=`
+<div class="ch-hdr">
+  <div class="ch-ey">Chapter ${CHAPTERS.indexOf(ch)+1} of ${CHAPTERS.length}</div>
+  <div class="ch-t">${ch.icon} ${ch.title}</div>
+  <p class="ch-d">${ch.desc}</p>
+  <div class="ch-chips">
+    <div class="chip"><span class="chip-dot" style="background:${ch.lc}"></span>${ch.level}</div>
+    <div class="chip">📚 ${ch.topics.length} Topics</div>
+    <div class="chip">🗄️ ${ch.sub}</div>
+  </div>
+</div>
+<div class="tg">${ch.topics.map(t=>`
+<div class="tc" onclick="selTopic('${ch.id}','${t.id}',event)">
+  <div class="tc-cmd">${t.cmd}</div>
+  <div class="tc-title">${t.title}</div>
+  <div class="tc-d">${t.desc}</div>
+  <div class="tc-tags">${(t.tags||[]).map(tag=>`<span class="tag ${tag}">${tag}</span>`).join('')}</div>
+</div>`).join('')}
+</div>`;
+  closeRight();
+}
+function selTopic(cid,tid,ev){
+  activeTid=tid;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+  ev.currentTarget.classList.add('active');
+  const ch=CHAPTERS.find(c=>c.id===cid);
+  const topic=ch?.topics.find(t=>t.id===tid);
+  if(!topic) return;
+  clearTimers();
+  const rp=document.getElementById('rightPanel');
+  rp.classList.remove('hidden');
+  document.getElementById('rightTitle').textContent='SELECT * FROM '+topic.cmd;
+  const tabs=topic.tabs||['Demo'];
+  document.getElementById('rightTabs').innerHTML=tabs.map((tab,i)=>
+    `<div class="rt ${i===0?'active':''}" onclick="selTab(this,'${cid}','${tid}','${tab}')">${tab}</div>`).join('');
+  renderTab(cid,tid,tabs[0]);
+}
+function selTab(el,cid,tid,tab){
+  clearTimers();
+  document.querySelectorAll('.rt').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTab(cid,tid,tab);
+}
+function renderTab(cid,tid,tab){
+  document.getElementById('rightBody').innerHTML=getContent(cid,tid,tab);
+}
+function closeRight(){
+  clearTimers();
+  document.getElementById('rightPanel').classList.add('hidden');
+  activeTid=null;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+}
+function toggleQA(el){el.classList.toggle('open');}
+function filterQs(btn,diff,container){
+  container.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  container.querySelectorAll('.qa-item').forEach(item=>{
+    item.style.display=(diff==='all'||item.dataset.diff===diff)?'':'none';
+  });
+}
+function updateProgress(){
+  const pct=Math.round(visited.size/CHAPTERS.length*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`${visited.size} / ${CHAPTERS.length} chapters visited`;
+}
+renderNav();
+</script>
+<script src="/embedded/mastery-resize.js"></script>
+</body>
+</html>

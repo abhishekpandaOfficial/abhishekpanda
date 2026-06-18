@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.abhishekpanda.com/schemas/openowl-tool-call.json",
+  "title": "OpenOwl Tool Call",
+  "type": "object",
+  "required": ["tool", "needs_approval", "payload"],
+  "properties": {
+    "tool": {
+      "type": "string",
+      "enum": ["publish", "preview", "create_task", "fetch_blog"]
+    },
+    "needs_approval": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "source_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "payload": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["platform", "content"],
+          "properties": {
+            "platform": {
+              "type": "string",
+              "enum": ["LinkedIn", "X", "Telegram", "WhatsApp", "Slack"]
+            },
+            "content": { "type": "string" },
+            "schedule_at": { "type": "string", "format": "date-time" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["platforms", "content"],
+          "properties": {
+            "platforms": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["LinkedIn", "X", "Telegram", "WhatsApp", "Slack"]
+              }
+            },
+            "content": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["title", "description"],
+          "properties": {
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "priority": { "type": "string", "enum": ["low", "medium", "high"] },
+            "owner": { "type": "string" },
+            "due_date": { "type": "string", "format": "date" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["url"],
+          "properties": {
+            "url": { "type": "string", "format": "uri" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

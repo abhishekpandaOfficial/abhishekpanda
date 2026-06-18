@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Microservice Architecture PDF Viewer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(10, 22, 40, 0.92);
+      --line: rgba(125, 211, 252, 0.16);
+      --text: #e8eef8;
+      --muted: #9fb0cb;
+      --cyan: #7dd3fc;
+      --cyan-strong: #38bdf8;
+      --shadow: 0 24px 80px rgba(2, 6, 23, 0.42);
+      --radius: 28px;
+      --max: 1380px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 24%),
+        radial-gradient(circle at top right, rgba(125, 211, 252, 0.12), transparent 28%),
+        linear-gradient(180deg, #08111d, #0a1626 45%, #09111f);
+      color: var(--text);
+      font-family: "Manrope", sans-serif;
+    }
+
+    body {
+      padding: 18px 14px 28px;
+    }
+
+    .shell {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+    }
+
+    .hero {
+      margin-bottom: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(12, 24, 44, 0.96), rgba(9, 17, 31, 0.92));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 22px 24px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.04;
+      letter-spacing: -0.03em;
+    }
+
+    .subtle {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .actions a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 132px;
+      padding: 11px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.03);
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .actions a.primary {
+      color: #05111e;
+      background: linear-gradient(135deg, var(--cyan), var(--cyan-strong));
+      border-color: transparent;
+    }
+
+    .actions a:hover {
+      transform: translateY(-1px);
+      border-color: rgba(125, 211, 252, 0.32);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .actions a.primary:hover {
+      background: linear-gradient(135deg, #a5f3fc, var(--cyan));
+    }
+
+    .viewer {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .viewer-frame {
+      width: 100%;
+      height: calc(100vh - 170px);
+      min-height: 900px;
+      display: block;
+      border: 0;
+      background: #0b1320;
+    }
+
+    .fallback {
+      display: none;
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .fallback a {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .hero-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .actions a {
+        flex: 1 1 180px;
+      }
+
+      .viewer-frame {
+        height: calc(100vh - 220px);
+        min-height: 760px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 10px 8px 18px;
+      }
+
+      .hero-inner {
+        padding: 18px;
+      }
+
+      .viewer-frame {
+        height: calc(100vh - 210px);
+        min-height: 640px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero" id="intro">
+      <div class="hero-inner">
+        <div>
+          <span class="eyebrow">Architecture PDF</span>
+          <h1>Microservice Architecture</h1>
+          <p class="subtle">Embedded directly from the original PDF for full-fidelity viewing on the website.</p>
+        </div>
+
+        <div class="actions">
+          <a class="primary" href="/documents/microservice-architecture.pdf" target="_blank" rel="noopener noreferrer">Open full screen</a>
+          <a href="/documents/microservice-architecture.pdf" download>Download PDF</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="viewer" id="pdf-viewer">
+      <iframe
+        class="viewer-frame"
+        src="/documents/microservice-architecture.pdf#view=FitH"
+        title="Microservice Architecture PDF"
+      ></iframe>
+
+      <div class="fallback">
+        Inline PDF viewing is not available in this browser.
+        <a href="/documents/microservice-architecture.pdf" target="_blank" rel="noopener noreferrer">Open the PDF directly</a>.
+      </div>
+    </section>
+  </div>
+</body>
+</html>

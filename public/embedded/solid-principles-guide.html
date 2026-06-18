@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOLID Principles - Architect Mastery</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --font-display:'Fraunces',serif;
+  --font-body:'Inter',sans-serif;
+  --font-code:'JetBrains Mono',monospace;
+  --left-w:280px;
+  --right-w:590px;
+  --header-h:56px;
+  --accent:#6384ff;
+  --accent2:#a78bfa;
+  --s-color:#38bdf8;
+  --o-color:#fb923c;
+  --l-color:#4ade80;
+  --i-color:#f472b6;
+  --d-color:#facc15;
+}
+[data-theme="dark"]{
+  --bg-primary:#0a0e1a;
+  --bg-secondary:#0f1424;
+  --bg-card:#171d30;
+  --bg-hover:#202842;
+  --border:#263455;
+  --border-bright:#3b4c73;
+  --text-primary:#e2e8f0;
+  --text-secondary:#94a3b8;
+  --text-muted:#64748b;
+  --code-bg:#0d1117;
+  --code-border:#22314f;
+  --header-bg:rgba(10,14,26,0.96);
+}
+[data-theme="light"]{
+  --bg-primary:#f7f9fd;
+  --bg-secondary:#ffffff;
+  --bg-card:#eef2fb;
+  --bg-hover:#e4ebf7;
+  --border:#d7deef;
+  --border-bright:#bfcae3;
+  --text-primary:#0f172a;
+  --text-secondary:#475569;
+  --text-muted:#7c889b;
+  --code-bg:#edf2f9;
+  --code-border:#d5deef;
+  --header-bg:rgba(247,249,253,0.96);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg-secondary)}
+::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:2px}
+.header{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:100;
+  display:flex;align-items:center;gap:16px;padding:0 20px;background:var(--header-bg);
+  border-bottom:1px solid var(--border);backdrop-filter:blur(12px);
+}
+.header-logo{
+  font-family:var(--font-display);font-size:21px;font-weight:800;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  white-space:nowrap;
+}
+.header-subtitle{
+  font-family:var(--font-code);font-size:11px;color:var(--text-muted);
+  border-left:1px solid var(--border);padding-left:16px;
+}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.badge{
+  background:linear-gradient(135deg,rgba(99,132,255,.12),rgba(167,139,250,.12));
+  border:1px solid rgba(99,132,255,.24);border-radius:20px;padding:4px 12px;
+  color:var(--accent);font-size:11px;font-family:var(--font-code);
+}
+.progress-wrap{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted)}
+.progress-bar{width:80px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s ease}
+.layout{display:flex;height:100vh;padding-top:var(--header-h)}
+.left-panel{
+  width:var(--left-w);min-width:var(--left-w);background:var(--bg-secondary);
+  border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;
+}
+.left-search{padding:12px;border-bottom:1px solid var(--border)}
+.left-search input{
+  width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);
+  color:var(--text-primary);font-size:12px;font-family:var(--font-body);outline:none;
+}
+.left-search input:focus{border-color:var(--accent)}
+.left-search input::placeholder{color:var(--text-muted)}
+.chapter-item{cursor:pointer;border-bottom:1px solid rgba(38,52,85,.6)}
+.chapter-header{display:flex;align-items:center;gap:10px;padding:11px 14px;transition:background .18s;user-select:none}
+.chapter-header:hover{background:var(--bg-hover)}
+.chapter-header.active{background:linear-gradient(90deg,rgba(99,132,255,.08),transparent);border-left:2px solid var(--accent)}
+.ch-num{
+  width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;font-family:var(--font-code);flex-shrink:0;
+}
+.ch-title{font-size:12px;font-weight:500;color:var(--text-secondary);flex:1;line-height:1.3}
+.chapter-header.active .ch-title{color:var(--text-primary)}
+.ch-arrow{font-size:9px;color:var(--text-muted);transition:transform .24s;flex-shrink:0}
+.chapter-item.open .ch-arrow{transform:rotate(90deg)}
+.topics-list{display:none;padding:4px 0 8px}
+.chapter-item.open .topics-list{display:block}
+.topic-item{
+  padding:6px 14px 6px 46px;font-size:11.5px;color:var(--text-muted);display:flex;align-items:center;gap:8px;
+  cursor:pointer;transition:all .15s;
+}
+.topic-item:hover{color:var(--text-secondary);background:rgba(255,255,255,.03)}
+.topic-item.active{color:var(--accent);background:rgba(99,132,255,.06)}
+.topic-item.done::before{content:'•';font-size:12px;color:var(--l-color);margin-right:2px}
+.middle-panel{
+  flex:1;background:var(--bg-primary);border-right:1px solid var(--border);overflow-y:auto;padding:24px 20px;
+}
+.welcome-screen{
+  min-height:calc(100vh - 120px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+}
+.welcome-logo{
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;
+}
+.welcome-letter{
+  width:62px;height:62px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:28px;font-weight:800;border:1px solid;
+}
+.welcome-title{font-family:var(--font-display);font-size:30px;font-weight:800;margin-bottom:10px}
+.welcome-subtitle{max-width:740px;font-size:14px;line-height:1.7;color:var(--text-secondary);margin-bottom:26px}
+.welcome-stats{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:26px}
+.welcome-stat{min-width:112px;padding:16px 18px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border)}
+.welcome-stat-num{font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--accent)}
+.welcome-stat-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);font-family:var(--font-code)}
+.welcome-actions{
+  position:relative;isolation:isolate;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  width:min(100%,560px);padding:14px;border-radius:28px;overflow:visible;
+  background:linear-gradient(135deg,rgba(23,29,48,.82),rgba(15,20,36,.74));
+  border:1px solid rgba(59,76,115,.85);
+  box-shadow:0 24px 60px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(18px);
+}
+.welcome-actions::before{
+  content:'';position:absolute;inset:1px;border-radius:27px;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at top left,rgba(99,132,255,.18),transparent 42%),
+    radial-gradient(circle at bottom right,rgba(167,139,250,.15),transparent 40%);
+}
+.start-btn{
+  position:relative;z-index:1;flex:1 1 220px;justify-content:space-between;
+  display:inline-flex;align-items:center;gap:12px;white-space:nowrap;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,0)) padding-box,
+    linear-gradient(135deg,var(--accent),var(--accent2)) border-box;
+  color:#fff;border:1px solid transparent;border-radius:999px;padding:8px 10px 8px 18px;
+  font-size:13px;font-weight:700;cursor:pointer;transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;box-shadow:0 16px 34px rgba(99,132,255,.22), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 20px 38px rgba(99,132,255,.28), inset 0 1px 0 rgba(255,255,255,.22);filter:saturate(1.06)}
+.start-btn-text{display:inline-flex;align-items:center}
+.start-btn-icon{
+  width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:rgba(10,14,26,.24);border:1px solid rgba(255,255,255,.18);font-size:13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.02)) padding-box,
+    linear-gradient(135deg,var(--o-color),var(--i-color)) border-box;
+  box-shadow:0 16px 34px rgba(251,146,60,.18), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary:hover{box-shadow:0 20px 38px rgba(244,114,182,.22), inset 0 1px 0 rgba(255,255,255,.18)}
+.start-btn-secondary .start-btn-icon{
+  background:rgba(244,114,182,.14);border-color:rgba(255,255,255,.18);color:#fff0f8;
+}
+.chapter-hero{
+  background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));border:1px solid var(--border);border-radius:14px;padding:24px;
+  margin-bottom:20px;position:relative;overflow:hidden;
+}
+.chapter-hero::before{
+  content:'';position:absolute;top:-30px;right:-30px;width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(99,132,255,.14),transparent);
+}
+.chapter-hero-num{font-family:var(--font-code);font-size:10px;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:2px}
+.chapter-hero-title{font-family:var(--font-display);font-size:25px;font-weight:800;margin-bottom:8px;line-height:1.15}
+.chapter-hero-desc{font-size:13px;color:var(--text-secondary);line-height:1.65;max-width:560px}
+.chapter-hero-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.hero-tag,.meta-tag,.dbadge{font-size:10px;padding:3px 8px;border-radius:4px;font-family:var(--font-code);border:1px solid}
+.topics-grid{display:flex;flex-direction:column;gap:8px}
+.topic-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;
+  transition:all .18s;display:flex;align-items:flex-start;gap:12px;
+}
+.topic-card:hover{border-color:var(--border-bright);background:var(--bg-hover);transform:translateX(2px)}
+.topic-card.active{border-color:var(--accent);background:rgba(99,132,255,.05)}
+.topic-card-icon{font-size:20px;width:36px;text-align:center;flex-shrink:0;margin-top:1px}
+.topic-card-body{flex:1}
+.topic-card-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.topic-card-desc{font-size:11.5px;color:var(--text-muted);line-height:1.55}
+.topic-card-meta{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.right-panel{width:var(--right-w);min-width:var(--right-w);background:var(--bg-secondary);overflow-y:auto;position:relative}
+.detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;text-align:center;padding:40px;color:var(--text-muted)}
+.detail-empty-icon{font-size:48px;opacity:.35}
+.detail-empty h3{font-family:var(--font-display);font-size:18px;color:var(--text-secondary)}
+.detail-empty p{font-size:13px;line-height:1.6}
+.detail-content{padding:24px}
+.detail-header{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.detail-breadcrumb{font-size:10px;color:var(--text-muted);font-family:var(--font-code);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.detail-title{font-family:var(--font-display);font-size:24px;font-weight:800;line-height:1.15;margin-bottom:6px}
+.detail-subtitle{font-size:13px;color:var(--text-secondary);line-height:1.6}
+.detail-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.section{margin-bottom:24px}
+.section-title{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';display:block;width:3px;height:14px;background:var(--accent);border-radius:2px}
+.prose{font-size:13px;color:var(--text-secondary);line-height:1.75}
+.prose p{margin-bottom:10px}
+.prose strong{color:var(--text-primary)}
+.prose ul{padding-left:18px;margin-bottom:10px}
+.prose li{margin-bottom:5px}
+.prose code,.table-wrap code,.qa-answer-text code{
+  background:var(--code-bg);border:1px solid var(--code-border);border-radius:4px;padding:1px 5px;font-family:var(--font-code);font-size:11px;color:var(--accent);
+}
+.code-block,.diagram-box,.table-wrap,.steps-box{background:var(--code-bg);border:1px solid var(--code-border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.code-header,.diagram-header,.table-header,.steps-header{
+  display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--code-border);background:rgba(0,0,0,.18);
+}
+.code-lang,.code-title,.diagram-header,.table-header,.steps-header{
+  font-size:10px;color:var(--accent2);font-family:var(--font-code);text-transform:uppercase;letter-spacing:1px;
+}
+.code-copy{background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer}
+.code-copy:hover{border-color:var(--accent);color:var(--accent)}
+.code-body{padding:16px;overflow-x:auto}
+.code-body pre{font-family:var(--font-code);font-size:11.5px;line-height:1.75;color:#d8e3f5}
+.code-body pre{min-width:max-content}
+.kw{color:#93c5fd}
+.type,.cls{color:#7dd3fc}
+.str{color:#86efac}
+.num{color:#fbbf24}
+.cmt,.cm{color:#73839b;font-style:italic}
+.fn{color:#c4b5fd}
+.prop{color:#fda4af}
+.dec{color:#fde68a}
+.diagram-body{padding:16px;display:flex;justify-content:center;overflow-x:auto}
+.diagram-body svg,.diagram-body img{display:block;width:min(100%,560px);max-width:100%;height:auto;flex-shrink:0}
+.callout{border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;font-size:12.5px;line-height:1.65}
+.callout-info{background:rgba(99,132,255,.08);border:1px solid rgba(99,132,255,.25);color:var(--text-secondary)}
+.callout-warn{background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.25);color:var(--text-secondary)}
+.callout-success{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);color:var(--text-secondary)}
+.callout-danger{background:rgba(244,114,182,.08);border:1px solid rgba(244,114,182,.25);color:var(--text-secondary)}
+.callout-icon{flex-shrink:0;font-size:15px}
+.table-body{padding:0;overflow-x:auto}
+.comp-table{width:100%;border-collapse:collapse;font-size:12px}
+.comp-table{min-width:520px}
+.comp-table th{background:var(--bg-card);padding:10px 12px;text-align:left;font-size:10px;color:var(--text-muted);font-family:var(--font-code);text-transform:uppercase;letter-spacing:.5px;border:1px solid var(--border)}
+.comp-table td{padding:10px 12px;border:1px solid var(--border);color:var(--text-secondary);vertical-align:top;line-height:1.55}
+.steps-body{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.step-item{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:12px}
+.step-num{width:28px;height:28px;border-radius:8px;background:rgba(99,132,255,.14);border:1px solid rgba(99,132,255,.25);display:flex;align-items:center;justify-content:center;color:var(--accent);font-family:var(--font-display);font-size:13px;font-weight:800;flex-shrink:0}
+.step-copy h4{font-family:var(--font-display);font-size:13px;margin-bottom:4px}
+.step-copy p{font-size:12px;color:var(--text-secondary);line-height:1.6}
+.qa-item{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.qa-question{padding:12px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;transition:background .2s}
+.qa-question:hover{background:var(--bg-hover)}
+.qa-q-icon{font-size:11px;font-weight:700;color:var(--accent);font-family:var(--font-code);margin-top:1px;flex-shrink:0}
+.qa-q-text{font-size:12.5px;font-weight:500;color:var(--text-primary);flex:1;line-height:1.5}
+.qa-kicker{font-size:9px;color:var(--text-muted);font-family:var(--font-code);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.qa-qmeta{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.qa-pill{font-size:8.5px;padding:2px 6px;border-radius:4px;font-family:var(--font-code);border:1px solid}
+.qa-legend{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}
+.qa-stat{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:12px 0;font-size:11.5px;color:var(--text-secondary);line-height:1.7}
+.qa-stat strong{font-family:var(--font-code);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-primary)}
+.qa-level{font-size:9px;padding:2px 6px;border-radius:3px;font-family:var(--font-code);margin-top:2px;flex-shrink:0}
+.qa-arrow{color:var(--text-muted);font-size:10px;transition:transform .25s;margin-top:3px}
+.qa-item.open .qa-arrow{transform:rotate(90deg)}
+.qa-answer{display:none;padding:12px 14px;border-top:1px solid var(--border);background:rgba(0,0,0,.12)}
+.qa-item.open .qa-answer{display:block}
+.qa-answer-text{font-size:12px;color:var(--text-secondary);line-height:1.75}
+.qa-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.qa-filter-btn{
+  background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);border-radius:999px;
+  padding:7px 12px;font-size:10.5px;font-family:var(--font-code);cursor:pointer;transition:all .18s ease;
+}
+.qa-filter-btn:hover,.qa-filter-btn.active{
+  color:#fff;border-color:rgba(167,139,250,.35);
+  background:linear-gradient(135deg,rgba(99,132,255,.22),rgba(167,139,250,.24));
+  box-shadow:0 10px 24px rgba(99,132,255,.12);
+}
+@media (max-width:1180px){
+  html,body{overflow:auto}
+  .layout{height:auto;min-height:100vh;display:block}
+  .left-panel,.right-panel{width:100%;min-width:0;border-right:none;border-left:none}
+  .left-panel{border-bottom:1px solid var(--border)}
+  .middle-panel{border-right:none;border-bottom:1px solid var(--border)}
+}
+@media (max-width:640px){
+  .welcome-actions{width:min(100%,420px);padding:10px}
+  .start-btn{flex-basis:100%;width:100%}
+  .comp-table{min-width:420px}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-logo">SOLID Principles</div>
+  <div class="header-subtitle">Tri-pane architect guide · OOP design discipline · refactoring and interview prep</div>
+  <div class="header-right">
+    <div class="progress-wrap">
+      <span id="progressText">0%</span>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="badge">Architect Guide</div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="left-panel">
+    <div class="left-search">
+      <input type="text" id="searchInput" placeholder="Search SOLID topics..." oninput="filterTopics(this.value)">
+    </div>
+    <div id="chapterNav"></div>
+  </div>
+
+  <div class="middle-panel">
+    <div class="welcome-screen" id="welcomeScreen">
+      <div class="welcome-logo">
+        <div class="welcome-letter" style="color:var(--s-color);background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.25)">S</div>
+        <div class="welcome-letter" style="color:var(--o-color);background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.25)">O</div>
+        <div class="welcome-letter" style="color:var(--l-color);background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.25)">L</div>
+        <div class="welcome-letter" style="color:var(--i-color);background:rgba(244,114,182,.12);border-color:rgba(244,114,182,.25)">I</div>
+        <div class="welcome-letter" style="color:var(--d-color);background:rgba(250,204,21,.12);border-color:rgba(250,204,21,.25)">D</div>
+      </div>
+      <div class="welcome-title">SOLID Mastery Explorer</div>
+      <div class="welcome-subtitle">The same mastery experience as C# and Angular: chapter navigation on the left, focused principle topics in the middle, and rich explanations with diagrams, code, tradeoffs, smells, refactoring moves, and interview questions on the right.</div>
+      <div class="welcome-stats">
+        <div class="welcome-stat"><div class="welcome-stat-num">10</div><div class="welcome-stat-label">Chapters</div></div>
+        <div class="welcome-stat"><div class="welcome-stat-num">40</div><div class="welcome-stat-label">Topics</div></div>
+        <div class="welcome-stat"><div class="welcome-stat-num">SOLID</div><div class="welcome-stat-label">Principles</div></div>
+        <div class="welcome-stat"><div class="welcome-stat-num">250</div><div class="welcome-stat-label">Interview Q&amp;A</div></div>
+      </div>
+      <div class="welcome-actions">
+        <button class="start-btn" onclick="selectChapter(0)">
+          <span class="start-btn-text">Start SOLID Guide</span>
+          <span class="start-btn-icon" aria-hidden="true">→</span>
+        </button>
+        <button class="start-btn start-btn-secondary" onclick="showAllInterviewQuestions()">
+          <span class="start-btn-text">Interview Q&amp;A</span>
+          <span class="start-btn-icon" aria-hidden="true">🎯</span>
+        </button>
+      </div>
+    </div>
+    <div id="chapterContent" style="display:none"></div>
+  </div>
+
+  <div class="right-panel">
+    <div class="detail-empty" id="detailEmpty">
+      <div class="detail-empty-icon">📐</div>
+      <h3>Select a Topic</h3>
+      <p>Open a topic from the middle panel to see principle explanations, clean vs bad code, refactoring patterns, diagrams, and interview questions.</p>
+    </div>
+    <div id="detailContent" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const chapters = [
+  { id:0, num:"01", title:"SOLID Foundations", icon:"🏛️", color:"#6384ff", bg:"rgba(99,132,255,0.12)", desc:"Understand why SOLID exists, what it optimizes for, and where teams misuse it.", tags:["Core","Architecture","Mental Model"], topics:[
+    {id:"solid-what", title:"What SOLID Really Means", icon:"🧭", desc:"The intent behind the acronym and how it changes design behavior.", tags:["Core","Important"]},
+    {id:"solid-benefits", title:"Why Teams Need SOLID", icon:"📈", desc:"Maintainability, extensibility, testability, and lower coupling.", tags:["Architecture","Value"]},
+    {id:"solid-tradeoffs", title:"SOLID Tradeoffs", icon:"⚖️", desc:"Where abstraction helps and where overengineering starts.", tags:["Advanced","Judgment"]},
+    {id:"solid-misuse", title:"Common SOLID Misuse", icon:"🚫", desc:"Cargo-cult interfaces, fake abstractions, and needless indirection.", tags:["Important","Smells"]}
+  ]},
+  { id:1, num:"02", title:"Single Responsibility", icon:"S", color:"#38bdf8", bg:"rgba(56,189,248,0.12)", desc:"One module, one reason to change. Separate policies, workflows, formatting, and infrastructure concerns.", tags:["SRP","Design","Refactoring"], topics:[
+    {id:"srp-core", title:"Core SRP Rule", icon:"🧱", desc:"Reason-to-change thinking instead of line-count thinking.", tags:["SRP","Important"]},
+    {id:"srp-smells", title:"SRP Violation Smells", icon:"🧨", desc:"God classes, mixed concerns, bloated services, and fragile changes.", tags:["SRP","Smells"]},
+    {id:"srp-refactor", title:"SRP Refactoring Moves", icon:"✂️", desc:"Extract class, split workflow, isolate persistence, isolate presentation.", tags:["SRP","Refactoring"]},
+    {id:"srp-dotnet", title:"SRP in ASP.NET Core", icon:"🔵", desc:"Controllers, handlers, validators, repositories, and domain services.", tags:["SRP",".NET"]}
+  ]},
+  { id:2, num:"03", title:"Open / Closed", icon:"O", color:"#fb923c", bg:"rgba(251,146,60,0.12)", desc:"Extend behavior with new code instead of editing battle-tested code every time requirements change.", tags:["OCP","Extension","Patterns"], topics:[
+    {id:"ocp-core", title:"Open for Extension", icon:"🧩", desc:"Add features without cracking open stable logic.", tags:["OCP","Important"]},
+    {id:"ocp-strategy", title:"Strategy & Policy Injection", icon:"🎯", desc:"One of the cleanest OCP implementations in production code.", tags:["OCP","Patterns"]},
+    {id:"ocp-switch-smell", title:"Switch Statement Smell", icon:"🔀", desc:"When giant type-condition branches signal OCP failure.", tags:["OCP","Smells"]},
+    {id:"ocp-plugin", title:"Plugin / Provider Models", icon:"🔌", desc:"Extensible architectures with registries and abstractions.", tags:["OCP","Architecture"]}
+  ]},
+  { id:3, num:"04", title:"Liskov Substitution", icon:"L", color:"#4ade80", bg:"rgba(74,222,128,0.12)", desc:"Subtypes must honor the behavioral contract of the base abstraction, not merely compile against it.", tags:["LSP","Behavior","Contracts"], topics:[
+    {id:"lsp-core", title:"Behavioral Compatibility", icon:"📏", desc:"Substitutability is about expected behavior, not inheritance syntax.", tags:["LSP","Important"]},
+    {id:"lsp-inheritance-trap", title:"Inheritance Trap", icon:"🪤", desc:"Why Rectangle/Square style inheritance examples still matter.", tags:["LSP","Smells"]},
+    {id:"lsp-contracts", title:"Preconditions & Postconditions", icon:"📜", desc:"How contracts get weakened or strengthened incorrectly.", tags:["LSP","Contracts"]},
+    {id:"lsp-testing", title:"How to Test LSP", icon:"🧪", desc:"Shared contract tests and subtype behavior verification.", tags:["LSP","Testing"]}
+  ]},
+  { id:4, num:"05", title:"Interface Segregation", icon:"I", color:"#f472b6", bg:"rgba(244,114,182,0.12)", desc:"Prefer focused role interfaces over oversized kitchen-sink contracts that leak responsibilities.", tags:["ISP","Interfaces","Contracts"], topics:[
+    {id:"isp-core", title:"Small Focused Interfaces", icon:"📐", desc:"Model capabilities, not departments or teams.", tags:["ISP","Important"]},
+    {id:"isp-fat-interfaces", title:"Fat Interface Smell", icon:"🍔", desc:"Unused members, NotImplementedException, and forced coupling.", tags:["ISP","Smells"]},
+    {id:"isp-role-modeling", title:"Role-Based Contracts", icon:"🎭", desc:"Split read, write, execute, configure, and observe responsibilities.", tags:["ISP","Modeling"]},
+    {id:"isp-api-design", title:"ISP for Public APIs", icon:"🌐", desc:"SDKs and shared libraries benefit heavily from narrow contracts.", tags:["ISP","API Design"]}
+  ]},
+  { id:5, num:"06", title:"Dependency Inversion", icon:"D", color:"#facc15", bg:"rgba(250,204,21,0.12)", desc:"High-level policy should depend on abstractions, not concrete implementation details.", tags:["DIP","DI","Architecture"], topics:[
+    {id:"dip-core", title:"Depend on Abstractions", icon:"🔺", desc:"Keep policy stable while infrastructure varies underneath.", tags:["DIP","Important"]},
+    {id:"dip-container", title:".NET DI Container Patterns", icon:"🧰", desc:"Constructor injection, lifetimes, composition root discipline.", tags:["DIP",".NET"]},
+    {id:"dip-boundaries", title:"Ports and Adapters Boundaries", icon:"🚪", desc:"Hexagonal thinking made practical in business apps.", tags:["DIP","Architecture"]},
+    {id:"dip-overkill", title:"When NOT to Abstract", icon:"🛑", desc:"Avoid abstraction where there is no variability or no policy boundary.", tags:["DIP","Judgment"]}
+  ]},
+  { id:6, num:"07", title:"SOLID in .NET", icon:"⚙️", color:"#6384ff", bg:"rgba(99,132,255,0.12)", desc:"Translate SOLID into everyday .NET architecture: APIs, services, handlers, and domain code.", tags:[".NET","Practical","Production"], topics:[
+    {id:"solid-api", title:"SOLID in Web APIs", icon:"🌐", desc:"Controllers, MediatR handlers, validators, and orchestrators.", tags:[".NET","API"]},
+    {id:"solid-ef", title:"SOLID with EF Core", icon:"🗄️", desc:"Keep queries, persistence, and domain policy from collapsing together.", tags:[".NET","Data"]},
+    {id:"solid-background", title:"SOLID in Background Jobs", icon:"⏰", desc:"Separating schedule, orchestration, work units, and side effects.", tags:[".NET","Workers"]},
+    {id:"solid-ui", title:"SOLID in Blazor / UI", icon:"🖥️", desc:"Components should render, not absorb all workflow logic.", tags:[".NET","UI"]}
+  ]},
+  { id:7, num:"08", title:"Refactoring Patterns", icon:"🔧", color:"#a78bfa", bg:"rgba(167,139,250,0.12)", desc:"Concrete moves to transform tangled OOP code into stable, extensible, testable design.", tags:["Refactoring","Patterns","Practical"], topics:[
+    {id:"refactor-extract", title:"Extract and Isolate", icon:"✂️", desc:"Split responsibilities and isolate unstable dependencies.", tags:["Refactoring","SRP"]},
+    {id:"refactor-polymorphism", title:"Replace Conditionals with Polymorphism", icon:"🧬", desc:"The classic OCP and LSP refactor path.", tags:["Refactoring","OCP"]},
+    {id:"refactor-interfaces", title:"Slice Interfaces", icon:"🔪", desc:"Carve large contracts into focused collaboration points.", tags:["Refactoring","ISP"]},
+    {id:"refactor-composition", title:"Prefer Composition", icon:"🧱", desc:"Use composition where inheritance would create brittle contracts.", tags:["Refactoring","LSP"]}
+  ]},
+  { id:8, num:"09", title:"Anti-Patterns", icon:"☠️", color:"#fb923c", bg:"rgba(251,146,60,0.12)", desc:"Recognize the most common anti-patterns that violate SOLID and slowly destroy maintainability.", tags:["Smells","Anti-Patterns","Maintenance"], topics:[
+    {id:"anti-god-class", title:"God Class", icon:"👹", desc:"One class doing too much and changing too often.", tags:["Smells","SRP"]},
+    {id:"anti-service-locator", title:"Service Locator Abuse", icon:"🕳️", desc:"Hidden dependencies and runtime surprises.", tags:["Smells","DIP"]},
+    {id:"anti-notimpl", title:"NotImplementedException Interfaces", icon:"❌", desc:"A signature sign of ISP failure.", tags:["Smells","ISP"]},
+    {id:"anti-base-class", title:"Brittle Base Class", icon:"🏚️", desc:"Inheritance hierarchies that silently violate LSP.", tags:["Smells","LSP"]}
+  ]},
+  { id:9, num:"10", title:"Interview & Practice", icon:"🎯", color:"#38bdf8", bg:"rgba(56,189,248,0.12)", desc:"Interview framing, code review heuristics, and practical SOLID decision-making in real codebases.", tags:["Interview","Practice","Senior"], topics:[
+    {id:"interview-solid", title:"How to Explain SOLID", icon:"🗣️", desc:"Interview-ready articulation with practical examples.", tags:["Interview","Important"]},
+    {id:"review-checklist", title:"SOLID Review Checklist", icon:"✅", desc:"Questions to ask when reading production code.", tags:["Practice","Review"]},
+    {id:"solid-vs-yagni", title:"SOLID vs YAGNI", icon:"⚔️", desc:"Balancing principled design against premature abstraction.", tags:["Judgment","Architecture"]},
+    {id:"solid-exercises", title:"Practice Exercises", icon:"🏋️", desc:"Exercises to internalize SRP, OCP, LSP, ISP, and DIP.", tags:["Practice","Growth"]}
+  ]}
+];
+
+const topicDetails = {
+  "solid-what": {
+    title:"What SOLID Really Means",
+    breadcrumb:"Chapter 1 · SOLID Foundations",
+    subtitle:"SOLID is a design vocabulary for controlling change. It is not a badge you add after the fact and not a reason to abstract everything.",
+    badges:[{text:"Core",color:"#6384ff"},{text:"Important",color:"#38bdf8"},{text:"Architecture",color:"#a78bfa"}],
+    sections:[
+      {type:"prose", title:"The actual goal", content:`
+        <p>SOLID exists to reduce the blast radius of change. In real systems, the question is not whether code compiles today. The question is whether a new requirement next month forces you to edit stable code, duplicate logic, or break unrelated behavior.</p>
+        <p>Each principle addresses a different failure mode:</p>
+        <ul>
+          <li><strong>SRP</strong> controls reasons to change.</li>
+          <li><strong>OCP</strong> controls extension pressure.</li>
+          <li><strong>LSP</strong> controls behavioral correctness in inheritance and abstractions.</li>
+          <li><strong>ISP</strong> controls contract bloat.</li>
+          <li><strong>DIP</strong> controls dependency direction and policy stability.</li>
+        </ul>
+      `},
+      {type:"table", title:"What SOLID optimizes for", columns:["Concern","Without SOLID","With SOLID discipline"], rows:[
+        ["Change isolation","One request ripples through many classes","Changes stay closer to one policy boundary"],
+        ["Testing","Hard to isolate behavior from infrastructure","Policies are testable behind abstractions"],
+        ["Extensibility","New case means editing giant switch logic","New behavior plugs into stable seams"],
+        ["Readability","Intent is mixed with mechanisms","Responsibilities and collaboration points are clearer"]
+      ]},
+      {type:"callout", kind:"info", icon:"💡", text:"SOLID is most useful when code has to survive <strong>future change under team pressure</strong>. On tiny throwaway code, maximal abstraction can be wasteful."}
+    ]
+  },
+  "solid-tradeoffs": {
+    title:"SOLID Tradeoffs",
+    breadcrumb:"Chapter 1 · SOLID Foundations",
+    subtitle:"Good design is not free. Every abstraction increases indirection, and every seam should pay rent.",
+    badges:[{text:"Judgment",color:"#6384ff"},{text:"Advanced",color:"#fb923c"},{text:"Important",color:"#38bdf8"}],
+    sections:[
+      {type:"prose", title:"Where overengineering starts", content:`
+        <p>SOLID becomes harmful when developers create abstractions before any real variability exists. An interface with only one trivial implementation is not automatically bad, but if no policy boundary or expected variation exists, it may just be noise.</p>
+        <ul>
+          <li>Abstractions should usually isolate volatility, policy boundaries, or external dependencies.</li>
+          <li>Do not create ten interfaces to avoid changing a three-line class.</li>
+          <li>YAGNI still matters: build the seam when the seam is justified.</li>
+        </ul>
+      `},
+      {type:"callout", kind:"warn", icon:"⚠️", text:"A class hierarchy can satisfy the letter of SOLID while still making the codebase harder to read. The real test is whether the next change gets easier."}
+    ]
+  },
+  "srp-core": {
+    title:"Core SRP Rule",
+    breadcrumb:"Chapter 2 · Single Responsibility",
+    subtitle:"Single Responsibility is about reasons to change, not the number of methods in a class.",
+    badges:[{text:"SRP",color:"#38bdf8"},{text:"Important",color:"#6384ff"},{text:"Refactoring",color:"#a78bfa"}],
+    sections:[
+      {type:"prose", title:"Think in reasons to change", content:`
+        <p>If one class changes for database schema updates, formatting requests, and business policy changes, it has multiple responsibilities.</p>
+        <p>A good SRP cut often separates:</p>
+        <ul>
+          <li><strong>Business policy</strong></li>
+          <li><strong>Persistence</strong></li>
+          <li><strong>Presentation / formatting</strong></li>
+          <li><strong>Orchestration / workflow</strong></li>
+        </ul>
+      `},
+      {type:"code", title:"Bad mixed-responsibility class", lang:"csharp", code:`<span class="kw">public class</span> <span class="type">InvoiceService</span>
+{
+    <span class="kw">public void</span> <span class="fn">GenerateInvoice</span>(<span class="type">Order</span> order)
+    {
+        <span class="cmt">// business calculation</span>
+        <span class="kw">var</span> total = order.<span class="prop">Items</span>.<span class="fn">Sum</span>(i => i.<span class="prop">Price</span>);
+
+        <span class="cmt">// persistence</span>
+        <span class="fn">SaveToDatabase</span>(order, total);
+
+        <span class="cmt">// presentation / output formatting</span>
+        <span class="fn">WritePdf</span>(order, total);
+
+        <span class="cmt">// notification</span>
+        <span class="fn">SendEmail</span>(order.<span class="prop">CustomerEmail</span>);
+    }
+}`},
+      {type:"code", title:"Split by responsibility", lang:"csharp", code:`<span class="kw">public class</span> <span class="type">InvoiceCalculator</span> { <span class="cmt">// policy</span> }
+<span class="kw">public interface</span> <span class="type">IInvoiceRepository</span> { <span class="cmt">// persistence</span> }
+<span class="kw">public interface</span> <span class="type">IInvoiceRenderer</span> { <span class="cmt">// presentation</span> }
+<span class="kw">public interface</span> <span class="type">INotificationSender</span> { <span class="cmt">// communication</span> }
+
+<span class="kw">public class</span> <span class="type">InvoiceOrchestrator</span>
+{
+    <span class="cmt">// coordinates collaborators, owns workflow only</span>
+}`},
+      {type:"diagram", title:"SRP Boundary Model", svg:`
+        <svg width="520" height="220" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="76" width="120" height="56" rx="10" fill="#171d30" stroke="#3b4c73"/><text x="80" y="98" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e2e8f0">Policy</text><text x="80" y="116" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#94a3b8">Business rules</text>
+          <rect x="200" y="76" width="120" height="56" rx="10" fill="#171d30" stroke="#3b4c73"/><text x="260" y="98" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e2e8f0">Workflow</text><text x="260" y="116" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#94a3b8">Use-case orchestration</text>
+          <rect x="380" y="76" width="120" height="56" rx="10" fill="#171d30" stroke="#3b4c73"/><text x="440" y="98" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e2e8f0">Infrastructure</text><text x="440" y="116" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#94a3b8">DB / Email / Files</text>
+          <line x1="140" y1="104" x2="196" y2="104" stroke="#6384ff" stroke-width="1.6"/>
+          <line x1="320" y1="104" x2="376" y2="104" stroke="#6384ff" stroke-width="1.6"/>
+        </svg>
+      `}
+    ]
+  },
+  "srp-smells": {
+    title:"SRP Violation Smells",
+    breadcrumb:"Chapter 2 · Single Responsibility",
+    subtitle:"SRP violations usually show up as classes that attract unrelated edits from multiple kinds of work.",
+    badges:[{text:"SRP",color:"#38bdf8"},{text:"Smells",color:"#fb923c"},{text:"Important",color:"#6384ff"}],
+    sections:[
+      {type:"table", title:"Typical SRP smells", columns:["Smell","What it usually means"], rows:[
+        ["Huge service class","One object absorbed workflow, policy, persistence, and notifications"],
+        ["Frequent unrelated edits","Class changes for business, DB, and UI reasons"],
+        ["Hard-to-name class","The name is vague because it does too many things"],
+        ["Difficult isolated tests","Too many collaborators and side effects mixed together"]
+      ]},
+      {type:"callout", kind:"warn", icon:"🧨", text:"If a code review starts with “this class does a lot,” you are often already looking at an SRP problem."}
+    ]
+  },
+  "ocp-core": {
+    title:"Open for Extension",
+    breadcrumb:"Chapter 3 · Open / Closed",
+    subtitle:"The goal is not zero modification forever. The goal is that common feature growth happens by adding behavior at seams rather than rewriting stable logic.",
+    badges:[{text:"OCP",color:"#fb923c"},{text:"Important",color:"#6384ff"},{text:"Patterns",color:"#a78bfa"}],
+    sections:[
+      {type:"prose", title:"What OCP protects", content:`
+        <p>OCP protects stable code from constant reopening. A pricing engine, payment processor, export pipeline, or discount policy often needs new behaviors over time. You want to add those behaviors without rewriting the original engine each time.</p>
+      `},
+      {type:"code", title:"Closed to modification? Not yet", lang:"csharp", code:`<span class="kw">public decimal</span> <span class="fn">CalculateDiscount</span>(<span class="type">Customer</span> customer)
+{
+    <span class="kw">if</span> (customer.<span class="prop">Type</span> == <span class="str">"Regular"</span>) <span class="kw">return</span> <span class="num">0.05m</span>;
+    <span class="kw">if</span> (customer.<span class="prop">Type</span> == <span class="str">"Premium"</span>) <span class="kw">return</span> <span class="num">0.10m</span>;
+    <span class="kw">if</span> (customer.<span class="prop">Type</span> == <span class="str">"Vip"</span>) <span class="kw">return</span> <span class="num">0.15m</span>;
+    <span class="kw">return</span> <span class="num">0m</span>;
+}`},
+      {type:"code", title:"Extension seam with strategy", lang:"csharp", code:`<span class="kw">public interface</span> <span class="type">IDiscountPolicy</span>
+{
+    <span class="kw">bool</span> <span class="fn">CanHandle</span>(<span class="type">Customer</span> customer);
+    <span class="kw">decimal</span> <span class="fn">GetDiscount</span>(<span class="type">Customer</span> customer);
+}
+
+<span class="kw">public class</span> <span class="type">DiscountEngine</span>
+{
+    <span class="kw">private readonly</span> <span class="type">IEnumerable</span>&lt;<span class="type">IDiscountPolicy</span>&gt; _policies;
+
+    <span class="kw">public decimal</span> <span class="fn">Calculate</span>(<span class="type">Customer</span> customer)
+        => _policies.<span class="fn">First</span>(p => p.<span class="fn">CanHandle</span>(customer)).<span class="fn">GetDiscount</span>(customer);
+}`},
+      {type:"callout", kind:"success", icon:"✅", text:"OCP is strongest where variation is expected: payment methods, notification channels, pricing rules, exporters, parsers, and integration providers."}
+    ]
+  },
+  "ocp-switch-smell": {
+    title:"Switch Statement Smell",
+    breadcrumb:"Chapter 3 · Open / Closed",
+    subtitle:"Repeated type-code switches across a codebase usually mean behavior is not living with the thing that varies.",
+    badges:[{text:"OCP",color:"#fb923c"},{text:"Smells",color:"#6384ff"},{text:"Refactoring",color:"#a78bfa"}],
+    sections:[
+      {type:"prose", title:"The smell pattern", content:`
+        <p>One switch is not automatically bad. But repeated branching on type codes or modes across different places often means the code is missing polymorphism, policy objects, or a plugin seam.</p>
+      `},
+      {type:"steps", title:"Refactor path", steps:[
+        {title:"Find repeated branching", text:"Look for the same enum or type-code driving logic in multiple places."},
+        {title:"Name the varying behavior", text:"Often this becomes a policy, strategy, or handler abstraction."},
+        {title:"Move behavior behind the seam", text:"Let the caller depend on the abstraction and compose implementations."}
+      ]}
+    ]
+  },
+  "lsp-core": {
+    title:"Behavioral Compatibility",
+    breadcrumb:"Chapter 4 · Liskov Substitution",
+    subtitle:"LSP means callers should not need subtype-specific defensive logic to stay correct.",
+    badges:[{text:"LSP",color:"#4ade80"},{text:"Important",color:"#6384ff"},{text:"Contracts",color:"#a78bfa"}],
+    sections:[
+      {type:"prose", title:"Substitutability", content:`
+        <p>If code expects a base type or interface, every subtype should honor the same expectations. Violations often happen when subclasses throw new exceptions, refuse valid operations, or change semantic meaning.</p>
+      `},
+      {type:"code", title:"Classic LSP break", lang:"csharp", code:`<span class="kw">public class</span> <span class="type">Bird</span>
+{
+    <span class="kw">public virtual void</span> <span class="fn">Fly</span>() { }
+}
+
+<span class="kw">public class</span> <span class="type">Penguin</span> : <span class="type">Bird</span>
+{
+    <span class="kw">public override void</span> <span class="fn">Fly</span>()
+        => <span class="kw">throw new</span> <span class="type">NotSupportedException</span>();
+}`},
+      {type:"callout", kind:"danger", icon:"❌", text:"If your subtype must throw because a base method does not make sense, the abstraction is probably wrong."},
+      {type:"code", title:"Model capabilities instead", lang:"csharp", code:`<span class="kw">public interface</span> <span class="type">IBird</span> { }
+<span class="kw">public interface</span> <span class="type">IFlyingBird</span> : <span class="type">IBird</span>
+{
+    <span class="kw">void</span> <span class="fn">Fly</span>();
+}
+
+<span class="kw">public class</span> <span class="type">Sparrow</span> : <span class="type">IFlyingBird</span> { }
+<span class="kw">public class</span> <span class="type">Penguin</span> : <span class="type">IBird</span> { }`}
+    ]
+  },
+  "lsp-contracts": {
+    title:"Preconditions & Postconditions",
+    breadcrumb:"Chapter 4 · Liskov Substitution",
+    subtitle:"Subclasses should not require more from callers or promise less than the base contract.",
+    badges:[{text:"LSP",color:"#4ade80"},{text:"Contracts",color:"#6384ff"},{text:"Advanced",color:"#a78bfa"}],
+    sections:[
+      {type:"table", title:"Contract rules", columns:["Contract part","Subtype should..."], rows:[
+        ["Preconditions","Not become stricter than the base type"],
+        ["Postconditions","Not become weaker than the base type"],
+        ["Invariants","Preserve the base assumptions over time"],
+        ["Exceptions","Not surprise callers with incompatible failure behavior"]
+      ]}
+    ]
+  },
+  "isp-core": {
+    title:"Small Focused Interfaces",
+    breadcrumb:"Chapter 5 · Interface Segregation",
+    subtitle:"Interfaces should model capabilities that a client actually needs, not bundle unrelated operations into one dependency.",
+    badges:[{text:"ISP",color:"#f472b6"},{text:"Important",color:"#6384ff"},{text:"Contracts",color:"#a78bfa"}],
+    sections:[
+      {type:"code", title:"Fat interface problem", lang:"csharp", code:`<span class="kw">public interface</span> <span class="type">IWorker</span>
+{
+    <span class="kw">void</span> <span class="fn">Work</span>();
+    <span class="kw">void</span> <span class="fn">Eat</span>();
+    <span class="kw">void</span> <span class="fn">Sleep</span>();
+    <span class="kw">void</span> <span class="fn">Report</span>();
+}`},
+      {type:"code", title:"Role-focused interfaces", lang:"csharp", code:`<span class="kw">public interface</span> <span class="type">IWorkable</span> { <span class="kw">void</span> <span class="fn">Work</span>(); }
+<span class="kw">public interface</span> <span class="type">IReportable</span> { <span class="kw">void</span> <span class="fn">Report</span>(); }
+<span class="kw">public interface</span> <span class="type">IRestAware</span> { <span class="kw">void</span> <span class="fn">Sleep</span>(); }`},
+      {type:"prose", title:"The design principle", content:`
+        <p>Clients should only know about the operations they actually use. Smaller contracts reduce accidental coupling, make mocking easier, and prevent fake implementations full of unused methods.</p>
+      `}
+    ]
+  },
+  "isp-fat-interfaces": {
+    title:"Fat Interface Smell",
+    breadcrumb:"Chapter 5 · Interface Segregation",
+    subtitle:"Large interfaces force implementations to carry dead weight, and dead weight eventually becomes broken weight.",
+    badges:[{text:"ISP",color:"#f472b6"},{text:"Smells",color:"#fb923c"},{text:"Important",color:"#6384ff"}],
+    sections:[
+      {type:"table", title:"How fat interfaces show up", columns:["Symptom","Meaning"], rows:[
+        ["NotImplementedException in members","Implementation was forced into operations it does not need"],
+        ["Mocks with huge setup","Clients depend on too much of the contract"],
+        ["Broad service dependencies","One consumer asked for an all-purpose interface"],
+        ["Difficult evolution","Any new method breaks many implementers"]
+      ]}
+    ]
+  },
+  "dip-core": {
+    title:"Depend on Abstractions",
+    breadcrumb:"Chapter 6 · Dependency Inversion",
+    subtitle:"Policy should sit above mechanism. Your core decisions should not care whether data comes from SQL, HTTP, files, or test doubles.",
+    badges:[{text:"DIP",color:"#facc15"},{text:"Important",color:"#6384ff"},{text:"Architecture",color:"#a78bfa"}],
+    sections:[
+      {type:"prose", title:"Direction matters", content:`
+        <p>DIP is about <strong>dependency direction</strong>. High-level use cases and domain policy should not point downward to concrete infrastructure details. Instead, both sides depend on abstractions and composition happens at the edge.</p>
+      `},
+      {type:"diagram", title:"Dependency Direction", svg:`
+        <svg width="520" height="220" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+          <rect x="30" y="78" width="150" height="64" rx="10" fill="#171d30" stroke="#3b4c73"/><text x="105" y="102" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e2e8f0">Use Case / Policy</text><text x="105" y="121" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#94a3b8">Stable high-level logic</text>
+          <rect x="200" y="78" width="120" height="64" rx="10" fill="#171d30" stroke="#3b4c73"/><text x="260" y="102" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e2e8f0">Port</text><text x="260" y="121" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#94a3b8">Abstraction boundary</text>
+          <rect x="340" y="78" width="150" height="64" rx="10" fill="#171d30" stroke="#3b4c73"/><text x="415" y="102" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e2e8f0">Adapter / Infra</text><text x="415" y="121" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#94a3b8">SQL, Email, HTTP, Queue</text>
+          <line x1="180" y1="110" x2="196" y2="110" stroke="#6384ff" stroke-width="1.6"/>
+          <line x1="320" y1="110" x2="336" y2="110" stroke="#6384ff" stroke-width="1.6"/>
+        </svg>
+      `},
+      {type:"code", title:"Policy depending on abstraction", lang:"csharp", code:`<span class="kw">public interface</span> <span class="type">IOrderNotifier</span>
+{
+    <span class="kw">Task</span> <span class="fn">SendAsync</span>(<span class="type">Order</span> order);
+}
+
+<span class="kw">public class</span> <span class="type">PlaceOrderHandler</span>
+{
+    <span class="kw">private readonly</span> <span class="type">IOrderNotifier</span> _notifier;
+
+    <span class="kw">public async</span> <span class="kw">Task</span> <span class="fn">Handle</span>(<span class="type">Order</span> order)
+    {
+        <span class="cmt">// domain + use-case policy</span>
+        <span class="kw">await</span> _notifier.<span class="fn">SendAsync</span>(order);
+    }
+}`},
+      {type:"callout", kind:"success", icon:"✅", text:"DIP usually pays off most around things that are slow, external, or unstable: databases, queues, email, cloud SDKs, payment gateways, search, and remote APIs."}
+    ]
+  },
+  "dip-overkill": {
+    title:"When NOT to Abstract",
+    breadcrumb:"Chapter 6 · Dependency Inversion",
+    subtitle:"Some dependencies are so stable or so trivial that adding a layer buys very little and costs a lot.",
+    badges:[{text:"DIP",color:"#facc15"},{text:"Judgment",color:"#6384ff"},{text:"Important",color:"#fb923c"}],
+    sections:[
+      {type:"prose", title:"Skip fake seams", content:`
+        <p>If the dependency is a tiny internal helper with no policy boundary, no external variability, and no testing pressure, an abstraction may just create extra files and naming overhead.</p>
+        <ul>
+          <li>Do abstract external systems and infrastructure.</li>
+          <li>Usually do not abstract every utility class on day one.</li>
+          <li>Abstractions should protect something meaningful.</li>
+        </ul>
+      `}
+    ]
+  },
+  "solid-api": {
+    title:"SOLID in Web APIs",
+    breadcrumb:"Chapter 7 · SOLID in .NET",
+    subtitle:"Many API codebases drift into controller-heavy architecture because web concerns and business policy are never separated.",
+    badges:[{text:".NET",color:"#6384ff"},{text:"API",color:"#38bdf8"},{text:"Production",color:"#a78bfa"}],
+    sections:[
+      {type:"steps", title:"Healthy API layering", steps:[
+        {title:"Controllers handle transport", text:"HTTP mapping, input/output models, status codes, and nothing more."},
+        {title:"Handlers/use cases own workflow", text:"Validate intent, coordinate domain actions, and call ports/services."},
+        {title:"Domain services own rules", text:"Business policy should not leak into controllers or repositories."},
+        {title:"Infrastructure adapts outward", text:"Persistence, messaging, and notifications should sit at the edge."}
+      ]},
+      {type:"callout", kind:"info", icon:"🔵", text:"A controller with database code, validation branches, PDF formatting, and email calls is usually violating SRP, DIP, and often OCP all at once."}
+    ]
+  },
+  "refactor-polymorphism": {
+    title:"Replace Conditionals with Polymorphism",
+    breadcrumb:"Chapter 8 · Refactoring Patterns",
+    subtitle:"This refactor is one of the most practical bridges from large branching logic toward OCP and cleaner testing.",
+    badges:[{text:"Refactoring",color:"#a78bfa"},{text:"OCP",color:"#fb923c"},{text:"Important",color:"#6384ff"}],
+    sections:[
+      {type:"prose", title:"When it is worth doing", content:`
+        <p>If the same type-code or mode branching appears repeatedly, move the varying behavior behind a strategy or handler abstraction so callers stop repeating conditional logic.</p>
+      `},
+      {type:"steps", title:"Refactor sequence", steps:[
+        {title:"Identify the varying branch", text:"Payment type, export type, notification type, pricing model, etc."},
+        {title:"Extract an abstraction", text:"Create a policy interface that owns the varying behavior."},
+        {title:"Push logic into implementations", text:"Each variation gets its own object with its own tests."},
+        {title:"Compose implementations", text:"Inject a collection or registry and choose the right one at runtime."}
+      ]}
+    ]
+  },
+  "anti-god-class": {
+    title:"God Class",
+    breadcrumb:"Chapter 9 · Anti-Patterns",
+    subtitle:"The god class is often the natural endpoint of ignoring SRP long enough under delivery pressure.",
+    badges:[{text:"Smells",color:"#fb923c"},{text:"SRP",color:"#38bdf8"},{text:"Important",color:"#6384ff"}],
+    sections:[
+      {type:"table", title:"How to spot a god class", columns:["Signal","What you usually see"], rows:[
+        ["Huge constructor","Many unrelated dependencies injected"],
+        ["Huge method count","Object is acting as a subsystem, not a unit"],
+        ["Mixed vocabulary","Business rules, DB calls, DTO mapping, logging, notifications"],
+        ["High merge conflict rate","Too many developers touch the same file for unrelated reasons"]
+      ]},
+      {type:"callout", kind:"warn", icon:"👹", text:"Do not refactor a god class by just moving methods randomly. First identify responsibility boundaries, then extract around those seams."}
+    ]
+  },
+  "interview-solid": {
+    title:"How to Explain SOLID",
+    breadcrumb:"Chapter 10 · Interview & Practice",
+    subtitle:"Interviewers usually want clarity, not philosophy. Explain what each principle prevents and what it improves in real code.",
+    badges:[{text:"Interview",color:"#38bdf8"},{text:"Important",color:"#6384ff"},{text:"Senior",color:"#a78bfa"}],
+    sections:[
+      {type:"prose", title:"A strong interview framing", content:`
+        <p>Explain SOLID as a set of design constraints that make changing a system safer. Then give one practical example per principle:</p>
+        <ul>
+          <li><strong>SRP</strong>: Split validation, persistence, and notification out of one service.</li>
+          <li><strong>OCP</strong>: Add payment methods by plugging in new strategies.</li>
+          <li><strong>LSP</strong>: Avoid base types that subtypes cannot honestly fulfill.</li>
+          <li><strong>ISP</strong>: Split broad repository or worker contracts into roles.</li>
+          <li><strong>DIP</strong>: Make use cases depend on ports, not concrete gateways.</li>
+        </ul>
+      `},
+      {type:"callout", kind:"success", icon:"✅", text:"If you can connect each principle to a code smell, a refactor, and an architectural outcome, your answer will sound senior rather than memorized."}
+    ]
+  },
+  "solid-vs-yagni": {
+    title:"SOLID vs YAGNI",
+    breadcrumb:"Chapter 10 · Interview & Practice",
+    subtitle:"Good engineers know that principled design and restraint must coexist.",
+    badges:[{text:"Judgment",color:"#6384ff"},{text:"Architecture",color:"#a78bfa"},{text:"Important",color:"#38bdf8"}],
+    sections:[
+      {type:"table", title:"Balancing the two", columns:["Situation","Bias"], rows:[
+        ["External dependency or unstable integration","Bias toward abstraction and DIP"],
+        ["Likely future variation point","Bias toward OCP seam"],
+        ["Simple local helper with no volatility","Bias toward YAGNI and direct code"],
+        ["Team struggles with tangled edits","Bias toward SRP/ISP cleanup"]
+      ]}
+    ]
+  }
+};
+
+const SOLID_INTERVIEW_PRINCIPLES = {
+  srp: {
+    label: 'SRP',
+    focus: 'one reason to change for a module or class',
+    example: 'splitting policy, persistence, and formatting in one workflow',
+    anti: 'one service class validates, saves, logs, and sends email'
+  },
+  ocp: {
+    label: 'OCP',
+    focus: 'extension through new implementations instead of repeated edits to stable code',
+    example: 'adding another pricing rule by introducing a new strategy implementation',
+    anti: 'editing the same if/else tree every time a new behavior arrives'
+  },
+  lsp: {
+    label: 'LSP',
+    focus: 'behavioral substitutability between base contracts and subtypes',
+    example: 'a subtype preserving all expectations promised by the base abstraction',
+    anti: 'a subclass throwing NotSupportedException for expected base behavior'
+  },
+  isp: {
+    label: 'ISP',
+    focus: 'small focused contracts instead of oversized multipurpose interfaces',
+    example: 'splitting read and write responsibilities into separate interfaces',
+    anti: 'forcing implementations to carry unused members and fake methods'
+  },
+  dip: {
+    label: 'DIP',
+    focus: 'high-level policy depending on abstractions instead of infrastructure details',
+    example: 'injecting a payment abstraction into checkout logic instead of constructing a concrete gateway directly',
+    anti: 'business rules new up infrastructure classes inside methods'
+  }
+};
+
+const SOLID_INTERVIEW_VARIANTS = [
+  { level:'Basic', tags:['Direct','Use Case'] },
+  { level:'Intermediate', tags:['Scenario','Architecture'] },
+  { level:'Advanced', tags:['Logical Twist','Tradeoff'] },
+  { level:'Advanced', tags:['Scenario','.NET 10'] },
+  { level:'Expert', tags:['Whiteboard','Real World'] }
+];
+
+const SOLID_INTERVIEW_TEMPLATES = [
+  (p) => ({
+    q: `What does ${p.label} mean in practical design terms?`,
+    a: `${p.label} is about ${p.focus}. In practical terms, it protects a code boundary so changes stay local. A good example is ${p.example}. The warning sign is ${p.anti}.`
+  }),
+  (p) => ({
+    q: `Why does ${p.label} matter more in a large codebase than in a toy example?`,
+    a: `In a toy example, weak structure may survive because the blast radius is small. In a large codebase, ${p.label} matters because change pressure is constant. If the boundary is weak, one requirement can ripple through many unrelated files and teams.`
+  }),
+  (p) => ({
+    q: `Give a small refactoring that improves ${p.label} without changing behavior.`,
+    a: `A safe refactoring is to isolate the main pressure first, then move the related logic behind a smaller, clearer boundary. For ${p.label}, that often means separating the responsibility or contract that changes most often while keeping behavior identical from the caller's point of view.`
+  }),
+  (p) => ({
+    q: `What code smell usually tells you ${p.label} is being violated?`,
+    a: `A strong warning sign is ${p.anti}. More generally, if one change request keeps forcing unrelated edits or one contract makes several implementations awkward, ${p.label} is probably being violated.`
+  }),
+  (p) => ({
+    q: `How would you explain ${p.label} to a junior developer in one minute?`,
+    a: `I would say that ${p.label} helps keep one kind of design pressure in one place. When unrelated reasons to change are mixed together, the code becomes harder to trust. A simple example is ${p.example}.`
+  }),
+  (p) => ({
+    q: `How does ${p.label} improve testability?`,
+    a: `${p.label} improves testability because clear boundaries are easier to isolate. When the design matches the principle, tests become narrower, mocks become smaller, and failures become easier to diagnose.`
+  }),
+  (p) => ({
+    q: `When can applying ${p.label} too aggressively turn into overengineering?`,
+    a: `It becomes overengineering when the team adds indirection without a real pressure to protect. If there is no meaningful variation point or change boundary yet, extra abstraction makes the design harder to read without making it easier to change.`
+  }),
+  (p) => ({
+    q: `What interview scenario would quickly reveal whether a candidate really understands ${p.label}?`,
+    a: `Ask the candidate to refactor a small but messy service and explain the first design boundary they would change. Someone who understands ${p.label} will talk about responsibility, contract shape, and change pressure, not just renaming classes.`
+  }),
+  (p) => ({
+    q: `How does ${p.label} connect to modern .NET design?`,
+    a: `In modern .NET, ${p.label} shows up through dependency injection, focused handlers, minimal contracts, and clearer separation between policy and infrastructure. The important part is not the framework feature itself, but the boundary it helps express.`
+  }),
+  (p) => ({
+    q: `What is the most common misunderstanding teams have about ${p.label}?`,
+    a: `A common misunderstanding is treating ${p.label} as a slogan rather than a real design decision. Teams say they follow it, but the code still shows ${p.anti}. The principle only matters when it changes how responsibilities and contracts are actually drawn.`
+  })
+];
+
+const SOLID_INTERVIEW_TAG_STYLES = {
+  'Direct':'color:#38bdf8;border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.08)',
+  'Use Case':'color:#4ade80;border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.08)',
+  'Scenario':'color:#fb923c;border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.08)',
+  'Architecture':'color:#a78bfa;border-color:rgba(167,139,250,.32);background:rgba(167,139,250,.08)',
+  'Logical Twist':'color:#f472b6;border-color:rgba(244,114,182,.3);background:rgba(244,114,182,.08)',
+  'Tradeoff':'color:#facc15;border-color:rgba(250,204,21,.3);background:rgba(250,204,21,.08)',
+  '.NET 10':'color:#99f6e4;border-color:rgba(153,246,228,.3);background:rgba(153,246,228,.08)',
+  'Whiteboard':'color:#c4b5fd;border-color:rgba(196,181,253,.3);background:rgba(196,181,253,.08)',
+  'Real World':'color:#fdba74;border-color:rgba(253,186,116,.3);background:rgba(253,186,116,.08)',
+  'SOLID':'color:#6384ff;border-color:rgba(99,132,255,.3);background:rgba(99,132,255,.08)',
+  'SRP':'color:#38bdf8;border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.08)',
+  'OCP':'color:#fb923c;border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.08)',
+  'LSP':'color:#4ade80;border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.08)',
+  'ISP':'color:#f472b6;border-color:rgba(244,114,182,.3);background:rgba(244,114,182,.08)',
+  'DIP':'color:#facc15;border-color:rgba(250,204,21,.3);background:rgba(250,204,21,.08)'
+};
+
+function buildSolidInterviewBank() {
+  const questions = [];
+  Object.entries(SOLID_INTERVIEW_PRINCIPLES).forEach(([key, principle]) => {
+    SOLID_INTERVIEW_VARIANTS.forEach((variant) => {
+      SOLID_INTERVIEW_TEMPLATES.forEach((template) => {
+        const qa = template(principle);
+        questions.push({
+          tag: key,
+          level: variant.level,
+          principle: principle.label,
+          q: qa.q,
+          a: qa.a,
+          tags: [...variant.tags, 'SOLID', principle.label]
+        });
+      });
+    });
+  });
+  return questions;
+}
+
+const interviewQuestions = buildSolidInterviewBank();
+
+const SOLID_INTERVIEW_TRACKS = {
+  junior: {
+    title: '🟢 Junior Card',
+    shortTitle: 'Junior',
+    color: '#38bdf8',
+    summary: 'Foundations, direct definitions, and first practical examples.',
+    match: (q) => q.level === 'Basic'
+  },
+  mid: {
+    title: '🟡 Mid-Level Card',
+    shortTitle: 'Mid-Level',
+    color: '#fb923c',
+    summary: 'Applied design decisions, code review signals, and refactoring moves.',
+    match: (q) => q.level === 'Intermediate'
+  },
+  senior: {
+    title: '🔴 Senior Card',
+    shortTitle: 'Senior',
+    color: '#a78bfa',
+    summary: 'Tradeoffs, scenarios, and failure analysis under production pressure.',
+    match: (q) => q.level === 'Advanced'
+  },
+  architect: {
+    title: '🏆 Architect Card',
+    shortTitle: 'Architect',
+    color: '#4ade80',
+    summary: 'Whiteboard reasoning, architecture framing, and long-horizon design judgement.',
+    match: (q) => q.level === 'Expert'
+  }
+};
+
+function renderSolidInterviewPill(tag) {
+  return `<span class="qa-pill" style="${SOLID_INTERVIEW_TAG_STYLES[tag] || 'color:#94a3b8;border-color:rgba(148,163,184,.28);background:rgba(148,163,184,.08)'}">${tag}</span>`;
+}
+
+function buildSolidInterviewTrack(trackKey) {
+  const track = SOLID_INTERVIEW_TRACKS[trackKey];
+  return interviewQuestions.filter((q) => track?.match(q));
+}
+
+function renderSolidInterviewHubCards(activeTrack = '') {
+  return Object.entries(SOLID_INTERVIEW_TRACKS).map(([key, track]) => {
+    const count = buildSolidInterviewTrack(key).length;
+    return `
+      <div class="topic-card ${activeTrack === key ? 'active' : ''}" id="solid-interview-card-${key}" onclick="selectSolidInterviewTrack('${key}')">
+        <div class="topic-card-icon">${track.title.split(' ')[0]}</div>
+        <div class="topic-card-body">
+          <div class="topic-card-title">${track.shortTitle} (${count})</div>
+          <div class="topic-card-desc">${track.summary}</div>
+          <div class="topic-card-meta">
+            <span class="meta-tag" style="color:${track.color};border-color:${track.color}33">${count} Questions</span>
+            <span class="meta-tag" style="color:#94a3b8;border-color:#94a3b833">SOLID</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+let currentChapter = -1;
+let currentTopic = null;
+let visitedTopics = new Set();
+
+function buildNav() {
+  const nav = document.getElementById('chapterNav');
+  chapters.forEach((ch, i) => {
+    const item = document.createElement('div');
+    item.className = 'chapter-item';
+    item.id = `ch-${i}`;
+    item.innerHTML = `
+      <div class="chapter-header" onclick="selectChapter(${i})">
+        <div class="ch-num" style="background:${ch.bg};color:${ch.color}">${ch.num}</div>
+        <div class="ch-title">${ch.title}</div>
+        <div class="ch-arrow">▶</div>
+      </div>
+      <div class="topics-list">
+        ${ch.topics.map((t) => `<div class="topic-item" id="nav-${t.id}" onclick="selectTopic('${t.id}', ${i})">${t.icon} ${t.title}</div>`).join('')}
+      </div>`;
+    nav.appendChild(item);
+  });
+}
+
+function selectChapter(idx) {
+  currentChapter = idx;
+  document.querySelectorAll('.chapter-item').forEach((el, i) => {
+    const header = el.querySelector('.chapter-header');
+    if (i === idx) {
+      el.classList.add('open');
+      header.classList.add('active');
+    } else {
+      el.classList.remove('open');
+      header.classList.remove('active');
+    }
+  });
+
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('chapterContent').style.display = 'block';
+
+  const ch = chapters[idx];
+  const tagsHTML = ch.tags.map((t) => `<span class="hero-tag" style="background:${ch.bg};color:${ch.color};border-color:${ch.color}33">${t}</span>`).join('');
+  const cardsHTML = ch.topics.map((t) => {
+    const metaHTML = t.tags.map((tag) => {
+      const color = tag.includes('Important') ? '#6384ff' : tag.includes('Smells') ? '#fb923c' : tag.includes('Refactoring') ? '#a78bfa' : tag.includes('.NET') ? '#38bdf8' : '#94a3b8';
+      return `<span class="meta-tag" style="color:${color};border-color:${color}33">${tag}</span>`;
+    }).join('');
+    return `
+      <div class="topic-card" id="card-${t.id}" onclick="selectTopic('${t.id}', ${idx})">
+        <div class="topic-card-icon">${t.icon}</div>
+        <div class="topic-card-body">
+          <div class="topic-card-title">${t.title}</div>
+          <div class="topic-card-desc">${t.desc}</div>
+          <div class="topic-card-meta">${metaHTML}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('chapterContent').innerHTML = `
+    <div class="chapter-hero">
+      <div class="chapter-hero-num">Chapter ${ch.num} · ${ch.topics.length} Topics</div>
+      <div class="chapter-hero-title" style="color:${ch.color}">${ch.icon} ${ch.title}</div>
+      <div class="chapter-hero-desc">${ch.desc}</div>
+      <div class="chapter-hero-tags">${tagsHTML}</div>
+    </div>
+    <div class="topics-grid">${cardsHTML}</div>`;
+}
+
+function selectTopic(topicId, chapterIdx) {
+  if (chapterIdx !== currentChapter) selectChapter(chapterIdx);
+  currentTopic = topicId;
+  visitedTopics.add(topicId);
+  updateProgress();
+
+  document.querySelectorAll('.topic-card').forEach((el) => el.classList.remove('active'));
+  document.querySelectorAll('.topic-item').forEach((el) => el.classList.remove('active'));
+
+  const card = document.getElementById(`card-${topicId}`);
+  const nav = document.getElementById(`nav-${topicId}`);
+  if (card) card.classList.add('active');
+  if (nav) nav.classList.add('active');
+
+  const detail = topicDetails[topicId];
+  if (!detail) {
+    renderGenericDetail(topicId, chapterIdx);
+    return;
+  }
+  renderDetail(detail);
+}
+
+function renderDetail(detail) {
+  document.getElementById('detailEmpty').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'block';
+
+  const badgesHTML = detail.badges.map((b) => `<span class="dbadge" style="background:${b.color}22;color:${b.color};border-color:${b.color}44">${b.text}</span>`).join('');
+  const sectionsHTML = detail.sections.map((section) => renderSection(section)).join('');
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-content">
+      <div class="detail-header">
+        <div class="detail-breadcrumb">${detail.breadcrumb}</div>
+        <div class="detail-title">${detail.title}</div>
+        <div class="detail-subtitle">${detail.subtitle}</div>
+        <div class="detail-badges">${badgesHTML}</div>
+      </div>
+      ${sectionsHTML}
+      ${renderInterviewSection(detail.title)}
+    </div>`;
+}
+
+function renderSection(section) {
+  if (section.type === 'prose') {
+    return `<div class="section"><div class="section-title">${section.title}</div><div class="prose">${section.content}</div></div>`;
+  }
+  if (section.type === 'code') {
+    return `<div class="section"><div class="code-block"><div class="code-header"><span class="code-lang">${section.lang}</span><span class="code-title">${section.title}</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div><div class="code-body"><pre>${section.code}</pre></div></div></div>`;
+  }
+  if (section.type === 'diagram') {
+    return `<div class="section"><div class="diagram-box"><div class="diagram-header">${section.title}</div><div class="diagram-body">${section.svg}</div></div></div>`;
+  }
+  if (section.type === 'table') {
+    return `<div class="section"><div class="table-wrap"><div class="table-header">${section.title}</div><div class="table-body"><table class="comp-table"><thead><tr>${section.columns.map((col) => `<th>${col}</th>`).join('')}</tr></thead><tbody>${section.rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div></div>`;
+  }
+  if (section.type === 'steps') {
+    return `<div class="section"><div class="steps-box"><div class="steps-header">${section.title}</div><div class="steps-body">${section.steps.map((step, index) => `<div class="step-item"><div class="step-num">${index + 1}</div><div class="step-copy"><h4>${step.title}</h4><p>${step.text}</p></div></div>`).join('')}</div></div></div>`;
+  }
+  if (section.type === 'callout') {
+    const kind = section.kind === 'info' ? 'callout-info' : section.kind === 'warn' ? 'callout-warn' : section.kind === 'success' ? 'callout-success' : 'callout-danger';
+    return `<div class="callout ${kind}"><span class="callout-icon">${section.icon}</span><span>${section.text}</span></div>`;
+  }
+  return '';
+}
+
+function renderInterviewSection(topicTitle) {
+  const relevant = interviewQuestions.filter((q) => {
+    const keys = topicTitle.toLowerCase().split(/\s+/);
+    return keys.some((key) => q.q.toLowerCase().includes(key) || q.a.toLowerCase().includes(key) || q.tag.toLowerCase().includes(key) || q.principle.toLowerCase().includes(key));
+  }).slice(0, topicTitle.toLowerCase().includes('solid') ? 10 : 6);
+  if (!relevant.length) return '';
+
+  const levelColors = { Basic:'#38bdf8', Intermediate:'#fb923c', Advanced:'#a78bfa', Expert:'#4ade80' };
+  return `<div class="section"><div class="section-title">Interview Questions</div>${relevant.map((q, index) => {
+    const levelColor = levelColors[q.level] || '#94a3b8';
+    return `<div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="flex:1;min-width:0"><div class="qa-kicker">${q.principle} · Q${index + 1}</div><div class="qa-q-text">${q.q}</div><div class="qa-qmeta">${q.tags.map(renderSolidInterviewPill).join('')}</div></div><span class="qa-level" style="background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44">${q.level}</span><span class="qa-arrow">▶</span></div><div class="qa-answer"><div class="qa-answer-text">${q.a}</div></div></div>`;
+  }).join('')}</div>`;
+}
+
+function renderSolidInterviewHub(activeTrack = '') {
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('chapterContent').style.display = 'block';
+  document.getElementById('chapterContent').innerHTML = `
+    <div class="chapter-hero">
+      <div class="chapter-hero-num">Interview Mastery · 4 Cards</div>
+      <div class="chapter-hero-title" style="color:#c4b5fd">🎯 SOLID Interview Q&amp;A</div>
+      <div class="chapter-hero-desc">250 generated questions split across four cards so you can prepare from beginner articulation through architect-level SOLID reasoning.</div>
+      <div class="chapter-hero-tags">
+        ${['250 Questions','4 Cards','SRP → DIP','Scenario + Logical','.NET 10'].map(renderSolidInterviewPill).join('')}
+      </div>
+    </div>
+    <div class="topics-grid">${renderSolidInterviewHubCards(activeTrack)}</div>`;
+
+  document.getElementById('detailEmpty').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'block';
+  document.getElementById('detailContent').innerHTML = activeTrack ? renderSolidInterviewTrackDetail(activeTrack) : `
+    <div class="detail-content">
+      <div class="detail-header">
+        <div class="detail-breadcrumb">SOLID Mastery · Interview Prep</div>
+        <div class="detail-title">🎯 Interview Q&amp;A</div>
+        <div class="detail-subtitle>Select one of the four cards from the middle panel. Each card focuses on a different interview level and still covers all five principles.</div>
+      </div>
+      <div class="qa-stat"><strong>Structure</strong><br>Junior covers direct explanation, mid-level covers implementation reasoning, senior covers tradeoffs and scenarios, and architect covers whiteboard and system-level articulation.</div>
+      <div class="qa-legend">${['Junior','Mid-Level','Senior','Architect','SOLID','SRP','OCP','LSP','ISP','DIP'].map(renderSolidInterviewPill).join('')}</div>
+    </div>`;
+}
+
+function renderSolidInterviewTrackDetail(trackKey) {
+  const track = SOLID_INTERVIEW_TRACKS[trackKey];
+  const questions = buildSolidInterviewTrack(trackKey);
+  const levelColors = { Basic:'#38bdf8', Intermediate:'#fb923c', Advanced:'#a78bfa', Expert:'#4ade80' };
+  const tags = ['Direct','Use Case','Scenario','Architecture','Logical Twist','Tradeoff','.NET 10','Whiteboard','Real World','SOLID','SRP','OCP','LSP','ISP','DIP'];
+  const qHTML = questions.map((q, index) => {
+    const levelColor = levelColors[q.level] || '#94a3b8';
+    return `<div class="qa-item" data-tags="${q.tags.join('|')}|${q.principle}"><div class="qa-question" onclick="toggleQA(this)"><div style="flex:1;min-width:0"><div class="qa-kicker">${q.principle} · ${track.shortTitle} · Q${index + 1}</div><div class="qa-q-text">${q.q}</div><div class="qa-qmeta">${q.tags.map(renderSolidInterviewPill).join('')}</div></div><span class="qa-level" style="background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44">${q.level}</span><span class="qa-arrow">▶</span></div><div class="qa-answer"><div class="qa-answer-text">${q.a}</div></div></div>`;
+  }).join('');
+
+  return `
+    <div class="detail-content">
+      <div class="detail-header">
+        <div class="detail-breadcrumb">SOLID Mastery · Interview Prep</div>
+        <div class="detail-title">${track.title}</div>
+        <div class="detail-subtitle">${questions.length} questions focused on ${track.summary.toLowerCase()}</div>
+      </div>
+      <div class="qa-stat"><strong>Coverage</strong><br>${track.summary} This card still spans SRP, OCP, LSP, ISP, and DIP so the prep stays balanced.</div>
+      <div class="qa-legend">${tags.map(renderSolidInterviewPill).join('')}</div>
+      <div class="qa-filter-bar">
+        <button class="qa-filter-btn active" onclick="filterQA('', this)">All Topics</button>
+        ${tags.map((tag) => `<button class="qa-filter-btn" onclick='filterQA(${JSON.stringify(tag)}, this)'>${tag}</button>`).join('')}
+      </div>
+      <div id="qaList">${qHTML}</div>
+    </div>`;
+}
+
+function showAllInterviewQuestions() {
+  currentChapter = -1;
+  currentTopic = null;
+  document.querySelectorAll('.topic-card').forEach((el) => el.classList.remove('active'));
+  document.querySelectorAll('.topic-item').forEach((el) => el.classList.remove('active'));
+  document.querySelectorAll('.chapter-item').forEach((el) => {
+    el.classList.remove('open');
+    el.querySelector('.chapter-header')?.classList.remove('active');
+  });
+  renderSolidInterviewHub();
+}
+
+function selectSolidInterviewTrack(trackKey) {
+  renderSolidInterviewHub(trackKey);
+}
+
+function filterQA(tag, btn) {
+  document.querySelectorAll('.qa-filter-btn').forEach((item) => item.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('#qaList .qa-item').forEach((item) => {
+    const tags = (item.dataset.tags || '').split('|');
+    item.style.display = (!tag || tags.includes(tag)) ? '' : 'none';
+  });
+}
+
+function renderGenericDetail(topicId, chapterIdx) {
+  const chapter = chapters[chapterIdx];
+  const topic = chapter.topics.find((item) => item.id === topicId);
+  if (!topic) return;
+
+  document.getElementById('detailEmpty').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'block';
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-content">
+      <div class="detail-header">
+        <div class="detail-breadcrumb">${chapter.title}</div>
+        <div class="detail-title">${topic.icon} ${topic.title}</div>
+        <div class="detail-subtitle">${topic.desc}</div>
+      </div>
+      <div class="callout callout-info">
+        <span class="callout-icon">📚</span>
+        <span>This topic is already connected to the new SOLID tri-pane explorer. Additional deep sections can be expanded here using the same code, diagram, and review patterns as the fully detailed topics.</span>
+      </div>
+      ${renderInterviewSection(topic.title)}
+    </div>`;
+}
+
+function toggleQA(el) {
+  el.parentElement.classList.toggle('open');
+}
+
+function copyCode(button) {
+  const pre = button.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    button.textContent = 'Copied';
+    setTimeout(() => { button.textContent = 'Copy'; }, 1800);
+  });
+}
+
+function updateProgress() {
+  const total = chapters.reduce((sum, chapter) => sum + chapter.topics.length, 0);
+  const pct = Math.round((visitedTopics.size / total) * 100);
+  document.getElementById('progressText').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.querySelectorAll('.topic-item').forEach((item) => {
+    const topicId = item.id.replace('nav-', '');
+    if (visitedTopics.has(topicId)) item.classList.add('done');
+  });
+}
+
+function filterTopics(query) {
+  const q = query.trim().toLowerCase();
+  chapters.forEach((chapter, index) => {
+    const chapterEl = document.getElementById(`ch-${index}`);
+    let anyVisible = false;
+    chapter.topics.forEach((topic) => {
+      const navEl = document.getElementById(`nav-${topic.id}`);
+      if (!navEl) return;
+      const match = !q || topic.title.toLowerCase().includes(q) || topic.desc.toLowerCase().includes(q) || topic.tags.join(' ').toLowerCase().includes(q);
+      navEl.style.display = match ? '' : 'none';
+      if (match) anyVisible = true;
+    });
+    if (q && anyVisible) chapterEl.classList.add('open');
+  });
+}
+
+function applyTheme(theme) {
+  if (theme !== 'dark' && theme !== 'light') return;
+  document.documentElement.setAttribute('data-theme', theme);
+  try { localStorage.setItem('theme', theme); } catch (error) {}
+}
+
+(function initTheme() {
+  const params = new URLSearchParams(window.location.search);
+  const theme = params.get('theme');
+  let saved = 'dark';
+  try { saved = localStorage.getItem('theme') || 'dark'; } catch (error) {}
+  applyTheme(theme || saved);
+})();
+
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'parent-theme') applyTheme(event.data.theme);
+});
+
+buildNav();
+</script>
+<script src="/embedded/mastery-resize.js"></script>
+</body>
+</html>

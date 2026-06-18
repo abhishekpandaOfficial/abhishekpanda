@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Design a System Handling 10M Users in .NET</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07090f;
+  --bg2: #0c0f1a;
+  --bg3: #101422;
+  --card: #0e1320;
+  --card2: #121828;
+  --border: rgba(99,179,237,0.12);
+  --border2: rgba(246,173,85,0.12);
+  --blue: #63b3ed;
+  --blue2: #90cdf4;
+  --orange: #f6ad55;
+  --teal: #4fd1c5;
+  --purple: #b794f4;
+  --green: #68d391;
+  --red: #fc8181;
+  --yellow: #f6e05e;
+  --pink: #f687b3;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #4a5568;
+  --code-bg: #080b14;
+  --head: 'Syne', sans-serif;
+  --body: 'Outfit', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--body); font-size: 14px; line-height: 1.6; overflow-x: hidden; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 3px; }
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, #07090f 0%, #0c1525 45%, #080d18 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 60px 40px 44px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,179,237,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(99,179,237,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(99,179,237,0.025) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none;
+}
+/* Animated floating orbs */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: orbDrift 8s ease-in-out infinite;
+}
+.orb1 { width: 300px; height: 300px; background: rgba(99,179,237,0.04); top: -80px; left: -60px; animation-delay: 0s; }
+.orb2 { width: 250px; height: 250px; background: rgba(246,173,85,0.04); top: -40px; right: -40px; animation-delay: 3s; }
+.orb3 { width: 200px; height: 200px; background: rgba(79,209,197,0.03); bottom: -60px; left: 40%; animation-delay: 5s; }
+@keyframes orbDrift { 0%,100%{transform:translate(0,0)} 33%{transform:translate(20px,-15px)} 66%{transform:translate(-15px,10px)} }
+
+.hero-badge {
+  display: inline-block;
+  background: rgba(99,179,237,0.1);
+  border: 1px solid rgba(99,179,237,0.3);
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  animation: badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse { 0%,100%{box-shadow:0 0 0 0 rgba(99,179,237,0.15)} 50%{box-shadow:0 0 20px 4px rgba(99,179,237,0.08)} }
+.hero h1 { font-family: var(--head); font-size: clamp(2rem, 4.5vw, 3.8rem); font-weight: 800; line-height: 1.1; letter-spacing: -1px; margin-bottom: 14px; }
+.hero h1 .a1 { color: var(--blue); }
+.hero h1 .a2 { color: var(--orange); }
+.hero-sub { color: var(--text2); font-size: 14px; max-width: 560px; margin: 0 auto 28px; }
+.hero-stats { display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; }
+.stat { text-align: center; }
+.stat-num { font-family: var(--head); font-size: 26px; font-weight: 800; color: var(--blue); display: block; }
+.stat-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+
+/* LAYOUT */
+.layout { display: flex; min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar { width: 230px; flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 18px 0; }
+.sidebar-title { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); padding: 0 14px 10px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+.nav-item { display: flex; align-items: center; gap: 7px; padding: 6px 14px; color: var(--text3); text-decoration: none; font-size: 11px; border-left: 2px solid transparent; transition: all 0.2s; cursor: pointer; }
+.nav-item:hover, .nav-item.active { color: var(--blue); border-left-color: var(--blue); background: rgba(99,179,237,0.04); }
+.nav-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.nav-group { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.nav-group-title { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); padding: 0 14px 5px; }
+
+/* MAIN */
+.main { flex: 1; min-width: 0; padding: 28px 22px; }
+
+/* MODULE */
+.module-section { margin-bottom: 44px; }
+.module-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.module-num { background: linear-gradient(135deg, var(--blue), #4299e1); color: #000; font-family: var(--mono); font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 4px; flex-shrink: 0; }
+.module-num.or { background: linear-gradient(135deg, var(--orange), #ed8936); }
+.module-num.tl { background: linear-gradient(135deg, var(--teal), #38b2ac); }
+.module-num.pu { background: linear-gradient(135deg, var(--purple), #9f7aea); }
+.module-num.gr { background: linear-gradient(135deg, var(--green), #48bb78); }
+.module-num.re { background: linear-gradient(135deg, var(--red), #f56565); }
+.module-title { font-family: var(--head); font-size: 17px; font-weight: 700; color: var(--text); }
+.module-desc { font-size: 11px; color: var(--text3); margin-left: auto; font-family: var(--mono); }
+
+/* GRIDS */
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.col-span2 { grid-column: 1 / -1; }
+
+/* CARDS */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; }
+.card:hover { border-color: rgba(99,179,237,0.3); transform: translateY(-1px); }
+.card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), transparent); opacity: 0; transition: opacity 0.2s; }
+.card:hover::before { opacity: 1; }
+.card.or { border-color: var(--border2); }
+.card.or::before { background: linear-gradient(90deg, var(--orange), transparent); }
+.card.or:hover { border-color: rgba(246,173,85,0.3); }
+.card.tl { border-color: rgba(79,209,197,0.12); }
+.card.tl::before { background: linear-gradient(90deg, var(--teal), transparent); }
+.card.pu { border-color: rgba(183,148,244,0.12); }
+.card.pu::before { background: linear-gradient(90deg, var(--purple), transparent); }
+.card.gr { border-color: rgba(104,211,145,0.12); }
+.card.gr::before { background: linear-gradient(90deg, var(--green), transparent); }
+.card.re { border-color: rgba(252,129,129,0.15); }
+.card.re::before { background: linear-gradient(90deg, var(--red), transparent); }
+.card.ye { border-color: rgba(246,224,94,0.12); }
+.card.ye::before { background: linear-gradient(90deg, var(--yellow), transparent); }
+
+.card-num { font-family: var(--mono); font-size: 9px; color: var(--blue); margin-bottom: 5px; opacity: 0.7; }
+.card-num.or { color: var(--orange); }
+.card-num.tl { color: var(--teal); }
+.card-num.pu { color: var(--purple); }
+.card-num.gr { color: var(--green); }
+.card-num.re { color: var(--red); }
+.card-num.ye { color: var(--yellow); }
+.card-title { font-family: var(--head); font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+.card-body { font-size: 13px; color: var(--text2); line-height: 1.65; }
+.card-body p { margin-bottom: 7px; }
+.card-body p:last-child { margin-bottom: 0; }
+
+/* CODE */
+code { font-family: var(--mono); font-size: 11px; background: rgba(99,179,237,0.07); border: 1px solid rgba(99,179,237,0.14); color: var(--blue); padding: 1px 5px; border-radius: 3px; }
+.code-block { background: var(--code-bg); border: 1px solid rgba(99,179,237,0.09); border-radius: 8px; padding: 14px; font-family: var(--mono); font-size: 11.5px; line-height: 1.7; color: #a5f3fc; overflow-x: auto; margin: 10px 0; position: relative; }
+.code-block .kw { color: #c084fc; }
+.code-block .cls { color: #60a5fa; }
+.code-block .str { color: #86efac; }
+.code-block .cm { color: var(--text3); font-style: italic; }
+.code-block .nm { color: #fbbf24; }
+.code-block .op { color: #f472b6; }
+.code-lang { position: absolute; top: 7px; right: 10px; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); }
+
+/* HIGHLIGHT */
+.hl { background: rgba(99,179,237,0.05); border-left: 3px solid var(--blue); border-radius: 0 8px 8px 0; padding: 9px 12px; margin: 8px 0; font-size: 12px; color: var(--text2); }
+.hl.or { background: rgba(246,173,85,0.05); border-left-color: var(--orange); }
+.hl.re { background: rgba(252,129,129,0.05); border-left-color: var(--red); }
+.hl.gr { background: rgba(104,211,145,0.05); border-left-color: var(--green); }
+.hl.pu { background: rgba(183,148,244,0.05); border-left-color: var(--purple); }
+.hl.tl { background: rgba(79,209,197,0.05); border-left-color: var(--teal); }
+.hl.ye { background: rgba(246,224,94,0.05); border-left-color: var(--yellow); }
+
+/* CHIPS */
+.chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.chip { background: rgba(99,179,237,0.07); border: 1px solid rgba(99,179,237,0.18); color: var(--blue); font-family: var(--mono); font-size: 10px; padding: 2px 9px; border-radius: 20px; }
+.chip.or { background: rgba(246,173,85,0.07); border-color: rgba(246,173,85,0.18); color: var(--orange); }
+.chip.tl { background: rgba(79,209,197,0.07); border-color: rgba(79,209,197,0.18); color: var(--teal); }
+.chip.gr { background: rgba(104,211,145,0.07); border-color: rgba(104,211,145,0.18); color: var(--green); }
+.chip.re { background: rgba(252,129,129,0.07); border-color: rgba(252,129,129,0.18); color: var(--red); }
+.chip.pu { background: rgba(183,148,244,0.07); border-color: rgba(183,148,244,0.18); color: var(--purple); }
+
+/* BADGE */
+.badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.22); color: var(--blue); font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 10px; }
+.badge.or { background: rgba(246,173,85,0.08); border-color: rgba(246,173,85,0.22); color: var(--orange); }
+.badge.gr { background: rgba(104,211,145,0.08); border-color: rgba(104,211,145,0.22); color: var(--green); }
+.badge.re { background: rgba(252,129,129,0.08); border-color: rgba(252,129,129,0.22); color: var(--red); }
+.badge.pu { background: rgba(183,148,244,0.08); border-color: rgba(183,148,244,0.22); color: var(--purple); }
+
+/* TABLE */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+.tbl th { background: rgba(99,179,237,0.07); color: var(--blue); font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+.tbl td { padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,0.035); color: var(--text2); vertical-align: top; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl td:first-child { color: var(--blue); font-family: var(--mono); font-size: 11px; }
+
+/* LIST */
+.clist { list-style: none; padding: 0; margin: 6px 0; }
+.clist li { display: flex; align-items: flex-start; gap: 7px; padding: 4px 0; font-size: 12px; color: var(--text2); border-bottom: 1px solid rgba(255,255,255,0.025); }
+.clist li:last-child { border-bottom: none; }
+.clist li::before { content: '▸'; color: var(--blue); flex-shrink: 0; margin-top: 1px; font-size: 10px; }
+
+/* DIVIDER */
+.divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== ANIMATED FLOW DIAGRAMS ===== */
+/* Vertical node+arrow */
+.flow { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.fnode { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 18px; font-family: var(--mono); font-size: 11px; color: var(--text); text-align: center; min-width: 150px; }
+.fnode.bl { border-color: rgba(99,179,237,0.4); color: var(--blue); background: rgba(99,179,237,0.05); }
+.fnode.or { border-color: rgba(246,173,85,0.4); color: var(--orange); background: rgba(246,173,85,0.05); }
+.fnode.tl { border-color: rgba(79,209,197,0.4); color: var(--teal); background: rgba(79,209,197,0.05); }
+.fnode.pu { border-color: rgba(183,148,244,0.4); color: var(--purple); background: rgba(183,148,244,0.05); }
+.fnode.gr { border-color: rgba(104,211,145,0.4); color: var(--green); background: rgba(104,211,145,0.05); }
+.fnode.re { border-color: rgba(252,129,129,0.4); color: var(--red); background: rgba(252,129,129,0.05); }
+.fnode.ye { border-color: rgba(246,224,94,0.4); color: var(--yellow); background: rgba(246,224,94,0.05); }
+
+.farrow { display: flex; flex-direction: column; align-items: center; margin: 2px 0; }
+.fline { width: 2px; height: 16px; background: linear-gradient(to bottom, var(--blue), transparent); position: relative; overflow: hidden; }
+.fline::after { content: ''; position: absolute; top: -100%; left: 0; right: 0; height: 100%; background: linear-gradient(to bottom, transparent, var(--blue2)); animation: fd 1.4s linear infinite; }
+@keyframes fd { 0%{top:-100%} 100%{top:100%} }
+.farrow-or .fline { background: linear-gradient(to bottom, var(--orange), transparent); }
+.farrow-or .fline::after { background: linear-gradient(to bottom, transparent, #fbd38d); }
+.farrow-or .fhead { border-top-color: var(--orange); }
+.fhead { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid var(--blue); }
+
+/* Horizontal flow */
+.hflow { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0; }
+.hfnode { background: var(--card2); border: 1px solid var(--border); border-radius: 7px; padding: 6px 12px; font-family: var(--mono); font-size: 10px; color: var(--text); text-align: center; }
+.hfnode.bl { border-color: rgba(99,179,237,0.35); color: var(--blue); background: rgba(99,179,237,0.05); }
+.hfnode.or { border-color: rgba(246,173,85,0.35); color: var(--orange); background: rgba(246,173,85,0.05); }
+.hfnode.tl { border-color: rgba(79,209,197,0.35); color: var(--teal); background: rgba(79,209,197,0.05); }
+.hfnode.pu { border-color: rgba(183,148,244,0.35); color: var(--purple); background: rgba(183,148,244,0.05); }
+.hfnode.gr { border-color: rgba(104,211,145,0.35); color: var(--green); background: rgba(104,211,145,0.05); }
+
+.harrow { display: flex; align-items: center; margin: 0 3px; }
+.hline { height: 2px; width: 18px; background: linear-gradient(to right, var(--blue), transparent); position: relative; overflow: hidden; }
+.hline::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, transparent, var(--blue2)); animation: fr 1.4s linear infinite; }
+@keyframes fr { 0%{left:-100%} 100%{left:100%} }
+.hhead { width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 6px solid var(--blue); }
+.harrow.or .hline { background: linear-gradient(to right, var(--orange), transparent); }
+.harrow.or .hline::after { background: linear-gradient(to right, transparent, #fbd38d); }
+.harrow.or .hhead { border-left-color: var(--orange); }
+.harrow.tl .hline { background: linear-gradient(to right, var(--teal), transparent); }
+.harrow.tl .hhead { border-left-color: var(--teal); }
+
+/* Fan-out diagram (1 → many) */
+.fanout { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.fo-top { }
+.fo-lines { display: flex; justify-content: center; gap: 24px; align-items: flex-start; }
+.fo-branch { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.fo-vline { width: 2px; height: 20px; background: var(--border); position: relative; overflow: hidden; }
+.fo-vline::after { content: ''; position: absolute; top: -100%; left: 0; right: 0; height: 100%; background: linear-gradient(to bottom, transparent, var(--blue)); animation: fd 1.4s linear infinite; }
+.fo-vline.or::after { background: linear-gradient(to bottom, transparent, var(--orange)); }
+.fo-vline.tl::after { background: linear-gradient(to bottom, transparent, var(--teal)); }
+.fo-vline.pu::after { background: linear-gradient(to bottom, transparent, var(--purple)); }
+.fo-vline.gr::after { background: linear-gradient(to bottom, transparent, var(--green)); }
+.fo-tip { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--blue); }
+.fo-tip.or { border-top-color: var(--orange); }
+.fo-tip.tl { border-top-color: var(--teal); }
+.fo-tip.pu { border-top-color: var(--purple); }
+.fo-tip.gr { border-top-color: var(--green); }
+
+/* PARALLEL BARS */
+.pbar { height: 26px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; position: relative; overflow: hidden; margin-bottom: 5px; }
+.pbar::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent); transform: translateX(-100%); animation: shimmer 2s ease-in-out infinite; }
+@keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+.pbar.bl { background: rgba(99,179,237,0.1); border: 1px solid rgba(99,179,237,0.28); color: var(--blue); }
+.pbar.or { background: rgba(246,173,85,0.1); border: 1px solid rgba(246,173,85,0.28); color: var(--orange); }
+.pbar.tl { background: rgba(79,209,197,0.1); border: 1px solid rgba(79,209,197,0.28); color: var(--teal); }
+.pbar.pu { background: rgba(183,148,244,0.1); border: 1px solid rgba(183,148,244,0.28); color: var(--purple); }
+.pbar.gr { background: rgba(104,211,145,0.1); border: 1px solid rgba(104,211,145,0.28); color: var(--green); }
+
+/* METRICS CARDS */
+.metric-card { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
+.metric-val { font-family: var(--head); font-size: 26px; font-weight: 800; color: var(--blue); margin-bottom: 2px; }
+.metric-val.or { color: var(--orange); }
+.metric-val.gr { color: var(--green); }
+.metric-val.pu { color: var(--purple); }
+.metric-label { font-family: var(--mono); font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+
+/* COMPARE GRID */
+.cmpgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0; }
+.cmpcol { border-radius: 8px; padding: 10px; }
+.cmpcol.bad { background: rgba(252,129,129,0.04); border: 1px solid rgba(252,129,129,0.14); }
+.cmpcol.good { background: rgba(104,211,145,0.04); border: 1px solid rgba(104,211,145,0.14); }
+.cmptitle { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; display: flex; align-items: center; gap: 5px; }
+.cmpcol.bad .cmptitle { color: var(--red); }
+.cmpcol.good .cmptitle { color: var(--green); }
+
+/* SEQUENCE DIAGRAM */
+.seqdiag { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; overflow-x: auto; }
+.seq-participants { display: flex; justify-content: space-around; margin-bottom: 14px; flex-wrap: wrap; gap: 6px; }
+.seq-p { background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.22); border-radius: 6px; padding: 5px 12px; font-family: var(--mono); font-size: 11px; color: var(--blue); text-align: center; min-width: 60px; }
+.seq-p.or { background: rgba(246,173,85,0.08); border-color: rgba(246,173,85,0.22); color: var(--orange); }
+.seq-p.tl { background: rgba(79,209,197,0.08); border-color: rgba(79,209,197,0.22); color: var(--teal); }
+.seq-p.pu { background: rgba(183,148,244,0.08); border-color: rgba(183,148,244,0.22); color: var(--purple); }
+.seq-p.re { background: rgba(252,129,129,0.08); border-color: rgba(252,129,129,0.22); color: var(--red); }
+.seq-p.gr { background: rgba(104,211,145,0.08); border-color: rgba(104,211,145,0.22); color: var(--green); }
+.seq-rows { display: flex; flex-direction: column; gap: 6px; }
+.seq-row { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; }
+.seq-from { color: var(--blue); min-width: 55px; text-align: right; flex-shrink: 0; }
+.seq-from.or { color: var(--orange); }
+.seq-from.tl { color: var(--teal); }
+.seq-from.pu { color: var(--purple); }
+.seq-from.re { color: var(--red); }
+.seq-from.gr { color: var(--green); }
+.seq-arrow-area { flex: 1; display: flex; align-items: center; gap: 0; min-width: 80px; }
+.seq-line { flex: 1; height: 1px; background: var(--border); position: relative; overflow: hidden; }
+.seq-line::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, transparent, var(--blue)); animation: fr 1.8s linear infinite; }
+.seq-line.or::after { background: linear-gradient(to right, transparent, var(--orange)); }
+.seq-line.re::after { background: linear-gradient(to right, transparent, var(--red)); }
+.seq-line.gr::after { background: linear-gradient(to right, transparent, var(--green)); }
+.seq-hd { width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 5px solid var(--blue); flex-shrink: 0; }
+.seq-hd.or { border-left-color: var(--orange); }
+.seq-hd.re { border-left-color: var(--red); }
+.seq-hd.gr { border-left-color: var(--green); }
+.seq-to { color: var(--text3); min-width: 55px; flex-shrink: 0; }
+.seq-label { color: var(--text2); font-size: 10px; min-width: 80px; }
+
+/* SHARDING VISUAL */
+.shard-visual { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; padding: 10px 0; }
+.shard-api { background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.25); border-radius: 8px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; color: var(--blue); text-align: center; }
+.shard-list { display: flex; flex-direction: column; gap: 6px; }
+.shard-item { display: flex; align-items: center; gap: 6px; }
+.shard-line { flex: 1; height: 1px; background: var(--border); position: relative; overflow: hidden; }
+.shard-line::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, transparent, var(--blue)); animation: fr 1.5s linear infinite; }
+.shard-line:nth-child(2)::after { animation-delay: 0.5s; }
+.shard-line:nth-child(3)::after { animation-delay: 1s; }
+.shard-db { background: rgba(246,173,85,0.08); border: 1px solid rgba(246,173,85,0.25); border-radius: 6px; padding: 5px 12px; font-family: var(--mono); font-size: 11px; color: var(--orange); }
+
+/* KUBERNETES PODS */
+.k8s-visual { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0; }
+.k8s-lb { background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.25); border-radius: 8px; padding: 8px 20px; font-family: var(--mono); font-size: 12px; color: var(--blue); }
+.k8s-cluster { background: rgba(183,148,244,0.05); border: 1px dashed rgba(183,148,244,0.3); border-radius: 10px; padding: 12px; }
+.k8s-cluster-label { font-family: var(--mono); font-size: 10px; color: var(--purple); text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+.k8s-pods { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.k8s-pod { background: rgba(104,211,145,0.08); border: 1px solid rgba(104,211,145,0.25); border-radius: 8px; padding: 7px 12px; font-family: var(--mono); font-size: 11px; color: var(--green); animation: podPulse 2s ease-in-out infinite; }
+.k8s-pod:nth-child(2) { animation-delay: 0.5s; }
+.k8s-pod:nth-child(3) { animation-delay: 1s; }
+.k8s-pod:nth-child(4) { animation-delay: 1.5s; background: rgba(246,173,85,0.08); border-color: rgba(246,173,85,0.25); color: var(--orange); }
+@keyframes podPulse { 0%,100%{transform:scale(1);opacity:0.8} 50%{transform:scale(1.04);opacity:1} }
+.k8s-arrow-up { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.k8s-fline { width: 2px; height: 14px; background: linear-gradient(to bottom, var(--blue), transparent); position: relative; overflow: hidden; }
+.k8s-fline::after { content: ''; position: absolute; top: -100%; left: 0; right: 0; height: 100%; background: var(--blue2); animation: fd 1.2s linear infinite; }
+
+/* MONITORING VISUAL */
+.monitor-flow { display: flex; align-items: center; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 10px 0; }
+.monitor-node { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 14px; font-family: var(--mono); font-size: 11px; text-align: center; }
+.monitor-pulse { position: relative; }
+.monitor-pulse::after { content: ''; position: absolute; inset: -3px; border-radius: 10px; border: 1px solid rgba(104,211,145,0.3); animation: monPulse 2s ease-in-out infinite; }
+@keyframes monPulse { 0%,100%{opacity:0;transform:scale(1)} 50%{opacity:1;transform:scale(1.05)} }
+
+/* REDIS CACHE HIT/MISS */
+.cache-flow { background: var(--code-bg); border-radius: 10px; padding: 14px; margin: 10px 0; }
+.cache-step { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-family: var(--mono); font-size: 11px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.cache-step:last-child { border-bottom: none; }
+.cache-num { background: rgba(99,179,237,0.1); border: 1px solid rgba(99,179,237,0.2); color: var(--blue); width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.cache-hit { color: var(--green); }
+.cache-miss { color: var(--orange); }
+
+/* COMPANY BADGES */
+.company-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; justify-content: center; }
+.company-badge { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-family: var(--mono); font-size: 12px; color: var(--text2); transition: all 0.2s; }
+.company-badge:hover { border-color: rgba(99,179,237,0.3); color: var(--blue); }
+
+/* LOAD BALANCER ALGO */
+.lb-algo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+.lb-card { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+.lb-name { font-family: var(--mono); font-size: 11px; color: var(--blue); margin-bottom: 4px; }
+.lb-desc { font-size: 11px; color: var(--text3); }
+
+/* SCALE COMPARISON */
+.scale-bars { margin: 10px 0; }
+.sbar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.sbar-label { font-family: var(--mono); font-size: 10px; color: var(--text3); min-width: 70px; }
+.sbar-track { flex: 1; height: 20px; background: rgba(255,255,255,0.03); border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+.sbar-fill { height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-family: var(--mono); font-size: 10px; font-weight: 600; position: relative; overflow: hidden; animation: barGrow 1.5s ease-out forwards; }
+.sbar-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 60%, rgba(255,255,255,0.08)); animation: shimmer 2s ease-in-out infinite; }
+@keyframes barGrow { from{width:0} }
+.sbar-fill.bl { background: linear-gradient(90deg, rgba(99,179,237,0.3), rgba(99,179,237,0.5)); color: var(--blue); }
+.sbar-fill.gr { background: linear-gradient(90deg, rgba(104,211,145,0.3), rgba(104,211,145,0.5)); color: var(--green); }
+
+/* RESP */
+@media (max-width:900px) { .sidebar{display:none} .cols2{grid-template-columns:1fr} .hero{padding:36px 18px 28px} .main{padding:18px 14px} }
+@media (max-width:1100px) { .cols3{grid-template-columns:1fr 1fr} }
+
+/* FOOTER */
+.page-footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 20px 40px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.page-footer span { color: var(--blue); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="hero-badge">.NET System Design</div>
+  <h1>How to Design a System<br>Handling <span class="a1">10 Million</span> <span class="a2">Users</span></h1>
+  <p class="hero-sub">A step-by-step guide to building scalable, distributed .NET systems — from CDN to Kubernetes, Redis to microservices.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">10M</span><span class="stat-label">Total Users</span></div>
+    <div class="stat"><span class="stat-num" style="color:var(--orange)">100K</span><span class="stat-label">Peak Concurrent</span></div>
+    <div class="stat"><span class="stat-num" style="color:var(--teal)">50K</span><span class="stat-label">Req/sec</span></div>
+    <div class="stat"><span class="stat-num" style="color:var(--green)">&lt;200ms</span><span class="stat-label">Target Latency</span></div>
+    <div class="stat"><span class="stat-num" style="color:var(--purple)">99.9%</span><span class="stat-label">Availability</span></div>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-title">Navigation</div>
+  <a class="nav-item active" href="#m1"><span class="nav-dot"></span>Scale &amp; Architecture</a>
+  <a class="nav-item" href="#m2"><span class="nav-dot"></span>CDN &amp; Load Balancer</a>
+  <a class="nav-item" href="#m3"><span class="nav-dot"></span>API Gateway &amp; APIs</a>
+  <a class="nav-item" href="#m4"><span class="nav-dot"></span>Redis Caching</a>
+  <a class="nav-item" href="#m5"><span class="nav-dot"></span>Database Scaling</a>
+  <div class="nav-group">
+    <div class="nav-group-title">Async &amp; Scale</div>
+    <a class="nav-item" href="#m6"><span class="nav-dot"></span>Message Queues</a>
+    <a class="nav-item" href="#m7"><span class="nav-dot"></span>Worker Services</a>
+    <a class="nav-item" href="#m8"><span class="nav-dot"></span>Microservices</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Operations</div>
+    <a class="nav-item" href="#m9"><span class="nav-dot"></span>Monitoring</a>
+    <a class="nav-item" href="#m10"><span class="nav-dot"></span>Auto Scaling</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Reference</div>
+    <a class="nav-item" href="#m11"><span class="nav-dot"></span>End-to-End Architecture</a>
+    <a class="nav-item" href="#m12"><span class="nav-dot"></span>Request Lifecycle</a>
+    <a class="nav-item" href="#m13"><span class="nav-dot"></span>Real Companies</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ===== MODULE 1: SCALE + HIGH-LEVEL ===== -->
+<section class="module-section" id="m1">
+  <div class="module-header">
+    <span class="module-num">MODULE 01</span>
+    <span class="module-title">Understand the Scale &amp; Architecture</span>
+    <span class="module-desc">Steps 1–2</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- Step 1: Understand Scale -->
+    <div class="card">
+      <div class="card-num">STEP 01</div>
+      <div class="card-title">Understand the Scale First</div>
+      <div class="card-body">
+        <p>Before designing, <strong style="color:var(--blue)">estimate the load</strong>. Every architectural decision flows from these numbers.</p>
+        <!-- Metric bars -->
+        <div class="scale-bars" style="margin-top:12px">
+          <div class="sbar-row">
+            <div class="sbar-label">Total Users</div>
+            <div class="sbar-track"><div class="sbar-fill bl" style="width:100%">10M</div></div>
+          </div>
+          <div class="sbar-row">
+            <div class="sbar-label">Daily Active</div>
+            <div class="sbar-track"><div class="sbar-fill gr" style="width:10%;animation-delay:0.2s">1M</div></div>
+          </div>
+          <div class="sbar-row">
+            <div class="sbar-label">Peak Concurrent</div>
+            <div class="sbar-track"><div class="sbar-fill bl" style="width:15%;animation-delay:0.4s">100K</div></div>
+          </div>
+          <div class="sbar-row">
+            <div class="sbar-label">Req / Second</div>
+            <div class="sbar-track"><div class="sbar-fill gr" style="width:50%;animation-delay:0.6s">10K–50K</div></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px">
+          <div class="metric-card">
+            <div class="metric-val">&lt;200ms</div>
+            <div class="metric-label">Latency</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val or">99.9%</div>
+            <div class="metric-label">Availability</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val gr">∞</div>
+            <div class="metric-label">Horizontal Scale</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: High-Level Architecture -->
+    <div class="card or">
+      <div class="card-num or">STEP 02</div>
+      <div class="card-title">High-Level Architecture</div>
+      <div class="card-body">
+        <p>A system for 10M users <strong style="color:var(--orange)">must be distributed</strong>. 8 main components work together.</p>
+        <!-- Animated high-level flow -->
+        <div style="background:var(--code-bg);border-radius:8px;padding:12px;margin-top:10px">
+          <div class="hflow" style="gap:4px;flex-wrap:wrap">
+            <div class="hfnode bl">Users</div>
+            <div class="harrow"><div class="hline"></div><div class="hhead"></div></div>
+            <div class="hfnode or">CDN</div>
+            <div class="harrow"><div class="hline"></div><div class="hhead"></div></div>
+            <div class="hfnode tl">LB</div>
+            <div class="harrow"><div class="hline"></div><div class="hhead"></div></div>
+            <div class="hfnode pu">Gateway</div>
+          </div>
+          <div style="height:10px"></div>
+          <!-- Fan out to APIs -->
+          <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+            <div class="hfnode bl">API 1</div>
+            <div class="hfnode bl" style="animation-delay:0.3s">API 2</div>
+            <div class="hfnode bl" style="animation-delay:0.6s">API 3</div>
+          </div>
+          <div style="height:8px"></div>
+          <div style="display:flex;justify-content:space-around;flex-wrap:wrap;gap:6px">
+            <div class="hfnode re">Redis</div>
+            <div class="hfnode or">Queue</div>
+            <div class="hfnode gr">Workers</div>
+            <div class="hfnode tl">DB Cluster</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">① CDN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ② Load Balancer</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">③ API Gateway &nbsp; ④ .NET APIs</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">⑤ Redis Cache &nbsp; ⑥ Message Queue</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3)">⑦ Worker Services ⑧ DB Cluster</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== MODULE 2: CDN + LOAD BALANCER ===== -->
+<section class="module-section" id="m2">
+  <div class="module-header">
+    <span class="module-num or">MODULE 02</span>
+    <span class="module-title">CDN &amp; Load Balancer</span>
+    <span class="module-desc">Steps 3–4</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- Step 3: CDN -->
+    <div class="card tl">
+      <div class="card-num tl">STEP 03 — Step 1</div>
+      <div class="card-title">CDN — Content Delivery Network</div>
+      <div class="card-body">
+        <p><strong style="color:var(--teal)">Purpose:</strong> Serve static files quickly from servers geographically close to the user.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0">
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px">SERVES</div>
+            <ul class="clist">
+              <li>Images &amp; Videos</li>
+              <li>CSS stylesheets</li>
+              <li>JavaScript files</li>
+              <li>Static HTML</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px">BENEFITS</div>
+            <ul class="clist" style="list-style:none">
+              <li style="color:var(--green)">Reduces server load</li>
+              <li style="color:var(--green)">Lower global latency</li>
+              <li style="color:var(--green)">Edge caching</li>
+              <li style="color:var(--green)">DDoS protection</li>
+            </ul>
+          </div>
+        </div>
+        <!-- CDN flow diagram -->
+        <div style="background:var(--code-bg);border-radius:8px;padding:12px;margin-top:6px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">FLOW</div>
+          <div class="hflow">
+            <div class="hfnode bl">User</div>
+            <div class="harrow tl"><div class="hline" style="background:linear-gradient(to right,var(--teal),transparent)"></div><div class="hhead" style="border-left-color:var(--teal)"></div></div>
+            <div class="hfnode tl">CDN</div>
+            <div style="display:flex;flex-direction:column;gap:4px;margin-left:8px">
+              <div style="display:flex;align-items:center;gap:4px">
+                <div style="width:1px;height:12px;background:var(--border)"></div>
+                <div style="width:0;height:0;border-top:3px solid transparent;border-bottom:3px solid transparent;border-left:5px solid var(--teal)"></div>
+                <div class="hfnode" style="font-size:10px;padding:4px 8px">Static Files</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:4px">
+                <div style="width:1px;height:12px;background:var(--border)"></div>
+                <div style="width:0;height:0;border-top:3px solid transparent;border-bottom:3px solid transparent;border-left:5px solid var(--blue)"></div>
+                <div class="hfnode bl" style="font-size:10px;padding:4px 8px">API (miss)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Load Balancer -->
+    <div class="card">
+      <div class="card-num">STEP 04 — Step 2</div>
+      <div class="card-title">Load Balancer</div>
+      <div class="card-body">
+        <p>Distributes traffic across multiple server instances. <strong style="color:var(--blue)">No single point of failure.</strong></p>
+        <div class="chips" style="margin-bottom:10px">
+          <span class="chip">NGINX</span>
+          <span class="chip">AWS ALB</span>
+          <span class="chip">Azure Load Balancer</span>
+        </div>
+        <!-- Fan-out diagram -->
+        <div style="background:var(--code-bg);border-radius:8px;padding:12px;margin-bottom:10px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">TRAFFIC DISTRIBUTION</div>
+          <div class="fanout">
+            <div class="fnode bl" style="font-size:11px;padding:6px 16px">User Requests</div>
+            <div style="margin:4px 0"><div class="fo-vline"></div><div class="fo-tip"></div></div>
+            <div class="fnode pu" style="font-size:11px;padding:6px 16px">Load Balancer</div>
+            <div class="fo-lines" style="margin-top:6px">
+              <div class="fo-branch"><div class="fo-vline or"></div><div class="fo-tip or"></div><div class="hfnode or" style="font-size:10px;margin-top:3px">API Server 1</div></div>
+              <div class="fo-branch"><div class="fo-vline tl"></div><div class="fo-tip tl"></div><div class="hfnode tl" style="font-size:10px;margin-top:3px">API Server 2</div></div>
+              <div class="fo-branch"><div class="fo-vline pu"></div><div class="fo-tip pu"></div><div class="hfnode pu" style="font-size:10px;margin-top:3px">API Server 3</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="lb-algo">
+          <div class="lb-card">
+            <div class="lb-name">Round Robin</div>
+            <div class="lb-desc">Sequential rotation</div>
+          </div>
+          <div class="lb-card">
+            <div class="lb-name">Least Conn.</div>
+            <div class="lb-desc">Least busy server</div>
+          </div>
+          <div class="lb-card">
+            <div class="lb-name">IP Hash</div>
+            <div class="lb-desc">Same user → same server</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== MODULE 3: API GATEWAY + STATELESS APIS ===== -->
+<section class="module-section" id="m3">
+  <div class="module-header">
+    <span class="module-num tl">MODULE 03</span>
+    <span class="module-title">API Gateway &amp; Stateless APIs</span>
+    <span class="module-desc">Steps 5–6</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- Step 5: API Gateway -->
+    <div class="card pu">
+      <div class="card-num pu">STEP 05 — Step 3</div>
+      <div class="card-title">API Gateway</div>
+      <div class="card-body">
+        <p>The API Gateway is the <strong style="color:var(--purple)">single entry point</strong> for all client requests — handling cross-cutting concerns.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0">
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px">HANDLES</div>
+            <ul class="clist">
+              <li>Authentication</li>
+              <li>Routing</li>
+              <li>Rate limiting</li>
+              <li>Logging</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px">TOOLS</div>
+            <div class="chips" style="flex-direction:column;gap:5px;margin-top:0">
+              <span class="chip pu">YARP (.NET)</span>
+              <span class="chip">Kong</span>
+              <span class="chip">AWS API Gateway</span>
+            </div>
+          </div>
+        </div>
+        <!-- Gateway fan-out -->
+        <div style="background:var(--code-bg);border-radius:8px;padding:12px;margin-top:6px">
+          <div class="fanout">
+            <div class="fnode pu" style="font-size:11px;padding:5px 14px">API Gateway</div>
+            <div class="fo-lines" style="margin-top:6px">
+              <div class="fo-branch"><div class="fo-vline or"></div><div class="fo-tip or"></div><div class="hfnode or" style="font-size:10px;margin-top:3px">User Svc</div></div>
+              <div class="fo-branch"><div class="fo-vline bl"></div><div class="fo-tip"></div><div class="hfnode bl" style="font-size:10px;margin-top:3px">Product Svc</div></div>
+              <div class="fo-branch"><div class="fo-vline tl"></div><div class="fo-tip tl"></div><div class="hfnode tl" style="font-size:10px;margin-top:3px">Order Svc</div></div>
+              <div class="fo-branch"><div class="fo-vline gr"></div><div class="fo-tip gr"></div><div class="hfnode gr" style="font-size:10px;margin-top:3px">Payment Svc</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6: Stateless APIs -->
+    <div class="card">
+      <div class="card-num">STEP 06 — Step 4</div>
+      <div class="card-title">Stateless .NET Web APIs</div>
+      <div class="card-body">
+        <div class="hl" style="margin-bottom:10px"><strong style="color:var(--blue)">Key Principle:</strong> Servers must be stateless — traffic can go to <em>any</em> instance.</div>
+        <div class="code-block">
+<span class="kw">var</span> builder = <span class="cls">WebApplication</span>.<span class="nm">CreateBuilder</span>(args);
+builder.Services.<span class="nm">AddControllers</span>();
+<span class="kw">var</span> app = builder.<span class="nm">Build</span>();
+
+app.<span class="nm">MapGet</span>(<span class="str">"/products"</span>, <span class="kw">async</span> () => {
+  <span class="kw">await</span> <span class="cls">Task</span>.<span class="nm">Delay</span>(<span class="nm">10</span>); <span class="cm">// simulate DB</span>
+  <span class="kw">return new</span>[] { <span class="str">"Laptop"</span>, <span class="str">"Phone"</span> };
+});
+app.<span class="nm">Run</span>();</div>
+        <!-- 3 equal servers -->
+        <div style="background:var(--code-bg);border-radius:8px;padding:12px;margin-top:8px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px;text-align:center">STATELESS = ANY SERVER CAN HANDLE REQUEST</div>
+          <div style="display:flex;gap:8px;justify-content:center">
+            <div class="hfnode bl" style="padding:8px 12px">Server 1<br><span style="color:var(--text3);font-size:9px">same behavior</span></div>
+            <div class="hfnode bl" style="padding:8px 12px;animation-delay:0.4s">Server 2<br><span style="color:var(--text3);font-size:9px">same behavior</span></div>
+            <div class="hfnode bl" style="padding:8px 12px;animation-delay:0.8s">Server 3<br><span style="color:var(--text3);font-size:9px">same behavior</span></div>
+          </div>
+          <div style="text-align:center;font-family:var(--mono);font-size:10px;color:var(--green);margin-top:8px">All behave the same → horizontal scale freely</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== MODULE 4: REDIS CACHING ===== -->
+<section class="module-section" id="m4">
+  <div class="module-header">
+    <span class="module-num re">MODULE 04</span>
+    <span class="module-title">Redis Caching Layer</span>
+    <span class="module-desc">Step 7 — Step 5</span>
+  </div>
+
+  <div class="cols2">
+
+    <div class="card re col-span2">
+      <div class="card-num re">STEP 07 — Step 5</div>
+      <div class="card-title">Redis Caching Layer</div>
+      <div class="card-body">
+        <p>Database cannot handle millions of requests alone. <strong style="color:var(--red)">Cache frequently used data</strong> in Redis — sub-millisecond reads.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px">
+          <div>
+            <!-- Cache hit/miss flow -->
+            <div style="background:var(--code-bg);border-radius:8px;padding:12px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">Cache-Aside Flow</div>
+              <div class="flow" style="gap:2px">
+                <div class="fnode bl" style="font-size:10px;padding:5px 12px">API Request</div>
+                <div class="farrow"><div class="fline"></div><div class="fhead"></div></div>
+                <div class="fnode re" style="font-size:10px;padding:5px 12px">Check Redis Cache</div>
+                <div style="display:flex;gap:12px;margin:3px 0">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+                    <div style="width:1px;height:12px;background:var(--border)"></div>
+                    <div style="width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--green)"></div>
+                    <div class="fnode gr" style="font-size:10px;padding:4px 10px">Cache HIT ✓</div>
+                    <div style="font-family:var(--mono);font-size:9px;color:var(--green);margin-top:3px">Return to user</div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+                    <div style="width:1px;height:12px;background:var(--border)"></div>
+                    <div style="width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--orange)"></div>
+                    <div class="fnode or" style="font-size:10px;padding:4px 10px">Cache MISS ✗</div>
+                    <div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:3px">↓ Query DB</div>
+                    <div class="fnode" style="font-size:10px;padding:4px 10px;margin-top:3px">Database</div>
+                    <div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:3px">↓ Store in cache</div>
+                    <div class="fnode re" style="font-size:10px;padding:4px 10px;margin-top:3px">Save to Redis</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">REDIS EXAMPLE IN .NET</div>
+            <div class="code-block" style="height:auto">
+<span class="cm">// Install: StackExchange.Redis</span>
+<span class="kw">var</span> redis = <span class="cls">ConnectionMultiplexer</span>
+  .<span class="nm">Connect</span>(<span class="str">"localhost"</span>);
+<span class="kw">var</span> db = redis.<span class="nm">GetDatabase</span>();
+
+<span class="cm">// Set cache</span>
+<span class="kw">await</span> db.<span class="nm">StringSetAsync</span>(
+  <span class="str">"product:1"</span>, <span class="str">"Laptop"</span>);
+
+<span class="cm">// Get cache</span>
+<span class="kw">var</span> val = <span class="kw">await</span> db.<span class="nm">StringGetAsync</span>(
+  <span class="str">"product:1"</span>);
+Console.<span class="nm">WriteLine</span>(val); <span class="cm">// Laptop</span></div>
+            <div class="hl re" style="margin-top:10px">
+              Redis operates in-memory → reads are <strong style="color:var(--red)">~100x faster</strong> than database reads. This is the most impactful scaling layer.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== MODULE 5: DATABASE SCALING ===== -->
+<section class="module-section" id="m5">
+  <div class="module-header">
+    <span class="module-num pu">MODULE 05</span>
+    <span class="module-title">Database Scaling</span>
+    <span class="module-desc">Step 8 — Step 6</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- Scaling strategies -->
+    <div class="card">
+      <div class="card-num">STEP 08 — Step 6</div>
+      <div class="card-title">Database Scaling Strategies</div>
+      <div class="card-body">
+        <p>For 10M users, a single database instance <strong style="color:var(--red)">will not scale</strong>. Three main approaches:</p>
+        <div class="cmpgrid" style="margin-top:10px;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div style="background:rgba(99,179,237,0.05);border:1px solid rgba(99,179,237,0.15);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--blue);margin-bottom:4px">Vertical</div>
+            <div style="font-size:28px;margin:6px 0">↑</div>
+            <div style="font-size:11px;color:var(--text2)">Bigger machine<br><span style="color:var(--red)">Limited ceiling</span></div>
+          </div>
+          <div style="background:rgba(104,211,145,0.05);border:1px solid rgba(104,211,145,0.15);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--green);margin-bottom:4px">Horizontal</div>
+            <div style="font-size:28px;margin:6px 0">↔</div>
+            <div style="font-size:11px;color:var(--text2)">More machines<br><span style="color:var(--green)">Scales freely</span></div>
+          </div>
+          <div style="background:rgba(246,173,85,0.05);border:1px solid rgba(246,173,85,0.15);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--orange);margin-bottom:4px">Read Replicas</div>
+            <div style="font-size:28px;margin:6px 0">⎘</div>
+            <div style="font-size:11px;color:var(--text2)">Read scale-out<br><span style="color:var(--orange)">Write → primary</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Database Sharding -->
+    <div class="card or">
+      <div class="card-num or">SHARDING</div>
+      <div class="card-title">Database Sharding</div>
+      <div class="card-body">
+        <p>Split data across multiple databases by <strong style="color:var(--orange)">UserID</strong>. Each shard holds a subset of the data.</p>
+        <div class="hl or"><strong>Sharding Rule:</strong> <code>UserID % 3</code> → determines shard</div>
+        <!-- Shard visual -->
+        <div style="background:var(--code-bg);border-radius:8px;padding:12px;margin:10px 0">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px">SHARD ROUTING</div>
+          <div class="shard-visual">
+            <div class="shard-api">API</div>
+            <div class="shard-list">
+              <div class="shard-item">
+                <div class="shard-line"></div>
+                <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid var(--blue);flex-shrink:0"></div>
+                <div class="shard-db">DB Shard 1 &nbsp;(UserID % 3 = 1)</div>
+              </div>
+              <div class="shard-item">
+                <div class="shard-line"></div>
+                <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid var(--orange);flex-shrink:0"></div>
+                <div class="shard-db" style="background:rgba(183,148,244,0.08);border-color:rgba(183,148,244,0.25);color:var(--purple)">DB Shard 2 &nbsp;(UserID % 3 = 2)</div>
+              </div>
+              <div class="shard-item">
+                <div class="shard-line"></div>
+                <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid var(--teal);flex-shrink:0"></div>
+                <div class="shard-db" style="background:rgba(79,209,197,0.08);border-color:rgba(79,209,197,0.25);color:var(--teal)">DB Shard 3 &nbsp;(UserID % 3 = 0)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <table class="tbl">
+          <tr><th>UserID</th><th>Shard</th><th>Rule</th></tr>
+          <tr><td>1</td><td style="color:var(--text2)">DB1</td><td style="color:var(--text3)">1 % 3 = 1</td></tr>
+          <tr><td>2</td><td style="color:var(--text2)">DB2</td><td style="color:var(--text3)">2 % 3 = 2</td></tr>
+          <tr><td>3</td><td style="color:var(--text2)">DB3</td><td style="color:var(--text3)">3 % 3 = 0</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== MODULE 6: MESSAGE QUEUES ===== -->
+<section class="module-section" id="m6">
+  <div class="module-header">
+    <span class="module-num gr">MODULE 06</span>
+    <span class="module-title">Message Queue — Async Processing</span>
+    <span class="module-desc">Step 9 — Step 7</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- Queue concept -->
+    <div class="card gr">
+      <div class="card-num gr">STEP 09 — Step 7</div>
+      <div class="card-title">Message Queue</div>
+      <div class="card-body">
+        <p>For <strong style="color:var(--green)">heavy / slow operations</strong>, don't make the user wait. Push to a queue and process asynchronously.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0">
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px">HEAVY OPERATIONS</div>
+            <ul class="clist">
+              <li>Email sending</li>
+              <li>Notifications</li>
+              <li>Report generation</li>
+              <li>Image processing</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px">QUEUE TOOLS</div>
+            <div class="chips" style="flex-direction:column;gap:5px;margin:0">
+              <span class="chip gr">Kafka</span>
+              <span class="chip gr">RabbitMQ</span>
+              <span class="chip gr">Azure Service Bus</span>
+            </div>
+          </div>
+        </div>
+        <!-- Queue flow -->
+        <div style="background:var(--code-bg);border-radius:8px;padding:12px;margin-top:6px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">ASYNC FLOW</div>
+          <div class="hflow">
+            <div class="hfnode bl">API</div>
+            <div class="harrow tl"><div class="hline" style="background:linear-gradient(to right,var(--teal),transparent);width:20px"></div><div class="hhead" style="border-left-color:var(--teal)"></div></div>
+            <div class="hfnode gr">Queue</div>
+            <div class="harrow tl"><div class="hline" style="background:linear-gradient(to right,var(--teal),transparent);width:20px"></div><div class="hhead" style="border-left-color:var(--teal)"></div></div>
+            <div class="hfnode or">Worker</div>
+            <div class="harrow tl"><div class="hline" style="background:linear-gradient(to right,var(--teal),transparent);width:20px"></div><div class="hhead" style="border-left-color:var(--teal)"></div></div>
+            <div class="hfnode tl">Database</div>
+          </div>
+          <div style="text-align:center;font-family:var(--mono);font-size:10px;color:var(--green);margin-top:8px">API returns immediately → worker processes in background</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code examples -->
+    <div class="card">
+      <div class="card-num">RABBITMQ CODE</div>
+      <div class="card-title">Producer &amp; Consumer</div>
+      <div class="card-body">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--orange);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Producer (API side)</div>
+        <div class="code-block" style="margin-bottom:10px">
+<span class="kw">var</span> factory = <span class="kw">new</span> <span class="cls">ConnectionFactory</span>()
+  { HostName = <span class="str">"localhost"</span> };
+<span class="kw">using var</span> conn = factory.<span class="nm">CreateConnection</span>();
+<span class="kw">using var</span> ch = conn.<span class="nm">CreateModel</span>();
+
+ch.<span class="nm">QueueDeclare</span>(<span class="str">"orders"</span>);
+<span class="kw">var</span> body = <span class="cls">Encoding</span>.<span class="nm">UTF8</span>
+  .<span class="nm">GetBytes</span>(<span class="str">"New order created"</span>);
+ch.<span class="nm">BasicPublish</span>(<span class="str">""</span>, <span class="str">"orders"</span>, <span class="kw">null</span>, body);</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Consumer (Worker side)</div>
+        <div class="code-block">
+<span class="kw">var</span> consumer = <span class="kw">new</span>
+  <span class="cls">EventingBasicConsumer</span>(channel);
+consumer.<span class="nm">Received</span> += (model, ea) => {
+  <span class="kw">var</span> msg = <span class="cls">Encoding</span>.<span class="nm">UTF8</span>
+    .<span class="nm">GetString</span>(ea.Body.<span class="nm">ToArray</span>());
+  Console.<span class="nm">WriteLine</span>(<span class="str">"Processing: "</span> + msg);
+};
+ch.<span class="nm">BasicConsume</span>(<span class="str">"orders"</span>, <span class="kw">true</span>, consumer);</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== MODULE 7: WORKER SERVICES ===== -->
+<section class="module-section" id="m7">
+  <div class="module-header">
+    <span class="module-num or">MODULE 07</span>
+    <span class="module-title">Background Worker Services</span>
+    <span class="module-desc">Step 10 — Step 8</span>
+  </div>
+
+  <div class="cols2">
+
+    <div class="card col-span2">
+      <div class="card-num or">STEP 10 — Step 8</div>
+      <div class="card-title">Background Worker Services</div>
+      <div class="card-body">
+        <p>Background services process async jobs independently of request traffic. Implement <code>BackgroundService</code> in .NET.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Example Use Cases</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div class="pbar or" style="font-size:11px">Email Notifications</div>
+              <div class="pbar bl" style="font-size:11px;animation-delay:0.2s">Analytics Processing</div>
+              <div class="pbar pu" style="font-size:11px;animation-delay:0.4s">Recommendation Engine</div>
+              <div class="pbar tl" style="font-size:11px;animation-delay:0.6s">Report Generation</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">.NET WORKER EXAMPLE</div>
+            <div class="code-block">
+<span class="kw">public class</span> <span class="cls">EmailWorker</span>
+  : <span class="cls">BackgroundService</span>
+{
+  <span class="kw">protected override async</span> <span class="cls">Task</span>
+    <span class="nm">ExecuteAsync</span>(<span class="cls">CancellationToken</span> token)
+  {
+    <span class="kw">while</span> (!token.<span class="nm">IsCancellationRequested</span>) {
+      Console.<span class="nm">WriteLine</span>(
+        <span class="str">"Processing emails..."</span>);
+      <span class="kw">await</span> <span class="cls">Task</span>.<span class="nm">Delay</span>(<span class="nm">5000</span>, token);
+    }
+  }
+}</div>
+            <div class="hl or" style="margin-top:8px">Worker runs in a loop with a <code>CancellationToken</code> for graceful shutdown — no blocking, fully async.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== MODULE 8: MICROSERVICES ===== -->
+<section class="module-section" id="m8">
+  <div class="module-header">
+    <span class="module-num tl">MODULE 08</span>
+    <span class="module-title">Microservices Architecture</span>
+    <span class="module-desc">Step 11 — Step 9</span>
+  </div>
+
+  <div class="cols2">
+
+    <div class="card tl col-span2">
+      <div class="card-num tl">STEP 11 — Step 9</div>
+      <div class="card-title">Microservices Architecture</div>
+      <div class="card-body">
+        <p>Instead of a single monolith, <strong style="color:var(--teal)">split into independent services</strong>. Each service owns its data and can be scaled independently.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px">
+          <div>
+            <!-- Monolith vs Microservices -->
+            <div class="cmpgrid">
+              <div class="cmpcol bad">
+                <div class="cmptitle">✗ Monolith</div>
+                <div style="font-family:var(--mono);font-size:11px;color:var(--text2)">One huge app<br>Scale all or nothing<br>One deploy risk</div>
+              </div>
+              <div class="cmpcol good">
+                <div class="cmptitle">✓ Microservices</div>
+                <div style="font-family:var(--mono);font-size:11px;color:var(--text2)">Independent services<br>Scale per service<br>Isolated failures</div>
+              </div>
+            </div>
+            <div style="margin-top:10px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px">BENEFITS</div>
+              <ul class="clist">
+                <li>Independent scaling per service</li>
+                <li>Independent deployment</li>
+                <li>Better fault isolation</li>
+                <li>Technology flexibility per service</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <!-- Microservices fan-out diagram -->
+            <div style="background:var(--code-bg);border-radius:8px;padding:14px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px;text-align:center;text-transform:uppercase;letter-spacing:1px">Service Architecture</div>
+              <div class="fanout">
+                <div class="fnode pu" style="font-size:11px;padding:6px 16px">API Gateway</div>
+                <div class="fo-lines" style="margin-top:8px;gap:10px">
+                  <div class="fo-branch">
+                    <div class="fo-vline or"></div><div class="fo-tip or"></div>
+                    <div class="hfnode or" style="font-size:10px;margin-top:3px;padding:6px 8px">User<br>Service</div>
+                  </div>
+                  <div class="fo-branch">
+                    <div class="fo-vline bl"></div><div class="fo-tip"></div>
+                    <div class="hfnode bl" style="font-size:10px;margin-top:3px;padding:6px 8px">Product<br>Service</div>
+                  </div>
+                  <div class="fo-branch">
+                    <div class="fo-vline tl"></div><div class="fo-tip tl"></div>
+                    <div class="hfnode tl" style="font-size:10px;margin-top:3px;padding:6px 8px">Order<br>Service</div>
+                  </div>
+                  <div class="fo-branch">
+                    <div class="fo-vline gr"></div><div class="fo-tip gr"></div>
+                    <div class="hfnode gr" style="font-size:10px;margin-top:3px;padding:6px 8px">Payment<br>Service</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== MODULE 9: MONITORING ===== -->
+<section class="module-section" id="m9">
+  <div class="module-header">
+    <span class="module-num pu">MODULE 09</span>
+    <span class="module-title">Observability &amp; Monitoring</span>
+    <span class="module-desc">Step 12 — Step 10</span>
+  </div>
+
+  <div class="cols2">
+
+    <div class="card pu col-span2">
+      <div class="card-num pu">STEP 12 — Step 10</div>
+      <div class="card-title">Observability &amp; Monitoring</div>
+      <div class="card-body">
+        <p>You <strong style="color:var(--purple)">must monitor</strong> your system in production. Without observability, you're flying blind at 10M users.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px">
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Monitor These</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px;background:rgba(99,179,237,0.05);border:1px solid rgba(99,179,237,0.15);border-radius:6px;padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--blue)">
+                <span style="font-size:14px">⚡</span>CPU Usage
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;background:rgba(246,173,85,0.05);border:1px solid rgba(246,173,85,0.15);border-radius:6px;padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--orange)">
+                <span style="font-size:14px">💾</span>Memory
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.15);border-radius:6px;padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--teal)">
+                <span style="font-size:14px">⏱</span>Request Latency
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;background:rgba(252,129,129,0.05);border:1px solid rgba(252,129,129,0.15);border-radius:6px;padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--red)">
+                <span style="font-size:14px">⚠</span>Errors / Exceptions
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Tooling Stack</div>
+            <ul class="clist">
+              <li style="color:var(--orange)">Prometheus — metrics scraping</li>
+              <li style="color:var(--blue)">Grafana — dashboards &amp; alerts</li>
+              <li style="color:var(--teal)">ELK Stack — log aggregation</li>
+              <li style="color:var(--purple)">OpenTelemetry — tracing</li>
+            </ul>
+          </div>
+          <div>
+            <!-- Monitoring flow -->
+            <div style="background:var(--code-bg);border-radius:8px;padding:12px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">MONITORING PIPELINE</div>
+              <div class="flow" style="gap:2px">
+                <div class="fnode" style="font-size:10px;padding:5px 12px">Services</div>
+                <div class="farrow"><div class="fline"></div><div class="fhead"></div></div>
+                <div class="fnode bl" style="font-size:10px;padding:5px 12px">Metrics</div>
+                <div class="farrow"><div class="fline"></div><div class="fhead"></div></div>
+                <div class="fnode or" style="font-size:10px;padding:5px 12px">Prometheus</div>
+                <div class="farrow"><div class="fline"></div><div class="fhead"></div></div>
+                <div class="fnode pu" style="font-size:10px;padding:5px 12px">Grafana</div>
+                <div class="farrow"><div class="fline"></div><div class="fhead"></div></div>
+                <div class="fnode re" style="font-size:10px;padding:5px 12px">Alerts 🔔</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== MODULE 10: AUTO SCALING ===== -->
+<section class="module-section" id="m10">
+  <div class="module-header">
+    <span class="module-num gr">MODULE 10</span>
+    <span class="module-title">Auto Scaling</span>
+    <span class="module-desc">Step 13 — Step 11</span>
+  </div>
+
+  <div class="cols2">
+
+    <div class="card gr col-span2">
+      <div class="card-num gr">STEP 13 — Step 11</div>
+      <div class="card-title">Auto Scaling with Kubernetes</div>
+      <div class="card-body">
+        <p>Servers should <strong style="color:var(--green)">scale automatically</strong> based on traffic. Kubernetes (K8s) manages containerized pods and scales on demand.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px">
+          <div>
+            <!-- K8s visual -->
+            <div style="background:var(--code-bg);border-radius:8px;padding:14px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px;text-align:center;text-transform:uppercase;letter-spacing:1px">Kubernetes Auto-Scaling</div>
+              <div class="k8s-visual">
+                <div class="hflow" style="gap:6px">
+                  <div class="hfnode bl">Users</div>
+                  <div class="harrow"><div class="hline"></div><div class="hhead"></div></div>
+                  <div class="hfnode bl">Load Balancer</div>
+                </div>
+                <div class="k8s-arrow-up"><div class="k8s-fline"></div><div style="width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--blue)"></div></div>
+                <div class="k8s-cluster">
+                  <div class="k8s-cluster-label">Kubernetes Cluster</div>
+                  <div class="k8s-pods">
+                    <div class="k8s-pod">Pod 1</div>
+                    <div class="k8s-pod">Pod 2</div>
+                    <div class="k8s-pod">Pod 3</div>
+                    <div class="k8s-pod">Pod 4 ⬆</div>
+                  </div>
+                </div>
+                <div style="font-family:var(--mono);font-size:10px;color:var(--green);margin-top:6px;text-align:center">Traffic ↑ → Pods scale automatically ✓</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">HOW IT WORKS</div>
+            <ul class="clist">
+              <li>Horizontal Pod Autoscaler (HPA) monitors CPU/memory</li>
+              <li>When threshold exceeded, new pods spin up automatically</li>
+              <li>Pods are stateless — any new pod can handle any request</li>
+              <li>Scale-down happens when traffic drops</li>
+            </ul>
+            <div class="hl gr" style="margin-top:10px">
+              K8s works seamlessly with stateless services — this is why <strong>statelessness (Step 6)</strong> is a prerequisite for auto-scaling.
+            </div>
+            <div style="margin-top:10px">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px">CLOUD PROVIDERS</div>
+              <div class="chips">
+                <span class="chip gr">AWS EKS</span>
+                <span class="chip gr">Azure AKS</span>
+                <span class="chip gr">Google GKE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== MODULE 11: END-TO-END ARCHITECTURE ===== -->
+<section class="module-section" id="m11">
+  <div class="module-header">
+    <span class="module-num">MODULE 11</span>
+    <span class="module-title">Final End-to-End Architecture</span>
+    <span class="module-desc">Step 14</span>
+  </div>
+
+  <div class="cols2">
+
+    <div class="card col-span2">
+      <div class="card-num">STEP 14 — Complete Picture</div>
+      <div class="card-title">Full System Architecture for 10M Users</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px">
+
+          <!-- Left: visual system diagram -->
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">System Flow</div>
+            <div style="background:var(--code-bg);border-radius:10px;padding:16px">
+              <div class="flow" style="gap:2px">
+                <div class="fnode bl" style="font-size:11px;padding:6px 16px">Users</div>
+                <div class="farrow"><div class="fline"></div><div class="fhead"></div></div>
+                <div class="fnode tl" style="font-size:11px;padding:6px 16px">CDN</div>
+                <div class="farrow"><div class="fline"></div><div class="fhead"></div></div>
+                <div class="fnode or" style="font-size:11px;padding:6px 16px">Load Balancer</div>
+                <div class="farrow"><div class="fline"></div><div class="fhead"></div></div>
+                <div class="fnode pu" style="font-size:11px;padding:6px 16px">API Gateway</div>
+              </div>
+              <div style="margin:8px 0;display:flex;justify-content:center;gap:10px">
+                <div class="hfnode bl" style="padding:5px 10px;font-size:10px">Service 1</div>
+                <div class="hfnode bl" style="padding:5px 10px;font-size:10px">Service 2</div>
+                <div class="hfnode bl" style="padding:5px 10px;font-size:10px">Service 3</div>
+              </div>
+              <div style="margin:4px 0;display:flex;justify-content:space-around;flex-wrap:wrap;gap:5px">
+                <div class="hfnode re" style="padding:4px 8px;font-size:10px">Redis</div>
+                <div class="hfnode gr" style="padding:4px 8px;font-size:10px">Queue</div>
+                <div class="hfnode or" style="padding:4px 8px;font-size:10px">Workers</div>
+              </div>
+              <div style="margin:4px 0;display:flex;justify-content:center">
+                <div class="hfnode tl" style="padding:4px 14px;font-size:10px">DB Cluster</div>
+              </div>
+              <div style="margin:4px 0;display:flex;justify-content:center">
+                <div class="hfnode" style="padding:4px 14px;font-size:10px;border-color:rgba(100,116,139,0.3);color:var(--text3)">Backup</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: performance techniques -->
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Step 15 — Performance Techniques</div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div style="display:flex;align-items:center;gap:8px;background:rgba(99,179,237,0.04);border:1px solid rgba(99,179,237,0.12);border-radius:7px;padding:8px 12px">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;animation:podPulse 2s ease-in-out infinite"></div>
+                <span style="font-family:var(--mono);font-size:11px;color:var(--text2)"><code>async/await</code> everywhere</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;background:rgba(252,129,129,0.04);border:1px solid rgba(252,129,129,0.12);border-radius:7px;padding:8px 12px">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0;animation:podPulse 2s ease-in-out infinite 0.3s"></div>
+                <span style="font-family:var(--mono);font-size:11px;color:var(--text2)">Caching (Redis)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;background:rgba(246,173,85,0.04);border:1px solid rgba(246,173,85,0.12);border-radius:7px;padding:8px 12px">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0;animation:podPulse 2s ease-in-out infinite 0.6s"></div>
+                <span style="font-family:var(--mono);font-size:11px;color:var(--text2)">Database indexing</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;background:rgba(104,211,145,0.04);border:1px solid rgba(104,211,145,0.12);border-radius:7px;padding:8px 12px">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;animation:podPulse 2s ease-in-out infinite 0.9s"></div>
+                <span style="font-family:var(--mono);font-size:11px;color:var(--text2)">Message queues</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;background:rgba(183,148,244,0.04);border:1px solid rgba(183,148,244,0.12);border-radius:7px;padding:8px 12px">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--purple);flex-shrink:0;animation:podPulse 2s ease-in-out infinite 1.2s"></div>
+                <span style="font-family:var(--mono);font-size:11px;color:var(--text2)">Horizontal scaling</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;background:rgba(79,209,197,0.04);border:1px solid rgba(79,209,197,0.12);border-radius:7px;padding:8px 12px">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--teal);flex-shrink:0;animation:podPulse 2s ease-in-out infinite 1.5s"></div>
+                <span style="font-family:var(--mono);font-size:11px;color:var(--text2)">CDN</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;background:rgba(246,224,94,0.04);border:1px solid rgba(246,224,94,0.12);border-radius:7px;padding:8px 12px">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--yellow);flex-shrink:0;animation:podPulse 2s ease-in-out infinite 1.8s"></div>
+                <span style="font-family:var(--mono);font-size:11px;color:var(--text2)">Connection pooling</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== MODULE 12: REQUEST LIFECYCLE ===== -->
+<section class="module-section" id="m12">
+  <div class="module-header">
+    <span class="module-num tl">MODULE 12</span>
+    <span class="module-title">Example Request Lifecycle</span>
+    <span class="module-desc">Step 16</span>
+  </div>
+
+  <div class="cols2">
+
+    <div class="card tl col-span2">
+      <div class="card-num tl">STEP 16 — Request Lifecycle</div>
+      <div class="card-title">End-to-End Request Flow (Sequence Diagram)</div>
+      <div class="card-body">
+        <p>A single request travels through every layer of the system. This sequence shows both a <strong style="color:var(--orange)">cache miss</strong> (full path) and the return journey.</p>
+        <div class="seqdiag" style="margin-top:12px">
+          <div class="seq-participants">
+            <div class="seq-p bl">User</div>
+            <div class="seq-p tl">CDN</div>
+            <div class="seq-p or">LB</div>
+            <div class="seq-p bl">API</div>
+            <div class="seq-p re">Cache</div>
+            <div class="seq-p gr">DB</div>
+          </div>
+          <div class="seq-rows">
+            <div class="seq-row">
+              <div class="seq-from bl">User</div>
+              <div class="seq-arrow-area"><div class="seq-line"></div><div class="seq-hd"></div></div>
+              <div class="seq-to">CDN</div>
+              <div class="seq-label">HTTP Request</div>
+            </div>
+            <div class="seq-row">
+              <div class="seq-from tl">CDN</div>
+              <div class="seq-arrow-area"><div class="seq-line or"></div><div class="seq-hd or"></div></div>
+              <div class="seq-to" style="color:var(--orange)">LB</div>
+              <div class="seq-label" style="color:var(--text3)">Forward (API miss)</div>
+            </div>
+            <div class="seq-row">
+              <div class="seq-from or">LB</div>
+              <div class="seq-arrow-area"><div class="seq-line"></div><div class="seq-hd"></div></div>
+              <div class="seq-to">API</div>
+              <div class="seq-label">Route to instance</div>
+            </div>
+            <div class="seq-row">
+              <div class="seq-from bl">API</div>
+              <div class="seq-arrow-area"><div class="seq-line re"></div><div class="seq-hd re"></div></div>
+              <div class="seq-to" style="color:var(--red)">Cache</div>
+              <div class="seq-label" style="color:var(--red)">Check cache</div>
+            </div>
+            <div class="seq-row">
+              <div class="seq-from re">Cache</div>
+              <div class="seq-arrow-area"><div class="seq-line or"></div><div class="seq-hd or"></div></div>
+              <div class="seq-to" style="color:var(--blue)">API</div>
+              <div class="seq-label" style="color:var(--orange)">⟵ MISS (no data)</div>
+            </div>
+            <div class="seq-row">
+              <div class="seq-from bl">API</div>
+              <div class="seq-arrow-area"><div class="seq-line gr"></div><div class="seq-hd gr"></div></div>
+              <div class="seq-to" style="color:var(--green)">DB</div>
+              <div class="seq-label" style="color:var(--green)">SQL Query</div>
+            </div>
+            <div class="seq-row">
+              <div class="seq-from gr">DB</div>
+              <div class="seq-arrow-area"><div class="seq-line gr"></div><div class="seq-hd gr"></div></div>
+              <div class="seq-to" style="color:var(--blue)">API</div>
+              <div class="seq-label" style="color:var(--green)">⟵ Result rows</div>
+            </div>
+            <div class="seq-row">
+              <div class="seq-from bl">API</div>
+              <div class="seq-arrow-area"><div class="seq-line re"></div><div class="seq-hd re"></div></div>
+              <div class="seq-to" style="color:var(--red)">Cache</div>
+              <div class="seq-label" style="color:var(--teal)">Store result (TTL)</div>
+            </div>
+            <div class="seq-row">
+              <div class="seq-from bl">API</div>
+              <div class="seq-arrow-area"><div class="seq-line"></div><div class="seq-hd"></div></div>
+              <div class="seq-to" style="color:var(--blue)">User</div>
+              <div class="seq-label" style="color:var(--green)">⟵ JSON Response</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <span class="badge gr">Next request → Cache HIT (no DB query)</span>
+          <span class="badge or">Total target latency: &lt;200ms</span>
+          <span class="badge">Fully async throughout</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== MODULE 13: REAL COMPANIES ===== -->
+<section class="module-section" id="m13">
+  <div class="module-header">
+    <span class="module-num or">MODULE 13</span>
+    <span class="module-title">Real Companies &amp; Reference</span>
+    <span class="module-desc">Steps 17 — Summary</span>
+  </div>
+
+  <div class="cols2">
+
+    <!-- Real companies -->
+    <div class="card">
+      <div class="card-num">STEP 17</div>
+      <div class="card-title">Real Companies Using This Architecture</div>
+      <div class="card-body">
+        <p>These companies operate at massive scale using the same architectural principles.</p>
+        <div class="company-grid" style="margin-top:12px">
+          <div class="company-badge">🎬 Netflix</div>
+          <div class="company-badge">🛒 Amazon</div>
+          <div class="company-badge">🚗 Uber</div>
+          <div class="company-badge">💼 LinkedIn</div>
+          <div class="company-badge">☁️ Microsoft</div>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px">ALL RELY ON</div>
+          <div class="chips">
+            <span class="chip">Microservices</span>
+            <span class="chip or">Distributed caching</span>
+            <span class="chip tl">Message queues</span>
+            <span class="chip gr">Horizontal scaling</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full summary reference -->
+    <div class="card or">
+      <div class="card-num or">SUMMARY</div>
+      <div class="card-title">All 11 Steps at a Glance</div>
+      <div class="card-body">
+        <table class="tbl">
+          <tr><th>#</th><th>Step</th><th>Key Tech</th></tr>
+          <tr><td>1</td><td style="color:var(--text)">Understand Scale</td><td style="color:var(--text2)">Load estimation</td></tr>
+          <tr><td>2</td><td style="color:var(--text)">High-Level Arch</td><td style="color:var(--text2)">8 components</td></tr>
+          <tr><td>3</td><td style="color:var(--text)">CDN</td><td style="color:var(--text2)">Cloudflare / AWS CF</td></tr>
+          <tr><td>4</td><td style="color:var(--text)">Load Balancer</td><td style="color:var(--text2)">NGINX / AWS ALB</td></tr>
+          <tr><td>5</td><td style="color:var(--text)">API Gateway</td><td style="color:var(--text2)">YARP / Kong</td></tr>
+          <tr><td>6</td><td style="color:var(--text)">Stateless APIs</td><td style="color:var(--text2)">ASP.NET Core</td></tr>
+          <tr><td>7</td><td style="color:var(--text)">Redis Cache</td><td style="color:var(--text2)">StackExchange.Redis</td></tr>
+          <tr><td>8</td><td style="color:var(--text)">DB Scaling</td><td style="color:var(--text2)">Sharding / Replicas</td></tr>
+          <tr><td>9</td><td style="color:var(--text)">Message Queue</td><td style="color:var(--text2)">Kafka / RabbitMQ</td></tr>
+          <tr><td>10</td><td style="color:var(--text)">Worker Services</td><td style="color:var(--text2)">BackgroundService</td></tr>
+          <tr><td>11</td><td style="color:var(--text)">Microservices</td><td style="color:var(--text2)">Containerized .NET</td></tr>
+          <tr><td>12</td><td style="color:var(--text)">Monitoring</td><td style="color:var(--text2)">Prometheus / Grafana</td></tr>
+          <tr><td>13</td><td style="color:var(--text)">Auto Scaling</td><td style="color:var(--text2)">Kubernetes (K8s)</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+</div>
+
+<div class="page-footer">
+  <span>System Design: 10M Users in .NET</span> — Complete Architecture Reference &nbsp;·&nbsp; 17 steps &nbsp;·&nbsp; <span>.NET / C#</span>
+</div>
+
+<script>
+// Active nav on scroll
+const secs = document.querySelectorAll('.module-section');
+const navs = document.querySelectorAll('.nav-item');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      navs.forEach(n => n.classList.remove('active'));
+      const a = document.querySelector(`.nav-item[href="#${id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { threshold: 0.25 });
+secs.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

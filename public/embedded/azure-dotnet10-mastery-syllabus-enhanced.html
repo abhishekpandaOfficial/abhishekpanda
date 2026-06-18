@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Mastery - Cloud Architect</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --font-display:'Syne',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-code:'JetBrains Mono',monospace;
+  --left-w:280px;
+  --right-w:590px;
+  --header-h:56px;
+  --az-blue:#0078d4;
+  --az-cyan:#00bcf2;
+  --az-green:#00c896;
+  --az-gold:#ffb900;
+  --az-red:#ff6a5c;
+}
+[data-theme="dark"]{
+  --bg-primary:#08111f;
+  --bg-secondary:#0d1728;
+  --bg-card:#132033;
+  --bg-hover:#1a2b44;
+  --border:#223a57;
+  --border-bright:#33557d;
+  --text-primary:#e7eef8;
+  --text-secondary:#9fb1c8;
+  --text-muted:#5f7390;
+  --code-bg:#091221;
+  --code-border:#1b3556;
+  --header-bg:rgba(8,17,31,0.96);
+}
+[data-theme="light"]{
+  --bg-primary:#f4f8fd;
+  --bg-secondary:#ffffff;
+  --bg-card:#ebf3fb;
+  --bg-hover:#e2edf9;
+  --border:#d1dfef;
+  --border-bright:#b8cce4;
+  --text-primary:#10213a;
+  --text-secondary:#536985;
+  --text-muted:#7e8ea3;
+  --code-bg:#edf3fa;
+  --code-border:#d3e0ef;
+  --header-bg:rgba(244,248,253,0.96);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg-secondary)}
+::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:2px}
+.header{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:100;
+  display:flex;align-items:center;gap:16px;padding:0 20px;
+  border-bottom:1px solid var(--border);background:var(--header-bg);backdrop-filter:blur(12px);
+}
+.header-logo{
+  font-family:var(--font-display);font-size:20px;font-weight:800;
+  background:linear-gradient(135deg,var(--az-blue),var(--az-cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  white-space:nowrap;
+}
+.header-subtitle{
+  font-size:11px;color:var(--text-muted);font-family:var(--font-code);
+  border-left:1px solid var(--border);padding-left:16px;
+}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.badge{
+  background:linear-gradient(135deg,rgba(0,120,212,0.12),rgba(0,188,242,0.12));
+  border:1px solid rgba(0,120,212,0.22);border-radius:20px;padding:4px 12px;
+  color:var(--az-cyan);font-size:11px;font-family:var(--font-code);
+}
+.progress-wrap{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted)}
+.progress-bar{width:80px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--az-blue),var(--az-cyan));border-radius:2px;transition:width .4s ease}
+.layout{display:flex;height:100vh;padding-top:var(--header-h)}
+.left-panel{
+  width:var(--left-w);min-width:var(--left-w);background:var(--bg-secondary);
+  border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;
+}
+.left-search{padding:12px;border-bottom:1px solid var(--border)}
+.left-search input{
+  width:100%;padding:8px 12px;border-radius:6px;background:var(--bg-card);border:1px solid var(--border);
+  color:var(--text-primary);font-size:12px;font-family:var(--font-body);outline:none;
+}
+.left-search input:focus{border-color:var(--az-cyan)}
+.left-search input::placeholder{color:var(--text-muted)}
+.chapter-item{cursor:pointer;border-bottom:1px solid rgba(34,58,87,.6)}
+.chapter-header{display:flex;align-items:center;gap:10px;padding:11px 14px;transition:background .18s;user-select:none}
+.chapter-header:hover{background:var(--bg-hover)}
+.chapter-header.active{background:linear-gradient(90deg,rgba(0,188,242,.09),transparent);border-left:2px solid var(--az-cyan)}
+.ch-num{
+  width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;font-family:var(--font-code);flex-shrink:0;
+}
+.ch-title{font-size:12px;font-weight:500;color:var(--text-secondary);flex:1;line-height:1.3}
+.chapter-header.active .ch-title{color:var(--text-primary)}
+.ch-arrow{font-size:9px;color:var(--text-muted);transition:transform .24s;flex-shrink:0}
+.chapter-item.open .ch-arrow{transform:rotate(90deg)}
+.topics-list{display:none;padding:4px 0 8px}
+.chapter-item.open .topics-list{display:block}
+.topic-item{
+  padding:6px 14px 6px 46px;font-size:11.5px;color:var(--text-muted);display:flex;align-items:center;gap:8px;
+  cursor:pointer;transition:all .15s;
+}
+.topic-item:hover{color:var(--text-secondary);background:rgba(255,255,255,.03)}
+.topic-item.active{color:var(--az-cyan);background:rgba(0,188,242,.07)}
+.topic-item.done::before{content:'•';font-size:12px;color:var(--az-green);margin-right:2px}
+.middle-panel{
+  flex:1;background:var(--bg-primary);border-right:1px solid var(--border);overflow-y:auto;padding:24px 20px;
+}
+.welcome-screen{
+  min-height:calc(100vh - 120px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+}
+.welcome-logo{
+  width:88px;height:88px;border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;
+  background:linear-gradient(135deg,rgba(0,120,212,.22),rgba(0,188,242,.18));
+  border:1px solid rgba(0,188,242,.26);font-family:var(--font-display);font-size:34px;font-weight:800;color:var(--az-cyan);
+  box-shadow:0 0 50px rgba(0,120,212,.15);
+}
+.welcome-title{font-family:var(--font-display);font-size:30px;font-weight:800;margin-bottom:10px}
+.welcome-subtitle{max-width:720px;font-size:14px;line-height:1.7;color:var(--text-secondary);margin-bottom:26px}
+.welcome-stats{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:26px}
+.welcome-stat{min-width:112px;padding:16px 18px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border)}
+.welcome-stat-num{font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--az-cyan)}
+.welcome-stat-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);font-family:var(--font-code)}
+.welcome-actions{
+  position:relative;isolation:isolate;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  width:min(100%,560px);padding:14px;border-radius:28px;overflow:visible;
+  background:linear-gradient(135deg,rgba(19,32,51,.82),rgba(13,23,40,.74));
+  border:1px solid rgba(51,85,125,.85);
+  box-shadow:0 24px 60px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(18px);
+}
+.welcome-actions::before{
+  content:'';position:absolute;inset:1px;border-radius:27px;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at top left,rgba(0,120,212,.18),transparent 42%),
+    radial-gradient(circle at bottom right,rgba(0,188,242,.16),transparent 40%);
+}
+.start-btn{
+  position:relative;z-index:1;flex:1 1 220px;justify-content:space-between;
+  display:inline-flex;align-items:center;gap:12px;white-space:nowrap;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,0)) padding-box,
+    linear-gradient(135deg,var(--az-blue),var(--az-cyan)) border-box;
+  color:#fff;border:1px solid transparent;border-radius:999px;padding:8px 10px 8px 18px;
+  font-size:13px;font-weight:700;cursor:pointer;transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  box-shadow:0 16px 34px rgba(0,120,212,.22), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 20px 38px rgba(0,120,212,.28), inset 0 1px 0 rgba(255,255,255,.22);filter:saturate(1.06)}
+.start-btn-text{display:inline-flex;align-items:center}
+.start-btn-icon{
+  width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:rgba(8,17,31,.24);border:1px solid rgba(255,255,255,.18);font-size:13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.02)) padding-box,
+    linear-gradient(135deg,var(--az-cyan),var(--az-green)) border-box;
+  color:var(--text-primary);
+  box-shadow:0 16px 34px rgba(0,188,242,.16), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary:hover{box-shadow:0 20px 38px rgba(0,188,242,.22), inset 0 1px 0 rgba(255,255,255,.18)}
+.start-btn-secondary .start-btn-icon{
+  background:rgba(0,188,242,.14);border-color:rgba(255,255,255,.18);color:#e6fbff;
+}
+.chapter-hero{
+  background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));border:1px solid var(--border);border-radius:14px;padding:24px;
+  margin-bottom:20px;position:relative;overflow:hidden;
+}
+.chapter-hero::before{
+  content:'';position:absolute;top:-30px;right:-30px;width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,188,242,.16),transparent);
+}
+.chapter-hero-num{font-family:var(--font-code);font-size:10px;color:var(--az-cyan);margin-bottom:8px;text-transform:uppercase;letter-spacing:2px}
+.chapter-hero-title{font-family:var(--font-display);font-size:25px;font-weight:800;margin-bottom:8px;line-height:1.15}
+.chapter-hero-desc{font-size:13px;color:var(--text-secondary);line-height:1.65;max-width:560px}
+.chapter-hero-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.hero-tag,.meta-tag,.dbadge{
+  font-size:10px;padding:3px 8px;border-radius:4px;font-family:var(--font-code);border:1px solid;
+}
+.topics-grid{display:flex;flex-direction:column;gap:8px}
+.topic-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;
+  cursor:pointer;transition:all .18s;display:flex;align-items:flex-start;gap:12px;
+}
+.topic-card:hover{border-color:var(--border-bright);background:var(--bg-hover);transform:translateX(2px)}
+.topic-card.active{border-color:var(--az-cyan);background:rgba(0,188,242,.05)}
+.topic-card-icon{font-size:20px;width:36px;text-align:center;flex-shrink:0;margin-top:1px}
+.topic-card-body{flex:1}
+.topic-card-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.topic-card-desc{font-size:11.5px;color:var(--text-muted);line-height:1.55}
+.topic-card-meta{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.right-panel{width:var(--right-w);min-width:var(--right-w);background:var(--bg-secondary);overflow-y:auto;position:relative}
+.detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;text-align:center;padding:40px;color:var(--text-muted)}
+.detail-empty-icon{font-size:48px;opacity:.35}
+.detail-empty h3{font-family:var(--font-display);font-size:18px;color:var(--text-secondary)}
+.detail-empty p{font-size:13px;line-height:1.6}
+.detail-content{padding:24px}
+.detail-header{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.detail-breadcrumb{font-size:10px;color:var(--text-muted);font-family:var(--font-code);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.detail-title{font-family:var(--font-display);font-size:24px;font-weight:800;line-height:1.15;margin-bottom:6px}
+.detail-subtitle{font-size:13px;color:var(--text-secondary);line-height:1.6}
+.detail-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.section{margin-bottom:24px}
+.section-title{
+  font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.section-title::before{content:'';display:block;width:3px;height:14px;background:var(--az-cyan);border-radius:2px}
+.prose{font-size:13px;color:var(--text-secondary);line-height:1.75}
+.prose p{margin-bottom:10px}
+.prose strong{color:var(--text-primary)}
+.prose ul{padding-left:18px;margin-bottom:10px}
+.prose li{margin-bottom:5px}
+.prose code,.table-wrap code,.qa-answer-text code{
+  background:var(--code-bg);border:1px solid var(--code-border);border-radius:4px;padding:1px 5px;font-family:var(--font-code);font-size:11px;color:var(--az-cyan);
+}
+.code-block,.diagram-box,.table-wrap,.steps-box{
+  background:var(--code-bg);border:1px solid var(--code-border);border-radius:10px;overflow:hidden;margin-bottom:16px;
+}
+.code-header,.diagram-header,.table-header,.steps-header{
+  display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--code-border);background:rgba(0,0,0,.18);
+}
+.code-lang,.code-title,.diagram-header,.table-header,.steps-header{
+  font-size:10px;color:var(--az-cyan);font-family:var(--font-code);text-transform:uppercase;letter-spacing:1px;
+}
+.code-copy{
+  background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;
+}
+.code-copy:hover{border-color:var(--az-cyan);color:var(--az-cyan)}
+.code-body{padding:16px;overflow-x:auto}
+.code-body pre{font-family:var(--font-code);font-size:11.5px;line-height:1.75;color:#d8e7fa}
+.code-body pre{min-width:max-content}
+.kw{color:#7dd3fc}
+.type,.cls{color:#93c5fd}
+.str{color:#a7f3d0}
+.num{color:#fbbf24}
+.cmt,.cm{color:#73839b;font-style:italic}
+.fn{color:#c4b5fd}
+.prop{color:#fda4af}
+.dec{color:#fde68a}
+.diagram-body{padding:16px;display:flex;justify-content:center;overflow-x:auto}
+.diagram-body svg,.diagram-body img{display:block;width:min(100%,560px);max-width:100%;height:auto;flex-shrink:0}
+.callout{border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;font-size:12.5px;line-height:1.65}
+.callout-info{background:rgba(0,188,242,.07);border:1px solid rgba(0,188,242,.22);color:var(--text-secondary)}
+.callout-warn{background:rgba(255,185,0,.08);border:1px solid rgba(255,185,0,.25);color:var(--text-secondary)}
+.callout-success{background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.24);color:var(--text-secondary)}
+.callout-danger{background:rgba(255,106,92,.08);border:1px solid rgba(255,106,92,.24);color:var(--text-secondary)}
+.callout-icon{flex-shrink:0;font-size:15px}
+.table-body{padding:0;overflow-x:auto}
+.comp-table{width:100%;border-collapse:collapse;font-size:12px}
+.comp-table{min-width:520px}
+.comp-table th{background:var(--bg-card);padding:10px 12px;text-align:left;font-size:10px;color:var(--text-muted);font-family:var(--font-code);text-transform:uppercase;letter-spacing:.5px;border:1px solid var(--border)}
+.comp-table td{padding:10px 12px;border:1px solid var(--border);color:var(--text-secondary);vertical-align:top;line-height:1.55}
+.steps-body{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.step-item{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:12px}
+.step-num{
+  width:28px;height:28px;border-radius:8px;background:rgba(0,188,242,.14);border:1px solid rgba(0,188,242,.25);display:flex;align-items:center;justify-content:center;
+  color:var(--az-cyan);font-family:var(--font-display);font-size:13px;font-weight:800;flex-shrink:0;
+}
+.step-copy h4{font-family:var(--font-display);font-size:13px;margin-bottom:4px}
+.step-copy p{font-size:12px;color:var(--text-secondary);line-height:1.6}
+.qa-item{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.qa-question{padding:12px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;transition:background .2s}
+.qa-question:hover{background:var(--bg-hover)}
+.qa-q-icon{font-size:11px;font-weight:700;color:var(--az-cyan);font-family:var(--font-code);margin-top:1px;flex-shrink:0}
+.qa-q-text{font-size:12.5px;font-weight:500;color:var(--text-primary);flex:1;line-height:1.5}
+.qa-level{font-size:9px;padding:2px 6px;border-radius:3px;font-family:var(--font-code);margin-top:2px;flex-shrink:0}
+.qa-arrow{color:var(--text-muted);font-size:10px;transition:transform .25s;margin-top:3px}
+.qa-item.open .qa-arrow{transform:rotate(90deg)}
+.qa-answer{display:none;padding:12px 14px;border-top:1px solid var(--border);background:rgba(0,0,0,.12)}
+.qa-item.open .qa-answer{display:block}
+.qa-answer-text{font-size:12px;color:var(--text-secondary);line-height:1.75}
+.qa-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.qa-filter-btn{
+  background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);border-radius:999px;
+  padding:7px 12px;font-size:10.5px;font-family:var(--font-code);cursor:pointer;transition:all .18s ease;
+}
+.qa-filter-btn:hover,.qa-filter-btn.active{
+  color:#fff;border-color:rgba(0,188,242,.35);
+  background:linear-gradient(135deg,rgba(0,120,212,.22),rgba(0,188,242,.24));
+  box-shadow:0 10px 24px rgba(0,188,242,.12);
+}
+.qa-kicker{font-size:9px;color:var(--text-muted);font-family:var(--font-code);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.qa-qmeta{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.qa-tag{font-size:8.5px;padding:2px 6px;border-radius:4px;font-family:var(--font-code);border:1px solid}
+.qa-stat{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin:14px 0;font-size:11.5px;color:var(--text-secondary);line-height:1.75}
+.qa-stat strong{font-family:var(--font-code);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-primary)}
+.qa-answer-code{margin-top:12px;background:var(--code-bg);border:1px solid var(--code-border);border-radius:10px;overflow-x:auto}
+.qa-answer-code pre{padding:14px;font-family:var(--font-code);font-size:11px;line-height:1.7;color:#d8e7fa;min-width:max-content}
+.interview-overview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.interview-overview-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .18s ease}
+.interview-overview-card:hover,.interview-overview-card.active{border-color:rgba(0,188,242,.38);background:linear-gradient(160deg,rgba(0,120,212,.12),rgba(0,188,242,.08));box-shadow:0 12px 28px rgba(0,120,212,.12)}
+.interview-overview-kicker{font-size:9px;font-family:var(--font-code);letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+.interview-overview-title{font-size:13px;font-weight:800;color:var(--text-primary);margin-bottom:5px}
+.interview-overview-copy{font-size:11.5px;color:var(--text-secondary);line-height:1.6}
+.interview-overview-count{margin-top:10px;font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--az-cyan)}
+.interview-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.interview-toolbar-label{width:100%;font-size:9px;font-family:var(--font-code);letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)}
+.field-guide{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.field-guide-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px}
+.field-guide-card h4{font-family:var(--font-display);font-size:13px;margin-bottom:8px;color:var(--text-primary)}
+.field-guide-card p,.field-guide-card li{font-size:12px;line-height:1.65;color:var(--text-secondary)}
+.field-guide-card ul{padding-left:17px}
+@media (max-width:1180px){
+  html,body{overflow:auto}
+  .layout{height:auto;min-height:100vh;display:block}
+  .left-panel,.right-panel{width:100%;min-width:0;border-right:none;border-left:none}
+  .left-panel{border-bottom:1px solid var(--border)}
+  .middle-panel{border-right:none;border-bottom:1px solid var(--border)}
+}
+@media (max-width:640px){
+  .welcome-actions{width:min(100%,420px);padding:10px}
+  .start-btn{flex-basis:100%;width:100%}
+  .comp-table{min-width:420px}
+  .interview-overview-grid,.field-guide{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-logo">Azure Mastery</div>
+  <div class="header-subtitle">Tri-pane cloud guide · Azure architecture · .NET delivery · security, observability, AI</div>
+  <div class="header-right">
+    <div class="progress-wrap">
+      <span id="progressText">0%</span>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="badge">Cloud Architect</div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="left-panel">
+    <div class="left-search">
+      <input type="text" id="searchInput" placeholder="Search Azure topics..." oninput="filterTopics(this.value)">
+    </div>
+    <div id="chapterNav"></div>
+  </div>
+
+  <div class="middle-panel">
+    <div class="welcome-screen" id="welcomeScreen">
+      <div class="welcome-logo">Az</div>
+      <div class="welcome-title">Azure Mastery</div>
+      <div class="welcome-subtitle">Navigate Azure the same way as the C# and .NET mastery tracks: left-side chapter navigation, middle topic explorer, and a right-side deep panel for architecture explanations, deployment flows, code, diagrams, governance patterns, and interview preparation.</div>
+      <div class="welcome-stats">
+        <div class="welcome-stat"><div class="welcome-stat-num">10</div><div class="welcome-stat-label">Chapters</div></div>
+        <div class="welcome-stat"><div class="welcome-stat-num">40</div><div class="welcome-stat-label">Topics</div></div>
+        <div class="welcome-stat"><div class="welcome-stat-num">40</div><div class="welcome-stat-label">Service Tracks</div></div>
+        <div class="welcome-stat"><div class="welcome-stat-num">640+</div><div class="welcome-stat-label">Interview Q&amp;A</div></div>
+      </div>
+      <div class="welcome-actions">
+        <button class="start-btn" onclick="selectChapter(0)">
+          <span class="start-btn-text">Start With Azure Foundations</span>
+          <span class="start-btn-icon" aria-hidden="true">→</span>
+        </button>
+        <button class="start-btn start-btn-secondary" onclick="showAllInterviewQuestions()">
+          <span class="start-btn-text">Interview Q&amp;A</span>
+          <span class="start-btn-icon" aria-hidden="true">🎯</span>
+        </button>
+      </div>
+    </div>
+    <div id="chapterContent" style="display:none"></div>
+  </div>
+
+  <div class="right-panel">
+    <div class="detail-empty" id="detailEmpty">
+      <div class="detail-empty-icon">☁️</div>
+      <h3>Select a Topic</h3>
+      <p>Open a topic from the middle panel to see Azure explanations, reference architecture, code samples, deployment flows, governance tables, and interview questions.</p>
+    </div>
+    <div id="detailContent" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const chapters = [
+  {
+    id:0, num:"01", title:"Foundations", icon:"☁️", color:"#00bcf2", bg:"rgba(0,188,242,0.12)",
+    desc:"Start with the Azure operating model: tenants, subscriptions, resource groups, IaC, and identity fundamentals.",
+    tags:["Core","Governance","Beginner"],
+    topics:[
+      {id:"azure-platform", title:"Azure Platform Mental Model", icon:"🧭", desc:"Tenant, subscription, region, resource provider, and landing zone basics.", tags:["Core","Important"]},
+      {id:"subscriptions-rg", title:"Subscriptions, Resource Groups, Tags", icon:"🗂️", desc:"How to organize ownership, billing, lifecycle, and access boundaries.", tags:["Governance","Important"]},
+      {id:"cli-bicep", title:"Azure CLI + Bicep Workflow", icon:"🛠️", desc:"The IaC path for repeatable environments.", tags:["IaC","Tooling"]},
+      {id:"identity-basics", title:"Entra ID and Identity Basics", icon:"🔐", desc:"Directory, principals, RBAC, and identity flow into Azure resources.", tags:["Security","Core"]}
+    ]
+  },
+  {
+    id:1, num:"02", title:"Compute", icon:"⚙️", color:"#0078d4", bg:"rgba(0,120,212,0.12)",
+    desc:"Choose the right Azure compute surface for .NET workloads, APIs, event handlers, and containers.",
+    tags:["Compute",".NET","Architecture"],
+    topics:[
+      {id:"app-service", title:"App Service for Web APIs", icon:"🌐", desc:"Fast path for ASP.NET Core web apps with managed hosting.", tags:[".NET","Important"]},
+      {id:"functions-isolated", title:"Azure Functions Isolated Worker", icon:"⚡", desc:"Event-driven .NET with triggers, bindings, and cold-start tradeoffs.", tags:["Serverless","Important"]},
+      {id:"container-apps", title:"Azure Container Apps", icon:"📦", desc:"Containers without owning Kubernetes, ideal for APIs and workers.", tags:["Containers","Modern"]},
+      {id:"aks-platform", title:"AKS Platform Design", icon:"☸️", desc:"When platform control, scale, and Kubernetes flexibility matter.", tags:["Kubernetes","Important"]}
+    ]
+  },
+  {
+    id:2, num:"03", title:"Networking", icon:"🌍", color:"#00c896", bg:"rgba(0,200,150,0.12)",
+    desc:"Connect services safely with VNets, private endpoints, API gateways, and global traffic control.",
+    tags:["Network","Edge","Security"],
+    topics:[
+      {id:"vnet-subnets", title:"VNets, Subnets, NSGs", icon:"🕸️", desc:"Private network layout for Azure workloads.", tags:["Core","Network"]},
+      {id:"apim-frontdoor", title:"API Management + Front Door", icon:"🚪", desc:"Global entry, routing, policy enforcement, and API mediation.", tags:["Architecture","Important"]},
+      {id:"private-link", title:"Private Link and Private DNS", icon:"🔒", desc:"Keep PaaS traffic off the public internet.", tags:["Security","Important"]},
+      {id:"traffic-patterns", title:"Traffic Manager and Regional Failover", icon:"🧭", desc:"Route traffic by health, geography, or priority.", tags:["Resilience","Global"]}
+    ]
+  },
+  {
+    id:3, num:"04", title:"Identity & Security", icon:"🛡️", color:"#ffb900", bg:"rgba(255,185,0,0.12)",
+    desc:"Secure Azure workloads with RBAC, managed identity, secrets isolation, policy, and posture management.",
+    tags:["Security","Identity","Zero Trust"],
+    topics:[
+      {id:"entra-rbac", title:"Entra ID, RBAC, and Scopes", icon:"👤", desc:"Role assignments, least privilege, and access boundaries.", tags:["Security","Important"]},
+      {id:"managed-identity", title:"Managed Identity Flow", icon:"🪪", desc:"Replace connection strings and app secrets with workload identities.", tags:["Security","Important"]},
+      {id:"key-vault", title:"Key Vault and Secret Delivery", icon:"🔑", desc:"Secrets, certificates, CMKs, and runtime retrieval patterns.", tags:["Security","Important"]},
+      {id:"defender-policy", title:"Policy, Defender, and Guardrails", icon:"📏", desc:"Prevent drift and surface security posture issues early.", tags:["Governance","Operations"]}
+    ]
+  },
+  {
+    id:4, num:"05", title:"Storage & Data", icon:"🗄️", color:"#00bcf2", bg:"rgba(0,188,242,0.12)",
+    desc:"Choose storage primitives deliberately: blobs, queues, relational data, globally distributed documents, and cache.",
+    tags:["Data","Storage","Performance"],
+    topics:[
+      {id:"storage-account", title:"Storage Account Strategy", icon:"🪣", desc:"Blob, queue, file, table, tiers, replication, and SAS.", tags:["Storage","Important"]},
+      {id:"sql-azure", title:"Azure SQL Design", icon:"🧾", desc:"Managed relational database patterns for business systems.", tags:["SQL","Data"]},
+      {id:"cosmosdb", title:"Cosmos DB Partitioning", icon:"🌌", desc:"Partition keys, RU budgeting, and document model decisions.", tags:["NoSQL","Important"]},
+      {id:"redis-cache", title:"Azure Cache for Redis", icon:"⚡", desc:"Cache-aside, session, and distributed performance patterns.", tags:["Performance","Caching"]}
+    ]
+  },
+  {
+    id:5, num:"06", title:"Messaging & Integration", icon:"🔄", color:"#ff6a5c", bg:"rgba(255,106,92,0.12)",
+    desc:"Model asynchronous systems with queues, events, streams, and integration workflows.",
+    tags:["Messaging","Events","Integration"],
+    topics:[
+      {id:"service-bus", title:"Service Bus Queues and Topics", icon:"📮", desc:"Reliable commands, retries, sessions, and competing consumers.", tags:["Messaging","Important"]},
+      {id:"event-grid", title:"Event Grid and Domain Events", icon:"📣", desc:"Push notifications and event fan-out between Azure services.", tags:["Events","Cloud Native"]},
+      {id:"event-hubs", title:"Event Hubs Streaming", icon:"📡", desc:"Telemetry and ingestion at scale.", tags:["Streaming","Data"]},
+      {id:"logic-apps", title:"Logic Apps Orchestration", icon:"🧩", desc:"Low-code integrations around enterprise workflows.", tags:["Integration","Automation"]}
+    ]
+  },
+  {
+    id:6, num:"07", title:"Delivery & IaC", icon:"🚀", color:"#0078d4", bg:"rgba(0,120,212,0.12)",
+    desc:"Ship Azure environments and workloads consistently with Bicep, pipelines, environments, and release safety.",
+    tags:["IaC","DevOps","Delivery"],
+    topics:[
+      {id:"bicep-modules", title:"Bicep Modules and Environments", icon:"📐", desc:"Structure Azure infrastructure as reusable modules.", tags:["IaC","Important"]},
+      {id:"github-actions", title:"GitHub Actions Deployments", icon:"🔁", desc:"CI/CD for .NET apps and Azure infrastructure.", tags:["DevOps","Important"]},
+      {id:"container-delivery", title:"Container Build and Promotion", icon:"🏷️", desc:"ACR, image tags, environments, and supply chain flow.", tags:["Containers","DevOps"]},
+      {id:"release-strategies", title:"Blue/Green and Slot Swaps", icon:"🎛️", desc:"Release strategies for low-risk cloud delivery.", tags:["Reliability","Production"]}
+    ]
+  },
+  {
+    id:7, num:"08", title:"Observability", icon:"📈", color:"#00c896", bg:"rgba(0,200,150,0.12)",
+    desc:"Make cloud systems debuggable and operable with metrics, logs, traces, alerts, and resilience patterns.",
+    tags:["Observability","Reliability","Operations"],
+    topics:[
+      {id:"app-insights", title:"Application Insights", icon:"🔍", desc:"Distributed tracing, dependency telemetry, and failure analysis.", tags:["Observability","Important"]},
+      {id:"azure-monitor", title:"Azure Monitor and Alerts", icon:"🚨", desc:"Metrics, logs, dashboards, and incident signals.", tags:["Operations","Important"]},
+      {id:"resiliency-patterns", title:"Retry, Circuit Breaker, and DR", icon:"🧯", desc:"Cloud failure handling and operational resilience.", tags:["Reliability","Important"]},
+      {id:"backup-dr", title:"Backup and Disaster Recovery", icon:"🧰", desc:"Restore plans, geo-redundancy, and workload recovery.", tags:["Continuity","Production"]}
+    ]
+  },
+  {
+    id:8, num:"09", title:"AI & Modern Data", icon:"🤖", color:"#ffb900", bg:"rgba(255,185,0,0.12)",
+    desc:"Use Azure's AI platform intentionally: model serving, search, embeddings, and retrieval architecture.",
+    tags:["AI","Data","Modern Azure"],
+    topics:[
+      {id:"azure-openai", title:"Azure OpenAI Integration", icon:"🧠", desc:"Model access, content safety, and enterprise API design.", tags:["AI","Important"]},
+      {id:"ai-search-rag", title:"AI Search and RAG Flow", icon:"🔎", desc:"Indexing, chunking, retrieval, and citation architecture.", tags:["AI","Important"]},
+      {id:"ml-inference", title:"Azure ML and Inference Paths", icon:"📊", desc:"Model training, registries, endpoints, and ops boundaries.", tags:["ML","Platforms"]},
+      {id:"fabric-data", title:"Analytics and Fabric Awareness", icon:"📚", desc:"Know where Azure operational data ends and analytics platforms begin.", tags:["Data","Architecture"]}
+    ]
+  },
+  {
+    id:9, num:"10", title:".NET on Azure", icon:"🔵", color:"#00bcf2", bg:"rgba(0,188,242,0.12)",
+    desc:"Tie Azure and .NET together: hosting choices, Aspire, cost decisions, and interview-ready cloud architecture reasoning.",
+    tags:[".NET","Architecture","Interview"],
+    topics:[
+      {id:"dotnet-hosting", title:".NET Hosting Decision Matrix", icon:"🧠", desc:"App Service, Functions, Container Apps, AKS, and when each wins.", tags:[".NET","Important"]},
+      {id:"aspire-azure", title:".NET Aspire with Azure", icon:"🕹️", desc:"Local orchestration, resource wiring, and cloud deployment discipline.", tags:[".NET","Modern"]},
+      {id:"cost-governance", title:"Cost and Governance Discipline", icon:"💸", desc:"Budgets, tags, rightsizing, and avoiding cloud waste.", tags:["Governance","Important"]},
+      {id:"azure-interview", title:"Azure Architecture Interview Prep", icon:"🎯", desc:"How to explain Azure design choices clearly under pressure.", tags:["Interview","Important"]}
+    ]
+  }
+];
+
+const topicDetails = {
+  "azure-platform": {
+    title:"Azure Platform Mental Model",
+    breadcrumb:"Chapter 1 · Foundations",
+    subtitle:"Azure works best when you think in boundaries: tenant for identity, subscription for billing and isolation, resource group for lifecycle, region for placement, and landing zone for repeatable governance.",
+    badges:[{text:"Core",color:"#00bcf2"},{text:"Important",color:"#0078d4"},{text:"Architecture",color:"#00c896"}],
+    sections:[
+      {type:"prose", title:"How to think about Azure", content:`
+        <p>Cloud mistakes usually come from mixing scopes. Teams put all resources in one subscription, attach ad hoc access, and only later realize cost, blast radius, and compliance are all tangled together.</p>
+        <ul>
+          <li><strong>Tenant</strong> is the identity boundary.</li>
+          <li><strong>Subscription</strong> is the billing and broad governance boundary.</li>
+          <li><strong>Resource group</strong> is the deployment and lifecycle boundary.</li>
+          <li><strong>Region</strong> affects latency, residency, and disaster planning.</li>
+          <li><strong>Landing zone</strong> standardizes policy, networking, management groups, and guardrails.</li>
+        </ul>
+      `},
+      {type:"diagram", title:"Azure Scope Model", svg:`
+        <svg width="520" height="250" viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrAz1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#00bcf2"/>
+            </marker>
+            <style>
+              .box{fill:#132033;stroke:#33557d;stroke-width:1.4;rx:10}
+              .txt{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#e7eef8;text-anchor:middle}
+              .sub{font-family:'JetBrains Mono',monospace;font-size:8px;fill:#9fb1c8;text-anchor:middle}
+              .line{stroke:#00bcf2;stroke-width:1.5;fill:none;marker-end:url(#arrAz1)}
+            </style>
+          </defs>
+          <rect class="box" x="180" y="20" width="160" height="42"/><text class="txt" x="260" y="38">Entra Tenant</text><text class="sub" x="260" y="52">Identity and principals</text>
+          <rect class="box" x="60" y="95" width="160" height="52"/><text class="txt" x="140" y="115">Subscription A</text><text class="sub" x="140" y="131">Billing, policy, RBAC</text>
+          <rect class="box" x="300" y="95" width="160" height="52"/><text class="txt" x="380" y="115">Subscription B</text><text class="sub" x="380" y="131">Separate workload boundary</text>
+          <rect class="box" x="60" y="182" width="160" height="44"/><text class="txt" x="140" y="200">Resource Group</text><text class="sub" x="140" y="214">Deployment lifecycle</text>
+          <rect class="box" x="300" y="182" width="160" height="44"/><text class="txt" x="380" y="200">Resources</text><text class="sub" x="380" y="214">App, DB, storage, secrets</text>
+          <path class="line" d="M220 62 L160 95"/>
+          <path class="line" d="M300 62 L360 95"/>
+          <path class="line" d="M140 147 L140 182"/>
+          <path class="line" d="M220 204 L296 204"/>
+        </svg>
+      `},
+      {type:"table", title:"Azure boundaries that matter", columns:["Boundary","Primary purpose","Typical mistake"], rows:[
+        ["Tenant","Identity root for users, groups, apps","Treating subscriptions as identity boundaries"],
+        ["Subscription","Billing, quota, access scope, policy","Putting prod and sandbox in one subscription"],
+        ["Resource Group","Lifecycle and deployment grouping","Grouping by technology instead of app lifecycle"],
+        ["Region","Latency and residency","Ignoring paired-region DR requirements"]
+      ]},
+      {type:"callout", kind:"info", icon:"💡", text:"If you cannot explain why a workload sits in a specific subscription, region, and resource group, the environment is not designed yet. It is merely deployed."}
+    ]
+  },
+  "subscriptions-rg": {
+    title:"Subscriptions, Resource Groups, Tags",
+    breadcrumb:"Chapter 1 · Foundations",
+    subtitle:"Good Azure hygiene starts with clean ownership, lifecycle boundaries, and mandatory metadata, not after-the-fact cleanup.",
+    badges:[{text:"Governance",color:"#00bcf2"},{text:"Important",color:"#0078d4"},{text:"FinOps",color:"#ffb900"}],
+    sections:[
+      {type:"steps", title:"Practical organization rules", steps:[
+        {title:"Split by environment and risk", text:"Production, non-production, shared platform, and sandbox should not all live in one billing and policy bucket."},
+        {title:"Use resource groups by lifecycle", text:"If resources deploy, scale, and retire together, they belong together."},
+        {title:"Mandate tags", text:"At minimum use application, owner, environment, cost-center, data-classification, and business-criticality."},
+        {title:"Back tags with policy", text:"If tags matter for cost and support, enforce them with Azure Policy rather than hoping developers remember."}
+      ]},
+      {type:"code", title:"Tag enforcement with Bicep", lang:"bicep", code:`<span class="kw">param</span> environment <span class="type">string</span>
+<span class="kw">param</span> appName <span class="type">string</span>
+<span class="kw">param</span> owner <span class="type">string</span>
+
+<span class="kw">resource</span> appRg <span class="str">'Microsoft.Resources/resourceGroups@2024-03-01'</span> = {
+  name: <span class="str">'rg-\${appName}-\${environment}'</span>
+  location: resourceGroup().location
+  tags: {
+    application: appName
+    environment: environment
+    owner: owner
+    costCenter: <span class="str">'platform'</span>
+  }
+}`},
+      {type:"callout", kind:"warn", icon:"⚠️", text:"A resource group is not a folder. It is a lifecycle boundary. If two resources do not belong to the same release and retirement story, be cautious about grouping them together."}
+    ]
+  },
+  "cli-bicep": {
+    title:"Azure CLI + Bicep Workflow",
+    breadcrumb:"Chapter 1 · Foundations",
+    subtitle:"Mature Azure teams create environments from code, inspect plans before apply, and keep changes reviewable in Git.",
+    badges:[{text:"IaC",color:"#00bcf2"},{text:"Tooling",color:"#0078d4"},{text:"Important",color:"#00c896"}],
+    sections:[
+      {type:"code", title:"Bicep deployment flow", lang:"bash", code:`<span class="cmt"># validate</span>
+az deployment sub validate \
+  --location centralindia \
+  --template-file main.bicep \
+  --parameters environment=prod
+
+<span class="cmt"># preview changes</span>
+az deployment sub what-if \
+  --location centralindia \
+  --template-file main.bicep \
+  --parameters environment=prod
+
+<span class="cmt"># apply</span>
+az deployment sub create \
+  --location centralindia \
+  --template-file main.bicep \
+  --parameters environment=prod`},
+      {type:"prose", title:"Workflow discipline", content:`
+        <p>Keep <strong>modules small and composable</strong>. App teams should not need to edit one giant infrastructure file for every change. A good Bicep repo usually separates networking, data, platform services, and workload modules.</p>
+      `}
+    ]
+  },
+  "app-service": {
+    title:"App Service for Web APIs",
+    breadcrumb:"Chapter 2 · Compute",
+    subtitle:"App Service is the fastest way to host ASP.NET Core APIs when you want managed runtime, deployment slots, diagnostics, and low platform overhead.",
+    badges:[{text:".NET",color:"#0078d4"},{text:"Important",color:"#00bcf2"},{text:"Managed Hosting",color:"#00c896"}],
+    sections:[
+      {type:"table", title:"Why App Service wins", columns:["Area","What App Service gives you"], rows:[
+        ["Operations","Managed OS patching, runtime configuration, deployment slots"],
+        ["Scaling","Scale out without owning orchestrator control planes"],
+        ["Developer experience","Simple deployment from GitHub Actions, zip deploy, or containers"],
+        ["Diagnostics","App Insights integration, log streaming, site extensions, Kudu"]
+      ]},
+      {type:"code", title:"Bicep for App Service + App Insights", lang:"bicep", code:`<span class="kw">resource</span> plan <span class="str">'Microsoft.Web/serverfarms@2023-12-01'</span> = {
+  name: <span class="str">'asp-api-prod'</span>
+  location: resourceGroup().location
+  sku: {
+    name: <span class="str">'P1v3'</span>
+    tier: <span class="str">'PremiumV3'</span>
+  }
+}
+
+<span class="kw">resource</span> site <span class="str">'Microsoft.Web/sites@2023-12-01'</span> = {
+  name: <span class="str">'api-orders-prod'</span>
+  location: resourceGroup().location
+  properties: {
+    serverFarmId: plan.id
+    httpsOnly: <span class="kw">true</span>
+    siteConfig: {
+      linuxFxVersion: <span class="str">'DOTNETCORE|10.0'</span>
+      alwaysOn: <span class="kw">true</span>
+    }
+  }
+}`},
+      {type:"steps", title:"App Service production checklist", steps:[
+        {title:"Use slots for safe releases", text:"Warm the new version, run smoke checks, then swap instead of redeploying blindly."},
+        {title:"Keep config in settings", text:"Use app settings and Key Vault references, not hard-coded values."},
+        {title:"Attach monitoring early", text:"App Insights, alerts, and availability checks should exist before the first incident."}
+      ]},
+      {type:"callout", kind:"success", icon:"✅", text:"If your workload is an HTTP .NET API and you do not need Kubernetes-level control, App Service is usually the cleanest first choice."}
+    ]
+  },
+  "functions-isolated": {
+    title:"Azure Functions Isolated Worker",
+    breadcrumb:"Chapter 2 · Compute",
+    subtitle:"Functions isolated worker is the clean serverless path for event-driven .NET, but only if you design around execution limits, idempotency, and cold starts.",
+    badges:[{text:"Serverless",color:"#00bcf2"},{text:"Important",color:"#0078d4"},{text:".NET",color:"#00c896"}],
+    sections:[
+      {type:"prose", title:"When Functions fit", content:`
+        <p>Functions are excellent when work is <strong>trigger-driven, bursty, or integration-heavy</strong>: queue consumers, timers, webhooks, lightweight APIs, file processing, and background event handlers.</p>
+        <p>They are less attractive for large monolith APIs, long-running interactive workloads, or systems needing deep network and process control.</p>
+      `},
+      {type:"code", title:"Isolated worker queue trigger", lang:"csharp", code:`<span class="kw">public class</span> <span class="type">InvoiceQueueHandler</span>
+{
+    <span class="kw">private readonly</span> <span class="type">ILogger</span>&lt;<span class="type">InvoiceQueueHandler</span>&gt; _logger;
+
+    <span class="kw">public</span> <span class="fn">InvoiceQueueHandler</span>(<span class="type">ILogger</span>&lt;<span class="type">InvoiceQueueHandler</span>&gt; logger)
+    {
+        _logger = logger;
+    }
+
+    [<span class="dec">Function</span>(<span class="str">"ProcessInvoice"</span>)]
+    <span class="kw">public async</span> <span class="type">Task</span> <span class="fn">RunAsync</span>(
+        [<span class="dec">ServiceBusTrigger</span>(<span class="str">"invoice-commands"</span>, Connection = <span class="str">"ServiceBus"</span>)]
+        <span class="type">string</span> message)
+    {
+        _logger.<span class="fn">LogInformation</span>(<span class="str">"Processing invoice command {message}"</span>, message);
+        <span class="cmt">// perform idempotent work here</span>
+        <span class="kw">await</span> <span class="type">Task</span>.<span class="fn">CompletedTask</span>;
+    }
+}`},
+      {type:"callout", kind:"warn", icon:"⚠️", text:"Serverless does not remove architecture. You still need idempotency, retries, dead-letter handling, observability, and clear ownership of what happens when a trigger fires twice."}
+    ]
+  },
+  "aks-platform": {
+    title:"AKS Platform Design",
+    breadcrumb:"Chapter 2 · Compute",
+    subtitle:"AKS is worth its complexity when you need Kubernetes control, multi-service platform patterns, or portability that simpler Azure compute services cannot provide.",
+    badges:[{text:"Kubernetes",color:"#0078d4"},{text:"Important",color:"#00bcf2"},{text:"Platform",color:"#00c896"}],
+    sections:[
+      {type:"diagram", title:"AKS platform layers", svg:`
+        <svg width="520" height="250" viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="22" width="480" height="42" rx="10" fill="#132033" stroke="#33557d"/>
+          <text x="260" y="48" text-anchor="middle" font-family="Syne" font-size="16" fill="#00bcf2">Front Door / APIM / WAF</text>
+          <rect x="40" y="92" width="440" height="56" rx="10" fill="#132033" stroke="#33557d"/>
+          <text x="260" y="118" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Ingress Controller · Gateway API · TLS · Routing</text>
+          <rect x="40" y="170" width="130" height="54" rx="10" fill="#132033" stroke="#33557d"/>
+          <rect x="195" y="170" width="130" height="54" rx="10" fill="#132033" stroke="#33557d"/>
+          <rect x="350" y="170" width="130" height="54" rx="10" fill="#132033" stroke="#33557d"/>
+          <text x="105" y="193" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">API pods</text>
+          <text x="105" y="208" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">HPA · probes</text>
+          <text x="260" y="193" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Worker pods</text>
+          <text x="260" y="208" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">queues · jobs</text>
+          <text x="415" y="193" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Platform addons</text>
+          <text x="415" y="208" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">logs · secrets · certs</text>
+        </svg>
+      `},
+      {type:"table", title:"AKS tradeoff test", columns:["Signal you need AKS","If not, prefer"], rows:[
+        ["You need Kubernetes-native patterns, operators, service mesh, custom ingress","App Service or Container Apps"],
+        ["Multiple containerized services need shared platform controls","Container Apps for simpler cases"],
+        ["Team can operate clusters and incident response","Managed platform first if team cannot"],
+        ["You need workload portability and deeper runtime control","Managed hosting if control is not justified"]
+      ]},
+      {type:"callout", kind:"warn", icon:"🧠", text:"AKS is a platform choice, not just a deployment target. If you choose it, own cluster governance, upgrade cadence, ingress, secrets flow, observability, and security posture."}
+    ]
+  },
+  "apim-frontdoor": {
+    title:"API Management + Front Door",
+    breadcrumb:"Chapter 3 · Networking",
+    subtitle:"A mature Azure API edge often uses Front Door for global entry and APIM for policy, mediation, versioning, and client-facing governance.",
+    badges:[{text:"Architecture",color:"#00c896"},{text:"Important",color:"#00bcf2"},{text:"Edge",color:"#0078d4"}],
+    sections:[
+      {type:"diagram", title:"Global API edge flow", svg:`
+        <svg width="520" height="220" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrAz2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#00bcf2"/>
+            </marker>
+          </defs>
+          <rect x="18" y="84" width="92" height="46" rx="8" fill="#132033" stroke="#33557d"/><text x="64" y="102" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Clients</text><text x="64" y="117" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">web / mobile / partners</text>
+          <rect x="142" y="84" width="98" height="46" rx="8" fill="#132033" stroke="#33557d"/><text x="191" y="102" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Front Door</text><text x="191" y="117" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">WAF · global routing</text>
+          <rect x="272" y="84" width="98" height="46" rx="8" fill="#132033" stroke="#33557d"/><text x="321" y="102" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">APIM</text><text x="321" y="117" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">policy · auth · versioning</text>
+          <rect x="402" y="84" width="100" height="46" rx="8" fill="#132033" stroke="#33557d"/><text x="452" y="102" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Backends</text><text x="452" y="117" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">App Service / AKS / Functions</text>
+          <path d="M110 107 L138 107" stroke="#00bcf2" stroke-width="1.5" fill="none" marker-end="url(#arrAz2)"/>
+          <path d="M240 107 L268 107" stroke="#00bcf2" stroke-width="1.5" fill="none" marker-end="url(#arrAz2)"/>
+          <path d="M370 107 L398 107" stroke="#00bcf2" stroke-width="1.5" fill="none" marker-end="url(#arrAz2)"/>
+          <text x="321" y="160" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#9fb1c8">Keep public API policies out of application code where possible</text>
+        </svg>
+      `},
+      {type:"prose", title:"What belongs at the edge", content:`
+        <ul>
+          <li><strong>Front Door</strong>: global routing, WAF, TLS, caching, and latency-aware entry.</li>
+          <li><strong>APIM</strong>: API products, quotas, JWT validation, header transforms, versioning, and partner-facing contracts.</li>
+          <li><strong>Backends</strong>: business logic, not generic client mediation concerns.</li>
+        </ul>
+      `},
+      {type:"callout", kind:"info", icon:"🚪", text:"If every backend team is rewriting rate-limit, auth translation, and version headers, your API edge is underdesigned."}
+    ]
+  },
+  "managed-identity": {
+    title:"Managed Identity Flow",
+    breadcrumb:"Chapter 4 · Identity & Security",
+    subtitle:"Managed identity removes long-lived secrets by letting Azure-hosted workloads obtain tokens for Azure resources automatically.",
+    badges:[{text:"Security",color:"#ffb900"},{text:"Important",color:"#00bcf2"},{text:"Zero Secrets",color:"#00c896"}],
+    sections:[
+      {type:"diagram", title:"Managed identity token flow", svg:`
+        <svg width="520" height="220" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="84" width="110" height="50" rx="8" fill="#132033" stroke="#33557d"/><text x="75" y="104" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">App Service</text><text x="75" y="120" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">managed identity enabled</text>
+          <rect x="175" y="84" width="120" height="50" rx="8" fill="#132033" stroke="#33557d"/><text x="235" y="104" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Entra Token Endpoint</text><text x="235" y="120" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">issues access token</text>
+          <rect x="340" y="84" width="160" height="50" rx="8" fill="#132033" stroke="#33557d"/><text x="420" y="104" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Key Vault / Storage / SQL</text><text x="420" y="120" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">RBAC or access policy grants</text>
+          <line x1="130" y1="109" x2="171" y2="109" stroke="#00bcf2" stroke-width="1.5"/>
+          <line x1="295" y1="109" x2="336" y2="109" stroke="#00bcf2" stroke-width="1.5"/>
+        </svg>
+      `},
+      {type:"code", title:"Access Key Vault with DefaultAzureCredential", lang:"csharp", code:`<span class="kw">using</span> <span class="type">Azure.Identity</span>;
+<span class="kw">using</span> <span class="type">Azure.Security.KeyVault.Secrets</span>;
+
+<span class="kw">var</span> client = <span class="kw">new</span> <span class="type">SecretClient</span>(
+    <span class="kw">new</span> <span class="type">Uri</span>(<span class="str">"https://kv-orders-prod.vault.azure.net/"</span>),
+    <span class="kw">new</span> <span class="type">DefaultAzureCredential</span>());
+
+<span class="kw">var</span> secret = <span class="kw">await</span> client.<span class="fn">GetSecretAsync</span>(<span class="str">"sql-connection"</span>);
+<span class="kw">var</span> connectionString = secret.<span class="prop">Value</span>.<span class="prop">Value</span>;`},
+      {type:"callout", kind:"success", icon:"✅", text:"The ideal production secret is the one your app never had to store in the first place. Managed identity is the first move; Key Vault is the second."}
+    ]
+  },
+  "key-vault": {
+    title:"Key Vault and Secret Delivery",
+    breadcrumb:"Chapter 4 · Identity & Security",
+    subtitle:"Key Vault should be the control point for secrets and certificates, not a dumping ground for every runtime configuration value.",
+    badges:[{text:"Security",color:"#ffb900"},{text:"Important",color:"#00bcf2"},{text:"Secrets",color:"#0078d4"}],
+    sections:[
+      {type:"table", title:"What belongs in Key Vault", columns:["Good fit","Avoid when possible"], rows:[
+        ["Database passwords, signing keys, certificates, API secrets","Large configuration blobs"],
+        ["Customer-managed keys and rotation targets","Frequently changing feature flags"],
+        ["Secrets consumed via references or SDK at startup","Values that should be environment variables or App Config"]
+      ]},
+      {type:"callout", kind:"warn", icon:"🔑", text:"Do not fetch Key Vault on every request. Resolve secrets through references, startup hydration, or controlled caching patterns."}
+    ]
+  },
+  "storage-account": {
+    title:"Storage Account Strategy",
+    breadcrumb:"Chapter 5 · Storage & Data",
+    subtitle:"Storage accounts look simple until tiering, replication, SAS, lifecycle rules, and data access patterns are ignored.",
+    badges:[{text:"Storage",color:"#00bcf2"},{text:"Important",color:"#0078d4"},{text:"Data",color:"#00c896"}],
+    sections:[
+      {type:"table", title:"Azure Storage choices", columns:["Capability","Use it for","Watch out for"], rows:[
+        ["Blob","Files, media, archives, data lake-like objects","Access tier, lifecycle rules, public access"],
+        ["Queue","Simple storage-backed queueing","Not a replacement for Service Bus semantics"],
+        ["File","Lift-and-shift SMB workloads","Performance and network planning"],
+        ["Table","Simple key-value entities","Rarely the first choice for modern app data"]
+      ]},
+      {type:"steps", title:"Blob storage production rules", steps:[
+        {title:"Choose replication intentionally", text:"LRS, ZRS, GRS, and RA-GRS are business continuity decisions, not defaults to ignore."},
+        {title:"Use managed auth", text:"Prefer managed identity or short-lived SAS rather than account keys."},
+        {title:"Automate lifecycle", text:"Move cold data to cheaper tiers and expire stale blobs automatically."}
+      ]}
+    ]
+  },
+  "cosmosdb": {
+    title:"Cosmos DB Partitioning",
+    breadcrumb:"Chapter 5 · Storage & Data",
+    subtitle:"Cosmos DB succeeds when partition keys reflect access patterns and throughput economics, not when teams treat it like document-shaped SQL.",
+    badges:[{text:"NoSQL",color:"#00bcf2"},{text:"Important",color:"#0078d4"},{text:"Scale",color:"#ffb900"}],
+    sections:[
+      {type:"prose", title:"Partitioning decides success", content:`
+        <p>Cosmos DB throughput scales by partition. A bad key creates hot partitions, expensive queries, and latency spikes. A good key spreads writes while still supporting your main read paths.</p>
+      `},
+      {type:"table", title:"Partition key checks", columns:["Question","Why it matters"], rows:[
+        ["Does it spread writes well?","Avoid hot partitions and throttling"],
+        ["Is it in your common query path?","Cross-partition queries cost more RU"],
+        ["Does it match tenant or aggregate boundaries?","Logical isolation and operational clarity improve"],
+        ["Will it still work at 100x scale?","Some keys look fine only at small data volume"]
+      ]},
+      {type:"callout", kind:"warn", icon:"🌌", text:"The worst Cosmos design smell is choosing a partition key because it was easy to think of, not because it modeled access pressure correctly."}
+    ]
+  },
+  "service-bus": {
+    title:"Service Bus Queues and Topics",
+    breadcrumb:"Chapter 6 · Messaging & Integration",
+    subtitle:"Service Bus is the right Azure primitive when message reliability, ordering options, retries, sessions, and dead-letter queues matter.",
+    badges:[{text:"Messaging",color:"#ff6a5c"},{text:"Important",color:"#00bcf2"},{text:"Integration",color:"#0078d4"}],
+    sections:[
+      {type:"diagram", title:"Reliable command flow", svg:`
+        <svg width="520" height="220" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="84" width="88" height="46" rx="8" fill="#132033" stroke="#33557d"/><text x="64" y="103" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">API</text><text x="64" y="118" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">enqueue command</text>
+          <rect x="142" y="84" width="110" height="46" rx="8" fill="#132033" stroke="#33557d"/><text x="197" y="103" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Service Bus</text><text x="197" y="118" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">queue / topic</text>
+          <rect x="286" y="84" width="104" height="46" rx="8" fill="#132033" stroke="#33557d"/><text x="338" y="103" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Worker</text><text x="338" y="118" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">retry / complete</text>
+          <rect x="424" y="84" width="80" height="46" rx="8" fill="#132033" stroke="#33557d"/><text x="464" y="103" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">DLQ</text><text x="464" y="118" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">poison items</text>
+          <line x1="108" y1="107" x2="138" y2="107" stroke="#00bcf2" stroke-width="1.5"/>
+          <line x1="252" y1="107" x2="282" y2="107" stroke="#00bcf2" stroke-width="1.5"/>
+          <line x1="390" y1="107" x2="420" y2="107" stroke="#ff6a5c" stroke-width="1.5" stroke-dasharray="4 3"/>
+        </svg>
+      `},
+      {type:"code", title:".NET message processor", lang:"csharp", code:`<span class="kw">var</span> client = <span class="kw">new</span> <span class="type">ServiceBusClient</span>(namespaceFqdn, <span class="kw">new</span> <span class="type">DefaultAzureCredential</span>());
+<span class="kw">var</span> processor = client.<span class="fn">CreateProcessor</span>(<span class="str">"invoice-commands"</span>, <span class="kw">new</span> <span class="type">ServiceBusProcessorOptions</span>
+{
+    MaxConcurrentCalls = <span class="num">4</span>,
+    AutoCompleteMessages = <span class="kw">false</span>
+});
+
+processor.<span class="prop">ProcessMessageAsync</span> += <span class="kw">async</span> args =>
+{
+    <span class="cmt">// do work</span>
+    <span class="kw">await</span> args.<span class="fn">CompleteMessageAsync</span>(args.Message);
+};`},
+      {type:"callout", kind:"info", icon:"📮", text:"Use Service Bus for commands and reliable async workflows. Use Event Grid for notification-style events. Use Event Hubs for streams. Mixing them casually causes pain later."}
+    ]
+  },
+  "bicep-modules": {
+    title:"Bicep Modules and Environments",
+    breadcrumb:"Chapter 7 · Delivery & IaC",
+    subtitle:"Bicep becomes maintainable when modules describe stable building blocks instead of one giant template that knows everything.",
+    badges:[{text:"IaC",color:"#0078d4"},{text:"Important",color:"#00bcf2"},{text:"Scale",color:"#00c896"}],
+    sections:[
+      {type:"code", title:"Composable Bicep module usage", lang:"bicep", code:`<span class="kw">module</span> appPlan <span class="str">'./modules/app-service-plan.bicep'</span> = {
+  name: <span class="str">'plan'</span>
+  params: {
+    name: <span class="str">'asp-orders-prod'</span>
+    location: location
+  }
+}
+
+<span class="kw">module</span> webApi <span class="str">'./modules/web-app.bicep'</span> = {
+  name: <span class="str">'web'</span>
+  params: {
+    name: <span class="str">'api-orders-prod'</span>
+    serverFarmId: appPlan.outputs.id
+    appInsightsConnectionString: appInsights.outputs.connectionString
+  }
+}`},
+      {type:"steps", title:"Module design rules", steps:[
+        {title:"Design around platform capabilities", text:"Networking, web apps, storage, databases, and monitoring should be reusable modules."},
+        {title:"Keep environment values separate", text:"Parameters and environment files should differ, not module logic."},
+        {title:"Output only what downstream modules need", text:"Avoid exposing excessive internal implementation details."}
+      ]}
+    ]
+  },
+  "github-actions": {
+    title:"GitHub Actions Deployments",
+    breadcrumb:"Chapter 7 · Delivery & IaC",
+    subtitle:"Azure delivery pipelines should promote the same artifact, deploy infra predictably, and gate production with verification rather than faith.",
+    badges:[{text:"DevOps",color:"#0078d4"},{text:"Important",color:"#00bcf2"},{text:".NET",color:"#00c896"}],
+    sections:[
+      {type:"code", title:"Build and deploy to App Service", lang:"yaml", code:`<span class="prop">name</span>: deploy-api
+
+<span class="prop">on</span>:
+  push:
+    branches: [ <span class="str">main</span> ]
+
+<span class="prop">jobs</span>:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: <span class="str">'10.0.x'</span>
+      - run: dotnet publish src/Orders.Api -c Release -o publish
+      - uses: azure/login@v2
+        with:
+          client-id: \${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: \${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: <span class="str">'api-orders-prod'</span>
+          package: publish`},
+      {type:"callout", kind:"warn", icon:"🔁", text:"Never let production pipelines build different bits than the ones you verified earlier. Promote artifacts, not branches."}
+    ]
+  },
+  "app-insights": {
+    title:"Application Insights",
+    breadcrumb:"Chapter 8 · Observability",
+    subtitle:"In Azure, debugging production means correlating traces, dependencies, exceptions, and custom business telemetry, not just reading logs line by line.",
+    badges:[{text:"Observability",color:"#00c896"},{text:"Important",color:"#00bcf2"},{text:"Telemetry",color:"#0078d4"}],
+    sections:[
+      {type:"prose", title:"What good telemetry answers", content:`
+        <ul>
+          <li>Which request failed and what downstream dependency caused it?</li>
+          <li>Which deployment changed the latency profile?</li>
+          <li>Which tenant or operation is producing the highest error rate?</li>
+          <li>Are retries hiding user pain or actually solving transient failures?</li>
+        </ul>
+      `},
+      {type:"code", title:"Custom telemetry in ASP.NET Core", lang:"csharp", code:`<span class="kw">app</span>.<span class="fn">MapPost</span>(<span class="str">"/orders"</span>, <span class="kw">async</span> (
+    <span class="type">TelemetryClient</span> telemetry,
+    <span class="type">CreateOrderRequest</span> request) =>
+{
+    telemetry.<span class="fn">TrackEvent</span>(<span class="str">"order-create-requested"</span>, <span class="kw">new</span> <span class="type">Dictionary</span>&lt;<span class="type">string</span>, <span class="type">string</span>&gt;
+    {
+        [<span class="str">"region"</span>] = <span class="str">"centralindia"</span>,
+        [<span class="str">"customerTier"</span>] = request.Tier
+    });
+
+    <span class="kw">return</span> Results.<span class="fn">Accepted</span>();
+});`},
+      {type:"callout", kind:"success", icon:"✅", text:"If incidents require someone to SSH into a box or grep text logs manually, your cloud observability posture is underbuilt."}
+    ]
+  },
+  "resiliency-patterns": {
+    title:"Retry, Circuit Breaker, and DR",
+    breadcrumb:"Chapter 8 · Observability",
+    subtitle:"Azure reliability is about assuming partial failure: dependencies time out, regions degrade, queues back up, and secrets or tokens expire.",
+    badges:[{text:"Reliability",color:"#00c896"},{text:"Important",color:"#00bcf2"},{text:"Production",color:"#ffb900"}],
+    sections:[
+      {type:"table", title:"Failure pattern mapping", columns:["Failure type","Design response"], rows:[
+        ["Transient HTTP / SQL issue","Bounded retry with jitter and timeout"],
+        ["Downstream meltdown","Circuit breaker and load shedding"],
+        ["Region outage","Failover plan and paired-region design"],
+        ["Message poison item","Dead-letter queue and operator workflow"]
+      ]},
+      {type:"code", title:"Polly resilience pipeline", lang:"csharp", code:`builder.Services.<span class="fn">AddHttpClient</span>(<span class="str">"payments"</span>)
+  .<span class="fn">AddStandardResilienceHandler</span>(options =>
+  {
+      options.TotalRequestTimeout.Timeout = <span class="type">TimeSpan</span>.<span class="fn">FromSeconds</span>(<span class="num">8</span>);
+      options.CircuitBreaker.FailureRatio = <span class="num">0.5</span>;
+      options.CircuitBreaker.MinimumThroughput = <span class="num">20</span>;
+  });`},
+      {type:"callout", kind:"warn", icon:"🧯", text:"Retries without timeouts, idempotency, and observability often make outages worse, not better."}
+    ]
+  },
+  "azure-openai": {
+    title:"Azure OpenAI Integration",
+    breadcrumb:"Chapter 9 · AI & Modern Data",
+    subtitle:"Enterprise Azure OpenAI design is not just one API call. It includes identity, content filtering, model choice, grounding, rate limits, logging, and cost control.",
+    badges:[{text:"AI",color:"#ffb900"},{text:"Important",color:"#00bcf2"},{text:"Enterprise",color:"#0078d4"}],
+    sections:[
+      {type:"diagram", title:"Enterprise Azure OpenAI request path", svg:`
+        <svg width="520" height="230" viewBox="0 0 520 230" xmlns="http://www.w3.org/2000/svg">
+          <rect x="18" y="90" width="82" height="44" rx="8" fill="#132033" stroke="#33557d"/><text x="59" y="108" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Client</text><text x="59" y="122" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">chat / app</text>
+          <rect x="126" y="90" width="94" height="44" rx="8" fill="#132033" stroke="#33557d"/><text x="173" y="108" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">API Layer</text><text x="173" y="122" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">auth · quota · logs</text>
+          <rect x="246" y="90" width="100" height="44" rx="8" fill="#132033" stroke="#33557d"/><text x="296" y="108" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">RAG / Safety</text><text x="296" y="122" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">search · guardrails</text>
+          <rect x="372" y="90" width="126" height="44" rx="8" fill="#132033" stroke="#33557d"/><text x="435" y="108" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Azure OpenAI</text><text x="435" y="122" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">model deployment</text>
+          <line x1="100" y1="112" x2="122" y2="112" stroke="#00bcf2" stroke-width="1.5"/>
+          <line x1="220" y1="112" x2="242" y2="112" stroke="#00bcf2" stroke-width="1.5"/>
+          <line x1="346" y1="112" x2="368" y2="112" stroke="#00bcf2" stroke-width="1.5"/>
+        </svg>
+      `},
+      {type:"code", title:"Call Azure OpenAI from .NET", lang:"csharp", code:`<span class="kw">using</span> <span class="type">Azure</span>;
+<span class="kw">using</span> <span class="type">Azure.AI.OpenAI</span>;
+
+<span class="kw">var</span> client = <span class="kw">new</span> <span class="type">AzureOpenAIClient</span>(
+    <span class="kw">new</span> <span class="type">Uri</span>(endpoint),
+    <span class="kw">new</span> <span class="type">DefaultAzureCredential</span>());
+
+<span class="kw">var</span> chat = client.<span class="fn">GetChatClient</span>(<span class="str">"gpt-4o-mini"</span>);
+<span class="kw">var</span> result = <span class="kw">await</span> chat.<span class="fn">CompleteChatAsync</span>([
+    <span class="kw">new</span> <span class="type">SystemChatMessage</span>(<span class="str">"Answer with citations when available."</span>),
+    <span class="kw">new</span> <span class="type">UserChatMessage</span>(<span class="str">"Summarize this support ticket."</span>)
+]);`},
+      {type:"callout", kind:"warn", icon:"🤖", text:"AI systems in Azure still need ordinary engineering: RBAC, cost budgets, prompt/version control, content review, observability, and retrieval validation."}
+    ]
+  },
+  "ai-search-rag": {
+    title:"AI Search and RAG Flow",
+    breadcrumb:"Chapter 9 · AI & Modern Data",
+    subtitle:"RAG systems fail when retrieval quality, chunking, metadata, and security filtering are treated as implementation details instead of product behavior.",
+    badges:[{text:"AI",color:"#ffb900"},{text:"Important",color:"#00bcf2"},{text:"Search",color:"#0078d4"}],
+    sections:[
+      {type:"steps", title:"RAG architecture path", steps:[
+        {title:"Ingest and normalize", text:"Clean source documents and preserve metadata like tenant, source, version, and confidentiality."},
+        {title:"Chunk and embed", text:"Chunk to retrieval granularity, not arbitrary token counts only."},
+        {title:"Retrieve with filters", text:"Combine semantic relevance with security and tenant filters."},
+        {title:"Ground generation", text:"Prompt the model with citations, context boundaries, and fallback behavior when retrieval is weak."}
+      ]},
+      {type:"callout", kind:"info", icon:"🔎", text:"Most RAG bugs are not model bugs. They are retrieval, chunking, permissions, freshness, or citation bugs."}
+    ]
+  },
+  "dotnet-hosting": {
+    title:".NET Hosting Decision Matrix",
+    breadcrumb:"Chapter 10 · .NET on Azure",
+    subtitle:"The Azure host should match the workload's operational shape, not the team's familiarity bias.",
+    badges:[{text:".NET",color:"#00bcf2"},{text:"Important",color:"#0078d4"},{text:"Architecture",color:"#00c896"}],
+    sections:[
+      {type:"table", title:"Choose the right host", columns:["Workload shape","Best fit","Why"], rows:[
+        ["Standard web API or MVC app","App Service","Managed hosting with minimal platform tax"],
+        ["Bursty trigger-driven jobs","Functions","Pay-per-execution, event-driven model"],
+        ["Containerized API with moderate complexity","Container Apps","Simple container platform without full AKS burden"],
+        ["Platform-heavy microservices or mesh needs","AKS","Kubernetes control and multi-service flexibility"]
+      ]},
+      {type:"diagram", title:"Hosting decision ladder", svg:`
+        <svg width="520" height="220" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+          <rect x="30" y="26" width="460" height="34" rx="8" fill="#132033" stroke="#33557d"/><text x="260" y="48" text-anchor="middle" font-family="Syne" font-size="15" fill="#00bcf2">Prefer the simplest host that satisfies the workload</text>
+          <rect x="50" y="84" width="88" height="82" rx="10" fill="#132033" stroke="#33557d"/><text x="94" y="110" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">App Service</text><text x="94" y="129" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">web-first</text><text x="94" y="143" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">managed ops</text>
+          <rect x="160" y="84" width="88" height="82" rx="10" fill="#132033" stroke="#33557d"/><text x="204" y="110" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Functions</text><text x="204" y="129" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">triggers</text><text x="204" y="143" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">bursty work</text>
+          <rect x="270" y="84" width="108" height="82" rx="10" fill="#132033" stroke="#33557d"/><text x="324" y="110" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">Container Apps</text><text x="324" y="129" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">containers</text><text x="324" y="143" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">less platform burden</text>
+          <rect x="400" y="84" width="88" height="82" rx="10" fill="#132033" stroke="#33557d"/><text x="444" y="110" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e7eef8">AKS</text><text x="444" y="129" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">platform control</text><text x="444" y="143" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9fb1c8">highest ops load</text>
+        </svg>
+      `},
+      {type:"callout", kind:"success", icon:"🔵", text:"Choosing a more complex host than the workload needs is one of the most common cloud architecture mistakes in .NET teams."}
+    ]
+  },
+  "aspire-azure": {
+    title:".NET Aspire with Azure",
+    breadcrumb:"Chapter 10 · .NET on Azure",
+    subtitle:"Aspire improves local composition and service wiring, but it still needs clean Azure boundaries for identity, secrets, observability, and deployment.",
+    badges:[{text:".NET",color:"#00bcf2"},{text:"Modern",color:"#0078d4"},{text:"Cloud",color:"#00c896"}],
+    sections:[
+      {type:"prose", title:"Where Aspire helps", content:`
+        <p>Aspire is valuable when you need a consistent local developer environment for multiple services, dependencies, dashboards, and service discovery. It reduces friction, but it does not replace Azure architecture decisions.</p>
+      `},
+      {type:"callout", kind:"info", icon:"🕹️", text:"Use Aspire to improve local orchestration and developer feedback. Still design Azure networking, identities, configuration sources, and deployment boundaries deliberately."}
+    ]
+  },
+  "cost-governance": {
+    title:"Cost and Governance Discipline",
+    breadcrumb:"Chapter 10 · .NET on Azure",
+    subtitle:"Cloud cost problems are usually architecture and process problems before they become invoice problems.",
+    badges:[{text:"Governance",color:"#00bcf2"},{text:"Important",color:"#0078d4"},{text:"FinOps",color:"#ffb900"}],
+    sections:[
+      {type:"table", title:"Common Azure waste patterns", columns:["Waste pattern","Preventive control"], rows:[
+        ["Over-sized app service plans or nodes","Rightsizing review and autoscale policy"],
+        ["Unused storage and snapshots","Lifecycle cleanup and retention policies"],
+        ["No tags or owner metadata","Mandatory tags enforced with policy"],
+        ["Always-on premium resources for low-value environments","Environment-specific SKUs and schedules"]
+      ]},
+      {type:"steps", title:"Cost discipline loop", steps:[
+        {title:"Tag every resource", text:"Without ownership metadata, cost review turns into archaeology."},
+        {title:"Set budgets and alerts", text:"Detect spikes while they are operationally actionable."},
+        {title:"Review architecture monthly", text:"Waste is often structural, not just idle resources."},
+        {title:"Treat shared platform spend explicitly", text:"Platform subscriptions need productized ownership too."}
+      ]},
+      {type:"callout", kind:"warn", icon:"💸", text:"The most expensive Azure resource is often the one nobody feels responsible for."}
+    ]
+  },
+  "azure-interview": {
+    title:"Azure Architecture Interview Prep",
+    breadcrumb:"Chapter 10 · .NET on Azure",
+    subtitle:"Strong Azure interview answers explain tradeoffs: why a service was chosen, what risks it introduces, and how security, cost, and operations are handled.",
+    badges:[{text:"Interview",color:"#00bcf2"},{text:"Important",color:"#0078d4"},{text:"Senior",color:"#00c896"}],
+    sections:[
+      {type:"prose", title:"How to answer well", content:`
+        <p>When asked to design on Azure, answer in layers:</p>
+        <ul>
+          <li><strong>Ingress</strong>: how traffic enters and is secured.</li>
+          <li><strong>Compute</strong>: why App Service, Functions, Container Apps, or AKS fit.</li>
+          <li><strong>Data</strong>: what persistence model the workload needs.</li>
+          <li><strong>Identity</strong>: how workloads authenticate without secrets.</li>
+          <li><strong>Observability</strong>: what proves the system is healthy.</li>
+          <li><strong>Governance</strong>: how environments are deployed, tagged, and cost-controlled.</li>
+        </ul>
+      `},
+      {type:"callout", kind:"success", icon:"🎯", text:"Senior cloud answers sound grounded because they include operations, security, and failure handling, not just service names."}
+    ]
+  }
+};
+
+const interviewQuestions = [
+  {tag:"azure", level:"Basic", q:"What is the difference between a tenant, subscription, and resource group in Azure?", a:"A tenant is the identity root in Entra ID. A subscription is the billing and broad governance boundary. A resource group is a deployment and lifecycle boundary for related Azure resources."},
+  {tag:"app-service", level:"Basic", q:"When would you choose App Service over AKS for a .NET API?", a:"When the workload is a standard HTTP API and does not need Kubernetes-level control. App Service reduces platform complexity while still giving scaling, diagnostics, TLS, and deployment slots."},
+  {tag:"functions", level:"Intermediate", q:"What makes Azure Functions a good or bad fit?", a:"They fit trigger-driven, bursty, event-based work. They are a poor fit when you need long-running interactive APIs, deep network control, or platform behaviors that are easier on App Service, Container Apps, or AKS."},
+  {tag:"security", level:"Intermediate", q:"Why are managed identities important in Azure?", a:"They remove long-lived secrets from app configuration by letting Azure-hosted workloads request tokens directly for resources like Key Vault, Storage, SQL, or Service Bus."},
+  {tag:"network", level:"Intermediate", q:"What does Private Link solve?", a:"It lets Azure PaaS services be reached over private IPs in your virtual network, reducing exposure to the public internet and tightening network boundaries."},
+  {tag:"data", level:"Advanced", q:"What is the most important design decision in Cosmos DB?", a:"Usually the partition key, because it shapes throughput distribution, hot partitions, query cost, and long-term scalability."},
+  {tag:"messaging", level:"Advanced", q:"When would you use Service Bus instead of Event Grid?", a:"Use Service Bus for reliable command-style messaging, queue semantics, retries, sessions, and dead-letter support. Use Event Grid for event notifications and fan-out."},
+  {tag:"observability", level:"Advanced", q:"What should Application Insights answer during an incident?", a:"Which request path failed, which dependency was slow or broken, what deployment changed behavior, and whether the failure is isolated to a tenant, region, or operation type."},
+  {tag:"cost", level:"Intermediate", q:"How do you control Azure cost besides just setting budgets?", a:"Use good subscription structure, mandatory tags, rightsizing, lifecycle rules, environment-appropriate SKUs, and periodic architecture reviews. Budgets alone only tell you after drift has already happened."},
+  {tag:"interview", level:"Advanced", q:"What makes an Azure architecture answer sound senior?", a:"Explaining ingress, compute, data, identity, observability, failure handling, and governance as a coherent system instead of listing Azure services mechanically."}
+];
+
+let currentChapter = -1;
+let currentTopic = null;
+let visitedTopics = new Set();
+
+function buildNav() {
+  const nav = document.getElementById('chapterNav');
+  chapters.forEach((ch, i) => {
+    const item = document.createElement('div');
+    item.className = 'chapter-item';
+    item.id = `ch-${i}`;
+    item.innerHTML = `
+      <div class="chapter-header" onclick="selectChapter(${i})">
+        <div class="ch-num" style="background:${ch.bg};color:${ch.color}">${ch.num}</div>
+        <div class="ch-title">${ch.title}</div>
+        <div class="ch-arrow">▶</div>
+      </div>
+      <div class="topics-list">
+        ${ch.topics.map((t) => `<div class="topic-item" id="nav-${t.id}" onclick="selectTopic('${t.id}', ${i})">${t.icon} ${t.title}</div>`).join('')}
+      </div>`;
+    nav.appendChild(item);
+  });
+}
+
+function selectChapter(idx) {
+  currentChapter = idx;
+  document.querySelectorAll('.chapter-item').forEach((el, i) => {
+    const header = el.querySelector('.chapter-header');
+    if (i === idx) {
+      el.classList.add('open');
+      header.classList.add('active');
+    } else {
+      el.classList.remove('open');
+      header.classList.remove('active');
+    }
+  });
+
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('chapterContent').style.display = 'block';
+
+  const ch = chapters[idx];
+  const tagsHTML = ch.tags.map((t) => `<span class="hero-tag" style="background:${ch.bg};color:${ch.color};border-color:${ch.color}33">${t}</span>`).join('');
+  const cardsHTML = ch.topics.map((t) => {
+    const metaHTML = t.tags.map((tag) => {
+      const color = tag.includes('Important') ? '#00bcf2' : tag.includes('Security') ? '#ffb900' : tag.includes('.NET') ? '#0078d4' : tag.includes('Governance') ? '#00c896' : '#9fb1c8';
+      return `<span class="meta-tag" style="color:${color};border-color:${color}33">${tag}</span>`;
+    }).join('');
+    return `
+      <div class="topic-card" id="card-${t.id}" onclick="selectTopic('${t.id}', ${idx})">
+        <div class="topic-card-icon">${t.icon}</div>
+        <div class="topic-card-body">
+          <div class="topic-card-title">${t.title}</div>
+          <div class="topic-card-desc">${t.desc}</div>
+          <div class="topic-card-meta">${metaHTML}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('chapterContent').innerHTML = `
+    <div class="chapter-hero">
+      <div class="chapter-hero-num">Chapter ${ch.num} · ${ch.topics.length} Topics</div>
+      <div class="chapter-hero-title" style="color:${ch.color}">${ch.icon} ${ch.title}</div>
+      <div class="chapter-hero-desc">${ch.desc}</div>
+      <div class="chapter-hero-tags">${tagsHTML}</div>
+    </div>
+    <div class="topics-grid">${cardsHTML}</div>`;
+}
+
+function selectTopic(topicId, chapterIdx) {
+  if (chapterIdx !== currentChapter) selectChapter(chapterIdx);
+  currentTopic = topicId;
+  visitedTopics.add(topicId);
+  updateProgress();
+
+  document.querySelectorAll('.topic-card').forEach((el) => el.classList.remove('active'));
+  document.querySelectorAll('.topic-item').forEach((el) => el.classList.remove('active'));
+
+  const card = document.getElementById(`card-${topicId}`);
+  const nav = document.getElementById(`nav-${topicId}`);
+  if (card) card.classList.add('active');
+  if (nav) nav.classList.add('active');
+
+  const detail = topicDetails[topicId];
+  if (!detail) {
+    renderGenericDetail(topicId, chapterIdx);
+    return;
+  }
+  renderDetail(detail);
+}
+
+function renderDetail(detail) {
+  document.getElementById('detailEmpty').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'block';
+
+  const badgesHTML = detail.badges.map((b) => `<span class="dbadge" style="background:${b.color}22;color:${b.color};border-color:${b.color}44">${b.text}</span>`).join('');
+  const sectionsHTML = detail.sections.map((section) => renderSection(section)).join('');
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-content">
+      <div class="detail-header">
+        <div class="detail-breadcrumb">${detail.breadcrumb}</div>
+        <div class="detail-title">${detail.title}</div>
+        <div class="detail-subtitle">${detail.subtitle}</div>
+        <div class="detail-badges">${badgesHTML}</div>
+      </div>
+      ${sectionsHTML}
+      ${renderInterviewSection(currentTopic)}
+    </div>`;
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderSection(section) {
+  if (section.type === 'prose') {
+    return `<div class="section"><div class="section-title">${section.title}</div><div class="prose">${section.content}</div></div>`;
+  }
+  if (section.type === 'code') {
+    const codeHtml = String(section.code || '').includes('<span') ? section.code : escapeHtml(section.code);
+    return `
+      <div class="section">
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">${section.lang}</span>
+            <span class="code-title">${section.title}</span>
+            <button class="code-copy" onclick="copyCode(this)">Copy</button>
+          </div>
+          <div class="code-body"><pre>${codeHtml}</pre></div>
+        </div>
+      </div>`;
+  }
+  if (section.type === 'diagram') {
+    return `
+      <div class="section">
+        <div class="diagram-box">
+          <div class="diagram-header">${section.title}</div>
+          <div class="diagram-body">${section.svg}</div>
+        </div>
+      </div>`;
+  }
+  if (section.type === 'table') {
+    return `
+      <div class="section">
+        <div class="table-wrap">
+          <div class="table-header">${section.title}</div>
+          <div class="table-body">
+            <table class="comp-table">
+              <thead><tr>${section.columns.map((col) => `<th>${col}</th>`).join('')}</tr></thead>
+              <tbody>${section.rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>`;
+  }
+  if (section.type === 'steps') {
+    return `
+      <div class="section">
+        <div class="steps-box">
+          <div class="steps-header">${section.title}</div>
+          <div class="steps-body">
+            ${section.steps.map((step, index) => `
+              <div class="step-item">
+                <div class="step-num">${index + 1}</div>
+                <div class="step-copy">
+                  <h4>${step.title}</h4>
+                  <p>${step.text}</p>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  }
+  if (section.type === 'callout') {
+    const kind = section.kind === 'info' ? 'callout-info' : section.kind === 'warn' ? 'callout-warn' : section.kind === 'success' ? 'callout-success' : 'callout-danger';
+    return `<div class="callout ${kind}"><span class="callout-icon">${section.icon}</span><span>${section.text}</span></div>`;
+  }
+  return '';
+}
+
+const AZURE_INTERVIEW_LEVELS = {
+  beginner: {
+    label: 'Beginner',
+    title: 'Foundation Card',
+    countLabel: '160 questions',
+    color: '#00c896',
+    focus: 'Core service fit, Azure vocabulary, and .NET 10 setup instincts.',
+    summary: 'Build fast confidence in Azure service purpose, default integration paths, and common platform language.'
+  },
+  intermediate: {
+    label: 'Intermediate',
+    title: 'Delivery Card',
+    countLabel: '160 questions',
+    color: '#ffb900',
+    focus: 'Scenario reasoning, troubleshooting, security boundaries, and delivery flow.',
+    summary: 'Move from naming services to explaining how .NET 10 workloads behave when they meet real delivery and support constraints.'
+  },
+  advanced: {
+    label: 'Advanced',
+    title: 'Optimization Card',
+    countLabel: '160 questions',
+    color: '#0078d4',
+    focus: 'Performance, resilience, observability, and tradeoffs under pressure.',
+    summary: 'This level focuses on the decisions senior engineers make when cost, latency, throughput, and failure handling start competing.'
+  },
+  architect: {
+    label: 'Architect',
+    title: 'Architecture Card',
+    countLabel: '160 questions',
+    color: '#ff6a5c',
+    focus: 'Platform shape, governance, modernization, and multi-service design.',
+    summary: 'Explain Azure as a coherent operating model, not a list of icons. This is the principal-level reasoning layer.'
+  }
+};
+
+const AZURE_INTERVIEW_LEVEL_ORDER = ['beginner','intermediate','advanced','architect'];
+const AZURE_INTERVIEW_CACHE = new Map();
+const AZURE_INTERVIEW_STATE = { level: 'beginner', tag: 'All' };
+
+const AZURE_INTERVIEW_TAG_COLORS = {
+  'Direct': { bg:'rgba(0,200,150,.12)', fg:'#00c896', bd:'rgba(0,200,150,.32)' },
+  'Compare': { bg:'rgba(255,185,0,.12)', fg:'#ffb900', bd:'rgba(255,185,0,.34)' },
+  'Scenario': { bg:'rgba(0,188,242,.12)', fg:'#00bcf2', bd:'rgba(0,188,242,.34)' },
+  'Issue Fix': { bg:'rgba(255,106,92,.12)', fg:'#ff6a5c', bd:'rgba(255,106,92,.34)' },
+  'Optimization': { bg:'rgba(0,120,212,.12)', fg:'#0078d4', bd:'rgba(0,120,212,.34)' },
+  'Architecture': { bg:'rgba(255,106,92,.12)', fg:'#ff6a5c', bd:'rgba(255,106,92,.34)' },
+  'Security': { bg:'rgba(255,185,0,.12)', fg:'#ffb900', bd:'rgba(255,185,0,.34)' },
+  'Reliability': { bg:'rgba(0,200,150,.12)', fg:'#00c896', bd:'rgba(0,200,150,.32)' },
+  'Observability': { bg:'rgba(0,188,242,.12)', fg:'#00bcf2', bd:'rgba(0,188,242,.34)' },
+  'Governance': { bg:'rgba(0,120,212,.12)', fg:'#0078d4', bd:'rgba(0,120,212,.34)' },
+  '.NET 10': { bg:'rgba(0,120,212,.12)', fg:'#00bcf2', bd:'rgba(0,188,242,.34)' },
+  'Cost': { bg:'rgba(255,185,0,.12)', fg:'#ffb900', bd:'rgba(255,185,0,.34)' },
+  'Migration': { bg:'rgba(255,106,92,.12)', fg:'#ff6a5c', bd:'rgba(255,106,92,.34)' },
+  'Compute': { bg:'rgba(0,120,212,.12)', fg:'#00bcf2', bd:'rgba(0,188,242,.34)' },
+  'Network': { bg:'rgba(0,200,150,.12)', fg:'#00c896', bd:'rgba(0,200,150,.32)' },
+  'Security Group': { bg:'rgba(255,185,0,.12)', fg:'#ffb900', bd:'rgba(255,185,0,.34)' },
+  'Data': { bg:'rgba(0,120,212,.12)', fg:'#0078d4', bd:'rgba(0,120,212,.34)' },
+  'Messaging': { bg:'rgba(255,106,92,.12)', fg:'#ff6a5c', bd:'rgba(255,106,92,.34)' },
+  'DevOps': { bg:'rgba(0,188,242,.12)', fg:'#00bcf2', bd:'rgba(0,188,242,.34)' },
+  'AI': { bg:'rgba(255,185,0,.12)', fg:'#ffb900', bd:'rgba(255,185,0,.34)' }
+};
+
+const AZURE_INTERVIEW_TEMPLATES = {
+  beginner: [
+    {
+      tags:['Direct','Core','.NET 10'],
+      q:(d)=>`What is ${d.title} in Azure, and how would you explain its job in a .NET 10 system?`,
+      a:(d)=>`${d.summary} In a .NET 10 solution, the clean starting point is ${d.dotnetPath}. Anchor the answer to the workload shape first, then show where security, configuration, and telemetry plug in.`
+    },
+    {
+      tags:['Compare','Service Fit','.NET 10'],
+      q:(d)=>`What simpler or adjacent Azure option would you compare against ${d.title} before committing to it?`,
+      a:(d)=>`A good answer compares ${d.title} with ${d.compare}. The senior signal is explaining why the team would accept the extra operational surface only when the workload actually needs it.`
+    },
+    {
+      tags:['Scenario','Delivery','.NET 10'],
+      q:(d)=>`A team is deploying a new .NET 10 workload this week. Where does ${d.title} sit in that delivery path?`,
+      a:(d)=>`Place ${d.title} where it controls the architecture boundary it was designed for. In practice that means ${d.ops}. The wrong move is wiring it in late without identity, configuration, and rollout discipline.`
+    },
+    {
+      tags:['Security','Direct'],
+      q:(d)=>`What is the first security or governance point you would mention when introducing ${d.title}?`,
+      a:(d)=>`Start with ${d.governance}. Even basic Azure answers sound stronger when they mention subscription boundaries, RBAC, private access, managed identity, or policy before talking about convenience.`
+    }
+  ],
+  intermediate: [
+    {
+      tags:['Scenario','Issue Fix','.NET 10'],
+      q:(d)=>`Your .NET 10 service uses ${d.title} and starts failing after a deployment. How do you triage it without guessing?`,
+      a:(d)=>`Trace the path through ingress, identity, configuration, deployment change, and dependency health. For ${d.title}, the likely first checks are ${d.troubleshoot}. Focus on evidence in Application Insights, Azure Monitor, and deployment history instead of restarting blindly.`
+    },
+    {
+      tags:['Issue Fix','Security'],
+      q:(d)=>`What misconfiguration around ${d.title} creates the most common avoidable outage or security issue?`,
+      a:(d)=>`A common failure mode is ${d.risk}. The fix is to move the concern into platform controls early: managed identity, private networking, explicit RBAC, environment-specific settings, and clear alerting.`
+    },
+    {
+      tags:['Compare','Cost','Scenario'],
+      q:(d)=>`How would you stop a team from overusing ${d.title} when a cheaper or simpler Azure option would work?`,
+      a:(d)=>`Tie the decision to workload shape, operator burden, and scaling pattern. ${d.title} is justified when ${d.justification}; otherwise ${d.compare} usually keeps cost and complexity lower.`
+    },
+    {
+      tags:['Observability','Scenario'],
+      q:(d)=>`What telemetry proves ${d.title} is behaving correctly in production?`,
+      a:(d)=>`You want signals that answer ${d.telemetry}. If the platform only shows raw logs and no dependency, latency, failure, or retry picture, the integration is under-instrumented.`
+    }
+  ],
+  advanced: [
+    {
+      tags:['Optimization','Performance','.NET 10'],
+      q:(d)=>`What optimization would you prioritize first for ${d.title} in a busy .NET 10 production path?`,
+      a:(d)=>`Optimize the bottleneck the platform is actually surfacing, not the one the team assumes. For ${d.title}, the first serious optimization usually involves ${d.optimization}. Pair it with measured latency, throughput, and cost data.`
+    },
+    {
+      tags:['Tradeoff','Reliability'],
+      q:(d)=>`What tradeoff should a senior engineer call out immediately before recommending ${d.title}?`,
+      a:(d)=>`The value is ${d.summary.toLowerCase()}, but the cost is ${d.tradeoff}. Strong answers state both sides clearly, then explain why the system still benefits from the service.`
+    },
+    {
+      tags:['Failure','Observability','Reliability'],
+      q:(d)=>`How does ${d.title} fail, and what design move keeps the rest of the Azure system stable when it does?`,
+      a:(d)=>`Assume partial failure. For ${d.title}, stable systems rely on ${d.failureMode}. That usually means bounded retries, idempotency, health-based routing, circuit breaking, dead-letter handling, or regional failover instead of optimistic hope.`
+    },
+    {
+      tags:['Optimization','Cost'],
+      q:(d)=>`How would you tune ${d.title} so the Azure bill improves without damaging the product?`,
+      a:(d)=>`Start by removing waste tied to always-on capacity, bad partitioning, oversized SKUs, noisy logging, or incorrect scaling behavior. For ${d.title}, the real cost lever is ${d.costLens}. Budgets help, but architecture changes matter more.`
+    }
+  ],
+  architect: [
+    {
+      tags:['Architecture','.NET 10','Governance'],
+      q:(d)=>`Where does ${d.title} belong in a full Azure + .NET 10 reference architecture, and what boundary does it own?`,
+      a:(d)=>`${d.title} should own the ${d.boundary} boundary. In architecture answers, place it relative to ingress, compute, data, identity, observability, and delivery. That shows you understand system shape instead of naming isolated services.`
+    },
+    {
+      tags:['Migration','Architecture'],
+      q:(d)=>`How would you introduce ${d.title} into an existing .NET estate without causing platform chaos?`,
+      a:(d)=>`Modernize in slices. Start with one bounded workload, move identity and configuration first, then add ${d.title} behind clear operational ownership. The migration story should mention rollout safety, parallel telemetry, and exit criteria for the old path.`
+    },
+    {
+      tags:['Architecture','Multi-Region','Reliability'],
+      q:(d)=>`If the business wants multi-region resilience, what changes in the way you design around ${d.title}?`,
+      a:(d)=>`Multi-region design shifts the conversation from deployment to operating model. With ${d.title}, you must think about ${d.multiRegion}. Good answers mention state, failover order, configuration drift, and what proves failover actually works.`
+    },
+    {
+      tags:['Governance','Architecture','Security'],
+      q:(d)=>`What governance rule or platform guardrail should exist before multiple teams start using ${d.title}?`,
+      a:(d)=>`Before scale, define landing-zone expectations around ${d.governance}. Architect-level answers translate service adoption into platform rules: tags, policy, RBAC, naming, network posture, and approved delivery patterns.`
+    }
+  ]
+};
+
+function getAzureTopicDomain(topicId) {
+  for (const chapter of chapters) {
+    const topic = chapter.topics.find((item) => item.id === topicId);
+    if (!topic) continue;
+    return buildAzureTopicDomain(topic, chapter);
+  }
+  return null;
+}
+
+function buildAzureTopicDomain(topic, chapter) {
+  return {
+    topicId: topic.id,
+    title: topic.title,
+    summary: topic.desc,
+    chapterTitle: chapter.title,
+    chapterTag: chapter.tags[0] || chapter.title,
+    topicTag: topic.tags[0] || topic.title,
+    dotnetPath: getAzureDotnetPath(topic, chapter),
+    compare: getAzureCompare(topic, chapter),
+    ops: getAzureOpsLens(topic, chapter),
+    governance: getAzureGovernanceLens(topic, chapter),
+    troubleshoot: getAzureTroubleshootLens(topic, chapter),
+    risk: getAzureRiskLens(topic, chapter),
+    justification: getAzureJustification(topic, chapter),
+    telemetry: getAzureTelemetryLens(topic, chapter),
+    optimization: getAzureOptimizationLens(topic, chapter),
+    tradeoff: getAzureTradeoff(topic, chapter),
+    failureMode: getAzureFailureLens(topic, chapter),
+    costLens: getAzureCostLens(topic, chapter),
+    boundary: getAzureBoundaryLens(topic, chapter),
+    multiRegion: getAzureMultiRegionLens(topic, chapter),
+    code: getAzureSampleCode(topic, chapter)
+  };
+}
+
+function buildAzureInterviewBank(levelKey) {
+  if (AZURE_INTERVIEW_CACHE.has(levelKey)) return AZURE_INTERVIEW_CACHE.get(levelKey);
+  const bank = [];
+  const levelMeta = AZURE_INTERVIEW_LEVELS[levelKey];
+  const templates = AZURE_INTERVIEW_TEMPLATES[levelKey] || [];
+  chapters.forEach((chapter) => {
+    chapter.topics.forEach((topic) => {
+      const domain = buildAzureTopicDomain(topic, chapter);
+      templates.forEach((template, index) => {
+        bank.push({
+          id: `${levelKey}_${topic.id}_${index}`,
+          levelKey,
+          levelLabel: levelMeta.label,
+          kicker: `${levelMeta.title} · ${chapter.title} · ${topic.title}`,
+          chapterTitle: chapter.title,
+          topicId: topic.id,
+          topicTag: domain.topicTag,
+          chapterTag: domain.chapterTag,
+          tags: [...template.tags, chapter.title, ...chapter.tags, ...topic.tags],
+          q: template.q(domain),
+          a: template.a(domain),
+          code: domain.code
+        });
+      });
+    });
+  });
+  AZURE_INTERVIEW_CACHE.set(levelKey, bank);
+  return bank;
+}
+
+function getAzureInterviewTotal() {
+  return AZURE_INTERVIEW_LEVEL_ORDER.reduce((sum, key) => sum + buildAzureInterviewBank(key).length, 0);
+}
+
+function renderAzureInterviewTag(tag) {
+  const tone = AZURE_INTERVIEW_TAG_COLORS[tag] || { bg:'rgba(159,177,200,.12)', fg:'#9fb1c8', bd:'rgba(159,177,200,.28)' };
+  return `<span class="qa-tag" style="background:${tone.bg};color:${tone.fg};border-color:${tone.bd}">${tag}</span>`;
+}
+
+function renderAzureInterviewItem(item, index) {
+  const meta = AZURE_INTERVIEW_LEVELS[item.levelKey];
+  const levelColor = meta.color;
+  const answerCode = item.code ? `<div class="qa-answer-code"><pre>${escapeHtml(item.code)}</pre></div>` : '';
+  return `
+    <div class="qa-item" id="qa_${item.id}" data-tags="${item.tags.join('|')}">
+      <div class="qa-question" onclick="toggleQA(this)">
+        <span class="qa-q-icon">Q</span>
+        <span class="qa-q-text">
+          <div class="qa-kicker">${item.kicker}</div>
+          ${item.q}
+          <div class="qa-qmeta">${item.tags.map(renderAzureInterviewTag).join('')}</div>
+        </span>
+        <span class="qa-level" style="background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44">${meta.label}</span>
+        <span class="qa-arrow">▶</span>
+      </div>
+      <div class="qa-answer">
+        <div class="qa-answer-text">${item.a}${answerCode}</div>
+      </div>
+    </div>`;
+}
+
+function getAzureInterviewFilters() {
+  const preferred = ['All','Direct','Compare','Scenario','Issue Fix','Optimization','Architecture','Security','Reliability','Observability','Governance','.NET 10','Compute','Network','Data','Messaging','DevOps','AI'];
+  const available = new Set();
+  AZURE_INTERVIEW_LEVEL_ORDER.forEach((levelKey) => {
+    buildAzureInterviewBank(levelKey).forEach((item) => item.tags.forEach((tag) => available.add(tag)));
+  });
+  const ordered = preferred.filter((tag) => tag === 'All' || available.has(tag));
+  const extras = [...available].filter((tag) => tag !== 'All' && !ordered.includes(tag)).slice(0, 14);
+  return [...ordered, ...extras];
+}
+
+function renderInterviewSection(topicId) {
+  const topicQuestions = AZURE_INTERVIEW_LEVEL_ORDER.map((levelKey) => {
+    const bank = buildAzureInterviewBank(levelKey).filter((item) => item.topicId === topicId);
+    return bank[0];
+  }).filter(Boolean);
+
+  if (!topicQuestions.length) return '';
+
+  return `
+    <div class="section">
+      <div class="section-title">Interview Questions</div>
+      <div class="qa-stat"><strong>Coverage</strong> ${topicQuestions.length} levels sampled from the full ${getAzureInterviewTotal()} question Azure interview bank. Use the main interview view for tag filters, level cards, and complete coverage.</div>
+      ${topicQuestions.map(renderAzureInterviewItem).join('')}
+    </div>`;
+}
+
+function showAllInterviewQuestions(levelKey = AZURE_INTERVIEW_STATE.level) {
+  AZURE_INTERVIEW_STATE.level = levelKey;
+  AZURE_INTERVIEW_STATE.tag = 'All';
+  document.getElementById('detailEmpty').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'block';
+
+  const activeLevel = AZURE_INTERVIEW_LEVELS[levelKey];
+  const overviewCards = AZURE_INTERVIEW_LEVEL_ORDER.map((key) => {
+    const meta = AZURE_INTERVIEW_LEVELS[key];
+    const bank = buildAzureInterviewBank(key);
+    return `
+      <div class="interview-overview-card ${key === levelKey ? 'active' : ''}" onclick="showAllInterviewQuestions('${key}')">
+        <div class="interview-overview-kicker">${meta.label}</div>
+        <div class="interview-overview-title">${meta.title}</div>
+        <div class="interview-overview-copy">${meta.summary}</div>
+        <div class="interview-overview-count" style="color:${meta.color}">${bank.length}</div>
+      </div>`;
+  }).join('');
+
+  const filters = getAzureInterviewFilters();
+  const filterButtons = filters.map((tag) => `<button class="qa-filter-btn ${tag === 'All' ? 'active' : ''}" onclick="filterQA('${tag}', this)">${tag}</button>`).join('');
+  const qHTML = buildAzureInterviewBank(levelKey).map(renderAzureInterviewItem).join('');
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-content">
+      <div class="detail-header">
+        <div class="detail-breadcrumb">Azure Mastery · Interview Prep · ${activeLevel.label}</div>
+        <div class="detail-title">🎯 Azure Interview Questions &amp; Answers</div>
+        <div class="detail-subtitle">${getAzureInterviewTotal()} generated Azure + .NET 10 questions across foundations, compute, networking, security, data, messaging, delivery, observability, AI, and platform governance.</div>
+      </div>
+      <div class="qa-stat"><strong>Coverage</strong> 40 Azure topics x 4 interview levels x 4 reasoning styles = ${getAzureInterviewTotal()} questions. Current card focus: ${activeLevel.focus}</div>
+      <div class="interview-overview-grid">${overviewCards}</div>
+      <div class="interview-toolbar">
+        <div class="interview-toolbar-label">Filter By Reasoning Style Or Azure Concern</div>
+        ${filterButtons}
+      </div>
+      <div id="qaList">${qHTML}</div>
+    </div>`;
+}
+
+function filterQA(tag, btn) {
+  AZURE_INTERVIEW_STATE.tag = tag;
+  document.querySelectorAll('.qa-filter-btn').forEach((item) => item.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('#qaList .qa-item').forEach((item) => {
+    const tags = (item.dataset.tags || '').split('|');
+    item.style.display = (tag === 'All' || tags.includes(tag)) ? '' : 'none';
+  });
+}
+
+function renderGenericDetail(topicId, chapterIdx) {
+  const chapter = chapters[chapterIdx];
+  const topic = chapter.topics.find((item) => item.id === topicId);
+  if (!topic) return;
+  const code = getAzureSampleCode(topic, chapter);
+  const rows = getAzureFieldRows(topic, chapter);
+  const steps = getAzureImplementationSteps(topic, chapter);
+
+  document.getElementById('detailEmpty').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'block';
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-content">
+      <div class="detail-header">
+        <div class="detail-breadcrumb">Chapter ${chapter.num} · ${chapter.title}</div>
+        <div class="detail-title">${topic.icon} ${topic.title}</div>
+        <div class="detail-subtitle">${topic.desc}</div>
+        <div class="detail-badges">${topic.tags.map((tag) => `<span class="dbadge" style="background:${chapter.color}22;color:${chapter.color};border-color:${chapter.color}44">${tag}</span>`).join('')}</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Azure Service Lens</div>
+        <div class="prose">
+          <p>${getAzureNarrative(topic, chapter)}</p>
+        </div>
+      </div>
+      <div class="field-guide">
+        <div class="field-guide-card">
+          <h4>How It Fits In Azure</h4>
+          <p>${getAzureOpsLens(topic, chapter)}</p>
+        </div>
+        <div class="field-guide-card">
+          <h4>.NET 10 Integration</h4>
+          <p>${getAzureDotnetPath(topic, chapter)}</p>
+        </div>
+      </div>
+      ${renderSection({ type:'table', title:'Decision Checklist', columns:['Concern','What good looks like'], rows })}
+      ${renderSection({ type:'code', title:`${topic.title} with Azure + .NET 10`, lang:getAzureCodeLang(topic), code })}
+      ${renderSection({ type:'steps', title:'Implementation Flow', steps })}
+      ${renderSection({ type:'callout', kind:getAzureCalloutKind(topic, chapter), icon:getAzureCalloutIcon(topic, chapter), text:getAzureCalloutText(topic, chapter) })}
+      ${renderInterviewSection(topic.id)}
+    </div>`;
+}
+
+function getAzureNarrative(topic, chapter) {
+  return `${topic.title} belongs in the ${chapter.title} layer of Azure architecture. The goal is not just to deploy the service, but to place it with the right identity, network, operational, and cost boundaries so a .NET 10 workload stays understandable in production.`;
+}
+
+function getAzureDotnetPath(topic, chapter) {
+  const map = {
+    'identity-basics': 'wire authentication and authorization early in ASP.NET Core 10 so Entra ID, token validation, and role boundaries are part of the app shape from day one.',
+    'container-apps': 'ship a containerized ASP.NET Core 10 API or Worker, push it to ACR, and expose only the ingress, scale rule, and secrets the workload actually needs.',
+    'vnet-subnets': 'treat networking as infrastructure code and make your .NET service consume private endpoints, DNS, and outbound rules instead of assuming open internet access.',
+    'private-link': 'move connection paths for SQL, Storage, Key Vault, and other PaaS dependencies behind private endpoints so your .NET 10 app talks over private IPs.',
+    'traffic-patterns': 'design health-based routing and failover expectations before you add another region to the ASP.NET Core 10 deployment.',
+    'entra-rbac': 'map workload identity, operator access, and deployment identity to separate RBAC scopes so the app never runs with human-shaped privileges.',
+    'key-vault': 'use DefaultAzureCredential plus Key Vault-backed configuration or runtime secret reads instead of appsettings secrets.',
+    'defender-policy': 'attach Azure Policy, Defender recommendations, and deployment gates around the service before teams start cloning bad patterns.',
+    'storage-account': 'treat blobs, queues, and file patterns as explicit architectural choices and consume them through Azure SDK clients registered in DI.',
+    'sql-azure': 'connect with managed identity, keep EF Core migrations deliberate, and model retries, pooling, and failover behavior intentionally.',
+    'cosmosdb': 'pick a partition key before writing code, then let the .NET 10 app align request shape, indexing, and RU usage with that decision.',
+    'redis-cache': 'use cache-aside or output caching intentionally so Redis protects latency-sensitive endpoints instead of becoming a hidden source of stale data.',
+    'event-grid': 'treat events as notifications and keep your .NET 10 subscribers idempotent, observable, and safe to replay.',
+    'event-hubs': 'build ingestion workers that can checkpoint, parallelize, and absorb bursty telemetry without dropping operational visibility.',
+    'logic-apps': 'keep the .NET application focused on business rules while Logic Apps handle connector-heavy integration choreography.',
+    'container-delivery': 'promote the same container artifact from test to production and bind environment-specific Azure settings late.',
+    'release-strategies': 'use deployment slots, revision traffic splits, or staged rollouts instead of replacing a healthy version in one shot.',
+    'azure-monitor': 'emit metrics, logs, and trace context so the Azure portal view and the .NET service view tell the same incident story.',
+    'backup-dr': 'design restore drills, region assumptions, and RPO/RTO expectations alongside the code, not after go-live.',
+    'ml-inference': 'keep model serving, feature dependencies, and API contracts clean so the .NET 10 app consumes inference as a reliable dependency.',
+    'fabric-data': 'separate operational Azure services from analytics workflows and keep the handoff between product data and analytical workloads explicit.'
+  };
+  return map[topic.id] || `integrate ${topic.title} as a deliberate boundary in the .NET 10 application, with identity, configuration, telemetry, and deployment flow handled outside ad hoc code paths.`;
+}
+
+function getAzureCompare(topic, chapter) {
+  const map = {
+    'container-apps': 'App Service for simpler web-first hosting or AKS when Kubernetes control is truly required',
+    'traffic-patterns': 'Front Door when you need global HTTP edge behaviors, or Traffic Manager when DNS-level routing is enough',
+    'event-grid': 'Service Bus for commands and delivery guarantees, not just notification fan-out',
+    'event-hubs': 'Service Bus or Storage Queues when you need work distribution instead of high-volume event streaming',
+    'logic-apps': 'code-first orchestration when the workflow is mostly business logic rather than connector-heavy integration',
+    'redis-cache': 'in-process or output caching only when the workload does not need distributed consistency'
+  };
+  return map[topic.id] || `the simpler neighboring Azure service that solves the same problem with less operational surface`;
+}
+
+function getAzureOpsLens(topic, chapter) {
+  return `Place ${topic.title} so operators can answer four questions quickly: who owns it, how it authenticates, how traffic reaches it, and what telemetry proves it is healthy. In ${chapter.title}, that usually becomes the boundary between platform responsibility and application responsibility.`;
+}
+
+function getAzureGovernanceLens(topic, chapter) {
+  return `clear RBAC scope, mandatory tags, policy enforcement, environment separation, and a deployment path that does not rely on manual portal changes`;
+}
+
+function getAzureTroubleshootLens(topic, chapter) {
+  return `deployment diff, effective configuration, identity path, network reachability, dependency telemetry, and whether scale or throttling changed at the same time`;
+}
+
+function getAzureRiskLens(topic, chapter) {
+  return `treating ${topic.title} as a checkbox service while leaving identity, network posture, or observability implicit`;
+}
+
+function getAzureJustification(topic, chapter) {
+  return `the workload actually needs the service boundary ${topic.title} provides and the team is willing to own the resulting operational model`;
+}
+
+function getAzureTelemetryLens(topic, chapter) {
+  return `latency, error rate, dependency health, saturation, and deployment correlation for the exact workload path that depends on ${topic.title}`;
+}
+
+function getAzureOptimizationLens(topic, chapter) {
+  return `correct scaling rules, tighter request shape, leaner networking, right-sized SKUs, and telemetry that shows where time or RU/CPU budget is really being spent`;
+}
+
+function getAzureTradeoff(topic, chapter) {
+  return `extra platform control usually also means extra delivery, troubleshooting, and governance responsibility`;
+}
+
+function getAzureFailureLens(topic, chapter) {
+  return `timeouts, fallback paths, retries with idempotency, queue or event back-pressure handling, and operator-visible failure signals`;
+}
+
+function getAzureCostLens(topic, chapter) {
+  return `matching the SKU, scaling mode, retention policy, and traffic pattern to real product demand instead of buying safety with permanent overprovisioning`;
+}
+
+function getAzureBoundaryLens(topic, chapter) {
+  return `${chapter.title.toLowerCase()}`;
+}
+
+function getAzureMultiRegionLens(topic, chapter) {
+  return `region-paired dependencies, state placement, failover verification, DNS or edge behavior, and what the .NET application should do when one region is only partially degraded`;
+}
+
+function getAzureCodeLang(topic) {
+  if (['container-delivery','release-strategies'].includes(topic.id)) return 'yaml';
+  if (['vnet-subnets','private-link','defender-policy','storage-account'].includes(topic.id)) return 'bicep';
+  return 'csharp';
+}
+
+function getAzureSampleCode(topic, chapter) {
+  const samples = {
+    'identity-basics': `builder.Services.AddAuthentication().AddJwtBearer();
+builder.Services.AddAuthorization();
+
+app.UseAuthentication();
+app.UseAuthorization();`,
+    'container-apps': `builder.Services.AddHealthChecks();
+
+app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
+app.MapGet("/orders", () => Results.Ok(new[] { "ord-1001" }));`,
+    'vnet-subnets': `resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
+  name: 'vnet-platform-prod'
+  location: resourceGroup().location
+  properties: {
+    addressSpace: { addressPrefixes: ['10.40.0.0/16'] }
+    subnets: [
+      { name: 'apps', properties: { addressPrefix: '10.40.1.0/24' } }
+      { name: 'private-endpoints', properties: { addressPrefix: '10.40.2.0/24' } }
+    ]
+  }
+}`,
+    'private-link': `resource sqlPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-01-01' = {
+  name: 'pep-sql-orders'
+  location: resourceGroup().location
+  properties: {
+    subnet: { id: subnetId }
+    privateLinkServiceConnections: [
+      {
+        name: 'sql'
+        properties: {
+          privateLinkServiceId: sqlServerId
+          groupIds: ['sqlServer']
+        }
+      }
+    ]
+  }
+}`,
+    'traffic-patterns': `builder.Services.AddHttpClient("regional-api")
+  .AddStandardResilienceHandler();`,
+    'entra-rbac': `var credential = new DefaultAzureCredential();
+var client = new SecretClient(new Uri(keyVaultUrl), credential);`,
+    'key-vault': `builder.Configuration.AddAzureKeyVault(
+  new Uri(keyVaultUrl),
+  new DefaultAzureCredential());`,
+    'defender-policy': `resource assignment 'Microsoft.Authorization/policyAssignments@2024-04-01' = {
+  name: 'require-tags'
+  properties: {
+    policyDefinitionId: policyId
+    displayName: 'Require platform tags'
+  }
+}`,
+    'storage-account': `var blobClient = new BlobContainerClient(
+  new Uri(containerUri),
+  new DefaultAzureCredential());`,
+    'sql-azure': `var connectionString =
+  "Server=tcp:sql-orders.database.windows.net;Database=Orders;Authentication=Active Directory Managed Identity;";
+
+builder.Services.AddDbContext<OrdersDbContext>(options =>
+  options.UseSqlServer(connectionString));`,
+    'cosmosdb': `var cosmos = new CosmosClient(endpoint, new DefaultAzureCredential());
+var container = cosmos.GetContainer("orders-db", "orders");`,
+    'redis-cache': `builder.Services.AddStackExchangeRedisCache(options =>
+{
+  options.Configuration = redisConnectionString;
+  options.InstanceName = "orders:";
+});`,
+    'event-grid': `app.MapPost("/events/order-created", async (HttpRequest request) =>
+{
+  // validate Event Grid handshake and route the notification
+  return Results.Ok();
+});`,
+    'event-hubs': `await foreach (PartitionEvent partitionEvent in processor.ReadEventsAsync())
+{
+  Console.WriteLine(partitionEvent.Data.EventBody);
+}`,
+    'logic-apps': `app.MapPost("/integrations/sap-order", async (SapOrderRequest request) =>
+{
+  return Results.Accepted();
+});`,
+    'container-delivery': `- run: docker build -t \${{ env.ACR_NAME }}.azurecr.io/orders-api:\${{ github.sha }} .
+- run: docker push \${{ env.ACR_NAME }}.azurecr.io/orders-api:\${{ github.sha }}`,
+    'release-strategies': `- uses: azure/webapps-deploy@v3
+  with:
+    app-name: api-orders-prod
+    slot-name: staging
+    package: publish`,
+    'azure-monitor': `builder.Services.AddOpenTelemetry()
+  .WithTracing(tracing => tracing.AddAspNetCoreInstrumentation())
+  .UseAzureMonitor();`,
+    'backup-dr': `app.MapGet("/dr/readiness", () => Results.Ok(new
+{
+  restoreRunbook = "verified",
+  regionPair = "Central India / South India"
+}));`,
+    'ml-inference': `var payload = JsonContent.Create(new { input = "summarize this order history" });
+var response = await httpClient.PostAsync("/score", payload);`,
+    'fabric-data': `app.MapGet("/analytics/export", () =>
+  Results.Accepted("/exports/orders-daily"));`
+  };
+  return samples[topic.id] || `builder.Services.AddHealthChecks();
+app.MapGet("/health", () => Results.Ok("${topic.title} ready"));`;
+}
+
+function getAzureFieldRows(topic, chapter) {
+  return [
+    ['Primary job', `Use ${topic.title} to own the ${chapter.title.toLowerCase()} concern for the workload.`],
+    ['.NET 10 integration', getAzureDotnetPath(topic, chapter)],
+    ['Watch closely', getAzureRiskLens(topic, chapter)],
+    ['Operator proof', getAzureTelemetryLens(topic, chapter)]
+  ];
+}
+
+function getAzureImplementationSteps(topic, chapter) {
+  return [
+    { title:'Set the boundary', text:`Decide exactly what ${topic.title} should own in this Azure architecture and what should remain in application code or another platform layer.` },
+    { title:'Wire identity and network early', text:`Do not integrate ${topic.title} before the workload identity, RBAC, and network posture are clear.` },
+    { title:'Add .NET 10 integration path', text:getAzureDotnetPath(topic, chapter) },
+    { title:'Prove it operationally', text:`Add alerts, dashboards, and failure handling so ${topic.title} is observable before the first real incident.` }
+  ];
+}
+
+function getAzureCalloutKind(topic, chapter) {
+  if (['entra-rbac','key-vault','private-link','managed-identity','defender-policy'].includes(topic.id)) return 'warn';
+  if (['release-strategies','backup-dr','azure-monitor'].includes(topic.id)) return 'success';
+  return 'info';
+}
+
+function getAzureCalloutIcon(topic, chapter) {
+  if (['entra-rbac','key-vault','private-link','managed-identity','defender-policy'].includes(topic.id)) return '🔐';
+  if (['release-strategies','backup-dr','azure-monitor'].includes(topic.id)) return '✅';
+  return '☁️';
+}
+
+function getAzureCalloutText(topic, chapter) {
+  return `Treat ${topic.title} as part of an Azure operating model, not a portal feature. Strong designs define ownership, rollout flow, and telemetry before the team scales usage.`;
+}
+
+function toggleQA(el) {
+  el.parentElement.classList.toggle('open');
+}
+
+function copyCode(button) {
+  const pre = button.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    button.textContent = 'Copied';
+    setTimeout(() => { button.textContent = 'Copy'; }, 1800);
+  });
+}
+
+function updateProgress() {
+  const total = chapters.reduce((sum, chapter) => sum + chapter.topics.length, 0);
+  const pct = Math.round((visitedTopics.size / total) * 100);
+  document.getElementById('progressText').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.querySelectorAll('.topic-item').forEach((item) => {
+    const topicId = item.id.replace('nav-', '');
+    if (visitedTopics.has(topicId)) item.classList.add('done');
+  });
+}
+
+function filterTopics(query) {
+  const q = query.trim().toLowerCase();
+  chapters.forEach((chapter, index) => {
+    const chapterEl = document.getElementById(`ch-${index}`);
+    let anyVisible = false;
+    chapter.topics.forEach((topic) => {
+      const navEl = document.getElementById(`nav-${topic.id}`);
+      if (!navEl) return;
+      const match = !q || topic.title.toLowerCase().includes(q) || topic.desc.toLowerCase().includes(q) || topic.tags.join(' ').toLowerCase().includes(q);
+      navEl.style.display = match ? '' : 'none';
+      if (match) anyVisible = true;
+    });
+    if (q && anyVisible) chapterEl.classList.add('open');
+  });
+}
+
+function applyTheme(theme) {
+  if (theme !== 'dark' && theme !== 'light') return;
+  document.documentElement.setAttribute('data-theme', theme);
+  try { localStorage.setItem('theme', theme); } catch (error) {}
+}
+
+(function initTheme() {
+  const params = new URLSearchParams(window.location.search);
+  const theme = params.get('theme');
+  let saved = 'dark';
+  try { saved = localStorage.getItem('theme') || 'dark'; } catch (error) {}
+  applyTheme(theme || saved);
+})();
+
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'parent-theme') applyTheme(event.data.theme);
+});
+
+buildNav();
+</script>
+<script src="/embedded/mastery-resize.js"></script>
+</body>
+</html>

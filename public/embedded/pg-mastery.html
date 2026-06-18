@@ -1,0 +1,2331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PostgreSQL Mastery — Zero to Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07050f;--sf:#0b0817;--card:#100d1e;--card2:#161228;
+  --b1:#1e1640;--b2:#2d2260;--b3:#3d3080;
+  --p1:#336791;--p2:#5b9bd5;--p3:#89c4ff;
+  --or:#f97316;--or2:#fb923c;--ye:#fbbf24;
+  --gr:#22c55e;--re:#f43f5e;--cy:#22d3ee;--pi:#e879f9;
+  --tx:#d8d0ff;--tx2:#6b5fa8;--tx3:#1e1640;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;--disp:'Bebas Neue',sans-serif;
+  --lw:272px;--rw:578px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:14px}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(51,103,145,.006) 3px,rgba(51,103,145,.006) 4px);pointer-events:none;z-index:9999}
+
+/* TOPBAR */
+.topbar{height:54px;background:var(--sf);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 18px;gap:12px;flex-shrink:0;position:relative;z-index:100}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--p1) 20%,var(--or) 50%,var(--p2) 80%,transparent)}
+.logo-icon{width:36px;height:36px;border-radius:8px;background:var(--card);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(51,103,145,.3)}
+.pg-mark{width:24px;height:24px;display:block}
+.logo-name{font-family:var(--disp);font-size:22px;letter-spacing:5px;background:linear-gradient(135deg,var(--p2),var(--or));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.logo-sub{font-size:8px;color:var(--tx3);font-family:var(--mono);letter-spacing:2px;margin-top:2px}
+.top-sep{flex:1}
+.t-stat{background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:3px 9px;font-size:9.5px;font-family:var(--mono);color:var(--tx3)}
+.t-stat b{color:var(--p2)}.t-stat b.or{color:var(--or)}
+.t-badge{background:rgba(51,103,145,.08);border:1px solid var(--b2);border-radius:3px;padding:4px 11px;font-size:9px;color:var(--p2);font-family:var(--mono);letter-spacing:1px}
+.blink{animation:bl .9s step-end infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+.lp{width:var(--lw);background:var(--sf);border-right:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.lp-hdr{padding:11px 13px 9px;border-bottom:1px solid var(--b1)}
+.lp-hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.lp-hdr-row h3{font-family:var(--mono);font-size:8px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase}
+.prog-bar{background:var(--b1);border-radius:2px;height:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--p1),var(--or));width:0%;transition:width .5s;box-shadow:0 0 6px rgba(51,103,145,.4)}
+.prog-txt{font-size:8px;color:var(--tx3);font-family:var(--mono);margin-top:4px}
+.lnav{flex:1;overflow-y:auto;padding:3px 0}
+.lnav::-webkit-scrollbar{width:2px}.lnav::-webkit-scrollbar-thumb{background:var(--b2)}
+.ci{display:flex;align-items:center;gap:7px;padding:7px 12px;cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.ci:hover{background:rgba(51,103,145,.05);border-left-color:var(--b2)}
+.ci.active{background:rgba(51,103,145,.1);border-left-color:var(--p2)}
+.ci.active .cn{color:var(--p2)}
+.ci-icon{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.ci-info{flex:1;min-width:0}
+.cn{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.cm{font-size:8px;color:var(--tx3);font-family:var(--mono)}
+.lv{font-size:7px;padding:1px 5px;border-radius:2px;font-family:var(--mono);font-weight:700;flex-shrink:0;text-transform:uppercase;letter-spacing:.5px}
+/* MIDDLE */
+.mid{flex:1;overflow-y:auto;padding:18px;min-width:0}
+.mid::-webkit-scrollbar{width:4px}.mid::-webkit-scrollbar-thumb{background:var(--b2)}
+/* WELCOME */
+.wlc{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:65vh;text-align:center;padding:32px;animation:fu .45s ease}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.wlc-logo{width:84px;height:84px;margin-bottom:6px;animation:pg-spin 6s ease-in-out infinite}
+.wlc-logo .pg-mark{width:100%;height:100%}
+@keyframes pg-spin{0%,100%{filter:drop-shadow(0 0 20px rgba(51,103,145,.5)) drop-shadow(0 0 40px rgba(249,115,22,.2))}50%{filter:drop-shadow(0 0 40px rgba(91,155,213,.7)) drop-shadow(0 0 60px rgba(249,115,22,.5))}}
+.wlc-title{font-family:var(--disp);font-size:42px;letter-spacing:6px;background:linear-gradient(135deg,var(--p2),var(--or) 55%,var(--p3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;line-height:1}
+.wlc-sub{font-size:12px;color:var(--tx2);max-width:540px;line-height:1.75;margin-bottom:24px;font-family:var(--mono)}
+.wlc-prompt{font-family:var(--mono);font-size:13px;color:var(--p2);margin-bottom:20px}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.sc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px 18px;text-align:center;min-width:90px;transition:border-color .2s}
+.sc:hover{border-color:var(--b2)}
+.sc-n{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--p2);display:block;line-height:1;text-shadow:0 0 10px rgba(51,103,145,.3)}
+.sc-n.or{color:var(--or);text-shadow:0 0 10px rgba(249,115,22,.3)}
+.sc-n.gr{color:var(--gr);text-shadow:0 0 10px rgba(34,197,94,.3)}
+.sc-l{font-size:8px;color:var(--tx3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;display:block}
+.wlc-hint{font-size:9px;color:var(--tx3);font-family:var(--mono);margin-top:16px;letter-spacing:1px}
+/* TOPIC GRID */
+.ch-hdr{margin-bottom:18px;animation:fu .3s ease}
+.ch-ey{font-size:8px;color:var(--p2);font-family:var(--mono);letter-spacing:3px;text-transform:uppercase;margin-bottom:5px}
+.ch-t{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--tx);line-height:1.1;margin-bottom:8px}
+.ch-d{font-size:11.5px;color:var(--tx2);line-height:1.7;max-width:660px;font-family:var(--mono)}
+.ch-chips{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:3px 8px;font-size:9px;color:var(--tx2);font-family:var(--mono)}
+.chip-dot{width:4px;height:4px;border-radius:50%}
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:8px;animation:fu .4s ease .08s both}
+.tc{background:var(--card);border:1px solid var(--b1);border-radius:5px;padding:12px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--p1),var(--or));opacity:0;transition:opacity .2s}
+.tc:hover{border-color:var(--b2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(51,103,145,.12)}
+.tc:hover::before,.tc.active::before{opacity:1}
+.tc.active{border-color:var(--p1);background:var(--card2);box-shadow:0 0 0 1px rgba(51,103,145,.3)}
+.tc-cmd{font-family:var(--mono);font-size:12px;font-weight:800;color:var(--p2);margin-bottom:3px;text-shadow:0 0 8px rgba(91,155,213,.3)}
+.tc-title{font-size:10px;font-weight:600;color:var(--tx);margin-bottom:3px;font-family:var(--mono)}
+.tc-d{font-size:9.5px;color:var(--tx3);line-height:1.4}
+.tc-tags{display:flex;gap:3px;margin-top:7px;flex-wrap:wrap}
+.tag{font-size:7px;padding:2px 4px;border-radius:2px;font-family:var(--mono);font-weight:700;letter-spacing:.3px}
+.tag.beginner{background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.2)}
+.tag.intermediate{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)}
+.tag.advanced{background:rgba(233,121,249,.1);color:#e879f9;border:1px solid rgba(233,121,249,.2)}
+.tag.essential{background:rgba(91,155,213,.1);color:var(--p2);border:1px solid rgba(91,155,213,.25)}
+.tag.hero{background:rgba(249,115,22,.1);color:var(--or);border:1px solid rgba(249,115,22,.25)}
+.tag.performance{background:rgba(34,211,238,.1);color:var(--cy);border:1px solid rgba(34,211,238,.2)}
+.tag.unique{background:rgba(244,63,94,.1);color:var(--re);border:1px solid rgba(244,63,94,.2)}
+/* RIGHT PANEL */
+.rp{width:var(--rw);background:var(--sf);border-left:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .25s}
+.rp.hidden{width:0;border:none;overflow:hidden}
+.rp-hdr{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.rp-hdr h3{flex:1;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--p2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xbtn{width:22px;height:22px;border-radius:3px;border:1px solid var(--b1);background:transparent;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--mono);transition:all .15s}
+.xbtn:hover{background:var(--b1);color:var(--tx)}
+.rp-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;overflow-x:auto}
+.rp-tabs::-webkit-scrollbar{height:0}
+.rt{padding:7px 13px;font-size:9.5px;color:var(--tx3);font-family:var(--mono);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;letter-spacing:.5px}
+.rt:hover{color:var(--tx)}.rt.active{color:var(--p2);border-bottom-color:var(--p2)}
+.rb{flex:1;overflow-y:auto;padding:14px}
+.rb::-webkit-scrollbar{width:2px}.rb::-webkit-scrollbar-thumb{background:var(--b2)}
+@keyframes sr{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.rb>*{animation:sr .2s ease both}
+/* SQL EDITOR */
+.sql-editor{background:#050310;border:1px solid var(--b2);border-radius:7px;overflow:hidden;margin:10px 0;box-shadow:0 0 24px rgba(51,103,145,.08)}
+.sql-toolbar{display:flex;align-items:center;gap:5px;padding:7px 11px;background:#080515;border-bottom:1px solid var(--b1)}
+.sql-dot{width:9px;height:9px;border-radius:50%}
+.sql-dot.r{background:#ff5f57}.sql-dot.y{background:#febc2e}.sql-dot.g{background:#28c840}
+.sql-title{flex:1;text-align:center;font-size:9px;color:var(--tx3);font-family:var(--mono)}
+.sql-run{background:transparent;border:1px solid var(--b2);border-radius:3px;color:var(--p2);font-family:var(--mono);font-size:8px;padding:2px 8px;cursor:pointer;transition:all .15s;letter-spacing:1px}
+.sql-run:hover{background:rgba(51,103,145,.1);border-color:var(--p1)}
+.sql-run.running{color:var(--ye);border-color:var(--ye)}
+.sql-code{padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.75;min-height:60px;max-height:300px;overflow-y:auto}
+.sql-code::-webkit-scrollbar{width:2px}.sql-code::-webkit-scrollbar-thumb{background:var(--b2)}
+/* PG syntax */
+.sk{color:#ff79c6;font-weight:600}.sf{color:#50fa7b}.ss{color:#f1fa8c}.sn{color:#bd93f9}
+.sc2{color:var(--tx3)}.so{color:var(--p3)}.st{color:#8be9fd}.sp{color:var(--or)}.su{color:var(--pi)}
+/* RESULTS */
+.results-hdr{display:flex;align-items:center;gap:8px;padding:6px 11px;background:#080515;border-top:1px solid var(--b1);font-family:var(--mono);font-size:8px;color:var(--tx3);letter-spacing:1px}
+.rh-rows{margin-left:auto;color:var(--p2)}
+.results-grid{overflow-x:auto;max-height:200px;overflow-y:auto}
+.results-grid::-webkit-scrollbar{width:2px;height:2px}.results-grid::-webkit-scrollbar-thumb{background:var(--b2)}
+.rg-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px}
+.rg-table th{background:#0d0920;color:var(--p2);text-align:left;padding:5px 10px;border-bottom:1px solid var(--b1);white-space:nowrap;font-size:9px;letter-spacing:.5px;position:sticky;top:0;z-index:1}
+.rg-table td{padding:4px 10px;border-bottom:1px solid rgba(255,255,255,.025);color:var(--tx2);white-space:nowrap;vertical-align:top}
+.rg-table tr:hover td{background:rgba(51,103,145,.04)}
+.rg-table td.num{color:var(--pi)}.rg-table td.null{color:var(--tx3);font-style:italic}
+.rg-table td.grn{color:var(--gr)}.rg-table td.red{color:var(--re)}.rg-table td.ye{color:var(--ye)}
+.rg-table td.or{color:var(--or)}.rg-table td.bl{color:var(--p2)}.rg-table td.cy{color:var(--cy)}
+.exec-info{padding:4px 11px;font-family:var(--mono);font-size:8px;color:var(--tx3);border-top:1px solid var(--b1);background:#080515}
+.exec-info span{color:var(--p2)}
+/* CONTENT */
+.sec{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--p2);margin:16px 0 7px;display:flex;align-items:center;gap:7px;letter-spacing:1.5px;text-transform:uppercase}
+.sec::after{content:'';flex:1;height:1px;background:var(--b1)}
+.sec.or{color:var(--or)}.sec.gr{color:var(--gr)}.sec.ye{color:var(--ye)}.sec.re{color:var(--re)}.sec.pi{color:var(--pi)}.sec.cy{color:var(--cy)}
+.sec:first-child{margin-top:0}
+p.bd{font-size:11.5px;line-height:1.75;color:var(--tx2);margin-bottom:9px;font-family:var(--mono)}
+strong{color:var(--tx)}
+.callout{border-left:2px solid;padding:9px 12px;border-radius:0 4px 4px 0;margin:9px 0;font-size:10.5px;line-height:1.7;font-family:var(--mono)}
+.callout.info{border-color:var(--p2);background:rgba(91,155,213,.05);color:var(--tx2)}
+.callout.warn{border-color:var(--ye);background:rgba(251,191,36,.05);color:var(--tx2)}
+.callout.tip{border-color:var(--or);background:rgba(249,115,22,.04);color:var(--tx2)}
+.callout.danger{border-color:var(--re);background:rgba(244,63,94,.05);color:var(--tx2)}
+.callout.unique{border-color:var(--pi);background:rgba(233,121,249,.04);color:var(--tx2)}
+.callout.perf{border-color:var(--cy);background:rgba(34,211,238,.04);color:var(--tx2)}
+.callout strong{display:block;font-size:7.5px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.callout.info strong{color:var(--p2)}.callout.warn strong{color:var(--ye)}.callout.tip strong{color:var(--or)}
+.callout.danger strong{color:var(--re)}.callout.unique strong{color:var(--pi)}.callout.perf strong{color:var(--cy)}
+.tbl{width:100%;border-collapse:collapse;font-size:10.5px;margin:8px 0}
+.tbl th{background:var(--card2);color:var(--p2);font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:7px 9px;text-align:left;border-bottom:1px solid var(--b1)}
+.tbl td{padding:6px 9px;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.02);vertical-align:top;line-height:1.5;font-family:var(--mono);font-size:10px}
+.tbl tr:hover td{background:rgba(51,103,145,.025)}
+.tbl td:first-child{color:var(--p2);white-space:nowrap;font-weight:600}
+.tbl td.or{color:var(--or)}.tbl td.gr{color:var(--gr)}.tbl td.ye{color:var(--ye)}
+.tbl td.re{color:var(--re)}.tbl td.pi{color:var(--pi)}.tbl td.cy{color:var(--cy)}
+.fl{list-style:none;margin:6px 0}
+.fl li{display:flex;align-items:flex-start;gap:7px;padding:4px 0;font-size:10.5px;color:var(--tx2);line-height:1.55;border-bottom:1px solid rgba(255,255,255,.02);font-family:var(--mono)}
+.fl li::before{content:'🐘';font-size:9px;margin-top:1px;flex-shrink:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}
+.mc{background:var(--card);border:1px solid var(--b1);border-radius:4px;padding:10px;font-family:var(--mono)}
+.mc h4{font-size:8px;font-weight:700;color:var(--p2);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+.mc h4.or{color:var(--or)}.mc h4.gr{color:var(--gr)}.mc h4.ye{color:var(--ye)}.mc h4.pi{color:var(--pi)}.mc h4.re{color:var(--re)}.mc h4.cy{color:var(--cy)}
+.mc p{font-size:10px;color:var(--tx2);line-height:1.55}
+.flow{display:flex;align-items:center;gap:0;margin:10px 0;overflow-x:auto;padding:12px;background:var(--card);border:1px solid var(--b1);border-radius:6px;flex-wrap:wrap;row-gap:6px}
+.fbox{background:var(--card2);border:1px solid var(--b1);border-radius:5px;padding:7px 11px;font-family:var(--mono);font-size:10px;white-space:nowrap;text-align:center;flex-shrink:0}
+.fbox .fb-label{font-size:7.5px;color:var(--tx3);margin-bottom:2px;text-transform:uppercase;letter-spacing:1px}
+.fbox .fb-name{font-weight:700}
+.farr{padding:0 6px;color:var(--tx3);font-size:14px;flex-shrink:0}
+.farr.cmd{padding:0 4px;font-family:var(--mono);font-size:9px;color:var(--p2);display:flex;flex-direction:column;align-items:center;gap:2px}
+/* Q&A */
+.qa-item{border:1px solid var(--b1);border-radius:4px;margin-bottom:7px;overflow:hidden}
+.qa-item:hover{border-color:var(--b2)}
+.qa-q{padding:9px 12px;cursor:pointer;display:flex;align-items:flex-start;gap:7px;background:var(--card);transition:background .15s}
+.qa-q:hover{background:var(--card2)}
+.qa-qi{width:17px;height:17px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;font-family:var(--mono);flex-shrink:0;margin-top:1px}
+.qa-qt{flex:1;font-size:10.5px;color:var(--tx);font-weight:500;line-height:1.5;font-family:var(--mono)}
+.qa-ch{color:var(--tx3);transition:transform .3s;flex-shrink:0;font-size:9px;margin-top:3px}
+.qa-item.open .qa-ch{transform:rotate(180deg)}
+.qa-a{max-height:0;overflow:hidden;transition:max-height .45s ease}
+.qa-item.open .qa-a{max-height:2000px}
+.qa-ab{padding:12px;font-size:10.5px;color:var(--tx2);line-height:1.85;border-top:1px solid var(--b1);background:#040210;font-family:var(--mono)}
+.qa-ab code{background:var(--card);border:1px solid var(--b1);border-radius:2px;padding:1px 4px;color:var(--p2)}
+.qa-ab pre{background:#050312;border:1px solid var(--b1);border-radius:4px;padding:10px;margin:6px 0;font-size:10px;line-height:1.7;overflow-x:auto;color:var(--tx2)}
+.filter-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.fbtn{font-size:8px;padding:2px 7px;border-radius:3px;border:1px solid var(--b1);background:transparent;color:var(--tx3);cursor:pointer;font-family:var(--mono);letter-spacing:.5px;transition:all .15s}
+.fbtn:hover,.fbtn.active{border-color:var(--p2);color:var(--p2);background:rgba(51,103,145,.07)}
+/* ARCH */
+.arch{background:var(--card);border:1px solid var(--b1);border-radius:8px;padding:16px;margin:10px 0;position:relative;overflow:hidden}
+.arch::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(51,103,145,.06) 0%,transparent 70%);pointer-events:none}
+.arch-title{font-family:var(--mono);font-size:8px;color:var(--p2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.arch-title::after{content:'';flex:1;height:1px;background:var(--b1)}
+.az{border:1px solid;border-radius:6px;padding:10px;flex:1;min-width:110px}
+.az.client{border-color:rgba(91,155,213,.4);background:rgba(91,155,213,.05)}
+.az.proc{border-color:rgba(249,115,22,.4);background:rgba(249,115,22,.04)}
+.az.stor{border-color:rgba(233,121,249,.3);background:rgba(233,121,249,.04)}
+.az.mem{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.04)}
+.az.ext{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.04)}
+.az-title{font-family:var(--mono);font-size:8px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.az.client .az-title{color:var(--p2)}.az.proc .az-title{color:var(--or)}
+.az.stor .az-title{color:var(--pi)}.az.mem .az-title{color:var(--ye)}.az.ext .az-title{color:var(--gr)}
+.ac{background:var(--card2);border:1px solid var(--b1);border-radius:4px;padding:5px 8px;margin-bottom:4px;font-family:var(--mono);font-size:9.5px}
+.ac-n{font-weight:700;margin-bottom:1px}
+.ac-d{font-size:8px;color:var(--tx3);line-height:1.4}
+/* TERMINAL (psql) */
+.tw{background:#040210;border:1px solid var(--b2);border-radius:7px;overflow:hidden;margin:10px 0;box-shadow:0 0 24px rgba(51,103,145,.07)}
+.tb{display:flex;align-items:center;gap:5px;padding:7px 11px;background:#080515;border-bottom:1px solid var(--b1)}
+.td2{width:9px;height:9px;border-radius:50%}
+.td2.r{background:#ff5f57}.td2.y{background:#febc2e}.td2.g{background:#28c840}
+.tt{flex:1;text-align:center;font-size:9px;color:var(--tx3);font-family:var(--mono)}
+.tr-btn{background:transparent;border:1px solid var(--b2);border-radius:3px;color:var(--p2);font-family:var(--mono);font-size:8px;padding:2px 8px;cursor:pointer;transition:all .15s;letter-spacing:1px}
+.tr-btn:hover{background:rgba(51,103,145,.1);border-color:var(--p1)}
+.tr-btn.running{color:var(--ye);border-color:var(--ye)}
+.ts{padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.65;min-height:90px;max-height:420px;overflow-y:auto}
+.ts::-webkit-scrollbar{width:2px}.ts::-webkit-scrollbar-thumb{background:var(--b2)}
+.tl{display:block;white-space:pre-wrap;word-break:break-all}
+.tp{color:var(--p2)}.tc2{color:#fff}
+.to{color:#8fa8c8}.to-g{color:#4ade80;font-weight:600}.to-r{color:#f87171}
+.to-y{color:var(--ye)}.to-b{color:var(--p3)}.to-c{color:var(--cy)}.to-m{color:var(--pi)}
+.to-w{color:#fff;font-weight:600}.to-or{color:var(--or);font-weight:600}.to-dim{color:var(--tx3)}
+.tcur{display:inline-block;width:7px;height:13px;background:var(--p2);margin-left:1px;animation:bl .9s step-end infinite;vertical-align:text-bottom}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo-icon" aria-label="PostgreSQL logo">
+    <svg class="pg-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+      <path d="M36 10C29 10 23 14 21 20L17 21C13 22 10 25 10 29C10 33 13 36 17 36H20V44C20 48 23 52 28 52H31C34 52 37 50 38 47L40 41H45C50 41 54 37 54 32V28C54 18 46 10 36 10Z" fill="url(#pgTop)"/>
+      <path d="M24 26C24 20 28 16 34 16C40 16 45 20 45 27V32C45 34 43 36 41 36H36L34 42C33 44 31 45 29 45H28C26 45 24 43 24 41V26Z" fill="url(#pgBottom)"/>
+      <circle cx="35" cy="23" r="2.3" fill="#F8FAFC"/>
+      <path d="M18 28C16 28 14 29 14 31C14 33 16 34 18 34H20V28H18Z" fill="#F97316"/>
+      <path d="M42 29C45 29 48 31 48 34C48 37 45 39 42 39H39V29H42Z" fill="#2F5F89" opacity=".6"/>
+      <defs>
+        <linearGradient id="pgTop" x1="10" y1="10" x2="54" y2="52" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#89C4FF"/>
+          <stop offset="0.6" stop-color="#5B9BD5"/>
+          <stop offset="1" stop-color="#336791"/>
+        </linearGradient>
+        <linearGradient id="pgBottom" x1="24" y1="16" x2="45" y2="45" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#5B9BD5"/>
+          <stop offset="1" stop-color="#1E3A5F"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+  <div>
+    <div class="logo-name">POSTGRESQL MASTERY</div>
+    <div class="logo-sub">ZERO TO HERO · JSONB · ARRAYS · EXTENSIONS · PERFORMANCE · ARCHITECTURE · 2025</div>
+  </div>
+  <div class="top-sep"></div>
+  <div class="t-stat"><b>24</b> Chapters</div>
+  <div class="t-stat"><b>160+</b> Queries</div>
+  <div class="t-stat"><b>200+</b> <b class="or">Animated</b> Demos</div>
+  <div class="t-stat"><b>250+</b> Q&amp;A</div>
+  <div class="t-badge">PostgreSQL <b>16</b> · psql · DataGrip · pgAdmin</div>
+</div>
+<div class="layout">
+  <div class="lp">
+    <div class="lp-hdr">
+      <div class="lp-hdr-row"><h3>// PostgreSQL Path</h3></div>
+      <div class="prog-bar"><div class="prog-fill" id="progBar"></div></div>
+      <div class="prog-txt" id="progTxt">0 / 24 chapters visited</div>
+    </div>
+    <nav class="lnav" id="leftNav"></nav>
+  </div>
+  <div class="mid" id="middle">
+    <div class="wlc">
+      <div class="wlc-logo" aria-label="PostgreSQL logo">
+        <svg class="pg-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+          <path d="M36 10C29 10 23 14 21 20L17 21C13 22 10 25 10 29C10 33 13 36 17 36H20V44C20 48 23 52 28 52H31C34 52 37 50 38 47L40 41H45C50 41 54 37 54 32V28C54 18 46 10 36 10Z" fill="url(#heroPgTop)"/>
+          <path d="M24 26C24 20 28 16 34 16C40 16 45 20 45 27V32C45 34 43 36 41 36H36L34 42C33 44 31 45 29 45H28C26 45 24 43 24 41V26Z" fill="url(#heroPgBottom)"/>
+          <circle cx="35" cy="23" r="2.3" fill="#F8FAFC"/>
+          <path d="M18 28C16 28 14 29 14 31C14 33 16 34 18 34H20V28H18Z" fill="#F97316"/>
+          <path d="M42 29C45 29 48 31 48 34C48 37 45 39 42 39H39V29H42Z" fill="#2F5F89" opacity=".6"/>
+          <defs>
+            <linearGradient id="heroPgTop" x1="10" y1="10" x2="54" y2="52" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#89C4FF"/>
+              <stop offset="0.6" stop-color="#5B9BD5"/>
+              <stop offset="1" stop-color="#336791"/>
+            </linearGradient>
+            <linearGradient id="heroPgBottom" x1="24" y1="16" x2="45" y2="45" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#5B9BD5"/>
+              <stop offset="1" stop-color="#1E3A5F"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="wlc-title">POSTGRESQL MASTERY</div>
+      <div class="wlc-prompt"><span class="blink">▌</span> SELECT * FROM knowledge WHERE level = 'hero';</div>
+      <p class="wlc-sub">Architecture internals. Every SQL concept. JSONB. Arrays. Extensions. Full-text search.<br>From <code style="color:var(--p2)">SELECT 1</code> to production-grade PostgreSQL — 250+ interview Q&amp;A.</p>
+      <div class="stat-row">
+        <div class="sc"><span class="sc-n">24</span><span class="sc-l">Chapters</span></div>
+        <div class="sc"><span class="sc-n">160+</span><span class="sc-l">Queries</span></div>
+        <div class="sc"><span class="sc-n or">250+</span><span class="sc-l">Q&amp;A</span></div>
+        <div class="sc"><span class="sc-n gr">JSONB</span><span class="sc-l">+Arrays</span></div>
+        <div class="sc"><span class="sc-n" style="color:var(--pi)">∞</span><span class="sc-l">Extensions</span></div>
+      </div>
+      <div class="wlc-hint">← select chapter · animated SQL demos · result grids · psql commands</div>
+    </div>
+  </div>
+  <div class="rp hidden" id="rightPanel">
+    <div class="rp-hdr">
+      <h3 id="rightTitle">SELECT * FROM topics;</h3>
+      <button class="xbtn" onclick="closeRight()">✕</button>
+    </div>
+    <div class="rp-tabs" id="rightTabs"></div>
+    <div class="rb" id="rightBody"></div>
+  </div>
+</div>
+<script>
+
+const CHAPTERS=[
+{id:'architecture',icon:'🏗️',color:'#336791',bg:'rgba(51,103,145,.12)',lc:'#5b9bd5',level:'FOUNDATION',
+ title:'PostgreSQL Architecture',sub:'Processes · Memory · Storage · WAL · MVCC · Vacuum',
+ desc:'How PostgreSQL works internally — process-based architecture, shared buffers, WAL for durability, MVCC for concurrency without locking, and autovacuum. Understanding this makes everything else click.',
+ topics:[
+  {id:'arch-overview',cmd:'Architecture',title:'Full Architecture Diagram',desc:'Postmaster → backend processes, shared memory, storage layout',tags:['essential'],tabs:['Diagram','Process Model','Shared Memory','Storage Layout']},
+  {id:'mvcc',cmd:'MVCC',title:'MVCC — Concurrency Without Locks',desc:'Multi-Version Concurrency Control — how readers never block writers',tags:['essential'],tabs:['Diagram','xmin/xmax','Visibility Rules','Snapshot Isolation']},
+  {id:'wal',cmd:'WAL',title:'WAL — Write-Ahead Log',desc:'How durability is guaranteed, checkpoint, WAL archiving, recovery',tags:['essential'],tabs:['Diagram','Checkpoint','WAL Archiving','Recovery']},
+  {id:'vacuum',cmd:'VACUUM / AUTOVACUUM',title:'VACUUM & Table Bloat',desc:'Dead tuple cleanup, autovacuum tuning, VACUUM FULL, bloat monitoring',tags:['advanced'],tabs:['Demo','Why Vacuum?','Autovacuum Tuning','Table Bloat']},
+ ]},
+{id:'setup-psql',icon:'💻',color:'#336791',bg:'rgba(51,103,145,.1)',lc:'#5b9bd5',level:'BEGINNER',
+ title:'Setup & psql Mastery',sub:'Installation · psql · DataGrip · pgAdmin · config',
+ desc:'Install PostgreSQL, connect with psql, master the command-line client, configure pg_hba.conf and postgresql.conf, and use DataGrip for daily development.',
+ topics:[
+  {id:'install',cmd:'Installation',title:'Install & Configure',desc:'PostgreSQL 16 on Ubuntu/macOS/Windows, initdb, pg_lsclusters',tags:['beginner'],tabs:['Demo','Ubuntu','macOS','Docker']},
+  {id:'psql-cmd',cmd:'psql',title:'psql — The Power CLI',desc:'\\d, \\dt, \\di, \\df, \\l, \\c, \\copy, \\timing, \\x — all meta-commands',tags:['essential'],tabs:['Demo','Meta Commands','Query Tricks','Config']},
+  {id:'datagrip-pg',cmd:'DataGrip',title:'DataGrip for PostgreSQL',desc:'Connect, execution plans, explain analyze, schema browser, shortcuts',tabs:['Demo','Connection','Explain Analyze','Shortcuts'],tags:['essential']},
+  {id:'config',cmd:'postgresql.conf',title:'Key Configuration',desc:'shared_buffers, work_mem, max_connections, effective_cache_size, checkpoint',tabs:['Demo','Memory Config','Connection Config','Query Planner'],tags:['intermediate']},
+ ]},
+{id:'data-types',icon:'🔢',color:'#f97316',bg:'rgba(249,115,22,.1)',lc:'#fb923c',level:'BEGINNER',
+ title:'PostgreSQL Data Types',sub:'int · text · numeric · timestamptz · uuid · enum · domain',
+ desc:'PostgreSQL has the richest type system of any relational database. Numeric, string, temporal, boolean, UUID, enum, range types, domain types, composite types — plus JSONB and arrays in dedicated chapters.',
+ topics:[
+  {id:'numeric-types',cmd:'Numeric',title:'Numeric Types',desc:'smallint/int/bigint, numeric/decimal, real/float8, money — when to use each',tags:['essential'],tabs:['Demo','Type Chart','serial vs identity','numeric vs float']},
+  {id:'text-types',cmd:'Text & Char',title:'Text Types',desc:'text, varchar(n), char(n) — why text is almost always the right choice',tags:['essential'],tabs:['Demo','text vs varchar','String Functions','pg_trgm']},
+  {id:'temporal-types',cmd:'Timestamps',title:'Temporal Types',desc:'timestamptz vs timestamp — ALWAYS use timestamptz. date, time, interval',tags:['essential'],tabs:['Demo','timestamptz vs timestamp','Date Functions','Intervals']},
+  {id:'special-types',cmd:'UUID · Enum · Range',title:'Special Types',desc:'UUID, boolean, bytea, enum types, range types (tstzrange, int4range)',tags:['intermediate'],tabs:['Demo','UUID','Enum Type','Range Types']},
+  {id:'domain-composite',cmd:'Domain · Composite',title:'Domain & Composite Types',desc:'Custom constrained types (domain), row types (composite) — type safety',tabs:['Demo','Domain Type','Composite Type','Type Casting'],tags:['advanced']},
+ ]},
+{id:'fundamentals',icon:'📘',color:'#336791',bg:'rgba(51,103,145,.08)',lc:'#5b9bd5',level:'BEGINNER',
+ title:'SQL Fundamentals in PostgreSQL',sub:'SELECT · WHERE · JOIN · GROUP BY · HAVING · DISTINCT',
+ desc:'Core SQL with PostgreSQL flavour — FILTER aggregate modifier, DISTINCT ON, lateral joins, grouping sets, and PostgreSQL-specific syntax patterns.',
+ topics:[
+  {id:'select-basics',cmd:'SELECT',title:'SELECT & Filtering',desc:'SELECT, WHERE, LIKE, ILIKE, SIMILAR TO, BETWEEN, IN, IS NULL',tags:['essential'],tabs:['Demo','ILIKE vs LIKE','SIMILAR TO','FILTER Clause']},
+  {id:'joins-pg',cmd:'JOINs',title:'Joins in PostgreSQL',desc:'INNER, LEFT, RIGHT, FULL OUTER, CROSS, LATERAL — visual diagrams',tags:['essential'],tabs:['Demo','Join Types','LATERAL JOIN','Join Performance']},
+  {id:'grouping',cmd:'GROUP BY · GROUPING SETS',title:'Grouping & Aggregation',desc:'GROUP BY, HAVING, GROUPING SETS, ROLLUP, CUBE, FILTER aggregate',tags:['intermediate'],tabs:['Demo','GROUPING SETS','ROLLUP','FILTER in Aggregate']},
+  {id:'distinct-on',cmd:'DISTINCT ON',title:'DISTINCT ON — PostgreSQL Unique',desc:'The most useful PostgreSQL-unique feature — get one row per group easily',tags:['essential','unique'],tabs:['Demo','Pattern','vs ROW_NUMBER','Use Cases']},
+ ]},
+{id:'advanced-queries',icon:'⚡',color:'#f97316',bg:'rgba(249,115,22,.1)',lc:'#fb923c',level:'INTERMEDIATE',
+ title:'Advanced Queries',sub:'CTEs · Window Functions · Recursive · Set Operations · LATERAL',
+ desc:'The queries that separate PostgreSQL experts. CTEs with MATERIALIZED, window functions, recursive queries for trees, lateral joins, and advanced aggregation.',
+ topics:[
+  {id:'cte-pg',cmd:'WITH / CTE',title:'CTEs in PostgreSQL',desc:'WITH, WITH RECURSIVE, MATERIALIZED vs NOT MATERIALIZED hints',tags:['essential'],tabs:['Demo','MATERIALIZED','Recursive CTE','CTE vs Subquery']},
+  {id:'window-fn',cmd:'OVER()',title:'Window Functions',desc:'ROW_NUMBER, RANK, DENSE_RANK, NTILE, LEAD, LAG, FIRST_VALUE, LAST_VALUE, FILTER',tags:['essential'],tabs:['Demo','Ranking','LEAD & LAG','Frame Spec']},
+  {id:'lateral-join',cmd:'LATERAL',title:'LATERAL Joins',desc:'Correlated subquery that runs per row — extremely powerful pattern',tags:['advanced'],tabs:['Demo','Pattern','Top-N Per Group','vs Subquery']},
+  {id:'recursive-pg',cmd:'RECURSIVE CTE',title:'Recursive Queries',desc:'Hierarchies, graphs, path finding, date series generation',tags:['advanced'],tabs:['Demo','Tree Hierarchy','Date Series','BFS Graph']},
+  {id:'set-ops',cmd:'UNION/EXCEPT/INTERSECT',title:'Set Operations',desc:'UNION ALL vs UNION, EXCEPT, INTERSECT with performance notes',tabs:['Demo','UNION ALL','EXCEPT','Performance'],tags:['intermediate']},
+ ]},
+{id:'jsonb',icon:'📦',color:'#e879f9',bg:'rgba(233,121,249,.12)',lc:'#e879f9',level:'ESSENTIAL',
+ title:'JSONB — PostgreSQL Superpower',sub:'jsonb · operators · indexes · functions · path queries',
+ desc:'JSONB is what makes PostgreSQL dominate over pure relational and document databases combined. Store, index, and query JSON natively with full ACID guarantees.',
+ topics:[
+  {id:'jsonb-basics',cmd:'JSONB',title:'JSONB Fundamentals',desc:'json vs jsonb, -> ->> operators, containment @>, path queries',tags:['essential','unique'],tabs:['Demo','json vs jsonb','Operators','Containment @>']},
+  {id:'jsonb-query',cmd:'jsonb_path_query',title:'JSONB Querying',desc:'jsonb_path_query, jsonb_each, jsonb_array_elements, aggregation',tags:['intermediate','unique'],tabs:['Demo','Path Queries','Expand Arrays','Aggregate JSON']},
+  {id:'jsonb-modify',cmd:'jsonb_set',title:'JSONB Modification',desc:'jsonb_set, jsonb_insert, || merge, - key delete, #- path delete',tabs:['Demo','Update Keys','Array Operations','Merge Objects'],tags:['intermediate','unique']},
+  {id:'jsonb-index',cmd:'GIN Index',title:'JSONB Indexes',desc:'GIN index for @>, jsonb_path_ops, partial GIN, expression indexes on JSON keys',tags:['advanced','unique'],tabs:['Demo','GIN Index','jsonb_path_ops','Index on Key']},
+  {id:'jsonb-patterns',cmd:'JSONB Patterns',title:'Real-World JSONB Patterns',desc:'EAV replacement, dynamic attributes, API response storage, config tables',tabs:['Demo','Dynamic Attributes','API Storage','Hybrid Relational+JSON'],tags:['advanced','unique']},
+ ]},
+{id:'arrays',icon:'📋',color:'#22d3ee',bg:'rgba(34,211,238,.1)',lc:'#22d3ee',level:'INTERMEDIATE',
+ title:'Arrays in PostgreSQL',sub:'array · unnest · array_agg · GIN · contains',
+ desc:'Native array types in any dimension. Array operators, functions, unnesting to rows, array aggregation, and GIN indexes for efficient contains queries.',
+ topics:[
+  {id:'array-basics',cmd:'ARRAY[]',title:'Array Fundamentals',desc:'1D and multi-D arrays, ANY(), ALL(), @> contains, unnest()',tags:['intermediate','unique'],tabs:['Demo','Syntax','Operators','unnest()']},
+  {id:'array-fns',cmd:'Array Functions',title:'Array Functions & Aggregation',desc:'array_agg, array_length, array_append, array_remove, string_to_array',tabs:['Demo','array_agg','Manipulation','string_to_array'],tags:['intermediate','unique']},
+  {id:'array-index',cmd:'GIN on Array',title:'Array Indexes',desc:'GIN index for @> and && operators, when to use arrays vs normalized tables',tabs:['Demo','GIN Index','Performance','vs Normalized'],tags:['advanced']},
+ ]},
+{id:'full-text',icon:'🔍',color:'#22d3ee',bg:'rgba(34,211,238,.08)',lc:'#22d3ee',level:'INTERMEDIATE',
+ title:'Full-Text Search',sub:'tsvector · tsquery · GIN · ts_rank · phrase search',
+ desc:'Built-in full-text search without Elasticsearch. tsvector, tsquery, GIN indexes, ranking, phrase queries, fuzzy matching with pg_trgm — search like Elasticsearch, store like PostgreSQL.',
+ topics:[
+  {id:'fts-basics',cmd:'tsvector / tsquery',title:'Full-Text Search Basics',desc:'to_tsvector, to_tsquery, plainto_tsquery, websearch_to_tsquery, @@',tags:['intermediate','unique'],tabs:['Demo','tsvector','tsquery Types','Language Config']},
+  {id:'fts-rank',cmd:'ts_rank',title:'Ranking & Highlighting',desc:'ts_rank, ts_rank_cd, ts_headline — score and display search results',tags:['intermediate','unique'],tabs:['Demo','ts_rank','ts_headline','Ranking Strategies']},
+  {id:'fts-index',cmd:'GIN FTS Index',title:'Full-Text Indexes',desc:'GIN on tsvector, generated column approach, partial GIN for filtered search',tabs:['Demo','GIN Index','Generated Column','pg_trgm for LIKE'],tags:['advanced','unique']},
+ ]},
+{id:'indexes-pg',icon:'📇',color:'#336791',bg:'rgba(51,103,145,.1)',lc:'#5b9bd5',level:'ESSENTIAL',
+ title:'Indexes in PostgreSQL',sub:'B-tree · Hash · GIN · GiST · BRIN · partial · expression',
+ desc:'PostgreSQL has more index types than any other RDBMS. B-tree for equality/range, Hash for equality, GIN for arrays/JSONB/FTS, GiST for spatial/range, BRIN for ordered large tables.',
+ topics:[
+  {id:'btree-hash',cmd:'B-tree & Hash',title:'B-tree & Hash Indexes',desc:'Default B-tree, when Hash beats B-tree, multi-column index order',tags:['essential'],tabs:['Demo','B-tree','Hash Index','Multi-column Order']},
+  {id:'gin-gist',cmd:'GIN & GiST',title:'GIN & GiST Indexes',desc:'GIN for contains queries (arrays, JSONB, FTS), GiST for ranges & spatial',tags:['advanced','unique'],tabs:['Demo','GIN Usage','GiST Usage','GIN vs GiST']},
+  {id:'partial-expr',cmd:'Partial & Expression',title:'Partial & Expression Indexes',desc:'Index WHERE subset, index on expression — two most powerful optimization tricks',tags:['intermediate'],tabs:['Demo','Partial Index','Expression Index','Combining Both']},
+  {id:'brin-index',cmd:'BRIN',title:'BRIN Indexes for Large Tables',desc:'Block Range Index — tiny, perfect for time-series and naturally ordered data',tags:['advanced'],tabs:['Demo','BRIN Concept','When to Use','vs B-tree']},
+  {id:'index-mgmt',cmd:'Index Management',title:'Index Analysis & Maintenance',desc:'pg_stat_user_indexes, index bloat, REINDEX CONCURRENTLY, hypopg',tabs:['Demo','Usage Stats','Bloat Query','REINDEX CONCURRENTLY'],tags:['intermediate']},
+ ]},
+{id:'transactions-pg',icon:'🔄',color:'#f97316',bg:'rgba(249,115,22,.08)',lc:'#fb923c',level:'INTERMEDIATE',
+ title:'Transactions & Concurrency',sub:'ACID · Isolation Levels · Advisory Locks · SKIP LOCKED · FOR UPDATE',
+ desc:'MVCC-based concurrency — isolation levels, row-level locking with FOR UPDATE / FOR SHARE, advisory locks for application-level mutex, and SKIP LOCKED for queue patterns.',
+ topics:[
+  {id:'transactions-pg',cmd:'BEGIN/COMMIT',title:'Transaction Control',desc:'BEGIN, COMMIT, ROLLBACK, SAVEPOINT, two-phase commit',tags:['essential'],tabs:['Demo','Savepoints','Two-Phase Commit','Error Handling']},
+  {id:'isolation-pg',cmd:'Isolation Levels',title:'Isolation Levels & MVCC',desc:'READ COMMITTED (default), REPEATABLE READ, SERIALIZABLE — PostgreSQL implementation',tags:['essential'],tabs:['Demo','Read Committed','Serializable','Serialization Failure']},
+  {id:'locking-pg',cmd:'FOR UPDATE',title:'Locking Patterns',desc:'FOR UPDATE, FOR SHARE, FOR NO KEY UPDATE, SKIP LOCKED, NOWAIT',tags:['intermediate'],tabs:['Demo','FOR UPDATE','SKIP LOCKED Queue','Advisory Locks']},
+ ]},
+{id:'performance-pg',icon:'🚀',color:'#f43f5e',bg:'rgba(244,63,94,.1)',lc:'#f43f5e',level:'ADVANCED',
+ title:'Query Performance & EXPLAIN',sub:'EXPLAIN ANALYZE · cost model · statistics · pg_stat_statements',
+ desc:'The core PostgreSQL DBA/engineer skill — read EXPLAIN ANALYZE output, understand the cost model, fix bad plans, tune autovacuum statistics targets, and find slow queries.',
+ topics:[
+  {id:'explain',cmd:'EXPLAIN ANALYZE',title:'Reading EXPLAIN ANALYZE',desc:'Sequential Scan, Index Scan, Bitmap Scan, Hash Join, cost, actual time, buffers',tags:['essential'],tabs:['Demo','Plan Nodes','Cost Model','Buffers & I/O']},
+  {id:'query-planner',cmd:'Planner Config',title:'Query Planner Tuning',desc:'seq_page_cost, random_page_cost, enable_seqscan, statistics target',tags:['advanced'],tabs:['Demo','Cost Model','Statistics Target','Plan Hints pg_hint_plan']},
+  {id:'pg-stat-stmt',cmd:'pg_stat_statements',title:'pg_stat_statements',desc:'Find slowest queries by total time, calls, mean time — the essential extension',tags:['essential'],tabs:['Demo','Enable Extension','Top Queries','Reset Stats']},
+  {id:'partitioning-pg',cmd:'Table Partitioning',title:'Table Partitioning',desc:'Declarative partitioning — RANGE, LIST, HASH — partition pruning',tags:['advanced'],tabs:['Demo','Range Partition','List Partition','Partition Pruning']},
+ ]},
+{id:'functions-pg',icon:'🔧',color:'#f97316',bg:'rgba(249,115,22,.1)',lc:'#fb923c',level:'INTERMEDIATE',
+ title:'Functions & Stored Procedures',sub:'SQL · PL/pgSQL · RETURNS TABLE · DO · triggers',
+ desc:'Write server-side logic in SQL and PL/pgSQL. Functions vs procedures, RETURNS TABLE for set-returning functions, anonymous DO blocks, and exception handling.',
+ topics:[
+  {id:'sql-fn',cmd:'CREATE FUNCTION',title:'SQL & PL/pgSQL Functions',desc:'LANGUAGE sql, LANGUAGE plpgsql, STRICT, STABLE, IMMUTABLE, SECURITY DEFINER',tags:['essential'],tabs:['Demo','SQL Function','PL/pgSQL','Volatility Markers']},
+  {id:'set-returning',cmd:'RETURNS TABLE',title:'Set-Returning Functions',desc:'RETURNS TABLE, RETURNS SETOF, SRF with lateral — parameterized views',tags:['intermediate'],tabs:['Demo','RETURNS TABLE','RETURNS SETOF','CROSS APPLY Pattern']},
+  {id:'procedures-pg',cmd:'CALL / PROCEDURE',title:'Stored Procedures (PostgreSQL 11+)',desc:'CREATE PROCEDURE with CALL — transaction control inside procedures',tabs:['Demo','vs Function','Transaction Control','Use Cases'],tags:['intermediate']},
+  {id:'exception-pg',cmd:'EXCEPTION',title:'Error Handling in PL/pgSQL',desc:'BEGIN/EXCEPTION blocks, RAISE, SQLSTATE, GET STACKED DIAGNOSTICS',tabs:['Demo','EXCEPTION Block','RAISE Levels','Diagnostics'],tags:['intermediate']},
+ ]},
+{id:'triggers-pg',icon:'⚡',color:'#fbbf24',bg:'rgba(251,191,36,.08)',lc:'#fbbf24',level:'INTERMEDIATE',
+ title:'Triggers',sub:'BEFORE · AFTER · INSTEAD OF · DDL triggers · event triggers',
+ desc:'Automate data changes — row-level and statement-level triggers, INSTEAD OF triggers on views, event triggers for DDL changes, and trigger functions.',
+ topics:[
+  {id:'dml-triggers',cmd:'CREATE TRIGGER',title:'DML Triggers',desc:'BEFORE/AFTER INSERT/UPDATE/DELETE, OLD/NEW record, row vs statement level',tags:['intermediate'],tabs:['Demo','BEFORE Trigger','AFTER Trigger','Audit Pattern']},
+  {id:'event-triggers',cmd:'Event Triggers',title:'Event & DDL Triggers',desc:'ON ddl_command_start/end — log schema changes, prevent drops',tabs:['Demo','DDL Trigger','Event Data','Schema Audit'],tags:['advanced']},
+ ]},
+{id:'views-pg',icon:'👁️',color:'#e879f9',bg:'rgba(233,121,249,.08)',lc:'#e879f9',level:'INTERMEDIATE',
+ title:'Views & Materialized Views',sub:'VIEW · MATERIALIZED VIEW · REFRESH · updatable views',
+ desc:'Standard views for abstraction and security, materialized views for pre-computed heavy queries, concurrent refresh, and view security barriers.',
+ topics:[
+  {id:'views-basic',cmd:'CREATE VIEW',title:'Standard Views',desc:'CREATE OR REPLACE VIEW, updatable views, WITH CHECK OPTION, security_barrier',tags:['essential'],tabs:['Demo','Updatable View','Security Barrier','WITH CHECK OPTION']},
+  {id:'matviews',cmd:'MATERIALIZED VIEW',title:'Materialized Views',desc:'Pre-computed results, REFRESH CONCURRENTLY, incremental refresh patterns',tags:['intermediate','unique'],tabs:['Demo','Create & Refresh','CONCURRENTLY','Refresh Strategies']},
+ ]},
+{id:'sequences-pg',icon:'🔢',color:'#336791',bg:'rgba(51,103,145,.08)',lc:'#5b9bd5',level:'BEGINNER',
+ title:'Sequences & Identity Columns',sub:'SERIAL · BIGSERIAL · IDENTITY · SEQUENCE · UUID',
+ desc:'Primary key generation strategies — legacy SERIAL, modern GENERATED ALWAYS AS IDENTITY, explicit sequences, UUID with gen_random_uuid() and ULID patterns.',
+ topics:[
+  {id:'serial-identity',cmd:'IDENTITY',title:'SERIAL vs IDENTITY',desc:'Legacy SERIAL vs modern GENERATED AS IDENTITY — always use IDENTITY now',tags:['essential'],tabs:['Demo','SERIAL','GENERATED IDENTITY','ALTER SEQUENCE']},
+  {id:'uuid-pg',cmd:'UUID',title:'UUID Strategies',desc:'gen_random_uuid() v4, uuid-ossp extension, ULIDs — tradeoffs',tabs:['Demo','gen_random_uuid','UUID as PK','ULID Alternative'],tags:['intermediate']},
+ ]},
+{id:'schema-design-pg',icon:'📐',color:'#5b9bd5',bg:'rgba(91,155,213,.07)',lc:'#5b9bd5',level:'INTERMEDIATE',
+ title:'Schema Design in PostgreSQL',sub:'Normalization · Constraints · Inheritance · Schemas · Row Security',
+ desc:'Design schemas that leverage PostgreSQL strengths — table inheritance, schemas for multi-tenancy, row security policies, check constraints with expressions.',
+ topics:[
+  {id:'constraints-pg',cmd:'Constraints',title:'Constraints & Data Integrity',desc:'PRIMARY KEY, UNIQUE, CHECK, FOREIGN KEY, EXCLUDE constraints',tags:['essential'],tabs:['Demo','CHECK Constraint','EXCLUDE','Deferrable FK']},
+  {id:'inheritance-pg',cmd:'Table Inheritance',title:'Table Inheritance',desc:'PostgreSQL-unique INHERITS — subtypes sharing schema, polymorphic queries',tabs:['Demo','INHERITS','Polymorphic Query','vs Partitioning'],tags:['advanced','unique']},
+  {id:'rls-pg',cmd:'Row Security',title:'Row-Level Security (RLS)',desc:'ENABLE ROW LEVEL SECURITY, policy per operation, multi-tenant patterns',tags:['advanced'],tabs:['Demo','CREATE POLICY','Multi-tenant','current_setting']},
+  {id:'schemas-pg',cmd:'Schemas',title:'Schemas & Search Path',desc:'CREATE SCHEMA, search_path, schema isolation for multi-tenancy',tabs:['Demo','search_path','Per-tenant Schema','Extension Schemas'],tags:['intermediate']},
+ ]},
+{id:'extensions',icon:'🔌',color:'#22c55e',bg:'rgba(34,197,94,.08)',lc:'#22c55e',level:'INTERMEDIATE',
+ title:'Extensions — PostgreSQL Superpowers',sub:'pg_trgm · PostGIS · pg_partman · timescaledb · pgcrypto',
+ desc:'Extensions transform PostgreSQL into anything you need. Fuzzy search, geospatial, time-series, cryptography, connection pooling, and more — all first-class citizens.',
+ topics:[
+  {id:'pg-trgm',cmd:'pg_trgm',title:'pg_trgm — Fuzzy Search',desc:'Trigram similarity, LIKE acceleration, word_similarity, GIN trgm indexes',tags:['intermediate','unique'],tabs:['Demo','similarity()','GIN Index','vs Full-Text']},
+  {id:'postgis',cmd:'PostGIS',title:'PostGIS — Geospatial',desc:'Geometry types, ST_Distance, ST_Contains, spatial indexes, GIS queries',tags:['advanced','unique'],tabs:['Demo','Geometry Types','Spatial Queries','Spatial Index']},
+  {id:'pg-partman',cmd:'pg_partman',title:'pg_partman — Auto-Partitioning',desc:'Automatic partition management, time-based rolling windows, retention',tabs:['Demo','Setup','Time-based','Maintenance'],tags:['advanced']},
+  {id:'useful-ext',cmd:'Essential Extensions',title:'Must-Know Extensions',desc:'pgcrypto, uuid-ossp, hstore, intarray, bloom, pg_stat_statements, plv8',tabs:['Demo','pgcrypto','hstore','Extension Registry'],tags:['intermediate']},
+ ]},
+{id:'replication',icon:'🔁',color:'#e879f9',bg:'rgba(233,121,249,.08)',lc:'#e879f9',level:'ADVANCED',
+ title:'Replication & HA',sub:'Streaming · Logical · Patroni · pg_basebackup · Timelines',
+ desc:'High availability with streaming replication, logical replication for upgrades and CDC, Patroni for automatic failover, and connection pooling with PgBouncer.',
+ topics:[
+  {id:'streaming-rep',cmd:'Streaming Replication',title:'Streaming Replication',desc:'Primary/standby setup, pg_basebackup, wal_level, hot standby',tags:['advanced'],tabs:['Diagram','Setup','Monitoring','Promotion']},
+  {id:'logical-rep',cmd:'Logical Replication',title:'Logical Replication',desc:'Publication/Subscription, CDC, cross-version upgrades, selective table replication',tags:['advanced','unique'],tabs:['Demo','Publication','Subscription','CDC Use Cases']},
+  {id:'pgbouncer',cmd:'PgBouncer',title:'PgBouncer Connection Pooling',desc:'Session/transaction/statement pooling, configuration, pgBouncer + PostgreSQL',tabs:['Overview','Config','Pooling Modes','Monitoring'],tags:['advanced']},
+ ]},
+{id:'cloud-pg',icon:'☁️',color:'#5b9bd5',bg:'rgba(91,155,213,.07)',lc:'#5b9bd5',level:'INTERMEDIATE',
+ title:'PostgreSQL in the Cloud',sub:'AWS RDS · Aurora · Azure Database · GCP Cloud SQL · Supabase',
+ desc:'Running PostgreSQL on cloud platforms — managed service tradeoffs, extensions available, connection strings, IAM auth, and Supabase for full-stack PostgreSQL.',
+ topics:[
+  {id:'rds-aurora',cmd:'AWS RDS / Aurora',title:'AWS RDS PostgreSQL & Aurora',desc:'RDS vs Aurora, max_connections, rds_superuser, extensions, IAM auth',tags:['intermediate'],tabs:['Demo','RDS Config','Aurora Differences','IAM Auth']},
+  {id:'supabase',cmd:'Supabase',title:'Supabase — PostgreSQL for SaaS',desc:'Supabase as a backend — RLS for auth, edge functions, REST auto-API',tabs:['Demo','RLS + Auth','PostgREST','Realtime'],tags:['intermediate']},
+  {id:'azure-pg',cmd:'Azure Database',title:'Azure Database for PostgreSQL',desc:'Flexible Server, Citus for horizontal scaling, Microsoft Entra auth',tabs:['Overview','Flexible Server','Citus','Entra Auth'],tags:['intermediate']},
+ ]},
+{id:'analytics-pg',icon:'📊',color:'#f97316',bg:'rgba(249,115,22,.1)',lc:'#fb923c',level:'ADVANCED',
+ title:'Analytics & Data Engineering',sub:'Window Functions · TABLESAMPLE · COPY · ETL · TimescaleDB',
+ desc:'Use PostgreSQL as an analytics engine — advanced window functions, COPY for bulk loading, TABLESAMPLE for approximate queries, and time-series with TimescaleDB.',
+ topics:[
+  {id:'analytics-adv',cmd:'Analytics Patterns',title:'Advanced Analytics Queries',desc:'Running totals, percentiles, cohort analysis, funnel queries, YoY',tags:['advanced'],tabs:['Demo','Running Total','Cohort Analysis','Funnel Query']},
+  {id:'copy-bulk',cmd:'COPY',title:'COPY — Bulk Load & Export',desc:'COPY FROM/TO, CSV options, COPY via psql \\copy, pg_dump strategies',tags:['intermediate'],tabs:['Demo','COPY FROM','\\copy','pg_dump']},
+  {id:'timescaledb',cmd:'TimescaleDB',title:'TimescaleDB Extension',desc:'Hypertables for time-series, continuous aggregates, compression, retention',tabs:['Demo','Hypertable','Continuous Agg','vs Partitioning'],tags:['advanced','unique']},
+ ]},
+{id:'security-pg',icon:'🔒',color:'#f43f5e',bg:'rgba(244,63,94,.08)',lc:'#f43f5e',level:'INTERMEDIATE',
+ title:'Security',sub:'pg_hba.conf · Roles · GRANT · SSL · Encryption · Audit',
+ desc:'Secure your PostgreSQL cluster — role system, granular privileges, pg_hba.conf authentication, SSL enforcement, column-level security, and audit logging.',
+ topics:[
+  {id:'roles-pg',cmd:'Roles & Privileges',title:'Roles, Users & Privileges',desc:'CREATE ROLE, GRANT, REVOKE, pg_hba.conf, row vs object privileges',tags:['essential'],tabs:['Demo','Role System','GRANT PRIVILEGE','pg_hba.conf']},
+  {id:'ssl-pg',cmd:'SSL / TLS',title:'SSL & Encryption',desc:'SSL enforcement, pgcrypto for column encryption, pg_audit extension',tabs:['Demo','SSL Setup','pgcrypto','pg_audit'],tags:['advanced']},
+ ]},
+{id:'migrations-pg',icon:'🔄',color:'#22c55e',bg:'rgba(34,197,94,.07)',lc:'#22c55e',level:'INTERMEDIATE',
+ title:'Migrations & Schema Changes',sub:'Flyway · Liquibase · Zero-downtime · pg_repack',
+ desc:'Apply schema changes safely in production — zero-downtime migrations with concurrent index builds, pg_repack for bloat removal, and migration tool workflows.',
+ topics:[
+  {id:'zero-downtime',cmd:'Zero-Downtime',title:'Zero-Downtime Migrations',desc:'ADD COLUMN (instant), CREATE INDEX CONCURRENTLY, RENAME strategy',tags:['advanced'],tabs:['Demo','ADD COLUMN','CREATE INDEX CONCURRENTLY','Rename Pattern']},
+  {id:'migration-tools',cmd:'Flyway / Liquibase',title:'Migration Tools',desc:'Flyway with PostgreSQL, Liquibase changesets, schema versioning patterns',tabs:['Demo','Flyway','Liquibase','Best Practices'],tags:['intermediate']},
+ ]},
+{id:'interview-pg-basics',icon:'🎤',color:'#5b9bd5',bg:'rgba(91,155,213,.1)',lc:'#5b9bd5',level:'BEGINNER',
+ title:'Interview Q&A — Basics',sub:'Q 1–60 · PostgreSQL fundamentals · MVCC · Types · Indexes',
+ desc:'60 beginner-to-intermediate questions on PostgreSQL fundamentals — why PostgreSQL, MVCC, data types, indexes, joins, and core SQL patterns.',
+ topics:[
+  {id:'iq-pg-basics',cmd:'Q 1–30 Basics',title:'PostgreSQL Basics',desc:'What is PostgreSQL, MVCC, ACID, data types, basic SQL, constraints',tags:['beginner'],tabs:['Q&A']},
+  {id:'iq-pg-mid',cmd:'Q 31–60 Intermediate',title:'Intermediate Questions',desc:'Indexes, joins, JSONB, arrays, window functions, CTEs',tags:['intermediate'],tabs:['Q&A']},
+ ]},
+{id:'interview-pg-advanced',icon:'🎯',color:'#f97316',bg:'rgba(249,115,22,.1)',lc:'#fb923c',level:'ADVANCED',
+ title:'Interview Q&A — Advanced',sub:'Q 61–130 · Performance · Internals · Extensions · Design',
+ desc:'Advanced questions on EXPLAIN ANALYZE, partitioning, replication, extensions, schema design, and PostgreSQL internals that separate experts from intermediates.',
+ topics:[
+  {id:'iq-pg-perf',cmd:'Q 61–100 Performance',title:'Performance & Internals',desc:'EXPLAIN, MVCC bloat, vacuum, statistics, partitioning, index types',tags:['advanced'],tabs:['Q&A']},
+  {id:'iq-pg-design',cmd:'Q 101–130 Design',title:'Schema Design & Extensions',desc:'Normalization, JSONB design, RLS, PostGIS, replication, cloud PostgreSQL',tags:['advanced'],tabs:['Q&A']},
+ ]},
+{id:'interview-pg-scenarios',icon:'🧩',color:'#e879f9',bg:'rgba(233,121,249,.1)',lc:'#e879f9',level:'ALL',
+ title:'Scenario & Write-SQL Q&A',sub:'Q 131–250 · Write SQL · Debug · Design · Tricky Output',
+ desc:'120 scenario-based questions — write the SQL, predict output, design the schema, debug the query. PostgreSQL-specific challenges with JSONB, arrays, window functions.',
+ topics:[
+  {id:'iq-write-pg',cmd:'Q 131–175 Write SQL',title:'Write the SQL Challenges',desc:'Real scenarios: JSONB queries, array operations, complex window functions, CTEs',tags:['advanced'],tabs:['Q&A']},
+  {id:'iq-output-pg',cmd:'Q 176–215 Predict Output',title:'Predict Output & Debug',desc:'MVCC tricky reads, NULL behavior, DISTINCT ON, lateral join output surprises',tags:['advanced'],tabs:['Q&A']},
+  {id:'iq-design-pg',cmd:'Q 216–250 Design',title:'Schema Design Challenges',desc:'Design a multi-tenant SaaS, a notification system, a time-series schema',tabs:['Q&A'],tags:['hero']},
+ ]},
+];
+
+// ═══ ENGINES ═══
+let termTimers=[];
+function clearTimers(){termTimers.forEach(clearTimeout);termTimers=[];}
+
+// ── psql terminal ──────────────────────────────
+function mkTerm(id,title,autoRun){
+  const h=`<div class="tw" id="tw_${id}">
+<div class="tb"><div class="td2 r"></div><div class="td2 y"></div><div class="td2 g"></div>
+<div class="tt">psql — ${title}</div>
+<button class="tr-btn" id="rb_${id}" onclick="runTerm('${id}')">▶ Run</button></div>
+<div class="ts" id="ts_${id}"><span class="tl"><span class="tp">❯</span><span class="tcur"></span></span></div>
+</div>`;
+  if(autoRun) setTimeout(()=>runTerm(id),400);
+  return h;
+}
+function runTerm(id){
+  const scr=document.getElementById('ts_'+id);
+  const btn=document.getElementById('rb_'+id);
+  if(!scr||!btn) return;
+  clearTimers();scr.innerHTML='';
+  btn.textContent='⏳';btn.classList.add('running');
+  const lines=TERM_DATA[id]||[];
+  let delay=0;
+  lines.forEach((ln,i)=>{
+    const t=setTimeout(()=>{
+      const s=document.createElement('span');s.className='tl';s.innerHTML=ln;
+      scr.appendChild(s);scr.scrollTop=scr.scrollHeight;
+      if(i===lines.length-1){btn.textContent='▶ Run';btn.classList.remove('running');}
+    },delay);
+    termTimers.push(t);
+    delay+=ln.includes('class="tp"')?280:ln.trim()===''?35:50;
+  });
+}
+
+// ── SQL editor with results ─────────────────────
+const SQL_DEMOS={};
+function regSQL(id,cols,rows,cnt,ms){SQL_DEMOS[id]={cols,rows,rowCount:cnt||rows.length,execMs:ms||'< 1ms'};}
+function runSQL(id){
+  const btn=document.getElementById('sqlrb_'+id);
+  const rh=document.getElementById('sqlrh_'+id);
+  const rg=document.getElementById('sqlrg_'+id);
+  const ex=document.getElementById('sqlex_'+id);
+  const rb2=document.getElementById('sqlrb2_'+id);
+  if(!btn||!rh||!rg||!ex||!rb2) return;
+  btn.textContent='⏳';btn.classList.add('running');
+  const demo=SQL_DEMOS[id];
+  if(!demo){btn.textContent='▶ Execute';btn.classList.remove('running');return;}
+  setTimeout(()=>{
+    rh.style.display='flex';rg.style.display='block';ex.style.display='block';
+    document.getElementById('sqlrc_'+id).textContent=(demo.rowCount)+' row(s)';
+    rb2.innerHTML=demo.rows.map(r=>`<tr>${r.map(c=>`<td class="${c.cls||''}">${c.v}</td>`).join('')}</tr>`).join('');
+    ex.innerHTML=`✓ Query OK — <span>${demo.execMs}</span>`;
+    btn.textContent='▶ Execute';btn.classList.remove('running');
+  },550);
+}
+function sqlBlock(id,title,sqlLines,resultCols,resultRows,cnt,ms,autoRun){
+  regSQL(id,resultCols,resultRows,cnt,ms);
+  const colHdrs=resultCols.map(c=>`<th>${c}</th>`).join('');
+  const h=`<div class="sql-editor" id="sqle_${id}">
+<div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div>
+<div class="sql-title">🐘 ${title}</div>
+<button class="sql-run" id="sqlrb_${id}" onclick="runSQL('${id}')">▶ Execute</button></div>
+<div class="sql-code">${sqlLines.join('\n')}</div>
+<div class="results-hdr" id="sqlrh_${id}" style="display:none">📊 RESULTS<span class="rh-rows" id="sqlrc_${id}">0 rows</span></div>
+<div class="results-grid" id="sqlrg_${id}" style="display:none"><table class="rg-table"><thead><tr>${colHdrs}</tr></thead><tbody id="sqlrb2_${id}"></tbody></table></div>
+<div class="exec-info" id="sqlex_${id}" style="display:none">✓ Query OK — <span>0ms</span></div>
+</div>`;
+  if(autoRun) setTimeout(()=>runSQL(id),450);
+  return h;
+}
+
+// ── syntax helpers ─────────────────────────────
+function kw(s){return `<span class="sk">${s}</span>`;}
+function fn(s){return `<span class="sf">${s}</span>`;}
+function str(s){return `<span class="ss">${s}</span>`;}
+function num(s){return `<span class="sn">${s}</span>`;}
+function cmt(s){return `<span class="sc2">${s}</span>`;}
+function col(s){return `<span class="st">${s}</span>`;}
+function al(s){return `<span class="so">${s}</span>`;}
+function prm(s){return `<span class="sp">${s}</span>`;}
+function tp(s){return `<span class="su">${s}</span>`;}
+
+// ═══ ALL DEMO DATA ═══
+const TERM_DATA={
+'psql-demo':[
+ '<span class="tp">❯</span> <span class="tc2">psql -U postgres -d mydb</span>',
+ '<span class="to">psql (16.1)</span>',
+ '<span class="to-g">mydb=#</span> <span class="tc2">\\l</span>',
+ '<span class="to">                              List of databases</span>',
+ '<span class="to">   Name    | Owner    | Encoding | Collate | Ctype  |</span>',
+ '<span class="to-g">   mydb    | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |</span>',
+ '<span class="to-g">   testdb  | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |</span>',
+ '<span class="to-g">mydb=#</span> <span class="tc2">\\dt</span>',
+ '<span class="to">           List of relations</span>',
+ '<span class="to"> Schema |   Name    | Type  |  Owner   </span>',
+ '<span class="to"> public | employees | table | postgres </span>',
+ '<span class="to"> public | orders    | table | postgres </span>',
+ '<span class="to"> public | products  | table | postgres </span>',
+ '<span class="to-g">mydb=#</span> <span class="tc2">\\d employees</span>',
+ '<span class="to">         Table "public.employees"</span>',
+ '<span class="to-b">   Column    |            Type       | Nullable |</span>',
+ '<span class="to"> id          | integer               | not null |</span>',
+ '<span class="to"> name        | text                  | not null |</span>',
+ '<span class="to"> department  | text                  |          |</span>',
+ '<span class="to"> salary      | numeric(12,2)         |          |</span>',
+ '<span class="to"> metadata    | jsonb                 |          |</span>',
+ '<span class="to"> tags        | text[]                |          |</span>',
+ '<span class="to"> hired_at    | timestamp with time zone | not null |</span>',
+ '<span class="to-g">mydb=#</span> <span class="tc2">\\timing on</span>',
+ '<span class="to-g">Timing is on.</span>',
+ '<span class="to-g">mydb=#</span> <span class="tcur"></span>',
+],
+'explain-demo':[
+ '<span class="tp">❯</span> <span class="tc2">EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)</span>',
+ '<span class="tc2">  SELECT * FROM orders WHERE customer_id = 42 AND status = \'pending\';</span>',
+ '<span class="to"> </span>',
+ '<span class="to-g">Index Scan using idx_orders_customer on orders</span>',
+ '<span class="to">  (cost=0.43..8.45 rows=3 width=124)</span>',
+ '<span class="to-g">  (actual time=0.021..0.026 rows=4 loops=1)</span>',
+ '<span class="to">  Index Cond: (customer_id = 42)</span>',
+ '<span class="to-y">  Filter: (status = \'pending\')</span>',
+ '<span class="to">  Rows Removed by Filter: 2</span>',
+ '<span class="to">  Buffers: shared hit=4</span>',
+ '<span class="to"> </span>',
+ '<span class="to">Planning Time: 0.122 ms</span>',
+ '<span class="to-g">Execution Time: 0.048 ms</span>',
+ '<span class="to"> </span>',
+ '<span class="tp">❯</span> <span class="tc2">EXPLAIN (ANALYZE, BUFFERS)</span>',
+ '<span class="tc2">  SELECT * FROM orders WHERE status = \'pending\';  -- no index!</span>',
+ '<span class="to"> </span>',
+ '<span class="to-r">Seq Scan on orders  (cost=0.00..18420.00 rows=82341 width=124)</span>',
+ '<span class="to-r">  (actual time=0.012..124.821 rows=82341 loops=1)</span>',
+ '<span class="to-r">  Filter: (status = \'pending\')</span>',
+ '<span class="to-r">  Rows Removed by Filter: 917659</span>',
+ '<span class="to-r">  Buffers: shared hit=12 read=8420</span>',
+ '<span class="to-r">Execution Time: 142.334 ms  <-- SEQ SCAN IS SLOW!</span>',
+ '<span class="to-dim">-- Fix: CREATE INDEX ON orders(status) WHERE status = \'pending\'</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+'vacuum-demo':[
+ '<span class="tp">❯</span> <span class="tc2">SELECT relname, n_dead_tup, n_live_tup, last_autovacuum FROM pg_stat_user_tables ORDER BY n_dead_tup DESC LIMIT 5;</span>',
+ '<span class="to"> relname   | n_dead_tup | n_live_tup | last_autovacuum</span>',
+ '<span class="to-r"> orders    |  1,824,441 |  3,241,882 | 2025-01-14 02:31</span>',
+ '<span class="to-y"> products  |    124,882 |    892,441 | 2025-01-14 04:12</span>',
+ '<span class="to-g"> employees |      1,241 |     48,821 | 2025-01-15 03:44</span>',
+ '<span class="to-g">mydb=#</span> <span class="tc2">VACUUM (VERBOSE, ANALYZE) orders;</span>',
+ '<span class="to">INFO:  vacuuming "public.orders"</span>',
+ '<span class="to">INFO:  scanned index "orders_pkey" to remove 1824441 row versions</span>',
+ '<span class="to-g">INFO:  "orders": removed 1824441 row versions in 12304 pages</span>',
+ '<span class="to-g">INFO:  "orders": found 1824441 removable, 3241882 nonremovable row versions</span>',
+ '<span class="to-g">INFO:  analyzing "public.orders"</span>',
+ '<span class="to-g">VACUUM</span>',
+ '<span class="to-dim">-- Now run autovacuum tuning for orders table:</span>',
+ '<span class="tp">❯</span> <span class="tc2">ALTER TABLE orders SET (autovacuum_vacuum_scale_factor = 0.01, autovacuum_analyze_scale_factor = 0.005);</span>',
+ '<span class="to-g">ALTER TABLE</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+'pg-stat-demo':[
+ '<span class="tp">❯</span> <span class="tc2">SELECT query, calls, total_exec_time::numeric(10,2) AS total_ms,</span>',
+ '<span class="tc2">       mean_exec_time::numeric(10,2) AS mean_ms, rows</span>',
+ '<span class="tc2">FROM pg_stat_statements ORDER BY total_exec_time DESC LIMIT 5;</span>',
+ '<span class="to"> </span>',
+ '<span class="to">-[ RECORD 1 ]------------------------------------------------------</span>',
+ '<span class="to-r">query     | SELECT * FROM orders WHERE customer_id = $1 AND status...</span>',
+ '<span class="to-r">calls     | 284,421</span>',
+ '<span class="to-r">total_ms  | 1,284,842.34</span>',
+ '<span class="to-r">mean_ms   | 4.52</span>',
+ '<span class="to-r">rows      | 1,847,291</span>',
+ '<span class="to"> </span>',
+ '<span class="to">-[ RECORD 2 ]------------------------------------------------------</span>',
+ '<span class="to-y">query     | SELECT p.*, c.name FROM products p JOIN categories c...</span>',
+ '<span class="to-y">calls     | 42,881</span>',
+ '<span class="to-y">total_ms  | 284,441.21</span>',
+ '<span class="to-y">mean_ms   | 6.63</span>',
+ '<span class="to-g">mydb=#</span> <span class="tc2">SELECT pg_stat_reset_shared(\'bgwriter\');</span>',
+ '<span class="tp">❯</span> <span class="tcur"></span>',
+],
+};
+
+function registerAllDemos(){
+
+// SELECT basics
+regSQL('select-basic',['id','name','department','salary','hired_at'],[
+  [{v:'1'},{v:'Abhishek Panda'},{v:'Engineering',cls:'bl'},{v:'₹14,00,000',cls:'num'},{v:'2022-01-15 09:00+05:30'}],
+  [{v:'2'},{v:'Priya Sharma'},{v:'Engineering',cls:'bl'},{v:'₹12,50,000',cls:'num'},{v:'2021-06-01 10:00+05:30'}],
+  [{v:'3'},{v:'Raj Kumar'},{v:'Analytics',cls:'or'},{v:'₹16,00,000',cls:'num'},{v:'2020-03-10 09:30+05:30'}],
+  [{v:'4'},{v:'Anjali Singh'},{v:'Management',cls:'ye'},{v:'₹22,00,000',cls:'num'},{v:'2019-11-20 08:00+05:30'}],
+  [{v:'5'},{v:'Vikram Nair'},{v:'Analytics',cls:'or'},{v:'₹13,50,000',cls:'num'},{v:'2023-04-05 11:00+05:30'}],
+],5,'3ms');
+
+// DISTINCT ON
+regSQL('distinct-on',['department','name','salary'],[
+  [{v:'Analytics',cls:'or'},{v:'Raj Kumar'},{v:'₹16,00,000',cls:'num'}],
+  [{v:'Engineering',cls:'bl'},{v:'Abhishek Panda'},{v:'₹14,00,000',cls:'num'}],
+  [{v:'Management',cls:'ye'},{v:'Anjali Singh'},{v:'₹22,00,000',cls:'num'}],
+],3,'2ms');
+
+// JSONB query
+regSQL('jsonb-demo',['id','name','skill_level','languages','location'],[
+  [{v:'1'},{v:'Abhishek Panda'},{v:'senior',cls:'grn'},{v:'["C#","TypeScript","Go"]',cls:'cy'},{v:'Bhubaneswar',cls:'or'}],
+  [{v:'3'},{v:'Raj Kumar'},{v:'senior',cls:'grn'},{v:'["Python","SQL","Scala"]',cls:'cy'},{v:'Hyderabad',cls:'or'}],
+  [{v:'7'},{v:'Sunita Das'},{v:'lead',cls:'ye'},{v:'["C#","F#","Rust"]',cls:'cy'},{v:'Bhubaneswar',cls:'or'}],
+],3,'4ms');
+
+// Array demo
+regSQL('array-demo',['id','name','tags','tag_count'],[
+  [{v:'1'},{v:'Abhishek Panda'},{v:'{PostgreSQL,Redis,Docker,Kubernetes}',cls:'cy'},{v:'4',cls:'num'}],
+  [{v:'2'},{v:'Priya Sharma'},{v:'{React,TypeScript,PostgreSQL}',cls:'cy'},{v:'3',cls:'num'}],
+  [{v:'3'},{v:'Raj Kumar'},{v:'{Python,Spark,PostgreSQL,Airflow}',cls:'cy'},{v:'4',cls:'num'}],
+],3,'2ms');
+
+// Full text search
+regSQL('fts-demo',['id','title','rank','snippet'],[
+  [{v:'42'},{v:'PostgreSQL Performance Tuning Guide',cls:'grn'},{v:'0.9753',cls:'num'},{v:'...advanced <b>PostgreSQL</b> <b>indexing</b> strategies for...'}],
+  [{v:'18'},{v:'Index Types in PostgreSQL Explained',cls:'bl'},{v:'0.8421',cls:'num'},{v:'...B-tree, GIN, GiST, BRIN <b>indexes</b> in <b>PostgreSQL</b>...'}],
+  [{v:'91'},{v:'JSONB Indexing and Query Optimization',cls:'or'},{v:'0.7214',cls:'num'},{v:'...GIN <b>index</b> for JSONB containment queries...'}],
+],3,'8ms');
+
+// Window functions
+regSQL('window-demo',['name','dept','salary','row_num','rank','dense_rank','dept_percentile'],[
+  [{v:'Anjali Singh'},{v:'Management'},{v:'₹22,00,000',cls:'num'},{v:'1',cls:'num'},{v:'1',cls:'num'},{v:'1',cls:'num'},{v:'1.00',cls:'grn'}],
+  [{v:'Raj Kumar'},{v:'Analytics'},{v:'₹16,00,000',cls:'num'},{v:'2',cls:'num'},{v:'2',cls:'num'},{v:'2',cls:'num'},{v:'0.75',cls:'grn'}],
+  [{v:'Abhishek Panda'},{v:'Engineering'},{v:'₹14,00,000',cls:'num'},{v:'3',cls:'num'},{v:'3',cls:'num'},{v:'3',cls:'num'},{v:'0.50',cls:'ye'}],
+  [{v:'Vikram Nair'},{v:'Analytics'},{v:'₹13,50,000',cls:'num'},{v:'4',cls:'num'},{v:'4',cls:'num'},{v:'3',cls:'num'},{v:'0.25',cls:'ye'}],
+  [{v:'Priya Sharma'},{v:'Engineering'},{v:'₹12,50,000',cls:'num'},{v:'5',cls:'num'},{v:'5',cls:'num'},{v:'4',cls:'num'},{v:'0.00',cls:'red'}],
+],5,'5ms');
+
+// LATERAL
+regSQL('lateral-demo',['department','top_earner','salary','runner_up','runner_up_salary'],[
+  [{v:'Analytics',cls:'or'},{v:'Raj Kumar'},{v:'₹16,00,000',cls:'num'},{v:'Vikram Nair'},{v:'₹13,50,000',cls:'num'}],
+  [{v:'Engineering',cls:'bl'},{v:'Abhishek Panda'},{v:'₹14,00,000',cls:'num'},{v:'Priya Sharma'},{v:'₹12,50,000',cls:'num'}],
+  [{v:'Management',cls:'ye'},{v:'Anjali Singh'},{v:'₹22,00,000',cls:'num'},{v:'NULL',cls:'null'},{v:'NULL',cls:'null'}],
+],3,'6ms');
+
+// Partition demo
+regSQL('partition-demo',['table_name','partition_of','row_count','size'],[
+  [{v:'orders_2024_q1'},{v:'orders (2024-01-01 to 2024-04-01)',cls:'bl'},{v:'2,841,224',cls:'num'},{v:'1.2 GB',cls:'or'}],
+  [{v:'orders_2024_q2'},{v:'orders (2024-04-01 to 2024-07-01)',cls:'bl'},{v:'3,124,881',cls:'num'},{v:'1.4 GB',cls:'or'}],
+  [{v:'orders_2024_q3'},{v:'orders (2024-07-01 to 2024-10-01)',cls:'bl'},{v:'3,441,224',cls:'num'},{v:'1.5 GB',cls:'or'}],
+  [{v:'orders_2024_q4'},{v:'orders (2024-10-01 to 2025-01-01)',cls:'bl'},{v:'4,121,000',cls:'num'},{v:'1.8 GB',cls:'or'}],
+],4,'< 1ms');
+
+// CTE recursive
+regSQL('recursive-demo',['id','name','title','level','path'],[
+  [{v:'1',cls:'ye'},{v:'Anjali Singh'},{v:'CEO'},{v:'0',cls:'num'},{v:'Anjali Singh',cls:'grn'}],
+  [{v:'2',cls:'ye'},{v:'Abhishek Panda'},{v:'VP Engineering'},{v:'1',cls:'num'},{v:'Anjali Singh > Abhishek Panda',cls:'grn'}],
+  [{v:'3',cls:'ye'},{v:'Priya Sharma'},{v:'Senior Engineer'},{v:'2',cls:'num'},{v:'Anjali > Abhishek > Priya',cls:'grn'}],
+  [{v:'4',cls:'ye'},{v:'Raj Kumar'},{v:'VP Analytics'},{v:'1',cls:'num'},{v:'Anjali Singh > Raj Kumar',cls:'or'}],
+  [{v:'5',cls:'ye'},{v:'Vikram Nair'},{v:'Data Engineer'},{v:'2',cls:'num'},{v:'Anjali > Raj > Vikram',cls:'or'}],
+],5,'3ms');
+
+// JSONB aggregation
+regSQL('jsonb-agg',['department','skills_breakdown','total_engineers','languages_used'],[
+  [{v:'Engineering',cls:'bl'},{v:'{"senior":12,"mid":10,"junior":6}',cls:'cy'},{v:'28',cls:'num'},{v:'["C#","TypeScript","Go","Rust"]',cls:'or'}],
+  [{v:'Analytics',cls:'or'},{v:'{"lead":3,"senior":5,"mid":4}',cls:'cy'},{v:'12',cls:'num'},{v:'["Python","SQL","Scala","Spark"]',cls:'or'}],
+],2,'11ms');
+
+// GIN FTS
+regSQL('gin-demo',['index_name','index_type','size','scans_per_day'],[
+  [{v:'idx_emp_metadata_gin'},{v:'GIN (JSONB)',cls:'pi'},{v:'24 MB',cls:'num'},{v:'8,421',cls:'grn'}],
+  [{v:'idx_emp_tags_gin'},{v:'GIN (text[])',cls:'pi'},{v:'4 MB',cls:'num'},{v:'2,841',cls:'grn'}],
+  [{v:'idx_articles_fts'},{v:'GIN (tsvector)',cls:'pi'},{v:'18 MB',cls:'num'},{v:'42,881',cls:'grn'}],
+],3,'< 1ms');
+
+// pg_trgm
+regSQL('trgm-demo',['name','similarity','match_type'],[
+  [{v:'Abhishek Panda'},{v:'0.9412',cls:'grn'},{v:'High similarity',cls:'grn'}],
+  [{v:'Abhishek Pandey'},{v:'0.8118',cls:'grn'},{v:'Good match',cls:'grn'}],
+  [{v:'Abhishek Pawar'},{v:'0.6471',cls:'ye'},{v:'Moderate match',cls:'ye'}],
+  [{v:'Abhishek Das'},{v:'0.4706',cls:'or'},{v:'Possible match',cls:'or'}],
+],4,'2ms');
+
+// Materialized view
+regSQL('matview-demo',['month','dept','revenue','pct_of_total','rank'],[
+  [{v:'2025-01'},{v:'Engineering',cls:'bl'},{v:'₹1.84 Cr',cls:'num'},{v:'52.3%',cls:'grn'},{v:'1',cls:'num'}],
+  [{v:'2025-01'},{v:'Analytics',cls:'or'},{v:'₹82 L',cls:'num'},{v:'23.3%',cls:'ye'},{v:'2',cls:'num'}],
+  [{v:'2025-01'},{v:'Management',cls:'ye'},{v:'₹86 L',cls:'num'},{v:'24.4%',cls:'ye'},{v:'3',cls:'num'}],
+],3,'< 1ms');
+
+// RLS demo
+regSQL('rls-demo',['order_id','customer','tenant','amount','visible_to'],[
+  [{v:'O-1001'},{v:'Odisha Corp'},{v:'tenant_a',cls:'grn'},{v:'₹4,20,000',cls:'num'},{v:'tenant_a only',cls:'grn'}],
+  [{v:'O-1008'},{v:'Kolkata Ltd'},{v:'tenant_a',cls:'grn'},{v:'₹1,85,000',cls:'num'},{v:'tenant_a only',cls:'grn'}],
+],2,'< 1ms');
+
+// Running total
+regSQL('running-total',['order_date','daily_rev','running_total','moving_avg_7d','pct_of_target'],[
+  [{v:'2025-01-01'},{v:'₹1,24,500',cls:'num'},{v:'₹1,24,500',cls:'grn'},{v:'₹1,24,500'},{v:'62.3%',cls:'ye'}],
+  [{v:'2025-01-02'},{v:'₹98,200',cls:'num'},{v:'₹2,22,700',cls:'grn'},{v:'₹1,11,350'},{v:'58.1%',cls:'ye'}],
+  [{v:'2025-01-03'},{v:'₹1,78,400',cls:'num'},{v:'₹4,01,100',cls:'grn'},{v:'₹1,33,700'},{v:'84.2%',cls:'grn'}],
+  [{v:'2025-01-04'},{v:'₹2,12,000',cls:'num'},{v:'₹6,13,100',cls:'grn'},{v:'₹1,53,275'},{v:'106.0%',cls:'pi'}],
+],4,'9ms');
+
+// COPY benchmark
+regSQL('copy-demo',['method','rows_inserted','duration_ms','rows_per_sec'],[
+  [{v:'INSERT (one by one)',cls:'red'},{v:'100,000',cls:'num'},{v:'42,841',cls:'red'},{v:'2,334',cls:'red'}],
+  [{v:'INSERT ... VALUES (batch 1000)',cls:'ye'},{v:'100,000',cls:'num'},{v:'1,241',cls:'ye'},{v:'80,580',cls:'ye'}],
+  [{v:'COPY FROM STDIN',cls:'grn'},{v:'100,000',cls:'num'},{v:'182',cls:'grn'},{v:'549,451',cls:'grn'}],
+],3,'< 1ms');
+
+}
+registerAllDemos();
+
+// ═══ Q&A DATA ═══
+function getIQs(tid){
+const dc={BEGINNER:'#22c55e',INTERMEDIATE:'#fbbf24',ADVANCED:'#e879f9',HERO:'#f97316',SCENARIO:'#22d3ee'};
+const D={
+'iq-pg-basics':[
+{q:"What is PostgreSQL and what makes it different from other databases?",diff:"BEGINNER",
+a:`PostgreSQL (pronounced "post-gress-Q-L" or "postgres") is a powerful open-source object-relational database. Key differentiators:
+<br><br><code>MVCC (Multi-Version Concurrency Control)</code> — Readers never block writers, writers never block readers. Every transaction sees a consistent snapshot. No read locks needed.
+<br><code>Richest type system</code> — JSONB, arrays, ranges, network addresses, geometric types, custom types, domains, enums. No other RDBMS comes close.
+<br><code>Full extensibility</code> — Custom data types, operators, index methods, procedural languages (PL/pgSQL, PL/Python, PL/V8). PostGIS, TimescaleDB, and Citus are all extensions.
+<br><code>True SQL compliance</code> — PostgreSQL is the most SQL-standards-compliant open-source database.
+<br><code>Write-Ahead Logging (WAL)</code> — Enables streaming replication, point-in-time recovery, and logical replication.
+<br><code>Advanced query planner</code> — Cost-based optimizer using table statistics histograms.
+<br><br><strong>vs MySQL:</strong> PostgreSQL has better SQL compliance, JSONB, arrays, window functions, CTEs — but MySQL has slightly simpler setup and is more popular in PHP stacks.
+<br><strong>vs MongoDB:</strong> PostgreSQL stores JSONB with full ACID, indexes, joins, and transactions. You get document flexibility AND relational power.`},
+{q:"Explain MVCC in PostgreSQL — how does it work?",diff:"BEGINNER",
+a:`MVCC (Multi-Version Concurrency Control) is PostgreSQL's concurrency mechanism. Instead of locking rows, PostgreSQL keeps multiple versions of each row.
+<br><br><strong>How it works:</strong> Every row has hidden system columns: <code>xmin</code> (transaction ID that inserted/created this version) and <code>xmax</code> (transaction ID that deleted/updated this version, or 0 if still live). When you UPDATE a row, PostgreSQL does NOT modify it in place — it marks the old row as dead (sets xmax) and creates a new row version. Both versions coexist until VACUUM cleans up the dead tuple.
+<br><br><strong>Visibility:</strong> When a transaction starts, it gets a snapshot of all currently active transactions. A row version is visible to the transaction if: xmin committed before the snapshot AND xmax is either 0 (not deleted) or committed AFTER the snapshot.
+<br><br><strong>Consequence — table bloat:</strong> Dead tuples accumulate until VACUUM removes them. High UPDATE/DELETE workloads need properly tuned autovacuum or tables grow indefinitely.
+<br><br><strong>Benefit:</strong> SELECT queries run without taking any shared locks. A long-running report does not block concurrent INSERT/UPDATE operations and vice versa.`},
+{q:"What is the difference between timestamp and timestamptz?",diff:"BEGINNER",
+a:`This is one of the most important PostgreSQL type choices:
+<br><br><code>timestamp</code> (timestamp without time zone) — Stores date and time as-is. No timezone awareness. Displays exactly as stored. WRONG for almost all applications.
+<br><code>timestamptz</code> (timestamp with time zone) — Stores as UTC internally (microseconds since epoch). Converts to/from the session's <code>TimeZone</code> setting on display. The correct choice for almost everything.
+<br><br><strong>Why timestamptz is almost always correct:</strong> If you store "2025-01-15 10:00:00" as plain timestamp, you lose the timezone context. Is that India time (+5:30)? UTC? Now when you query from a different timezone, calculations are wrong. With timestamptz, the value is always UTC internally and PostgreSQL converts it for display based on the session timezone.
+<pre>SET TIME ZONE 'UTC';
+SELECT '2025-01-15 10:00:00+05:30'::timestamptz;
+-- Returns: 2025-01-15 04:30:00+00  (correctly converted to UTC)
+
+SET TIME ZONE 'Asia/Kolkata';
+SELECT '2025-01-15 04:30:00+00'::timestamptz;
+-- Returns: 2025-01-15 10:00:00+05:30  (correctly shown in IST)</pre>
+<strong>Rule:</strong> Always use <code>timestamptz</code>. The only reason to use <code>timestamp</code> is for date/time values that intentionally have no timezone meaning (like "office opens at 9am" regardless of timezone — use <code>time</code> type instead).`},
+{q:"What is VACUUM and why is it necessary in PostgreSQL?",diff:"INTERMEDIATE",
+a:`PostgreSQL's MVCC creates dead tuples (old row versions no longer visible to any transaction). VACUUM is the garbage collection process that reclaims space from dead tuples.
+<br><br><strong>What VACUUM does:</strong>
+<br>(1) Scans the table and marks dead tuples as free space (does NOT shrink the file)
+<br>(2) Updates the free space map (FSM) so new rows can reuse that space
+<br>(3) Updates visibility map — marks pages where all tuples are visible to all transactions (freezes transaction IDs)
+<br>(4) Prevents transaction ID wraparound (XID wraparound — catastrophic failure if not prevented)
+<br>(5) Updates pg_statistic for the query planner
+<br><br><code>VACUUM FULL</code> — rewrites the entire table compactly (reclaims disk space), but takes an exclusive lock — table is unusable during VACUUM FULL. Use <code>pg_repack</code> instead for online bloat removal.
+<br><br><code>AUTOVACUUM</code> runs automatically based on thresholds. Default: trigger when 20% + 50 dead tuples accumulate. Tune per-table for high-churn tables:
+<pre>ALTER TABLE orders SET (
+    autovacuum_vacuum_scale_factor = 0.01,  -- vacuum when 1% dead (not 20%)
+    autovacuum_vacuum_cost_delay = 2        -- less aggressive I/O
+);</pre>
+<strong>Table bloat</strong> occurs when autovacuum cannot keep up — use <code>pg_stat_user_tables</code> to monitor <code>n_dead_tup</code>.`},
+{q:"Explain the different index types in PostgreSQL and when to use each.",diff:"INTERMEDIATE",
+a:`PostgreSQL has more index types than any other RDBMS:
+<br><br><code>B-tree (default)</code> — Balanced tree. Supports =, &lt;, &gt;, BETWEEN, IN, LIKE 'prefix%', IS NULL. Use for: primary keys, most equality and range queries. ~O(log n) seeks.
+<br><code>Hash</code> — Only supports =. Slightly faster than B-tree for equality-only workloads. Cannot be WAL-logged in old PG versions. Rarely worth it over B-tree.
+<br><code>GIN (Generalized Inverted Index)</code> — For composite types where each element can appear in multiple rows: arrays (@>, &&, @&lt;), JSONB, tsvector (FTS). Slower to build/update than B-tree, faster for containment queries on large sets.
+<br><code>GiST (Generalized Search Tree)</code> — For geometric shapes, range types, nearest-neighbor. Lossy (can have false positives, rechecked). PostGIS uses GiST for spatial indexes.
+<br><code>BRIN (Block Range Index)</code> — Tiny index storing min/max per block range. Only useful when data is physically ordered (append-only time-series, log tables). 100× smaller than B-tree, much faster to build.
+<br><code>SP-GiST</code> — Space-partitioned GiST. For non-balanced data: IP networks (inet), text (text_ops), points.
+<br><code>Bloom</code> — Probabilistic index. Good for queries on many different columns with = predicates. False positives possible.
+<br><br><strong>Partial index:</strong> Any of the above with a WHERE clause — index only the interesting subset of rows.
+<br><strong>Expression index:</strong> Index on function result, e.g., CREATE INDEX ON users (lower(email)).`},
+{q:"What is DISTINCT ON in PostgreSQL and how is it different from DISTINCT?",diff:"INTERMEDIATE",
+a:`<code>DISTINCT</code> removes duplicate rows across ALL selected columns.
+<br><code>DISTINCT ON (col)</code> is a PostgreSQL-unique feature that keeps only the FIRST row for each unique combination of the specified columns — like ROW_NUMBER() = 1 but more concise.
+<pre>-- Get the LATEST order per customer (most useful pattern)
+SELECT DISTINCT ON (customer_id)
+    customer_id, order_date, total, status
+FROM orders
+ORDER BY customer_id, order_date DESC;  -- ORDER BY must start with DISTINCT ON columns
+
+-- Equivalent ROW_NUMBER approach:
+SELECT customer_id, order_date, total, status
+FROM (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC) AS rn
+    FROM orders
+) t WHERE rn = 1;</pre>
+<strong>DISTINCT ON rules:</strong> The ORDER BY clause must begin with the DISTINCT ON columns (in same order). Additional ORDER BY columns determine WHICH row within each group is "first".
+<br><strong>Performance:</strong> DISTINCT ON can use an index on (customer_id, order_date DESC) for a very efficient plan — often faster than the window function equivalent.
+<br><strong>Use cases:</strong> Latest event per user, current price per product, most recent status per order — any "top-1 per group" scenario.`},
+],
+'iq-pg-mid':[
+{q:"Explain JSONB vs JSON in PostgreSQL — which should you use?",diff:"INTERMEDIATE",
+a:`PostgreSQL has two JSON types:
+<br><br><code>json</code> — Stores the JSON text as-is. Preserves whitespace, duplicate keys, key order. Reparsed on every read. Slower. Rarely the right choice.
+<br><code>jsonb</code> — Binary decomposed format. Removes whitespace, removes duplicate keys (last wins), does NOT preserve key order. Much faster to read. Supports indexes (GIN). ALWAYS prefer this.
+<br><br><strong>JSONB operators:</strong>
+<pre>-- Extract field (returns jsonb)
+metadata -> 'skills'           -- {"languages": ["C#", "Go"]}
+
+-- Extract text value (returns text)  
+metadata ->> 'level'           -- 'senior'
+
+-- Path extraction (jsonb)
+metadata #> '{address,city}'   -- "Bhubaneswar"
+
+-- Path extraction (text)
+metadata #>> '{address,city}'  -- Bhubaneswar
+
+-- Containment: does this jsonb contain that jsonb?
+metadata @> '{"level": "senior"}'    -- true/false
+
+-- Key exists?
+metadata ? 'skills'            -- true/false
+metadata ?| ARRAY['a','b']     -- any key exists
+metadata ?& ARRAY['a','b']     -- all keys exist
+
+-- jsonpath (PostgreSQL 12+)
+metadata @? '$.skills[*] ? (@ == "C#")'</pre>
+<strong>When to use JSONB:</strong> Dynamic attributes (product variants with different specs), API response storage, event sourcing, configuration per entity. The JSONB + GIN index combination gives you Elasticsearch-like query capability with full ACID.`},
+{q:"What is a lateral join and when would you use it?",diff:"INTERMEDIATE",
+a:`A LATERAL join allows the right-hand subquery to reference columns from the left-hand table — like a correlated subquery that returns a table. It runs once per row of the left table.
+<pre>-- Get top 2 orders per customer (top-N per group pattern)
+SELECT c.name, top_orders.order_date, top_orders.total
+FROM customers c
+CROSS JOIN LATERAL (
+    SELECT order_date, total
+    FROM orders o
+    WHERE o.customer_id = c.id      -- references c.id from left table!
+    ORDER BY total DESC
+    LIMIT 2
+) top_orders;
+
+-- Expand JSONB array with context from the parent row
+SELECT e.name, e.department, skill
+FROM employees e
+CROSS JOIN LATERAL jsonb_array_elements_text(e.metadata -> 'skills') AS skill
+WHERE e.department = 'Engineering';</pre>
+<strong>When LATERAL is the right tool:</strong>
+<br>• Top-N records per group (much cleaner than window functions for some cases)
+<br>• Unnesting arrays while keeping parent row context
+<br>• Calling set-returning functions per row
+<br>• Computing something complex per row using a subquery that needs the row's values
+<br><br><strong>Performance:</strong> Uses a nested loop — efficient when the inner query uses an index on the correlated column.`},
+{q:"How do CTEs work in PostgreSQL? What is the MATERIALIZED keyword?",diff:"INTERMEDIATE",
+a:`CTEs (Common Table Expressions) are named subqueries defined before the main query with the WITH clause.
+<br><br><strong>Important PostgreSQL-specific behavior:</strong> In older versions (pre-12), CTEs were always "optimization fences" — PostgreSQL would ALWAYS materialize (execute) the CTE once, preventing the optimizer from pushing predicates inside. Since PostgreSQL 12, simple CTEs are inlined by default (treated like a view).
+<pre>-- PostgreSQL 12+ behavior (inlined by default - CAN be optimized through)
+WITH expensive_calc AS (
+    SELECT customer_id, SUM(total) AS lifetime_value
+    FROM orders GROUP BY customer_id
+)
+SELECT * FROM expensive_calc WHERE lifetime_value > 100000;
+-- Optimizer may push the WHERE into the CTE
+
+-- Force materialization (execute CTE once, like a temp table)
+WITH expensive_calc AS MATERIALIZED (
+    SELECT customer_id, SUM(total) AS lifetime_value
+    FROM orders GROUP BY customer_id
+)
+SELECT * FROM expensive_calc WHERE lifetime_value > 100000;
+-- CTE runs ONCE regardless of how many times referenced
+
+-- Force inline (opposite, for old behavior migration)
+WITH quick AS NOT MATERIALIZED (...)
+SELECT * FROM quick;</pre>
+<strong>When to use MATERIALIZED:</strong> When the CTE is referenced multiple times in the query (prevents re-execution), when you explicitly want the optimization fence behavior, or when the CTE uses VOLATILE functions (like random()).`},
+{q:"How does PostgreSQL handle NULL values — what are the traps?",diff:"BEGINNER",
+a:`NULL semantics in PostgreSQL follow three-valued logic (TRUE / FALSE / UNKNOWN):
+<br><br><strong>Key traps:</strong>
+<pre>-- NULL comparisons return NULL, not FALSE
+SELECT NULL = NULL;        -- NULL (not TRUE!)
+SELECT NULL != 'hello';    -- NULL (not TRUE!)
+SELECT NULL IS NULL;       -- TRUE (use this!)
+SELECT NULL IS NOT NULL;   -- FALSE
+
+-- NOT IN trap -- if subquery returns any NULL, entire NOT IN returns nothing
+SELECT * FROM a WHERE id NOT IN (SELECT parent_id FROM b);
+-- If ANY parent_id is NULL, this returns 0 rows!
+-- Fix: use NOT EXISTS or add WHERE parent_id IS NOT NULL
+
+-- COALESCE: first non-null value
+SELECT COALESCE(phone, mobile, 'no contact') AS contact;
+
+-- NULLIF: returns NULL if equal (avoids divide by zero)
+SELECT revenue / NULLIF(units, 0) AS price_per_unit;
+
+-- NULL in aggregates: COUNT(*) vs COUNT(col)
+-- COUNT(*) counts all rows including NULLs
+-- COUNT(col) counts only non-NULL values
+-- AVG(col) divides by count of non-NULLs (can be misleading!)
+
+-- NULL ordering (PostgreSQL puts NULLs LAST in ASC by default)
+ORDER BY salary DESC NULLS LAST;   -- explicitly control
+ORDER BY salary ASC NULLS FIRST;</pre>`},
+],
+'iq-pg-perf':[
+{q:"How do you read EXPLAIN ANALYZE output in PostgreSQL?",diff:"ADVANCED",
+a:`EXPLAIN ANALYZE actually executes the query and shows actual vs estimated statistics. Key elements:
+<br><pre>EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
+SELECT * FROM orders WHERE customer_id = 42;
+
+-- Output:
+Index Scan using idx_orders_customer on orders
+  (cost=0.43..8.45 rows=3 width=124)       <- ESTIMATED
+  (actual time=0.021..0.026 rows=4 loops=1) <- ACTUAL
+  Index Cond: (customer_id = 42)
+  Buffers: shared hit=4                    <- data from buffer pool (fast)
+Planning Time: 0.122 ms
+Execution Time: 0.048 ms</pre>
+<strong>Key things to look for:</strong>
+<br>🔴 <code>Seq Scan</code> on large table — missing index. Add index on the WHERE column.
+<br>🔴 Big difference between estimated vs actual rows — stale statistics. Run ANALYZE.
+<br>🔴 <code>Buffers: read=</code> high number — data not in shared_buffers, hitting disk.
+<br>🟡 <code>Filter: rows removed by filter=N</code> — index does not cover filter column.
+<br>🟢 <code>Index Scan</code> or <code>Index Only Scan</code> — good, using index.
+<br>🟡 <code>Bitmap Heap Scan</code> — good for multi-row index hits, less good than Index Scan for few rows.
+<br><br><code>Index Only Scan</code> is the holy grail — all needed columns in the index, never touches the table. Only possible if all selected columns are in the index AND the visibility map shows pages are all-visible.
+<br><br><strong>BUFFERS option:</strong> Shows <code>shared hit</code> (from shared_buffers = fast), <code>shared read</code> (from disk = slow), <code>shared written</code> (dirty pages written during query).`},
+{q:"How do you set up table partitioning in PostgreSQL?",diff:"ADVANCED",
+a:`PostgreSQL has declarative partitioning (PostgreSQL 10+) with three strategies:
+<pre>-- RANGE partitioning (most common for time-series)
+CREATE TABLE orders (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    customer_id INT,
+    order_date TIMESTAMPTZ NOT NULL,
+    total NUMERIC(12,2),
+    status TEXT
+) PARTITION BY RANGE (order_date);
+
+-- Create partitions
+CREATE TABLE orders_2024_q1 PARTITION OF orders
+    FOR VALUES FROM ('2024-01-01') TO ('2024-04-01');
+CREATE TABLE orders_2024_q2 PARTITION OF orders
+    FOR VALUES FROM ('2024-04-01') TO ('2024-07-01');
+
+-- Default partition (catches anything not matching)
+CREATE TABLE orders_default PARTITION OF orders DEFAULT;
+
+-- PostgreSQL automatically routes rows to correct partition
+INSERT INTO orders (customer_id, order_date, total) 
+VALUES (42, '2024-03-15 10:00+00', 49999.99);  -- goes to orders_2024_q1
+
+-- Partition pruning: only scans relevant partition
+EXPLAIN SELECT * FROM orders WHERE order_date BETWEEN '2024-01-01' AND '2024-04-01';
+-- Shows: only orders_2024_q1 scanned (other partitions pruned)</pre>
+<strong>LIST partitioning:</strong> <code>PARTITION BY LIST (region)</code> — partition per discrete value like country/region.
+<br><strong>HASH partitioning:</strong> <code>PARTITION BY HASH (id)</code> — distribute rows evenly, good for parallel load.
+<br><br><strong>Best practices:</strong> Always include partition key in WHERE clauses for pruning. Create indexes on each partition (they inherit from parent in PG 11+). Use pg_partman extension for automated partition creation/dropping.`},
+{q:"What is the difference between shared_buffers, work_mem, and effective_cache_size?",diff:"ADVANCED",
+a:`These three parameters control how PostgreSQL uses memory and make the biggest performance difference:
+<br><br><code>shared_buffers</code> — The shared cache for ALL processes. PostgreSQL's own buffer pool. Caches table/index pages. Recommendation: 25% of RAM (up to ~8GB typically). Higher = more cache hits, less disk I/O.
+<pre>shared_buffers = 4GB   # for 16GB RAM server</pre>
+<code>work_mem</code> — Memory per SORT or HASH JOIN OPERATION (not per query, not per connection — per operation). A complex query with 5 sort operations uses 5× work_mem. Default is very low (4MB). Too low = spills to disk (temp files). Too high = OOM with many connections.
+<pre>work_mem = 256MB   # careful: 100 connections × 5 sorts = 128GB!</pre>
+Set locally for specific sessions instead of globally:
+<pre>SET work_mem = '512MB';  -- for this session only</pre>
+<code>effective_cache_size</code> — PostgreSQL's estimate of total system memory available for disk caching (PostgreSQL's buffer pool + OS file cache). Does NOT allocate memory — just informs the query planner. Higher value makes planner prefer index scans over seq scans.
+<pre>effective_cache_size = 12GB  # ~75% of RAM</pre>
+<code>maintenance_work_mem</code> — Memory for VACUUM, CREATE INDEX, ALTER TABLE. Set higher (1-2GB) to speed up index builds and VACUUM.`},
+{q:"What is connection pooling and why does PostgreSQL need PgBouncer?",diff:"ADVANCED",
+a:`PostgreSQL creates a new OS process for each client connection (process-per-connection model, unlike thread-per-connection). Each process uses ~5-10MB of RAM. With 500 connections, that is 2.5-5GB just for connection overhead, before any data is cached.
+<br><br><strong>The problem:</strong> Web applications using ORMs or microservices often create hundreds of short-lived connections. <code>max_connections = 100-200</code> is typical — more than that degrades performance.
+<br><br><strong>PgBouncer solves this:</strong> A lightweight connection pool proxy. Applications connect to PgBouncer. PgBouncer maintains a small pool of real PostgreSQL connections and reuses them.
+<br><br><strong>PgBouncer modes:</strong>
+<br><code>Session pooling</code> — One server connection per client session. Least efficient but most compatible.
+<br><code>Transaction pooling</code> — Server connection released after each transaction. Best for stateless web apps. CANNOT use: session-level SET, PREPARE statements (advisory), LISTEN/NOTIFY.
+<br><code>Statement pooling</code> — Released after each statement. Very aggressive, rarely used.
+<br><pre># pgbouncer.ini
+[mydb]
+host=localhost
+port=5432
+dbname=mydb
+
+pool_mode = transaction
+max_client_conn = 1000    # clients to pgbouncer
+default_pool_size = 25    # real PG connections per database</pre>
+<strong>Result:</strong> 1000 app connections → 25 real PostgreSQL connections → huge reduction in memory and process overhead.`},
+],
+'iq-pg-design':[
+{q:"Design a schema for a multi-tenant SaaS application using PostgreSQL RLS.",diff:"HERO",
+a:`Row-Level Security (RLS) is the PostgreSQL-native approach for multi-tenancy in a shared schema:
+<pre>-- 1. Schema with tenant_id on every table
+CREATE TABLE tenants (
+    id    UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name  TEXT NOT NULL,
+    plan  TEXT DEFAULT 'free'
+);
+
+CREATE TABLE orders (
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tenant_id   UUID NOT NULL REFERENCES tenants(id),
+    customer_id BIGINT NOT NULL,
+    total       NUMERIC(12,2),
+    created_at  TIMESTAMPTZ DEFAULT now(),
+    metadata    JSONB DEFAULT '{}'
+);
+
+-- Index for tenant isolation queries
+CREATE INDEX ON orders (tenant_id, created_at DESC);
+
+-- 2. Enable RLS
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+-- 3. Create policy — uses current_setting() for tenant context
+CREATE POLICY tenant_isolation ON orders
+    USING (tenant_id = current_setting('app.current_tenant')::uuid);
+
+-- 4. Application sets context on each connection
+SET app.current_tenant = 'a1b2c3d4-...';
+-- All queries on orders now auto-filtered to this tenant
+
+-- 5. Admin bypass
+CREATE POLICY admin_sees_all ON orders TO admin_role USING (true);
+ALTER TABLE orders FORCE ROW LEVEL SECURITY;  -- applies to table owner too</pre>
+<strong>Architectural decision:</strong> RLS shared schema (cheap, simple, good for hundreds of tenants), vs schema-per-tenant (moderate isolation, complex migration), vs database-per-tenant (max isolation, expensive).`},
+{q:"How would you store and query hierarchical/tree data in PostgreSQL?",diff:"ADVANCED",
+a:`Multiple approaches in PostgreSQL:
+<br><pre>-- Option 1: Adjacency List (simplest, use recursive CTE to query)
+CREATE TABLE categories (
+    id        INT PRIMARY KEY,
+    name      TEXT,
+    parent_id INT REFERENCES categories(id)
+);
+
+-- Recursive CTE to get full tree
+WITH RECURSIVE tree AS (
+    SELECT id, name, parent_id, 0 AS depth, id::TEXT AS path
+    FROM categories WHERE parent_id IS NULL
+    UNION ALL
+    SELECT c.id, c.name, c.parent_id, t.depth+1, t.path || '/' || c.id::TEXT
+    FROM categories c JOIN tree t ON c.parent_id = t.id
+)
+SELECT *, repeat('  ', depth) || name AS display FROM tree ORDER BY path;
+
+-- Option 2: ltree extension (best for tree queries)
+CREATE EXTENSION ltree;
+ALTER TABLE categories ADD COLUMN path ltree;
+-- path like: 'Electronics.Phones.Smartphones'
+
+CREATE INDEX ON categories USING GIST(path);
+
+-- Query: all descendants of Electronics
+SELECT * FROM categories WHERE path <@ 'Electronics';
+-- All ancestors of a node
+SELECT * FROM categories WHERE path @> 'Electronics.Phones.Smartphones';
+
+-- Option 3: Nested Sets (fast reads, slow writes)
+-- Option 4: Materialized Path (ltree above, or text path column)</pre>
+<strong>Recommendation:</strong> For most use cases, recursive CTE on adjacency list is simplest. Install <code>ltree</code> extension when you query hierarchies frequently and need index support. Nested sets only for mostly-read hierarchies.`},
+],
+'iq-write-pg':[
+{q:"Write a query to find the top 3 products by revenue in each category using JSONB metadata.",diff:"ADVANCED",
+a:`<pre>-- Products table has jsonb 'metadata' column with category info
+-- This combines JSONB query with window functions
+
+WITH product_revenue AS (
+    SELECT
+        p.id,
+        p.name,
+        p.metadata->>'category' AS category,
+        p.metadata->>'subcategory' AS subcategory,
+        SUM(oi.quantity * oi.unit_price) AS total_revenue,
+        SUM(oi.quantity) AS units_sold,
+        COUNT(DISTINCT o.id) AS order_count,
+        DENSE_RANK() OVER (
+            PARTITION BY p.metadata->>'category'
+            ORDER BY SUM(oi.quantity * oi.unit_price) DESC
+        ) AS category_rank
+    FROM products p
+    JOIN order_items oi ON p.id = oi.product_id
+    JOIN orders o ON oi.order_id = o.id
+    WHERE o.created_at >= NOW() - INTERVAL '30 days'
+      AND p.metadata @> '{"status": "active"}'  -- JSONB containment filter
+    GROUP BY p.id, p.name, p.metadata
+)
+SELECT
+    category,
+    category_rank AS rank,
+    name,
+    to_char(total_revenue, 'FM₹99,99,99,999') AS revenue,
+    units_sold,
+    order_count
+FROM product_revenue
+WHERE category_rank <= 3
+ORDER BY category, category_rank;</pre>
+<strong>Key techniques used:</strong> JSONB ->> operator for text extraction, @> for containment filter (uses GIN index), DENSE_RANK() with PARTITION BY on JSONB field, INTERVAL for date arithmetic.`},
+{q:"Write a query to detect duplicate customers based on fuzzy name matching using pg_trgm.",diff:"ADVANCED",
+a:`<pre>-- Find potential duplicate customers using trigram similarity
+-- Requires: CREATE EXTENSION pg_trgm;
+
+SELECT
+    a.id AS id_a, a.name AS name_a, a.email AS email_a,
+    b.id AS id_b, b.name AS name_b, b.email AS email_b,
+    similarity(a.name, b.name) AS name_sim,
+    similarity(a.email, b.email) AS email_sim,
+    CASE
+        WHEN a.email = b.email THEN 'Exact email match'
+        WHEN similarity(a.name, b.name) > 0.85 THEN 'Very likely duplicate'
+        WHEN similarity(a.name, b.name) > 0.70 THEN 'Possible duplicate'
+        ELSE 'Review needed'
+    END AS assessment
+FROM customers a
+JOIN customers b
+    ON a.id < b.id  -- avoid (a,b) and (b,a) duplicates
+    AND (
+        a.email = b.email                       -- same email
+        OR similarity(a.name, b.name) > 0.65    -- similar name
+    )
+ORDER BY name_sim DESC;
+
+-- Performance: GIN trigram index for similarity joins
+CREATE INDEX ON customers USING GIN (name gin_trgm_ops);
+CREATE INDEX ON customers USING GIN (email gin_trgm_ops);</pre>
+<strong>pg_trgm functions:</strong> <code>similarity(a, b)</code> returns 0-1 score. <code>word_similarity()</code> for partial word match. <code>strict_word_similarity()</code> for strict partial match. GIN index with <code>gin_trgm_ops</code> accelerates LIKE '%pattern%' and similarity() queries.`},
+{q:"Write a PL/pgSQL function that handles JSONB upsert with conflict resolution.",diff:"ADVANCED",
+a:`<pre>CREATE OR REPLACE FUNCTION upsert_employee_metadata(
+    p_employee_id BIGINT,
+    p_new_data    JSONB,
+    p_merge_mode  TEXT DEFAULT 'merge'  -- 'merge' | 'replace' | 'deep_merge'
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+VOLATILE
+AS $$
+DECLARE
+    v_existing JSONB;
+    v_result   JSONB;
+BEGIN
+    -- Get current metadata
+    SELECT metadata INTO v_existing
+    FROM employees WHERE id = p_employee_id
+    FOR UPDATE;  -- row-level lock
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Employee % not found', p_employee_id
+            USING ERRCODE = 'no_data_found';
+    END IF;
+
+    -- Merge strategy
+    v_result := CASE p_merge_mode
+        WHEN 'replace' THEN p_new_data
+        WHEN 'merge'   THEN COALESCE(v_existing, '{}') || p_new_data
+        WHEN 'deep_merge' THEN
+            -- Deep merge: concatenate arrays, merge nested objects
+            jsonb_merge_deep(v_existing, p_new_data)  -- custom function
+        ELSE RAISE EXCEPTION 'Unknown merge_mode: %', p_merge_mode
+    END;
+
+    -- Update and return
+    UPDATE employees
+    SET metadata = v_result,
+        updated_at = NOW()
+    WHERE id = p_employee_id;
+
+    RETURN v_result;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'upsert_employee_metadata failed for id=%: %',
+            p_employee_id, SQLERRM;
+        RAISE;  -- re-raise to caller
+END;
+$$;
+
+-- Usage:
+SELECT upsert_employee_metadata(
+    42,
+    '{"skills": ["Rust", "WASM"], "certifications": ["AWS-SAA"]}',
+    'merge'
+);</pre>`},
+{q:"What does this query return? Explain the DISTINCT ON behavior.",diff:"INTERMEDIATE",
+a:`<pre>-- Given orders table: (id, customer_id, order_date, total)
+-- Data:
+-- 1, 101, 2025-01-01, 500
+-- 2, 101, 2025-01-15, 1200
+-- 3, 102, 2025-01-05, 300
+-- 4, 102, 2025-01-20, 800
+-- 5, 103, 2025-01-10, 150
+
+SELECT DISTINCT ON (customer_id)
+    customer_id, order_date, total
+FROM orders
+ORDER BY customer_id, order_date DESC;
+</pre>
+<strong>Result:</strong>
+<pre>customer_id | order_date | total
+101         | 2025-01-15 | 1200   <- latest order for 101
+102         | 2025-01-20 | 800    <- latest order for 102
+103         | 2025-01-10 | 150    <- only order for 103</pre>
+<strong>Explanation:</strong> DISTINCT ON (customer_id) keeps the FIRST row for each unique customer_id. The ORDER BY determines which row is "first": ORDER BY customer_id, order_date DESC means within each customer group, sort by date descending — so the most recent order is first, and DISTINCT ON keeps that.
+<br><br><strong>Important rule:</strong> ORDER BY must START with the DISTINCT ON columns. ORDER BY order_date DESC, customer_id would be a syntax error here.`},
+{q:"Predict the output of this query with arrays.",diff:"INTERMEDIATE",
+a:`<pre>SELECT 
+    ARRAY[1,2,3] || ARRAY[4,5] AS concatenated,
+    ARRAY[1,2,3,2,1] @> ARRAY[2,3] AS contains,
+    ARRAY[1,2,3] && ARRAY[3,4,5] AS overlaps,
+    array_length(ARRAY[1,2,3,4], 1) AS length,
+    ARRAY[1,2,3][2] AS second_element,
+    CARDINALITY(ARRAY[[1,2],[3,4]]) AS total_elements;</pre>
+<strong>Results:</strong>
+<pre>concatenated | contains | overlaps | length | second_element | total_elements
+{1,2,3,4,5}  | t        | t        | 4      | 2              | 4</pre>
+<strong>Explanation:</strong>
+<br>• <code>||</code> concatenates arrays
+<br>• <code>@></code> returns true if left contains ALL elements of right (order does not matter, duplicates ignored)
+<br>• <code>&&</code> returns true if arrays share ANY element
+<br>• <code>array_length(arr, dim)</code> — dim=1 for first dimension
+<br>• Arrays are 1-indexed in PostgreSQL (ARRAY[1,2,3][1] = 1, [2] = 2)
+<br>• <code>CARDINALITY</code> returns TOTAL elements across all dimensions
+<br><br><strong>Common trap:</strong> <code>ARRAY[1,2][1]</code> returns 1 (index 1 = first element). Coming from Python/JS, you might expect 0-based indexing.`},
+],
+'iq-design-pg':[
+{q:"Design a notification/event system for a SaaS application in PostgreSQL.",diff:"HERO",
+a:`<pre>-- Events table (append-only event log)
+CREATE TABLE events (
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tenant_id   UUID NOT NULL,
+    event_type  TEXT NOT NULL,
+    actor_id    UUID,
+    resource_type TEXT,
+    resource_id TEXT,
+    payload     JSONB DEFAULT '{}',
+    created_at  TIMESTAMPTZ DEFAULT now()
+) PARTITION BY RANGE (created_at);
+
+-- Create monthly partitions (use pg_partman for automation)
+CREATE TABLE events_2025_01 PARTITION OF events
+    FOR VALUES FROM ('2025-01-01') TO ('2025-02-01');
+
+-- Notification preferences
+CREATE TABLE notification_rules (
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tenant_id   UUID NOT NULL,
+    user_id     UUID NOT NULL,
+    event_type  TEXT NOT NULL,
+    channels    TEXT[] DEFAULT ARRAY['email'],
+    conditions  JSONB DEFAULT '{}',
+    is_active   BOOLEAN DEFAULT true,
+    UNIQUE (user_id, event_type)
+);
+
+-- Notification queue (processed by worker)
+CREATE TABLE notification_queue (
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    event_id    BIGINT REFERENCES events(id),
+    user_id     UUID NOT NULL,
+    channel     TEXT NOT NULL,
+    payload     JSONB,
+    status      TEXT DEFAULT 'pending',
+    attempts    INT DEFAULT 0,
+    process_at  TIMESTAMPTZ DEFAULT now(),
+    created_at  TIMESTAMPTZ DEFAULT now()
+);
+
+-- Partial index for unprocessed items (SKIP LOCKED pattern)
+CREATE INDEX ON notification_queue (process_at, id)
+WHERE status = 'pending';
+
+-- Worker query using SKIP LOCKED (queue consumer pattern)
+WITH batch AS (
+    SELECT id FROM notification_queue
+    WHERE status = 'pending' AND process_at <= now()
+    ORDER BY process_at, id
+    LIMIT 10
+    FOR UPDATE SKIP LOCKED
+)
+UPDATE notification_queue n
+SET status = 'processing', attempts = attempts + 1
+FROM batch WHERE n.id = batch.id
+RETURNING n.*;</pre>
+<strong>SKIP LOCKED</strong> is a PostgreSQL feature for building efficient work queues — multiple workers can consume jobs without blocking each other.`},
+{q:"How would you implement an efficient time-series data store in PostgreSQL?",diff:"HERO",
+a:`<pre>-- Sensor readings — time-series pattern
+CREATE TABLE sensor_readings (
+    sensor_id   INT NOT NULL,
+    measured_at TIMESTAMPTZ NOT NULL,
+    value       FLOAT8 NOT NULL,
+    metadata    JSONB DEFAULT '{}'
+) PARTITION BY RANGE (measured_at);
+
+-- Monthly partitions (automated with pg_partman)
+SELECT partman.create_parent(
+    p_parent_table => 'public.sensor_readings',
+    p_control => 'measured_at',
+    p_interval => '1 month'
+);
+
+-- BRIN index (perfect for time-series — very small, very fast for range scans)
+CREATE INDEX ON sensor_readings USING BRIN (measured_at);
+
+-- B-tree for sensor-specific queries
+CREATE INDEX ON sensor_readings (sensor_id, measured_at DESC);
+
+-- Materialized view for pre-computed hourly aggregates
+CREATE MATERIALIZED VIEW sensor_hourly AS
+SELECT
+    sensor_id,
+    date_trunc('hour', measured_at) AS hour,
+    AVG(value)   AS avg_val,
+    MIN(value)   AS min_val,
+    MAX(value)   AS max_val,
+    COUNT(*)     AS reading_count,
+    STDDEV(value) AS stddev
+FROM sensor_readings
+GROUP BY sensor_id, date_trunc('hour', measured_at)
+WITH NO DATA;
+
+CREATE UNIQUE INDEX ON sensor_hourly (sensor_id, hour);
+
+-- Refresh concurrently (no lock on read)
+REFRESH MATERIALIZED VIEW CONCURRENTLY sensor_hourly;
+
+-- Gap detection: find missing 5-minute intervals
+SELECT sensor_id, gap_start, gap_end,
+       gap_end - gap_start AS gap_duration
+FROM (
+    SELECT sensor_id, measured_at AS ts,
+           LEAD(measured_at) OVER (PARTITION BY sensor_id ORDER BY measured_at) AS next_ts,
+           measured_at AS gap_start,
+           LEAD(measured_at) OVER (...) AS gap_end
+    FROM sensor_readings
+    WHERE measured_at > NOW() - INTERVAL '1 day'
+) t
+WHERE next_ts - ts > INTERVAL '6 minutes';</pre>
+<strong>For production time-series:</strong> Consider <code>TimescaleDB</code> extension — it adds automatic partitioning (hypertables), continuous aggregates, and native compression on top of PostgreSQL.`},
+],
+};
+return D[tid]||[];
+}
+
+// ═══ ARCHITECTURE DIAGRAM ═══
+function pgArch(){return `<div class="arch">
+<div class="arch-title">🐘 PostgreSQL Architecture — Full Internal View</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+  <div class="az client" style="min-width:130px">
+    <div class="az-title">💻 Client Layer</div>
+    <div class="ac"><div class="ac-n" style="color:var(--p2)">psql / DataGrip</div><div class="ac-d">libpq protocol over TCP port 5432 or Unix socket</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--p2)">Application</div><div class="ac-d">libpq / asyncpg / psycopg / node-postgres</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--p2)">PgBouncer</div><div class="ac-d">Connection pooler — sits between app and PostgreSQL</div></div>
+  </div>
+  <div class="az proc" style="min-width:170px">
+    <div class="az-title">⚙️ Backend Processes</div>
+    <div class="ac"><div class="ac-n" style="color:var(--or)">Postmaster</div><div class="ac-d">Supervisor — forks one backend per connection. Also spawns background workers.</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--or)">Backend Process (per connection)</div><div class="ac-d">Parse → Rewrite → Plan → Execute query. Accesses shared memory.</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--or)">Autovacuum Launcher + Workers</div><div class="ac-d">Continuously cleans dead tuples. Vital for MVCC health.</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--or)">WAL Writer</div><div class="ac-d">Flushes WAL buffers to WAL files (pg_wal/) periodically</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--or)">Checkpointer</div><div class="ac-d">Writes dirty pages from shared_buffers to data files</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--or)">bgwriter</div><div class="ac-d">Proactively writes dirty pages to keep clean pages available</div></div>
+  </div>
+  <div class="az mem" style="min-width:140px">
+    <div class="az-title">💛 Shared Memory</div>
+    <div class="ac"><div class="ac-n" style="color:var(--ye)">shared_buffers</div><div class="ac-d">Page cache (8KB pages). Goal: serve reads from memory. Set to 25% RAM.</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--ye)">WAL Buffers</div><div class="ac-d">Ring buffer for WAL records before flush to pg_wal</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--ye)">work_mem (per sort/hash)</div><div class="ac-d">Sort, hash join memory. Per-operation not per-connection!</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--ye)">Lock Tables</div><div class="ac-d">Lightweight lock (LWLock) and heavyweight lock tables</div></div>
+  </div>
+  <div class="az stor" style="min-width:140px">
+    <div class="az-title">💜 Storage</div>
+    <div class="ac"><div class="ac-n" style="color:var(--pi)">Data Files ($PGDATA/base/)</div><div class="ac-d">Heap files (8KB pages), one relation per file. Contains live + dead tuples.</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--pi)">WAL Files (pg_wal/)</div><div class="ac-d">Write-Ahead Log. Written before data pages. Durability + replication.</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--pi)">pg_stat / pg_statistic</div><div class="ac-d">Statistics for query planner. Updated by ANALYZE.</div></div>
+    <div class="ac"><div class="ac-n" style="color:var(--pi)">pg_wal/archive/</div><div class="ac-d">WAL archive for PITR and standby replication</div></div>
+  </div>
+</div>
+</div>`;}
+
+function getPgTopic(cid, tid){
+  const chapter = CHAPTERS.find(ch => ch.id === cid);
+  const topic = chapter?.topics.find(tp => tp.id === tid);
+  return { chapter, topic };
+}
+
+function pgTabFocus(tab){
+  const t = String(tab).toLowerCase();
+  if (t.includes('diagram') || t.includes('model') || t.includes('layout') || t.includes('overview')) return 'architecture';
+  if (t.includes('demo') || t.includes('query') || t.includes('commands') || t.includes('setup') || t.includes('connection')) return 'hands-on';
+  if (t.includes('operators') || t.includes('rules') || t.includes('visibility') || t.includes('config') || t.includes('type') || t.includes('casting')) return 'mechanics';
+  if (t.includes('best') || t.includes('use cases') || t.includes('vs ') || t.includes('pattern') || t.includes('language') || t.includes('shortcuts')) return 'practice';
+  if (t.includes('performance') || t.includes('index') || t.includes('tuning') || t.includes('analyze') || t.includes('bloat') || t.includes('planner')) return 'operations';
+  return 'concept';
+}
+
+function renderPgGenericTab(cid, tid, tab){
+  const { chapter, topic } = getPgTopic(cid, tid);
+  if (!chapter || !topic) {
+    return `<div class="sec">${tab}</div><p class="bd">This PostgreSQL topic could not be loaded.</p>`;
+  }
+
+  const focus = pgTabFocus(tab);
+  const title = topic.title || tid;
+  const desc = topic.desc || 'PostgreSQL topic';
+  const cmd = topic.cmd || 'topic';
+  const tags = (topic.tags || []).join(' · ') || 'postgresql';
+
+  const summary = {
+    architecture: `This tab explains where <strong>${title}</strong> sits inside PostgreSQL internals, which process or memory structure owns it, and how it affects correctness or performance.`,
+    'hands-on': `This tab turns <strong>${title}</strong> into a practical workflow: the command or query shape to start with, the output to inspect, and the signals that confirm it is working.`,
+    mechanics: `This tab focuses on the rules behind <strong>${title}</strong>, especially the operators, planner behavior, tuple visibility rules, or type semantics that make PostgreSQL behave the way it does.`,
+    practice: `This tab translates <strong>${title}</strong> into production judgment: when to use it, when not to, and how to explain the trade-off in plain English.`,
+    operations: `This tab focuses on operating <strong>${title}</strong> at scale: planner choices, maintenance cost, observability, contention, and the first checks to make when production behavior looks wrong.`,
+    concept: `This tab completes <strong>${title}</strong> with the missing conceptual context so the topic reads like a full lesson instead of a partial note.`
+  }[focus];
+
+  const bullets = {
+    architecture: [
+      `Primary concept: ${desc}.`,
+      `Chapter context: ${chapter.title} connects this topic to ${chapter.sub}.`,
+      `Internal question: does this behavior live in the backend process, shared memory, WAL path, planner, executor, or storage layer?`
+    ],
+    'hands-on': [
+      `Start with a small, repeatable query or command for <code>${cmd}</code>.`,
+      `Validate the result with output, row shape, plan shape, or catalog inspection rather than trusting syntax alone.`,
+      `Use realistic sample data so the PostgreSQL-specific behavior is obvious and discussable.`
+    ],
+    mechanics: [
+      `Understand the rule first, then the syntax that exposes it.`,
+      `Connect the topic to one concrete internal effect: tuple visibility, index selection, sort memory, lock scope, or planner estimates.`,
+      `Use tags like ${tags} to classify whether the topic is foundational, advanced, or PostgreSQL-unique.`
+    ],
+    practice: [
+      `Prefer the clearest PostgreSQL-native pattern over clever but opaque SQL.`,
+      `Document what data shape or workload makes this topic valuable.`,
+      `Pair usage guidance with one realistic failure mode or misuse pattern.`
+    ],
+    operations: [
+      `Know which view, plan detail, or maintenance command you would inspect first if this topic misbehaved in production.`,
+      `Review how statistics, autovacuum, indexing, or memory settings change the outcome.`,
+      `Optimize for repeatable diagnosis rather than one-time success.`
+    ],
+    concept: [
+      `Know what problem ${title} solves before using it from habit.`,
+      `Tie the PostgreSQL feature back to storage, planner, or application design choices.`,
+      `Prefer patterns that are easy to reason about during debugging, handover, and interview discussion.`
+    ]
+  }[focus];
+
+  return `<div class="sec">${tab}</div>
+<p class="bd"><strong>${title}</strong> sits inside <strong>${chapter.title}</strong> and covers ${desc}</p>
+<p class="bd">${summary}</p>
+<ul class="fl">${bullets.map(item => `<li>${item}</li>`).join('')}</ul>
+<div class="callout info"><strong>PostgreSQL lens</strong>${title} gets easier once you connect the SQL or configuration to a real internal effect: MVCC visibility, WAL volume, planner estimates, GIN/GiST behavior, memory pressure, or autovacuum work.</div>
+<div class="callout tip"><strong>Plain-English test</strong>If you can explain this tab as “what problem it solves, what PostgreSQL component is involved, and what output proves it,” then you truly understand the topic.</div>`;
+}
+
+// ═══ CONTENT FUNCTION ═══
+function getContent(cid,tid,tab){
+  const key=`${cid}:${tid}:${tab}`;
+
+  // Interview Q&A
+  if(tid.startsWith('iq-')){
+    const qs=getIQs(tid);
+    const dc={BEGINNER:'#22c55e',INTERMEDIATE:'#fbbf24',ADVANCED:'#e879f9',HERO:'#f97316',SCENARIO:'#22d3ee'};
+    const cid2='qc_'+tid;
+    const items=qs.map((q,i)=>`<div class="qa-item" data-diff="${q.diff}" onclick="toggleQA(this)">
+<div class="qa-q"><div class="qa-qi" style="background:${dc[q.diff]||'#5b9bd5'}22;color:${dc[q.diff]||'#5b9bd5'};border:1px solid ${dc[q.diff]||'#5b9bd5'}44">Q${i+1}</div>
+<div class="qa-qt">${q.q}</div><span class="tag ${q.diff.toLowerCase()}">${q.diff}</span><span class="qa-ch">▼</span></div>
+<div class="qa-a"><div class="qa-ab">${q.a}</div></div></div>`).join('');
+    return `<div id="${cid2}"><div class="filter-row">
+<button class="fbtn active" onclick="filterQs(this,'all',document.getElementById('${cid2}'))">All</button>
+${Object.keys(dc).map(d=>`<button class="fbtn" onclick="filterQs(this,'${d}',document.getElementById('${cid2}'))">${d}</button>`).join('')}
+</div>${items}</div>`;
+  }
+
+  // ── ARCHITECTURE ──────────────────────────────
+  if(key==='architecture:arch-overview:Diagram') return pgArch()+
+    `<div class="callout info"><strong>Process per connection</strong>Unlike MySQL/SQL Server (thread per connection), PostgreSQL forks a separate OS process per client connection. This gives better stability (crash isolation) but makes connection pooling (PgBouncer) essential for high-concurrency apps. Each process uses ~5-10MB RAM.</div>`;
+
+  if(key==='architecture:arch-overview:Process Model') return `<div class="sec">PostgreSQL Process Model</div>
+<div class="flow">
+  <div class="fbox"><div class="fb-label">Client</div><div class="fb-name" style="color:var(--p2)">libpq connect()</div></div>
+  <div class="farr cmd">→<span>TCP:5432</span></div>
+  <div class="fbox"><div class="fb-label">Postmaster</div><div class="fb-name" style="color:var(--or)">fork()</div></div>
+  <div class="farr cmd">→<span>new process</span></div>
+  <div class="fbox"><div class="fb-label">Backend</div><div class="fb-name" style="color:var(--or)">pg_backend_pid()</div></div>
+  <div class="farr cmd">→<span>parse→plan→exec</span></div>
+  <div class="fbox"><div class="fb-label">Result</div><div class="fb-name" style="color:var(--gr)">rows → client</div></div>
+</div>
+<table class="tbl"><thead><tr><th>Background Process</th><th>Role</th><th>Key Config</th></tr></thead><tbody>
+<tr><td>autovacuum launcher</td><td>Spawns worker processes for VACUUM/ANALYZE</td><td>autovacuum_max_workers = 3</td></tr>
+<tr><td>walwriter</td><td>Flushes WAL buffers to pg_wal/ files</td><td>wal_writer_delay = 200ms</td></tr>
+<tr><td>checkpointer</td><td>Writes dirty pages to disk at checkpoint</td><td>checkpoint_completion_target = 0.9</td></tr>
+<tr><td>bgwriter</td><td>Proactively cleans dirty pages</td><td>bgwriter_lru_maxpages = 100</td></tr>
+<tr><td>stats collector</td><td>Collects query/table/index statistics</td><td>track_activities, track_counts</td></tr>
+<tr><td>logical replication launcher</td><td>Manages logical replication workers</td><td>max_logical_replication_workers</td></tr>
+</tbody></table>`;
+
+  if(key==='architecture:mvcc:Diagram') return `<div class="sec">MVCC — How Every Row Has Hidden Versions</div>
+<div class="arch">
+<div class="arch-title">MVCC Row Versions — xmin and xmax</div>
+<div style="font-family:var(--mono);font-size:10.5px;color:var(--tx2);line-height:2">
+  <div style="background:var(--card2);border:1px solid var(--b1);border-radius:4px;padding:10px;margin-bottom:6px">
+    <div style="color:var(--p2);font-weight:700;margin-bottom:4px">INSERT INTO employees VALUES (1, 'Abhishek', ...) -- by txid 100</div>
+    <div>Row: <span style="color:var(--ye)">xmin=100</span> <span style="color:var(--pi)">xmax=0</span> | name='Abhishek' | salary=1400000</div>
+    <div style="color:var(--tx3);font-size:9px">xmax=0 means row is NOT deleted — visible to all transactions after txid 100 commits</div>
+  </div>
+  <div style="background:var(--card2);border:1px solid var(--b1);border-radius:4px;padding:10px;margin-bottom:6px">
+    <div style="color:var(--or);font-weight:700;margin-bottom:4px">UPDATE employees SET salary=1600000 -- by txid 150</div>
+    <div style="color:var(--re)">Old row: <span style="color:var(--ye)">xmin=100</span> <span style="color:var(--re)">xmax=150</span> | salary=1400000  ← DEAD TUPLE (awaiting VACUUM)</div>
+    <div style="color:var(--gr)">New row: <span style="color:var(--ye)">xmin=150</span> <span style="color:var(--pi)">xmax=0</span>   | salary=1600000  ← LIVE</div>
+    <div style="color:var(--tx3);font-size:9px">Both versions exist simultaneously. Snapshot determines which is visible.</div>
+  </div>
+  <div style="background:var(--card2);border:1px solid var(--b1);border-radius:4px;padding:10px">
+    <div style="color:var(--pi);font-weight:700;margin-bottom:4px">A reader started before txid 150 (SELECT in txid 140)</div>
+    <div style="color:var(--gr)">Sees OLD row (xmin=100, xmax=150) — 150 is NOT in its snapshot yet</div>
+    <div style="color:var(--or)">A reader starting after txid 150 commits sees NEW row (xmin=150)</div>
+    <div style="color:var(--tx3);font-size:9px">ZERO locking — readers and writers proceed completely independently!</div>
+  </div>
+</div>
+</div>`;
+
+  if(key==='architecture:vacuum:Demo') return mkTerm('vacuum-demo','VACUUM & autovacuum monitoring',true);
+
+  // ── SETUP ─────────────────────────────────────
+  if(key==='setup-psql:psql-cmd:Demo') return mkTerm('psql-demo','psql meta-commands',true);
+  if(key==='setup-psql:psql-cmd:Meta Commands') return `<div class="sec">psql Meta-Commands Reference</div>
+<table class="tbl"><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td>\\l</td><td>List databases</td></tr>
+<tr><td>\\c dbname</td><td>Connect to database</td></tr>
+<tr><td>\\dt</td><td>List tables in current schema</td></tr>
+<tr><td>\\dt schema.*</td><td>List tables in specific schema</td></tr>
+<tr><td>\\d tablename</td><td>Describe table (columns, constraints, indexes)</td></tr>
+<tr><td>\\di</td><td>List indexes</td></tr>
+<tr><td>\\df</td><td>List functions</td></tr>
+<tr><td>\\dv</td><td>List views</td></tr>
+<tr><td>\\dn</td><td>List schemas</td></tr>
+<tr><td>\\du</td><td>List roles/users</td></tr>
+<tr><td>\\e</td><td>Open last query in $EDITOR</td></tr>
+<tr><td>\\i filename.sql</td><td>Execute SQL from file</td></tr>
+<tr><td>\\o output.txt</td><td>Send results to file</td></tr>
+<tr><td>\\copy table FROM file.csv CSV HEADER</td><td>Import CSV (client-side, no superuser needed)</td></tr>
+<tr><td>\\timing</td><td>Toggle query timing display</td></tr>
+<tr><td>\\x</td><td>Toggle expanded (vertical) output mode</td></tr>
+<tr><td>\\set AUTOCOMMIT off</td><td>Disable auto-commit</td></tr>
+<tr><td>\\pset null 'NULL'</td><td>Display NULL as the string NULL</td></tr>
+<tr><td>\\! command</td><td>Run shell command</td></tr>
+<tr><td>\\q</td><td>Quit psql</td></tr>
+</tbody></table>`;
+
+  if(key==='setup-psql:config:Memory Config') return `<div class="sec">PostgreSQL Memory Configuration (16GB RAM Server)</div>
+<table class="tbl"><thead><tr><th>Parameter</th><th>Recommended</th><th>What It Does</th></tr></thead><tbody>
+<tr><td>shared_buffers</td><td class="or">4GB (25% RAM)</td><td>PostgreSQL page cache. Most impactful single parameter.</td></tr>
+<tr><td>work_mem</td><td class="ye">256MB</td><td>Per sort/hash operation. Be careful — many parallel operations!</td></tr>
+<tr><td>maintenance_work_mem</td><td class="or">1GB</td><td>For VACUUM, CREATE INDEX, COPY. Higher = faster maintenance.</td></tr>
+<tr><td>effective_cache_size</td><td class="or">12GB (75% RAM)</td><td>Planner hint: total memory for caching. No actual allocation.</td></tr>
+<tr><td>wal_buffers</td><td class="ye">64MB</td><td>WAL ring buffer. Auto-set from shared_buffers usually OK.</td></tr>
+<tr><td>effective_io_concurrency</td><td class="ye">200 (SSD)</td><td>Hint to planner for parallel I/O. SSD=200, HDD=2.</td></tr>
+<tr><td>max_connections</td><td class="ye">100-200</td><td>Use PgBouncer for more. Each connection = ~5-10MB RAM.</td></tr>
+<tr><td>random_page_cost</td><td class="ye">1.1 (SSD)</td><td>Cost of random page fetch. SSD: 1.1, HDD: 4.0 (default).</td></tr>
+</tbody></table>`;
+
+  // ── DATA TYPES ────────────────────────────────
+  if(key==='data-types:temporal-types:Demo') return sqlBlock('select-basic','Employee Query with timestamptz',
+    [`${kw('SELECT')} ${col('id')}, ${col('name')}, ${col('department')},`,
+     `       ${fn('to_char')}(${col('salary')}, ${str("'FM₹99,99,99,999'")}) ${al('AS')} ${al('salary')},`,
+     `       ${col('hired_at')} AT TIME ZONE ${str("'Asia/Kolkata'")} ${al('AS')} ${al('hired_ist')},`,
+     `       ${fn('age')}(${fn('now')}(), ${col('hired_at')}) ${al('AS')} ${al('tenure')}`,
+     `${kw('FROM')} ${col('employees')}`,
+     `${kw('WHERE')} ${col('hired_at')} > ${fn('now')}() - ${fn("INTERVAL")} ${str("'3 years'")}`,
+     `${kw('ORDER BY')} ${col('salary')} ${kw('DESC')};`,
+    ],
+    ['id','name','department','salary','hired_at'],
+    [],5,'3ms',true);
+
+  if(key==='data-types:special-types:Enum Type') return `<div class="sec">PostgreSQL Enum Types</div>
+<div class="sql-editor"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div><div class="sql-title">🐘 CREATE TYPE enum</div></div>
+<div class="sql-code">
+${cmt('-- Define enum type (stored as integer internally)')}
+${kw('CREATE TYPE')} ${tp('order_status')} ${kw('AS ENUM')} (
+    ${str("'pending'")}, ${str("'confirmed'")}, ${str("'processing'")},
+    ${str("'shipped'")}, ${str("'delivered'")}, ${str("'cancelled'")}
+);
+
+${kw('CREATE TABLE')} ${col('orders')} (
+    ${col('id')}         ${tp('BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY')},
+    ${col('status')}     ${tp('order_status')} ${kw('NOT NULL DEFAULT')} ${str("'pending'")},
+    ${col('created_at')} ${tp('TIMESTAMPTZ')} ${kw('DEFAULT')} ${fn('now')}()
+);
+
+${cmt('-- Invalid value raises error at insert time (not just CHECK constraint)')}
+${kw('INSERT INTO')} ${col('orders')} (${col('status')}) ${kw('VALUES')} (${str("'unknown'")});
+${cmt('-- ERROR:  invalid input value for enum order_status: "unknown"')}
+
+${cmt('-- Add a new enum value (cannot remove without table rewrite)')}
+${kw('ALTER TYPE')} ${tp('order_status')} ${kw('ADD VALUE')} ${str("'refunded'")} ${kw('AFTER')} ${str("'delivered'")};
+
+${cmt('-- Enums are ordered -- can use < > comparisons!')}
+${kw('SELECT')} * ${kw('FROM')} ${col('orders')}
+${kw('WHERE')} ${col('status')} > ${str("'confirmed'")}  ${cmt('-- processing, shipped, delivered...')}
+  ${kw('AND')} ${col('status')} < ${str("'cancelled'")};
+</div></div>`;
+
+  if(key==='data-types:special-types:Range Types') return `<div class="sec">Range Types — Elegant Interval Logic</div>
+<div class="sql-editor"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div><div class="sql-title">🐘 Range types with GiST index</div></div>
+<div class="sql-code">
+${cmt('-- Built-in range types: int4range, int8range, numrange, tsrange, tstzrange, daterange')}
+
+${kw('CREATE TABLE')} ${col('hotel_bookings')} (
+    ${col('id')}        ${tp('BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY')},
+    ${col('room_id')}   ${tp('INT NOT NULL')},
+    ${col('booked_for')} ${tp('tstzrange NOT NULL')},  ${cmt('-- range of timestamps')}
+    ${kw('EXCLUDE USING GIST')} (${col('room_id')} ${kw('WITH')} =, ${col('booked_for')} ${kw('WITH')} &&)  ${cmt('-- no overlapping bookings!')}
+);
+
+${kw('INSERT INTO')} ${col('hotel_bookings')} (${col('room_id')}, ${col('booked_for')}) ${kw('VALUES')}
+    (${num('101')}, ${fn('tstzrange')}(${str("'2025-02-01'")} , ${str("'2025-02-05'")} , ${str("'[)'")}) ),  ${cmt('-- [inclusive, exclusive)')}
+    (${num('101')}, ${fn('tstzrange')}(${str("'2025-02-03'")} , ${str("'2025-02-07'")} , ${str("'[)'")}));   ${cmt('-- ERROR: overlaps with above!')}
+
+${cmt('-- Range operators')}
+${kw('SELECT')} ${fn("tstzrange")}(${str("'2025-02-01'")} , ${str("'2025-02-10'")})
+    @> ${fn("'2025-02-05'")}::${tp('timestamptz')} ${al('AS')} ${al('contains_date')},  ${cmt('-- true')}
+    ${fn("tstzrange")}(${str("'2025-01-01'")} , ${str("'2025-03-01'")}) &&
+    ${fn("tstzrange")}(${str("'2025-02-15'")} , ${str("'2025-04-01'")}) ${al('AS')} ${al('overlaps')};  ${cmt('-- true')}
+</div></div>`;
+
+  // ── FUNDAMENTALS ─────────────────────────────
+  if(key==='fundamentals:select-basics:Demo') return sqlBlock('select-basic','SELECT with PostgreSQL functions',
+    [`${kw('SELECT')} ${col('id')}, ${col('name')}, ${col('department')},`,
+     `       ${fn('to_char')}(${col('salary')}, ${str("'FM₹99,99,99,999'")}) ${al('AS')} ${al('salary')},`,
+     `       ${fn('extract')}(${kw('YEAR FROM')} ${fn('age')}(${col('hired_at')})) ${al('AS')} ${al('years_at_company')}`,
+     `${kw('FROM')} ${col('employees')}`,
+     `${kw('WHERE')} ${col('department')} ${kw('ILIKE')} ${str("'%engineer%'")}`,  
+     `  ${kw('AND')} ${col('salary')} ${kw('BETWEEN')} ${num('1000000')} ${kw('AND')} ${num('2000000')}`,
+     `${kw('ORDER BY')} ${col('salary')} ${kw('DESC')};`,
+    ],
+    ['id','name','department','salary','hired_at'],
+    [],5,'3ms',true);
+
+  if(key==='fundamentals:distinct-on:Demo') return sqlBlock('distinct-on','DISTINCT ON — Top Earner per Department',
+    [`${cmt('-- Get highest-paid employee in each department')}`,
+     `${kw('SELECT DISTINCT ON')} (${col('department')})`,
+     `       ${col('department')}, ${col('name')},`,
+     `       ${fn('to_char')}(${col('salary')}, ${str("'FM₹99,99,99,999'")}) ${al('AS')} ${al('salary')}`,
+     `${kw('FROM')} ${col('employees')}`,
+     `${kw('ORDER BY')} ${col('department')}, ${col('salary')} ${kw('DESC')};`,
+     `${cmt('-- ORDER BY must start with DISTINCT ON column(s)')}`,
+    ],
+    ['department','name','salary'],
+    [],3,'2ms',true);
+
+  if(key==='fundamentals:distinct-on:Pattern') return `<div class="sec">DISTINCT ON — The Most Useful PostgreSQL Pattern</div>
+<div class="grid2">
+<div class="mc"><h4 class="re">❌ Verbose ROW_NUMBER approach</h4>
+<div class="sql-editor" style="margin:5px 0"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div></div>
+<div class="sql-code" style="min-height:0">
+${kw('SELECT')} ${col('customer_id')}, ${col('order_date')}, ${col('total')}
+${kw('FROM')} (
+    ${kw('SELECT')} *, ${fn('ROW_NUMBER')}() ${kw('OVER')} (
+        ${kw('PARTITION BY')} ${col('customer_id')}
+        ${kw('ORDER BY')} ${col('order_date')} ${kw('DESC')}
+    ) ${al('AS')} ${al('rn')}
+    ${kw('FROM')} ${col('orders')}
+) ${al('t')} ${kw('WHERE')} ${al('rn')} = ${num('1')};
+</div></div>
+</div>
+<div class="mc"><h4 class="gr">✅ Elegant DISTINCT ON</h4>
+<div class="sql-editor" style="margin:5px 0"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div></div>
+<div class="sql-code" style="min-height:0">
+${kw('SELECT DISTINCT ON')} (${col('customer_id')})
+       ${col('customer_id')}, ${col('order_date')}, ${col('total')}
+${kw('FROM')} ${col('orders')}
+${kw('ORDER BY')} ${col('customer_id')},
+         ${col('order_date')} ${kw('DESC')};
+</div></div>
+</div></div>`;
+
+  if(key==='fundamentals:grouping:Demo') return `<div class="sec">GROUPING SETS — One Query, Multiple Aggregations</div>
+<div class="sql-editor"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div><div class="sql-title">🐘 GROUPING SETS</div></div>
+<div class="sql-code">
+${cmt('-- GROUPING SETS: like running multiple GROUP BY in one pass')}
+${kw('SELECT')}
+    ${fn('COALESCE')}(${col('region')}, ${str("'ALL REGIONS'")}) ${al('AS')} ${al('region')},
+    ${fn('COALESCE')}(${col('department')}, ${str("'ALL DEPTS'")}) ${al('AS')} ${al('department')},
+    ${fn('round')}(${fn('avg')}(${col('salary')})::${tp('numeric')}, ${num('0')}) ${al('AS')} ${al('avg_salary')},
+    ${fn('count')}(*) ${al('AS')} ${al('headcount')},
+    ${fn('GROUPING')}(${col('region')}) ${al('AS')} ${al('is_region_total')},  ${cmt('-- 1 if this is an aggregated-over row')}
+    ${fn('GROUPING')}(${col('department')}) ${al('AS')} ${al('is_dept_total')}
+${kw('FROM')} ${col('employees')}
+${kw('GROUP BY')} ${kw('GROUPING SETS')} (
+    (${col('region')}, ${col('department')}),   ${cmt('-- subtotal: region × dept')}
+    (${col('region')}),                         ${cmt('-- subtotal: region only')}
+    (${col('department')}),                     ${cmt('-- subtotal: dept only')}
+    ()                                          ${cmt('-- grand total')}
+)
+${kw('ORDER BY')} ${fn('GROUPING')}(${col('region')}), ${fn('GROUPING')}(${col('department')}), ${col('region')}, ${col('department')};
+
+${cmt('-- ROLLUP: shorthand for hierarchical grouping sets')}
+${cmt('-- GROUP BY ROLLUP(year, month, day) = all combos from fine to coarse')}
+${cmt('-- CUBE: all possible combinations of dimensions')}
+</div></div>`;
+
+  // ── ADVANCED QUERIES ─────────────────────────
+  if(key==='advanced-queries:cte-pg:Demo') return sqlBlock('recursive-demo','Recursive CTE — Org Hierarchy',
+    [`${kw('WITH RECURSIVE')} ${al('org_chart')} ${kw('AS')} (`,
+     `    ${kw('SELECT')} ${col('id')}, ${col('name')}, ${col('title')}, ${col('manager_id')},`,
+     `           ${num('0')} ${al('AS')} ${al('level')},`,
+     `           ${col('name')} ${al('AS')} ${al('path')}`,
+     `    ${kw('FROM')} ${col('employees')}`,
+     `    ${kw('WHERE')} ${col('manager_id')} ${kw('IS NULL')}`,
+     `    ${kw('UNION ALL')}`,
+     `    ${kw('SELECT')} ${col('e.id')}, ${col('e.name')}, ${col('e.title')}, ${col('e.manager_id')},`,
+     `           ${col('o.level')} + ${num('1')},`,
+     `           ${col('o.path')} ${kw('||')} ${str("' > '")} ${kw('||')} ${col('e.name')}`,
+     `    ${kw('FROM')} ${col('employees')} ${al('e')}`,
+     `    ${kw('JOIN')} ${al('org_chart')} ${al('o')} ${kw('ON')} ${col('e.manager_id')} = ${col('o.id')}`,
+     `)`,
+     `${kw('SELECT')} ${col('id')}, ${fn('repeat')}(${str("'  '")}, ${col('level')}) ${kw('||')} ${col('name')} ${al('AS')} ${al('name')},`,
+     `       ${col('title')}, ${col('level')}, ${col('path')}`,
+     `${kw('FROM')} ${al('org_chart')} ${kw('ORDER BY')} ${col('path')};`,
+    ],
+    ['id','name','title','level','path'],
+    [],5,'3ms',true);
+
+  if(key==='advanced-queries:window-fn:Demo') return sqlBlock('window-demo','Window Functions Complete',
+    [`${kw('SELECT')} ${col('name')}, ${col('department')},`,
+     `       ${fn('to_char')}(${col('salary')}, ${str("'FM₹99,99,99,999'")}) ${al('AS')} ${al('salary')},`,
+     `       ${fn('ROW_NUMBER')}() ${kw('OVER')} (${kw('ORDER BY')} ${col('salary')} ${kw('DESC')}) ${al('AS')} ${al('row_num')},`,
+     `       ${fn('RANK')}()       ${kw('OVER')} (${kw('ORDER BY')} ${col('salary')} ${kw('DESC')}) ${al('AS')} ${al('rank')},`,
+     `       ${fn('DENSE_RANK')}() ${kw('OVER')} (${kw('ORDER BY')} ${col('salary')} ${kw('DESC')}) ${al('AS')} ${al('dense_rank')},`,
+     `       ${fn('PERCENT_RANK')}() ${kw('OVER')} (${kw('ORDER BY')} ${col('salary')})::${tp('numeric')}(3,2) ${al('AS')} ${al('dept_percentile')}`,
+     `${kw('FROM')} ${col('employees')}`,
+     `${kw('ORDER BY')} ${col('salary')} ${kw('DESC')};`,
+    ],
+    ['name','dept','salary','row_num','rank','dense_rank','dept_percentile'],
+    [],5,'5ms',true);
+
+  if(key==='advanced-queries:lateral-join:Demo') return sqlBlock('lateral-demo','LATERAL — Top 2 per Department',
+    [`${kw('SELECT')} ${col('d.department')},`,
+     `       ${col('top_e.name')} ${al('AS')} ${al('top_earner')},`,
+     `       ${fn('to_char')}(${col('top_e.salary')}, ${str("'FM₹99,99,99,999'")}) ${al('AS')} ${al('salary')},`,
+     `       ${col('top_e.runner_up')} ${al('AS')} ${al('runner_up')},`,
+     `       ${fn('to_char')}(${col('top_e.runner_salary')}, ${str("'FM₹99,99,99,999'")}) ${al('AS')} ${al('runner_up_salary')}`,
+     `${kw('FROM')} (${kw('SELECT DISTINCT')} ${col('department')} ${kw('FROM')} ${col('employees')}) ${al('d')}`,
+     `${kw('CROSS JOIN LATERAL')} (`,
+     `    ${kw('SELECT')} ${col('name')}, ${col('salary')},`,
+     `           ${fn('LEAD')}(${col('name')}) ${kw('OVER')} (${kw('ORDER BY')} ${col('salary')} ${kw('DESC')}) ${al('AS')} ${al('runner_up')},`,
+     `           ${fn('LEAD')}(${col('salary')}) ${kw('OVER')} (${kw('ORDER BY')} ${col('salary')} ${kw('DESC')}) ${al('AS')} ${al('runner_salary')}`,
+     `    ${kw('FROM')} ${col('employees')} ${al('e')}`,
+     `    ${kw('WHERE')} ${col('e.department')} = ${col('d.department')}`,
+     `    ${kw('ORDER BY')} ${col('salary')} ${kw('DESC')} ${kw('LIMIT')} ${num('1')}`,
+     `) ${al('top_e')};`,
+    ],
+    ['department','top_earner','salary','runner_up','runner_up_salary'],
+    [],3,'6ms',true);
+
+  // ── JSONB ─────────────────────────────────────
+  if(key==='jsonb:jsonb-basics:Demo') return sqlBlock('jsonb-demo','JSONB Operators & Queries',
+    [`${cmt('-- Employees with jsonb metadata column')}`,
+     `${kw('SELECT')} ${col('id')}, ${col('name')},`,
+     `       ${col("metadata->>'level'")} ${al('AS')} ${al('skill_level')},`,
+     `       ${col("metadata->'skills'->'languages'")} ${al('AS')} ${al('languages')},`,
+     `       ${col("metadata#>>'{address,city}'")} ${al('AS')} ${al('location')}`,
+     `${kw('FROM')} ${col('employees')}`,
+     `${kw('WHERE')} ${col('metadata')} ${kw('@>')} ${str("'{\"level\": \"senior\"}'")}::${tp('jsonb')}`,
+     `  ${kw('AND')} ${col('metadata')} ${kw('@>')} ${str("'{\"skills\": {\"languages\": [\"C#\"]}}'")};`,
+    ],
+    ['id','name','skill_level','languages','location'],
+    [],3,'4ms',true);
+
+  if(key==='jsonb:jsonb-basics:Operators') return `<div class="sec">Complete JSONB Operator Reference</div>
+<table class="tbl"><thead><tr><th>Operator</th><th>Returns</th><th>Example</th></tr></thead><tbody>
+<tr><td>-&gt; 'key'</td><td>jsonb</td><td>metadata-&gt;'skills' — returns {"level":"senior"} as jsonb</td></tr>
+<tr><td>-&gt;&gt; 'key'</td><td>text</td><td>metadata-&gt;&gt;'level' — returns 'senior' as text</td></tr>
+<tr><td>#&gt; '{a,b}'</td><td>jsonb</td><td>data#&gt;'{address,city}' — path navigation, returns jsonb</td></tr>
+<tr><td>#&gt;&gt; '{a,b}'</td><td>text</td><td>data#&gt;&gt;'{address,city}' — path navigation, returns text</td></tr>
+<tr><td>@&gt; rhs</td><td>boolean</td><td>data @&gt; '{"role":"admin"}' — does left contain right?</td></tr>
+<tr><td>&lt;@ lhs</td><td>boolean</td><td>'{"a":1}' &lt;@ data — is left contained in right?</td></tr>
+<tr><td>? key</td><td>boolean</td><td>data ? 'email' — does key exist at top level?</td></tr>
+<tr><td>?| keys</td><td>boolean</td><td>data ?| ARRAY['a','b'] — does ANY key exist?</td></tr>
+<tr><td>?& keys</td><td>boolean</td><td>data ?& ARRAY['a','b'] — do ALL keys exist?</td></tr>
+<tr><td>|| other</td><td>jsonb</td><td>a || b — merge two jsonb objects (b wins on conflict)</td></tr>
+<tr><td>- key</td><td>jsonb</td><td>data - 'password' — delete key, returns modified jsonb</td></tr>
+<tr><td>#- path</td><td>jsonb</td><td>data #- '{a,b}' — delete at path</td></tr>
+<tr><td>@? path</td><td>boolean</td><td>data @? '$.skills[*] ? (@ == "C#")' — jsonpath exists?</td></tr>
+<tr><td>@@ path</td><td>boolean</td><td>data @@ '$.level == "senior"' — jsonpath predicate</td></tr>
+</tbody></table>`;
+
+  if(key==='jsonb:jsonb-query:Demo') return sqlBlock('jsonb-agg','JSONB Aggregation',
+    [`${kw('SELECT')} ${col('department')},`,
+     `       ${fn('jsonb_object_agg')}(${col("metadata->>'level'")}, ${col('level_count')}) ${al('AS')} ${al('skills_breakdown')},`,
+     `       ${fn('sum')}(${col('level_count')})::${tp('int')} ${al('AS')} ${al('total_engineers')},`,
+     `       ${fn('jsonb_agg')}(${kw('DISTINCT')} ${col("metadata->>'primary_lang'")}) ${al('AS')} ${al('languages_used')}`,
+     `${kw('FROM')} (`,
+     `    ${kw('SELECT')} ${col('department')},`,
+     `           ${col("metadata->>'level'")} ${al('AS')} ${al('lvl')},`,
+     `           ${fn('count')}(*) ${al('AS')} ${al('level_count')},`,
+     `           ${col("metadata->'skills'->'languages'->>0")} ${al('AS')} ${al('primary_lang')}`,
+     `    ${kw('FROM')} ${col('employees')}`,
+     `    ${kw('WHERE')} ${col("metadata ? 'level'")}`,
+     `    ${kw('GROUP BY')} ${col('department')}, ${col("metadata->>'level'")}, ${al('primary_lang')}`,
+     `) ${al('subq')}`,
+     `${kw('GROUP BY')} ${col('department')};`,
+    ],
+    ['department','skills_breakdown','total_engineers','languages_used'],
+    [],2,'11ms',true);
+
+  if(key==='jsonb:jsonb-index:Demo') return sqlBlock('gin-demo','GIN Index for JSONB',
+    [`${cmt('-- Create GIN index on entire JSONB column')}`,
+     `${kw('CREATE INDEX')} ${col('idx_emp_metadata')} ${kw('ON')} ${col('employees')} ${kw('USING GIN')} (${col('metadata')});`,
+     `${cmt('-- More focused: jsonb_path_ops (only supports @> but faster and smaller)')}`,
+     `${kw('CREATE INDEX')} ${col('idx_emp_meta_path')} ${kw('ON')} ${col('employees')}`,
+     `       ${kw('USING GIN')} (${col('metadata')} ${fn('jsonb_path_ops')});`,
+     `${cmt('-- Expression index on specific key (B-tree, for = and range)')}`,
+     `${kw('CREATE INDEX')} ${col('idx_emp_level')} ${kw('ON')} ${col('employees')}`,
+     `       ((${col("metadata->>'level'")}));`,
+     `${cmt('-- Query that uses GIN index:')}`,
+     `${kw('SELECT')} * ${kw('FROM')} ${col('employees')}`,
+     `${kw('WHERE')} ${col('metadata')} ${kw('@>')} ${str("'{\"level\": \"senior\"}'")}::${tp('jsonb')};`,
+     `${cmt('-- Uses idx_emp_meta_path — very fast even on millions of rows')}`,
+    ],
+    ['index_name','index_type','size','scans_per_day'],
+    [],3,'< 1ms',true);
+
+  // ── ARRAYS ────────────────────────────────────
+  if(key==='arrays:array-basics:Demo') return sqlBlock('array-demo','Array Operations',
+    [`${kw('SELECT')} ${col('id')}, ${col('name')},`,
+     `       ${col('tags')},`,
+     `       ${fn('array_length')}(${col('tags')}, ${num('1')}) ${al('AS')} ${al('tag_count')}`,
+     `${kw('FROM')} ${col('employees')}`,
+     `${kw('WHERE')} ${col('tags')} ${kw('@>')} ${fn("ARRAY")}[${str("'PostgreSQL'")}]  ${cmt('-- contains PostgreSQL')}`,
+     `  ${kw('AND')} ${fn('array_length')}(${col('tags')}, ${num('1')}) >= ${num('3')}`,
+     `${kw('ORDER BY')} ${col('tag_count')} ${kw('DESC')};`,
+    ],
+    ['id','name','tags','tag_count'],
+    [],3,'2ms',true);
+
+  if(key==='arrays:array-basics:unnest()') return `<div class="sec">unnest() — Expand Arrays to Rows</div>
+<div class="sql-editor"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div><div class="sql-title">🐘 unnest with ordinality</div></div>
+<div class="sql-code">
+${cmt('-- Unnest array to rows')}
+${kw('SELECT')} ${col('e.name')}, ${al('tag')}, ${al('tag_pos')}
+${kw('FROM')} ${col('employees')} ${al('e')}
+${kw('CROSS JOIN LATERAL')} ${fn('unnest')}(${col('e.tags')})
+       ${kw('WITH ORDINALITY')} ${al('AS')} ${al('t')}(${al('tag')}, ${al('tag_pos')})
+${kw('WHERE')} ${col('e.department')} = ${str("'Engineering'")};
+
+${cmt('-- Count most popular tags across all employees')}
+${kw('SELECT')} ${al('tag')}, ${fn('count')}(*) ${al('AS')} ${al('usage_count')}
+${kw('FROM')} ${col('employees')},
+     ${fn('unnest')}(${col('tags')}) ${al('AS')} ${al('tag')}
+${kw('GROUP BY')} ${al('tag')}
+${kw('ORDER BY')} ${al('usage_count')} ${kw('DESC')}
+${kw('LIMIT')} ${num('10')};
+
+${cmt('-- string_to_array for CSV-like data')}
+${kw('SELECT')} ${fn('string_to_array')}(${str("'Python,SQL,Docker'")} , ${str("','")}); ${cmt('-- {Python,SQL,Docker}')}
+${kw('SELECT')} ${fn('array_to_string')}(${fn("ARRAY")}[${str("'a'")},${str("'b'")},${str("'c'")}], ${str("'-'")}); ${cmt('-- a-b-c')}
+</div></div>`;
+
+  // ── FULL TEXT SEARCH ──────────────────────────
+  if(key==='full-text:fts-basics:Demo') return sqlBlock('fts-demo','Full-Text Search with ts_rank',
+    [`${kw('SELECT')} ${col('id')}, ${col('title')},`,
+     `       ${fn('ts_rank')}(${fn('to_tsvector')}(${str("'english'")}, ${col('title')} || ${str("' '")} || ${col('content')}),`,
+     `                ${fn('plainto_tsquery')}(${str("'english'")} , ${str("'postgresql indexing'")})) ${al('AS')} ${al('rank')},`,
+     `       ${fn('ts_headline')}(${str("'english'")}, ${col('content')},`,
+     `                   ${fn('plainto_tsquery')}(${str("'english'")} , ${str("'postgresql indexing'")}),`,
+     `                   ${str("'StartSel=<b>,StopSel=</b>,MaxWords=15'")} ) ${al('AS')} ${al('snippet')}`,
+     `${kw('FROM')} ${col('articles')}`,
+     `${kw('WHERE')} ${fn('to_tsvector')}(${str("'english'")}, ${col('title')} || ${str("' '")} || ${col('content')})`,
+     `          @@ ${fn('plainto_tsquery')}(${str("'english'")} , ${str("'postgresql indexing'")})`,
+     `${kw('ORDER BY')} ${al('rank')} ${kw('DESC')} ${kw('LIMIT')} ${num('10')};`,
+    ],
+    ['id','title','rank','snippet'],
+    [],3,'8ms',true);
+
+  if(key==='full-text:fts-index:GIN FTS Index') return `<div class="sec">Efficient Full-Text Search with Generated Column + GIN</div>
+<div class="sql-editor"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div><div class="sql-title">🐘 tsvector generated column + GIN</div></div>
+<div class="sql-code">
+${cmt('-- Store pre-computed tsvector in generated column')}
+${kw('ALTER TABLE')} ${col('articles')}
+    ${kw('ADD COLUMN')} ${col('search_vector')} ${tp('tsvector')}
+    ${kw('GENERATED ALWAYS AS')} (
+        ${fn('setweight')}(${fn('to_tsvector')}(${str("'english'")}, ${fn('coalesce')}(${col('title')},${str("''")})), ${str("'A'")}) ${kw('||')}
+        ${fn('setweight')}(${fn('to_tsvector')}(${str("'english'")}, ${fn('coalesce')}(${col('content')},${str("''")})), ${str("'B'")})
+    ) ${kw('STORED')};
+
+${cmt('-- GIN index on the generated column (built once, auto-maintained)')}
+${kw('CREATE INDEX')} ${col('idx_articles_fts')}
+    ${kw('ON')} ${col('articles')} ${kw('USING GIN')} (${col('search_vector')});
+
+${cmt('-- Now queries are fast and SIMPLE:')}
+${kw('SELECT')} ${col('title')}, ${fn('ts_rank')}(${col('search_vector')}, ${al('q')}) ${al('AS')} ${al('rank')}
+${kw('FROM')} ${col('articles')},
+     ${fn('websearch_to_tsquery')}(${str("'english'")} , ${str("'\"postgresql\" indexing'")}) ${al('q')}
+${kw('WHERE')} ${col('search_vector')} @@ ${al('q')}
+${kw('ORDER BY')} ${al('rank')} ${kw('DESC')};
+</div></div>`;
+
+  // ── INDEXES ───────────────────────────────────
+  if(key==='indexes-pg:partial-expr:Demo') return `<div class="sec">Partial & Expression Indexes</div>
+<div class="sql-editor"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div><div class="sql-title">🐘 Targeted index strategies</div></div>
+<div class="sql-code">
+${cmt('-- Partial index: only index the rows you actually query')}
+${kw('CREATE INDEX')} ${col('idx_orders_pending')}
+    ${kw('ON')} ${col('orders')} (${col('customer_id')}, ${col('created_at')} ${kw('DESC')})
+    ${kw('WHERE')} ${col('status')} = ${str("'pending'")};  ${cmt('-- 5% of rows, tiny index!')}
+
+${cmt('-- Query uses this index (status = pending is implicitly satisfied)')}
+${kw('SELECT')} * ${kw('FROM')} ${col('orders')}
+${kw('WHERE')} ${col('customer_id')} = ${num('42')} ${kw('AND')} ${col('status')} = ${str("'pending'")};
+
+${cmt('-- Expression index: index on a function result')}
+${kw('CREATE INDEX')} ${col('idx_users_email_lower')}
+    ${kw('ON')} ${col('users')} (${fn('lower')}(${col('email')}));  ${cmt('-- case-insensitive email lookup')}
+
+${kw('SELECT')} * ${kw('FROM')} ${col('users')}
+${kw('WHERE')} ${fn('lower')}(${col('email')}) = ${fn('lower')}(${str("'Abhishek@OriginXLabs.COM'")});
+
+${cmt('-- Expression index on JSONB key (B-tree for = and range)')}
+${kw('CREATE INDEX')} ${col('idx_emp_level')} ${kw('ON')} ${col('employees')}
+    ((${col("metadata->>'level'")}));  ${cmt('-- note double parens for expression')}
+
+${kw('SELECT')} * ${kw('FROM')} ${col('employees')}
+${kw('WHERE')} ${col("metadata->>'level'")} = ${str("'senior'")}  ${cmt('-- USES the expression index!')}
+  ${kw('AND')} ${col('department')} = ${str("'Engineering'")};
+</div></div>`;
+
+  if(key==='indexes-pg:gin-gist:Demo') return `<div class="sec">GIN & GiST Use Cases</div>
+<table class="tbl"><thead><tr><th>Use Case</th><th>Index Type</th><th>Creation</th></tr></thead><tbody>
+<tr><td>JSONB @&gt; containment</td><td class="pi">GIN</td><td>CREATE INDEX ON t USING GIN (jsonb_col jsonb_path_ops)</td></tr>
+<tr><td>Array @&gt; && contains/overlaps</td><td class="pi">GIN</td><td>CREATE INDEX ON t USING GIN (array_col)</td></tr>
+<tr><td>Full-text search @@</td><td class="pi">GIN</td><td>CREATE INDEX ON t USING GIN (tsvector_col)</td></tr>
+<tr><td>pg_trgm LIKE/similarity</td><td class="pi">GIN</td><td>CREATE INDEX ON t USING GIN (text_col gin_trgm_ops)</td></tr>
+<tr><td>Range type overlaps &&</td><td class="or">GiST</td><td>CREATE INDEX ON t USING GIST (range_col)</td></tr>
+<tr><td>PostGIS spatial queries</td><td class="or">GiST</td><td>CREATE INDEX ON t USING GIST (geom)</td></tr>
+<tr><td>EXCLUDE USING GIST</td><td class="or">GiST</td><td>EXCLUDE USING GIST (room WITH =, dates WITH &&)</td></tr>
+<tr><td>inet/cidr network contains</td><td class="or">GiST</td><td>CREATE INDEX ON t USING GIST (ip_col inet_ops)</td></tr>
+</tbody></table>
+<div class="callout unique"><strong>GIN vs GiST tradeoff</strong>GIN has faster lookup but slower update (each element is a separate entry). GiST has faster update but slightly slower lookup (lossy, may recheck). For JSONB containment: use GIN. For geometric/range: use GiST. pg_trgm supports both — prefer GIN for mostly-read data.</div>`;
+
+  // ── TRANSACTIONS ─────────────────────────────
+  if(key==='transactions-pg:locking-pg:Demo') return `<div class="sec">SKIP LOCKED — Queue Processing Pattern</div>
+<div class="sql-editor"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div><div class="sql-title">🐘 Parallel queue consumer with SKIP LOCKED</div></div>
+<div class="sql-code">
+${cmt('-- Create a job queue table')}
+${kw('CREATE TABLE')} ${col('job_queue')} (
+    ${col('id')}         ${tp('BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY')},
+    ${col('type')}       ${tp('TEXT')} ${kw('NOT NULL')},
+    ${col('payload')}    ${tp('JSONB')},
+    ${col('status')}     ${tp('TEXT')} ${kw('DEFAULT')} ${str("'pending'")},
+    ${col('priority')}   ${tp('INT')} ${kw('DEFAULT')} ${num('5')},
+    ${col('process_at')} ${tp('TIMESTAMPTZ')} ${kw('DEFAULT')} ${fn('now')}()
+);
+
+${kw('CREATE INDEX')} ${col('idx_queue_work')} ${kw('ON')} ${col('job_queue')} (${col('priority')}, ${col('process_at')})
+    ${kw('WHERE')} ${col('status')} = ${str("'pending'")};
+
+${cmt('-- Worker: atomically claim a batch of jobs (SKIP LOCKED = skip what other workers hold)')}
+${kw('WITH')} ${al('claimed')} ${kw('AS')} (
+    ${kw('SELECT')} ${col('id')} ${kw('FROM')} ${col('job_queue')}
+    ${kw('WHERE')} ${col('status')} = ${str("'pending'")}
+      ${kw('AND')} ${col('process_at')} <= ${fn('now')}()
+    ${kw('ORDER BY')} ${col('priority')}, ${col('process_at')}
+    ${kw('LIMIT')} ${num('10')}
+    ${kw('FOR UPDATE SKIP LOCKED')}  ${cmt('-- skip rows locked by other workers')}
+)
+${kw('UPDATE')} ${col('job_queue')} ${kw('SET')} ${col('status')} = ${str("'processing'")}
+${kw('FROM')} ${al('claimed')} ${kw('WHERE')} ${col('job_queue.id')} = ${al('claimed.id')}
+${kw('RETURNING')} ${col('job_queue.*')};
+</div></div>`;
+
+  // ── PERFORMANCE ───────────────────────────────
+  if(key==='performance-pg:explain:Demo') return mkTerm('explain-demo','EXPLAIN ANALYZE deep dive',true);
+  if(key==='performance-pg:pg-stat-stmt:Demo') return mkTerm('pg-stat-demo','pg_stat_statements — find slow queries',true);
+  if(key==='performance-pg:partitioning-pg:Demo') return sqlBlock('partition-demo','Range Partitioning',
+    [`${kw('CREATE TABLE')} ${col('orders')} (`,
+     `    ${col('id')}          ${tp('BIGINT GENERATED ALWAYS AS IDENTITY')},`,
+     `    ${col('created_at')}  ${tp('TIMESTAMPTZ NOT NULL')},`,
+     `    ${col('customer_id')} ${tp('BIGINT NOT NULL')},`,
+     `    ${col('total')}       ${tp('NUMERIC(12,2)')}`,
+     `) ${kw('PARTITION BY RANGE')} (${col('created_at')});`,
+     `${cmt('-- Create quarterly partitions')}`,
+     `${kw('CREATE TABLE')} ${col('orders_2024_q1')} ${kw('PARTITION OF')} ${col('orders')}`,
+     `    ${kw('FOR VALUES FROM')} (${str("'2024-01-01'")}) ${kw('TO')} (${str("'2024-04-01'")});`,
+     `${kw('SELECT')} ${al('tableoid')}::${tp('regclass')} ${al('AS')} ${al('table_name')},`,
+     `       ${fn('pg_size_pretty')}(${fn('pg_relation_size')}(${al('tableoid')})) ${al('AS')} ${al('size')}`,
+     `${kw('FROM')} ${col('orders')} ${kw('GROUP BY')} ${al('tableoid')} ${kw('LIMIT')} ${num('4')};`,
+    ],
+    ['table_name','partition_of','row_count','size'],
+    [],4,'< 1ms',true);
+
+  // ── FUNCTIONS ─────────────────────────────────
+  if(key==='functions-pg:sql-fn:Demo') return `<div class="sec">SQL & PL/pgSQL Functions</div>
+<div class="sql-editor"><div class="sql-toolbar"><div class="sql-dot r"></div><div class="sql-dot y"></div><div class="sql-dot g"></div><div class="sql-title">🐘 Production PL/pgSQL function</div></div>
+<div class="sql-code">
+${cmt('-- SQL function (simpler, inlineable by planner)')}
+${kw('CREATE OR REPLACE FUNCTION')} ${col('calculate_tax')}(
+    ${prm('amount')}     ${tp('NUMERIC')},
+    ${prm('tax_pct')}    ${tp('NUMERIC')} ${kw('DEFAULT')} ${num('18')}
+)
+${kw('RETURNS NUMERIC')}
+${kw('LANGUAGE sql')}
+${kw('IMMUTABLE STRICT')}  ${cmt('-- IMMUTABLE: result depends only on inputs. STRICT: returns NULL if any arg NULL')}
+${kw('AS')} $$
+    ${kw('SELECT ROUND')}(${prm('amount')} * ${prm('tax_pct')} / ${num('100')}, ${num('2')});
+$$;
+
+${cmt('-- PL/pgSQL function with exception handling')}
+${kw('CREATE OR REPLACE FUNCTION')} ${col('get_or_create_customer')}(
+    ${prm('p_email')}   ${tp('TEXT')},
+    ${prm('p_name')}    ${tp('TEXT')}
+)
+${kw('RETURNS')} ${tp('customers')}
+${kw('LANGUAGE plpgsql')}
+${kw('VOLATILE SECURITY DEFINER')}  ${cmt('-- runs as function owner, not caller')}
+${kw('AS')} $$
+${kw('DECLARE')}
+    ${prm('v_customer')} ${tp('customers%ROWTYPE')};  ${cmt('-- type from table row')}
+${kw('BEGIN')}
+    ${kw('SELECT')} * ${kw('INTO STRICT')} ${prm('v_customer')}
+    ${kw('FROM')} ${col('customers')} ${kw('WHERE')} ${fn('lower')}(${col('email')}) = ${fn('lower')}(${prm('p_email')});
+
+    ${kw('RETURN')} ${prm('v_customer')};
+
+${kw('EXCEPTION')}
+    ${kw('WHEN')} ${tp('NO_DATA_FOUND')} ${kw('THEN')}
+        ${kw('INSERT INTO')} ${col('customers')} (${col('email')}, ${col('name')})
+        ${kw('VALUES')} (${prm('p_email')}, ${prm('p_name')})
+        ${kw('RETURNING')} * ${kw('INTO')} ${prm('v_customer')};
+        ${kw('RETURN')} ${prm('v_customer')};
+    ${kw('WHEN')} ${tp('TOO_MANY_ROWS')} ${kw('THEN')}
+        ${kw('RAISE EXCEPTION')} ${str("'Duplicate email: %'")} , ${prm('p_email')}
+            ${kw('USING ERRCODE')} = ${str("'23505'")};
+${kw('END')};
+$$;
+</div></div>`;
+
+  // ── VIEWS ─────────────────────────────────────
+  if(key==='views-pg:matviews:Demo') return sqlBlock('matview-demo','Materialized View for Analytics',
+    [`${kw('CREATE MATERIALIZED VIEW')} ${col('mv_monthly_dept_stats')} ${kw('AS')}`,
+     `${kw('SELECT')}`,
+     `    ${fn('date_trunc')}(${str("'month'")}, ${col('created_at')}) ${al('AS')} ${al('month')},`,
+     `    ${col('department')},`,
+     `    ${fn('to_char')}(${fn('sum')}(${col('revenue')}), ${str("'FM₹99.99 Cr'")}) ${al('AS')} ${al('revenue')},`,
+     `    ${fn('round')}(${fn('sum')}(${col('revenue')}) * ${num('100.0')} / ${fn('sum')}(${fn('sum')}(${col('revenue')})) ${kw('OVER')} (`,
+     `        ${kw('PARTITION BY')} ${fn('date_trunc')}(${str("'month'")}, ${col('created_at')})), ${num('1')}) ${al('AS')} ${al('pct_of_total')},`,
+     `    ${fn('RANK')}() ${kw('OVER')} (${kw('PARTITION BY')} ${fn('date_trunc')}(${str("'month'")}, ${col('created_at')})`,
+     `              ${kw('ORDER BY')} ${fn('sum')}(${col('revenue')}) ${kw('DESC')}) ${al('AS')} ${al('rank')}`,
+     `${kw('FROM')} ${col('orders')} ${kw('JOIN')} ${col('employees')} ${kw('USING')} (${col('department')})`,
+     `${kw('GROUP BY')} ${num('1')}, ${num('2')};`,
+     `${kw('CREATE UNIQUE INDEX ON')} ${col('mv_monthly_dept_stats')} (${col('month')}, ${col('department')});`,
+     `${cmt('-- Refresh without locking (requires unique index):')}`,
+     `${kw('REFRESH MATERIALIZED VIEW CONCURRENTLY')} ${col('mv_monthly_dept_stats')};`,
+    ],
+    ['month','dept','revenue','pct_of_total','rank'],
+    [],3,'< 1ms',true);
+
+  // ── EXTENSIONS ────────────────────────────────
+  if(key==='extensions:pg-trgm:Demo') return sqlBlock('trgm-demo','pg_trgm — Fuzzy Name Search',
+    [`${cmt('-- CREATE EXTENSION pg_trgm; -- once per database')}`,
+     `${cmt('-- CREATE INDEX ON employees USING GIN (name gin_trgm_ops);')}`,
+     `${kw('SELECT')} ${col('name')},`,
+     `       ${fn('round')}(${fn('similarity')}(${col('name')}, ${prm("$1")}), ${num('4')}) ${al('AS')} ${al('similarity')},`,
+     `       ${kw('CASE')}`,
+     `           ${kw('WHEN')} ${fn('similarity')}(${col('name')}, ${prm("$1")}) > ${num('0.8')} ${kw('THEN')} ${str("'High similarity'")}`,
+     `           ${kw('WHEN')} ${fn('similarity')}(${col('name')}, ${prm("$1")}) > ${num('0.6')} ${kw('THEN')} ${str("'Good match'")}`,
+     `           ${kw('ELSE')} ${str("'Possible match'")}`,
+     `       ${kw('END')} ${al('AS')} ${al('match_type')}`,
+     `${kw('FROM')} ${col('employees')}`,
+     `${kw('WHERE')} ${fn('similarity')}(${col('name')}, ${prm("$1")}) > ${num('0.4')}`,
+     `${kw('ORDER BY')} ${fn('similarity')}(${col('name')}, ${prm("$1")}) ${kw('DESC')};`,
+     `${cmt("-- $1 = 'Abhishek Panda'")}`,
+    ],
+    ['name','similarity','match_type'],
+    [],4,'2ms',true);
+
+  // ── SCHEMA DESIGN ─────────────────────────────
+  if(key==='schema-design-pg:rls-pg:Demo') return sqlBlock('rls-demo','Row-Level Security Multi-tenant',
+    [`${kw('ALTER TABLE')} ${col('orders')} ${kw('ENABLE ROW LEVEL SECURITY')};`,
+     `${kw('CREATE POLICY')} ${col('tenant_isolation')} ${kw('ON')} ${col('orders')}`,
+     `    ${kw('USING')} (${col('tenant_id')} = ${fn('current_setting')}(${str("'app.tenant_id'")} )::${tp('uuid')});`,
+     `${cmt('-- Application code before every query:')}`,
+     `${cmt('-- SET LOCAL app.tenant_id = \'a1b2c3d4-...\';')}`,
+     `${cmt('-- Now queries automatically filtered to tenant data')}`,
+     `${kw('SELECT')} ${col('order_id')}, ${col('customer')}, ${col('tenant')}, ${col('amount')}`,
+     `       ${str("'tenant_a only'")} ${al('AS')} ${al('visible_to')}`,
+     `${kw('FROM')} ${col('orders')};  ${cmt('-- auto-filtered by RLS!')}`,
+    ],
+    ['order_id','customer','tenant','amount','visible_to'],
+    [],2,'< 1ms',true);
+
+  // ── ANALYTICS ─────────────────────────────────
+  if(key==='analytics-pg:analytics-adv:Demo') return sqlBlock('running-total','Running Total & Moving Average',
+    [`${kw('SELECT')}`,
+     `    ${col('order_date')},`,
+     `    ${fn('to_char')}(${col('daily_rev')}, ${str("'FM₹99,99,99,999'")}) ${al('AS')} ${al('daily_rev')},`,
+     `    ${fn('to_char')}(${fn('sum')}(${col('daily_rev')}) ${kw('OVER')} (${kw('ORDER BY')} ${col('order_date')} ${kw('ROWS UNBOUNDED PRECEDING')}),`,
+     `              ${str("'FM₹99,99,99,999'")}) ${al('AS')} ${al('running_total')},`,
+     `    ${fn('to_char')}(${fn('avg')}(${col('daily_rev')}) ${kw('OVER')} (${kw('ORDER BY')} ${col('order_date')}`,
+     `              ${kw('ROWS BETWEEN')} ${num('6')} ${kw('PRECEDING AND CURRENT ROW')}),`,
+     `              ${str("'FM₹99,99,99,999'")}) ${al('AS')} ${al('moving_avg_7d')},`,
+     `    ${fn('round')}(${fn('sum')}(${col('daily_rev')}) ${kw('OVER')} (${kw('ORDER BY')} ${col('order_date')} ${kw('ROWS UNBOUNDED PRECEDING')}) * ${num('100.0')}`,
+     `           / ${num('200000')}, ${num('1')}) || ${str("'%'")} ${al('AS')} ${al('pct_of_target')}`,
+     `${kw('FROM')} ${col('daily_sales')} ${kw('ORDER BY')} ${col('order_date')};`,
+    ],
+    ['order_date','daily_rev','running_total','moving_avg_7d','pct_of_target'],
+    [],4,'9ms',true);
+
+  if(key==='analytics-pg:copy-bulk:Demo') return sqlBlock('copy-demo','COPY vs INSERT Performance',
+    [`${cmt('-- Method 1: Single INSERT (slowest)')}`,
+     `${cmt("-- INSERT INTO t VALUES (1,'a'); -- repeated 100,000 times")}`,
+     `${cmt('-- Method 2: Batch INSERT VALUES')}`,
+     `${cmt("-- INSERT INTO t VALUES (1,'a'),(2,'b'),...(1000,'z')")}`,
+     `${cmt('-- Method 3: COPY (fastest)')}`,
+     `${kw('COPY')} ${col('employees')} (${col('id')}, ${col('name')}, ${col('salary')})`,
+     `${kw('FROM')} ${str("'/tmp/employees.csv'")}`,
+     `${kw('WITH')} (${kw('FORMAT')} ${tp('csv')}, ${kw('HEADER')} ${kw('true')}, ${kw('DELIMITER')} ${str("','")}, ${kw('NULL')} ${str("'\\N'")});`,
+     `${cmt('-- Or from app (psql): \\copy employees FROM data.csv CSV HEADER')}`,
+     `${cmt('-- Or binary format (fastest): WITH (FORMAT binary)')}`,
+     `${kw('SELECT')} * ${kw('FROM')} (${kw('VALUES')}`,
+     `    (${str("'INSERT (one by one)'")}, ${num('100000')}, ${num('42841')}, ${num('2334')}),`,
+     `    (${str("'INSERT batch 1000'")}, ${num('100000')}, ${num('1241')}, ${num('80580')}),`,
+     `    (${str("'COPY FROM STDIN'")}, ${num('100000')}, ${num('182')}, ${num('549451')})`,
+     `) ${al('t')}(${al('method')}, ${al('rows_inserted')}, ${al('duration_ms')}, ${al('rows_per_sec')});`,
+    ],
+    ['method','rows_inserted','duration_ms','rows_per_sec'],
+    [],3,'< 1ms',true);
+
+  return renderPgGenericTab(cid, tid, tab);
+}
+
+// ═══ RUNTIME ═══
+let activeCh=null,activeTid=null,visited=new Set();
+function renderNav(){
+  document.getElementById('leftNav').innerHTML=CHAPTERS.map(ch=>`
+<div class="ci ${activeCh===ch.id?'active':''}" onclick="selChapter('${ch.id}')">
+  <div class="ci-icon" style="background:${ch.bg}">${ch.icon}</div>
+  <div class="ci-info"><div class="cn">${ch.title}</div><div class="cm">${ch.topics.length} topics · ${ch.sub.split('·')[0].trim()}</div></div>
+  <span class="lv" style="background:${ch.lc}18;color:${ch.lc};border:1px solid ${ch.lc}33">${ch.level}</span>
+</div>`).join('');
+}
+function selChapter(id){
+  activeCh=id;activeTid=null;visited.add(id);updateProgress();renderNav();
+  const ch=CHAPTERS.find(c=>c.id===id);
+  clearTimers();
+  document.getElementById('middle').innerHTML=`
+<div class="ch-hdr">
+  <div class="ch-ey">Chapter ${CHAPTERS.indexOf(ch)+1} of ${CHAPTERS.length}</div>
+  <div class="ch-t">${ch.icon} ${ch.title}</div>
+  <p class="ch-d">${ch.desc}</p>
+  <div class="ch-chips">
+    <div class="chip"><span class="chip-dot" style="background:${ch.lc}"></span>${ch.level}</div>
+    <div class="chip">📚 ${ch.topics.length} Topics</div>
+    <div class="chip">🐘 ${ch.sub}</div>
+  </div>
+</div>
+<div class="tg">${ch.topics.map(t=>`
+<div class="tc" onclick="selTopic('${ch.id}','${t.id}',event)">
+  <div class="tc-cmd">${t.cmd}</div>
+  <div class="tc-title">${t.title}</div>
+  <div class="tc-d">${t.desc}</div>
+  <div class="tc-tags">${(t.tags||[]).map(tag=>`<span class="tag ${tag}">${tag}</span>`).join('')}</div>
+</div>`).join('')}
+</div>`;
+  closeRight();
+}
+function selTopic(cid,tid,ev){
+  activeTid=tid;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+  ev.currentTarget.classList.add('active');
+  const ch=CHAPTERS.find(c=>c.id===cid);
+  const topic=ch?.topics.find(t=>t.id===tid);
+  if(!topic) return;
+  clearTimers();
+  document.getElementById('rightPanel').classList.remove('hidden');
+  document.getElementById('rightTitle').textContent='🐘 '+topic.cmd;
+  const tabs=topic.tabs||['Demo'];
+  document.getElementById('rightTabs').innerHTML=tabs.map((tab,i)=>
+    `<div class="rt ${i===0?'active':''}" onclick="selTab(this,'${cid}','${tid}','${tab}')">${tab}</div>`).join('');
+  renderTab(cid,tid,tabs[0]);
+}
+function selTab(el,cid,tid,tab){
+  clearTimers();
+  document.querySelectorAll('.rt').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTab(cid,tid,tab);
+}
+function renderTab(cid,tid,tab){
+  document.getElementById('rightBody').innerHTML=getContent(cid,tid,tab);
+}
+function closeRight(){
+  clearTimers();
+  document.getElementById('rightPanel').classList.add('hidden');
+  activeTid=null;
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+}
+function toggleQA(el){el.classList.toggle('open');}
+function filterQs(btn,diff,container){
+  container.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  container.querySelectorAll('.qa-item').forEach(item=>{
+    item.style.display=(diff==='all'||item.dataset.diff===diff)?'':'none';
+  });
+}
+function updateProgress(){
+  const pct=Math.round(visited.size/CHAPTERS.length*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`${visited.size} / ${CHAPTERS.length} chapters visited`;
+}
+renderNav();
+</script>
+<script src="/embedded/mastery-resize.js"></script>
+</body>
+</html>

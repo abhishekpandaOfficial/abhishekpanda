@@ -1,0 +1,2568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>.NET Core Internals Mastery — Core Engineering</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Familjen+Grotesk:wght@400;500;600;700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg0:#060b0f;--bg1:#0a1018;--bg2:#0f1923;--bg3:#152030;
+  --border:#1b2d40;--border2:#243d55;
+  --g1:#00ffa3;--g2:#00c8ff;--g3:#7b61ff;--g4:#ff6b35;--g5:#ffd700;
+  --text1:#dde6f0;--text2:#8a9db5;--text3:#3d5068;
+  --code:#050e16;--codeborder:#1a3045;
+  --lw:272px;--rw:570px;--hh:54px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg0);color:var(--text1);font-family:'Lato',sans-serif}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--g2)}
+
+/* ── HEADER ── */
+.hdr{
+  position:fixed;top:0;left:0;right:0;height:var(--hh);z-index:200;
+  background:rgba(6,11,15,0.97);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 18px;gap:14px;
+  backdrop-filter:blur(16px);
+}
+.hdr-logo{
+  font-family:'Familjen Grotesk',sans-serif;font-size:18px;font-weight:800;
+  background:linear-gradient(120deg,var(--g1),var(--g2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;
+}
+.hdr-sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
+.hdr-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.5px}
+.hdr-r{margin-left:auto;display:flex;gap:8px;align-items:center}
+.pill{
+  font-family:'DM Mono',monospace;font-size:10px;padding:3px 10px;border-radius:20px;
+  border:1px solid;cursor:default;
+}
+.pill-g{color:var(--g1);border-color:rgba(0,255,163,.25);background:rgba(0,255,163,.06)}
+.pill-b{color:var(--g2);border-color:rgba(0,200,255,.25);background:rgba(0,200,255,.06)}
+.pill-btn{cursor:pointer;transition:all .2s}
+.pill-btn:hover{background:rgba(0,200,255,.15)}
+.prog-wrap{display:flex;align-items:center;gap:7px}
+.prog-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)}
+.prog-bar{width:70px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--g1),var(--g2));border-radius:2px;transition:width .5s}
+
+/* ── LAYOUT ── */
+.lay{display:flex;height:100vh;padding-top:var(--hh)}
+
+/* ── LEFT ── */
+.lp{
+  width:var(--lw);min-width:var(--lw);background:var(--bg1);
+  border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;
+}
+.lp-search{padding:10px;border-bottom:1px solid var(--border)}
+.lp-search input{
+  width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:5px;
+  padding:6px 11px;color:var(--text1);font-size:11.5px;font-family:'Lato',sans-serif;outline:none;
+}
+.lp-search input:focus{border-color:var(--g2)}
+.lp-search input::placeholder{color:var(--text3)}
+
+.ci{border-bottom:1px solid rgba(27,45,64,.6)}
+.ch{
+  display:flex;align-items:center;gap:9px;padding:10px 12px;
+  cursor:pointer;transition:background .15s;user-select:none;
+}
+.ch:hover{background:var(--bg2)}
+.ch.act{background:linear-gradient(90deg,rgba(0,200,255,.07),transparent);border-left:2px solid var(--g2)}
+.cnum{
+  width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:9px;font-weight:500;flex-shrink:0;
+}
+.ctitle{font-size:11.5px;font-weight:500;color:var(--text2);flex:1;line-height:1.3}
+.ch.act .ctitle{color:var(--text1)}
+.carr{font-size:8px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.ci.open .carr{transform:rotate(90deg)}
+.tl{display:none;padding:3px 0 7px}
+.ci.open .tl{display:block}
+.ti{
+  padding:5px 12px 5px 41px;font-size:11px;color:var(--text3);
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:7px;
+}
+.ti:hover{color:var(--text2);background:rgba(255,255,255,.02)}
+.ti.act{color:var(--g2);background:rgba(0,200,255,.05)}
+
+/* ── MIDDLE ── */
+.mp{
+  flex:1;background:var(--bg0);border-right:1px solid var(--border);
+  overflow-y:auto;padding:22px 18px;
+}
+
+/* WELCOME */
+.welcome{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:calc(100vh - 54px);text-align:center;gap:18px;padding:40px 20px;
+}
+.w-logo{
+  font-family:'Familjen Grotesk',sans-serif;font-size:64px;font-weight:800;
+  background:linear-gradient(135deg,var(--g1),var(--g2),var(--g3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  line-height:1;
+}
+@keyframes logoGlow{0%,100%{filter:drop-shadow(0 0 20px rgba(0,255,163,.3))}50%{filter:drop-shadow(0 0 40px rgba(0,200,255,.5))}}
+.w-logo{animation:logoGlow 4s ease-in-out infinite}
+.w-title{font-family:'Familjen Grotesk',sans-serif;font-size:26px;font-weight:700;color:var(--text1)}
+.w-sub{font-size:13px;color:var(--text2);max-width:440px;line-height:1.7}
+.w-stats{display:flex;gap:28px;margin-top:6px}
+.ws{text-align:center}
+.ws-n{font-family:'Familjen Grotesk',sans-serif;font-size:30px;font-weight:800;color:var(--g1)}
+.ws-l{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
+.welcome-actions{
+  position:relative;isolation:isolate;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  width:min(100%,560px);padding:14px;border-radius:28px;overflow:visible;margin-top:4px;
+  background:linear-gradient(135deg,rgba(15,25,35,.82),rgba(10,16,24,.74));
+  border:1px solid rgba(36,61,85,.85);
+  box-shadow:0 24px 60px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(18px);
+}
+.welcome-actions::before{
+  content:'';position:absolute;inset:1px;border-radius:27px;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at top left,rgba(0,255,163,.16),transparent 42%),
+    radial-gradient(circle at bottom right,rgba(0,200,255,.16),transparent 40%);
+}
+.start-btn{
+  position:relative;z-index:1;flex:1 1 220px;justify-content:space-between;
+  display:inline-flex;align-items:center;gap:12px;white-space:nowrap;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,0)) padding-box,
+    linear-gradient(135deg,var(--g1),var(--g2)) border-box;
+  border:1px solid transparent;color:#f3fbff;
+  font-family:'Familjen Grotesk',sans-serif;font-size:13px;font-weight:700;
+  padding:8px 10px 8px 18px;border-radius:999px;cursor:pointer;transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  box-shadow:0 16px 34px rgba(0,200,255,.18), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 20px 38px rgba(0,255,163,.22), inset 0 1px 0 rgba(255,255,255,.2);filter:saturate(1.06)}
+.start-btn-text{display:inline-flex;align-items:center}
+.start-btn-icon{
+  width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:rgba(6,11,15,.24);border:1px solid rgba(255,255,255,.18);font-size:13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.02)) padding-box,
+    linear-gradient(135deg,var(--g2),var(--g3)) border-box;
+  box-shadow:0 16px 34px rgba(123,97,255,.18), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary:hover{box-shadow:0 20px 38px rgba(123,97,255,.24), inset 0 1px 0 rgba(255,255,255,.18)}
+.start-btn-secondary .start-btn-icon{
+  background:rgba(123,97,255,.14);border-color:rgba(255,255,255,.18);color:#efe9ff;
+}
+
+/* CHAPTER HERO */
+.ch-hero{
+  background:linear-gradient(135deg,var(--bg2),var(--bg1));
+  border:1px solid var(--border);border-radius:10px;padding:22px;margin-bottom:18px;
+  position:relative;overflow:hidden;
+}
+.ch-hero::after{
+  content:'';position:absolute;top:-20px;right:-20px;
+  width:100px;height:100px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,200,255,.08),transparent);
+}
+.ch-hero-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.ch-hero-title{font-family:'Familjen Grotesk',sans-serif;font-size:22px;font-weight:800;margin-bottom:7px;line-height:1.2}
+.ch-hero-desc{font-size:12.5px;color:var(--text2);line-height:1.6;max-width:480px}
+.ch-hero-pills{display:flex;gap:5px;margin-top:12px;flex-wrap:wrap}
+.chp{font-family:'DM Mono',monospace;font-size:9.5px;padding:2px 8px;border-radius:3px;border:1px solid}
+
+/* TOPIC CARDS */
+.tgrid{display:flex;flex-direction:column;gap:7px}
+.tc{
+  background:var(--bg2);border:1px solid var(--border);border-radius:7px;
+  padding:13px 15px;cursor:pointer;transition:all .18s;display:flex;align-items:flex-start;gap:11px;
+}
+.tc:hover{border-color:var(--border2);transform:translateX(2px);background:var(--bg3)}
+.tc.act{border-color:var(--g2);background:rgba(0,200,255,.04)}
+.tc-icon{font-size:19px;flex-shrink:0;margin-top:1px}
+.tc-body{flex:1}
+.tc-title{font-size:12.5px;font-weight:700;color:var(--text1);margin-bottom:3px}
+.tc-desc{font-size:11px;color:var(--text3);line-height:1.5}
+.tc-tags{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.tct{font-family:'DM Mono',monospace;font-size:9.5px;padding:2px 6px;border-radius:3px;border:1px solid}
+
+/* ── RIGHT ── */
+.rp{width:var(--rw);min-width:var(--rw);background:var(--bg1);overflow-y:auto}
+
+.re{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:14px;color:var(--text3);text-align:center;padding:40px;
+}
+.re-icon{font-size:44px;opacity:.25}
+.re h3{font-family:'Familjen Grotesk',sans-serif;font-size:16px;color:var(--text2)}
+.re p{font-size:12px;line-height:1.6}
+
+/* DETAIL */
+.dc{padding:22px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.dc{animation:fadeUp .25s ease}
+
+.d-bread{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+.d-title{font-family:'Familjen Grotesk',sans-serif;font-size:21px;font-weight:800;margin-bottom:5px;line-height:1.2}
+.d-sub{font-size:12.5px;color:var(--text2);line-height:1.55;margin-bottom:10px}
+.d-pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.dp{font-family:'DM Mono',monospace;font-size:9.5px;padding:2px 8px;border-radius:3px;border:1px solid}
+
+/* SECTION */
+.sec{margin-bottom:22px}
+.sec-t{
+  font-family:'Familjen Grotesk',sans-serif;font-size:13px;font-weight:700;
+  color:var(--text1);margin-bottom:10px;display:flex;align-items:center;gap:7px;
+}
+.sec-t::before{content:'';display:block;width:3px;height:13px;background:var(--g2);border-radius:2px;flex-shrink:0}
+
+/* PROSE */
+.prose{font-size:12.5px;color:var(--text2);line-height:1.75}
+.prose p{margin-bottom:9px}
+.prose strong{color:var(--text1)}
+.prose ul{padding-left:16px;margin-bottom:9px}
+.prose li{margin-bottom:4px}
+.prose ol{padding-left:16px;margin-bottom:9px}
+.prose code{background:var(--code);border:1px solid var(--codeborder);border-radius:3px;padding:1px 5px;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--g2)}
+
+/* CODE BLOCK */
+.cb{background:var(--code);border:1px solid var(--codeborder);border-radius:9px;overflow:hidden;margin-bottom:14px}
+.cb-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 14px;border-bottom:1px solid var(--codeborder);background:rgba(0,0,0,.3);
+}
+.cb-lang{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--g1);text-transform:uppercase;letter-spacing:1px}
+.cb-name{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
+.cb-copy{background:none;border:1px solid var(--border);color:var(--text3);border-radius:3px;padding:2px 8px;font-size:9.5px;cursor:pointer;transition:all .2s;font-family:'DM Mono',monospace}
+.cb-copy:hover{border-color:var(--g2);color:var(--g2)}
+.cb-body{padding:14px;overflow-x:auto}
+.cb-body pre{font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;color:#c9d1d9}
+.cb-body pre{min-width:max-content}
+
+/* Syntax tokens */
+.kw{color:#79c0ff}.tp{color:#56d364}.st{color:#a5d6ff}.nu{color:#ffa657}
+.cm{color:#484f58;font-style:italic}.fn{color:#d2a8ff}.pr{color:#ff7b72}
+.at{color:#e3b341}.it{color:#39d353}
+
+/* DIAGRAM */
+.dg{background:var(--code);border:1px solid var(--codeborder);border-radius:9px;overflow:hidden;margin-bottom:14px}
+.dg-hdr{padding:9px 14px;border-bottom:1px solid var(--codeborder);background:rgba(0,0,0,.3);font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
+.dg-body{padding:14px;display:flex;justify-content:center;overflow-x:auto}
+.dg-body svg,.dg-body img{display:block;max-width:min(100%,720px);height:auto;margin:0 auto}
+
+/* CALLOUT */
+.co{border-radius:7px;padding:11px 13px;margin-bottom:13px;display:flex;gap:9px;font-size:12px;line-height:1.6}
+.co-info{background:rgba(0,200,255,.05);border:1px solid rgba(0,200,255,.2);color:var(--text2)}
+.co-warn{background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.2);color:var(--text2)}
+.co-ok{background:rgba(0,255,163,.05);border:1px solid rgba(0,255,163,.2);color:var(--text2)}
+.co-err{background:rgba(255,107,53,.05);border:1px solid rgba(255,107,53,.2);color:var(--text2)}
+.co-ic{flex-shrink:0;font-size:14px}
+
+/* COMPARE TABLE */
+.ctbl{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:14px}
+.ctbl{min-width:520px}
+.ctbl th{background:var(--bg2);padding:8px 11px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);border:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px}
+.ctbl td{padding:8px 11px;border:1px solid var(--border);color:var(--text2);vertical-align:top;line-height:1.5}
+.ctbl tr:hover td{background:rgba(255,255,255,.015)}
+.good{color:var(--g1)}.bad{color:var(--pr,#ff7b72)}.mid{color:var(--g5)}
+
+/* STEP LIST */
+.steps{counter-reset:step;margin-bottom:14px}
+.step{
+  display:flex;gap:12px;align-items:flex-start;padding:10px 0;
+  border-bottom:1px solid rgba(27,45,64,.5);font-size:12px;color:var(--text2);line-height:1.6;
+}
+.step:last-child{border-bottom:none}
+.step::before{
+  counter-increment:step;content:counter(step);
+  min-width:22px;height:22px;border-radius:50%;background:rgba(0,200,255,.12);
+  border:1px solid rgba(0,200,255,.3);color:var(--g2);font-family:'DM Mono',monospace;
+  font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.step strong{color:var(--text1)}
+
+/* Q&A */
+.qa{background:var(--bg2);border:1px solid var(--border);border-radius:7px;margin-bottom:9px;overflow:hidden}
+.qa-q{padding:11px 13px;cursor:pointer;display:flex;align-items:flex-start;gap:9px;transition:background .15s}
+.qa-q:hover{background:var(--bg3)}
+.qa-qi{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--g2);flex-shrink:0;margin-top:1px}
+.qa-qt{font-size:12px;font-weight:600;color:var(--text1);flex:1;line-height:1.5}
+.qa-kicker{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.qa-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.qa-pill{font-size:8.5px;padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;border:1px solid}
+.qa-legend{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}
+.qa-stat{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:12px 0;font-size:11.5px;color:var(--text2);line-height:1.7}
+.qa-stat strong{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text1)}
+.qa-lv{font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;border:1px solid;flex-shrink:0;margin-top:2px}
+.qa-ar{color:var(--text3);font-size:9px;transition:transform .2s;margin-top:3px;flex-shrink:0}
+.qa.open .qa-ar{transform:rotate(90deg)}
+.qa-a{display:none;padding:11px 13px;border-top:1px solid var(--border);background:rgba(0,0,0,.2)}
+.qa.open .qa-a{display:block}
+.qa-at{font-size:11.5px;color:var(--text2);line-height:1.75}
+.interview-sketch{width:100%;min-width:520px;height:auto;display:block}
+.sketch-box{fill:rgba(10,16,24,.95);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.sketch-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.06em;fill:var(--text1)}
+.sketch-copy{font-family:'DM Mono',monospace;font-size:8.5px;fill:var(--text2)}
+.sketch-arrow{fill:none;stroke:var(--g2);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:8 6;animation:sketchDash 12s linear infinite}
+.sketch-arrow.alt{stroke:var(--g3);animation-duration:10s}
+.sketch-arrow.soft{stroke:var(--g1);animation-duration:15s}
+@keyframes sketchDash{to{stroke-dashoffset:-140}}
+
+/* Level colors */
+.lv-b{color:#56d364;border-color:rgba(86,211,100,.3);background:rgba(86,211,100,.07)}
+.lv-i{color:var(--g5);border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.07)}
+.lv-a{color:#ff7b72;border-color:rgba(255,123,114,.3);background:rgba(255,123,114,.07)}
+.lv-e{color:var(--g3);border-color:rgba(123,97,255,.3);background:rgba(123,97,255,.07)}
+@media (max-width:640px){
+  .welcome-actions{width:min(100%,420px);padding:10px}
+  .start-btn{flex-basis:100%;width:100%}
+  .ctbl{min-width:420px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-logo">.NET</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-sub">.NET Core Internals Mastery · .NET 10</div>
+  <div class="hdr-r">
+    <div class="prog-wrap">
+      <span class="prog-num" id="pct">0%</span>
+      <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+    </div>
+    <div class="pill pill-g">.NET 10</div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="lay">
+
+  <!-- LEFT -->
+  <div class="lp">
+    <div class="lp-search">
+      <input id="search" type="text" placeholder="🔍  Search topics…" oninput="filterNav(this.value)">
+    </div>
+    <div id="nav"></div>
+  </div>
+
+  <!-- MIDDLE -->
+  <div class="mp" id="mp">
+    <div class="welcome" id="welcome">
+      <div class="w-logo">.NET</div>
+      <div class="w-title">.NET Core Internals Mastery</div>
+      <div class="w-sub">Deep dive into .NET internals — CLR, JIT, GC, async, DI, performance, and everything that runs under the hood of every .NET application, now with 540 tagged interview questions and answers.</div>
+      <div class="w-stats">
+        <div class="ws"><div class="ws-n">21</div><div class="ws-l">Chapters</div></div>
+        <div class="ws"><div class="ws-n">100+</div><div class="ws-l">Topics</div></div>
+        <div class="ws"><div class="ws-n">540+</div><div class="ws-l">Q&amp;A</div></div>
+        <div class="ws"><div class="ws-n">120+</div><div class="ws-l">Diagrams</div></div>
+      </div>
+      <div class="welcome-actions">
+        <button class="start-btn" onclick="selectCh(0)">
+          <span class="start-btn-text">Start .NET Mastery</span>
+          <span class="start-btn-icon" aria-hidden="true">→</span>
+        </button>
+        <button class="start-btn start-btn-secondary" onclick="showAllQA()">
+          <span class="start-btn-text">Interview Q&amp;A</span>
+          <span class="start-btn-icon" aria-hidden="true">🎯</span>
+        </button>
+      </div>
+    </div>
+    <div id="mcon" style="display:none"></div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="rp" id="rp">
+    <div class="re" id="re">
+      <div class="re-icon">⚙️</div>
+      <h3>Select a Topic</h3>
+      <p>Click any topic card to see in-depth explanations, architecture diagrams, code examples, and interview questions.</p>
+    </div>
+    <div id="rcon" style="display:none"></div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CHAPTER DATA
+// ═══════════════════════════════════════════════════════════
+const CHS = [
+{n:"01",title:".NET Fundamentals",icon:"🌐",c:"#00ffa3",bg:"rgba(0,255,163,0.1)",
+ desc:"What .NET is, its evolution from .NET Framework to .NET 10, managed vs unmanaged code, and cross-platform architecture.",
+ tags:["Beginner","Foundation","CLR"],
+ topics:[
+  {id:"f1",icon:"📖",title:"What is .NET?",desc:"Platform overview, runtime, BCL, SDK, CLI",tags:["Beginner","Core"]},
+  {id:"f2",icon:"📅",title:"Evolution: Framework → Core → .NET 5-10",desc:"Version history, unification, breaking changes",tags:["Beginner","History"]},
+  {id:"f3",icon:"🆚",title:".NET vs .NET Framework",desc:"Side-by-side comparison, migration paths",tags:["Beginner","Core"]},
+  {id:"f4",icon:"🌍",title:"Cross-Platform Architecture",desc:"RID, platform abstractions, runtime identifiers",tags:["Intermediate","Core"]},
+  {id:"f5",icon:"🔐",title:"Managed vs Unmanaged Code",desc:"CLR benefits, interop boundaries, P/Invoke",tags:["Intermediate","CLR"]},
+ ]},
+{n:"02",title:".NET Architecture",icon:"🏗️",c:"#00c8ff",bg:"rgba(0,200,255,0.1)",
+ desc:"Layered architecture of .NET: language, runtime, base libraries, SDK and how they interconnect.",
+ tags:["Core","Architecture","Design"],
+ topics:[
+  {id:"a1",icon:"🏛️",title:"Architecture Layers",desc:"Language → Runtime → BCL → App model",tags:["Core","Architecture"]},
+  {id:"a2",icon:"⚡",title:"CLR — Common Language Runtime",desc:"Execution engine, memory, security, threads",tags:["Core","CLR"]},
+  {id:"a3",icon:"📚",title:"Base Class Library (BCL)",desc:"System.* namespaces, what's in the box",tags:["Core","BCL"]},
+  {id:"a4",icon:"🔧",title:".NET SDK & CLI",desc:"SDK layout, global tools, workloads",tags:["Beginner","Tooling"]},
+  {id:"a5",icon:"📦",title:"Runtime vs Framework vs SDK",desc:"What each layer contains and who uses what",tags:["Intermediate","Core"]},
+ ]},
+{n:"03",title:"CLR Runtime Internals",icon:"⚙️",c:"#7b61ff",bg:"rgba(123,97,255,0.1)",
+ desc:"Inside the Common Language Runtime — execution engine, AppDomain, AssemblyLoadContext, type loading.",
+ tags:["Advanced","CLR","Expert"],
+ topics:[
+  {id:"r1",icon:"🔄",title:"CLR Architecture Overview",desc:"EE, loader, GC, JIT, security — full map",tags:["Advanced","CLR"]},
+  {id:"r2",icon:"📦",title:"AppDomain & AssemblyLoadContext",desc:"Isolation, plugin loading, hot reload",tags:["Advanced","CLR"]},
+  {id:"r3",icon:"🔃",title:"Type Loading Pipeline",desc:"From IL to runtime type, vtable, method tables",tags:["Expert","CLR"]},
+  {id:"r4",icon:"🧵",title:"Thread Management in CLR",desc:"OS threads, fiber mode, thread injection",tags:["Advanced","Threading"]},
+  {id:"r5",icon:"✅",title:"Verification & Security",desc:"Type safety, code access security, CAS",tags:["Advanced","Security"]},
+ ]},
+{n:"04",title:"Compilation Pipeline",icon:"⚗️",c:"#ffd700",bg:"rgba(255,215,0,0.1)",
+ desc:"End-to-end journey from C# source code to native CPU instructions via Roslyn, IL, and JIT.",
+ tags:["Core","Compiler","CLR"],
+ topics:[
+  {id:"c1",icon:"✏️",title:"Roslyn Compiler Architecture",desc:"Compilation phases, syntax trees, semantic model",tags:["Advanced","Roslyn"]},
+  {id:"c2",icon:"📜",title:"Common Intermediate Language (CIL)",desc:"IL opcodes, stack-based VM, reading IL",tags:["Expert","IL"]},
+  {id:"c3",icon:"🔄",title:"Full Compilation Pipeline",desc:"Source → Tokens → AST → IL → Native",tags:["Core","Compiler"]},
+  {id:"c4",icon:"🔬",title:"Reading IL with ILDasm",desc:"Disassembly, understanding output, SharpLab",tags:["Expert","IL"]},
+  {id:"c5",icon:"📋",title:"Metadata & Manifests",desc:"Assembly metadata, type tables, tokens",tags:["Advanced","Metadata"]},
+ ]},
+{n:"05",title:"JIT Compilation",icon:"⚡",c:"#ff6b35",bg:"rgba(255,107,53,0.1)",
+ desc:"Just-in-time compilation internals — tiered JIT, PGO, method inlining, and SIMD intrinsics.",
+ tags:["Expert","JIT","Performance"],
+ topics:[
+  {id:"j1",icon:"⚡",title:"JIT Pipeline & Phases",desc:"Frontend, optimizer, backend, codegen phases",tags:["Expert","JIT"]},
+  {id:"j2",icon:"📈",title:"Tiered Compilation",desc:"Tier-0, Tier-1, R2R, re-JIT thresholds",tags:["Advanced","JIT"]},
+  {id:"j3",icon:"🎯",title:"Profile-Guided Optimization (PGO)",desc:"Dynamic PGO, instrumented runs, hot/cold splitting",tags:["Expert","JIT"]},
+  {id:"j4",icon:"🔗",title:"Method Inlining",desc:"Inlining heuristics, [MethodImpl], AggressiveInlining",tags:["Advanced","Performance"]},
+  {id:"j5",icon:"🚀",title:"SIMD & Hardware Intrinsics",desc:"Vector<T>, AVX2, ARM NEON, platform-specific",tags:["Expert","Performance"]},
+  {id:"j6",icon:"🏭",title:"Native AOT",desc:"Ahead-of-time compilation, trimming, startup perf",tags:["Advanced","AOT"]},
+ ]},
+{n:"06",title:"Assemblies & Metadata",icon:"📦",c:"#56d364",bg:"rgba(86,211,100,0.1)",
+ desc:"Assembly structure, versioning, strong naming, reflection metadata tables.",
+ tags:["Core","Assembly","Deployment"],
+ topics:[
+  {id:"as1",icon:"📦",title:"Assembly Structure",desc:"PE format, sections, manifest, resources",tags:["Intermediate","Assembly"]},
+  {id:"as2",icon:"🏷️",title:"Assembly Versioning",desc:"SemVer, AssemblyVersion, binding redirects",tags:["Intermediate","Deployment"]},
+  {id:"as3",icon:"🔑",title:"Strong Naming",desc:"Key pairs, GAC, delayed signing",tags:["Advanced","Security"]},
+  {id:"as4",icon:"🔍",title:"Reflection & Metadata Tables",desc:"TypeDef, MethodDef, tokens, MemberInfo",tags:["Advanced","Reflection"]},
+  {id:"as5",icon:"🔌",title:"Dynamic Assemblies",desc:"AssemblyBuilder, Emit, expression trees",tags:["Expert","Dynamic"]},
+ ]},
+{n:"07",title:"Memory Management & GC",icon:"🗑️",c:"#00ffa3",bg:"rgba(0,255,163,0.1)",
+ desc:"Garbage collector internals — generational GC, LOH, GC modes, pinning, and IDisposable patterns.",
+ tags:["Core","GC","Performance"],
+ topics:[
+  {id:"m1",icon:"📊",title:"Heap Layout & Generations",desc:"Gen0/1/2, LOH, POH, segment sizes",tags:["Core","GC"]},
+  {id:"m2",icon:"🔄",title:"GC Algorithm: Mark-Compact",desc:"Mark phase, relocation, compaction, roots",tags:["Advanced","GC"]},
+  {id:"m3",icon:"⚙️",title:"GC Modes & Configuration",desc:"Workstation, Server, Concurrent, Background",tags:["Advanced","GC"]},
+  {id:"m4",icon:"📌",title:"Pinning & GC Handles",desc:"GCHandle, pinned objects, unsafe interop",tags:["Expert","GC"]},
+  {id:"m5",icon:"♻️",title:"IDisposable & Finalizers",desc:"Dispose pattern, using, IAsyncDisposable",tags:["Core","Patterns"]},
+  {id:"m6",icon:"🏊",title:"Object Pooling",desc:"ArrayPool, MemoryPool, ObjectPool<T>",tags:["Advanced","Performance"]},
+  {id:"m7",icon:"📉",title:"GC Tuning & DATAS",desc:"GCSettings, DOTNET_GCConserveMemory, metrics",tags:["Expert","Tuning"]},
+ ]},
+{n:"08",title:"Threading & Concurrency",icon:"🧵",c:"#00c8ff",bg:"rgba(0,200,255,0.1)",
+ desc:"Thread lifecycle, ThreadPool, synchronization primitives, lock-free programming.",
+ tags:["Core","Threading","Concurrency"],
+ topics:[
+  {id:"th1",icon:"🧵",title:"Thread Lifecycle",desc:"States, priority, foreground/background, abort",tags:["Core","Threading"]},
+  {id:"th2",icon:"🏊",title:"ThreadPool Internals",desc:"Work stealing, hill-climbing, injection",tags:["Advanced","ThreadPool"]},
+  {id:"th3",icon:"🔒",title:"Synchronization Primitives",desc:"lock, Monitor, Mutex, SemaphoreSlim, RWLock",tags:["Core","Sync"]},
+  {id:"th4",icon:"⚡",title:"Volatile & Interlocked",desc:"Memory barriers, Interlocked ops, compare-exchange",tags:["Advanced","LockFree"]},
+  {id:"th5",icon:"📊",title:"Concurrent Collections",desc:"ConcurrentDictionary, ConcurrentQueue, Channel<T>",tags:["Core","Collections"]},
+  {id:"th6",icon:"🔄",title:"Lock-Free Programming",desc:"CAS, ABA problem, SpinLock, memory models",tags:["Expert","LockFree"]},
+ ]},
+{n:"09",title:"Task & Async Infrastructure",icon:"⏳",c:"#7b61ff",bg:"rgba(123,97,255,0.1)",
+ desc:"TPL internals, Task state machine, async/await implementation, async streams, cancellation.",
+ tags:["Core","Async","TPL"],
+ topics:[
+  {id:"tp1",icon:"⏳",title:"Task & Task<T> Internals",desc:"Task state machine, continuations, scheduler",tags:["Core","TPL"]},
+  {id:"tp2",icon:"⚡",title:"async/await State Machine",desc:"Compiler transformation, IAsyncStateMachine",tags:["Advanced","Async"]},
+  {id:"tp3",icon:"🌊",title:"Async Streams & Channels",desc:"IAsyncEnumerable, await foreach, Channel<T>",tags:["Advanced","Async"]},
+  {id:"tp4",icon:"❌",title:"CancellationToken Internals",desc:"CTS, linked tokens, cooperative cancellation",tags:["Core","Async"]},
+  {id:"tp5",icon:"📋",title:"TaskScheduler & SyncContext",desc:"Custom schedulers, ConfigureAwait, deadlocks",tags:["Advanced","Async"]},
+  {id:"tp6",icon:"🏎️",title:"ValueTask & IValueTaskSource",desc:"Allocation-free async, pooled completion sources",tags:["Expert","Performance"]},
+ ]},
+{n:"10",title:"Dependency Injection",icon:"💉",c:"#ff6b35",bg:"rgba(255,107,53,0.1)",
+ desc:"Built-in DI container internals, service lifetimes, scopes, keyed services, and advanced patterns.",
+ tags:["Core","DI","Architecture"],
+ topics:[
+  {id:"di1",icon:"💉",title:"DI Container Internals",desc:"ServiceCollection, ServiceProvider, descriptors",tags:["Core","DI"]},
+  {id:"di2",icon:"⏱️",title:"Service Lifetimes",desc:"Transient/Scoped/Singleton — internals & gotchas",tags:["Core","DI"]},
+  {id:"di3",icon:"🗂️",title:"Scoped Services & IServiceScope",desc:"Scope factory, async scopes, captive deps",tags:["Advanced","DI"]},
+  {id:"di4",icon:"🔑",title:"Keyed Services (.NET 8+)",desc:"IKeyedServiceProvider, [FromKeyedServices]",tags:["Modern","DI"]},
+  {id:"di5",icon:"🔧",title:"Generic Host & IHostedService",desc:"Host builder, hosted services, startup",tags:["Core","Hosting"]},
+ ]},
+{n:"11",title:"Configuration System",icon:"⚙️",c:"#ffd700",bg:"rgba(255,215,0,0.1)",
+ desc:"Layered configuration providers, options pattern, reload on change, secrets management.",
+ tags:["Core","Configuration"],
+ topics:[
+  {id:"cf1",icon:"📄",title:"Configuration Providers",desc:"JSON, ENV, args, Azure KV — layering order",tags:["Core","Config"]},
+  {id:"cf2",icon:"🎯",title:"Options Pattern",desc:"IOptions, IOptionsSnapshot, IOptionsMonitor",tags:["Core","Options"]},
+  {id:"cf3",icon:"✅",title:"Options Validation",desc:"DataAnnotations, ValidateOnStart, IValidateOptions",tags:["Intermediate","Options"]},
+  {id:"cf4",icon:"🔄",title:"Reload-on-Change",desc:"IChangeToken, ChangeToken.OnChange, hot reload",tags:["Advanced","Config"]},
+  {id:"cf5",icon:"🔒",title:"Secrets Management",desc:"User secrets, Key Vault, environment overrides",tags:["Intermediate","Security"]},
+ ]},
+{n:"12",title:"Logging Infrastructure",icon:"📋",c:"#56d364",bg:"rgba(86,211,100,0.1)",
+ desc:"ILogger internals, structured logging, log scopes, high-performance logging with source generators.",
+ tags:["Core","Logging"],
+ topics:[
+  {id:"lg1",icon:"📋",title:"ILogger Internals",desc:"LoggerFactory, LoggerProvider, filter rules",tags:["Core","Logging"]},
+  {id:"lg2",icon:"📊",title:"Structured Logging",desc:"Message templates, {Name:format}, semantic logging",tags:["Core","Logging"]},
+  {id:"lg3",icon:"🏷️",title:"Log Scopes & Enrichment",desc:"BeginScope, correlation IDs, contextual props",tags:["Intermediate","Logging"]},
+  {id:"lg4",icon:"⚡",title:"High-Performance Logging",desc:"LoggerMessage source gen, compiled delegates",tags:["Advanced","Performance"]},
+  {id:"lg5",icon:"🔌",title:"Serilog & OpenTelemetry",desc:"Sink ecosystem, OTEL integration, traces",tags:["Intermediate","Observability"]},
+ ]},
+{n:"13",title:"File & IO System",icon:"💾",c:"#00ffa3",bg:"rgba(0,255,163,0.1)",
+ desc:"Stream hierarchy, async I/O, memory-mapped files, FileSystemWatcher, Pipelines API.",
+ tags:["Core","IO","Performance"],
+ topics:[
+  {id:"io1",icon:"🌊",title:"Stream Architecture",desc:"Stream base, buffering, composing streams",tags:["Core","IO"]},
+  {id:"io2",icon:"⚡",title:"Async IO & RandomAccess",desc:"FileStream, RandomAccess, overlapped IO",tags:["Advanced","IO"]},
+  {id:"io3",icon:"🗺️",title:"Memory-Mapped Files",desc:"MemoryMappedFile, views, IPC via mmf",tags:["Advanced","IO"]},
+  {id:"io4",icon:"🔭",title:"FileSystemWatcher",desc:"Events, filters, platform behavior differences",tags:["Intermediate","IO"]},
+  {id:"io5",icon:"🚿",title:"System.IO.Pipelines",desc:"PipeReader, PipeWriter, zero-copy networking",tags:["Expert","Performance"]},
+ ]},
+{n:"14",title:"Networking Stack",icon:"🌐",c:"#00c8ff",bg:"rgba(0,200,255,0.1)",
+ desc:"HttpClient internals, connection pooling, Sockets API, QUIC, WebSockets.",
+ tags:["Core","Networking"],
+ topics:[
+  {id:"net1",icon:"🌐",title:"HttpClient Internals",desc:"SocketsHttpHandler, connection pooling, DNS TTL",tags:["Core","HTTP"]},
+  {id:"net2",icon:"🔄",title:"HttpMessageHandler Pipeline",desc:"DelegatingHandler, IHttpClientFactory, resiliency",tags:["Core","HTTP"]},
+  {id:"net3",icon:"🔌",title:"Sockets & TCP/UDP",desc:"Socket, TcpClient, SocketAsyncEventArgs",tags:["Advanced","Sockets"]},
+  {id:"net4",icon:"🚀",title:"QUIC & HTTP/3",desc:"System.Net.Quic, multiplexing, 0-RTT",tags:["Advanced","Networking"]},
+  {id:"net5",icon:"🔗",title:"gRPC & WebSockets",desc:"Grpc.Net.Client, System.Net.WebSockets",tags:["Intermediate","Protocols"]},
+ ]},
+{n:"15",title:"Diagnostics & Debugging",icon:"🔬",c:"#7b61ff",bg:"rgba(123,97,255,0.1)",
+ desc:"dotnet-trace, EventSource, activity tracing, memory dumps, performance counters.",
+ tags:["Advanced","Diagnostics","Tooling"],
+ topics:[
+  {id:"dg1",icon:"📡",title:"EventSource & ETW",desc:"Events, keywords, channels, EventCounter",tags:["Advanced","Diagnostics"]},
+  {id:"dg2",icon:"🔭",title:"dotnet-trace & dotnet-counters",desc:"Collection, analysis, perfview, speedscope",tags:["Advanced","Tooling"]},
+  {id:"dg3",icon:"💥",title:"Memory Dump Analysis",desc:"createdump, WinDbg/sos, dotnet-dump analyze",tags:["Expert","Debugging"]},
+  {id:"dg4",icon:"📊",title:"Activity & Distributed Tracing",desc:"Activity, ActivitySource, W3C TraceContext",tags:["Intermediate","Observability"]},
+  {id:"dg5",icon:"⚡",title:"DiagnosticsObserver API",desc:"DiagnosticListener, IObservable<KeyValuePair>",tags:["Expert","Diagnostics"]},
+ ]},
+{n:"16",title:"Performance Optimization",icon:"🚀",c:"#ff6b35",bg:"rgba(255,107,53,0.1)",
+ desc:"Allocation profiling, Span<T>, pooling, unsafe code, BenchmarkDotNet, zero-alloc patterns.",
+ tags:["Advanced","Performance","Expert"],
+ topics:[
+  {id:"p1",icon:"🎯",title:"Allocation Profiling",desc:"dotMemory, PerfView, allocation sources",tags:["Advanced","Profiling"]},
+  {id:"p2",icon:"⚡",title:"Span<T> & Memory<T>",desc:"Zero-copy slicing, stackalloc, buffer patterns",tags:["Advanced","Performance"]},
+  {id:"p3",icon:"♻️",title:"Pooling Patterns",desc:"ArrayPool, MemoryPool, ObjectPool, RecyclableMemoryStream",tags:["Advanced","Performance"]},
+  {id:"p4",icon:"📏",title:"BenchmarkDotNet",desc:"Microbenchmarking, harness, diagnosers",tags:["Intermediate","Tooling"]},
+  {id:"p5",icon:"🔢",title:"LINQ Performance",desc:"Deferred vs immediate, LINQ vs for-loop, EnumerableX",tags:["Intermediate","Performance"]},
+  {id:"p6",icon:"🔬",title:"Unsafe & Fixed",desc:"unsafe context, pointer arithmetic, MemoryMarshal",tags:["Expert","Unsafe"]},
+ ]},
+{n:"17",title:"Security",icon:"🔒",c:"#ffd700",bg:"rgba(255,215,0,0.1)",
+ desc:"Cryptography APIs, secure coding, certificate handling, data protection, and threat modeling.",
+ tags:["Core","Security"],
+ topics:[
+  {id:"sec1",icon:"🔐",title:"Cryptography APIs",desc:"AES, RSA, ECDSA, SHA, X.509, CNG",tags:["Intermediate","Crypto"]},
+  {id:"sec2",icon:"🛡️",title:"Data Protection API",desc:"IDataProtector, key rotation, persistence",tags:["Intermediate","Security"]},
+  {id:"sec3",icon:"📜",title:"Certificates & TLS",desc:"X509Certificate2, SslStream, cert pinning",tags:["Advanced","TLS"]},
+  {id:"sec4",icon:"🔑",title:"Secret Storage",desc:"DPAPI, Azure Key Vault, environment secrets",tags:["Intermediate","Security"]},
+ ]},
+{n:"18",title:"Native Interop",icon:"🔌",c:"#56d364",bg:"rgba(86,211,100,0.1)",
+ desc:"P/Invoke, marshaling, COM interop, LibraryImport source generator, unsafe code.",
+ tags:["Advanced","Interop","Native"],
+ topics:[
+  {id:"ni1",icon:"🔌",title:"P/Invoke & DllImport",desc:"Calling native libs, calling conventions",tags:["Advanced","Interop"]},
+  {id:"ni2",icon:"📦",title:"LibraryImport Source Gen",desc:"Compile-time marshaling, [LibraryImport]",tags:["Advanced","Modern"]},
+  {id:"ni3",icon:"🔄",title:"Marshaling Rules",desc:"Blittable types, structs, strings, arrays",tags:["Advanced","Interop"]},
+  {id:"ni4",icon:"🏭",title:"COM Interop",desc:"RCW/CCW, IUnknown, CoClass, NoPIA",tags:["Expert","COM"]},
+  {id:"ni5",icon:"🧠",title:"Unsafe Code & NativeMemory",desc:"NativeMemory, Marshal, fixed, stackalloc",tags:["Expert","Unsafe"]},
+ ]},
+{n:"19",title:"Package & Project System",icon:"📦",c:"#00ffa3",bg:"rgba(0,255,163,0.1)",
+ desc:"NuGet internals, SDK-style projects, MSBuild pipeline, Central Package Management.",
+ tags:["Core","Tooling","Build"],
+ topics:[
+  {id:"pkg1",icon:"📦",title:"NuGet Internals",desc:"Package resolution, dependency graph, restore",tags:["Core","NuGet"]},
+  {id:"pkg2",icon:"📄",title:"SDK-Style Projects",desc:".csproj schema, implicit items, glob patterns",tags:["Core","MSBuild"]},
+  {id:"pkg3",icon:"🏗️",title:"MSBuild Pipeline",desc:"Targets, tasks, props, evaluation order",tags:["Advanced","MSBuild"]},
+  {id:"pkg4",icon:"📋",title:"Central Package Management",desc:"Directory.Packages.props, version pinning",tags:["Intermediate","NuGet"]},
+  {id:"pkg5",icon:"🔧",title:"Custom Build Tasks",desc:"Task authoring, ITask, TargetFramework",tags:["Advanced","MSBuild"]},
+ ]},
+{n:"20",title:"Advanced Runtime Topics",icon:"🧬",c:"#7b61ff",bg:"rgba(123,97,255,0.1)",
+ desc:"Runtime hosting, IL emit, dynamic proxies, expression trees, Roslyn analyzers.",
+ tags:["Expert","Runtime","Advanced"],
+ topics:[
+  {id:"rt1",icon:"🏠",title:"Runtime Hosting",desc:"Custom hosts, ICLRRuntimeHost, hybrid hosting",tags:["Expert","Runtime"]},
+  {id:"rt2",icon:"📜",title:"IL Emit & DynamicMethod",desc:"ILGenerator, opcodes, lightweight codegen",tags:["Expert","CodeGen"]},
+  {id:"rt3",icon:"🌳",title:"Expression Trees (Revisited)",desc:"Compile, DebugView, visitor pattern",tags:["Advanced","LINQ"]},
+  {id:"rt4",icon:"🔍",title:"Roslyn Analyzers",desc:"DiagnosticAnalyzer, CodeFix, IOperation",tags:["Advanced","Roslyn"]},
+  {id:"rt5",icon:"🔮",title:"Source Generators",desc:"IIncrementalGenerator, SyntaxProvider, output",tags:["Advanced","Roslyn"]},
+ ]},
+{n:"21",title:"Interview Q&A",icon:"🎯",c:"#00c8ff",bg:"rgba(0,200,255,0.1)",
+ desc:"540 tagged .NET Core internals interview questions across four levels: direct, scenario, logical twist, architecture, production debugging, and .NET 10 reasoning.",
+ tags:["Interview","CLR","GC","JIT","Performance"],
+ topics:[
+  {id:"iq-junior",icon:"🟢",title:"Junior Questions (135)",desc:"Fundamentals, direct questions, and runtime basics for early-career interviews",tags:["Basic","Interview"]},
+  {id:"iq-mid",icon:"🟡",title:"Mid-Level Questions (135)",desc:"Applied internals, diagnostics, and production reasoning",tags:["Intermediate","Interview"]},
+  {id:"iq-senior",icon:"🟠",title:"Senior Questions (135)",desc:"Deep performance, hosting, async, and architecture trade-offs",tags:["Advanced","Interview"]},
+  {id:"iq-architect",icon:"🔴",title:"Architect Questions (135)",desc:"System-level decisions, cross-team standards, and runtime strategy",tags:["Expert","Interview"]},
+ ]},
+];
+
+// ═══════════════════════════════════════════════════════════
+// TOPIC DETAIL DATA
+// ═══════════════════════════════════════════════════════════
+const DETAILS = {
+
+"a2": {
+  title:"CLR — Common Language Runtime",
+  bread:"Chapter 2 · .NET Architecture",
+  sub:"The heart of .NET — the execution engine that manages memory, security, type safety, and threading for all managed code.",
+  pills:[{t:"Core",c:"#00c8ff"},{t:"CLR",c:"#7b61ff"},{t:"Foundation",c:"#56d364"}],
+  secs:[
+    {ty:"prose",title:"What the CLR Does",html:`
+<p>The CLR is the virtual machine that executes .NET assemblies. It provides services that would otherwise require custom per-application implementation:</p>
+<ul>
+<li><strong>Memory management</strong> — automatic garbage collection, no manual malloc/free</li>
+<li><strong>Type safety</strong> — verifies IL is type-safe before execution</li>
+<li><strong>Exception handling</strong> — structured SEH-based exception propagation</li>
+<li><strong>Thread management</strong> — thread pool, synchronization primitives</li>
+<li><strong>JIT compilation</strong> — translates IL to native machine code on first call</li>
+<li><strong>Security</strong> — Code Access Security (legacy) + runtime type verification</li>
+<li><strong>Interop</strong> — marshaling between managed and native code</li>
+</ul>
+`},
+    {ty:"diagram",title:"CLR Internal Architecture",svg:`
+<svg width="500" height="280" viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="clrbg" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#0a1a2a"/>
+  <stop offset="1" stop-color="#060b0f"/>
+</linearGradient>
+<style>
+.b{fill:#0f2035;stroke:#1b3550;stroke-width:1.2;rx:6}
+.ht{font-family:'DM Mono',monospace;font-size:9px;fill:#8a9db5;text-anchor:middle}
+.bt{font-family:'DM Mono',monospace;font-size:9.5px;fill:#dde6f0;text-anchor:middle;font-weight:500}
+.gb{fill:#0d2a1a;stroke:#00ffa3;stroke-width:1.2}
+.bb{fill:#0d1a2a;stroke:#00c8ff;stroke-width:1.2}
+.pb{fill:#1a0d2a;stroke:#7b61ff;stroke-width:1.2}
+.ob{fill:#2a1a0d;stroke:#ff6b35;stroke-width:1.2}
+@keyframes cpulse{0%,100%{opacity:.8}50%{opacity:1;filter:drop-shadow(0 0 4px rgba(0,200,255,.5))}}
+.anim{animation:cpulse 3s ease-in-out infinite}
+</style>
+</defs>
+<rect fill="url(#clrbg)" x="5" y="5" width="490" height="270" rx="10" stroke="#1b3550" stroke-width="1"/>
+<text font-family="'Familjen Grotesk',sans-serif" font-size="12" font-weight="700" fill="#00c8ff" text-anchor="middle" x="250" y="26">CLR ARCHITECTURE</text>
+
+<!-- Row 1: Entry points -->
+<rect class="bb" x="20" y="36" width="100" height="32" rx="5"/>
+<text class="bt" x="70" y="53">C# Code</text>
+<rect class="bb" x="140" y="36" width="100" height="32" rx="5"/>
+<text class="bt" x="190" y="53">VB.NET</text>
+<rect class="bb" x="260" y="36" width="100" height="32" rx="5"/>
+<text class="bt" x="310" y="53">F#</text>
+<rect class="bb" x="380" y="36" width="100" height="32" rx="5"/>
+<text class="bt" x="430" y="53">Any .NET lang</text>
+
+<!-- Arrow down to IL -->
+<line x1="250" y1="68" x2="250" y2="85" stroke="#1b3550" stroke-width="1.5" marker-end="url(#a1)"/>
+<defs><marker id="a1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3z" fill="#1b3550"/></marker></defs>
+
+<!-- IL Layer -->
+<rect fill="#1a1a0d" stroke="#ffd700" stroke-width="1.2" x="80" y="86" width="340" height="32" rx="5" class="anim"/>
+<text class="bt" fill="#ffd700" x="250" y="107">CIL — Common Intermediate Language</text>
+
+<!-- Arrow down -->
+<line x1="250" y1="118" x2="250" y2="135" stroke="#1b3550" stroke-width="1.5" marker-end="url(#a1)"/>
+
+<!-- Row 2: CLR Components -->
+<rect class="ob" x="20" y="136" width="105" height="46" rx="5"/>
+<text class="bt" fill="#ff6b35" x="72" y="153">JIT</text>
+<text class="ht" x="72" y="169">Compiler</text>
+
+<rect class="gb" x="140" y="136" width="105" height="46" rx="5"/>
+<text class="bt" fill="#00ffa3" x="192" y="153">GC</text>
+<text class="ht" x="192" y="169">Garbage Coll.</text>
+
+<rect class="pb" x="260" y="136" width="105" height="46" rx="5"/>
+<text class="bt" fill="#7b61ff" x="312" y="153">Thread</text>
+<text class="ht" x="312" y="169">Pool</text>
+
+<rect class="bb" x="380" y="136" width="100" height="46" rx="5"/>
+<text class="bt" fill="#00c8ff" x="430" y="153">Type</text>
+<text class="ht" x="430" y="169">Loader</text>
+
+<!-- Row 3: OS Layer -->
+<rect fill="#0d1a0d" stroke="#56d364" stroke-width="1" x="20" y="208" width="460" height="50" rx="5"/>
+<text class="bt" fill="#56d364" x="250" y="230">OS (Windows / Linux / macOS / WASM)</text>
+<text class="ht" x="250" y="248">Threads · Memory · File I/O · Network · Signals</text>
+
+<!-- Arrows row2 to OS -->
+<line x1="250" y1="182" x2="250" y2="205" stroke="#1b3550" stroke-width="1.5" marker-end="url(#a1)"/>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"Observing CLR Behavior",code:`<span class="cm">// GC information at runtime</span>
+<span class="kw">var</span> gcInfo = <span class="tp">GC</span>.GetGCMemoryInfo();
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Gen0 size: {gcInfo.GenerationInfo[0].SizeAfterBytes:N0}"</span>);
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Heap size: {gcInfo.HeapSizeBytes:N0}"</span>);
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Fragmented: {gcInfo.FragmentedBytes:N0}"</span>);
+
+<span class="cm">// CLR version</span>
+<span class="tp">Console</span>.WriteLine(<span class="tp">Environment</span>.Version);
+<span class="tp">Console</span>.WriteLine(<span class="tp">RuntimeInformation</span>.FrameworkDescription);
+
+<span class="cm">// AppDomain info (one per app in .NET Core+)</span>
+<span class="kw">var</span> domain = <span class="tp">AppDomain</span>.CurrentDomain;
+<span class="tp">Console</span>.WriteLine(domain.FriendlyName);
+
+<span class="cm">// AssemblyLoadContext — one per isolation boundary</span>
+<span class="kw">var</span> ctx = <span class="tp">AssemblyLoadContext</span>.Default;
+<span class="kw">foreach</span> (<span class="kw">var</span> asm <span class="kw">in</span> ctx.Assemblies)
+    <span class="tp">Console</span>.WriteLine(asm.GetName().Name);</span>`},
+  ]},
+
+"c2": {
+  title:"Common Intermediate Language (CIL)",
+  bread:"Chapter 4 · Compilation Pipeline",
+  sub:"The bytecode format that all .NET languages compile to — a stack-based virtual instruction set that enables cross-language interoperability.",
+  pills:[{t:"Expert",c:"#7b61ff"},{t:"IL",c:"#ffd700"},{t:"CLR",c:"#00c8ff"}],
+  secs:[
+    {ty:"prose",title:"What is CIL?",html:`
+<p>CIL (also called MSIL or IL) is a CPU-independent bytecode format. Every .NET language (C#, F#, VB.NET) compiles to the same IL. The CLR's JIT then translates IL to native code for the target CPU at runtime.</p>
+<p><strong>Key properties of IL:</strong></p>
+<ul>
+<li><strong>Stack-based</strong> — operations pop/push a virtual evaluation stack</li>
+<li><strong>Strongly typed</strong> — all operations are type-checked</li>
+<li><strong>Object-oriented</strong> — native support for objects, virtual dispatch, inheritance</li>
+<li><strong>Verifiable</strong> — CLR can verify type safety before running</li>
+</ul>
+`},
+    {ty:"diagram",title:"IL Stack Machine — How ldarg/add/ret Work",svg:`
+<svg width="500" height="200" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+<defs><style>
+.st{fill:#0d1a2a;stroke:#00c8ff;stroke-width:1.2;rx:5}
+.stt{font-family:'DM Mono',monospace;font-size:9px;fill:#dde6f0;text-anchor:middle}
+.sub{font-family:'DM Mono',monospace;font-size:8px;fill:#8a9db5;text-anchor:middle}
+.op{fill:#0d2a1a;stroke:#00ffa3;stroke-width:1.2}
+@keyframes sp{0%{opacity:.4}50%{opacity:1}100%{opacity:.4}}
+.s1{animation:sp 1s ease-in-out infinite}.s2{animation:sp 1s .33s ease-in-out infinite}.s3{animation:sp 1s .66s ease-in-out infinite}
+</style></defs>
+
+<text font-family="'DM Mono',monospace" font-size="10" fill="#8a9db5" x="10" y="18">IL: int Add(int a, int b)</text>
+
+<!-- IL Instructions column -->
+<rect fill="#0a1018" stroke="#1b2d40" stroke-width="1" x="10" y="26" width="160" height="160" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="8.5" fill="#ffd700" x="20" y="44">IL_0000: ldarg.0</text>
+<text font-family="'DM Mono',monospace" font-size="8.5" fill="#ffd700" x="20" y="62">IL_0001: ldarg.1</text>
+<text font-family="'DM Mono',monospace" font-size="8.5" fill="#ffd700" x="20" y="80">IL_0002: add</text>
+<text font-family="'DM Mono',monospace" font-size="8.5" fill="#ffd700" x="20" y="98">IL_0003: ret</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" x="20" y="116">; push arg 0 (a)</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" x="20" y="130">; push arg 1 (b)</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" x="20" y="144">; pop a,b push a+b</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" x="20" y="158">; return top of stack</text>
+
+<!-- Stack visualization -->
+<text font-family="'DM Mono',monospace" font-size="9" fill="#8a9db5" text-anchor="middle" x="310" y="18">Eval Stack</text>
+<rect fill="#060b0f" stroke="#1b2d40" stroke-width="1" x="245" y="24" width="130" height="160" rx="5"/>
+
+<!-- Stack slots animated -->
+<rect class="st s3" x="260" y="35" width="100" height="28" rx="4"/>
+<text class="stt" x="310" y="54">42 (b)</text>
+<rect class="st s2" x="260" y="70" width="100" height="28" rx="4"/>
+<text class="stt" x="310" y="89">17 (a)</text>
+<rect class="op s1" x="260" y="130" width="100" height="28" rx="4"/>
+<text class="stt" fill="#00ffa3" x="310" y="149">59 (result)</text>
+
+<!-- Arrow pointing down -->
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" text-anchor="middle" x="310" y="113">↓ after add ↓</text>
+
+<!-- JIT output -->
+<rect fill="#0d2a1a" stroke="#00ffa3" stroke-width="1" x="405" y="24" width="85" height="80" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#00ffa3" x="410" y="40">Native:</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#56d364" x="410" y="56">lea eax,</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#56d364" x="410" y="68">[ecx+edx]</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#56d364" x="410" y="80">ret</text>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"Inspecting IL with Reflection.Emit",code:`<span class="cm">// Reading IL via MethodBody</span>
+<span class="kw">var</span> method = <span class="kw">typeof</span>(<span class="tp">Math</span>).GetMethod(<span class="st">"Max"</span>, <span class="kw">new</span>[] { <span class="kw">typeof</span>(<span class="tp">int</span>), <span class="kw">typeof</span>(<span class="tp">int</span>) });
+<span class="kw">var</span> body = method!.GetMethodBody();
+<span class="kw">byte</span>[] il = body!.GetILAsByteArray()!;
+<span class="tp">Console</span>.WriteLine(<span class="st">$"IL bytes: {BitConverter.ToString(il)}"</span>);
+
+<span class="cm">// Emitting IL dynamically — DynamicMethod</span>
+<span class="kw">var</span> dyn = <span class="kw">new</span> <span class="tp">DynamicMethod</span>(<span class="st">"Add"</span>, <span class="kw">typeof</span>(<span class="tp">int</span>),
+    <span class="kw">new</span>[] { <span class="kw">typeof</span>(<span class="tp">int</span>), <span class="kw">typeof</span>(<span class="tp">int</span>) });
+
+<span class="tp">ILGenerator</span> il2 = dyn.GetILGenerator();
+il2.Emit(<span class="tp">OpCodes</span>.Ldarg_0);   <span class="cm">// push arg0</span>
+il2.Emit(<span class="tp">OpCodes</span>.Ldarg_1);   <span class="cm">// push arg1</span>
+il2.Emit(<span class="tp">OpCodes</span>.Add);       <span class="cm">// pop 2, push sum</span>
+il2.Emit(<span class="tp">OpCodes</span>.Ret);       <span class="cm">// return</span>
+
+<span class="kw">var</span> addFn = (<span class="tp">Func</span>&lt;<span class="tp">int</span>,<span class="tp">int</span>,<span class="tp">int</span>&gt;)dyn.CreateDelegate(<span class="kw">typeof</span>(<span class="tp">Func</span>&lt;<span class="tp">int</span>,<span class="tp">int</span>,<span class="tp">int</span>&gt;));
+<span class="tp">Console</span>.WriteLine(addFn(<span class="nu">3</span>, <span class="nu">4</span>)); <span class="cm">// 7</span>
+
+<span class="cm">// Use SharpLab.io — paste C# and see IL + JIT ASM instantly</span></span>`},
+    {ty:"co",kind:"info",ic:"💡",txt:"Use <strong>SharpLab.io</strong> (free, browser-based) to see real-time IL and native ASM output for any C# code. Essential tool for .NET internals exploration."},
+  ]},
+
+"j2": {
+  title:"Tiered Compilation",
+  bread:"Chapter 5 · JIT Compilation",
+  sub:"How .NET achieves fast startup AND peak throughput — methods start with quick Tier-0 code and are re-JIT'd with full optimizations when they become hot.",
+  pills:[{t:"Advanced",c:"#ff6b35"},{t:"JIT",c:"#ffd700"},{t:"Performance",c:"#00ffa3"}],
+  secs:[
+    {ty:"prose",title:"The Problem Tiered JIT Solves",html:`
+<p>Traditional JIT faced a tradeoff: <strong>fast startup</strong> (quick but unoptimized compilation) vs <strong>peak performance</strong> (full optimization but slow startup). You had to pick one.</p>
+<p>Tiered compilation solves this by compiling methods twice:</p>
+<ul>
+<li><strong>Tier-0</strong> — Called on first invocation. Quick, minimal optimization. Code runs immediately.</li>
+<li><strong>Call counting</strong> — The runtime counts how many times each method is called.</li>
+<li><strong>Tier-1</strong> — After ~30 calls (configurable), method is re-JIT'd with full optimizations on a background thread.</li>
+</ul>
+`},
+    {ty:"diagram",title:"Tiered Compilation Flow",svg:`
+<svg width="500" height="220" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="ja" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto">
+  <path d="M0,0 L0,6 L7,3z" fill="#ff6b35"/>
+</marker>
+<style>
+.jbx{fill:#1a100d;stroke:#ff6b35;stroke-width:1.2}
+.jt{font-family:'DM Mono',monospace;font-size:9px;fill:#dde6f0;text-anchor:middle}
+.js{font-family:'DM Mono',monospace;font-size:8px;fill:#8a9db5;text-anchor:middle}
+.jg{fill:#0d1a0d;stroke:#00ffa3;stroke-width:1.2}
+.jb2{fill:#0d0d2a;stroke:#7b61ff;stroke-width:1.2}
+@keyframes jp{0%{stroke-dashoffset:60}100%{stroke-dashoffset:0}}
+.janim{stroke-dasharray:8 4;animation:jp 1.5s linear infinite}
+</style></defs>
+
+<!-- IL Box -->
+<rect fill="#1a1a0d" stroke="#ffd700" stroke-width="1.2" x="10" y="80" width="90" height="50" rx="5"/>
+<text class="jt" fill="#ffd700" x="55" y="100">IL</text>
+<text class="js" x="55" y="117">Assembly</text>
+
+<!-- Tier 0 -->
+<rect class="jbx" x="140" y="60" width="110" height="90" rx="5"/>
+<text class="jt" fill="#ff6b35" x="195" y="80">Tier-0</text>
+<text class="js" x="195" y="96">Quick JIT</text>
+<text class="js" x="195" y="110">No opt</text>
+<text class="js" fill="#56d364" x="195" y="127">Fast startup!</text>
+
+<!-- Call counter -->
+<rect fill="#0d1a1a" stroke="#00c8ff" stroke-width="1.2" x="140" y="168" width="110" height="36" rx="5"/>
+<text class="jt" fill="#00c8ff" x="195" y="183">Call Counter</text>
+<text class="js" x="195" y="197">n >= 30?</text>
+
+<!-- Tier 1 -->
+<rect class="jg" x="310" y="40" width="120" height="110" rx="5"/>
+<text class="jt" fill="#00ffa3" x="370" y="62">Tier-1</text>
+<text class="js" x="370" y="78">Full Optimize</text>
+<text class="js" x="370" y="93">Inlining</text>
+<text class="js" x="370" y="107">Loop unroll</text>
+<text class="js" x="370" y="121">SIMD</text>
+<text class="js" fill="#56d364" x="370" y="135">Max perf!</text>
+
+<!-- Background thread -->
+<rect class="jb2" x="310" y="165" width="120" height="36" rx="5"/>
+<text class="jt" fill="#7b61ff" x="370" y="180">Background</text>
+<text class="js" x="370" y="195">Thread Re-JIT</text>
+
+<!-- Arrows -->
+<line stroke="#ffd700" stroke-width="1.5" marker-end="url(#ja)" x1="100" y1="105" x2="137" y2="105"/>
+<line stroke="#ff6b35" stroke-width="1.5" class="janim" marker-end="url(#ja)" x1="250" y1="105" x2="307" y2="95"/>
+<line stroke="#00c8ff" stroke-width="1.5" x1="195" y1="150" x2="195" y2="165"/>
+<line stroke="#00c8ff" stroke-width="1.5" class="janim" marker-end="url(#ja)" x1="250" y1="185" x2="307" y2="185"/>
+
+<text class="js" fill="#3d5068" x="270" y="122">hot path</text>
+<text class="js" fill="#3d5068" x="258" y="176">re-jit trigger</text>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"Controlling JIT Compilation Behavior",code:`<span class="kw">using</span> System.Runtime.CompilerServices;
+
+<span class="cm">// Opt OUT of tiering — always use Tier-1 (slower startup, faster execution)</span>
+[<span class="at">MethodImpl(MethodImplOptions.AggressiveOptimization)</span>]
+<span class="kw">public static double</span> <span class="fn">ComputeHeavy</span>(<span class="tp">Span</span>&lt;<span class="tp">double</span>&gt; data)
+{
+    <span class="kw">double</span> sum = <span class="nu">0</span>;
+    <span class="kw">foreach</span> (<span class="kw">var</span> v <span class="kw">in</span> data) sum += v;
+    <span class="kw">return</span> sum;
+}
+
+<span class="cm">// Hint JIT to INLINE aggressively</span>
+[<span class="at">MethodImpl(MethodImplOptions.AggressiveInlining)</span>]
+<span class="kw">public static int</span> <span class="fn">FastAdd</span>(<span class="tp">int</span> a, <span class="tp">int</span> b) => a + b;
+
+<span class="cm">// Prevent inlining — e.g., for accurate stack traces</span>
+[<span class="at">MethodImpl(MethodImplOptions.NoInlining)</span>]
+<span class="kw">public static void</span> <span class="fn">ThrowHelper</span>(<span class="tp">string</span> msg)
+    => <span class="kw">throw new</span> <span class="tp">InvalidOperationException</span>(msg);
+
+<span class="cm">// Environment variable controls (set before app start):</span>
+<span class="cm">// DOTNET_TieredCompilation=0        — disable tiering</span>
+<span class="cm">// DOTNET_TieredPGO=1                — enable dynamic PGO</span>
+<span class="cm">// DOTNET_TC_QuickJitForLoops=1      — Tier-0 for loops too</span>
+<span class="cm">// DOTNET_TC_CallCountingDelayMs=100 — delay before Tier-1</span>
+
+<span class="cm">// ReadyToRun (R2R) — pre-JIT'd assemblies for fast startup</span>
+<span class="cm">// dotnet publish -r win-x64 --self-contained -p:PublishReadyToRun=true</span></span>`},
+    {ty:"co",kind:"warn",ic:"⚠️",txt:"<strong>Don't blindly add AggressiveInlining everywhere.</strong> Large inlined methods increase I-cache pressure. Profile first with BenchmarkDotNet before adding JIT hints."},
+  ]},
+
+"m2": {
+  title:"GC Algorithm: Mark-Compact",
+  bread:"Chapter 7 · Memory Management & GC",
+  sub:"How .NET's garbage collector finds live objects, moves them, and reclaims dead memory — generational collection and concurrent phases.",
+  pills:[{t:"Advanced",c:"#00ffa3"},{t:"GC",c:"#56d364"},{t:"CLR",c:"#7b61ff"}],
+  secs:[
+    {ty:"prose",title:"The Three-Phase GC Algorithm",html:`
+<p>The .NET GC uses a <strong>generational, mark-sweep-compact</strong> algorithm. Understanding it is critical for writing low-latency, high-throughput applications.</p>
+<ol>
+<li><strong>Mark phase</strong> — Starting from GC roots (stack variables, statics, GC handles), the GC traverses the object graph and marks all reachable (live) objects.</li>
+<li><strong>Sweep phase</strong> — Unmarked objects are considered dead. Their memory is available for reuse.</li>
+<li><strong>Compact phase</strong> — Live objects are moved together to eliminate fragmentation. References in all live objects are updated.</li>
+</ol>
+`},
+    {ty:"diagram",title:"Generational Heap Layout",svg:`
+<svg width="500" height="240" viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<style>
+.gl{font-family:'DM Mono',monospace;font-size:9px;fill:#8a9db5}
+.gv{font-family:'DM Mono',monospace;font-size:9px;fill:#dde6f0;font-weight:600}
+@keyframes gmark{0%{opacity:.3}50%{opacity:1}100%{opacity:.3}}
+.live{animation:gmark 2s ease-in-out infinite}
+.dead{fill:#1a0d0d;stroke:#ff7b72;stroke-width:1}
+.liveobj{fill:#0d2a1a;stroke:#00ffa3;stroke-width:1.2}
+.prom{fill:#1a1a0d;stroke:#ffd700;stroke-width:1.2}
+</style>
+</defs>
+
+<!-- Gen 0 -->
+<rect fill="#0a1018" stroke="#1b2d40" stroke-width="1" x="10" y="20" width="480" height="55" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="10" fill="#00ffa3" x="18" y="38">Gen 0  (small, ~256KB, collected frequently)</text>
+<!-- Objects in gen0 -->
+<rect class="liveobj live" x="20" y="42" width="28" height="22" rx="3"/>
+<rect class="dead" x="52" y="42" width="18" height="22" rx="3"/>
+<rect class="liveobj live" x="74" y="42" width="35" height="22" rx="3"/>
+<rect class="dead" x="113" y="42" width="22" height="22" rx="3"/>
+<rect class="liveobj live" x="139" y="42" width="28" height="22" rx="3"/>
+<rect class="dead" x="171" y="42" width="40" height="22" rx="3"/>
+<rect class="liveobj live" x="215" y="42" width="25" height="22" rx="3"/>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#56d364" x="255" y="57">live</text>
+<rect fill="#2a1a0d" stroke="#ff6b35" stroke-width="1" x="275" y="42" width="20" height="22" rx="3"/>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#ff7b72" x="300" y="57">dead → reclaim</text>
+
+<!-- Gen 1 -->
+<rect fill="#0a1018" stroke="#1b2d40" stroke-width="1" x="10" y="90" width="480" height="55" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="10" fill="#ffd700" x="18" y="108">Gen 1  (medium, ~2MB, buffer between Gen0/Gen2)</text>
+<rect class="prom" x="20" y="112" width="45" height="22" rx="3"/>
+<rect class="prom" x="70" y="112" width="30" height="22" rx="3"/>
+<rect class="dead" x="104" y="112" width="22" height="22" rx="3"/>
+<rect class="prom" x="130" y="112" width="60" height="22" rx="3"/>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#ffd700" x="198" y="127">promoted from Gen0</text>
+
+<!-- Gen 2 + LOH -->
+<rect fill="#0a1018" stroke="#1b2d40" stroke-width="1" x="10" y="160" width="310" height="55" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="10" fill="#00c8ff" x="18" y="178">Gen 2  (large, long-lived objects, rare GC)</text>
+<rect fill="#0d1a2a" stroke="#00c8ff" stroke-width="1" x="20" y="182" width="80" height="22" rx="3"/>
+<rect fill="#0d1a2a" stroke="#00c8ff" stroke-width="1" x="108" y="182" width="60" height="22" rx="3"/>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#8a9db5" x="178" y="197">static data, caches, singletons…</text>
+
+<!-- LOH -->
+<rect fill="#0a1018" stroke="#7b61ff" stroke-width="1" x="330" y="160" width="160" height="55" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="10" fill="#7b61ff" x="338" y="178">LOH  (&gt;85KB)</text>
+<rect fill="#1a0d2a" stroke="#7b61ff" stroke-width="1" x="338" y="182" width="145" height="22" rx="3"/>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#7b61ff" x="350" y="197">byte[100_000], large arrays</text>
+
+<!-- POH label -->
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" x="10" y="230">POH = Pinned Object Heap (.NET 5+) — for pinned buffers, avoids LOH fragmentation</text>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"GC Control & Monitoring",code:`<span class="cm">// Force GC (use in tests/benchmarks only, never production!)</span>
+<span class="tp">GC</span>.Collect(<span class="nu">2</span>, <span class="tp">GCCollectionMode</span>.Aggressive, <span class="kw">true</span>, <span class="kw">true</span>);
+
+<span class="cm">// Suppress GC for latency-sensitive sections</span>
+<span class="kw">try</span>
+{
+    <span class="tp">GC</span>.TryStartNoGCRegion(<span class="nu">64</span> * <span class="nu">1024</span> * <span class="nu">1024</span>); <span class="cm">// 64MB budget</span>
+    <span class="cm">// … latency-critical code here …</span>
+}
+<span class="kw">finally</span>
+{
+    <span class="tp">GC</span>.EndNoGCRegion();
+}
+
+<span class="cm">// Monitor GC via EventSource (production-safe)</span>
+<span class="kw">var</span> info = <span class="tp">GC</span>.GetGCMemoryInfo();
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Gen0 collections: {GC.CollectionCount(0)}"</span>);
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Gen2 collections: {GC.CollectionCount(2)}"</span>);
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Total memory:     {GC.GetTotalMemory(false):N0}"</span>);
+<span class="tp">Console</span>.WriteLine(<span class="st">$"Total alloc:      {GC.GetTotalAllocatedBytes():N0}"</span>); <span class="cm">// .NET 5+</span>
+
+<span class="cm">// Server GC — for throughput (multi-core, per-core heaps)</span>
+<span class="cm">// In runtimeconfig.json:</span>
+<span class="cm">// { "configProperties": { "System.GC.Server": true,</span>
+<span class="cm">//    "System.GC.HeapHardLimit": 536870912 } }</span>
+
+<span class="cm">// Weak reference — doesn't prevent GC</span>
+<span class="kw">var</span> weak = <span class="kw">new</span> <span class="tp">WeakReference</span>&lt;<span class="tp">byte</span>[]&gt;(<span class="kw">new</span> <span class="kw">byte</span>[<span class="nu">1024</span>]);
+<span class="kw">if</span> (weak.TryGetTarget(<span class="kw">out var</span> buf)) <span class="cm">// null if GC'd</span>
+    <span class="tp">Console</span>.WriteLine(<span class="st">$"Still alive: {buf.Length}"</span>);</span>`},
+    {ty:"co",kind:"err",ic:"🔥",txt:"<strong>LOH fragmentation</strong> is a common production issue. Never allocate large temporary arrays in loops — use <code>ArrayPool&lt;byte&gt;.Shared.Rent()</code> instead. LOH is only GC'd with Gen2, which can be expensive."},
+  ]},
+
+"tp2": {
+  title:"async/await State Machine",
+  bread:"Chapter 9 · Task & Async Infrastructure",
+  sub:"What the C# compiler generates behind every async method — the IAsyncStateMachine struct that makes await non-blocking.",
+  pills:[{t:"Advanced",c:"#7b61ff"},{t:"Async",c:"#00c8ff"},{t:"Compiler",c:"#ffd700"}],
+  secs:[
+    {ty:"prose",title:"What the Compiler Generates",html:`
+<p>When you write <code>async Task&lt;T&gt; FooAsync()</code>, the C# compiler transforms it into a <strong>state machine struct</strong> that implements <code>IAsyncStateMachine</code>. This is why async methods have almost zero overhead when they complete synchronously.</p>
+<p><strong>Key generated members:</strong></p>
+<ul>
+<li><code>&lt;state&gt;</code> — int tracking which await we're at (-1 = not started, -2 = completed)</li>
+<li><code>&lt;builder&gt;</code> — AsyncTaskMethodBuilder managing the Task and continuations</li>
+<li><code>MoveNext()</code> — called on each resume; the actual method body as a switch</li>
+<li>All local variables become fields (to survive across await points)</li>
+</ul>
+`},
+    {ty:"diagram",title:"async/await State Machine Flow",svg:`
+<svg width="500" height="250" viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="aa" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto">
+  <path d="M0,0 L0,6 L7,3z" fill="#7b61ff"/>
+</marker>
+<style>
+.ab{fill:#1a0d2a;stroke:#7b61ff;stroke-width:1.2}
+.at{font-family:'DM Mono',monospace;font-size:9px;fill:#dde6f0;text-anchor:middle}
+.as2{font-family:'DM Mono',monospace;font-size:8px;fill:#8a9db5;text-anchor:middle}
+.aarr{stroke:#7b61ff;stroke-width:1.5;fill:none;marker-end:url(#aa)}
+.freed{fill:#0d2a0d;stroke:#00ffa3;stroke-width:1.2}
+@keyframes pulse{0%,100%{opacity:1;fill:#1a0d2a}50%{opacity:.7;fill:#2a1a3a}}
+.apulse{animation:pulse 2.5s ease-in-out infinite}
+</style></defs>
+
+<!-- State machine struct -->
+<rect fill="#0a0d1a" stroke="#1b2d40" stroke-width="1" x="5" y="5" width="170" height="235" rx="6"/>
+<text font-family="'DM Mono',monospace" font-size="9" fill="#7b61ff" text-anchor="middle" x="90" y="24">IAsyncStateMachine</text>
+<rect class="ab apulse" x="15" y="30" width="150" height="24" rx="4"/>
+<text class="as2" x="90" y="46">state = -1 (initial)</text>
+<rect class="ab" x="15" y="58" width="150" height="24" rx="4"/>
+<text class="as2" x="90" y="74">builder (Task)</text>
+<rect class="ab" x="15" y="86" width="150" height="24" rx="4"/>
+<text class="as2" x="90" y="102">locals (as fields)</text>
+<rect class="ab" x="15" y="114" width="150" height="100" rx="4"/>
+<text class="at" fill="#7b61ff" x="90" y="134">MoveNext()</text>
+<text class="as2" x="90" y="152">switch (state) {</text>
+<text class="as2" x="90" y="167">  case 0: // start</text>
+<text class="as2" x="90" y="182">  case 1: // after await 1</text>
+<text class="as2" x="90" y="197">  case 2: // after await 2</text>
+<text class="as2" x="90" y="212">}</text>
+
+<!-- Thread box -->
+<rect fill="#0d1a0d" stroke="#56d364" stroke-width="1.2" x="200" y="20" width="120" height="50" rx="5"/>
+<text class="at" fill="#56d364" x="260" y="40">Thread</text>
+<text class="as2" x="260" y="56">calls MoveNext()</text>
+
+<!-- Await point -->
+<rect fill="#1a1a0d" stroke="#ffd700" stroke-width="1.2" x="200" y="90" width="120" height="50" rx="5"/>
+<text class="at" fill="#ffd700" x="260" y="110">await point</text>
+<text class="as2" x="260" y="126">register continuation</text>
+
+<!-- FREED -->
+<rect class="freed" x="200" y="160" width="120" height="50" rx="5"/>
+<text class="at" fill="#00ffa3" x="260" y="180">Thread FREED</text>
+<text class="as2" x="260" y="196">returns to pool</text>
+
+<!-- IO Complete -->
+<rect fill="#0d1a2a" stroke="#00c8ff" stroke-width="1.2" x="360" y="90" width="130" height="50" rx="5"/>
+<text class="at" fill="#00c8ff" x="425" y="110">I/O Complete</text>
+<text class="as2" x="425" y="126">post continuation</text>
+
+<!-- Resume -->
+<rect fill="#1a0d2a" stroke="#7b61ff" stroke-width="1.2" x="360" y="160" width="130" height="50" rx="5"/>
+<text class="at" fill="#7b61ff" x="425" y="180">Resume</text>
+<text class="as2" x="425" y="196">state = next, MoveNext()</text>
+
+<!-- Arrows -->
+<line class="aarr" x1="175" y1="45" x2="197" y2="45"/>
+<line class="aarr" x1="260" y1="70" x2="260" y2="87"/>
+<line class="aarr" x1="260" y1="140" x2="260" y2="157"/>
+<line class="aarr" x1="320" y1="115" x2="357" y2="115"/>
+<line class="aarr" x1="425" y1="140" x2="425" y2="157"/>
+<line class="aarr" x1="360" y1="185" x2="185" y2="130"/>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"What the Compiler Generates (Simplified)",code:`<span class="cm">// YOUR CODE:</span>
+<span class="kw">async</span> <span class="tp">Task</span>&lt;<span class="tp">string</span>&gt; <span class="fn">FetchAsync</span>(<span class="tp">string</span> url)
+{
+    <span class="kw">var</span> client = <span class="kw">new</span> <span class="tp">HttpClient</span>();
+    <span class="kw">string</span> result = <span class="kw">await</span> client.<span class="fn">GetStringAsync</span>(url);
+    <span class="kw">return</span> result.ToUpper();
+}
+
+<span class="cm">// COMPILER GENERATES (conceptually):</span>
+[<span class="at">CompilerGenerated</span>]
+<span class="kw">private struct</span> <span class="tp">FetchAsyncStateMachine</span> : <span class="tp">IAsyncStateMachine</span>
+{
+    <span class="kw">public int</span> &lt;state&gt;;            <span class="cm">// -1 = not started, &gt;=0 = awaiting</span>
+    <span class="kw">public</span> <span class="tp">AsyncTaskMethodBuilder</span>&lt;<span class="tp">string</span>&gt; &lt;builder&gt;;
+    <span class="kw">public string</span> url;             <span class="cm">// captured parameter</span>
+    <span class="kw">private</span> <span class="tp">HttpClient</span> &lt;client&gt;;   <span class="cm">// local variable → field</span>
+    <span class="kw">private string</span> &lt;result&gt;;
+    <span class="kw">private</span> <span class="tp">TaskAwaiter</span>&lt;<span class="tp">string</span>&gt; &lt;awaiter&gt;;
+
+    <span class="kw">void</span> <span class="fn">MoveNext</span>()
+    {
+        <span class="kw">switch</span> (&lt;state&gt;)
+        {
+            <span class="kw">case</span> -<span class="nu">1</span>: <span class="cm">// first call</span>
+                &lt;client&gt; = <span class="kw">new</span> <span class="tp">HttpClient</span>();
+                &lt;awaiter&gt; = &lt;client&gt;.<span class="fn">GetStringAsync</span>(url).GetAwaiter();
+                <span class="kw">if</span> (!&lt;awaiter&gt;.IsCompleted)
+                {
+                    &lt;state&gt; = <span class="nu">0</span>;
+                    &lt;builder&gt;.AwaitUnsafeOnCompleted(<span class="kw">ref</span> &lt;awaiter&gt;, <span class="kw">ref this</span>);
+                    <span class="kw">return</span>; <span class="cm">// ← THREAD RELEASED HERE</span>
+                }
+                <span class="kw">goto case</span> <span class="nu">0</span>;
+            <span class="kw">case</span> <span class="nu">0</span>: <span class="cm">// resumed after await</span>
+                &lt;result&gt; = &lt;awaiter&gt;.GetResult();
+                &lt;builder&gt;.SetResult(&lt;result&gt;.ToUpper());
+                <span class="kw">break</span>;
+        }
+    }
+}</span>`},
+    {ty:"co",kind:"warn",ic:"⚠️",txt:"Every <code>await</code> captures local variables as fields on the state machine struct. <strong>Avoid awaiting inside tight loops</strong> with large locals — it can cause excessive heap allocations per iteration. Use <code>ValueTask</code> for hot paths."},
+  ]},
+
+"di2": {
+  title:"Service Lifetimes Deep Dive",
+  bread:"Chapter 10 · Dependency Injection",
+  sub:"Transient, Scoped, and Singleton — understanding exactly when objects are created, shared, and disposed in .NET's DI container.",
+  pills:[{t:"Core",c:"#ff6b35"},{t:"DI",c:"#00c8ff"},{t:"Architecture",c:"#7b61ff"}],
+  secs:[
+    {ty:"prose",title:"The Three Lifetimes",html:`
+<p>Every service registered in .NET DI has a <strong>lifetime</strong> that controls when instances are created and how they're shared. Choosing the wrong lifetime is one of the most common .NET bugs.</p>
+<ul>
+<li><strong>Transient</strong> — new instance on every <code>GetService&lt;T&gt;()</code> call. No sharing. Disposed when scope ends.</li>
+<li><strong>Scoped</strong> — one instance per scope (HTTP request in ASP.NET Core). Shared within a scope, different across scopes.</li>
+<li><strong>Singleton</strong> — one instance for the entire application lifetime. Created once, never re-created.</li>
+</ul>
+`},
+    {ty:"diagram",title:"Lifetime Comparison Across Requests",svg:`
+<svg width="500" height="220" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<style>
+.lb{font-family:'DM Mono',monospace;font-size:9px;fill:#8a9db5}
+.lv{font-family:'DM Mono',monospace;font-size:9px;fill:#dde6f0;font-weight:600}
+.tr1{fill:#2a1a0d;stroke:#ff6b35;stroke-width:1.2}
+.sc1{fill:#0d1a2a;stroke:#00c8ff;stroke-width:1.2}
+.sg1{fill:#0d2a0d;stroke:#00ffa3;stroke-width:1.2}
+</style></defs>
+
+<!-- Headers -->
+<text class="lb" x="5" y="18">Lifetime</text>
+<text class="lb" x="120" y="18">Request 1</text>
+<text class="lb" x="280" y="18">Request 2</text>
+
+<!-- TRANSIENT ROW -->
+<text class="lv" fill="#ff6b35" x="5" y="55">Transient</text>
+<text class="lb" x="5" y="70">new each call</text>
+<!-- Req1: 2 different objects -->
+<rect class="tr1" x="120" y="28" width="55" height="28" rx="4"/>
+<text class="lb" x="136" y="44">#1 new</text>
+<rect class="tr1" x="185" y="28" width="55" height="28" rx="4"/>
+<text class="lb" x="201" y="44">#2 new</text>
+<!-- Req2: 2 different objects -->
+<rect class="tr1" x="280" y="28" width="55" height="28" rx="4"/>
+<text class="lb" x="296" y="44">#3 new</text>
+<rect class="tr1" x="345" y="28" width="55" height="28" rx="4"/>
+<text class="lb" x="361" y="44">#4 new</text>
+<text class="lb" x="415" y="44">all different!</text>
+
+<!-- SCOPED ROW -->
+<text class="lv" fill="#00c8ff" x="5" y="115">Scoped</text>
+<text class="lb" x="5" y="130">1 per request</text>
+<rect class="sc1" x="120" y="88" width="120" height="28" rx="4"/>
+<text class="lb" x="160" y="104">shared in req1</text>
+<rect class="sc1" x="280" y="88" width="120" height="28" rx="4"/>
+<text class="lb" x="320" y="104">shared in req2</text>
+<text class="lb" x="415" y="104">diff instances</text>
+
+<!-- SINGLETON ROW -->
+<text class="lv" fill="#00ffa3" x="5" y="175">Singleton</text>
+<text class="lb" x="5" y="190">1 forever</text>
+<rect class="sg1" x="120" y="148" width="290" height="28" rx="4"/>
+<text class="lb" text-anchor="middle" x="265" y="164">same instance across ALL requests, ALL scopes</text>
+<text class="lb" x="415" y="164">1 instance</text>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"Service Registration & Captive Dependency Detection",code:`<span class="cm">// Registration</span>
+<span class="kw">var</span> services = <span class="kw">new</span> <span class="tp">ServiceCollection</span>();
+
+services.AddTransient&lt;<span class="tp">IEmailSender</span>, <span class="tp">SmtpEmailSender</span>&gt;();  <span class="cm">// new each time</span>
+services.AddScoped&lt;<span class="tp">IOrderService</span>, <span class="tp">OrderService</span>&gt;();      <span class="cm">// per-request</span>
+services.AddSingleton&lt;<span class="tp">ICache</span>, <span class="tp">MemoryCache</span>&gt;();          <span class="cm">// app lifetime</span>
+
+<span class="cm">// KEYED SERVICES (.NET 8+)</span>
+services.AddKeyedSingleton&lt;<span class="tp">ICache</span>, <span class="tp">RedisCache</span>&gt;(<span class="st">"redis"</span>);
+services.AddKeyedSingleton&lt;<span class="tp">ICache</span>, <span class="tp">MemoryCache</span>&gt;(<span class="st">"memory"</span>);
+
+<span class="kw">class</span> <span class="tp">MyService</span>(
+    [<span class="at">FromKeyedServices("redis")</span>] <span class="tp">ICache</span> redis,
+    [<span class="at">FromKeyedServices("memory")</span>] <span class="tp">ICache</span> mem) { }
+
+<span class="cm">// CAPTIVE DEPENDENCY — common bug!</span>
+<span class="cm">// Singleton capturing Scoped = Scoped lives forever → WRONG!</span>
+<span class="kw">class</span> <span class="tp">BadSingleton</span>(<span class="tp">IOrderService</span> orders) { } <span class="cm">// orders is Scoped!</span>
+<span class="cm">// Fix: inject IServiceScopeFactory and create scope manually:</span>
+<span class="kw">class</span> <span class="tp">GoodSingleton</span>(<span class="tp">IServiceScopeFactory</span> factory)
+{
+    <span class="kw">public async</span> <span class="tp">Task</span> <span class="fn">DoWorkAsync</span>()
+    {
+        <span class="kw">await using var</span> scope = factory.CreateAsyncScope();
+        <span class="kw">var</span> svc = scope.ServiceProvider.GetRequiredService&lt;<span class="tp">IOrderService</span>&gt;();
+        <span class="kw">await</span> svc.<span class="fn">ProcessAsync</span>();
+    }
+}
+
+<span class="cm">// VALIDATE on startup (.NET 6+) — catches captive deps at build time</span>
+services.BuildServiceProvider(
+    <span class="kw">new</span> <span class="tp">ServiceProviderOptions</span> { ValidateScopes = <span class="kw">true</span>, ValidateOnBuild = <span class="kw">true</span> });</span>`},
+    {ty:"co",kind:"err",ic:"🚨",txt:"<strong>Captive dependency</strong> (injecting a Scoped service into a Singleton) is one of the most common .NET bugs. It causes stale, shared state across requests. Always enable <code>ValidateScopes = true</code> in development."},
+  ]},
+
+"p2": {
+  title:"Span&lt;T&gt; & Memory&lt;T&gt;",
+  bread:"Chapter 16 · Performance Optimization",
+  sub:"The zero-allocation workhorse of modern .NET — slice into any contiguous memory without copying a single byte.",
+  pills:[{t:"Advanced",c:"#ff6b35"},{t:"Performance",c:"#00ffa3"},{t:".NET 5+",c:"#7b61ff"}],
+  secs:[
+    {ty:"prose",title:"Why Span Matters",html:`
+<p>Before <code>Span&lt;T&gt;</code>, every <code>string.Substring()</code> allocated a new string. Every array slice copied data. Every buffer operation potentially moved memory. <code>Span&lt;T&gt;</code> changes all of this by representing a <strong>view into existing memory</strong> with zero allocation.</p>
+<ul>
+<li>Works over arrays, stack memory (stackalloc), string slices, unmanaged memory</li>
+<li><code>ReadOnlySpan&lt;T&gt;</code> — immutable view, can represent string content</li>
+<li><code>Memory&lt;T&gt;</code> — heap-safe span (can be stored in fields, used across async)</li>
+<li><code>Span&lt;T&gt;</code> is a <strong>ref struct</strong> — cannot escape to heap, cannot be used in async methods</li>
+</ul>
+`},
+    {ty:"code",lang:"csharp",name:"Span<T> — Zero-Allocation Patterns",code:`<span class="cm">// 1. Parsing without allocating substrings</span>
+<span class="tp">ReadOnlySpan</span>&lt;<span class="tp">char</span>&gt; date = <span class="st">"2024-03-15"</span>.AsSpan();
+<span class="tp">ReadOnlySpan</span>&lt;<span class="tp">char</span>&gt; year  = date[..<span class="nu">4</span>];      <span class="cm">// no alloc!</span>
+<span class="tp">ReadOnlySpan</span>&lt;<span class="tp">char</span>&gt; month = date[<span class="nu">5</span>..<span class="nu">7</span>];    <span class="cm">// no alloc!</span>
+<span class="kw">int</span> y = <span class="kw">int</span>.Parse(year);                   <span class="cm">// Parse from span directly</span>
+
+<span class="cm">// 2. Stack-allocated buffers — zero heap pressure</span>
+<span class="tp">Span</span>&lt;<span class="tp">byte</span>&gt; buf = <span class="kw">stackalloc byte</span>[<span class="nu">128</span>];
+<span class="kw">int</span> written = <span class="tp">Encoding</span>.UTF8.GetBytes(<span class="st">"Hello"</span>, buf);
+<span class="tp">Span</span>&lt;<span class="tp">byte</span>&gt; used = buf[..written];
+
+<span class="cm">// 3. Modifying array slices in-place</span>
+<span class="kw">int</span>[] data = [<span class="nu">1</span>,<span class="nu">2</span>,<span class="nu">3</span>,<span class="nu">4</span>,<span class="nu">5</span>];
+<span class="tp">Span</span>&lt;<span class="kw">int</span>&gt; middle = data.AsSpan(<span class="nu">1</span>, <span class="nu">3</span>);   <span class="cm">// [2,3,4], no copy</span>
+middle.Fill(<span class="nu">0</span>);                           <span class="cm">// data = [1,0,0,0,5]</span>
+middle.Reverse();                           <span class="cm">// in-place</span>
+
+<span class="cm">// 4. Memory&lt;T&gt; — for async methods (Span can't cross await)</span>
+<span class="kw">async</span> <span class="tp">Task</span> <span class="fn">ProcessAsync</span>(<span class="tp">Memory</span>&lt;<span class="tp">byte</span>&gt; buffer)
+{
+    <span class="kw">await</span> <span class="tp">Task</span>.Delay(<span class="nu">1</span>); <span class="cm">// await is fine with Memory&lt;T&gt;</span>
+    <span class="tp">Span</span>&lt;<span class="tp">byte</span>&gt; span = buffer.Span; <span class="cm">// get span when needed</span>
+}
+
+<span class="cm">// 5. High-perf string split — NO allocations at all</span>
+<span class="kw">static void</span> <span class="fn">ParseCsvLine</span>(<span class="tp">ReadOnlySpan</span>&lt;<span class="tp">char</span>&gt; line)
+{
+    <span class="kw">foreach</span> (<span class="kw">var</span> range <span class="kw">in</span> line.Split(<span class="st">','</span>))  <span class="cm">// C# 13: Span.Split</span>
+    {
+        <span class="tp">ReadOnlySpan</span>&lt;<span class="tp">char</span>&gt; field = line[range];
+        <span class="tp">Console</span>.WriteLine(field.ToString()); <span class="cm">// only alloc if needed</span>
+    }
+}</span>`},
+    {ty:"co",kind:"ok",ic:"⚡",txt:"<strong>Rule of thumb:</strong> In hot paths, replace <code>string.Substring()</code> with <code>AsSpan()[..]</code>, replace large array parameters with <code>Span&lt;T&gt;</code> parameters, and use <code>stackalloc</code> for small temporary buffers under 1KB."},
+  ]},
+
+"dg2": {
+  title:"dotnet-trace & dotnet-counters",
+  bread:"Chapter 15 · Diagnostics & Debugging",
+  sub:"Production-safe tracing tools for capturing CPU profiles, GC events, thread contention, and custom metrics from running .NET apps.",
+  pills:[{t:"Advanced",c:"#7b61ff"},{t:"Tooling",c:"#00ffa3"},{t:"Observability",c:"#00c8ff"}],
+  secs:[
+    {ty:"prose",title:"The .NET Diagnostics Toolchain",html:`
+<p>The .NET SDK ships a suite of CLI diagnostics tools installable as global tools. They connect to running processes via the <strong>diagnostics port</strong> (Unix socket / named pipe) without requiring debugger attachment.</p>
+<ul>
+<li><strong>dotnet-trace</strong> — CPU sampling, GC events, threadpool events, custom EventSource</li>
+<li><strong>dotnet-counters</strong> — Live metric monitoring (GC, threadpool, HTTP, custom)</li>
+<li><strong>dotnet-dump</strong> — Capture and analyze memory dumps</li>
+<li><strong>dotnet-gcdump</strong> — Lightweight heap snapshot (GC roots only, not full dump)</li>
+<li><strong>dotnet-stack</strong> — Print managed stack traces of all threads</li>
+</ul>
+`},
+    {ty:"code",lang:"bash",name:"Using Diagnostics Tools",code:`<span class="cm"># Install global tools</span>
+dotnet tool install -g dotnet-trace
+dotnet tool install -g dotnet-counters
+dotnet tool install -g dotnet-dump
+dotnet tool install -g dotnet-gcdump
+
+<span class="cm"># dotnet-counters — live dashboard</span>
+dotnet-counters monitor --process-id 12345 <span class="st">\
+  System.Runtime \</span>
+  <span class="st">Microsoft.AspNetCore.Hosting \</span>
+  <span class="st">MyApp.CustomMetrics</span>
+
+<span class="cm"># Output:</span>
+<span class="cm"># [System.Runtime]</span>
+<span class="cm">#   GC Heap Size (MB)                          42</span>
+<span class="cm">#   Gen 0 GC Count (/sec)                      3.2</span>
+<span class="cm">#   ThreadPool Queue Length                     0</span>
+<span class="cm">#   Active Timers Count                         5</span>
+
+<span class="cm"># dotnet-trace — CPU + GC profile</span>
+dotnet-trace collect --process-id 12345 <span class="st">\
+  --profile gc-collect \</span>  <span class="cm"># preset: GC events</span>
+  <span class="st">--profile cpu-sampling</span>  <span class="cm"># preset: CPU samples</span>
+  <span class="cm"># Output: trace.nettrace → open in PerfView / SpeedScope</span>
+
+<span class="cm"># dotnet-dump — analyze live or file</span>
+dotnet-dump collect --process-id 12345
+dotnet-dump analyze core_20240315.dump
+<span class="cm"># Inside analyzer:</span>
+<span class="cm"># > dumpheap -stat       — heap summary by type</span>
+<span class="cm"># > gcroot &lt;addr&gt;        — find what's keeping object alive</span>
+<span class="cm"># > clrthreads           — all managed threads + stacks</span>
+<span class="cm"># > threadpool           — threadpool queue/worker state</span></span>`},
+    {ty:"code",lang:"csharp",name:"Custom EventCounters & Metrics",code:`<span class="cm">// Custom metrics visible to dotnet-counters</span>
+<span class="kw">using</span> System.Diagnostics.Tracing;
+
+[<span class="at">EventSource(Name = "MyApp.Metrics")</span>]
+<span class="kw">sealed class</span> <span class="tp">AppMetrics</span> : <span class="tp">EventSource</span>
+{
+    <span class="kw">public static readonly</span> <span class="tp">AppMetrics</span> Instance = <span class="kw">new</span>();
+
+    <span class="kw">private readonly</span> <span class="tp">IncrementingPollingCounter</span> _reqCounter;
+    <span class="kw">private readonly</span> <span class="tp">PollingCounter</span> _queueDepth;
+    <span class="kw">private int</span> _queue;
+
+    <span class="kw">private</span> <span class="tp">AppMetrics</span>()
+    {
+        _reqCounter = <span class="kw">new</span> <span class="tp">IncrementingPollingCounter</span>(
+            <span class="st">"requests-per-second"</span>, <span class="kw">this</span>,
+            () => <span class="tp">Interlocked</span>.Read(<span class="kw">ref</span> _requestCount))
+            { DisplayRateTimeScale = <span class="tp">TimeSpan</span>.FromSeconds(<span class="nu">1</span>) };
+
+        _queueDepth = <span class="kw">new</span> <span class="tp">PollingCounter</span>(
+            <span class="st">"queue-depth"</span>, <span class="kw">this</span>,
+            () => <span class="tp">Volatile</span>.Read(<span class="kw">ref</span> _queue));
+    }
+    <span class="kw">private long</span> _requestCount;
+    <span class="kw">public void</span> <span class="fn">RequestReceived</span>() => <span class="tp">Interlocked</span>.Increment(<span class="kw">ref</span> _requestCount);
+}</span>`},
+  ]},
+
+"net1": {
+  title:"HttpClient Internals",
+  bread:"Chapter 14 · Networking Stack",
+  sub:"What happens inside HttpClient — SocketsHttpHandler, connection pools, DNS refresh, and how IHttpClientFactory keeps it healthy.",
+  pills:[{t:"Core",c:"#00c8ff"},{t:"HTTP",c:"#00ffa3"},{t:"Architecture",c:"#7b61ff"}],
+  secs:[
+    {ty:"prose",title:"HttpClient Architecture",html:`
+<p>Since .NET Core 2.1, <code>HttpClient</code> delegates to <code>SocketsHttpHandler</code> — a pure managed HTTP implementation built on <code>Socket</code>. It handles:</p>
+<ul>
+<li><strong>Connection pooling</strong> — reuses TCP connections per <code>(host, port, scheme)</code> tuple</li>
+<li><strong>HTTP/1.1, 2, and 3</strong> — protocol negotiation via ALPN</li>
+<li><strong>DNS TTL</strong> — by default, connections live forever (DNS change blindness). Use <code>PooledConnectionLifetime</code>.</li>
+<li><strong>SSL/TLS</strong> — certificate validation, client certs, SNI</li>
+</ul>
+`},
+    {ty:"diagram",title:"IHttpClientFactory Pipeline",svg:`
+<svg width="500" height="200" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="ha" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto">
+  <path d="M0,0 L0,6 L7,3z" fill="#00c8ff"/>
+</marker>
+<style>
+.hb{fill:#0d1a2a;stroke:#00c8ff;stroke-width:1.2}
+.ht2{font-family:'DM Mono',monospace;font-size:9px;fill:#dde6f0;text-anchor:middle}
+.hs{font-family:'DM Mono',monospace;font-size:8px;fill:#8a9db5;text-anchor:middle}
+.harr{stroke:#00c8ff;stroke-width:1.5;fill:none;marker-end:url(#ha)}
+@keyframes hflow{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}
+.hanim{stroke-dasharray:6 3;animation:hflow 1.5s linear infinite}
+</style></defs>
+
+<text font-family="'DM Mono',monospace" font-size="10" fill="#8a9db5" x="10" y="18">IHttpClientFactory Pipeline</text>
+
+<!-- Boxes left to right -->
+<rect class="hb" x="10" y="30" width="80" height="50" rx="5"/>
+<text class="ht2" x="50" y="52">Request</text>
+<text class="hs" x="50" y="68">GetClient()</text>
+
+<rect fill="#1a1a0d" stroke="#ffd700" stroke-width="1.2" x="115" y="30" width="80" height="50" rx="5"/>
+<text class="ht2" fill="#ffd700" x="155" y="52">Logging</text>
+<text class="hs" x="155" y="68">Handler</text>
+
+<rect fill="#2a1a0d" stroke="#ff6b35" stroke-width="1.2" x="225" y="30" width="80" height="50" rx="5"/>
+<text class="ht2" fill="#ff6b35" x="265" y="52">Retry</text>
+<text class="hs" x="265" y="68">Handler</text>
+
+<rect fill="#0d1a0d" stroke="#00ffa3" stroke-width="1.2" x="335" y="30" width="80" height="50" rx="5"/>
+<text class="ht2" fill="#00ffa3" x="375" y="52">Circuit</text>
+<text class="hs" x="375" y="68">Breaker</text>
+
+<rect fill="#1a0d2a" stroke="#7b61ff" stroke-width="1.2" x="435" y="30" width="55" height="50" rx="5"/>
+<text class="ht2" fill="#7b61ff" x="462" y="52">HTTP</text>
+<text class="hs" x="462" y="68">Socket</text>
+
+<!-- Arrows -->
+<line class="harr hanim" x1="90" y1="55" x2="112" y2="55"/>
+<line class="harr hanim" x1="195" y1="55" x2="222" y2="55"/>
+<line class="harr hanim" x1="305" y1="55" x2="332" y2="55"/>
+<line class="harr hanim" x1="415" y1="55" x2="432" y2="55"/>
+
+<!-- Connection Pool -->
+<rect fill="#0a1018" stroke="#1b2d40" stroke-width="1" x="10" y="110" width="480" height="60" rx="5"/>
+<text font-family="'DM Mono',monospace" font-size="9.5" fill="#00c8ff" x="18" y="130">SocketsHttpHandler  —  Connection Pool</text>
+<rect class="hb" x="18" y="138" width="80" height="24" rx="4"/>
+<text class="hs" x="58" y="153">api.stripe.com:443</text>
+<rect class="hb" x="108" y="138" width="80" height="24" rx="4"/>
+<text class="hs" x="148" y="153">api.github.com:443</text>
+<rect class="hb" x="198" y="138" width="80" height="24" rx="4"/>
+<text class="hs" x="238" y="153">db.prod:5432</text>
+<text font-family="'DM Mono',monospace" font-size="8" fill="#3d5068" x="295" y="153">PooledConnectionLifetime = 2min (recommended)</text>
+</svg>`},
+    {ty:"code",lang:"csharp",name:"HttpClient Best Practices (.NET 10)",code:`<span class="cm">// ✅ CORRECT: use IHttpClientFactory — registered in DI</span>
+services.AddHttpClient&lt;<span class="tp">IGitHubService</span>, <span class="tp">GitHubService</span>&gt;(client =>
+{
+    client.BaseAddress = <span class="kw">new</span> <span class="tp">Uri</span>(<span class="st">"https://api.github.com"</span>);
+    client.DefaultRequestHeaders.Add(<span class="st">"User-Agent"</span>, <span class="st">"MyApp/1.0"</span>);
+    client.Timeout = <span class="tp">TimeSpan</span>.FromSeconds(<span class="nu">30</span>);
+})
+.AddStandardResilienceHandler()   <span class="cm">// Polly v8: retry + circuit breaker</span>
+.ConfigurePrimaryHttpMessageHandler(() => <span class="kw">new</span> <span class="tp">SocketsHttpHandler</span>
+{
+    <span class="cm">// KEY: rotate connections to pick up DNS changes</span>
+    PooledConnectionLifetime = <span class="tp">TimeSpan</span>.FromMinutes(<span class="nu">2</span>),
+    PooledConnectionIdleTimeout = <span class="tp">TimeSpan</span>.FromMinutes(<span class="nu">1</span>),
+    MaxConnectionsPerServer = <span class="nu">20</span>,
+    EnableMultipleHttp2Connections = <span class="kw">true</span>,
+});
+
+<span class="cm">// ❌ WRONG: creating HttpClient per request — socket exhaustion!</span>
+<span class="cm">// using var client = new HttpClient(); // DO NOT DO THIS</span>
+
+<span class="cm">// Resilience pipeline (.NET 8+ Microsoft.Extensions.Http.Resilience)</span>
+services.AddHttpClient(<span class="st">"api"</span>)
+    .AddResilienceHandler(<span class="st">"pipeline"</span>, b => b
+        .AddRetry(<span class="kw">new</span> <span class="tp">HttpRetryStrategyOptions</span> { MaxRetryAttempts = <span class="nu">3</span> })
+        .AddCircuitBreaker(<span class="kw">new</span> <span class="tp">HttpCircuitBreakerStrategyOptions</span>())
+        .AddTimeout(<span class="tp">TimeSpan</span>.FromSeconds(<span class="nu">10</span>)));</span>`},
+    {ty:"co",kind:"err",ic:"🚨",txt:"<strong>Socket exhaustion</strong> from <code>new HttpClient()</code> per request is one of the most common .NET production outages. Always use <code>IHttpClientFactory</code> or a static/singleton <code>HttpClient</code> with <code>PooledConnectionLifetime</code> set."},
+  ]},
+
+"io5": {
+  title:"System.IO.Pipelines",
+  bread:"Chapter 13 · File & IO System",
+  sub:"The highest-performance I/O API in .NET — zero-copy, backpressure-aware byte processing for network and stream workloads.",
+  pills:[{t:"Expert",c:"#7b61ff"},{t:"Performance",c:"#00ffa3"},{t:".NET Core 2.1+",c:"#00c8ff"}],
+  secs:[
+    {ty:"prose",title:"Why Pipelines?",html:`
+<p>Traditional stream processing requires manual buffer management, awkward partial-read handling, and usually allocates. <code>System.IO.Pipelines</code> solves these problems with a high-level, backpressure-aware API:</p>
+<ul>
+<li><strong>PipeWriter</strong> — producer requests memory buffers from the pipe, writes to them, advances</li>
+<li><strong>PipeReader</strong> — consumer reads available data, processes, advances past consumed bytes</li>
+<li><strong>Backpressure</strong> — if consumer is slow, writer pauses automatically</li>
+<li><strong>Buffer reuse</strong> — memory is rented from <code>MemoryPool</code>, not allocated per read</li>
+</ul>
+`},
+    {ty:"code",lang:"csharp",name:"System.IO.Pipelines — Line Reader",code:`<span class="kw">using</span> System.IO.Pipelines;
+
+<span class="cm">// Read a stream line-by-line with ZERO allocation per line</span>
+<span class="kw">async</span> <span class="tp">Task</span> <span class="fn">ReadLinesAsync</span>(<span class="tp">Stream</span> stream)
+{
+    <span class="kw">var</span> reader = <span class="tp">PipeReader</span>.Create(stream);
+
+    <span class="kw">while</span> (<span class="kw">true</span>)
+    {
+        <span class="tp">ReadResult</span> result = <span class="kw">await</span> reader.<span class="fn">ReadAsync</span>();
+        <span class="tp">ReadOnlySequence</span>&lt;<span class="tp">byte</span>&gt; buffer = result.Buffer;
+
+        <span class="kw">while</span> (<span class="fn">TryReadLine</span>(<span class="kw">ref</span> buffer, <span class="kw">out</span> <span class="tp">ReadOnlySequence</span>&lt;<span class="tp">byte</span>&gt; line))
+        {
+            <span class="fn">ProcessLine</span>(line); <span class="cm">// handle line — no allocation!</span>
+        }
+
+        reader.AdvanceTo(buffer.Start, buffer.End);
+
+        <span class="kw">if</span> (result.IsCompleted) <span class="kw">break</span>;
+    }
+    <span class="kw">await</span> reader.<span class="fn">CompleteAsync</span>();
+}
+
+<span class="kw">static bool</span> <span class="fn">TryReadLine</span>(
+    <span class="kw">ref</span> <span class="tp">ReadOnlySequence</span>&lt;<span class="tp">byte</span>&gt; buf,
+    <span class="kw">out</span> <span class="tp">ReadOnlySequence</span>&lt;<span class="tp">byte</span>&gt; line)
+{
+    <span class="tp">SequencePosition</span>? pos = buf.PositionOf((<span class="tp">byte</span>)<span class="st">'\n'</span>);
+    <span class="kw">if</span> (pos == <span class="kw">null</span>) { line = <span class="kw">default</span>; <span class="kw">return false</span>; }
+    line = buf.Slice(<span class="nu">0</span>, pos.Value);
+    buf = buf.Slice(buf.GetPosition(<span class="nu">1</span>, pos.Value));
+    <span class="kw">return true</span>;
+}
+
+<span class="cm">// Custom pipe with backpressure control</span>
+<span class="kw">var</span> pipe = <span class="kw">new</span> <span class="tp">Pipe</span>(<span class="kw">new</span> <span class="tp">PipeOptions</span>(
+    pauseWriterThreshold: <span class="nu">1024</span> * <span class="nu">1024</span>,   <span class="cm">// pause writer at 1MB</span>
+    resumeWriterThreshold: <span class="nu">512</span> * <span class="nu">1024</span>,  <span class="cm">// resume at 512KB</span>
+    minimumSegmentSize: <span class="nu">4096</span>));           <span class="cm">// segment size</span></span>`},
+  ]},
+
+};
+
+// ═══════════════════════════════════════════════════════════
+// INTERVIEW QUESTIONS
+// ═══════════════════════════════════════════════════════════
+const QA = [
+{q:"What is the CLR and what services does it provide?",a:"The <strong>CLR (Common Language Runtime)</strong> is the virtual machine that executes .NET assemblies. It provides: (1) Memory management via generational GC, (2) Type safety — verifies IL is type-safe before execution, (3) JIT compilation — translates IL to native code on first call, (4) Exception handling — structured exception propagation, (5) Thread management — thread pool, synchronization, (6) Security — code access security, assembly verification, (7) Interop — marshaling between managed and native code. In .NET Core, the CLR is called CoreCLR and is cross-platform.",level:"b",tag:"CLR"},
+{q:"Explain .NET's generational garbage collector and why it's generational.",a:"Generational GC is based on the <strong>generational hypothesis</strong>: most objects die young. The heap is split into Gen0 (new, small ~256KB), Gen1 (medium ~2MB), Gen2 (long-lived). New objects go to Gen0. When Gen0 fills, a GC is triggered — surviving objects are promoted to Gen1. Gen1 survivors promote to Gen2. The LOH (>85KB objects) is collected only with Gen2. Why generational? Gen0 collections are cheap and frequent — they only scan a tiny portion of the heap. Gen2 is expensive but rare. This matches real allocation patterns: HTTP request objects should die in Gen0, not pollute Gen2.",level:"i",tag:"GC"},
+{q:"What is the difference between Tier-0 and Tier-1 JIT compilation?",a:"<strong>Tier-0</strong>: when a method is first called, the JIT compiles it quickly with minimal optimization. Code runs immediately — startup is fast. <strong>Tier-1</strong>: after ~30 invocations (threshold configurable), a background thread re-JITs the method with full optimization (inlining, loop unrolling, SIMD). The running code is patched to point to the new native code. This achieves fast startup AND peak performance. You can control this with: <code>[MethodImpl(AggressiveOptimization)]</code> to skip Tier-0, or set <code>DOTNET_TieredCompilation=0</code> to disable tiering entirely.",level:"a",tag:"JIT"},
+{q:"How does async/await work internally?",a:"The C# compiler transforms every <code>async</code> method into a <strong>state machine struct</strong> implementing <code>IAsyncStateMachine</code>. The struct stores: (1) a state integer (which await we're at), (2) an <code>AsyncTaskMethodBuilder</code>, (3) all local variables as fields (so they survive the await). The <code>MoveNext()</code> method contains the actual method body as a switch on state. At each await point, if the awaitable isn't complete, the method registers a continuation and <strong>returns the thread to the pool</strong>. When the awaited operation completes, the continuation schedules MoveNext() again from the saved state.",level:"a",tag:"Async"},
+{q:"What causes a deadlock with async/await and how do you prevent it?",a:"Classic deadlock: code with a SynchronizationContext (ASP.NET classic, WinForms, WPF) calls <code>.Result</code> or <code>.Wait()</code> on a Task. The context has one thread. The Task's continuation needs to resume on that same thread — but the thread is blocked by <code>.Wait()</code>. Deadlock. <strong>Prevention:</strong> (1) Never call <code>.Result/.Wait()</code> — use await all the way, (2) Use <code>ConfigureAwait(false)</code> in library code to avoid capturing the context, (3) ASP.NET Core has no SyncContext — deadlocks are harder to trigger but still possible, (4) If you must call async from sync, use a dedicated thread with <code>Task.Run(...).GetAwaiter().GetResult()</code>.",level:"a",tag:"Async"},
+{q:"What is the difference between Transient, Scoped, and Singleton DI lifetimes?",a:"<strong>Transient</strong> — new instance every call to GetService. Stateless services, formatters. <strong>Scoped</strong> — one instance per scope (one HTTP request in ASP.NET Core). DbContext, unit-of-work. <strong>Singleton</strong> — one instance for app lifetime. Config, caches, stateless infrastructure. Key gotcha: <strong>captive dependency</strong> — a Singleton capturing a Scoped service gets that service for its entire lifetime (stale per-request state). Fix: inject IServiceScopeFactory and create scopes manually. Always enable <code>ValidateScopes = true</code> in development to catch this at startup.",level:"i",tag:"DI"},
+{q:"What is socket exhaustion and how does IHttpClientFactory prevent it?",a:"<strong>Socket exhaustion</strong> happens when code creates <code>new HttpClient()</code> per request and disposes it. Disposing HttpClient closes TCP connections, but OS sockets linger in TIME_WAIT for 2-4 minutes. Under load, you exhaust the OS socket limit and get connection failures. <code>IHttpClientFactory</code> fixes this by: (1) Managing named HttpClient instances with configurable lifetimes, (2) Rotating <code>SocketsHttpHandler</code> instances (which hold the connection pool) on a configurable interval, (3) Keeping TCP connections alive and reusing them. Set <code>PooledConnectionLifetime</code> to pick up DNS changes without socket exhaustion.",level:"i",tag:"Networking"},
+{q:"Explain what Span<T> is and its key limitations.",a:"<code>Span&lt;T&gt;</code> is a <strong>ref struct</strong> that represents a contiguous region of arbitrary memory (array, stack, unmanaged) without owning or copying it. Zero-allocation slicing. Key limitations: (1) It's a ref struct — cannot be stored as a class field, cannot be boxed, cannot be used as a generic type argument, (2) Cannot cross async boundaries (cannot exist on heap, which await would require), (3) Cannot be used in lambdas or iterators. Solutions: use <code>Memory&lt;T&gt;</code> when you need to store the slice, use <code>MemoryMarshal</code> for advanced cases. <code>ReadOnlySpan&lt;T&gt;</code> can represent string content without string allocation.",level:"a",tag:"Performance"},
+{q:"What is the Large Object Heap (LOH) and why does it cause problems?",a:"Objects larger than 85KB go to the <strong>LOH</strong> instead of Gen0. The LOH is problematic because: (1) It's only collected with Gen2 GC, which is expensive, (2) The LOH is NOT compacted by default — dead space creates fragmentation, (3) Fragmentation means OutOfMemoryException despite available memory. Common LOH allocators: <code>byte[100_000]</code>, large strings, <code>List&lt;T&gt;</code> backing arrays at certain sizes. Solutions: (1) Use <code>ArrayPool&lt;byte&gt;.Shared</code> to rent/return arrays, (2) Set <code>GCSettings.LargeObjectHeapCompactionMode = CompactOnce</code> for one-time compaction, (3) Use <code>MemoryPool&lt;T&gt;</code> for long-lived buffers.",level:"a",tag:"GC"},
+{q:"How does the .NET ThreadPool work?",a:"The .NET ThreadPool manages a pool of worker threads for executing <code>Task</code> items, async continuations, and threadpool work items. Key mechanisms: (1) <strong>Hill-climbing algorithm</strong> — measures throughput and adjusts thread count. If throughput improves with more threads, add one; if it drops, remove one, (2) <strong>Work-stealing queues</strong> — each thread has a local deque. Threads process their own items first; idle threads steal from others' tails, (3) <strong>Injection delay</strong> — new threads are added slowly (one per 500ms) to prevent explosive thread counts during I/O burst. Use <code>ThreadPool.SetMinThreads</code> to pre-warm threads for low-latency scenarios.",level:"a",tag:"Threading"},
+{q:"What is CIL (Common Intermediate Language)?",a:"CIL (also MSIL or IL) is the bytecode format all .NET languages compile to. It's a <strong>stack-based virtual instruction set</strong>: operations push/pop a virtual evaluation stack. Key properties: (1) CPU-independent — same IL runs on x64, ARM, WASM, (2) Strongly typed — all ops are type-checked, (3) Object-oriented — native support for virtual dispatch, inheritance, interfaces, (4) Verifiable — CLR can verify type safety before JIT. You can read IL with <code>ildasm.exe</code>, <code>dotnet ildasm</code>, or SharpLab.io. IL can be emitted dynamically via <code>ILGenerator</code> for runtime code generation.",level:"a",tag:"CLR"},
+{q:"What is the difference between AppDomain and AssemblyLoadContext?",a:"In .NET Framework, <strong>AppDomain</strong> was the isolation boundary — multiple AppDomains per process for isolation and hot-reload. In .NET Core/5+, AppDomain is emulated (only one per process). <strong>AssemblyLoadContext (ALC)</strong> is the modern equivalent — it's a boundary around a set of loaded assemblies. Each ALC has its own type identity: the same type from two different ALCs are different types. Uses: (1) Plugin architectures — load plugins in separate ALCs, unload by releasing the ALC, (2) Hot reload — load new version in new ALC, (3) Isolation — prevent assembly conflicts. The default ALC (<code>AssemblyLoadContext.Default</code>) holds the main app assemblies.",level:"a",tag:"CLR"},
+{q:"What is Profile-Guided Optimization (PGO) in .NET?",a:"PGO gathers runtime profiling data (which branches were taken, which types appeared at virtual call sites) and uses it to generate better-optimized Tier-1 code. <strong>Dynamic PGO</strong> (.NET 6+): the JIT instruments Tier-0 code to collect type and branch statistics, then uses this data when promoting to Tier-1 — no separate profiling run needed. Benefits: (1) Devirtualization of interface calls based on observed types, (2) Cold/hot code splitting — moves rare paths out of hot sections, (3) Better inlining decisions. Enable with: <code>DOTNET_TieredPGO=1</code>. PGO can give 10-30% throughput improvements on real workloads.",level:"e",tag:"JIT"},
+{q:"Explain the IDisposable pattern and when to add a finalizer.",a:"Implement <code>IDisposable</code> when your class holds <strong>unmanaged resources</strong> (file handles, sockets, native memory) or references to other IDisposable objects. Full pattern: (1) <code>public void Dispose()</code> calls <code>Dispose(true)</code> then <code>GC.SuppressFinalize(this)</code>, (2) <code>protected virtual void Dispose(bool disposing)</code> — if disposing, release managed resources; always release unmanaged, (3) Finalizer (<code>~MyClass()</code>) calls <code>Dispose(false)</code> as a safety net. Add a finalizer ONLY if you hold raw unmanaged resources (IntPtr to native memory). If you only hold IDisposable objects, no finalizer needed — they have their own. Modern: prefer <code>IAsyncDisposable</code> + <code>await using</code>.",level:"i",tag:"GC"},
+{q:"What is AssemblyLoadContext and how do you build a plugin system with it?",a:"An <code>AssemblyLoadContext</code> is an isolated assembly loading scope. Types loaded in different ALCs are separate types — even if from the same .dll. For plugin systems: (1) Create a <code>PluginLoadContext : AssemblyLoadContext</code> with <code>isCollectible: true</code>, (2) Override <code>Load(AssemblyName)</code> — return null for shared types (interfaces, contracts) to let them resolve from Default ALC, return your plugin assembly for plugin-specific types, (3) Unload by releasing all references to the ALC and calling <code>alc.Unload()</code> — GC eventually collects it. Gotcha: any live references (event handlers, statics) will prevent unloading — use <code>WeakReference</code> to ALC to detect completion.",level:"e",tag:"CLR"},
+{q:"How does the .NET Configuration system layer providers?",a:"Configuration is built from providers layered in priority order (last wins). Default order in ASP.NET Core: (1) appsettings.json, (2) appsettings.{Environment}.json, (3) User Secrets (dev only), (4) Environment variables, (5) Command-line args. Each provider is an <code>IConfigurationProvider</code> implementing a key-value store. The <code>ConfigurationRoot</code> iterates providers in reverse order, returning the first non-null value. The Options pattern binds configuration sections to POCOs: <code>IOptions&lt;T&gt;</code> (singleton, snapshot at startup), <code>IOptionsSnapshot&lt;T&gt;</code> (scoped, re-reads per request), <code>IOptionsMonitor&lt;T&gt;</code> (singleton + change notification).",level:"i",tag:"Config"},
+{q:"What is System.IO.Pipelines and when would you use it over Stream?",a:"<code>System.IO.Pipelines</code> provides a high-performance I/O abstraction with built-in backpressure, buffer management, and zero-copy semantics. <code>PipeWriter</code> requests memory from the pipe, writes, advances. <code>PipeReader</code> reads available data, processes, advances past consumed bytes. The pipe manages memory from <code>MemoryPool</code> — no per-read allocation. Use Pipelines when: (1) Processing high-throughput network streams (Kestrel uses Pipelines internally), (2) Frame-delimited protocols (length-prefix, newline), (3) You need backpressure (consumer controls writer pace). Use Stream when: (1) Simple file I/O, (2) Third-party APIs expect Stream, (3) Complexity isn't justified.",level:"e",tag:"IO"},
+{q:"What is the difference between EventSource and ILogger?",a:"<strong>ILogger</strong> is the high-level structured logging API — writes to sinks (console, files, Seq, etc.) via providers. Designed for application developers. Has log levels, scopes, message templates. Has overhead even when disabled (string formatting, object allocation). <strong>EventSource</strong> is a low-level, high-performance event tracing API — writes to ETW (Windows), LTTng (Linux), or EventPipe. Near-zero overhead when no listener is attached (payload formatting is deferred). Used for performance-critical infrastructure metrics. In .NET 6+, they're complementary: use ILogger for app logging, EventSource/EventCounter for metrics and diagnostics, and OpenTelemetry for distributed traces. <code>LoggerMessage.Define</code> source gen gives ILogger performance close to EventSource.",level:"i",tag:"Diagnostics"},
+{q:"What are Source Generators and how do they differ from Reflection?",a:"<strong>Reflection</strong> is runtime type inspection — reads metadata from loaded assemblies at runtime. Flexible but slow: no JIT optimization, lots of allocation, no compile-time errors. <strong>Source Generators</strong> (C# 9+) run at <em>compile time</em> as part of the Roslyn compilation pipeline. They analyze your source code and emit additional C# files that are compiled alongside yours. Zero runtime overhead — it's just generated code. Real-world uses: System.Text.Json serializers, LoggerMessage.Define, EF Core, DI registration. Implement via <code>IIncrementalGenerator</code> — use <code>SyntaxProvider</code> to filter relevant nodes, emit code only when input changes. Works with Native AOT (reflection doesn't).",level:"a",tag:"Roslyn"},
+{q:"How do you diagnose high memory usage in a .NET application?",a:"<strong>Step 1:</strong> Use <code>dotnet-counters monitor</code> to confirm heap growth vs. managed vs. unmanaged. <strong>Step 2:</strong> Capture a GC heap dump with <code>dotnet-gcdump</code> — lightweight, shows live object graph. Analyze with Visual Studio or PerfView. <strong>Step 3:</strong> For full heap analysis, <code>dotnet-dump collect</code> then <code>dotnet-dump analyze</code> → <code>dumpheap -stat</code> to find top allocating types, <code>gcroot &lt;address&gt;</code> to find what's keeping objects alive. <strong>Common causes:</strong> event handler leaks (+=, no -=), static collections growing forever, cache without eviction, LOH fragmentation, finalizer queue backup. <strong>Prevention:</strong> always unsubscribe events, use WeakReference for caches, set cache size limits.",level:"a",tag:"Diagnostics"},
+];
+
+const DOTNET_INTERVIEW_LEVEL_ORDER = ['iq-junior', 'iq-mid', 'iq-senior', 'iq-architect'];
+const DOTNET_INTERVIEW_LEVELS = {
+  'iq-junior': {
+    title: 'Junior Interview Card',
+    levelLabel: 'Junior',
+    badgeClass: 'lv-b',
+    accent: '#56d364',
+    summary: 'Direct questions, clear definitions, and first-principles runtime understanding.'
+  },
+  'iq-mid': {
+    title: 'Mid-Level Interview Card',
+    levelLabel: 'Mid-Level',
+    badgeClass: 'lv-i',
+    accent: '#ffd700',
+    summary: 'Production debugging, applied trade-offs, and diagnosing what the runtime is doing.'
+  },
+  'iq-senior': {
+    title: 'Senior Interview Card',
+    levelLabel: 'Senior',
+    badgeClass: 'lv-a',
+    accent: '#ff6b35',
+    summary: 'Deep performance, advanced hosting, concurrency, and operational decisions.'
+  },
+  'iq-architect': {
+    title: 'Architect Interview Card',
+    levelLabel: 'Architect',
+    badgeClass: 'lv-e',
+    accent: '#7b61ff',
+    summary: 'System-wide platform decisions, team standards, runtime strategy, and failure analysis.'
+  }
+};
+
+const DOTNET_INTERVIEW_DOMAIN_ORDER = [
+  'clr','gc','jit','async','threading','di','hosting','config','networking','io','diagnostics','performance','interop','security','build'
+];
+const DOTNET_INTERVIEW_DOMAINS = {
+  clr:{label:'CLR', focus:'CoreCLR execution engine, managed code, metadata, and assembly loading', scenario:'a plugin-heavy service host starts leaking collectible AssemblyLoadContexts', code:'AssemblyLoadContext', signal:'type identity mismatch across load contexts', anti:'assuming the same assembly name always means the same runtime type'},
+  gc:{label:'GC', focus:'generational collection, LOH, pinning, promotions, and finalization', scenario:'an API shows rising Gen2 pauses after adding large JSON payload handling', code:'ArrayPool<byte>.Shared', signal:'Gen2 collections and LOH fragmentation increase', anti:'allocating large buffers per request and trusting the GC to absorb it'},
+  jit:{label:'JIT', focus:'tiered compilation, PGO, inlining, ReadyToRun, and native code generation', scenario:'startup improves after ReadyToRun, but steady-state throughput drops in hot paths', code:'DOTNET_TieredPGO=1', signal:'Tier-1 optimized methods differ from Tier-0 startup paths', anti:'tuning one benchmark without checking startup versus throughput trade-offs'},
+  async:{label:'Async/Await', focus:'state machines, continuations, context capture, and async coordination', scenario:'a background workflow stalls because blocking calls were mixed with async I/O', code:'ConfigureAwait(false)', signal:'thread pool growth with low CPU usage and blocked continuations', anti:'calling .Result on async paths in application code'},
+  threading:{label:'Threading', focus:'thread pool, starvation, synchronization, scheduling, and work-stealing', scenario:'request latency spikes while CPU is low because synchronous work blocks worker threads', code:'ThreadPool.SetMinThreads', signal:'thread pool queue length rises before CPU saturation', anti:'fixing starvation by blindly creating dedicated threads everywhere'},
+  di:{label:'Dependency Injection', focus:'service lifetimes, scopes, validation, and composition roots', scenario:'a singleton caches a scoped service and leaks tenant-specific request data', code:'ValidateScopes = true', signal:'stale scoped state survives across requests', anti:'treating singleton lifetimes as free performance wins'},
+  hosting:{label:'Hosting', focus:'Generic Host, app startup, middleware bootstrapping, and service defaults', scenario:'multiple workers and APIs need one standard host policy for logging, resilience, and health checks', code:'builder.Services.AddOpenTelemetry()', signal:'teams drift because shared host defaults are missing', anti:'copy-pasting startup code across services with no platform baseline'},
+  config:{label:'Configuration', focus:'provider layering, options binding, reload behavior, and secret flow', scenario:'production settings differ from staging because env vars override JSON unexpectedly', code:'IOptionsMonitor<T>', signal:'effective values do not match appsettings files', anti:'assuming configuration is a single source instead of a layered chain'},
+  networking:{label:'Networking', focus:'SocketsHttpHandler, DNS refresh, HTTP/2, HTTP/3, connection pooling', scenario:'outbound calls fail after an endpoint IP rotates while old sockets remain pooled', code:'PooledConnectionLifetime', signal:'healthy app logic with stale network routes', anti:'creating new HttpClient instances per request'},
+  io:{label:'I/O', focus:'Pipelines, streams, backpressure, buffers, and file/socket throughput', scenario:'a custom protocol parser allocates heavily while reading framed messages', code:'PipeReader', signal:'allocation profiles point to repeated small buffer copies', anti:'using string-based parsing for binary or framed protocols'},
+  diagnostics:{label:'Diagnostics', focus:'EventPipe, counters, dumps, traces, and observability hooks', scenario:'a service slows down only in production and needs live investigation without restart', code:'dotnet-trace collect', signal:'you need evidence before changing runtime settings', anti:'guessing about bottlenecks without collecting counters or traces'},
+  performance:{label:'Performance', focus:'Span<T>, pooling, allocation control, benchmarking, and hotspots', scenario:'a hot serialization path regresses after adding convenience abstractions', code:'BenchmarkDotNet', signal:'allocations rise while algorithmic work stays constant', anti:'optimizing cold paths because they look low-level'},
+  interop:{label:'Interop', focus:'P/Invoke, marshaling, native memory, and ABI boundaries', scenario:'a native library call works on Windows but corrupts memory on Linux', code:'[LibraryImport]', signal:'platform-specific calling convention or marshaling mismatch', anti:'assuming C signatures map 1:1 to managed declarations'},
+  security:{label:'Security', focus:'crypto APIs, TLS, certificates, secrets, and secure defaults', scenario:'certificate validation differs across environments after a trust chain change', code:'X509Chain', signal:'the same outbound call passes locally and fails in production', anti:'turning off certificate validation to unblock deployments'},
+  build:{label:'Build & Packaging', focus:'NuGet restore, MSBuild evaluation, SDK pipeline, and artifacts', scenario:'two services compile differently because transitive package versions drift by branch', code:'Directory.Packages.props', signal:'build outputs differ without source changes', anti:'treating restore and build graphs as deterministic without pinning versions'}
+};
+
+const DOTNET_INTERVIEW_TAG_COLORS = {
+  'Direct':'color:#56d364;border-color:rgba(86,211,100,.35);background:rgba(86,211,100,.08)',
+  'Indirect':'color:#8a9db5;border-color:rgba(138,157,181,.28);background:rgba(138,157,181,.08)',
+  'Scenario':'color:#00c8ff;border-color:rgba(0,200,255,.3);background:rgba(0,200,255,.08)',
+  'Logical Twist':'color:#ff6b35;border-color:rgba(255,107,53,.3);background:rgba(255,107,53,.08)',
+  'Architecture':'color:#7b61ff;border-color:rgba(123,97,255,.34);background:rgba(123,97,255,.08)',
+  'Tradeoff':'color:#ffd700;border-color:rgba(255,215,0,.32);background:rgba(255,215,0,.08)',
+  'Production Debugging':'color:#00ffa3;border-color:rgba(0,255,163,.32);background:rgba(0,255,163,.08)',
+  '.NET 10':'color:#e3f2ff;border-color:rgba(227,242,255,.26);background:rgba(227,242,255,.08)',
+  'Performance':'color:#ff7b72;border-color:rgba(255,123,114,.32);background:rgba(255,123,114,.08)',
+  'Real World':'color:#f4b8ff;border-color:rgba(244,184,255,.28);background:rgba(244,184,255,.08)',
+  'Whiteboard':'color:#4cc9f0;border-color:rgba(76,201,240,.28);background:rgba(76,201,240,.08)',
+  'Diagnostics':'color:#a5d6ff;border-color:rgba(165,214,255,.28);background:rgba(165,214,255,.08)'
+};
+
+const DOTNET_INTERVIEW_TEMPLATES = {
+  'iq-junior': [
+    domain => ({
+      tags:['Direct', domain.label, '.NET 10'],
+      q:`What does ${domain.label} mean inside .NET, and why should an application engineer care about it?`,
+      a:`${domain.label} matters because it controls ${domain.focus}. An engineer should care because this affects production behavior, not just internals trivia. In simple terms: if you understand ${domain.label}, you can explain why a .NET app starts, runs, allocates, blocks, or fails the way it does. In .NET 10 conversations, tie it back to how platform defaults, diagnostics, and runtime features improve measurable behavior instead of memorizing names only.`
+    }),
+    domain => ({
+      tags:['Direct', 'Use Case', domain.label],
+      q:`Give one simple use case where understanding ${domain.label} helps you write better code.`,
+      a:`A practical use case is ${domain.scenario}. Understanding ${domain.label} lets you choose the right API or runtime setting early. For example, you would look at ${domain.code} or a related runtime feature because the underlying behavior is controlled by ${domain.label}, not by surface syntax alone.`
+    }),
+    domain => ({
+      tags:['Scenario', 'Production Debugging', domain.label],
+      q:`You are asked to investigate ${domain.scenario}. What would you check first?`,
+      a:`Start with observable evidence. First confirm the symptom through logs, counters, or traces. Then inspect the runtime area most closely tied to ${domain.label}. The first signal to verify is that ${domain.signal}. Only after that should you change code or runtime settings. This sequence shows discipline: measure, narrow, then fix.`
+    }),
+    domain => ({
+      tags:['Logical Twist', 'Tradeoff', domain.label],
+      q:`A teammate says, "We do not need to understand ${domain.label}; the framework handles it for us." Why is that weak reasoning?`,
+      a:`That statement is weak because the framework provides abstractions, but production failures still surface through runtime behavior. ${domain.label} explains the cost model and failure modes behind those abstractions. If a team ignores it, they will misread symptoms, overcorrect blindly, and struggle in interviews when asked to justify trade-offs beyond happy-path code.`
+    }),
+    domain => ({
+      tags:['Indirect', 'Architecture', domain.label],
+      q:`How would you explain ${domain.label} to a teammate without going too low-level?`,
+      a:`Explain it as the runtime boundary responsible for ${domain.focus}. Then connect it to one application outcome: throughput, latency, memory, startup, safety, or maintainability. The goal is not to dump internals; it is to show which part of the runtime owns the behavior and how that changes engineering decisions.`
+    }),
+    domain => ({
+      tags:['Whiteboard', domain.label, 'Real World'],
+      q:`On a whiteboard, what flow would you draw to explain ${domain.label} during an interview?`,
+      a:`Draw the application entry point, then the runtime boundary for ${domain.label}, then the observable result. Keep the flow simple: input, runtime processing, output. Add one production example such as ${domain.scenario}. This shows you can communicate the concept clearly under interview pressure.`
+    }),
+    domain => ({
+      tags:['Direct', 'Diagnostics', domain.label],
+      q:`Which signal or tool helps you verify whether ${domain.label} is involved in a problem?`,
+      a:`Use the tool closest to the runtime symptom: counters, traces, dumps, or targeted logs. A strong answer mentions that the first clue is ${domain.signal}. Then name a fitting tool or API, such as ${domain.code}, EventPipe tooling, benchmark traces, or host diagnostics depending on the domain.`
+    }),
+    domain => ({
+      tags:['Scenario', '.NET 10', 'Production Debugging'],
+      q:`How would you speak about ${domain.label} in a modern .NET 10 interview instead of giving an old .NET Framework answer?`,
+      a:`Anchor the answer in current runtime behavior and platform defaults. Mention modern hosting, diagnostics, service defaults, source-generated paths, or updated runtime optimizations where relevant. The important part is to explain what changed operationally, not to recite old framework-era rules that no longer fit cross-platform .NET.`
+    }),
+    domain => ({
+      tags:['Logical Twist', domain.label, 'Tradeoff'],
+      q:`What is one common mistake teams make when they first start learning ${domain.label}?`,
+      a:`A frequent mistake is ${domain.anti}. Teams often over-trust abstractions or optimize the wrong layer. A better approach is to connect ${domain.label} to measured behavior, confirm the bottleneck, and only then adjust code, configuration, or runtime settings.`
+    })
+  ],
+  'iq-mid': [
+    domain => ({
+      tags:['Scenario', 'Production Debugging', domain.label],
+      q:`A production incident points to ${domain.label}. Walk through your investigation order.`,
+      a:`My order is: confirm the symptom, capture lightweight evidence, correlate it with the runtime area, then narrow to one hypothesis at a time. For ${domain.label}, that means I would start from ${domain.signal}, validate it with counters or traces, inspect the code paths using ${domain.code}, and only then test a fix. This avoids changing two variables at once during incident response.`
+    }),
+    domain => ({
+      tags:['Tradeoff', 'Architecture', domain.label],
+      q:`What trade-off would you explain before changing a system because of ${domain.label}?`,
+      a:`I would explain that tuning ${domain.label} usually improves one axis while risking another. For example, you may gain throughput but increase startup time, reduce allocations but add complexity, or simplify hosting while limiting flexibility. The right answer depends on workload shape, operational constraints, and how often the path is exercised.`
+    }),
+    domain => ({
+      tags:['Indirect', '.NET 10', domain.label],
+      q:`Which modern .NET 10 capability changes how you talk about ${domain.label} in interviews?`,
+      a:`The best answer ties ${domain.label} to current runtime and platform capabilities such as better diagnostics, tiered compilation behavior, host defaults, source generation, or improved libraries. The point is to show you know the current engineering model rather than giving a historical answer frozen in older framework versions.`
+    }),
+    domain => ({
+      tags:['Scenario', 'Diagnostics', domain.label],
+      q:`If dashboards suggest ${domain.label} is the bottleneck, what evidence would prove it and what evidence would disprove it?`,
+      a:`To prove it, I would want direct runtime evidence around ${domain.signal}. To disprove it, I would show that the symptom remains unchanged even when I inspect or isolate the ${domain.label} path. This matters in interviews because strong engineers know how to falsify a theory, not just argue for one.`
+    }),
+    domain => ({
+      tags:['Logical Twist', 'Architecture', domain.label],
+      q:`When can a change that looks correct for ${domain.label} still make the system worse overall?`,
+      a:`It can happen when the local improvement shifts cost to another boundary. For example, better throughput in one runtime area can raise memory pressure, debugging difficulty, or operational drift somewhere else. That is why I describe ${domain.label} as part of a whole execution model instead of an isolated trick.`
+    }),
+    domain => ({
+      tags:['Use Case', 'Real World', domain.label],
+      q:`Give a realistic platform or product scenario where teams publicly talk about concerns close to ${domain.label}.`,
+      a:`Publicly available talks and docs from cloud-scale platforms often discuss issues adjacent to ${domain.label}: latency budgets, connection management, memory pressure, compilation, or diagnostics. The exact internal implementation may be private, but the engineering pattern is public: teams invest in the runtime area because it directly shapes reliability, cost, or throughput.`
+    }),
+    domain => ({
+      tags:['Direct', 'Whiteboard', domain.label],
+      q:`How would you whiteboard the boundary between application code and ${domain.label}?`,
+      a:`I would draw application code first, then the runtime or framework boundary owned by ${domain.label}, then the external effect such as network I/O, memory pressure, native calls, or startup latency. I would mark where measurement happens and where the failure signal appears. That shows I understand both the boundary and the observable outcome.`
+    }),
+    domain => ({
+      tags:['Performance', 'Tradeoff', domain.label],
+      q:`What performance misconception appears often around ${domain.label}?`,
+      a:`A common misconception is assuming that lower-level automatically means faster. With ${domain.label}, faster only matters if the path is hot, measurable, and aligned to the workload. Otherwise you just trade maintainability for theoretical gains. The correct answer includes measurement and context.`
+    }),
+    domain => ({
+      tags:['Scenario', '.NET 10', 'Architecture'],
+      q:`How would you standardize team guidance around ${domain.label} for a .NET 10 platform?`,
+      a:`I would define one default policy, one diagnostic path, and one escalation rule. The policy says how teams should use the feature by default. The diagnostic path says what signal to capture first. The escalation rule says when platform engineers should step in. This keeps runtime decisions consistent across services instead of tribal.`
+    })
+  ],
+  'iq-senior': [
+    domain => ({
+      tags:['Architecture', 'Scenario', domain.label],
+      q:`Design a senior-level mitigation plan for ${domain.scenario}. What would you change immediately and what would you change later?`,
+      a:`Immediately, I would reduce blast radius by addressing the most observable symptom around ${domain.signal}. Then I would add targeted diagnostics and ship the smallest safe fix, often around ${domain.code}. Later, I would standardize the pattern, add tests or benchmarks, and document the runtime rule so the same domain-level issue does not return in a different service.`
+    }),
+    domain => ({
+      tags:['Logical Twist', 'Production Debugging', domain.label],
+      q:`How would you respond if logs point at ${domain.label}, but the real issue turns out to be elsewhere?`,
+      a:`I would treat ${domain.label} as a hypothesis, not a conclusion. Senior debugging means correlating multiple signals before acting. If the data shows the symptom is downstream of another cause, I pivot quickly, explain why the original signal was misleading, and capture that learning in the runbook so the team avoids false positives next time.`
+    }),
+    domain => ({
+      tags:['Tradeoff', 'Performance', domain.label],
+      q:`Which trade-off around ${domain.label} separates senior engineers from intermediate engineers?`,
+      a:`Senior engineers explain the second-order cost. They know that improving ${domain.label} can affect deployment shape, debugging quality, portability, memory layout, latency distribution, or team usability. The differentiator is not knowing the mechanism only; it is being able to say when the mechanism is worth the organizational cost.`
+    }),
+    domain => ({
+      tags:['Architecture', '.NET 10', domain.label],
+      q:`How would you incorporate ${domain.label} into a reusable .NET 10 platform baseline?`,
+      a:`I would encode the default through shared hosting or infrastructure packages, expose the safe tuning knobs, and document the evidence path. In .NET 10 terms, this means making runtime behavior visible through modern diagnostics and platform defaults instead of relying on every service team to rediscover the same internals decision.`
+    }),
+    domain => ({
+      tags:['Scenario', 'Real World', domain.label],
+      q:`Name a real-world system pattern where ${domain.label} clearly matters even if the internal code is not public.`,
+      a:`Any high-scale API platform, streaming system, commerce backend, or developer tooling service has to manage concerns adjacent to ${domain.label}. Public docs and conference material often discuss latency, allocation, startup, DNS refresh, certificate validation, build graphs, or diagnostics. The exact code may be private, but the runtime pressure is public and makes the domain relevant.`
+    }),
+    domain => ({
+      tags:['Whiteboard', 'Architecture', domain.label],
+      q:`What diagram would you draw to teach a team how ${domain.label} affects production behavior?`,
+      a:`I would draw a left-to-right flow: application request, framework boundary, ${domain.label} processing, runtime effect, external symptom. Then I would animate the decision path verbally: where work queues, buffering, allocation, blocking, or compilation appear, and where counters or traces can verify it. This is the kind of whiteboard answer that interviewers remember.`
+    }),
+    domain => ({
+      tags:['Production Debugging', 'Diagnostics', domain.label],
+      q:`Which runbook entry should always exist for incidents related to ${domain.label}?`,
+      a:`The runbook should name the primary symptom, the first signal to capture, the safest temporary mitigation, the toolset to use, and the rollback condition. For ${domain.label}, I would explicitly include how to confirm ${domain.signal} and which runtime artifact or API is most relevant before code changes are attempted.`
+    }),
+    domain => ({
+      tags:['Logical Twist', 'Tradeoff', '.NET 10'],
+      q:`Why can copying an optimization from one .NET service into another be a mistake when ${domain.label} is involved?`,
+      a:`Because the optimization may have been valid for one workload shape only. Different request patterns, payload sizes, allocation profiles, plugin models, or deployment environments change the correct answer. Senior engineers reuse principles, not cargo-cult fixes. ${domain.label} has to be revalidated against the new system.`
+    }),
+    domain => ({
+      tags:['Scenario', 'Architecture', 'Performance'],
+      q:`You need both deep observability and strong performance around ${domain.label}. How do you balance the two?`,
+      a:`I would keep low-cost signals always on, use heavier tools only during targeted windows, and prefer structured evidence over permanent verbose logging. The balance comes from understanding the cost profile of the runtime feature and designing diagnostics that scale with the incident, not with every request.`
+    })
+  ],
+  'iq-architect': [
+    domain => ({
+      tags:['Architecture', 'Scenario', domain.label],
+      q:`At platform level, how would you define standards for ${domain.label} across many .NET teams?`,
+      a:`I would define one golden path, one exception process, and one measurement contract. The golden path gives teams safe defaults for ${domain.label}. The exception process prevents ad hoc tuning. The measurement contract forces teams to justify deviations with data. That is how platform architecture avoids runtime chaos at scale.`
+    }),
+    domain => ({
+      tags:['Logical Twist', 'Architecture', 'Tradeoff'],
+      q:`When should an architect refuse a runtime-level optimization request involving ${domain.label}?`,
+      a:`I would refuse when the team cannot prove the pain, when the optimization complicates ownership without measurable gain, or when the request hides a higher-level design flaw. Runtime changes are powerful, but they are not a substitute for clean architecture, sane traffic patterns, or disciplined diagnostics.`
+    }),
+    domain => ({
+      tags:['Scenario', '.NET 10', 'Real World'],
+      q:`How would you explain the business value of investing in ${domain.label} knowledge for a .NET 10 platform team?`,
+      a:`The business value comes from fewer incidents, faster diagnosis, better cost control, and stronger engineering consistency. Teams that understand ${domain.label} avoid repeating the same runtime mistakes and can reason about modern .NET behavior more precisely during reviews, migrations, and capacity planning.`
+    }),
+    domain => ({
+      tags:['Whiteboard', 'Architecture', domain.label],
+      q:`If an interview panel asks you to whiteboard the platform implications of ${domain.label}, what is your structure?`,
+      a:`I structure it as policy, observability, guardrails, and escape hatches. Policy says the default. Observability says how to verify it. Guardrails stop common misuse. Escape hatches define when specialized workloads can diverge. This framing turns ${domain.label} from a low-level detail into platform architecture.`
+    }),
+    domain => ({
+      tags:['Tradeoff', 'Real World', domain.label],
+      q:`Which trade-off around ${domain.label} matters most when a company operates many services, not just one?`,
+      a:`Consistency versus local optimization. At scale, the wrong local optimization creates operational fragmentation. Architects choose defaults that are good enough for most workloads, then allow limited exceptions. That is usually more valuable than allowing every team to hand-tune ${domain.label} independently.`
+    }),
+    domain => ({
+      tags:['Production Debugging', 'Architecture', domain.label],
+      q:`How do you prevent repeated incidents related to ${domain.label} across multiple teams?`,
+      a:`After the first incident, I would convert the fix into platform guidance: shared libraries, templates, dashboards, alerts, and a short runbook. Then I would teach the failure mode using the exact evidence trail. The goal is not just to fix one service; it is to remove the class of failure from the platform where possible.`
+    }),
+    domain => ({
+      tags:['Logical Twist', 'Whiteboard', domain.label],
+      q:`An interviewer asks for the "best" approach to ${domain.label}. How do you answer without sounding vague?`,
+      a:`I say there is no universal best approach without workload context, then I state the decision variables clearly: latency goals, memory limits, deployment model, developer ergonomics, debugging needs, and production evidence. That answer is not vague; it is disciplined architecture reasoning.`
+    }),
+    domain => ({
+      tags:['Scenario', 'Architecture', '.NET 10'],
+      q:`You are modernizing a mixed fleet to current .NET. How does ${domain.label} affect migration strategy?`,
+      a:`Migration strategy should separate language changes, host changes, runtime changes, and diagnostics changes. ${domain.label} often changes the operational behavior enough that you need side-by-side evidence before rollout. I would establish baselines first, migrate incrementally, and compare runtime signals before broad adoption.`
+    }),
+    domain => ({
+      tags:['Real World', 'Architecture', 'Tradeoff'],
+      q:`Why do publicly documented high-scale .NET systems invest in runtime and internals literacy instead of staying purely at framework level?`,
+      a:`Because high-scale systems eventually run into runtime-shaped limits: memory, compilation, thread scheduling, connection reuse, native boundaries, build determinism, or diagnostics overhead. Public case studies may not reveal every internal implementation, but they consistently show that platform teams need internals literacy to keep services fast, stable, and operable.`
+    })
+  ]
+};
+
+const DOTNET_INTERVIEW_CACHE = new Map();
+
+// ═══════════════════════════════════════════════════════════
+// RENDER ENGINE
+// ═══════════════════════════════════════════════════════════
+let curCh=-1, curTopic=null, visited=new Set();
+
+function buildNav(){
+  const nav=document.getElementById('nav');
+  CHS.forEach((ch,i)=>{
+    const el=document.createElement('div');
+    el.className='ci';el.id=`ci${i}`;
+    el.innerHTML=`
+      <div class="ch" onclick="selectCh(${i})">
+        <div class="cnum" style="background:${ch.bg};color:${ch.c}">${ch.n}</div>
+        <div class="ctitle">${ch.title}</div>
+        <div class="carr">▶</div>
+      </div>
+      <div class="tl">
+        ${ch.topics.map(t=>`
+          <div class="ti" id="n${t.id}" onclick="selectTopic('${t.id}',${i})">${t.icon} ${t.title}</div>
+        `).join('')}
+      </div>`;
+    nav.appendChild(el);
+  });
+}
+
+function selectCh(i){
+  curCh=i;
+  document.querySelectorAll('.ci').forEach((el,j)=>{
+    el.classList.toggle('open',j===i);
+    el.querySelector('.ch').classList.toggle('act',j===i);
+  });
+  document.getElementById('welcome').style.display='none';
+  document.getElementById('mcon').style.display='block';
+
+  const ch=CHS[i];
+  const pills=ch.tags.map(t=>`<span class="chp" style="color:${ch.c};border-color:${ch.c}44;background:${ch.bg}">${t}</span>`).join('');
+  const cards=ch.topics.map(t=>{
+    const tags=t.tags.map(tg=>{
+      const c=tg.includes('Expert')?'#7b61ff':tg.includes('Adv')?'#ff6b35':tg.includes('Core')?'#00c8ff':'#8a9db5';
+      return `<span class="tct" style="color:${c};border-color:${c}33">${tg}</span>`;
+    }).join('');
+    return `<div class="tc" id="c${t.id}" onclick="selectTopic('${t.id}',${i})">
+      <div class="tc-icon">${t.icon}</div>
+      <div class="tc-body">
+        <div class="tc-title">${t.title}</div>
+        <div class="tc-desc">${t.desc}</div>
+        <div class="tc-tags">${tags}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('mcon').innerHTML=`
+    <div class="ch-hero">
+      <div class="ch-hero-tag" style="color:${ch.c}">Chapter ${ch.n} — ${ch.topics.length} Topics</div>
+      <div class="ch-hero-title" style="color:${ch.c}">${ch.icon} ${ch.title}</div>
+      <div class="ch-hero-desc">${ch.desc}</div>
+      <div class="ch-hero-pills">${pills}</div>
+    </div>
+    <div class="tgrid">${cards}</div>`;
+}
+
+function selectTopic(id,chi){
+  if(chi!==curCh)selectCh(chi);
+  curTopic=id;
+  visited.add(id);
+  updateProg();
+
+  document.querySelectorAll('.tc').forEach(el=>el.classList.remove('act'));
+  document.querySelectorAll('.ti').forEach(el=>el.classList.remove('act'));
+  const c=document.getElementById('c'+id);if(c)c.classList.add('act');
+  const n=document.getElementById('n'+id);if(n)n.classList.add('act');
+
+  const d=DETAILS[id];
+  if(!d){renderGeneric(id,chi);return;}
+  renderDetail(d);
+}
+
+function renderDetail(d){
+  document.getElementById('re').style.display='none';
+  document.getElementById('rcon').style.display='block';
+
+  const pills=d.pills.map(p=>`<span class="dp" style="color:${p.c};border-color:${p.c}44;background:${p.c}11">${p.t}</span>`).join('');
+  const secs=d.secs.map(renderSec).join('');
+  const qa=renderQASection(d.title);
+
+  document.getElementById('rcon').innerHTML=`
+    <div class="dc">
+      <div class="d-bread">${d.bread}</div>
+      <div class="d-title">${d.title}</div>
+      <div class="d-sub">${d.sub}</div>
+      <div class="d-pills">${pills}</div>
+      ${secs}
+      ${qa}
+    </div>`;
+}
+
+function renderSec(s){
+  if(s.ty==='prose') return `<div class="sec"><div class="sec-t">${s.title}</div><div class="prose">${s.html}</div></div>`;
+  if(s.ty==='code') return `
+    <div class="sec">
+      <div class="cb">
+        <div class="cb-hdr">
+          <span class="cb-lang">${s.lang}</span>
+          <span class="cb-name">${s.name}</span>
+          <button class="cb-copy" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="cb-body"><pre>${s.code}</pre></div>
+      </div>
+    </div>`;
+  if(s.ty==='diagram') return `
+    <div class="sec">
+      <div class="dg">
+        <div class="dg-hdr">${s.title}</div>
+        <div class="dg-body">${s.svg}</div>
+      </div>
+    </div>`;
+  if(s.ty==='co'){
+    const cls=s.kind==='info'?'co-info':s.kind==='warn'?'co-warn':s.kind==='ok'?'co-ok':'co-err';
+    return `<div class="co ${cls}"><span class="co-ic">${s.ic}</span><span>${s.txt}</span></div>`;
+  }
+  return '';
+}
+
+function renderQASection(title){
+  const words=title.toLowerCase().replace(/<[^>]*>/g,'').split(/\s+/);
+  const rel=QA.filter(q=>{
+    const text=(q.q+q.a+q.tag).toLowerCase();
+    return words.some(w=>w.length>3&&text.includes(w));
+  }).slice(0,4);
+  if(!rel.length)return '';
+  const lcMap={b:'lv-b',i:'lv-i',a:'lv-a',e:'lv-e'};
+  const lbMap={b:'Basic',i:'Intermediate',a:'Advanced',e:'Expert'};
+  return `
+    <div class="sec">
+      <div class="sec-t">🎯 Interview Questions</div>
+      ${rel.map((q,i)=>`
+        <div class="qa" id="qa${i}${Date.now()}">
+          <div class="qa-q" onclick="toggleQA(this)">
+            <span class="qa-qi">Q</span>
+            <span class="qa-qt">${q.q}</span>
+            <span class="qa-lv ${lcMap[q.level]}">${lbMap[q.level]}</span>
+            <span class="qa-ar">▶</span>
+          </div>
+          <div class="qa-a"><div class="qa-at">${q.a}</div></div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function escHtml(value){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function listHtml(items){
+  return `<ul>${items.map(item=>`<li>${item}</li>`).join('')}</ul>`;
+}
+
+function codeBlockHtml(title, code, lang='csharp'){
+  return `
+    <div class="sec">
+      <div class="cb">
+        <div class="cb-hdr">
+          <span class="cb-lang">${escHtml(lang)}</span>
+          <span class="cb-name">${escHtml(title)}</span>
+          <button class="cb-copy" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="cb-body"><pre>${escHtml(code)}</pre></div>
+      </div>
+    </div>`;
+}
+
+function tableHtml(headers, rows){
+  return `
+    <div class="sec">
+      <table class="ctbl">
+        <tr>${headers.map(h=>`<th>${escHtml(h)}</th>`).join('')}</tr>
+        ${rows.map(row=>`<tr>${row.map(cell=>`<td>${cell}</td>`).join('')}</tr>`).join('')}
+      </table>
+    </div>`;
+}
+
+function calloutHtml(kind, icon, text){
+  const cls = kind === 'info' ? 'co-info' : kind === 'warn' ? 'co-warn' : kind === 'ok' ? 'co-ok' : 'co-err';
+  return `<div class="co ${cls}"><span class="co-ic">${icon}</span><span>${text}</span></div>`;
+}
+
+function splitWords(text, maxChars=18, maxLines=2){
+  const words = String(text ?? '').trim().split(/\s+/).filter(Boolean);
+  if(!words.length) return [''];
+  const lines = [];
+  let current = '';
+  for(const word of words){
+    const next = current ? `${current} ${word}` : word;
+    if(next.length <= maxChars || !current){
+      current = next;
+    }else{
+      lines.push(current);
+      current = word;
+      if(lines.length === maxLines - 1) break;
+    }
+  }
+  const used = lines.join(' ').split(/\s+/).filter(Boolean).length;
+  const remainder = words.slice(used);
+  const finalLine = (current ? [current, ...remainder.slice(1)] : remainder).join(' ');
+  if(finalLine){
+    lines.push(finalLine.length > maxChars * 1.2 ? `${finalLine.slice(0, Math.max(0, maxChars - 1)).trimEnd()}…` : finalLine);
+  }
+  return lines.slice(0,maxLines);
+}
+
+function svgTextBlock(text, x, y, fill, fontSize, maxChars=18, maxLines=2, lineHeight){
+  const lines = splitWords(text, maxChars, maxLines);
+  const lh = lineHeight || fontSize + 2;
+  const startY = y - ((lines.length - 1) * lh) / 2;
+  return `<text x="${x}" y="${y}" text-anchor="middle" fill="${fill}" font-family="'DM Mono',monospace" font-size="${fontSize}">${lines.map((line, idx)=>`<tspan x="${x}" y="${startY + (idx * lh)}">${escHtml(line)}</tspan>`).join('')}</text>`;
+}
+
+function chapterPlaybook(ch){
+  const defaults = {
+    bestFor:'understanding how the runtime, libraries, and tooling behave under real production load',
+    when:[
+      'Use this knowledge when debugging behavior that basic application code cannot explain.',
+      'Reach for it when performance, startup, memory, or hosting decisions matter.',
+      'Use it in architecture and interview discussions to explain why .NET behaves the way it does.'
+    ],
+    tradeoffs:[
+      'Lower-level runtime knowledge improves decisions, but it also increases complexity.',
+      'The right answer often depends on workload shape, not on one universal best practice.',
+      'Deep internals are useful only when tied back to observable behavior and measurement.'
+    ],
+    rules:[
+      'Measure before optimizing runtime-level behavior.',
+      'Prefer readable abstractions first, then go lower level for proven hot paths.',
+      'Keep provider, host, and runtime boundaries explicit in production code.'
+    ],
+    source:'Managed code',
+    stage:'Runtime layer',
+    output:'Observed behavior'
+  };
+
+  const byNum = {
+    "01": { bestFor:'building the mental model of what .NET is and where the runtime fits', source:'Languages + SDK', stage:'Platform fundamentals', output:'Runtime-aware app model' },
+    "02": { bestFor:'understanding how .NET layers fit together from language to SDK to runtime', source:'Language + BCL + SDK', stage:'Architecture layers', output:'Platform composition' },
+    "03": { bestFor:'reasoning about the CLR execution engine, loading, verification, and runtime services', source:'Assemblies + metadata', stage:'CoreCLR engine', output:'Managed execution' },
+    "04": { bestFor:'following source code from compiler output to IL and metadata', source:'Source + Roslyn', stage:'Compilation pipeline', output:'IL + metadata' },
+    "05": { bestFor:'explaining how methods become optimized native code at runtime', source:'IL methods', stage:'JIT + optimization', output:'Native machine code' },
+    "06": { bestFor:'understanding assemblies, manifests, metadata, and versioning boundaries', source:'Assemblies', stage:'Metadata + loading', output:'Resolved runtime identity' },
+    "07": { bestFor:'memory behavior, garbage collection, disposal, and allocation strategy', source:'Object allocations', stage:'GC + heap management', output:'Surviving managed memory' },
+    "08": { bestFor:'threading, scheduling, synchronization, and lock-free tradeoffs', source:'Work items + threads', stage:'Concurrency runtime', output:'Scheduled execution' },
+    "09": { bestFor:'async infrastructure, task scheduling, cancellation, and continuations', source:'Async methods', stage:'Task + state machine', output:'Non-blocking orchestration' },
+    "10": { bestFor:'container behavior, scopes, hosting integration, and dependency graph correctness', source:'Registrations', stage:'DI + host', output:'Resolved services' },
+    "11": { bestFor:'configuration layering, options binding, and runtime reload behavior', source:'Config providers', stage:'Binding + options', output:'Typed configuration' },
+    "12": { bestFor:'logging pipelines, enrichment, and observability decisions', source:'Log events', stage:'Logger pipeline', output:'Structured telemetry' },
+    "13": { bestFor:'stream, file, and zero-copy I/O behavior under load', source:'Bytes + streams', stage:'I/O subsystem', output:'Buffered or pipeline-driven data' },
+    "14": { bestFor:'HTTP, sockets, handlers, and protocol-level networking decisions', source:'Requests + sockets', stage:'Networking stack', output:'Transport behavior' },
+    "15": { bestFor:'profiling, tracing, dump analysis, and production diagnostics', source:'Runtime events', stage:'Diagnostics pipeline', output:'Debuggable runtime signals' },
+    "16": { bestFor:'allocation trimming, Span<T>, pooling, and measured throughput improvements', source:'Hot path code', stage:'Performance tooling', output:'Lower latency / fewer allocations' },
+    "17": { bestFor:'cryptography, certificates, secrets, and data protection architecture', source:'Sensitive data', stage:'Security APIs', output:'Protected application state' },
+    "18": { bestFor:'interop boundaries, marshaling, and native integration behavior', source:'Managed/native boundary', stage:'Interop layer', output:'Marshaled calls and buffers' },
+    "19": { bestFor:'NuGet, SDK-style builds, MSBuild, and package resolution strategy', source:'Project + package metadata', stage:'Build system', output:'Build and restore graph' },
+    "20": { bestFor:'advanced runtime extensibility such as emit, analyzers, and generators', source:'Code + runtime hooks', stage:'Metaprogramming', output:'Generated or dynamic behavior' },
+  };
+  return { ...defaults, ...(byNum[ch.n] || {}) };
+}
+
+function topicSignature(id, title){
+  const map = {
+    f1:'Runtime + BCL + SDK + CLI',
+    f2:'Framework -> Core -> unified .NET',
+    f3:'Legacy framework vs modern unified runtime',
+    a1:'Language -> Runtime -> BCL -> SDK -> App model',
+    a2:'Execution engine, GC, JIT, threading, verification',
+    a4:'dotnet build / run / publish / workload / tool',
+    r1:'Loader + GC + JIT + thread pool + exception engine',
+    r2:'AssemblyLoadContext isolation boundary',
+    c3:'Source -> syntax -> semantic model -> IL -> JIT -> native',
+    j2:'Tier-0 quick JIT -> call counting -> Tier-1 optimized JIT',
+    m1:'Gen0 / Gen1 / Gen2 / LOH / POH',
+    m5:'Dispose / finalizer / using / await using',
+    th2:'ThreadPool queue + hill climbing + work stealing',
+    tp2:'Compiler-generated async state machine',
+    tp5:'TaskScheduler + SynchronizationContext + continuation flow',
+    di2:'Transient / Scoped / Singleton',
+    cf2:'IOptions / IOptionsSnapshot / IOptionsMonitor',
+    lg4:'LoggerMessage source generation',
+    io5:'PipeReader / PipeWriter / backpressure',
+    net1:'HttpClient + SocketsHttpHandler + connection pool',
+    dg2:'dotnet-trace / dotnet-counters / PerfView',
+    p2:'Span<T> / Memory<T> / stackalloc',
+    ni2:'LibraryImport source-generated interop',
+    rt5:'IIncrementalGenerator + syntax provider'
+  };
+  return map[id] || `${title} in .NET 10 / C# 14`;
+}
+
+function topicCode(id, title){
+  const map = {
+    f1:`// .NET 10 platform basics\nConsole.WriteLine(RuntimeInformation.FrameworkDescription);\nConsole.WriteLine(Environment.Version);\n\nvar sdkVersion = Environment.GetEnvironmentVariable("DOTNET_ROOT");\nConsole.WriteLine($".NET root: {sdkVersion}");`,
+    f2:`// Choosing the modern unified runtime target\n<Project Sdk="Microsoft.NET.Sdk">\n  <PropertyGroup>\n    <TargetFramework>net10.0</TargetFramework>\n    <Nullable>enable</Nullable>\n    <ImplicitUsings>enable</ImplicitUsings>\n  </PropertyGroup>\n</Project>`,
+    f3:`// Multi-targeting when migrating from .NET Framework style libraries\n<TargetFrameworks>net48;net10.0</TargetFrameworks>\n\n#if NET10_0\nConsole.WriteLine("Modern unified .NET path");\n#else\nConsole.WriteLine("Legacy compatibility path");\n#endif`,
+    f4:`using System.Runtime.InteropServices;\n\nConsole.WriteLine(RuntimeInformation.OSDescription);\nConsole.WriteLine(RuntimeInformation.ProcessArchitecture);\nConsole.WriteLine(RuntimeInformation.RuntimeIdentifier);`,
+    f5:`[LibraryImport("kernel32", SetLastError = true)]\nprivate static partial uint GetTickCount();\n\nvar managedTime = DateTime.UtcNow;\nvar nativeTime = GetTickCount();\nConsole.WriteLine($"{managedTime:o} / native tick: {nativeTime}");`,
+    a1:`var host = Host.CreateApplicationBuilder(args);\n\n// Language + app model + runtime + libraries working together\nhost.Services.AddLogging();\nhost.Services.AddOptions<AppOptions>()\n    .Bind(host.Configuration.GetSection("App"));\n\nusing var app = host.Build();\nawait app.RunAsync();`,
+    a3:`var json = JsonSerializer.Serialize(new { Name = ".NET", Version = 10 });\nusing var client = new HttpClient();\nvar bytes = Encoding.UTF8.GetBytes(json);\nConsole.WriteLine(bytes.Length);`,
+    a4:`dotnet --info\ndotnet workload list\ndotnet tool list -g\ndotnet build -c Release\ndotnet publish -c Release -r linux-x64 --self-contained false`,
+    a5:`Console.WriteLine(RuntimeInformation.FrameworkDescription); // runtime\nConsole.WriteLine(AppContext.BaseDirectory);              // app + deps\n// SDK is used at build time, runtime is used at execution time.`,
+    r1:`Console.WriteLine($"Framework: {RuntimeInformation.FrameworkDescription}");\nConsole.WriteLine($"64-bit process: {Environment.Is64BitProcess}");\nConsole.WriteLine($"GC latency mode: {GCSettings.LatencyMode}");`,
+    r2:`sealed class PluginLoadContext : AssemblyLoadContext\n{\n    public PluginLoadContext() : base(isCollectible: true) {}\n    protected override Assembly? Load(AssemblyName assemblyName) => null;\n}\n\nvar alc = new PluginLoadContext();\nvar asm = alc.LoadFromAssemblyPath(pluginPath);`,
+    r3:`var type = typeof(Dictionary<string, int>);\nConsole.WriteLine(type.TypeHandle.Value);\nConsole.WriteLine(type.AssemblyQualifiedName);`,
+    r4:`ThreadPool.GetAvailableThreads(out var workers, out var io);\nConsole.WriteLine($"Available worker threads: {workers}");`,
+    r5:`var isFullyTrusted = AppDomain.CurrentDomain.IsFullyTrusted;\nConsole.WriteLine($"Fully trusted: {isFullyTrusted}");`,
+    c1:`using Microsoft.CodeAnalysis.CSharp;\n\nvar tree = CSharpSyntaxTree.ParseText("int Add(int a,int b)=>a+b;");\nvar root = await tree.GetRootAsync();\nConsole.WriteLine(root.Kind());`,
+    c3:`// Source -> IL -> native mental model\nvar sum = Add(3, 4);\nConsole.WriteLine(sum);\n\nstatic int Add(int a, int b) => a + b;`,
+    c4:`// Use SharpLab or ildasm for real IL inspection\nvar method = typeof(string).GetMethod(nameof(string.StartsWith), [typeof(string)]);\nConsole.WriteLine(method);`,
+    c5:`var asm = typeof(string).Assembly;\nforeach (var module in asm.Modules)\n    Console.WriteLine(module.Name);`,
+    j1:`[MethodImpl(MethodImplOptions.AggressiveOptimization)]\nstatic int Sum(ReadOnlySpan<int> values)\n{\n    var total = 0;\n    foreach (var value in values) total += value;\n    return total;\n}`,
+    j2:`[MethodImpl(MethodImplOptions.AggressiveOptimization)]\nstatic double Compute(ReadOnlySpan<double> values)\n{\n    double sum = 0;\n    foreach (var v in values) sum += v;\n    return sum;\n}\n\n// DOTNET_TieredPGO=1 enables dynamic PGO`,
+    j3:`// Dynamic PGO works best on stable hot paths.\nfor (var i = 0; i < 10_000; i++)\n    total += prices[i % prices.Length];`,
+    j4:`[MethodImpl(MethodImplOptions.AggressiveInlining)]\nstatic int FastAdd(int a, int b) => a + b;`,
+    j5:`if (Avx2.IsSupported)\n{\n    Console.WriteLine("AVX2 path enabled");\n}`,
+    j6:`dotnet publish -c Release -r linux-x64 -p:PublishAot=true`,
+    as1:`var asm = Assembly.GetExecutingAssembly();\nConsole.WriteLine(asm.FullName);\nConsole.WriteLine(asm.Location);`,
+    as2:`<Version>10.0.0</Version>\n<AssemblyVersion>10.0.0.0</AssemblyVersion>\n<FileVersion>10.0.0.0</FileVersion>`,
+    as3:`sn -k key.snk\n// Use strong naming only when assembly identity requirements justify it.`,
+    as4:`var members = typeof(List<int>).GetMembers(BindingFlags.Public | BindingFlags.Instance);\nConsole.WriteLine(members.Length);`,
+    as5:`var assemblyName = new AssemblyName("DynamicDemo");\nvar assembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);`,
+    m1:`Console.WriteLine(GC.CollectionCount(0));\nConsole.WriteLine(GC.GetTotalMemory(false));\nvar info = GC.GetGCMemoryInfo();\nConsole.WriteLine(info.HeapSizeBytes);`,
+    m3:`Console.WriteLine(GCSettings.IsServerGC);\nConsole.WriteLine(GCSettings.LatencyMode);`,
+    m4:`var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);\ntry { Console.WriteLine(handle.AddrOfPinnedObject()); }\nfinally { handle.Free(); }`,
+    m5:`await using var stream = File.OpenRead(path);\nusing var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));`,
+    m6:`var rented = ArrayPool<byte>.Shared.Rent(4096);\ntry { /* use buffer */ }\nfinally { ArrayPool<byte>.Shared.Return(rented); }`,
+    m7:`Console.WriteLine(GC.GetTotalAllocatedBytes());\nConsole.WriteLine(GC.GetGCMemoryInfo().FragmentedBytes);`,
+    th1:`var thread = new Thread(() => Console.WriteLine("worker"));\nthread.IsBackground = true;\nthread.Start();`,
+    th2:`ThreadPool.QueueUserWorkItem(_ => Console.WriteLine("queued work"));\nThreadPool.GetMinThreads(out var minWorkers, out _);`,
+    th3:`lock (_gate)\n{\n    _count++;\n}`,
+    th4:`Interlocked.Increment(ref _count);\nvar snapshot = Volatile.Read(ref _state);`,
+    th5:`var channel = Channel.CreateBounded<string>(100);\nawait channel.Writer.WriteAsync("work");`,
+    th6:`while (true)\n{\n    var current = Volatile.Read(ref _value);\n    if (Interlocked.CompareExchange(ref _value, current + 1, current) == current)\n        break;\n}`,
+    tp1:`var task = Task.Run(() => Compute());\nvar result = await task;`,
+    tp2:`async Task<int> LoadAsync()\n{\n    await Task.Delay(50);\n    return 42;\n}`,
+    tp3:`await foreach (var item in ReadItemsAsync(ct))\n{\n    Console.WriteLine(item);\n}`,
+    tp4:`using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));\nawait Task.Delay(1000, cts.Token);`,
+    tp5:`await SomeLibraryCall().ConfigureAwait(false);`,
+    tp6:`public ValueTask<int> ReadFastAsync() => ValueTask.FromResult(42);`,
+    di1:`var builder = Host.CreateApplicationBuilder(args);\nbuilder.Services.AddSingleton<Clock>();\nusing var host = builder.Build();`,
+    di2:`services.AddTransient<IFormatter, JsonFormatter>();\nservices.AddScoped<RequestContext>();\nservices.AddSingleton<Clock>();`,
+    di3:`await using var scope = host.Services.CreateAsyncScope();\nvar db = scope.ServiceProvider.GetRequiredService<AppDbContext>();`,
+    di4:`services.AddKeyedScoped<ICache, BigCache>("big");`,
+    di5:`services.AddHostedService<SyncWorker>();`,
+    cf1:`var value = builder.Configuration["ConnectionStrings:Main"];`,
+    cf2:`services.AddOptions<AppOptions>()\n    .BindConfiguration("App")\n    .ValidateDataAnnotations();`,
+    cf3:`services.AddOptions<AppOptions>()\n    .Validate(o => o.TimeoutSeconds > 0, "Timeout must be positive")\n    .ValidateOnStart();`,
+    cf4:`ChangeToken.OnChange(() => config.GetReloadToken(), () => Console.WriteLine("Config changed"));`,
+    cf5:`dotnet user-secrets set "App:ApiKey" "secret-value"`,
+    lg1:`var logger = loggerFactory.CreateLogger("startup");\nlogger.LogInformation("Application booted");`,
+    lg2:`logger.LogInformation("Processed {Count} records for {TenantId}", count, tenantId);`,
+    lg3:`using (logger.BeginScope(new Dictionary<string, object>{{"TraceId", traceId}}))\n    logger.LogInformation("Scoped event");`,
+    lg4:`[LoggerMessage(EventId = 12, Level = LogLevel.Information, Message = "Handled {Path}")]
+static partial void RequestHandled(ILogger logger, string path);`,
+    lg5:`builder.Services.AddOpenTelemetry().WithTracing(t => t.AddSource("app"));`,
+    io1:`await using var stream = File.OpenRead(path);\nvar buffer = new byte[1024];\nvar read = await stream.ReadAsync(buffer);`,
+    io2:`var bytes = new byte[512];\nawait RandomAccess.ReadAsync(handle, bytes, 0);`,
+    io3:`using var mmf = MemoryMappedFile.CreateFromFile(path, FileMode.Open);`,
+    io4:`using var watcher = new FileSystemWatcher(path) { EnableRaisingEvents = true };`,
+    io5:`var reader = PipeReader.Create(stream);\nvar result = await reader.ReadAsync();`,
+    net1:`services.AddHttpClient("api")\n    .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler\n    {\n        PooledConnectionLifetime = TimeSpan.FromMinutes(2)\n    });`,
+    net2:`public sealed class LoggingHandler(ILogger<LoggingHandler> logger) : DelegatingHandler\n{\n    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)\n    {\n        logger.LogInformation("{Method} {Uri}", request.Method, request.RequestUri);\n        return await base.SendAsync(request, ct);\n    }\n}`,
+    net3:`using var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);\nawait socket.ConnectAsync(host, port);`,
+    net4:`Console.WriteLine("HTTP/3 and QUIC require platform + server support.");`,
+    net5:`using var ws = new ClientWebSocket();\nawait ws.ConnectAsync(new Uri(url), ct);`,
+    dg1:`[EventSource(Name = "Samples.Runtime")]\nsealed class RuntimeEvents : EventSource { public static RuntimeEvents Log = new(); }`,
+    dg2:`dotnet-counters monitor --process-id 1234\n\ndotnet-trace collect --process-id 1234`,
+    dg3:`dotnet-dump collect -p 1234\n\ndotnet-dump analyze dump.dmp`,
+    dg4:`using var activity = source.StartActivity("http.request");`,
+    dg5:`DiagnosticListener.AllListeners.Subscribe(new ListenerObserver());`,
+    p1:`var before = GC.GetTotalAllocatedBytes();\nRunHotPath();\nvar after = GC.GetTotalAllocatedBytes();\nConsole.WriteLine(after - before);`,
+    p2:`ReadOnlySpan<char> span = input.AsSpan().Trim();\nvar slash = span.IndexOf('/');`,
+    p3:`var stream = manager.GetStream();\nawait stream.WriteAsync(buffer);`,
+    p4:`[MemoryDiagnoser]\npublic class ParsingBenchmarks { }`,
+    p5:`var sum = items.Where(x => x > 0).Sum();`,
+    p6:`unsafe { fixed (byte* p = buffer) { Console.WriteLine((nint)p); } }`,
+    sec1:`using var sha = SHA256.Create();\nvar hash = sha.ComputeHash(data);`,
+    sec2:`var protector = provider.CreateProtector("cookies");\nvar protectedValue = protector.Protect("secret");`,
+    sec3:`using var cert = new X509Certificate2(path, password);`,
+    sec4:`var secret = builder.Configuration["Secrets:ApiKey"];`,
+    ni1:`[DllImport("user32.dll", CharSet = CharSet.Unicode)]\nstatic extern int MessageBox(IntPtr hWnd, string text, string caption, uint type);`,
+    ni2:`[LibraryImport("kernel32")] private static partial uint GetTickCount();`,
+    ni3:`[StructLayout(LayoutKind.Sequential)]\nstruct NativePoint { public int X; public int Y; }`,
+    ni4:`Console.WriteLine("COM interop should be isolated behind dedicated adapters.");`,
+    ni5:`var ptr = NativeMemory.Alloc(1024);\ntry { /* use native memory */ }\nfinally { NativeMemory.Free(ptr); }`,
+    pkg1:`dotnet restore\n\ndotnet list package --include-transitive`,
+    pkg2:`<Project Sdk="Microsoft.NET.Sdk">\n  <PropertyGroup>\n    <TargetFramework>net10.0</TargetFramework>\n  </PropertyGroup>\n</Project>`,
+    pkg3:`<Target Name="BeforeBuild">\n  <Message Text="Building..." Importance="High" />\n</Target>`,
+    pkg4:`<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>`,
+    pkg5:`public sealed class StampBuildTask : Task\n{\n    public override bool Execute() { Log.LogMessage("Stamped"); return true; }\n}`,
+    rt1:`Console.WriteLine("Runtime hosting is usually reserved for specialized hosts and embedding scenarios.");`,
+    rt2:`var dm = new DynamicMethod("Square", typeof(int), [typeof(int)]);`,
+    rt3:`Expression<Func<int,int>> expr = x => x + 1;\nConsole.WriteLine(expr);`,
+    rt4:`[DiagnosticAnalyzer(LanguageNames.CSharp)]\npublic sealed class SampleAnalyzer : DiagnosticAnalyzer { }`,
+    rt5:`[Generator]\npublic sealed class SampleGenerator : IIncrementalGenerator\n{\n    public void Initialize(IncrementalGeneratorInitializationContext context) { }\n}`,
+  };
+  return map[id] || `// ${title} in .NET 10 / C# 14\nConsole.WriteLine("${title}");`;
+}
+
+function topicScenario(id, title){
+  const map = {
+    a1:'A team needs to explain to new developers how the C# language, BCL, runtime, SDK, and app host fit together without mixing responsibilities.',
+    a4:'A platform engineer has to debug why build agents and developer machines behave differently because workloads, SDKs, or global tools are mismatched.',
+    r2:'A plugin system must load customer extensions safely and unload them without restarting the process.',
+    c3:'An interview or production debugging session requires explaining the full journey from source code to executed machine instructions.',
+    j2:'A low-latency API wants fast startup and good steady-state throughput without hand-tuning every method.',
+    m1:'An API allocates heavily under request bursts and the team needs to understand where those objects are living and dying.',
+    tp2:'A developer is confused about why async code does not block a thread while waiting on I/O.',
+    di2:'A service has lifetime bugs because scoped dependencies are being captured by singletons.',
+    net1:'A production service is seeing stale DNS entries or socket exhaustion and the team needs to understand HttpClient internals.',
+    io5:'A high-throughput parser needs backpressure and zero-copy buffer handling instead of manual stream loops.',
+    p2:'A hot parsing path is allocating too many temporary strings and needs a Span-based rewrite.'
+  };
+  return map[id] || `${title} becomes useful when the team needs to connect runtime behavior to a real operational, performance, or architecture decision.`;
+}
+
+function topicInterview(id, title){
+  const map = {
+    a1:{q:'How would you explain the main architecture layers of .NET?',a:'Start with the language and compiler, then the runtime and JIT/GC services, then the BCL and higher-level frameworks, then the SDK and host tooling. The key point is that each layer solves a different responsibility.'},
+    r2:{q:'What replaced AppDomain as the real isolation boundary in modern .NET?',a:'AssemblyLoadContext. In modern .NET, AppDomain is mostly a compatibility surface, while AssemblyLoadContext handles loading isolation and unloadable plugin scenarios.'},
+    c3:{q:'What are the major stages in the .NET compilation pipeline?',a:'Source code is parsed and compiled by Roslyn into IL and metadata. Then the CLR loads the assembly, and the JIT or AOT pipeline turns IL into native code for the target platform.'},
+    j2:{q:'Why does tiered compilation matter in .NET 10?',a:'Because it balances startup and throughput. Methods start with quick Tier-0 code and are recompiled as hotter Tier-1 code with better optimizations when the runtime has enough evidence.'},
+    tp2:{q:'What does the C# compiler generate for async/await?',a:'A state machine that implements IAsyncStateMachine, plus a method builder and captured locals stored as fields so execution can resume after each await.'},
+    di2:{q:'What is a captive dependency?',a:'A longer-lived service, usually a singleton, indirectly holding a shorter-lived scoped dependency, which can cause stale state and lifetime bugs.'}
+  };
+  return map[id] || {q:`What is the most important thing to understand about ${title}?`,a:`The right answer explains what ${title} does, where it sits in the .NET stack, when it runs, and what trade-offs it creates in real systems.`};
+}
+
+function renderGeneratedDiagram(ch, t, play){
+  return `
+    <div class="sec">
+      <div class="dg">
+        <div class="dg-hdr">${escHtml(t.title.toUpperCase())} · RUNTIME FLOW</div>
+        <div class="dg-body">
+          <svg viewBox="0 0 420 230" width="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="gdnet" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+                <polygon points="0 0,7 2.5,0 5" fill="${ch.c}"></polygon>
+              </marker>
+            </defs>
+            <rect x="12" y="34" width="84" height="34" rx="7" fill="${ch.bg}" stroke="${ch.c}" stroke-width="1.2"></rect>
+            ${svgTextBlock(play.source,54,52,ch.c,9,13,2,10)}
+
+            <rect x="116" y="34" width="110" height="34" rx="7" fill="#0f1923" stroke="#243d55" stroke-width="1.2"></rect>
+            ${svgTextBlock(t.title,171,52,'#dde6f0',9,17,2,10)}
+
+            <rect x="246" y="34" width="100" height="34" rx="7" fill="#0f1923" stroke="#00c8ff" stroke-width="1.2"></rect>
+            ${svgTextBlock(play.stage,296,52,'#00c8ff',9,15,2,10)}
+
+            <rect x="366" y="34" width="42" height="34" rx="7" fill="${ch.bg}" stroke="${ch.c}" stroke-width="1.2"></rect>
+            ${svgTextBlock('Result',387,52,ch.c,8,8,1,10)}
+
+            <line x1="96" y1="51" x2="116" y2="51" stroke="${ch.c}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#gdnet)">
+              <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.15s" repeatCount="indefinite"></animate>
+            </line>
+            <line x1="226" y1="51" x2="246" y2="51" stroke="${ch.c}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#gdnet)">
+              <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.15s" repeatCount="indefinite"></animate>
+            </line>
+            <line x1="346" y1="51" x2="366" y2="51" stroke="${ch.c}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#gdnet)">
+              <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.15s" repeatCount="indefinite"></animate>
+            </line>
+
+            ${svgTextBlock(topicSignature(t.id, t.title),171,95,'#8a9db5',8,20,2,9)}
+            ${svgTextBlock(play.bestFor,210,148,'#8a9db5',8,54,3,10)}
+            ${svgTextBlock(`Output: ${play.output}`,210,196,'#56d364',8,44,2,10)}
+          </svg>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderGeneratedDetail(id, chi){
+  const ch = CHS[chi];
+  const t = ch?.topics.find(x=>x.id===id);
+  if(!ch || !t) return '';
+  const play = chapterPlaybook(ch);
+  const interview = topicInterview(id, t.title);
+
+  const pills = [
+    {t: ch.title, c: ch.c},
+    {t: '.NET 10', c: '#00c8ff'},
+    {t: 'C# 14', c: '#56d364'},
+    ...(t.tags || []).slice(0,2).map(tag => ({ t: tag, c: ch.c }))
+  ];
+
+  const pillHtml = pills.map(p=>`<span class="dp" style="color:${p.c};border-color:${p.c}44;background:${p.c}11">${escHtml(p.t)}</span>`).join('');
+  const compareRows = [
+    ['Topic', escHtml(t.title)],
+    ['Signature / shape', escHtml(topicSignature(id, t.title))],
+    ['Execution / behavior', escHtml(play.stage)],
+    ['Best fit', escHtml(play.bestFor)],
+    ['Main trade-off', escHtml(play.tradeoffs[0])]
+  ];
+
+  return `
+    <div class="dc">
+      <div class="d-bread">${ch.title} · .NET Core Internals Mastery</div>
+      <div class="d-title">${t.icon} ${t.title}</div>
+      <div class="d-sub">${t.desc}. This guide is written in the same stronger style as the richer mastery pages: what it is, where it fits, .NET 10 / C# 14 code, runtime flow, trade-offs, scenarios, and interview context.</div>
+      <div class="d-pills">${pillHtml}</div>
+
+      <div class="sec">
+        <div class="sec-t">What It Is</div>
+        <div class="prose">
+          <p><strong>${t.title}</strong> belongs to <strong>${ch.title}</strong> and is best used for <strong>${play.bestFor}</strong>.</p>
+        </div>
+      </div>
+
+      ${tableHtml(['Quick fact', 'Detail'], compareRows)}
+
+      <div class="sec">
+        <div class="sec-t">When To Use It</div>
+        <div class="prose">${listHtml(play.when)}</div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t">Trade-offs</div>
+        <div class="prose">${listHtml(play.tradeoffs)}</div>
+      </div>
+
+      ${renderGeneratedDiagram(ch, t, play)}
+
+      ${codeBlockHtml(`${t.title} — .NET 10 / C# 14`, topicCode(id, t.title))}
+
+      ${calloutHtml('info','💡',`<strong>Definition</strong> ${escHtml(t.title)} is part of the ${escHtml(ch.title)} surface area. The right mental model is to understand the boundary it owns in the runtime or framework, then map that to measurable behavior.`)}
+
+      <div class="sec">
+        <div class="sec-t">Scenario & Use Case</div>
+        <div class="prose"><p>${escHtml(topicScenario(id, t.title))}</p></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t">Production Rules</div>
+        <div class="prose">${listHtml(play.rules)}</div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t">🎯 Interview Question</div>
+        <div class="qa open">
+          <div class="qa-q" onclick="toggleQA(this)">
+            <span class="qa-qi">Q</span>
+            <span class="qa-qt">${escHtml(interview.q)}</span>
+            <span class="qa-lv lv-i">Intermediate</span>
+            <span class="qa-ar">▶</span>
+          </div>
+          <div class="qa-a"><div class="qa-at">${escHtml(interview.a)}</div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderInterviewTag(tag){
+  return `<span class="qa-pill" style="${DOTNET_INTERVIEW_TAG_COLORS[tag] || 'color:var(--text2);border-color:rgba(138,157,181,.28);background:rgba(138,157,181,.08)'}">${escHtml(tag)}</span>`;
+}
+
+function getDotnetInterviewTotal(){
+  return DOTNET_INTERVIEW_LEVEL_ORDER.reduce((sum, key)=>sum + buildDotnetInterviewBank(key).length, 0);
+}
+
+function buildDotnetInterviewBank(levelKey){
+  if(DOTNET_INTERVIEW_CACHE.has(levelKey)) return DOTNET_INTERVIEW_CACHE.get(levelKey);
+  const templates = DOTNET_INTERVIEW_TEMPLATES[levelKey] || DOTNET_INTERVIEW_TEMPLATES['iq-junior'];
+  const bank = [];
+  DOTNET_INTERVIEW_DOMAIN_ORDER.forEach(domainKey=>{
+    const domain = DOTNET_INTERVIEW_DOMAINS[domainKey];
+    templates.forEach((template, index)=>{
+      const qa = template(domain, index);
+      bank.push({
+        id: `${levelKey}-${domainKey}-${index + 1}`,
+        levelKey,
+        levelLabel: DOTNET_INTERVIEW_LEVELS[levelKey].levelLabel,
+        badgeClass: DOTNET_INTERVIEW_LEVELS[levelKey].badgeClass,
+        domain: domain.label,
+        question: qa.q,
+        answer: qa.a,
+        tags: qa.tags
+      });
+    });
+  });
+  DOTNET_INTERVIEW_CACHE.set(levelKey, bank);
+  return bank;
+}
+
+function splitInterviewSketchText(text, maxChars=16){
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  const lines = [];
+  let current = '';
+  words.forEach(word=>{
+    const next = current ? `${current} ${word}` : word;
+    if(next.length <= maxChars || !current){
+      current = next;
+    }else{
+      lines.push(current);
+      current = word;
+    }
+  });
+  if(current) lines.push(current);
+  return lines.slice(0,3);
+}
+
+function renderInterviewSketchLines(lines, x, y){
+  return `<text x="${x}" y="${y}" text-anchor="middle" class="sketch-copy">${lines.map((line, idx)=>`<tspan x="${x}" y="${y + (idx * 12)}">${escHtml(line)}</tspan>`).join('')}</text>`;
+}
+
+function renderDotnetInterviewSketch(levelKey){
+  const meta = DOTNET_INTERVIEW_LEVELS[levelKey] || DOTNET_INTERVIEW_LEVELS['iq-junior'];
+  const left = splitInterviewSketchText('Runtime signals');
+  const center = splitInterviewSketchText(meta.levelLabel + ' interview reasoning');
+  const right = splitInterviewSketchText('Code + architecture explanation');
+  return `
+    <div class="sec">
+      <div class="dg">
+        <div class="dg-hdr">Interview Flow Sketch</div>
+        <div class="dg-body">
+          <svg class="interview-sketch" viewBox="0 0 560 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label=".NET internals interview sketch">
+            <defs>
+              <marker id="idotnetArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="${meta.accent}"></path>
+              </marker>
+            </defs>
+            <rect x="24" y="30" width="140" height="68" rx="14" class="sketch-box" stroke="#00ffa3"></rect>
+            <text x="94" y="52" text-anchor="middle" class="sketch-title">OBSERVE</text>
+            ${renderInterviewSketchLines(left, 94, 70)}
+
+            <rect x="210" y="22" width="140" height="84" rx="14" class="sketch-box" stroke="${meta.accent}"></rect>
+            <text x="280" y="48" text-anchor="middle" class="sketch-title">${escHtml(meta.levelLabel.toUpperCase())}</text>
+            ${renderInterviewSketchLines(center, 280, 68)}
+
+            <rect x="396" y="30" width="140" height="68" rx="14" class="sketch-box" stroke="#00c8ff"></rect>
+            <text x="466" y="52" text-anchor="middle" class="sketch-title">EXPLAIN</text>
+            ${renderInterviewSketchLines(right, 466, 70)}
+
+            <rect x="170" y="142" width="220" height="48" rx="14" class="sketch-box" stroke="#243d55"></rect>
+            <text x="280" y="162" text-anchor="middle" class="sketch-title">MEASURE → REASON → DECIDE</text>
+            ${renderInterviewSketchLines(splitInterviewSketchText('Tie CLR, GC, JIT, async, hosting, and diagnostics to production outcomes', 42), 280, 178)}
+
+            <path d="M164 64 C182 64, 188 64, 210 64" class="sketch-arrow soft" marker-end="url(#idotnetArrow)"></path>
+            <path d="M350 64 C372 64, 378 64, 396 64" class="sketch-arrow" marker-end="url(#idotnetArrow)"></path>
+            <path d="M280 106 C280 116, 280 126, 280 142" class="sketch-arrow alt" marker-end="url(#idotnetArrow)"></path>
+          </svg>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderInterviewDetail(levelKey){
+  const meta = DOTNET_INTERVIEW_LEVELS[levelKey] || DOTNET_INTERVIEW_LEVELS['iq-junior'];
+  const bank = buildDotnetInterviewBank(levelKey);
+  const uniqueTags = [...new Set(bank.flatMap(item=>item.tags))];
+  const legend = uniqueTags.slice(0,10).map(renderInterviewTag).join('');
+  const items = bank.map((item, index)=>`
+    <div class="qa" data-tags="${item.tags.join('|')}">
+      <div class="qa-q" onclick="toggleQA(this)">
+        <div style="flex:1;min-width:0">
+          <div class="qa-kicker">${escHtml(item.domain)} · ${escHtml(meta.levelLabel)} · Q${index + 1}</div>
+          <div class="qa-qt">${escHtml(item.question)}</div>
+          <div class="qa-meta">${item.tags.map(renderInterviewTag).join('')}</div>
+        </div>
+        <span class="qa-lv ${meta.badgeClass}">${escHtml(meta.levelLabel)}</span>
+        <span class="qa-ar">▶</span>
+      </div>
+      <div class="qa-a"><div class="qa-at">${item.answer}</div></div>
+    </div>`).join('');
+
+  document.getElementById('re').style.display='none';
+  document.getElementById('rcon').style.display='block';
+  document.getElementById('rcon').innerHTML = `
+    <div class="dc">
+      <div class="d-bread">.NET Core Internals Mastery · Interview Q&amp;A</div>
+      <div class="d-title">🎯 ${escHtml(meta.title)}</div>
+      <div class="d-sub">${escHtml(meta.summary)} Each card contains 135 questions across direct, scenario, logical twist, architecture, production debugging, and .NET 10 reasoning.</div>
+      <div class="d-pills">
+        <span class="dp" style="color:${meta.accent};border-color:${meta.accent}44;background:${meta.accent}11">${escHtml(meta.levelLabel)}</span>
+        <span class="dp" style="color:#00c8ff;border-color:#00c8ff44;background:#00c8ff11">135 Questions</span>
+        <span class="dp" style="color:#56d364;border-color:#56d36444;background:#56d36411">15 Domains</span>
+      </div>
+      <div class="qa-stat"><strong>Coverage</strong><br>${escHtml(meta.levelLabel)} interview prep for CLR, GC, JIT, async, threading, DI, hosting, config, networking, I/O, diagnostics, performance, interop, security, and build internals.</div>
+      <div class="qa-legend">${legend}</div>
+      ${renderDotnetInterviewSketch(levelKey)}
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+        <button class="cb-copy" onclick="filterInterviewQA(this,'all')" style="color:var(--g2);border-color:var(--g2)">All</button>
+        ${uniqueTags.map(tag=>`<button class="cb-copy" onclick="filterInterviewQA(this,'${escHtml(tag).replace(/'/g, '&#39;')}')">${escHtml(tag)}</button>`).join('')}
+      </div>
+      <div id="interviewQaList">${items}</div>
+    </div>`;
+}
+
+function renderGeneric(id,chi){
+  document.getElementById('re').style.display='none';
+  document.getElementById('rcon').style.display='block';
+  if(DOTNET_INTERVIEW_LEVELS[id]){
+    renderInterviewDetail(id);
+    return;
+  }
+  document.getElementById('rcon').innerHTML = renderGeneratedDetail(id,chi);
+}
+
+function toggleQA(el){el.parentElement.classList.toggle('open')}
+
+function copyCode(btn){
+  const txt=btn.closest('.cb').querySelector('pre').innerText;
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent='✓ Copied!';
+    setTimeout(()=>btn.textContent='Copy',2000);
+  });
+}
+
+function updateProg(){
+  const total=CHS.reduce((s,c)=>s+c.topics.length,0);
+  const p=Math.round(visited.size/total*100);
+  document.getElementById('pct').textContent=p+'%';
+  document.getElementById('pfill').style.width=p+'%';
+}
+
+function filterNav(q){
+  q=q.toLowerCase();
+  CHS.forEach((ch,i)=>{
+    let any=false;
+    ch.topics.forEach(t=>{
+      const el=document.getElementById('n'+t.id);
+      if(!el)return;
+      const match=!q||t.title.toLowerCase().includes(q)||t.desc.toLowerCase().includes(q);
+      el.style.display=match?'':'none';
+      if(match)any=true;
+    });
+    if(q&&any)document.getElementById(`ci${i}`).classList.add('open');
+  });
+}
+
+function showAllQA(){
+  const interviewIndex = CHS.findIndex(ch => ch.title === 'Interview Q&A');
+  if(interviewIndex === -1) return;
+  selectCh(interviewIndex);
+  document.getElementById('re').style.display='flex';
+  document.getElementById('rcon').style.display='none';
+}
+
+function filterInterviewQA(btn, tag){
+  document.querySelectorAll('#interviewQaList .qa').forEach(el=>{
+    const tags = (el.dataset.tags || '').split('|');
+    el.style.display = (tag === 'all' || tags.includes(tag)) ? '' : 'none';
+  });
+  btn.parentElement.querySelectorAll('.cb-copy').forEach(el=>{
+    el.style.color = '';
+    el.style.borderColor = '';
+  });
+  btn.style.color = 'var(--g2)';
+  btn.style.borderColor = 'var(--g2)';
+}
+
+// ── INIT ──
+buildNav();
+</script>
+<script src="/embedded/mastery-resize.js"></script>
+</body>
+</html>

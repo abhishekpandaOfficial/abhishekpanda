@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Angular Mastery - Zero to Hero</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --font-display:'Syne',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-code:'JetBrains Mono',monospace;
+  --left-w:280px;
+  --right-w:580px;
+  --header-h:56px;
+  --ang-red:#dd0031;
+  --ang-blue:#00d8ff;
+  --ang-green:#00c853;
+  --ang-pink:#ff6b9d;
+  --warn:#f59e0b;
+}
+[data-theme="dark"]{
+  --bg-primary:#080b10;
+  --bg-secondary:#0f1319;
+  --bg-card:#161c26;
+  --bg-hover:#1f2837;
+  --border:#263244;
+  --border-bright:#364960;
+  --text-primary:#e8edf5;
+  --text-secondary:#9aa7bb;
+  --text-muted:#566476;
+  --code-bg:#0b1017;
+  --code-border:#223042;
+  --header-bg:rgba(8,11,16,0.96);
+}
+[data-theme="light"]{
+  --bg-primary:#f3f6fb;
+  --bg-secondary:#ffffff;
+  --bg-card:#eef3fb;
+  --bg-hover:#e6edf8;
+  --border:#d6e0ef;
+  --border-bright:#c0d0e6;
+  --text-primary:#0d1726;
+  --text-secondary:#4f6178;
+  --text-muted:#7b8aa0;
+  --code-bg:#eaf0f8;
+  --code-border:#d3ddec;
+  --header-bg:rgba(243,246,251,0.96);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg-secondary)}
+::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:2px}
+.header{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:100;
+  display:flex;align-items:center;gap:16px;padding:0 20px;
+  border-bottom:1px solid var(--border);background:var(--header-bg);backdrop-filter:blur(12px);
+}
+.header-logo{
+  font-family:var(--font-display);font-size:20px;font-weight:800;
+  background:linear-gradient(135deg,var(--ang-red),var(--ang-blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  white-space:nowrap;
+}
+.header-subtitle{
+  font-size:11px;color:var(--text-muted);font-family:var(--font-code);
+  border-left:1px solid var(--border);padding-left:16px;
+}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.badge{
+  background:linear-gradient(135deg,rgba(221,0,49,0.12),rgba(0,216,255,0.12));
+  border:1px solid rgba(221,0,49,0.22);border-radius:20px;padding:4px 12px;
+  color:var(--ang-red);font-size:11px;font-family:var(--font-code);
+}
+.progress-wrap{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted)}
+.progress-bar{width:80px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--ang-red),var(--ang-blue));border-radius:2px;transition:width .4s ease}
+.layout{display:flex;height:100vh;padding-top:var(--header-h)}
+.left-panel{
+  width:var(--left-w);min-width:var(--left-w);background:var(--bg-secondary);
+  border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;
+}
+.left-search{padding:12px;border-bottom:1px solid var(--border)}
+.left-search input{
+  width:100%;padding:8px 12px;border-radius:6px;background:var(--bg-card);border:1px solid var(--border);
+  color:var(--text-primary);font-size:12px;font-family:var(--font-body);outline:none;
+}
+.left-search input:focus{border-color:var(--ang-red)}
+.left-search input::placeholder{color:var(--text-muted)}
+.chapter-item{cursor:pointer;border-bottom:1px solid rgba(38,50,68,.6)}
+.chapter-header{
+  display:flex;align-items:center;gap:10px;padding:11px 14px;transition:background .18s;user-select:none;
+}
+.chapter-header:hover{background:var(--bg-hover)}
+.chapter-header.active{background:linear-gradient(90deg,rgba(221,0,49,.08),transparent);border-left:2px solid var(--ang-red)}
+.ch-num{
+  width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;font-family:var(--font-code);flex-shrink:0;
+}
+.ch-title{font-size:12px;font-weight:500;color:var(--text-secondary);flex:1;line-height:1.3}
+.chapter-header.active .ch-title{color:var(--text-primary)}
+.ch-arrow{font-size:9px;color:var(--text-muted);transition:transform .24s;flex-shrink:0}
+.chapter-item.open .ch-arrow{transform:rotate(90deg)}
+.topics-list{display:none;padding:4px 0 8px}
+.chapter-item.open .topics-list{display:block}
+.topic-item{
+  padding:6px 14px 6px 46px;font-size:11.5px;color:var(--text-muted);display:flex;align-items:center;gap:8px;
+  cursor:pointer;transition:all .15s;
+}
+.topic-item:hover{color:var(--text-secondary);background:rgba(255,255,255,.03)}
+.topic-item.active{color:var(--ang-red);background:rgba(221,0,49,.06)}
+.topic-item.done::before{content:'•';font-size:12px;color:var(--ang-green);margin-right:2px}
+.middle-panel{
+  flex:1;background:var(--bg-primary);border-right:1px solid var(--border);overflow-y:auto;padding:24px 20px;
+}
+.welcome-screen{
+  min-height:calc(100vh - 120px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+}
+.welcome-logo{
+  width:86px;height:86px;border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;
+  background:linear-gradient(135deg,rgba(221,0,49,.2),rgba(0,216,255,.2));
+  border:1px solid rgba(221,0,49,.3);font-family:var(--font-display);font-size:34px;font-weight:800;color:var(--ang-red);
+  box-shadow:0 0 50px rgba(221,0,49,.12);
+}
+.welcome-title{font-family:var(--font-display);font-size:30px;font-weight:800;margin-bottom:10px}
+.welcome-subtitle{max-width:700px;font-size:14px;line-height:1.7;color:var(--text-secondary);margin-bottom:26px}
+.welcome-stats{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:26px}
+.welcome-stat{
+  min-width:112px;padding:16px 18px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border);
+}
+.welcome-stat-num{font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--ang-red)}
+.welcome-stat-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);font-family:var(--font-code)}
+.welcome-actions{
+  position:relative;isolation:isolate;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  width:min(100%,560px);padding:14px;border-radius:28px;overflow:visible;
+  background:linear-gradient(135deg,rgba(22,28,38,.8),rgba(15,19,25,.72));
+  border:1px solid rgba(54,73,96,.85);
+  box-shadow:0 24px 60px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(18px);
+}
+.welcome-actions::before{
+  content:'';position:absolute;inset:1px;border-radius:27px;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at top left,rgba(221,0,49,.18),transparent 42%),
+    radial-gradient(circle at bottom right,rgba(0,216,255,.16),transparent 40%);
+}
+.start-btn{
+  position:relative;z-index:1;flex:1 1 220px;justify-content:space-between;
+  display:inline-flex;align-items:center;gap:12px;white-space:nowrap;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,0)) padding-box,
+    linear-gradient(135deg,var(--ang-red),#ff6b9d 48%,var(--ang-blue)) border-box;
+  color:#fff;border:1px solid transparent;border-radius:999px;padding:8px 10px 8px 18px;
+  font-size:13px;font-weight:700;letter-spacing:.01em;cursor:pointer;
+  transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  box-shadow:0 16px 34px rgba(221,0,49,.22), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 20px 38px rgba(221,0,49,.28), inset 0 1px 0 rgba(255,255,255,.22);filter:saturate(1.06)}
+.start-btn-text{display:inline-flex;align-items:center}
+.start-btn-icon{
+  width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:rgba(8,11,16,.24);border:1px solid rgba(255,255,255,.18);font-size:13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.02)) padding-box,
+    linear-gradient(135deg,rgba(0,216,255,.85),rgba(0,200,83,.8)) border-box;
+  color:var(--text-primary);
+  box-shadow:0 16px 34px rgba(0,216,255,.16), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.start-btn-secondary:hover{box-shadow:0 20px 38px rgba(0,216,255,.2), inset 0 1px 0 rgba(255,255,255,.18)}
+.start-btn-secondary .start-btn-icon{
+  background:rgba(0,216,255,.14);border-color:rgba(0,216,255,.24);color:#dff9ff;
+}
+.chapter-hero{
+  background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));border:1px solid var(--border);border-radius:14px;padding:24px;
+  margin-bottom:20px;position:relative;overflow:hidden;
+}
+.chapter-hero::before{
+  content:'';position:absolute;top:-30px;right:-30px;width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(221,0,49,.14),transparent);
+}
+.chapter-hero-num{font-family:var(--font-code);font-size:10px;color:var(--ang-red);margin-bottom:8px;text-transform:uppercase;letter-spacing:2px}
+.chapter-hero-title{font-family:var(--font-display);font-size:25px;font-weight:800;margin-bottom:8px;line-height:1.15}
+.chapter-hero-desc{font-size:13px;color:var(--text-secondary);line-height:1.65;max-width:560px}
+.chapter-hero-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.hero-tag,.meta-tag,.dbadge{
+  font-size:10px;padding:3px 8px;border-radius:4px;font-family:var(--font-code);border:1px solid;
+}
+.topics-grid{display:flex;flex-direction:column;gap:8px}
+.topic-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;
+  cursor:pointer;transition:all .18s;display:flex;align-items:flex-start;gap:12px;
+}
+.topic-card:hover{border-color:var(--border-bright);background:var(--bg-hover);transform:translateX(2px)}
+.topic-card.active{border-color:var(--ang-red);background:rgba(221,0,49,.05)}
+.topic-card-icon{font-size:20px;width:36px;text-align:center;flex-shrink:0;margin-top:1px}
+.topic-card-body{flex:1}
+.topic-card-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.topic-card-desc{font-size:11.5px;color:var(--text-muted);line-height:1.55}
+.topic-card-meta{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.right-panel{
+  width:var(--right-w);min-width:var(--right-w);background:var(--bg-secondary);overflow-y:auto;position:relative;
+}
+.detail-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;text-align:center;padding:40px;color:var(--text-muted);
+}
+.detail-empty-icon{font-size:48px;opacity:.35}
+.detail-empty h3{font-family:var(--font-display);font-size:18px;color:var(--text-secondary)}
+.detail-empty p{font-size:13px;line-height:1.6}
+.detail-content{padding:24px;min-width:0}
+.detail-header{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.detail-breadcrumb{font-size:10px;color:var(--text-muted);font-family:var(--font-code);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.detail-title{font-family:var(--font-display);font-size:24px;font-weight:800;line-height:1.15;margin-bottom:6px}
+.detail-subtitle{font-size:13px;color:var(--text-secondary);line-height:1.6}
+.detail-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.section{margin-bottom:24px;min-width:0}
+.section-title{
+  font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.section-title::before{content:'';display:block;width:3px;height:14px;background:var(--ang-red);border-radius:2px}
+.prose{font-size:13px;color:var(--text-secondary);line-height:1.75}
+.prose p{margin-bottom:10px}
+.prose strong{color:var(--text-primary)}
+.prose ul{padding-left:18px;margin-bottom:10px}
+.prose li{margin-bottom:5px}
+.prose code,.table-wrap code,.qa-answer-text code{
+  background:var(--code-bg);border:1px solid var(--code-border);border-radius:4px;padding:1px 5px;font-family:var(--font-code);font-size:11px;color:var(--ang-red);
+}
+.code-block,.diagram-box,.table-wrap,.steps-box{
+  background:var(--code-bg);border:1px solid var(--code-border);border-radius:10px;overflow:hidden;margin-bottom:16px;
+}
+.code-header,.diagram-header,.table-header,.steps-header{
+  display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--code-border);background:rgba(0,0,0,.18);
+}
+.code-lang,.code-title,.diagram-header,.table-header,.steps-header{
+  font-size:10px;color:var(--ang-blue);font-family:var(--font-code);text-transform:uppercase;letter-spacing:1px;
+}
+.code-copy{
+  background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer;
+}
+.code-copy:hover{border-color:var(--ang-red);color:var(--ang-red)}
+.code-body{padding:16px;overflow-x:auto}
+.code-body pre{font-family:var(--font-code);font-size:11.5px;line-height:1.75;color:#d8e3f5;min-width:max-content}
+.kw{color:#ff6b9d}
+.type,.cls{color:#7dd3fc}
+.str{color:#a7f3d0}
+.num{color:#fbbf24}
+.cmt,.cm{color:#73839b;font-style:italic}
+.fn{color:#c4b5fd}
+.prop{color:#fda4af}
+.dec{color:#fde68a}
+.diagram-body{padding:16px;display:flex;justify-content:center;overflow-x:auto;overflow-y:hidden}
+.diagram-body svg{display:block;width:min(100%,520px);max-width:100%;height:auto;flex-shrink:0}
+.callout{
+  border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;font-size:12.5px;line-height:1.65;
+}
+.callout-info{background:rgba(0,216,255,.07);border:1px solid rgba(0,216,255,.22);color:var(--text-secondary)}
+.callout-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);color:var(--text-secondary)}
+.callout-success{background:rgba(0,200,83,.08);border:1px solid rgba(0,200,83,.24);color:var(--text-secondary)}
+.callout-danger{background:rgba(221,0,49,.08);border:1px solid rgba(221,0,49,.24);color:var(--text-secondary)}
+.callout-icon{flex-shrink:0;font-size:15px}
+.table-body{padding:0;overflow-x:auto}
+.comp-table{width:100%;min-width:520px;border-collapse:collapse;font-size:12px}
+.comp-table th{background:var(--bg-card);padding:10px 12px;text-align:left;font-size:10px;color:var(--text-muted);font-family:var(--font-code);text-transform:uppercase;letter-spacing:.5px;border:1px solid var(--border)}
+.comp-table td{padding:10px 12px;border:1px solid var(--border);color:var(--text-secondary);vertical-align:top;line-height:1.55}
+.steps-body{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.step-item{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:12px}
+.step-num{
+  width:28px;height:28px;border-radius:8px;background:rgba(221,0,49,.14);border:1px solid rgba(221,0,49,.25);display:flex;align-items:center;justify-content:center;
+  color:var(--ang-red);font-family:var(--font-display);font-size:13px;font-weight:800;flex-shrink:0;
+}
+.step-copy h4{font-family:var(--font-display);font-size:13px;margin-bottom:4px}
+.step-copy p{font-size:12px;color:var(--text-secondary);line-height:1.6}
+.qa-item{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.qa-question{padding:12px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;transition:background .2s}
+.qa-question:hover{background:var(--bg-hover)}
+.qa-q-icon{font-size:11px;font-weight:700;color:var(--ang-red);font-family:var(--font-code);margin-top:1px;flex-shrink:0}
+.qa-q-text{font-size:12.5px;font-weight:500;color:var(--text-primary);flex:1;line-height:1.5}
+.qa-level{font-size:9px;padding:2px 6px;border-radius:3px;font-family:var(--font-code);margin-top:2px;flex-shrink:0}
+.qa-arrow{color:var(--text-muted);font-size:10px;transition:transform .25s;margin-top:3px}
+.qa-item.open .qa-arrow{transform:rotate(90deg)}
+.qa-answer{display:none;padding:12px 14px;border-top:1px solid var(--border);background:rgba(0,0,0,.12)}
+.qa-item.open .qa-answer{display:block}
+.qa-answer-text{font-size:12px;color:var(--text-secondary);line-height:1.75}
+.qa-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.qa-filter-btn{
+  background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);border-radius:999px;
+  padding:7px 12px;font-size:10.5px;font-family:var(--font-code);cursor:pointer;transition:all .18s ease;
+}
+.qa-filter-btn:hover,.qa-filter-btn.active{
+  color:#fff;border-color:rgba(0,216,255,.32);
+  background:linear-gradient(135deg,rgba(221,0,49,.2),rgba(0,216,255,.24));
+  box-shadow:0 10px 24px rgba(0,216,255,.12);
+}
+.qa-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}
+.qa-summary-card{
+  background:linear-gradient(135deg,var(--bg-card),rgba(22,28,38,.72));border:1px solid var(--border);border-radius:12px;
+  padding:14px;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.qa-summary-card:hover,.qa-summary-card.active{transform:translateY(-1px);border-color:var(--border-bright);box-shadow:0 14px 28px rgba(0,0,0,.18)}
+.qa-summary-label{font-size:10px;font-family:var(--font-code);text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px}
+.qa-summary-count{font-family:var(--font-display);font-size:26px;font-weight:800;line-height:1}
+.qa-summary-note{font-size:11px;color:var(--text-secondary);margin-top:8px;line-height:1.5}
+.qa-meta-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0 10px}
+.qa-kind,.qa-tag-chip{
+  font-size:9px;padding:2px 7px;border-radius:999px;font-family:var(--font-code);border:1px solid var(--border);color:var(--text-muted);
+}
+.qa-kind{background:rgba(255,255,255,.03)}
+.qa-tag-chip{background:rgba(0,216,255,.06);color:var(--ang-blue);border-color:rgba(0,216,255,.22)}
+.qa-answer-section{margin-top:12px}
+.qa-answer-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-family:var(--font-code);color:var(--text-muted);margin-bottom:6px}
+.qa-answer-example{font-size:12px;color:var(--text-secondary);line-height:1.7}
+.qa-answer-code{margin-top:12px}
+@media (max-width: 1180px){
+  html,body{overflow:auto}
+  .layout{height:auto;min-height:100vh;display:block}
+  .left-panel,.right-panel{width:100%;min-width:0;border-right:none;border-left:none}
+  .left-panel{border-bottom:1px solid var(--border)}
+  .middle-panel{border-right:none;border-bottom:1px solid var(--border)}
+  .middle-panel,.right-panel{padding-inline:0}
+}
+@media (max-width: 900px){
+  .header{height:auto;align-items:flex-start;flex-wrap:wrap;padding:12px 16px;gap:8px}
+  .header-subtitle{border-left:none;padding-left:0;width:100%}
+  .header-right{margin-left:0;width:100%;justify-content:space-between}
+  .layout{padding-top:88px}
+  .detail-content{padding:20px 16px}
+  .middle-panel{padding:20px 16px}
+  .chapter-hero{padding:20px}
+  .chapter-hero-title,.detail-title{font-size:22px}
+}
+@media (max-width: 640px){
+  .welcome-actions{width:min(100%,420px);padding:10px}
+  .start-btn{flex-basis:100%;width:100%}
+  .qa-summary-grid{grid-template-columns:1fr}
+  .chapter-hero-title,.detail-title{font-size:20px}
+  .detail-content{padding:16px 12px}
+  .middle-panel{padding:16px 12px}
+  .diagram-body,.code-body{padding:12px}
+  .code-header,.diagram-header,.table-header,.steps-header{padding:10px 12px;gap:8px;flex-wrap:wrap}
+  .comp-table{min-width:420px}
+  .step-item{padding:10px;gap:10px}
+  .qa-question,.qa-answer{padding:12px}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-logo">Angular Mastery</div>
+  <div class="header-subtitle">Tri-pane curriculum explorer · Angular 21 · Signals · RxJS · SSR</div>
+  <div class="header-right">
+    <div class="progress-wrap">
+      <span id="progressText">0%</span>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="badge">Angular 21</div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="left-panel">
+    <div class="left-search">
+      <input type="text" id="searchInput" placeholder="Search Angular topics..." oninput="filterTopics(this.value)">
+    </div>
+    <div id="chapterNav"></div>
+  </div>
+
+  <div class="middle-panel">
+    <div class="welcome-screen" id="welcomeScreen">
+      <div class="welcome-logo">Ng</div>
+      <div class="welcome-title">Angular Mastery Series</div>
+      <div class="welcome-subtitle">Structured the same way as the C# mastery experience: chapter navigation on the left, focused topics in the middle, and rich explanations with code, diagrams, data flows, and interview prep on the right.</div>
+      <div class="welcome-stats">
+        <div class="welcome-stat"><div class="welcome-stat-num">12</div><div class="welcome-stat-label">Chapters</div></div>
+        <div class="welcome-stat"><div class="welcome-stat-num">48</div><div class="welcome-stat-label">Topics</div></div>
+        <div class="welcome-stat"><div class="welcome-stat-num">15+</div><div class="welcome-stat-label">Rich Details</div></div>
+        <div class="welcome-stat"><div class="welcome-stat-num">Flow</div><div class="welcome-stat-label">Diagrams</div></div>
+      </div>
+      <div class="welcome-actions">
+        <button class="start-btn" onclick="selectChapter(0)">
+          <span class="start-btn-text">Start Angular Mastery</span>
+          <span class="start-btn-icon" aria-hidden="true">→</span>
+        </button>
+        <button class="start-btn start-btn-secondary" onclick="showAllInterviewQuestions()">
+          <span class="start-btn-text">Interview Q&amp;A</span>
+          <span class="start-btn-icon" aria-hidden="true">🎯</span>
+        </button>
+      </div>
+    </div>
+    <div id="chapterContent" style="display:none"></div>
+  </div>
+
+  <div class="right-panel">
+    <div class="detail-empty" id="detailEmpty">
+      <div class="detail-empty-icon">📘</div>
+      <h3>Select a Topic</h3>
+      <p>Pick a topic from the middle panel to open explanations, code samples, diagrams, architecture flows, and interview questions.</p>
+    </div>
+    <div id="detailContent" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const chapters = [
+  {
+    id:0, num:"01", title:"Foundations", icon:"🚀",
+    color:"#dd0031", bg:"rgba(221,0,49,0.12)",
+    desc:"Get the Angular mental model right: platform architecture, workspace setup, standalone bootstrap, and TypeScript essentials.",
+    tags:["Beginner","Angular 21","Core"],
+    topics:[
+      {id:"ng-architecture",title:"Angular Platform Architecture",icon:"🏗️",desc:"How Angular apps are compiled, rendered, and wired together.",tags:["Core","Architecture"]},
+      {id:"cli-workspace",title:"CLI & Workspace Structure",icon:"🛠️",desc:"Project layout, build system, and CLI workflow.",tags:["Beginner","Tooling"]},
+      {id:"standalone-bootstrap",title:"Standalone Bootstrap",icon:"⚡",desc:"bootstrapApplication, provideRouter, provideHttpClient.",tags:["Angular 17+","Important"]},
+      {id:"ts-essentials",title:"TypeScript Essentials",icon:"📘",desc:"The TypeScript patterns Angular developers actually use daily.",tags:["TypeScript","Core"]}
+    ]
+  },
+  {
+    id:1, num:"02", title:"Components", icon:"🧩",
+    color:"#00d8ff", bg:"rgba(0,216,255,0.12)",
+    desc:"Understand component composition, lifecycle, inputs, outputs, signals, and view encapsulation.",
+    tags:["Core","UI","Signals"],
+    topics:[
+      {id:"component-lifecycle",title:"Lifecycle & Render Timing",icon:"⏱️",desc:"constructor, checks, afterNextRender/afterEveryRender, destroy paths.",tags:["Core","Lifecycle"]},
+      {id:"inputs-outputs",title:"Inputs, Outputs & Model Inputs",icon:"🔁",desc:"Data contracts between parent and child components.",tags:["Core","Communication"]},
+      {id:"signals-inputs",title:"Signals in Components",icon:"✨",desc:"signal, computed, effect, signal inputs, zoneless-friendly UI.",tags:["Angular 17+","Important"]},
+      {id:"view-encapsulation",title:"Templates, Styles & Encapsulation",icon:"🎨",desc:"Emulated, ShadowDom, None and style scoping.",tags:["UI","Architecture"]}
+    ]
+  },
+  {
+    id:2, num:"03", title:"Templates", icon:"🧾",
+    color:"#ff6b9d", bg:"rgba(255,107,157,0.12)",
+    desc:"Binding, new control flow, defer views, pipes, and template architecture that stays maintainable.",
+    tags:["Templates","Angular 17+","UI"],
+    topics:[
+      {id:"bindings",title:"Binding System",icon:"🔗",desc:"Property, event, two-way, signal reads, and template cost.",tags:["Core","Templates"]},
+      {id:"control-flow",title:"New Control Flow",icon:"🌿",desc:"@if, @for, @switch and why they beat structural directives.",tags:["Angular 17+","Important"]},
+      {id:"defer-views",title:"Deferrable Views",icon:"⏳",desc:"@defer, triggers, placeholders, and incremental UI loading.",tags:["Performance","Angular 17+"]},
+      {id:"pipes",title:"Pipes & Async Pipe",icon:"🔧",desc:"Pure vs impure pipes, async pipe, and template transformation.",tags:["Core","RxJS"]}
+    ]
+  },
+  {
+    id:3, num:"04", title:"Dependency Injection", icon:"💉",
+    color:"#00c853", bg:"rgba(0,200,83,0.12)",
+    desc:"Master inject(), provider scopes, service design, HttpClient, and interceptor pipelines.",
+    tags:["Architecture","Services","DI"],
+    topics:[
+      {id:"inject-api",title:"inject() API & Service Design",icon:"🧠",desc:"Functional DI, constructor DI, and service boundaries.",tags:["Core","Architecture"]},
+      {id:"provider-scopes",title:"Provider Scopes",icon:"📍",desc:"root, platform, route, component and when each matters.",tags:["Important","DI"]},
+      {id:"http-client",title:"HttpClient Patterns",icon:"🌐",desc:"Typed APIs, retry, cancellation, and request modeling.",tags:["Core","HTTP"]},
+      {id:"http-interceptors",title:"Interceptor Pipeline",icon:"🛡️",desc:"Cross-cutting concerns, auth, tracing, retries, error normalization.",tags:["Important","Flow"]}
+    ]
+  },
+  {
+    id:4, num:"05", title:"Routing", icon:"🗺️",
+    color:"#7c3aed", bg:"rgba(124,58,237,0.12)",
+    desc:"Build route trees, guards, lazy loading, and data-loading strategies that scale with teams.",
+    tags:["Router","Navigation","Architecture"],
+    topics:[
+      {id:"router-basics",title:"Route Tree & Navigation",icon:"🧭",desc:"Routes, outlets, links, nested navigation and state.",tags:["Core","Router"]},
+      {id:"route-guards",title:"Guards & Access Control",icon:"🔐",desc:"canActivate, canMatch, role rules, redirects, auth boundaries.",tags:["Security","Important"]},
+      {id:"lazy-loading",title:"Lazy Loading & Route Splits",icon:"📦",desc:"loadComponent, loadChildren, preloading, feature isolation.",tags:["Performance","Architecture"]},
+      {id:"route-resolvers",title:"Resolvers & Route Data",icon:"📄",desc:"Fetch-before-render and route-level data orchestration.",tags:["Advanced","Router"]}
+    ]
+  },
+  {
+    id:5, num:"06", title:"RxJS", icon:"🔄",
+    color:"#f59e0b", bg:"rgba(245,158,11,0.12)",
+    desc:"Reactive streams, higher-order operators, cleanup patterns, and RxJS discipline in Angular apps.",
+    tags:["RxJS","Streams","Important"],
+    topics:[
+      {id:"observable-basics",title:"Observable Mental Model",icon:"🌊",desc:"Cold vs hot, subscription lifecycle, push-based flow.",tags:["Core","RxJS"]},
+      {id:"higher-order",title:"Higher-Order Mapping",icon:"🧵",desc:"switchMap, concatMap, mergeMap, exhaustMap tradeoffs.",tags:["Important","RxJS"]},
+      {id:"cleanup-patterns",title:"Cleanup & takeUntilDestroyed",icon:"🧹",desc:"Avoid leaks with async pipe, destroy hooks, finalization.",tags:["Angular 16+","Important"]},
+      {id:"async-pipe",title:"Async Pipe vs Manual Subscribe",icon:"📡",desc:"Preferred rendering patterns for streams in components.",tags:["Core","Templates"]}
+    ]
+  },
+  {
+    id:6, num:"07", title:"State Management", icon:"🏪",
+    color:"#14b8a6", bg:"rgba(20,184,166,0.12)",
+    desc:"From simple service state to NgRx and signal stores, choose the right state shape for the job.",
+    tags:["State","Signals","NgRx"],
+    topics:[
+      {id:"service-state",title:"Service State with Subjects",icon:"📬",desc:"BehaviorSubject-based local/global state services.",tags:["Core","State"]},
+      {id:"ngrx-store",title:"NgRx Data Flow",icon:"🏪",desc:"Actions, reducers, selectors, effects, and immutable updates.",tags:["Important","Flow"]},
+      {id:"signals-store",title:"Signal Store Patterns",icon:"✨",desc:"Signal-based state for simpler local and feature state.",tags:["Modern","Signals"]},
+      {id:"selector-patterns",title:"Selectors & Derived State",icon:"🧮",desc:"Memoized derivation and keeping components lean.",tags:["Architecture","Performance"]}
+    ]
+  },
+  {
+    id:7, num:"08", title:"Performance", icon:"🏎️",
+    color:"#ef4444", bg:"rgba(239,68,68,0.12)",
+    desc:"Optimize change detection, rendering cost, list updates, and bundle size in serious Angular apps.",
+    tags:["Performance","Zoneless","Production"],
+    topics:[
+      {id:"onpush",title:"OnPush Strategy",icon:"🎯",desc:"Reference checks, immutable updates, and view predictability.",tags:["Core","Performance"]},
+      {id:"zoneless-cd",title:"Zoneless Change Detection",icon:"🌀",desc:"How Angular 21 shifts from global patching to precise reactivity.",tags:["Angular 21","Important"]},
+      {id:"track-defer",title:"track / @defer / Virtualization",icon:"📉",desc:"Template rendering controls that cut DOM churn.",tags:["Performance","Templates"]},
+      {id:"bundle-optimization",title:"Build & Bundle Optimization",icon:"📦",desc:"Route splits, image strategy, stats analysis, budgets.",tags:["Production","Tooling"]}
+    ]
+  },
+  {
+    id:8, num:"09", title:"SSR & Rendering", icon:"🖥️",
+    color:"#00d8ff", bg:"rgba(0,216,255,0.12)",
+    desc:"Server rendering, hydration, transfer state, and modern Angular rendering paths.",
+    tags:["SSR","Hydration","Architecture"],
+    topics:[
+      {id:"ssr-hydration",title:"SSR + Hydration Flow",icon:"💧",desc:"Server HTML, client takeover, and hydration boundaries.",tags:["Important","Flow"]},
+      {id:"incremental-hydration",title:"Incremental Hydration",icon:"🧊",desc:"Hydrate only what matters when it matters.",tags:["Angular 19+","Performance"]},
+      {id:"transfer-state",title:"TransferState & Caching",icon:"📮",desc:"Avoid duplicate fetches across server and client.",tags:["SSR","Optimization"]},
+      {id:"resource-api",title:"Resource API & Data Fetching",icon:"🧰",desc:"Resource patterns, async data orchestration, and UI states.",tags:["Modern","Data"]}
+    ]
+  },
+  {
+    id:9, num:"10", title:"Angular + APIs", icon:"🔵",
+    color:"#dd0031", bg:"rgba(221,0,49,0.12)",
+    desc:"Integrate Angular with .NET and backend APIs using solid contracts, auth, and real-time patterns.",
+    tags:["Full Stack",".NET","HTTP"],
+    topics:[
+      {id:"angular-dotnet",title:"Angular + ASP.NET Core",icon:"🤝",desc:"CORS, proxies, DTO contracts, and deployment shape.",tags:["Important","Full Stack"]},
+      {id:"auth-jwt",title:"JWT Auth & Refresh",icon:"🔐",desc:"Token flows, storage tradeoffs, interceptors, and guards.",tags:["Security","Architecture"]},
+      {id:"signalr-realtime",title:"SignalR & Realtime Updates",icon:"📡",desc:"Push updates, reconnects, and UI stream coordination.",tags:["Realtime",".NET"]},
+      {id:"api-contracts",title:"OpenAPI & Typed Contracts",icon:"📘",desc:"Generated clients, DTO drift prevention, boundary typing.",tags:["Tooling","Contracts"]}
+    ]
+  },
+  {
+    id:10, num:"11", title:"Testing & Tooling", icon:"🧪",
+    color:"#00c853", bg:"rgba(0,200,83,0.12)",
+    desc:"Build confidence with unit, component, and E2E testing plus the right dev tooling.",
+    tags:["Testing","Tooling","Quality"],
+    topics:[
+      {id:"unit-testing",title:"Unit & Service Testing",icon:"🧪",desc:"TestBed, spies, HttpTestingController, isolated tests.",tags:["Core","Quality"]},
+      {id:"component-testing",title:"Component Testing",icon:"🧩",desc:"Host components, DOM assertions, harnesses, signals updates.",tags:["UI","Testing"]},
+      {id:"e2e-testing",title:"E2E with Playwright / Vitest",icon:"🎭",desc:"Cross-browser flows, fixtures, mocking and stable CI.",tags:["Production","Testing"]},
+      {id:"devtools-nx",title:"DevTools, Nx & Monorepos",icon:"🧰",desc:"Workspace scale, profiling, architecture boundaries.",tags:["Architecture","Teams"]}
+    ]
+  },
+  {
+    id:11, num:"12", title:"Angular 21", icon:"✨",
+    color:"#ff6b9d", bg:"rgba(255,107,157,0.12)",
+    desc:"The newest Angular runtime and DX changes: signal forms, Angular Aria, MCP, Vitest, and the zoneless default.",
+    tags:["Angular 21","Latest","Interview"],
+    topics:[
+      {id:"signal-forms",title:"Signal Forms",icon:"📝",desc:"Form state without valueChanges ceremony.",tags:["Angular 21","Modern"]},
+      {id:"angular-aria",title:"Angular Aria",icon:"♿",desc:"Headless accessible primitives and state machines.",tags:["Angular 21","A11y"]},
+      {id:"mcp-server",title:"Angular MCP Server",icon:"🤖",desc:"AI tooling aware of Angular architecture and best practices.",tags:["Angular 21","Tooling"]},
+      {id:"vitest-default",title:"Vitest & New DX Defaults",icon:"⚙️",desc:"Faster tests, zoneless apps, and streamlined developer flow.",tags:["Angular 21","Tooling"]}
+    ]
+  }
+];
+
+const topicDetails = {
+  "ng-architecture": {
+    title:"Angular Platform Architecture",
+    breadcrumb:"Chapter 1 · Foundations",
+    subtitle:"See Angular as a pipeline: templates compile to instructions, the runtime wires dependency injection and routing, and change detection reconciles state with the DOM.",
+    badges:[{text:"Core",color:"#dd0031"},{text:"Architecture",color:"#00d8ff"},{text:"Important",color:"#00c853"}],
+    sections:[
+      {type:"prose", title:"The Angular Mental Model", content:`
+        <p>Angular is not just a UI library. It is a <strong>full application platform</strong> with conventions for rendering, dependency injection, routing, reactivity, forms, HTTP, testing, and build tooling.</p>
+        <p>The important architectural shift for modern Angular is that <strong>standalone APIs and signals reduce framework ceremony</strong> while keeping the same enterprise-grade runtime model.</p>
+        <ul>
+          <li><strong>Compile time</strong>: templates and metadata are transformed into optimized render instructions.</li>
+          <li><strong>Bootstrap time</strong>: providers, router, HttpClient, and root component are composed.</li>
+          <li><strong>Runtime</strong>: events, streams, and signals update component state and trigger DOM refresh.</li>
+        </ul>
+      `},
+      {type:"diagram", title:"Angular App Runtime Flow", svg:`
+        <svg width="520" height="220" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrA" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#00d8ff"/>
+            </marker>
+            <style>
+              .box{fill:#161c26;stroke:#364960;stroke-width:1.5;rx:8}
+              .txt{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#e8edf5;text-anchor:middle}
+              .sub{font-family:'JetBrains Mono',monospace;font-size:8px;fill:#9aa7bb;text-anchor:middle}
+              .line{stroke:#00d8ff;stroke-width:1.6;fill:none;marker-end:url(#arrA);stroke-dasharray:5 3}
+            </style>
+          </defs>
+          <rect class="box" x="20" y="82" width="90" height="46"/><text class="txt" x="65" y="99">Templates</text><text class="sub" x="65" y="114">HTML + metadata</text>
+          <rect class="box" x="140" y="82" width="90" height="46"/><text class="txt" x="185" y="99">Compiler</text><text class="sub" x="185" y="114">Ivy instructions</text>
+          <rect class="box" x="260" y="82" width="90" height="46"/><text class="txt" x="305" y="99">Runtime</text><text class="sub" x="305" y="114">DI + Router + CD</text>
+          <rect class="box" x="380" y="82" width="120" height="46"/><text class="txt" x="440" y="99">Rendered UI</text><text class="sub" x="440" y="114">DOM + listeners + state</text>
+          <path class="line" d="M110 105 L136 105"/>
+          <path class="line" d="M230 105 L256 105"/>
+          <path class="line" d="M350 105 L376 105"/>
+          <rect class="box" x="180" y="155" width="160" height="34"/><text class="txt" x="260" y="176">Signals / RxJS / Events / HTTP</text>
+          <path class="line" d="M260 155 L260 130"/>
+          <text class="sub" x="260" y="34">Angular runtime is a coordinated system, not isolated utilities</text>
+        </svg>
+      `},
+      {type:"table", title:"Angular Building Blocks", columns:["Layer","Primary Job","What Good Teams Care About"], rows:[
+        ["Standalone bootstrap","Compose root providers and root component","Provider hygiene, environment setup, feature toggles"],
+        ["Components","Own UI slices and local state","Stable inputs/outputs, render cost, readability"],
+        ["Services","Contain side effects and shared logic","Testability, isolation, API boundaries"],
+        ["Router","Shape application navigation and feature loading","Lazy loading, auth boundaries, deep linking"],
+        ["Reactivity","Move data through UI predictably","Signal/RxJS discipline, cleanup, derived state"]
+      ]},
+      {type:"callout", kind:"info", icon:"💡", text:"The easiest way to make Angular feel complex is to mix responsibilities. Keep <strong>components for rendering</strong>, <strong>services for effects</strong>, and <strong>state derivation explicit</strong>."}
+    ]
+  },
+  "standalone-bootstrap": {
+    title:"Standalone Bootstrap",
+    breadcrumb:"Chapter 1 · Foundations",
+    subtitle:"Modern Angular boots without NgModules by composing root providers directly in bootstrapApplication.",
+    badges:[{text:"Angular 17+",color:"#00d8ff"},{text:"Important",color:"#dd0031"},{text:"Bootstrap",color:"#00c853"}],
+    sections:[
+      {type:"prose", title:"Why Standalone Matters", content:`
+        <p>Standalone Angular removes the indirection of root NgModules. That makes the application's entry point clearer: you can see <strong>routing, HTTP, animations, auth, and environment providers</strong> in one place.</p>
+        <p>It also improves tree-shaking and makes feature code easier to lazy load because each component can declare its own imports directly.</p>
+      `},
+      {type:"code", title:"Modern bootstrapApplication Setup", lang:"typescript", code:`<span class="kw">import</span> { <span class="fn">bootstrapApplication</span> } <span class="kw">from</span> <span class="str">'@angular/platform-browser'</span>;
+<span class="kw">import</span> { <span class="fn">provideRouter</span>, <span class="fn">withPreloading</span>, <span class="type">PreloadAllModules</span> } <span class="kw">from</span> <span class="str">'@angular/router'</span>;
+<span class="kw">import</span> { <span class="fn">provideHttpClient</span>, <span class="fn">withInterceptors</span> } <span class="kw">from</span> <span class="str">'@angular/common/http'</span>;
+<span class="kw">import</span> { AppComponent } <span class="kw">from</span> <span class="str">'./app/app.component'</span>;
+<span class="kw">import</span> { routes } <span class="kw">from</span> <span class="str">'./app/app.routes'</span>;
+<span class="kw">import</span> { authInterceptor } <span class="kw">from</span> <span class="str">'./app/core/auth.interceptor'</span>;
+
+<span class="fn">bootstrapApplication</span>(AppComponent, {
+  providers: [
+    <span class="fn">provideRouter</span>(routes, <span class="fn">withPreloading</span>(PreloadAllModules)),
+    <span class="fn">provideHttpClient</span>(<span class="fn">withInterceptors</span>([authInterceptor]))
+  ]
+});`},
+      {type:"steps", title:"Bootstrap Review Checklist", steps:[
+        {title:"Keep root providers explicit", text:"Routing, HTTP, auth, feature flags, and global error handling should be visible at bootstrap."},
+        {title:"Prefer route-level lazy loading", text:"Keep the initial route tree thin and split major feature islands."},
+        {title:"Avoid root singleton overload", text:"Not every service belongs in root; some belong at route or feature scope."}
+      ]},
+      {type:"callout", kind:"success", icon:"✅", text:"If you can read your <code>main.ts</code> and understand the app's global runtime behavior in under a minute, your bootstrap is probably clean."}
+    ]
+  },
+  "ts-essentials": {
+    title:"TypeScript Essentials",
+    breadcrumb:"Chapter 1 · Foundations",
+    subtitle:"Angular quality scales with TypeScript discipline: exact data contracts, generics, unions, and utility types.",
+    badges:[{text:"TypeScript",color:"#00d8ff"},{text:"Core",color:"#dd0031"},{text:"Contracts",color:"#00c853"}],
+    sections:[
+      {type:"code", title:"Interfaces, DTOs, and View Models", lang:"typescript", code:`<span class="kw">export interface</span> <span class="type">OrderDto</span> {
+  id: <span class="type">string</span>;
+  total: <span class="type">number</span>;
+  status: <span class="str">'draft'</span> | <span class="str">'paid'</span> | <span class="str">'shipped'</span>;
+}
+
+<span class="kw">export type</span> <span class="type">OrderVm</span> = <span class="type">OrderDto</span> & {
+  isLate: <span class="type">boolean</span>;
+  displayTotal: <span class="type">string</span>;
+};
+
+<span class="kw">function</span> <span class="fn">toVm</span>(dto: <span class="type">OrderDto</span>): <span class="type">OrderVm</span> {
+  <span class="kw">return</span> {
+    ...dto,
+    isLate: <span class="kw">false</span>,
+    displayTotal: dto.total.<span class="fn">toFixed</span>(<span class="num">2</span>)
+  };
+}`},
+      {type:"prose", title:"What Actually Matters", content:`
+        <p>In Angular apps, TypeScript is mainly about <strong>protecting boundaries</strong>:</p>
+        <ul>
+          <li>API DTOs should be typed and transformed once.</li>
+          <li>Components should consume view models, not raw backend shapes.</li>
+          <li>Signals and observables should expose predictable types without <code>any</code> leaks.</li>
+          <li>Unions are more useful than booleans for state transitions like idle/loading/success/error.</li>
+        </ul>
+      `}
+    ]
+  },
+  "component-lifecycle": {
+    title:"Lifecycle & Render Timing",
+    breadcrumb:"Chapter 2 · Components",
+    subtitle:"Angular 21 lifecycle is about knowing the exact order of input changes, checks, content/view hooks, render callbacks, and cleanup.",
+    badges:[{text:"Lifecycle",color:"#dd0031"},{text:"Core",color:"#00d8ff"},{text:"Rendering",color:"#00c853"}],
+    sections:[
+      {type:"diagram", title:"Component Lifecycle Sequence", svg:`
+        <svg width="520" height="468" viewBox="0 0 520 468" xmlns="http://www.w3.org/2000/svg">
+          <defs><style>
+            .node{fill:#161c26;stroke:#364960;stroke-width:1.3;rx:8}
+            .t{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#e8edf5;text-anchor:middle}
+            .s{font-family:'JetBrains Mono',monospace;font-size:8px;fill:#9aa7bb;text-anchor:middle}
+            .label{font-family:'JetBrains Mono',monospace;font-size:8px;fill:#00d8ff;text-transform:uppercase;letter-spacing:1px}
+            .tiny{font-family:'JetBrains Mono',monospace;font-size:7px;fill:#9aa7bb;text-anchor:middle}
+            .line{stroke:#dd0031;stroke-width:1.5;fill:none;stroke-dasharray:4 3}
+          </style></defs>
+          <text class="label" x="42" y="28">Initialization</text>
+          <rect class="node" x="170" y="10" width="180" height="30"/><text class="t" x="260" y="29">constructor</text>
+          <rect class="node" x="170" y="48" width="180" height="30"/><text class="t" x="260" y="67">ngOnChanges</text>
+          <text class="s" x="260" y="88">first change runs before ngOnInit</text>
+          <rect class="node" x="170" y="98" width="180" height="30"/><text class="t" x="260" y="117">ngOnInit</text>
+          <rect class="node" x="170" y="136" width="180" height="30"/><text class="t" x="260" y="155">ngDoCheck</text>
+          <rect class="node" x="170" y="174" width="180" height="30"/><text class="t" x="260" y="193">ngAfterContentInit</text>
+          <rect class="node" x="170" y="212" width="180" height="30"/><text class="t" x="260" y="231">ngAfterViewInit</text>
+          <rect class="node" x="170" y="250" width="180" height="30"/><text class="t" x="260" y="269">ngAfterContentChecked</text>
+          <rect class="node" x="170" y="288" width="180" height="30"/><text class="t" x="260" y="307">ngAfterViewChecked</text>
+          <rect class="node" x="170" y="326" width="180" height="30"/><text class="t" x="260" y="345">afterNextRender / afterEveryRender</text>
+          <text class="s" x="260" y="366">render callbacks fire after DOM render</text>
+          <text class="label" x="260" y="390">Subsequent Updates</text>
+          <rect class="node" x="140" y="400" width="240" height="34"/>
+          <text class="tiny" x="260" y="414">ngOnChanges → ngDoCheck</text>
+          <text class="tiny" x="260" y="425">ngAfterContentChecked → ngAfterViewChecked → afterEveryRender</text>
+          <text class="label" x="260" y="452">Destruction</text>
+          <rect class="node" x="170" y="458" width="180" height="10" opacity="0"/>
+          <rect class="node" x="170" y="432" width="180" height="26"/><text class="s" x="260" y="449">ngOnDestroy / DestroyRef.onDestroy</text>
+          <path class="line" d="M260 40 L260 48"/><path class="line" d="M260 78 L260 98"/><path class="line" d="M260 128 L260 136"/><path class="line" d="M260 166 L260 174"/><path class="line" d="M260 204 L260 212"/><path class="line" d="M260 242 L260 250"/><path class="line" d="M260 280 L260 288"/><path class="line" d="M260 318 L260 326"/><path class="line" d="M260 356 L260 400"/><path class="line" d="M260 434 L260 432"/>
+        </svg>
+      `},
+      {type:"table", title:"Angular 21 Lifecycle Order", columns:["Phase","Order","Notes"], rows:[
+        ["Initialization","constructor → ngOnChanges → ngOnInit → ngDoCheck → ngAfterContentInit → ngAfterViewInit → ngAfterContentChecked → ngAfterViewChecked → afterNextRender → afterEveryRender","The first ngOnChanges runs before ngOnInit. Render callbacks run after Angular finishes rendering to the DOM."],
+        ["Subsequent updates","ngOnChanges → ngDoCheck → ngAfterContentChecked → ngAfterViewChecked → afterEveryRender","afterNextRender is one-time; afterEveryRender continues after each render cycle."],
+        ["Destruction","ngOnDestroy or DestroyRef.onDestroy","Use DestroyRef to keep setup and cleanup close together."]
+      ]},
+      {type:"code", title:"Lifecycle with Angular 21 render callbacks", lang:"typescript", code:`<span class="kw">import</span> {
+  <span class="fn">Component</span>,
+  <span class="fn">DestroyRef</span>,
+  <span class="fn">afterEveryRender</span>,
+  <span class="fn">afterNextRender</span>,
+  <span class="fn">effect</span>,
+  <span class="fn">inject</span>,
+  <span class="type">OnChanges</span>,
+  <span class="type">OnInit</span>,
+  <span class="type">SimpleChanges</span>,
+  <span class="fn">signal</span>
+} <span class="kw">from</span> <span class="str">'@angular/core'</span>;
+
+<span class="dec">@Component</span>({
+  selector: <span class="str">'app-orders'</span>,
+  standalone: <span class="kw">true</span>,
+  template: <span class="str">'&lt;h2&gt;{{ title() }}&lt;/h2&gt;'</span>
+})
+<span class="kw">export class</span> <span class="type">OrdersComponent</span> <span class="kw">implements</span> <span class="type">OnChanges</span>, <span class="type">OnInit</span> {
+  <span class="kw">private</span> destroyRef = <span class="fn">inject</span>(DestroyRef);
+  title = <span class="fn">signal</span>(<span class="str">'Orders'</span>);
+
+  <span class="fn">constructor</span>() {
+    <span class="fn">afterNextRender</span>(() => {
+      <span class="type">console</span>.<span class="fn">log</span>(<span class="str">'DOM is rendered once after init'</span>);
+    });
+
+    <span class="fn">afterEveryRender</span>(() => {
+      <span class="type">console</span>.<span class="fn">log</span>(<span class="str">'Runs after every render pass'</span>);
+    });
+  }
+
+  <span class="fn">ngOnChanges</span>(changes: <span class="type">SimpleChanges</span>) {
+    <span class="type">console</span>.<span class="fn">log</span>(<span class="str">'Inputs changed'</span>, changes);
+  }
+
+  <span class="fn">ngOnInit</span>() {
+    <span class="kw">const</span> timer = <span class="fn">setInterval</span>(() => {}, <span class="num">1000</span>);
+    <span class="kw">this</span>.destroyRef.<span class="fn">onDestroy</span>(() => <span class="fn">clearInterval</span>(timer));
+  }
+
+  logTitle = <span class="fn">effect</span>(() => {
+    <span class="type">console</span>.<span class="fn">log</span>(<span class="kw">this</span>.title());
+  });
+}`},
+      {type:"callout", kind:"warn", icon:"⚠️", text:"The old simplified sequence in this guide was missing Angular 21 hooks like <code>ngOnChanges</code>, <code>ngDoCheck</code>, <code>ngAfterContentChecked</code>, <code>ngAfterViewChecked</code>, and the correct render callback names <code>afterNextRender</code> / <code>afterEveryRender</code>."},
+      {type:"callout", kind:"info", icon:"🧠", text:"Angular's official lifecycle guide also notes that render callbacks are application-wide, must be registered in an injection context such as the constructor, and do not run during SSR or build-time pre-rendering."},
+      {type:"callout", kind:"warn", icon:"⚠️", text:"Do not put network calls or subscription setup in the constructor. Constructor is for dependency wiring and render callback registration; initialization logic belongs after inputs and runtime state are available."}
+    ]
+  },
+  "signals-inputs": {
+    title:"Signals in Components",
+    breadcrumb:"Chapter 2 · Components",
+    subtitle:"Signals give Angular a fine-grained reactive graph, and in Angular 21 they are central to the framework's performance story.",
+    badges:[{text:"Signals",color:"#00d8ff"},{text:"Important",color:"#dd0031"},{text:"Angular 17+",color:"#00c853"}],
+    sections:[
+      {type:"prose", title:"When Signals Fit Best", content:`
+        <p>Signals are ideal for <strong>synchronous UI state</strong>: selected tabs, filters, computed counts, form view state, and component-local models.</p>
+        <p>They are not a wholesale replacement for RxJS. Use signals for <strong>state</strong> and RxJS for <strong>asynchronous streams and orchestration</strong>.</p>
+      `},
+      {type:"code", title:"Signal Component Example", lang:"typescript", code:`<span class="kw">import</span> { <span class="fn">Component</span>, <span class="fn">computed</span>, <span class="fn">input</span>, <span class="fn">signal</span> } <span class="kw">from</span> <span class="str">'@angular/core'</span>;
+
+<span class="dec">@Component</span>({
+  selector: <span class="str">'app-cart-summary'</span>,
+  standalone: <span class="kw">true</span>,
+  template: <span class="str">'&lt;strong&gt;{{ total() }}&lt;/strong&gt;'</span>
+})
+<span class="kw">export class</span> <span class="type">CartSummaryComponent</span> {
+  items = <span class="fn">input</span>.<span class="fn">required</span>&lt;{ price: <span class="type">number</span>; qty: <span class="type">number</span> }[]&gt;();
+  coupon = <span class="fn">signal</span>(<span class="num">0</span>);
+
+  subtotal = <span class="fn">computed</span>(() =>
+    <span class="kw">this</span>.items().<span class="fn">reduce</span>((sum, item) => sum + item.price * item.qty, <span class="num">0</span>)
+  );
+
+  total = <span class="fn">computed</span>(() => <span class="kw">this</span>.subtotal() - <span class="kw">this</span>.coupon());
+}`},
+      {type:"diagram", title:"Signal Reactivity Flow", svg:`
+        <svg width="520" height="180" viewBox="0 0 520 180" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="arrB" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dd0031"/></marker></defs>
+          <rect x="20" y="70" width="100" height="42" rx="8" fill="#161c26" stroke="#364960"/><text x="70" y="94" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8edf5">signal()</text>
+          <rect x="170" y="70" width="120" height="42" rx="8" fill="#161c26" stroke="#364960"/><text x="230" y="94" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8edf5">computed()</text>
+          <rect x="340" y="70" width="160" height="42" rx="8" fill="#161c26" stroke="#364960"/><text x="420" y="94" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8edf5">template / effect</text>
+          <line x1="120" y1="91" x2="166" y2="91" stroke="#dd0031" stroke-width="1.6" marker-end="url(#arrB)"/>
+          <line x1="290" y1="91" x2="336" y2="91" stroke="#dd0031" stroke-width="1.6" marker-end="url(#arrB)"/>
+          <text x="260" y="26" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#9aa7bb">Only dependents that read a signal are updated</text>
+        </svg>
+      `}
+    ]
+  },
+  "control-flow": {
+    title:"New Control Flow",
+    breadcrumb:"Chapter 3 · Templates",
+    subtitle:"Modern Angular control flow is more readable, easier to optimize, and a better fit for the compiler than the older microsyntax.",
+    badges:[{text:"Angular 17+",color:"#00d8ff"},{text:"Templates",color:"#dd0031"},{text:"Important",color:"#00c853"}],
+    sections:[
+      {type:"table", title:"Old vs New Syntax", columns:["Use Case","Old Syntax","New Syntax"], rows:[
+        ["Conditional rendering","*ngIf='user'","@if (user()) { ... }"],
+        ["List rendering","*ngFor='let item of items'","@for (item of items(); track item.id) { ... }"],
+        ["Multi-branch selection","ngSwitch / ngSwitchCase","@switch (status()) { ... }"]
+      ]},
+      {type:"code", title:"Control Flow Example", lang:"html", code:`<span class="cmt">&lt;!-- Angular 17+ control flow --&gt;</span>
+<span class="kw">@if</span> (user()) {
+  &lt;app-user-card [user]=<span class="str">"user()"</span> /&gt;
+} <span class="kw">@else</span> {
+  &lt;app-skeleton /&gt;
+}
+
+<span class="kw">@for</span> (item <span class="kw">of</span> products(); <span class="kw">track</span> item.id) {
+  &lt;app-product-row [product]=<span class="str">"item"</span> /&gt;
+} <span class="kw">@empty</span> {
+  &lt;p&gt;No products found.&lt;/p&gt;
+}`},
+      {type:"callout", kind:"success", icon:"✅", text:"Always provide a stable <code>track</code> expression for repeated lists. If Angular cannot map identity correctly, it will recreate DOM nodes and lose performance."}
+    ]
+  },
+  "defer-views": {
+    title:"Deferrable Views",
+    breadcrumb:"Chapter 3 · Templates",
+    subtitle:"Use @defer to delay expensive UI islands until they are needed, rather than making the first render pay for everything.",
+    badges:[{text:"Performance",color:"#dd0031"},{text:"Angular 17+",color:"#00d8ff"},{text:"UI Loading",color:"#00c853"}],
+    sections:[
+      {type:"code", title:"@defer with placeholders", lang:"html", code:`<span class="kw">@defer</span> (on viewport) {
+  &lt;app-analytics-chart /&gt;
+} <span class="kw">@placeholder</span> {
+  &lt;app-chart-skeleton /&gt;
+} <span class="kw">@loading</span> {
+  &lt;p&gt;Loading analytics...&lt;/p&gt;
+} <span class="kw">@error</span> {
+  &lt;p&gt;Chart failed to load.&lt;/p&gt;
+}`},
+      {type:"steps", title:"When to defer", steps:[
+        {title:"Heavy dashboard widgets", text:"Charts, maps, and large filter panels should not block the first contentful paint."},
+        {title:"Below-the-fold islands", text:"Load sections only when they enter the viewport or when user intent is clear."},
+        {title:"Feature previews", text:"Admin drawers, side panels, and advanced inspectors are perfect defer candidates."}
+      ]}
+    ]
+  },
+  "inject-api": {
+    title:"inject() API & Service Design",
+    breadcrumb:"Chapter 4 · Dependency Injection",
+    subtitle:"Angular's inject() API makes functional DI cleaner, but the real engineering value is deciding where logic belongs.",
+    badges:[{text:"DI",color:"#dd0031"},{text:"Architecture",color:"#00d8ff"},{text:"Important",color:"#00c853"}],
+    sections:[
+      {type:"code", title:"Functional service usage", lang:"typescript", code:`<span class="kw">import</span> { <span class="fn">inject</span>, <span class="fn">Injectable</span> } <span class="kw">from</span> <span class="str">'@angular/core'</span>;
+<span class="kw">import</span> { <span class="type">HttpClient</span> } <span class="kw">from</span> <span class="str">'@angular/common/http'</span>;
+
+<span class="dec">@Injectable</span>({ providedIn: <span class="str">'root'</span> })
+<span class="kw">export class</span> <span class="type">OrdersService</span> {
+  <span class="kw">private</span> http = <span class="fn">inject</span>(HttpClient);
+
+  <span class="fn">getOrders</span>() {
+    <span class="kw">return</span> <span class="kw">this</span>.http.<span class="fn">get</span>&lt;<span class="type">OrderDto</span>[]&gt;(<span class="str">'/api/orders'</span>);
+  }
+}`},
+      {type:"prose", title:"Service boundary rules", content:`
+        <ul>
+          <li>Services should hide network and orchestration details from components.</li>
+          <li>Do not let components coordinate retries, caching, and normalization directly.</li>
+          <li>Prefer narrow feature services over giant "AppService" objects.</li>
+          <li>Provider scope is an architectural choice, not a default you ignore.</li>
+        </ul>
+      `}
+    ]
+  },
+  "http-interceptors": {
+    title:"Interceptor Pipeline",
+    breadcrumb:"Chapter 4 · Dependency Injection",
+    subtitle:"Interceptors create a formal request/response pipeline for auth, tracing, retries, and error normalization.",
+    badges:[{text:"HTTP",color:"#00d8ff"},{text:"Flow",color:"#dd0031"},{text:"Architecture",color:"#00c853"}],
+    sections:[
+      {type:"diagram", title:"HTTP Request / Response Flow", svg:`
+        <svg width="520" height="250" viewBox="0 0 520 250" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="arrC" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#00d8ff"/></marker></defs>
+          <rect x="20" y="50" width="80" height="40" rx="8" fill="#161c26" stroke="#364960"/><text x="60" y="74" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8edf5">Component</text>
+          <rect x="130" y="50" width="90" height="40" rx="8" fill="#161c26" stroke="#364960"/><text x="175" y="74" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8edf5">Service</text>
+          <rect x="250" y="35" width="100" height="32" rx="8" fill="#161c26" stroke="#364960"/><text x="300" y="55" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#e8edf5">Auth Interceptor</text>
+          <rect x="250" y="77" width="100" height="32" rx="8" fill="#161c26" stroke="#364960"/><text x="300" y="97" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#e8edf5">Trace / Metrics</text>
+          <rect x="250" y="119" width="100" height="32" rx="8" fill="#161c26" stroke="#364960"/><text x="300" y="139" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#e8edf5">Error Mapping</text>
+          <rect x="390" y="50" width="100" height="40" rx="8" fill="#161c26" stroke="#364960"/><text x="440" y="74" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8edf5">Backend API</text>
+          <line x1="100" y1="70" x2="126" y2="70" stroke="#00d8ff" stroke-width="1.5" marker-end="url(#arrC)"/>
+          <line x1="220" y1="70" x2="246" y2="70" stroke="#00d8ff" stroke-width="1.5" marker-end="url(#arrC)"/>
+          <line x1="350" y1="70" x2="386" y2="70" stroke="#00d8ff" stroke-width="1.5" marker-end="url(#arrC)"/>
+          <text x="260" y="190" font-family="JetBrains Mono" font-size="9" fill="#9aa7bb">Response comes back through the same interceptor chain in reverse</text>
+        </svg>
+      `},
+      {type:"code", title:"Functional Interceptor Example", lang:"typescript", code:`<span class="kw">import</span> { <span class="type">HttpInterceptorFn</span> } <span class="kw">from</span> <span class="str">'@angular/common/http'</span>;
+<span class="kw">import</span> { <span class="fn">inject</span> } <span class="kw">from</span> <span class="str">'@angular/core'</span>;
+<span class="kw">import</span> { <span class="type">AuthStateService</span> } <span class="kw">from</span> <span class="str">'./auth-state.service'</span>;
+
+<span class="kw">export const</span> authInterceptor: <span class="type">HttpInterceptorFn</span> = (req, next) => {
+  <span class="kw">const</span> auth = <span class="fn">inject</span>(AuthStateService);
+  <span class="kw">const</span> token = auth.<span class="fn">token</span>();
+
+  <span class="kw">const</span> authReq = token
+    ? req.<span class="fn">clone</span>({ setHeaders: { Authorization: <span class="str">'Bearer '</span> + token } })
+    : req;
+
+  <span class="kw">return</span> <span class="fn">next</span>(authReq);
+};`},
+      {type:"callout", kind:"warn", icon:"⚠️", text:"Do not hide business decisions in interceptors. Use them for cross-cutting concerns like auth headers, tracing, consistent errors, and standardized retry behavior."}
+    ]
+  },
+  "route-guards": {
+    title:"Guards & Access Control",
+    breadcrumb:"Chapter 5 · Routing",
+    subtitle:"Guards are runtime policy enforcement. Their job is to protect navigation boundaries, not to replace backend authorization.",
+    badges:[{text:"Security",color:"#dd0031"},{text:"Router",color:"#00d8ff"},{text:"Important",color:"#00c853"}],
+    sections:[
+      {type:"code", title:"Functional canActivate Guard", lang:"typescript", code:`<span class="kw">import</span> { <span class="type">CanActivateFn</span>, <span class="type">Router</span> } <span class="kw">from</span> <span class="str">'@angular/router'</span>;
+<span class="kw">import</span> { <span class="fn">inject</span> } <span class="kw">from</span> <span class="str">'@angular/core'</span>;
+<span class="kw">import</span> { <span class="type">AuthStateService</span> } <span class="kw">from</span> <span class="str">'./auth-state.service'</span>;
+
+<span class="kw">export const</span> adminGuard: <span class="type">CanActivateFn</span> = () => {
+  <span class="kw">const</span> auth = <span class="fn">inject</span>(AuthStateService);
+  <span class="kw">const</span> router = <span class="fn">inject</span>(Router);
+
+  <span class="kw">if</span> (auth.<span class="fn">isAdmin</span>()) <span class="kw">return true</span>;
+  <span class="kw">return</span> router.<span class="fn">parseUrl</span>(<span class="str">'/forbidden'</span>);
+};`},
+      {type:"prose", title:"Guard architecture rules", content:`
+        <ul>
+          <li><strong>canMatch</strong> is best when you want to block feature loading entirely.</li>
+          <li><strong>canActivate</strong> is best when the route may load but entry depends on session state.</li>
+          <li>Frontend guards are UX control only; backend APIs still require real authorization.</li>
+        </ul>
+      `}
+    ]
+  },
+  "higher-order": {
+    title:"Higher-Order Mapping",
+    breadcrumb:"Chapter 6 · RxJS",
+    subtitle:"Most Angular RxJS bugs come from choosing the wrong higher-order operator for user intent and cancellation behavior.",
+    badges:[{text:"RxJS",color:"#00d8ff"},{text:"Important",color:"#dd0031"},{text:"Async",color:"#00c853"}],
+    sections:[
+      {type:"table", title:"Operator tradeoffs", columns:["Operator","Use It When","Risk"], rows:[
+        ["switchMap","Only latest request should win","Cancels previous work"],
+        ["concatMap","Order matters","Can queue and feel slow under load"],
+        ["mergeMap","Parallel work is acceptable","Responses can interleave unpredictably"],
+        ["exhaustMap","Ignore repeated triggers while busy","Later clicks may be dropped"]
+      ]},
+      {type:"code", title:"Search with switchMap", lang:"typescript", code:`searchResults$ = <span class="kw">this</span>.searchTerm$.<span class="fn">pipe</span>(
+  <span class="fn">debounceTime</span>(<span class="num">250</span>),
+  <span class="fn">distinctUntilChanged</span>(),
+  <span class="fn">switchMap</span>(term =>
+    <span class="kw">this</span>.http.<span class="fn">get</span>&lt;<span class="type">ProductDto</span>[]&gt;(<span class="str">'/api/products?search='</span> + term)
+  )
+);`},
+      {type:"callout", kind:"info", icon:"💡", text:"For type-ahead search and route-driven reloads, <code>switchMap</code> is usually correct because stale results should not win the race."}
+    ]
+  },
+  "cleanup-patterns": {
+    title:"Cleanup & takeUntilDestroyed",
+    breadcrumb:"Chapter 6 · RxJS",
+    subtitle:"Memory leaks are usually not mysterious. They come from long-lived subscriptions, timers, listeners, and sockets that were never tied to component teardown.",
+    badges:[{text:"RxJS",color:"#00d8ff"},{text:"Angular 16+",color:"#dd0031"},{text:"Reliability",color:"#00c853"}],
+    sections:[
+      {type:"code", title:"Modern automatic cleanup", lang:"typescript", code:`<span class="kw">import</span> { <span class="fn">takeUntilDestroyed</span> } <span class="kw">from</span> <span class="str">'@angular/core/rxjs-interop'</span>;
+
+<span class="kw">this</span>.ordersService.<span class="fn">getOrders</span>()
+  .<span class="fn">pipe</span>(<span class="fn">takeUntilDestroyed</span>(<span class="kw">this</span>.destroyRef))
+  .<span class="fn">subscribe</span>(orders => {
+    <span class="kw">this</span>.orders.<span class="fn">set</span>(orders);
+  });`},
+      {type:"steps", title:"Preferred cleanup order", steps:[
+        {title:"Use async pipe where possible", text:"Let the template own subscription lifecycle for simple rendering flows."},
+        {title:"Use takeUntilDestroyed for imperative streams", text:"Especially when side effects or manual orchestration are necessary."},
+        {title:"Remember non-Rx resources", text:"WebSocket handles, event listeners, intervals, observers, and workers also need cleanup."}
+      ]}
+    ]
+  },
+  "ngrx-store": {
+    title:"NgRx Data Flow",
+    breadcrumb:"Chapter 7 · State Management",
+    subtitle:"NgRx is valuable when state transitions, cross-feature coordination, and auditability matter more than low ceremony.",
+    badges:[{text:"NgRx",color:"#dd0031"},{text:"Flow",color:"#00d8ff"},{text:"Architecture",color:"#00c853"}],
+    sections:[
+      {type:"diagram", title:"NgRx Unidirectional Cycle", svg:`
+        <svg width="520" height="260" viewBox="0 0 520 260" xmlns="http://www.w3.org/2000/svg">
+          <defs><style>
+            .n{fill:#161c26;stroke:#364960;stroke-width:1.4;rx:10}
+            .t{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#e8edf5;text-anchor:middle}
+            .p{stroke:#dd0031;stroke-width:1.5;fill:none;stroke-dasharray:6 4}
+          </style></defs>
+          <rect class="n" x="215" y="12" width="90" height="40"/><text class="t" x="260" y="36">Action</text>
+          <rect class="n" x="390" y="110" width="90" height="40"/><text class="t" x="435" y="134">Reducer</text>
+          <rect class="n" x="215" y="208" width="90" height="40"/><text class="t" x="260" y="232">Store</text>
+          <rect class="n" x="40" y="110" width="110" height="40"/><text class="t" x="95" y="134">Selectors</text>
+          <rect class="n" x="200" y="110" width="120" height="40"/><text class="t" x="260" y="134">Effects</text>
+          <path class="p" d="M305 32 C360 32 405 72 425 110"/>
+          <path class="p" d="M390 150 C360 190 315 210 260 208"/>
+          <path class="p" d="M215 228 C150 225 105 190 95 150"/>
+          <path class="p" d="M150 110 C175 90 190 82 215 52"/>
+          <path class="p" d="M305 52 C322 70 330 88 320 110"/>
+        </svg>
+      `},
+      {type:"prose", title:"When NgRx is justified", content:`
+        <ul>
+          <li>Many features read and update the same business state.</li>
+          <li>You need deterministic transitions and a strong audit trail.</li>
+          <li>Effects and optimistic updates are complex enough to justify formal structure.</li>
+        </ul>
+        <p>If your state is local to one feature and has simple transitions, signal-based stores are often a better fit.</p>
+      `}
+    ]
+  },
+  "zoneless-cd": {
+    title:"Zoneless Change Detection",
+    breadcrumb:"Chapter 8 · Performance",
+    subtitle:"Angular 21 moves toward precise reactivity instead of monkey-patching every async API and traversing broad component trees.",
+    badges:[{text:"Angular 21",color:"#dd0031"},{text:"Important",color:"#00d8ff"},{text:"Performance",color:"#00c853"}],
+    sections:[
+      {type:"table", title:"Zone.js vs Zoneless", columns:["Mode","How Updates Trigger","Tradeoff"], rows:[
+        ["Zone.js default","Patched async APIs notify Angular globally","Simple mental model, extra overhead"],
+        ["Zoneless + signals","Signal reads and explicit marks drive updates","Faster and more surgical, requires reactive discipline"]
+      ]},
+      {type:"diagram", title:"Change Detection Architecture Shift", svg:`
+        <svg width="520" height="210" viewBox="0 0 520 210" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="40" width="210" height="120" rx="14" fill="#161c26" stroke="#364960"/>
+          <text x="125" y="64" text-anchor="middle" font-family="Syne" font-size="16" fill="#ff6b9d">Zone.js Mode</text>
+          <text x="125" y="92" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8edf5">setTimeout / Promise / fetch / DOM events</text>
+          <text x="125" y="116" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#9aa7bb">global patching</text>
+          <text x="125" y="140" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#9aa7bb">broad CD traversal</text>
+          <rect x="290" y="40" width="210" height="120" rx="14" fill="#161c26" stroke="#364960"/>
+          <text x="395" y="64" text-anchor="middle" font-family="Syne" font-size="16" fill="#00d8ff">Zoneless + Signals</text>
+          <text x="395" y="92" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8edf5">signal writes / computed invalidation</text>
+          <text x="395" y="116" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#9aa7bb">precise subscriptions</text>
+          <text x="395" y="140" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#9aa7bb">surgical DOM refresh</text>
+        </svg>
+      `},
+      {type:"code", title:"Zoneless bootstrap", lang:"typescript", code:`<span class="kw">import</span> { <span class="fn">provideZonelessChangeDetection</span> } <span class="kw">from</span> <span class="str">'@angular/core'</span>;
+
+<span class="fn">bootstrapApplication</span>(AppComponent, {
+  providers: [
+    <span class="fn">provideZonelessChangeDetection</span>(),
+    <span class="fn">provideRouter</span>(routes)
+  ]
+});`},
+      {type:"callout", kind:"warn", icon:"⚠️", text:"Zoneless is not a performance cheat code by itself. If your state model is sloppy, your app can still be hard to reason about. Signals make precision possible; architecture still makes it effective."}
+    ]
+  },
+  "ssr-hydration": {
+    title:"SSR + Hydration Flow",
+    breadcrumb:"Chapter 9 · SSR & Rendering",
+    subtitle:"Server-rendered Angular should feel fast because HTML arrives early, then hydration upgrades it without throwing away the DOM.",
+    badges:[{text:"SSR",color:"#dd0031"},{text:"Hydration",color:"#00d8ff"},{text:"Flow",color:"#00c853"}],
+    sections:[
+      {type:"steps", title:"Hydration lifecycle", steps:[
+        {title:"Server render", text:"Angular renders HTML on the server and returns content immediately for SEO and perceived speed."},
+        {title:"HTML arrives first", text:"The browser paints useful content before Angular bundles finish loading."},
+        {title:"Client bootstrap", text:"Angular reads the DOM, wires listeners, restores state, and avoids re-rendering the same markup."},
+        {title:"Interactive handoff", text:"Hydrated components become live without losing the initial server paint."}
+      ]},
+      {type:"diagram", title:"SSR to Interactive UI", svg:`
+        <svg width="520" height="200" viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="70" width="90" height="42" rx="8" fill="#161c26" stroke="#364960"/><text x="65" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8edf5">Request</text>
+          <rect x="140" y="70" width="100" height="42" rx="8" fill="#161c26" stroke="#364960"/><text x="190" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8edf5">SSR HTML</text>
+          <rect x="270" y="70" width="100" height="42" rx="8" fill="#161c26" stroke="#364960"/><text x="320" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8edf5">Hydration</text>
+          <rect x="400" y="70" width="100" height="42" rx="8" fill="#161c26" stroke="#364960"/><text x="450" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e8edf5">Interactive App</text>
+          <line x1="110" y1="91" x2="136" y2="91" stroke="#00d8ff" stroke-width="1.5"/>
+          <line x1="240" y1="91" x2="266" y2="91" stroke="#00d8ff" stroke-width="1.5"/>
+          <line x1="370" y1="91" x2="396" y2="91" stroke="#00d8ff" stroke-width="1.5"/>
+        </svg>
+      `},
+      {type:"callout", kind:"success", icon:"✅", text:"Hydration problems usually come from browser-only APIs during server render, unstable markup, or duplicate client fetches. Treat SSR as a rendering contract, not a deployment toggle."}
+    ]
+  },
+  "angular-dotnet": {
+    title:"Angular + ASP.NET Core",
+    breadcrumb:"Chapter 10 · Angular + APIs",
+    subtitle:"Angular pairs well with ASP.NET Core when contracts, auth, and deployment boundaries are treated as first-class design concerns.",
+    badges:[{text:".NET",color:"#00d8ff"},{text:"Full Stack",color:"#dd0031"},{text:"Important",color:"#00c853"}],
+    sections:[
+      {type:"code", title:"Proxy + API Contract Setup", lang:"typescript", code:`<span class="cmt">// environment.ts</span>
+<span class="kw">export const</span> environment = {
+  apiBaseUrl: <span class="str">'/api'</span>
+};
+
+<span class="cmt">// orders.api.ts</span>
+<span class="fn">getOrders</span>() {
+  <span class="kw">return</span> <span class="kw">this</span>.http.<span class="fn">get</span>&lt;<span class="type">OrderDto</span>[]&gt;(environment.apiBaseUrl + <span class="str">'/orders'</span>);
+}`},
+      {type:"prose", title:"Integration rules", content:`
+        <ul>
+          <li>Use DTOs that are explicit on both sides. Do not let backend entity shapes leak into Angular UI.</li>
+          <li>Prefer OpenAPI-generated clients or shared contract packages when teams are large.</li>
+          <li>Keep auth and refresh rules centralized in the interceptor + auth state layer.</li>
+          <li>Use SignalR for realtime workflows like dashboards, order status, notifications, or collaborative state.</li>
+        </ul>
+      `}
+    ]
+  },
+  "unit-testing": {
+    title:"Unit & Service Testing",
+    breadcrumb:"Chapter 11 · Testing & Tooling",
+    subtitle:"Angular tests should mostly validate behavior at the right boundary: services for orchestration, components for rendering decisions, E2E for system confidence.",
+    badges:[{text:"Testing",color:"#dd0031"},{text:"Quality",color:"#00d8ff"},{text:"Core",color:"#00c853"}],
+    sections:[
+      {type:"code", title:"HttpTestingController example", lang:"typescript", code:`<span class="kw">it</span>(<span class="str">'loads orders'</span>, () => {
+  service.<span class="fn">getOrders</span>().<span class="fn">subscribe</span>(orders => {
+    <span class="fn">expect</span>(orders.length).<span class="fn">toBe</span>(<span class="num">2</span>);
+  });
+
+  <span class="kw">const</span> req = httpMock.<span class="fn">expectOne</span>(<span class="str">'/api/orders'</span>);
+  req.<span class="fn">flush</span>([{ id: <span class="str">'1'</span> }, { id: <span class="str">'2'</span> }]);
+});`},
+      {type:"steps", title:"Testing pyramid for Angular teams", steps:[
+        {title:"Many unit tests", text:"Cheap, fast checks for service logic, data transforms, selectors, pipes, and helpers."},
+        {title:"Focused component tests", text:"Verify rendered states, interactions, and host integration without over-mocking."},
+        {title:"A smaller E2E layer", text:"Cover login, checkout, critical flows, and integration seams that unit tests cannot prove."}
+      ]}
+    ]
+  },
+  "signal-forms": {
+    title:"Signal Forms",
+    breadcrumb:"Chapter 12 · Angular 21",
+    subtitle:"Signal forms reduce form ceremony by making field state composable and reactive without wiring endless subscriptions.",
+    badges:[{text:"Angular 21",color:"#dd0031"},{text:"Forms",color:"#00d8ff"},{text:"Modern",color:"#00c853"}],
+    sections:[
+      {type:"prose", title:"Why this matters", content:`
+        <p>Traditional reactive forms are powerful but can become verbose. Signal forms shift more of the form experience into <strong>derived reactive state</strong> instead of subscription plumbing.</p>
+      `},
+      {type:"callout", kind:"info", icon:"📝", text:"The exact API surface will continue to evolve, but the direction is clear: Angular wants forms to fit the same signal-based mental model as the rest of the framework."}
+    ]
+  },
+  "angular-aria": {
+    title:"Angular Aria",
+    breadcrumb:"Chapter 12 · Angular 21",
+    subtitle:"Headless accessible primitives move accessibility from ad hoc markup into reusable, state-driven interaction building blocks.",
+    badges:[{text:"Angular 21",color:"#dd0031"},{text:"Accessibility",color:"#00d8ff"},{text:"Headless UI",color:"#00c853"}],
+    sections:[
+      {type:"prose", title:"Why teams should care", content:`
+        <p>Angular Aria is promising because it separates <strong>behavior and accessibility semantics</strong> from visual styling. That gives design systems flexibility without sacrificing keyboard and screen reader expectations.</p>
+      `}
+    ]
+  },
+  "mcp-server": {
+    title:"Angular MCP Server",
+    breadcrumb:"Chapter 12 · Angular 21",
+    subtitle:"Angular's MCP tooling gives AI assistants project-aware context instead of forcing them to guess your app structure.",
+    badges:[{text:"Angular 21",color:"#dd0031"},{text:"Tooling",color:"#00d8ff"},{text:"AI",color:"#00c853"}],
+    sections:[
+      {type:"prose", title:"Why this is a real shift", content:`
+        <p>AI assistance becomes much more useful when tools understand routes, components, feature boundaries, and best-practice migrations. MCP is valuable because it turns Angular project structure into <strong>queryable context</strong>.</p>
+      `}
+    ]
+  },
+  "vitest-default": {
+    title:"Vitest & New DX Defaults",
+    breadcrumb:"Chapter 12 · Angular 21",
+    subtitle:"Angular 21 keeps pushing toward faster feedback loops: modern testing, simpler defaults, and less runtime overhead.",
+    badges:[{text:"Angular 21",color:"#dd0031"},{text:"DX",color:"#00d8ff"},{text:"Testing",color:"#00c853"}],
+    sections:[
+      {type:"prose", title:"Practical impact", content:`
+        <p>Teams care about test speed because it changes behavior. Faster local feedback means more tests stay enabled, more refactors happen confidently, and less broken code reaches CI.</p>
+      `}
+    ]
+  }
+};
+
+function slugify(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function getInterviewPrimaryTag(topic, chapter) {
+  const firstTopicTag = (topic.tags && topic.tags[0]) || chapter.title;
+  return slugify(firstTopicTag);
+}
+
+function getInterviewTags(topic, chapter) {
+  return [chapter.title, topic.title, ...(topic.tags || [])].slice(0, 5);
+}
+
+function getInterviewLens(chapter, topic) {
+  const base = getAngularLens(chapter);
+  return {
+    focus: base.focus,
+    implementation: base.implementation,
+    guardrail: base.guardrail,
+    code: base.code,
+    scenario: `A feature team is introducing <strong>${topic.title}</strong> inside <strong>${chapter.title}</strong> and needs the implementation to survive growth, debugging, SSR, and Angular 21 upgrade pressure.`,
+    optimization: `The optimization conversation for ${topic.title} usually starts by measuring render cost, provider scope, and dependency flow before reaching for heavier abstractions.`,
+    fix: `When ${topic.title} misbehaves, inspect state ownership, template reads, route boundaries, and whether the feature is mixing old Angular patterns with Angular 21-first primitives.`,
+    compare: `${topic.title} should be chosen because it fits ${base.focus}, not because it is the newest API in the docs.`,
+  };
+}
+
+function makeInterviewQuestion(chapter, topic, idx, level, kind, question, answer, example, code) {
+  return {
+    id: `${topic.id}-${idx}`,
+    chapter: chapter.title,
+    topic: topic.title,
+    tag: getInterviewPrimaryTag(topic, chapter),
+    tags: getInterviewTags(topic, chapter),
+    level,
+    kind,
+    q: question,
+    a: answer,
+    example,
+    code
+  };
+}
+
+function buildAngularInterviewQuestions() {
+  const questions = [];
+
+  chapters.forEach((chapter) => {
+    chapter.topics.forEach((topic) => {
+      const lens = getInterviewLens(chapter, topic);
+      const desc = topic.desc.toLowerCase();
+
+      questions.push(
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          1,
+          'Beginner',
+          'Direct',
+          `What is ${topic.title} in Angular, and when do you typically use it?`,
+          `${topic.title} is Angular's answer for ${desc}. In practice, teams use it when they need a clear way to handle ${lens.focus} without inventing custom patterns first. The healthy starting point in Angular 21 is to keep the implementation explicit, standalone-friendly, and easy to observe in tests and DevTools.`,
+          `Example: a team building a ${chapter.title.toLowerCase()} feature would start with ${topic.title} as the default solution before introducing custom wrappers.`,
+          lens.code
+        ),
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          2,
+          'Beginner',
+          'Indirect',
+          `How would you explain the role of ${topic.title} to a JavaScript developer who is new to Angular?`,
+          `I would explain ${topic.title} as part of Angular's bigger platform contract. Instead of hand-wiring everything, Angular gives you a structured way to handle ${desc}. That reduces team inconsistency and makes the feature easier to reason about as the app grows.`,
+          `Example: if a teammate already understands components and events, I would connect ${topic.title} to where it fits in the screen lifecycle and dependency flow.`,
+          lens.code
+        ),
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          3,
+          'Intermediate',
+          'Logical',
+          `Why would a team choose ${topic.title} over an ad-hoc custom pattern in a real Angular 21 application?`,
+          `Because ${topic.title} aligns with Angular's built-in runtime model. The team gets predictable behavior, easier onboarding, and fewer one-off conventions. The decision becomes stronger when the feature has to work with routing, SSR, testing, and Angular 21's move toward explicit reactivity.`,
+          `Example: teams usually regret custom plumbing once multiple pages need the same behavior and the app starts layering guards, forms, API calls, and performance constraints on top.`,
+          lens.code
+        ),
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          4,
+          'Intermediate',
+          'Issue Fix',
+          `A screen using ${topic.title} is behaving unexpectedly. What would you inspect first?`,
+          `First inspect ownership and boundaries: who owns the state, where the side effect starts, and whether the component tree is reading the latest source of truth. Then verify the Angular-specific edge: stale bindings, provider placement, route timing, hydration mismatch, or a mix of signal-era code with older imperative assumptions.`,
+          `Example: if the bug appears only after navigation or refresh, I would inspect route timing, SSR boundaries, and whether the feature depends on browser-only behavior too early.`,
+          lens.code
+        ),
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          5,
+          'Advanced',
+          'Scenario',
+          `You are designing a production feature around ${topic.title}. What architecture choice matters most?`,
+          `The most important choice is usually boundary clarity. ${lens.implementation} Once the boundary is right, implementation details stay local and the feature remains easier to test, cache, lazy-load, or refactor. Advanced Angular work is usually less about syntax and more about deciding where responsibility should live.`,
+          lens.scenario,
+          lens.code
+        ),
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          6,
+          'Advanced',
+          'Optimization',
+          `How do you optimize ${topic.title} without making the codebase harder to maintain?`,
+          `${lens.optimization} In Angular 21, optimization should reinforce explicit reactivity and simpler feature boundaries. Prefer small measurable wins such as reducing redundant template work, deferring non-critical UI, narrowing provider scope, and keeping derived state close to where it is consumed.`,
+          `Example: optimize the hot path first, then validate in Angular DevTools, browser performance tools, and integration tests before committing to a more complex abstraction.`,
+          lens.code
+        ),
+        makeInterviewQuestion(
+          chapter,
+          topic,
+          7,
+          'Architect',
+          'Architecture',
+          `What is the architectural risk of getting ${topic.title} wrong in a large Angular 21 codebase?`,
+          `The risk is not just a local bug. A weak ${topic.title} strategy spreads accidental complexity across the app: unstable APIs between features, poor SSR behavior, inconsistent testing, hidden state coupling, and upgrade friction. Architects should define a narrow default pattern, document the exceptions, and keep the framework's direction visible to the team.`,
+          `Example: when multiple squads solve ${topic.title} differently, the app becomes harder to migrate, profile, and reason about under load or during incidents.`,
+          lens.code
+        )
+      );
+    });
+  });
+
+  return questions;
+}
+
+const interviewQuestions = buildAngularInterviewQuestions();
+let qaFilterState = { tag:'', level:'' };
+
+let currentChapter = -1;
+let currentTopic = null;
+let visitedTopics = new Set();
+
+function buildNav() {
+  const nav = document.getElementById('chapterNav');
+  chapters.forEach((ch, i) => {
+    const item = document.createElement('div');
+    item.className = 'chapter-item';
+    item.id = `ch-${i}`;
+    item.innerHTML = `
+      <div class="chapter-header" onclick="selectChapter(${i})">
+        <div class="ch-num" style="background:${ch.bg};color:${ch.color}">${ch.num}</div>
+        <div class="ch-title">${ch.title}</div>
+        <div class="ch-arrow">▶</div>
+      </div>
+      <div class="topics-list">
+        ${ch.topics.map((t) => `<div class="topic-item" id="nav-${t.id}" onclick="selectTopic('${t.id}', ${i})">${t.icon} ${t.title}</div>`).join('')}
+      </div>`;
+    nav.appendChild(item);
+  });
+}
+
+function selectChapter(idx) {
+  currentChapter = idx;
+  document.querySelectorAll('.chapter-item').forEach((el, i) => {
+    const header = el.querySelector('.chapter-header');
+    if (i === idx) {
+      el.classList.add('open');
+      header.classList.add('active');
+    } else {
+      el.classList.remove('open');
+      header.classList.remove('active');
+    }
+  });
+
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('chapterContent').style.display = 'block';
+
+  const ch = chapters[idx];
+  const tagsHTML = ch.tags.map((t) => `<span class="hero-tag" style="background:${ch.bg};color:${ch.color};border-color:${ch.color}33">${t}</span>`).join('');
+  const cardsHTML = ch.topics.map((t) => {
+    const metaHTML = t.tags.map((tag) => {
+      const color = tag.includes('Angular') ? '#00d8ff' : tag.includes('Important') ? '#dd0031' : tag.includes('Performance') ? '#00c853' : tag.includes('Architecture') ? '#7c3aed' : '#9aa7bb';
+      return `<span class="meta-tag" style="color:${color};border-color:${color}33">${tag}</span>`;
+    }).join('');
+    return `
+      <div class="topic-card" id="card-${t.id}" onclick="selectTopic('${t.id}', ${idx})">
+        <div class="topic-card-icon">${t.icon}</div>
+        <div class="topic-card-body">
+          <div class="topic-card-title">${t.title}</div>
+          <div class="topic-card-desc">${t.desc}</div>
+          <div class="topic-card-meta">${metaHTML}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('chapterContent').innerHTML = `
+    <div class="chapter-hero">
+      <div class="chapter-hero-num">Chapter ${ch.num} · ${ch.topics.length} Topics</div>
+      <div class="chapter-hero-title" style="color:${ch.color}">${ch.icon} ${ch.title}</div>
+      <div class="chapter-hero-desc">${ch.desc}</div>
+      <div class="chapter-hero-tags">${tagsHTML}</div>
+    </div>
+    <div class="topics-grid">${cardsHTML}</div>`;
+}
+
+function selectTopic(topicId, chapterIdx) {
+  if (chapterIdx !== currentChapter) selectChapter(chapterIdx);
+  currentTopic = topicId;
+  visitedTopics.add(topicId);
+  updateProgress();
+
+  document.querySelectorAll('.topic-card').forEach((el) => el.classList.remove('active'));
+  document.querySelectorAll('.topic-item').forEach((el) => el.classList.remove('active'));
+
+  const card = document.getElementById(`card-${topicId}`);
+  const nav = document.getElementById(`nav-${topicId}`);
+  if (card) card.classList.add('active');
+  if (nav) nav.classList.add('active');
+
+  const detail = topicDetails[topicId];
+  if (!detail) {
+    renderGenericDetail(topicId, chapterIdx);
+    return;
+  }
+  renderDetail(detail);
+}
+
+function renderDetail(detail) {
+  document.getElementById('detailEmpty').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'block';
+
+  const badgesHTML = detail.badges.map((b) => `<span class="dbadge" style="background:${b.color}22;color:${b.color};border-color:${b.color}44">${b.text}</span>`).join('');
+  const sectionsHTML = detail.sections.map((section) => renderSection(section)).join('');
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-content">
+      <div class="detail-header">
+        <div class="detail-breadcrumb">${detail.breadcrumb}</div>
+        <div class="detail-title">${detail.title}</div>
+        <div class="detail-subtitle">${detail.subtitle}</div>
+        <div class="detail-badges">${badgesHTML}</div>
+      </div>
+      ${sectionsHTML}
+      ${renderInterviewSection(detail.title)}
+    </div>`;
+}
+
+function renderSection(section) {
+  if (section.type === 'prose') {
+    return `<div class="section"><div class="section-title">${section.title}</div><div class="prose">${section.content}</div></div>`;
+  }
+  if (section.type === 'code') {
+    return `
+      <div class="section">
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">${section.lang}</span>
+            <span class="code-title">${section.title}</span>
+            <button class="code-copy" onclick="copyCode(this)">Copy</button>
+          </div>
+          <div class="code-body"><pre>${section.code}</pre></div>
+        </div>
+      </div>`;
+  }
+  if (section.type === 'diagram') {
+    return `
+      <div class="section">
+        <div class="diagram-box">
+          <div class="diagram-header">${section.title}</div>
+          <div class="diagram-body">${section.svg}</div>
+        </div>
+      </div>`;
+  }
+  if (section.type === 'table') {
+    return `
+      <div class="section">
+        <div class="table-wrap">
+          <div class="table-header">${section.title}</div>
+          <div class="table-body">
+            <table class="comp-table">
+              <thead><tr>${section.columns.map((col) => `<th>${col}</th>`).join('')}</tr></thead>
+              <tbody>
+                ${section.rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join('')}</tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>`;
+  }
+  if (section.type === 'steps') {
+    return `
+      <div class="section">
+        <div class="steps-box">
+          <div class="steps-header">${section.title}</div>
+          <div class="steps-body">
+            ${section.steps.map((step, index) => `
+              <div class="step-item">
+                <div class="step-num">${index + 1}</div>
+                <div class="step-copy">
+                  <h4>${step.title}</h4>
+                  <p>${step.text}</p>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  }
+  if (section.type === 'callout') {
+    const kind = section.kind === 'info' ? 'callout-info' : section.kind === 'warn' ? 'callout-warn' : section.kind === 'success' ? 'callout-success' : 'callout-danger';
+    return `<div class="callout ${kind}"><span class="callout-icon">${section.icon}</span><span>${section.text}</span></div>`;
+  }
+  return '';
+}
+
+function renderInterviewSection(topicTitle) {
+  const relevant = interviewQuestions.filter((q) => {
+    const keys = topicTitle.toLowerCase().split(/\s+/);
+    return keys.some((key) =>
+      q.q.toLowerCase().includes(key) ||
+      q.a.toLowerCase().includes(key) ||
+      q.tag.toLowerCase().includes(key) ||
+      q.topic.toLowerCase().includes(key) ||
+      q.chapter.toLowerCase().includes(key)
+    );
+  }).slice(0, 4);
+
+  if (!relevant.length) return '';
+
+  return `
+    <div class="section">
+      <div class="section-title">Interview Questions</div>
+      ${relevant.map(renderQAItem).join('')}
+    </div>`;
+}
+
+const qaLevelColors = { Beginner:'#00c853', Intermediate:'#00d8ff', Advanced:'#f59e0b', Architect:'#dd0031' };
+
+function renderQAItem(q) {
+  const levelColor = qaLevelColors[q.level] || '#9aa7bb';
+  const tagChips = (q.tags || []).slice(0, 4).map((tag) =>
+    `<span class="qa-tag-chip">${tag}</span>`
+  ).join('');
+
+  return `
+    <div class="qa-item" data-tag="${q.tag}" data-level="${q.level}">
+      <div class="qa-question" onclick="toggleQA(this)">
+        <span class="qa-q-icon">Q</span>
+        <span class="qa-q-text">${q.q}</span>
+        <span class="qa-level" style="background:${levelColor}22;color:${levelColor};border:1px solid ${levelColor}44">${q.level}</span>
+        <span class="qa-arrow">▶</span>
+      </div>
+      <div class="qa-answer">
+        <div class="qa-meta-row">
+          <span class="qa-kind">${q.kind}</span>
+          <span class="qa-kind">${q.chapter}</span>
+          <span class="qa-kind">${q.topic}</span>
+          ${tagChips}
+        </div>
+        <div class="qa-answer-text">${q.a}</div>
+        <div class="qa-answer-section">
+          <div class="qa-answer-title">Example</div>
+          <div class="qa-answer-example">${q.example}</div>
+        </div>
+        <div class="qa-answer-code">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">ts</span>
+              <span class="code-title">${q.topic} interview snippet</span>
+              <button class="code-copy" onclick="copyCode(this)">Copy</button>
+            </div>
+            <div class="code-body"><pre>${q.code}</pre></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function showAllInterviewQuestions() {
+  document.getElementById('detailEmpty').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'block';
+
+  qaFilterState = { tag:'', level:'' };
+  const tags = [...new Set(interviewQuestions.map((q) => q.tag))];
+  const summaries = Object.entries(qaLevelColors).map(([level, color]) => {
+    const count = interviewQuestions.filter((q) => q.level === level).length;
+    return `
+      <div class="qa-summary-card" data-level-card="${level}" onclick="setQALevelFilter('${level}', this)" style="border-color:${color}33">
+        <div class="qa-summary-label">${level}</div>
+        <div class="qa-summary-count" style="color:${color}">${count}</div>
+        <div class="qa-summary-note">${level === 'Beginner' ? 'Direct foundations and clear definitions.' : level === 'Intermediate' ? 'Indirect reasoning, tradeoffs, and debugging flow.' : level === 'Advanced' ? 'Scenario, optimization, and production behavior.' : 'Architecture, boundaries, and system design decisions.'}</div>
+      </div>`;
+  }).join('');
+  const filterBtns = tags.map((tag) =>
+    `<button class="qa-filter-btn" data-tag-filter="${tag}" onclick='setQATagFilter(${JSON.stringify(tag)}, this)'>${tag}</button>`
+  ).join('');
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-content">
+      <div class="detail-header">
+        <div class="detail-breadcrumb">Angular Mastery · Interview Prep</div>
+        <div class="detail-title">🎯 Interview Questions &amp; Answers</div>
+        <div class="detail-subtitle">${interviewQuestions.length}+ Angular interview questions covering direct, indirect, scenario, logical, issue-fix, optimization, and architecture topics across Angular 21.</div>
+      </div>
+      <div class="qa-summary-grid">${summaries}</div>
+      <div class="qa-filter-bar">
+        <button class="qa-filter-btn active" data-tag-filter="" onclick="setQATagFilter('', this)">All Tags</button>
+        ${filterBtns}
+      </div>
+      <div id="qaList">${interviewQuestions.map(renderQAItem).join('')}</div>
+    </div>`;
+}
+
+function applyQAFilters() {
+  document.querySelectorAll('#qaList .qa-item').forEach((item) => {
+    const matchTag = !qaFilterState.tag || item.dataset.tag === qaFilterState.tag;
+    const matchLevel = !qaFilterState.level || item.dataset.level === qaFilterState.level;
+    item.style.display = (matchTag && matchLevel) ? '' : 'none';
+  });
+}
+
+function setQATagFilter(tag, btn) {
+  qaFilterState.tag = tag || '';
+  document.querySelectorAll('.qa-filter-btn').forEach((item) => item.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  applyQAFilters();
+}
+
+function setQALevelFilter(level, card) {
+  qaFilterState.level = qaFilterState.level === level ? '' : level;
+  document.querySelectorAll('.qa-summary-card').forEach((item) => item.classList.remove('active'));
+  if (qaFilterState.level && card) card.classList.add('active');
+  applyQAFilters();
+}
+
+function getAngularLens(chapter) {
+  const title = chapter.title.toLowerCase();
+  if (title.includes('foundations')) {
+    return {
+      focus:'platform architecture, workspace flow, and modern standalone bootstrap',
+      implementation:'Start from the standalone app shape, keep providers explicit, and understand how the CLI, compiler, and runtime cooperate before adding advanced abstractions.',
+      guardrail:'Avoid carrying pre-standalone mental models forward unless you truly need them for migration work.',
+      code:`import { bootstrapApplication } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
+
+bootstrapApplication(AppComponent, {
+  providers: [provideRouter(routes)]
+});`
+    };
+  }
+  if (title.includes('components') || title.includes('templates')) {
+    return {
+      focus:'component contracts, render flow, and template clarity',
+      implementation:'Model data flow first, then keep templates declarative and push derived state into signals, computed values, or focused view-model helpers.',
+      guardrail:'Do not let templates accumulate business logic, repeated lookups, or unstable bindings that rerun on every render.',
+      code:`readonly user = signal<User | null>(null);
+readonly displayName = computed(() => this.user()?.name ?? 'Anonymous');`
+    };
+  }
+  if (title.includes('dependency injection') || title.includes('routing')) {
+    return {
+      focus:'application boundaries, provider placement, and route composition',
+      implementation:'Keep services and route trees aligned with feature boundaries so each screen loads only what it needs and owns a clear dependency surface.',
+      guardrail:'Do not register everything at root by default; provider scope is part of your architecture, not a convenience switch.',
+      code:`export const routes: Routes = [
+  {
+    path: 'admin',
+    loadComponent: () => import('./admin.page').then(m => m.AdminPage)
+  }
+];`
+    };
+  }
+  if (title.includes('rxjs') || title.includes('state')) {
+    return {
+      focus:'reactive flow, derivation, cleanup, and state ownership',
+      implementation:'Use RxJS for async streams and integration edges, use signals for synchronous UI derivation, and keep each state container responsible for one slice of truth.',
+      guardrail:'Avoid mixing Subjects, signals, and store selectors in the same component without a clear ownership rule.',
+      code:`readonly query = signal('');
+readonly results$ = toObservable(this.query).pipe(
+  debounceTime(250),
+  switchMap(q => this.api.search(q))
+);`
+    };
+  }
+  if (title.includes('performance') || title.includes('ssr')) {
+    return {
+      focus:'render precision, delivery cost, hydration, and bundle discipline',
+      implementation:'Measure first, then reduce DOM churn, defer non-critical UI, split feature bundles, and choose hydration strategies intentionally.',
+      guardrail:'Do not optimize blindly; solve the actual bottleneck: CPU work, hydration cost, network payload, or rerender churn.',
+      code:`@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class DashboardCard { }`
+    };
+  }
+  if (title.includes('apis') || title.includes('testing')) {
+    return {
+      focus:'backend contracts, verification loops, and maintainable delivery',
+      implementation:'Keep client contracts typed, centralize transport concerns, and test behavior at the service, component, and user-flow layers.',
+      guardrail:'Do not let generated clients, auth flows, or test fixtures drift away from the real API and deployment shape.',
+      code:`this.http.get<UserDto[]>('/api/users', {
+  context: withInterceptorsFromDi()
+});`
+    };
+  }
+  return {
+    focus:'modern Angular 21 patterns and framework evolution',
+    implementation:'Lean into the Angular 21 direction: clearer reactivity, better tooling, and less hidden runtime behavior.',
+    guardrail:'Treat new APIs as opportunities to simplify architecture, not as extra layers to stack on top of older patterns.',
+    code:`readonly form = form({
+  email: field(''),
+  password: field('')
+});`
+  };
+}
+
+function getAngularBuildSteps(chapter, topic, lens) {
+  return [
+    `Frame ${topic.title} inside the wider ${chapter.title} architecture so the responsibility is explicit.`,
+    `Implement the smallest production-real slice using Angular 21-friendly primitives and explicit provider or render choices.`,
+    `Check runtime behavior with Angular DevTools, tests, or profiling before abstracting further.`,
+    `Review the main guardrail for this topic: ${lens.guardrail}`
+  ];
+}
+
+function renderAngularGenericDetail(topicId, chapterIdx) {
+  const chapter = chapters[chapterIdx];
+  const topic = chapter.topics.find((item) => item.id === topicId);
+  if (!topic) return;
+
+  const lens = getAngularLens(chapter);
+  const chapterBadges = (chapter.tags || []).map((tag) =>
+    `<span class="dbadge" style="background:${chapter.bg};color:${chapter.color};border-color:${chapter.color}44">${tag}</span>`
+  ).join('');
+  const topicBadges = (topic.tags || []).map((tag) =>
+    `<span class="dbadge" style="background:${chapter.color}18;color:${chapter.color};border-color:${chapter.color}44">${tag}</span>`
+  ).join('');
+  const steps = getAngularBuildSteps(chapter, topic, lens).map((step) => `<li>${step}</li>`).join('');
+  const related = chapter.topics
+    .filter((item) => item.id !== topic.id)
+    .slice(0, 3)
+    .map((item) => `<li><strong>${item.title}</strong> — ${item.desc}</li>`)
+    .join('');
+
+  document.getElementById('detailEmpty').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'block';
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-content">
+      <div class="detail-header">
+        <div class="detail-breadcrumb">Chapter ${chapter.num} · ${chapter.title}</div>
+        <div class="detail-title">${topic.icon} ${topic.title}</div>
+        <div class="detail-subtitle">${topic.desc}</div>
+        <div class="detail-badges">${chapterBadges}${topicBadges}</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Why This Topic Matters</div>
+        <div class="prose">
+          <p><strong>${topic.title}</strong> sits inside <strong>${chapter.title}</strong>, which in Angular 21 is mainly about ${lens.focus}.</p>
+          <p>${lens.implementation}</p>
+        </div>
+      </div>
+      <div class="callout callout-info">
+        <span class="callout-icon">✨</span>
+        <span><strong>Angular 21 lens:</strong> prefer explicit reactivity, standalone-first composition, and tooling that keeps runtime behavior observable.</span>
+      </div>
+      <div class="callout callout-warn">
+        <span class="callout-icon">🛡️</span>
+        <span><strong>Guardrail:</strong> ${lens.guardrail}</span>
+      </div>
+      <div class="section">
+        <div class="table-wrap">
+          <div class="table-header">Field Guide</div>
+          <div class="table-body">
+            <table class="comp-table">
+              <thead><tr><th>Area</th><th>Guidance</th></tr></thead>
+              <tbody>
+                <tr><td>Chapter</td><td>${chapter.title}</td></tr>
+                <tr><td>Topic intent</td><td>${topic.desc}</td></tr>
+                <tr><td>Primary focus</td><td>${lens.focus}</td></tr>
+                <tr><td>Recommended approach</td><td>${lens.implementation}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Suggested Build Sequence</div>
+        <div class="prose"><ol>${steps}</ol></div>
+      </div>
+      <div class="section">
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">ts</span>
+            <span class="code-title">${topic.title} starter pattern</span>
+            <button class="code-copy" onclick="copyCode(this)">Copy</button>
+          </div>
+          <div class="code-body"><pre>${lens.code}</pre></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="steps-box">
+          <div class="steps-header">Production Scenario</div>
+          <div class="steps-body">
+            <div class="step-item">
+              <div class="step-num">1</div>
+              <div class="step-copy">
+                <h4>Delivery context</h4>
+                <p>A team is shipping <strong>${topic.title}</strong> inside a larger <strong>${chapter.title}</strong> initiative and needs it to stay maintainable across upgrades, testing, and performance reviews.</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">2</div>
+              <div class="step-copy">
+                <h4>Recommended move</h4>
+                <p>Start with a thin vertical slice, confirm the runtime behavior end to end, and only then extract reusable helpers, stores, directives, or route-level abstractions.</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">3</div>
+              <div class="step-copy">
+                <h4>Review point</h4>
+                <p>Before calling the topic complete, verify that the solution still behaves well under Angular 21 defaults around signals, zoneless direction, SSR, and current tooling choices.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Explore Next In This Chapter</div>
+        <div class="prose"><ul>${related}</ul></div>
+      </div>
+      ${renderInterviewSection(topic.title)}
+    </div>`;
+}
+
+function renderGenericDetail(topicId, chapterIdx) {
+  renderAngularGenericDetail(topicId, chapterIdx);
+}
+
+function toggleQA(el) {
+  el.parentElement.classList.toggle('open');
+}
+
+function copyCode(button) {
+  const pre = button.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    button.textContent = 'Copied';
+    setTimeout(() => { button.textContent = 'Copy'; }, 1800);
+  });
+}
+
+function updateProgress() {
+  const total = chapters.reduce((sum, chapter) => sum + chapter.topics.length, 0);
+  const pct = Math.round((visitedTopics.size / total) * 100);
+  document.getElementById('progressText').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.querySelectorAll('.topic-item').forEach((item) => {
+    const topicId = item.id.replace('nav-', '');
+    if (visitedTopics.has(topicId)) item.classList.add('done');
+  });
+}
+
+function filterTopics(query) {
+  const q = query.trim().toLowerCase();
+  chapters.forEach((chapter, index) => {
+    const chapterEl = document.getElementById(`ch-${index}`);
+    let anyVisible = false;
+    chapter.topics.forEach((topic) => {
+      const navEl = document.getElementById(`nav-${topic.id}`);
+      if (!navEl) return;
+      const match = !q || topic.title.toLowerCase().includes(q) || topic.desc.toLowerCase().includes(q) || topic.tags.join(' ').toLowerCase().includes(q);
+      navEl.style.display = match ? '' : 'none';
+      if (match) anyVisible = true;
+    });
+    if (q && anyVisible) chapterEl.classList.add('open');
+  });
+}
+
+function applyTheme(theme) {
+  if (theme !== 'dark' && theme !== 'light') return;
+  document.documentElement.setAttribute('data-theme', theme);
+  try { localStorage.setItem('theme', theme); } catch (error) {}
+}
+
+(function initTheme() {
+  const params = new URLSearchParams(window.location.search);
+  const theme = params.get('theme');
+  let saved = 'dark';
+  try { saved = localStorage.getItem('theme') || 'dark'; } catch (error) {}
+  applyTheme(theme || saved);
+})();
+
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'parent-theme') applyTheme(event.data.theme);
+});
+
+buildNav();
+</script>
+<script src="/embedded/mastery-resize.js"></script>
+</body>
+</html>

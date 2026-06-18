@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C# 12/13/14 & .NET 8/9/10 — Complete Modern Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b14;--bg2:#0d1220;--bg3:#111827;--card:#0f1829;--card2:#141e30;
+  --border:rgba(0,212,170,0.12);--border2:rgba(255,107,53,0.12);
+  --teal:#00d4aa;--teal2:#00ffcc;--orange:#ff6b35;--purple:#a855f7;
+  --blue:#3b82f6;--yellow:#fbbf24;--red:#ef4444;--green:#22c55e;
+  --pink:#ec4899;--cyan:#06b6d4;--lime:#84cc16;--violet:#7c3aed;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--code-bg:#0a0f1e;
+  --head:'Syne',sans-serif;--body:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14px;line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:linear-gradient(to bottom,var(--teal),var(--purple));border-radius:3px}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(135deg,#070b14 0%,#0d1829 40%,#07091a 100%);border-bottom:1px solid var(--border);padding:58px 40px 42px;position:relative;overflow:hidden;text-align:center}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(0,212,170,0.07) 0%,transparent 60%),radial-gradient(ellipse 40% 40% at 80% 50%,rgba(168,85,247,0.05) 0%,transparent 60%);pointer-events:none}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,170,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,170,0.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.hero-badge{display:inline-block;background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.3);color:var(--teal);font-family:var(--mono);font-size:11px;padding:4px 14px;border-radius:20px;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;animation:badgePulse 3s ease-in-out infinite}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,170,0.2)}50%{box-shadow:0 0 20px 4px rgba(0,212,170,0.1)}}
+.hero h1{font-family:var(--head);font-size:clamp(1.9rem,5vw,3.6rem);font-weight:800;line-height:1.1;letter-spacing:-1px;margin-bottom:14px}
+.v8{color:#22c55e}.v9{color:#3b82f6}.v10{color:#a855f7}.c12{color:#fbbf24}.c13{color:#ff6b35}.c14{color:#ec4899}
+.hero-sub{color:var(--text2);font-size:15px;max-width:640px;margin:0 auto 26px}
+.ver-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.ver-pill{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:5px 13px;font-family:var(--mono);font-size:11px}
+.ver-pill .vd{width:7px;height:7px;border-radius:50%}
+.ver-pill .rel{color:var(--text3);font-size:10px}
+.hero-stats{display:flex;justify-content:center;gap:26px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-num{font-family:var(--head);font-size:26px;font-weight:800;color:var(--teal);display:block}
+.stat-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+
+/* ── TABS ── */
+.topic-tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;position:sticky;top:0;z-index:50}
+.ttab{display:flex;align-items:center;gap:6px;padding:11px 16px;font-family:var(--mono);font-size:11px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;text-decoration:none}
+.ttab:hover{color:var(--teal);background:rgba(0,212,170,0.03)}
+.ttab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* ── 3-COL LAYOUT ── */
+.layout3{display:grid;grid-template-columns:224px 1fr 258px;min-height:100vh}
+
+/* ── LEFT SIDEBAR ── */
+.sb-left{background:var(--bg2);border-right:1px solid var(--border);position:sticky;top:39px;height:calc(100vh - 39px);overflow-y:auto;padding:12px 0}
+.sb-left::-webkit-scrollbar{width:3px}
+.sbt{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--text3);padding:10px 13px 5px}
+.ni{display:flex;align-items:center;gap:7px;padding:5px 13px;color:var(--text3);text-decoration:none;font-size:12px;font-family:var(--body);border-left:2px solid transparent;transition:all 0.2s}
+.ni:hover,.ni.active{color:var(--teal);border-left-color:var(--teal);background:rgba(0,212,170,0.04)}
+.ni .nd{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.ni .nb{margin-left:auto;font-family:var(--mono);font-size:9px;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.2);color:var(--teal);padding:1px 5px;border-radius:8px}
+.ndiv{border:none;border-top:1px solid var(--border);margin:6px 12px}
+
+/* ── MAIN ── */
+.main{padding:24px 22px;min-width:0}
+
+/* ── RIGHT PANEL ── */
+.sb-right{background:var(--bg2);border-left:1px solid var(--border);position:sticky;top:39px;height:calc(100vh - 39px);overflow-y:auto;padding:14px}
+.sb-right::-webkit-scrollbar{width:3px}
+.rp-h{font-family:var(--head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:9px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+.rq{font-family:var(--mono);font-size:11px;color:var(--teal);margin-bottom:3px;display:flex;align-items:flex-start;gap:5px}
+.rq::before{content:'Q';background:rgba(0,212,170,0.12);border-radius:3px;padding:0 4px;flex-shrink:0;font-size:9px;margin-top:1px}
+.ra{font-size:11.5px;color:var(--text2);line-height:1.5;padding-left:18px;margin-bottom:9px}
+.ra code{font-family:var(--mono);font-size:10px;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.15);color:var(--teal);padding:0 4px;border-radius:3px}
+.rdiv{border:none;border-top:1px solid rgba(255,255,255,0.04);margin:7px 0}
+
+/* ── MODULE ── */
+.ms{margin-bottom:46px}
+.mh{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.mn{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 9px;border-radius:4px;flex-shrink:0;white-space:nowrap;color:#000}
+.mn.y{background:linear-gradient(135deg,var(--yellow),#fde68a)}
+.mn.g{background:linear-gradient(135deg,var(--green),#86efac)}
+.mn.o{background:linear-gradient(135deg,var(--orange),#ff9f6b)}
+.mn.b{background:linear-gradient(135deg,var(--blue),#60a5fa)}
+.mn.pk{background:linear-gradient(135deg,var(--pink),#f9a8d4)}
+.mn.p{background:linear-gradient(135deg,var(--purple),#c084fc)}
+.mn.c{background:linear-gradient(135deg,var(--cyan),#67e8f9)}
+.mn.r{background:linear-gradient(135deg,var(--red),#f87171)}
+.mn.v{background:linear-gradient(135deg,var(--violet),#a78bfa)}
+.mn.cy{background:linear-gradient(135deg,var(--cyan),#67e8f9)}
+.mt{font-family:var(--head);font-size:17px;font-weight:700;color:var(--text)}
+.md{font-size:11px;color:var(--text3);margin-left:auto;font-family:var(--mono);white-space:nowrap}
+
+/* ── GRIDS ── */
+.c2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.c3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.cs2{grid-column:1/-1}
+
+/* ── CARD ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden;transition:border-color 0.2s,transform 0.2s}
+.card:hover{border-color:rgba(0,212,170,0.28);transform:translateY(-1px)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal),transparent);opacity:0;transition:opacity 0.2s}
+.card:hover::before{opacity:1}
+.card.oy{border-color:rgba(251,191,36,0.15)}.card.oy::before{background:linear-gradient(90deg,var(--yellow),transparent)}.card.oy:hover{border-color:rgba(251,191,36,0.3)}
+.card.oo{border-color:var(--border2)}.card.oo::before{background:linear-gradient(90deg,var(--orange),transparent)}.card.oo:hover{border-color:rgba(255,107,53,0.3)}
+.card.op{border-color:rgba(168,85,247,0.12)}.card.op::before{background:linear-gradient(90deg,var(--purple),transparent)}.card.op:hover{border-color:rgba(168,85,247,0.3)}
+.card.ob{border-color:rgba(59,130,246,0.12)}.card.ob::before{background:linear-gradient(90deg,var(--blue),transparent)}.card.ob:hover{border-color:rgba(59,130,246,0.3)}
+.card.og{border-color:rgba(34,197,94,0.12)}.card.og::before{background:linear-gradient(90deg,var(--green),transparent)}.card.og:hover{border-color:rgba(34,197,94,0.3)}
+.card.opk{border-color:rgba(236,72,153,0.12)}.card.opk::before{background:linear-gradient(90deg,var(--pink),transparent)}.card.opk:hover{border-color:rgba(236,72,153,0.3)}
+.card.oc{border-color:rgba(6,182,212,0.12)}.card.oc::before{background:linear-gradient(90deg,var(--cyan),transparent)}.card.oc:hover{border-color:rgba(6,182,212,0.3)}
+.card.ov{border-color:rgba(124,58,237,0.12)}.card.ov::before{background:linear-gradient(90deg,var(--violet),transparent)}.card.ov:hover{border-color:rgba(124,58,237,0.3)}
+.card.or{border-color:rgba(239,68,68,0.12)}.card.or::before{background:linear-gradient(90deg,var(--red),transparent)}.card.or:hover{border-color:rgba(239,68,68,0.3)}
+
+.cn{font-family:var(--mono);font-size:10px;color:var(--teal);margin-bottom:5px;opacity:0.7}
+.cn.y{color:var(--yellow)}.cn.o{color:var(--orange)}.cn.p{color:var(--purple)}.cn.b{color:var(--blue)}.cn.g{color:var(--green)}.cn.pk{color:var(--pink)}.cn.c{color:var(--cyan)}.cn.r{color:var(--red)}.cn.v{color:var(--violet)}
+.ct{font-family:var(--head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:9px}
+.cb{font-size:13px;color:var(--text2);line-height:1.65}
+.cb p{margin-bottom:8px}
+
+/* ── NEW BADGE ── */
+.nb2{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;padding:2px 7px;border-radius:10px;margin-bottom:7px;font-weight:600}
+.nb2.cs12{background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);color:var(--yellow)}
+.nb2.cs13{background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);color:var(--orange)}
+.nb2.cs14{background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.3);color:var(--pink)}
+.nb2.net8{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green)}
+.nb2.net9{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:var(--blue)}
+.nb2.net10{background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:var(--purple)}
+.nb2.prev{background:rgba(236,72,153,0.08);border:1px solid rgba(236,72,153,0.25);color:var(--pink);animation:prevBlink 2s infinite}
+@keyframes prevBlink{0%,100%{opacity:0.7}50%{opacity:1}}
+
+/* ── INLINE CODE ── */
+code{font-family:var(--mono);font-size:12px;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.15);color:var(--teal);padding:1px 6px;border-radius:4px}
+
+/* ── CODE BLOCK ── */
+.cb-wrap{background:var(--code-bg);border:1px solid rgba(0,212,170,0.08);border-radius:10px;overflow:hidden;margin:10px 0;position:relative}
+.cb-hdr{display:flex;align-items:center;gap:6px;padding:7px 13px;background:rgba(0,212,170,0.04);border-bottom:1px solid rgba(0,212,170,0.07)}
+.cd{width:9px;height:9px;border-radius:50%}.cd.r{background:#ff5f57}.cd.y{background:#febc2e}.cd.g{background:#28c840}
+.cl2{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.cbdg{margin-left:auto;font-family:var(--mono);font-size:9px;padding:1px 7px;border-radius:8px;text-transform:uppercase;letter-spacing:1px}
+.cbdg.cs12{background:rgba(251,191,36,0.1);color:var(--yellow);border:1px solid rgba(251,191,36,0.25)}
+.cbdg.cs13{background:rgba(255,107,53,0.1);color:var(--orange);border:1px solid rgba(255,107,53,0.25)}
+.cbdg.cs14{background:rgba(236,72,153,0.1);color:var(--pink);border:1px solid rgba(236,72,153,0.25)}
+.cbdg.net8{background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.25)}
+.cbdg.net9{background:rgba(59,130,246,0.1);color:var(--blue);border:1px solid rgba(59,130,246,0.25)}
+.cbdg.net10{background:rgba(168,85,247,0.1);color:var(--purple);border:1px solid rgba(168,85,247,0.25)}
+.cbdg.prev{background:rgba(236,72,153,0.08);color:var(--pink);border:1px solid rgba(236,72,153,0.2);animation:prevBlink 2s infinite}
+.cb-body{padding:15px 16px;font-family:var(--mono);font-size:12px;line-height:1.75;color:#a5f3fc;overflow-x:auto}
+.cb-body::-webkit-scrollbar{height:3px}.cb-body::-webkit-scrollbar-thumb{background:rgba(0,212,170,0.3)}
+.cb-body, .ba-code, .arch, .tbl td, .tbl th { white-space: pre-wrap; }
+/* syntax colors */
+.k{color:#c084fc}.cc{color:#60a5fa}.s{color:#86efac}.cm{color:#475569;font-style:italic}.n{color:#fbbf24}.op{color:#f472b6}.pr{color:#67e8f9}.at{color:#fb923c}.tp{color:#a78bfa}
+
+/* ── BEFORE / AFTER ── */
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.ba-box{border-radius:8px;overflow:hidden}
+.ba-t{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:6px 11px;display:flex;align-items:center;gap:5px}
+.ba-t.bef{background:rgba(239,68,68,0.08);color:var(--red);border-bottom:1px solid rgba(239,68,68,0.15)}
+.ba-t.aft{background:rgba(34,197,94,0.08);color:var(--green);border-bottom:1px solid rgba(34,197,94,0.15)}
+.ba-code{background:var(--code-bg);padding:11px;font-family:var(--mono);font-size:11.5px;line-height:1.7;color:#94a3b8}
+
+/* ── HIGHLIGHT ── */
+.hl{background:rgba(0,212,170,0.05);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:9px 13px;margin:8px 0;font-size:13px;color:var(--text2)}
+.hl.o{background:rgba(255,107,53,0.05);border-left-color:var(--orange)}
+.hl.r{background:rgba(239,68,68,0.05);border-left-color:var(--red)}
+.hl.p{background:rgba(168,85,247,0.05);border-left-color:var(--purple)}
+.hl.y{background:rgba(251,191,36,0.05);border-left-color:var(--yellow)}
+.hl.b{background:rgba(59,130,246,0.05);border-left-color:var(--blue)}
+.hl.pk{background:rgba(236,72,153,0.05);border-left-color:var(--pink)}
+.hl.g{background:rgba(34,197,94,0.05);border-left-color:var(--green)}
+.hl.c{background:rgba(6,182,212,0.05);border-left-color:var(--cyan)}
+.hl.v{background:rgba(124,58,237,0.05);border-left-color:var(--violet)}
+
+/* ── CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.chip{font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:16px;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.2);color:var(--teal)}
+.chip.y{background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.2);color:var(--yellow)}
+.chip.o{background:rgba(255,107,53,0.08);border-color:rgba(255,107,53,0.2);color:var(--orange)}
+.chip.p{background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.2);color:var(--purple)}
+.chip.b{background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:var(--blue)}
+.chip.g{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.2);color:var(--green)}
+.chip.pk{background:rgba(236,72,153,0.08);border-color:rgba(236,72,153,0.2);color:var(--pink)}
+.chip.c{background:rgba(6,182,212,0.08);border-color:rgba(6,182,212,0.2);color:var(--cyan)}
+.chip.r{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.2);color:var(--red)}
+.chip.v{background:rgba(124,58,237,0.08);border-color:rgba(124,58,237,0.2);color:var(--violet)}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}
+.tbl th{background:rgba(0,212,170,0.08);color:var(--teal);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:7px 11px;text-align:left;border-bottom:1px solid var(--border)}
+.tbl td{padding:7px 11px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text2);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(0,212,170,0.02)}
+.tbl td:first-child{color:var(--teal);font-family:var(--mono);font-size:11px}
+
+/* ── CONCEPT LIST ── */
+.cl{list-style:none;padding:0;margin:8px 0}
+.cl li{display:flex;align-items:flex-start;gap:7px;padding:4px 0;font-size:13px;color:var(--text2);border-bottom:1px solid rgba(255,255,255,0.03)}
+.cl li:last-child{border-bottom:none}
+.cl li::before{content:'▸';color:var(--teal);flex-shrink:0;margin-top:1px;font-size:10px}
+
+/* ── FLOW ANIMATIONS ── */
+.flow{display:flex;flex-direction:column;align-items:center;gap:0;padding:10px 8px}
+.fn2{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 16px;font-family:var(--mono);font-size:11px;color:var(--text);text-align:center;min-width:140px;animation:npulse 3s ease-in-out infinite}
+.fn2.t{border-color:rgba(0,212,170,0.4);color:var(--teal);background:rgba(0,212,170,0.06)}
+.fn2.o{border-color:rgba(255,107,53,0.4);color:var(--orange);background:rgba(255,107,53,0.06)}
+.fn2.p{border-color:rgba(168,85,247,0.4);color:var(--purple);background:rgba(168,85,247,0.06)}
+.fn2.b{border-color:rgba(59,130,246,0.4);color:var(--blue);background:rgba(59,130,246,0.06)}
+.fn2.g{border-color:rgba(34,197,94,0.4);color:var(--green);background:rgba(34,197,94,0.06)}
+.fn2.y{border-color:rgba(251,191,36,0.4);color:var(--yellow);background:rgba(251,191,36,0.06)}
+.fn2.pk{border-color:rgba(236,72,153,0.4);color:var(--pink);background:rgba(236,72,153,0.06)}
+@keyframes npulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 10px rgba(0,212,170,0.07)}}
+.fa{display:flex;flex-direction:column;align-items:center;margin:2px 0}
+.fal{width:2px;height:13px;background:linear-gradient(to bottom,var(--teal),transparent);position:relative;overflow:hidden}
+.fal::after{content:'';position:absolute;top:-100%;left:0;right:0;height:100%;background:linear-gradient(to bottom,transparent,var(--teal2));animation:fd 1.5s linear infinite}
+@keyframes fd{0%{top:-100%}100%{top:100%}}
+.fah{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid var(--teal)}
+/* horizontal */
+.fh{display:flex;align-items:center;flex-wrap:wrap;justify-content:center}
+.fha{display:flex;align-items:center;margin:0 1px}
+.fhl{height:2px;width:16px;background:linear-gradient(to right,var(--teal),transparent);position:relative;overflow:hidden}
+.fhl::after{content:'';position:absolute;top:0;bottom:0;left:-100%;width:100%;background:linear-gradient(to right,transparent,var(--teal2));animation:fr 1.5s linear infinite}
+@keyframes fr{0%{left:-100%}100%{left:100%}}
+.fhh{width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:6px solid var(--teal)}
+
+/* ── ARCH ── */
+.arch{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:13px;margin:10px 0}
+.ar{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:3px}
+.ab{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:5px 11px;font-family:var(--mono);font-size:11px;color:var(--text2);text-align:center;flex:1;max-width:175px}
+.ab.t{border-color:rgba(0,212,170,0.3);color:var(--teal);background:rgba(0,212,170,0.05)}
+.ab.o{border-color:rgba(255,107,53,0.3);color:var(--orange);background:rgba(255,107,53,0.05)}
+.ab.b{border-color:rgba(59,130,246,0.3);color:var(--blue);background:rgba(59,130,246,0.05)}
+.ab.p{border-color:rgba(168,85,247,0.3);color:var(--purple);background:rgba(168,85,247,0.05)}
+.ab.g{border-color:rgba(34,197,94,0.3);color:var(--green);background:rgba(34,197,94,0.05)}
+.ab.pk{border-color:rgba(236,72,153,0.3);color:var(--pink);background:rgba(236,72,153,0.05)}
+.aa{width:2px;height:10px;background:var(--border);margin:0 auto;position:relative;overflow:hidden}
+.aa::after{content:'';position:absolute;top:-100%;left:0;right:0;height:100%;background:linear-gradient(to bottom,transparent,var(--teal));animation:af 1.2s linear infinite}
+@keyframes af{0%{top:-100%}100%{top:100%}}
+
+/* ── COMPARE ── */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.cmp-col{border-radius:8px;padding:11px}
+.cmp-col.bad{background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.15)}
+.cmp-col.good{background:rgba(34,197,94,0.04);border:1px solid rgba(34,197,94,0.15)}
+.cmp-t{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.cmp-col.bad .cmp-t{color:var(--red)}
+.cmp-col.good .cmp-t{color:var(--green)}
+
+/* ── PERF BAR ── */
+.perf-row{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.perf-item{display:flex;align-items:center;gap:10px}
+.perf-lbl{font-family:var(--mono);font-size:11px;color:var(--text2);min-width:125px}
+.perf-bw{flex:1;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+.perf-b{height:100%;border-radius:3px;transform-origin:left;animation:pf 1s ease-out forwards}
+@keyframes pf{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.perf-v{font-family:var(--mono);font-size:11px;min-width:38px;text-align:right}
+
+/* ── BADGE ── */
+.bdg{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:10px}
+.bdg.g{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);color:var(--green)}
+.bdg.b{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);color:var(--blue)}
+.bdg.p{background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);color:var(--purple)}
+.bdg.pk{background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.25);color:var(--pink)}
+.bdg.c{background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);color:var(--cyan)}
+.bdg.dim{background:rgba(100,116,139,0.1);border:1px solid rgba(100,116,139,0.2);color:var(--text3)}
+
+/* ── TIMELINE ── */
+.tl{position:relative;padding:8px 0}
+.tl::before{content:'';position:absolute;left:15px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--teal),var(--blue),var(--purple),var(--pink));opacity:0.3}
+.tl-item{display:flex;gap:14px;margin-bottom:14px}
+.tl-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0;margin-top:2px;position:relative;z-index:1;animation:tlp 2.5s ease-in-out infinite}
+@keyframes tlp{0%,100%{box-shadow:0 0 0 0 currentColor}50%{box-shadow:0 0 7px 2px currentColor}}
+.tl-dot.g{background:var(--green);color:rgba(34,197,94,0.3)}
+.tl-dot.b{background:var(--blue);color:rgba(59,130,246,0.3)}
+.tl-dot.pk{background:var(--pink);color:rgba(236,72,153,0.2);animation-delay:0.3s}
+.tl-dot.c{background:var(--cyan);color:rgba(6,182,212,0.2);animation-delay:0.6s}
+.tl-dot.dim{background:var(--text3);color:rgba(100,116,139,0.2);animation-delay:0.9s}
+.tl-v{font-family:var(--head);font-size:13px;font-weight:700;margin-bottom:2px}
+.tl-d{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:3px}
+.tl-desc{font-size:12px;color:var(--text2)}
+
+/* ── ROADMAP ── */
+.rm-item{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;margin-bottom:7px;display:flex;gap:9px;transition:border-color 0.2s}
+.rm-item:hover{border-color:rgba(0,212,170,0.25)}
+.rm-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.rm-t{font-family:var(--head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.rm-d{font-size:12px;color:var(--text2)}
+.rm-s{font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:8px;display:inline-block;margin-top:4px}
+.rm-s.plan{background:rgba(251,191,36,0.1);color:var(--yellow);border:1px solid rgba(251,191,36,0.2)}
+.rm-s.prev{background:rgba(236,72,153,0.1);color:var(--pink);border:1px solid rgba(236,72,153,0.2)}
+.rm-s.ship{background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
+.rm-s.exp{background:rgba(255,107,53,0.1);color:var(--orange);border:1px solid rgba(255,107,53,0.2)}
+
+/* ── PARALLEL BARS ── */
+.pbar{height:26px;border-radius:5px;display:flex;align-items:center;padding:0 10px;font-family:var(--mono);font-size:11px;margin-bottom:5px;position:relative;overflow:hidden}
+.pbar.t{background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.3);color:var(--teal)}
+.pbar.o{background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);color:var(--orange)}
+.pbar.p{background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:var(--purple)}
+.pbar.b{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:var(--blue)}
+.pbar.g{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green)}
+.pbar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.05),transparent);transform:translateX(-100%);animation:shim 2.5s ease-in-out infinite}
+@keyframes shim{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* ── DIV ── */
+.div{border:none;border-top:1px solid var(--border);margin:26px 0}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1300px){.layout3{grid-template-columns:210px 1fr 0}.sb-right{display:none}}
+@media(max-width:900px){.layout3{grid-template-columns:0 1fr 0}.sb-left{display:none}.c2{grid-template-columns:1fr}.hero{padding:38px 18px 26px}.main{padding:16px 14px}.ba{grid-template-columns:1fr}}
+@media(max-width:1100px){.c3{grid-template-columns:1fr 1fr}}
+
+/* ── FOOTER ── */
+.footer{background:var(--bg2);border-top:1px solid var(--border);padding:18px 40px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3)}
+.footer span{color:var(--teal)}
+</style>
+</head>
+<body>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-badge">C# & .NET — Modern Era Complete Reference</div>
+  <h1><span class="c12">C# 12</span> · <span class="c13">C# 13</span> · <span class="c14">C# 14</span><br><span class="v8">.NET 8</span> · <span class="v9">.NET 9</span> · <span class="v10">.NET 10</span></h1>
+  <p class="hero-sub">Every new language feature, runtime improvement and future roadmap — with deep explanations, real-world code, before/after comparisons, and what actually changed.</p>
+  <div class="ver-row">
+    <div class="ver-pill"><div class="vd" style="background:var(--yellow)"></div>C# 12<span class="rel">Nov 2023</span></div>
+    <div class="ver-pill"><div class="vd" style="background:var(--green)"></div>.NET 8 LTS<span class="rel">Nov 2023</span></div>
+    <div class="ver-pill"><div class="vd" style="background:var(--orange)"></div>C# 13<span class="rel">Nov 2024</span></div>
+    <div class="ver-pill"><div class="vd" style="background:var(--blue)"></div>.NET 9<span class="rel">Nov 2024</span></div>
+    <div class="ver-pill"><div class="vd" style="background:var(--pink)"></div>C# 14<span class="rel" style="color:var(--pink)">Nov 2025 Preview</span></div>
+    <div class="ver-pill"><div class="vd" style="background:var(--purple)"></div>.NET 10 LTS<span class="rel" style="color:var(--purple)">Nov 2025 Preview</span></div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">40+</span><span class="stat-lbl">New Features</span></div>
+    <div class="stat"><span class="stat-num">16</span><span class="stat-lbl">Modules</span></div>
+    <div class="stat"><span class="stat-num">70+</span><span class="stat-lbl">Code Examples</span></div>
+    <div class="stat"><span class="stat-num">50+</span><span class="stat-lbl">Q&amp;A</span></div>
+  </div>
+</div>
+<!-- TABS -->
+<div class="topic-tabs">
+  <a class="ttab active" href="#t-cs12"><span class="tdot" style="background:var(--yellow)"></span>C# 12</a>
+  <a class="ttab" href="#t-net8"><span class="tdot" style="background:var(--green)"></span>.NET 8</a>
+  <a class="ttab" href="#t-cs13"><span class="tdot" style="background:var(--orange)"></span>C# 13</a>
+  <a class="ttab" href="#t-net9"><span class="tdot" style="background:var(--blue)"></span>.NET 9</a>
+  <a class="ttab" href="#t-cs14"><span class="tdot" style="background:var(--pink)"></span>C# 14 Preview</a>
+  <a class="ttab" href="#t-net10"><span class="tdot" style="background:var(--purple)"></span>.NET 10 Preview</a>
+  <a class="ttab" href="#t-future"><span class="tdot" style="background:var(--cyan)"></span>Future Roadmap</a>
+  <a class="ttab" href="#t-qa"><span class="tdot" style="background:var(--red)"></span>Q&amp;A</a>
+</div>
+<div class="layout3">
+<!-- LEFT SIDEBAR -->
+<nav class="sb-left">
+  <div class="sbt" style="color:var(--yellow)">◆ C# 12 (.NET 8)</div>
+  <a class="ni" href="#m-pc"><span class="nd"></span>Primary Constructors<span class="nb">New</span></a>
+  <a class="ni" href="#m-ce"><span class="nd"></span>Collection Expressions</a>
+  <a class="ni" href="#m-alias"><span class="nd"></span>Alias Any Type</a>
+  <a class="ni" href="#m-lambda"><span class="nd"></span>Lambda Defaults</a>
+  <a class="ni" href="#m-inline"><span class="nd"></span>Inline Arrays</a>
+  <hr class="ndiv">
+  <div class="sbt" style="color:var(--green)">.NET 8 Runtime</div>
+  <a class="ni" href="#m-aot"><span class="nd"></span>Native AOT</a>
+  <a class="ni" href="#m-frozen"><span class="nd"></span>Frozen Collections</a>
+  <a class="ni" href="#m-time"><span class="nd"></span>TimeProvider</a>
+  <a class="ni" href="#m-keyed"><span class="nd"></span>Keyed DI Services</a>
+  <a class="ni" href="#m-json8"><span class="nd"></span>JSON &amp; Performance</a>
+  <hr class="ndiv">
+  <div class="sbt" style="color:var(--orange)">◆ C# 13 (.NET 9)</div>
+  <a class="ni" href="#m-params"><span class="nd"></span>params Collections</a>
+  <a class="ni" href="#m-lock"><span class="nd"></span>New Lock Type</a>
+  <a class="ni" href="#m-partial"><span class="nd"></span>Partial Properties</a>
+  <a class="ni" href="#m-cs13more"><span class="nd"></span>More C# 13</a>
+  <hr class="ndiv">
+  <div class="sbt" style="color:var(--blue)">.NET 9 Runtime</div>
+  <a class="ni" href="#m-linq9"><span class="nd"></span>LINQ New Methods</a>
+  <a class="ni" href="#m-when"><span class="nd"></span>Task.WhenEach</a>
+  <a class="ni" href="#m-hybrid"><span class="nd"></span>HybridCache &amp; APIs</a>
+  <hr class="ndiv">
+  <div class="sbt" style="color:var(--pink)">◆ C# 14 (Preview)</div>
+  <a class="ni" href="#m-field"><span class="nd"></span>field Keyword<span class="nb" style="color:var(--pink);border-color:rgba(236,72,153,0.3)">Preview</span></a>
+  <a class="ni" href="#m-ext"><span class="nd"></span>Extension Members</a>
+  <a class="ni" href="#m-cs14more"><span class="nd"></span>More C# 14</a>
+  <hr class="ndiv">
+  <div class="sbt" style="color:var(--purple)">.NET 10 (Preview)</div>
+  <a class="ni" href="#m-net10"><span class="nd"></span>ASP.NET &amp; Runtime</a>
+  <hr class="ndiv">
+  <div class="sbt" style="color:var(--cyan)">Future &amp; Q&amp;A</div>
+  <a class="ni" href="#t-future"><span class="nd"></span>C# 15 &amp; .NET 11+</a>
+  <a class="ni" href="#t-qa"><span class="nd"></span>All Topics Q&amp;A</a>
+</nav>
+<!-- MAIN -->
+<main class="main">
+<!-- ═══════════════ C# 12 ═══════════════ -->
+<div id="t-cs12" style="scroll-margin-top:90px">
+
+<section class="ms" id="m-pc">
+  <div class="mh"><span class="mn y">C# 12 · 01</span><span class="mt">Primary Constructors</span><span class="md">Classes &amp; Structs</span></div>
+  <div class="c2">
+    <div class="card oy">
+      <div class="nb2 cs12">✦ New in C# 12</div>
+      <div class="ct">What Are Primary Constructors?</div>
+      <div class="cb">
+        <p><strong style="color:var(--yellow)">Primary constructors</strong> let you declare constructor parameters directly on the class/struct declaration — removing the boilerplate of a separate constructor and field assignments.</p>
+        <div class="hl y">Previously only <code>record</code> types had primary constructors. C# 12 brings this to <strong>all classes and structs</strong>.</div>
+        <ul class="cl">
+          <li>Parameters are in scope throughout the <em>entire</em> class body</li>
+          <li>Parameters are NOT auto-stored as fields — you choose what to capture</li>
+          <li>Works for classes, structs, record classes, record structs</li>
+          <li>Reduces DI boilerplate by ~50% in typical services</li>
+        </ul>
+        <div class="chips"><span class="chip y">class</span><span class="chip y">struct</span><span class="chip y">DI</span><span class="chip y">Services</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">Before vs After</div>
+      <div class="cb">
+        <div class="ba">
+          <div class="ba-box">
+            <div class="ba-t bef">✗ C# 11 — Verbose</div>
+            <div class="ba-code"><span class="k">public class</span> <span class="cc">OrderService</span>
+{
+  <span class="cm">// 3 separate steps needed:</span>
+  <span class="k">private readonly</span> <span class="cc">IRepo</span> _repo;
+  <span class="k">private readonly</span> <span class="cc">ILogger</span> _log;
+
+  <span class="k">public</span> <span class="cc">OrderService</span>(
+    <span class="cc">IRepo</span> repo, <span class="cc">ILogger</span> log)
+  {
+    _repo = repo; _log = log;
+  }
+  <span class="k">public void</span> Process()
+    => _repo.Save();
+}</div>
+          </div>
+          <div class="ba-box">
+            <div class="ba-t aft">✓ C# 12 — Clean</div>
+            <div class="ba-code"><span class="cm">// Parameters declared inline!</span>
+<span class="k">public class</span> <span class="cc">OrderService</span>(
+  <span class="cc">IRepo</span> repo,
+  <span class="cc">ILogger</span> log)
+{
+  <span class="cm">// Both in scope everywhere</span>
+  <span class="k">public void</span> Process()
+    => repo.Save();
+
+  <span class="k">public void</span> Log(<span class="k">string</span> m)
+    => log.LogInfo(m);
+}
+<span class="cm">// ~50% less code!</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card ob cs2">
+      <div class="ct">Advanced Patterns — Field Capture, Validation, Base Calls</div>
+      <div class="cb">
+        <div class="c2">
+          <div>
+            <div class="cb-wrap">
+              <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Capture as field + validate</span><span class="cbdg cs12">C# 12</span></div>
+              <div class="cb-body"><span class="k">public class</span> <span class="cc">UserService</span>(<span class="cc">AppDb</span> db, <span class="cc">ILogger</span>&lt;<span class="cc">UserService</span>&gt; log)
+{
+    <span class="cm">// ✅ Explicitly capture when lifetime matters</span>
+    <span class="k">private readonly</span> <span class="cc">AppDb</span> _db = db;
+
+    <span class="cm">// ✅ Validation in field initializer</span>
+    <span class="k">private readonly</span> <span class="k">string</span> _key =
+        string.IsNullOrEmpty(apiKey)
+            ? <span class="k">throw new</span> <span class="cc">ArgumentNullException</span>()
+            : apiKey;
+
+    <span class="cm">// ✅ Use parameter directly in methods</span>
+    <span class="k">public async</span> <span class="cc">Task</span>&lt;<span class="cc">User</span>?&gt; GetAsync(<span class="k">int</span> id)
+    {
+        log.LogDebug(<span class="s">"Fetching {Id}"</span>, id);
+        <span class="k">return await</span> _db.Users.FindAsync(id);
+    }
+
+    <span class="cm">// ✅ Parameters in property initializers</span>
+    <span class="k">public string</span> DbName => db.Database.GetDbName();
+}</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="cb-wrap">
+              <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Struct + base constructor chain</span><span class="cbdg cs12">C# 12</span></div>
+              <div class="cb-body"><span class="cm">// ✅ Struct primary constructor</span>
+<span class="k">public record struct</span> <span class="cc">Point</span>(<span class="k">double</span> X, <span class="k">double</span> Y)
+{
+    <span class="cm">// Computed from primary params</span>
+    <span class="k">public double</span> Distance =&gt;
+        Math.Sqrt(X * X + Y * Y);
+}
+
+<span class="cm">// ✅ Derived class chains to base</span>
+<span class="k">public class</span> <span class="cc">AdminService</span>(<span class="cc">IRepo</span> repo, <span class="k">string</span> role)
+    : <span class="cc">BaseService</span>(repo)   <span class="cm">// ← chains to base</span>
+{
+    <span class="k">private readonly</span> <span class="k">string</span> _role = role;
+}
+
+<span class="cm">// ✅ Interface + primary constructor</span>
+<span class="k">public class</span> <span class="cc">CacheService</span>(<span class="cc">IDistributedCache</span> cache)
+    : <span class="cc">ICacheService</span>
+{
+    <span class="k">public async</span> <span class="cc">Task</span>&lt;T?&gt; GetAsync&lt;T&gt;(<span class="k">string</span> key)
+        =&gt; <span class="k">await</span> cache.GetAsync&lt;T&gt;(key);
+}</span></div>
+            </div>
+            <div class="hl y" style="margin-top:8px"><strong>When NOT to use:</strong> Complex multi-overload constructors, when constructor body needs try/catch, or when explicit field names differ from param names.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<section class="ms" id="m-ce">
+  <div class="mh"><span class="mn y">C# 12 · 02</span><span class="mt">Collection Expressions</span><span class="md">Unified [..] syntax</span></div>
+  <div class="c2">
+    <div class="card">
+      <div class="nb2 cs12">✦ New in C# 12</div>
+      <div class="ct">Unified Collection Creation with [...]</div>
+      <div class="cb">
+        <p>Collection expressions provide a <strong style="color:var(--teal)">single unified syntax</strong> <code>[...]</code> for creating any collection type. The compiler picks the most efficient allocation strategy.</p>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">All collection types — one syntax</span><span class="cbdg cs12">C# 12</span></div>
+          <div class="cb-body"><span class="cm">// ✅ Array (was: new int[] { 1, 2, 3 })</span>
+<span class="k">int</span>[] nums   = [<span class="n">1</span>, <span class="n">2</span>, <span class="n">3</span>, <span class="n">4</span>, <span class="n">5</span>];
+
+<span class="cm">// ✅ List&lt;T&gt; (was: new List&lt;string&gt; { ... })</span>
+<span class="cc">List</span>&lt;<span class="k">string</span>&gt; names = [<span class="s">"Alice"</span>, <span class="s">"Bob"</span>, <span class="s">"Carol"</span>];
+
+<span class="cm">// ✅ Span&lt;T&gt; — stack allocated, ZERO heap alloc!</span>
+<span class="cc">Span</span>&lt;<span class="k">int</span>&gt; span = [<span class="n">10</span>, <span class="n">20</span>, <span class="n">30</span>];
+
+<span class="cm">// ✅ ReadOnlySpan&lt;T&gt;</span>
+<span class="cc">ReadOnlySpan</span>&lt;<span class="k">char</span>&gt; chars = [<span class="s">'H'</span>, <span class="s">'i'</span>];
+
+<span class="cm">// ✅ ImmutableArray, HashSet, IEnumerable...</span>
+<span class="cc">ImmutableArray</span>&lt;<span class="k">int</span>&gt; ia = [<span class="n">1</span>, <span class="n">2</span>, <span class="n">3</span>];
+
+<span class="cm">// ✅ Empty (was: Array.Empty&lt;int&gt;())</span>
+<span class="k">int</span>[] empty = [];</div>
+        </div>
+      </div>
+    </div>
+    <div class="card oo">
+      <div class="ct">Spread Operator ..</div>
+      <div class="cb">
+        <p>The <strong style="color:var(--orange)">spread element</strong> <code>..</code> inlines another collection inside a collection expression — like JavaScript spread but for all types.</p>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Spread ..</span><span class="cbdg cs12">C# 12</span></div>
+          <div class="cb-body"><span class="k">int</span>[] first  = [<span class="n">1</span>, <span class="n">2</span>, <span class="n">3</span>];
+<span class="k">int</span>[] second = [<span class="n">4</span>, <span class="n">5</span>, <span class="n">6</span>];
+
+<span class="cm">// ✅ Merge two collections</span>
+<span class="k">int</span>[] all = [..first, ..second];
+<span class="cm">// → [1, 2, 3, 4, 5, 6]</span>
+
+<span class="cm">// ✅ Mix literals and spreads</span>
+<span class="k">int</span>[] mixed = [<span class="n">0</span>, ..first, <span class="n">99</span>, ..second];
+<span class="cm">// → [0, 1, 2, 3, 99, 4, 5, 6]</span>
+
+<span class="cm">// ✅ Real world: combine validation errors</span>
+<span class="cc">List</span>&lt;<span class="k">string</span>&gt; allErrors = [..ValidateName(n), ..ValidateEmail(e)];
+
+<span class="cm">// ✅ Route building</span>
+<span class="k">string</span>[] baseRoute = [<span class="s">"api"</span>, <span class="s">"v1"</span>];
+<span class="k">string</span>[] route = [..baseRoute, <span class="s">"orders"</span>, <span class="s">"details"</span>];
+<span class="cm">// → ["api","v1","orders","details"]</span></div>
+        </div>
+        <div class="hl o"><strong>Performance:</strong> Compiler chooses the most efficient allocation. For <code>Span&lt;T&gt;</code> — zero heap allocation!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<section class="ms" id="m-alias">
+  <div class="mh"><span class="mn y">C# 12 · 03</span><span class="mt">Alias Any Type</span><span class="md">using = for tuples, arrays, generics</span></div>
+  <div class="c2">
+    <div class="card">
+      <div class="nb2 cs12">✦ New in C# 12</div>
+      <div class="ct">Alias Any Type with <code>using</code></div>
+      <div class="cb">
+        <p>Previously <code>using</code> aliases only worked for named types. C# 12 allows aliasing <strong>any type</strong> — tuples, arrays, complex generics, and nullable types.</p>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Type aliases — all forms</span><span class="cbdg cs12">C# 12</span></div>
+          <div class="cb-body"><span class="cm">// ✅ Alias tuple types (huge readability win!)</span>
+<span class="k">using</span> <span class="cc">Point</span>    = (<span class="k">double</span> X, <span class="k">double</span> Y);
+<span class="k">using</span> <span class="cc">RGB</span>      = (<span class="k">byte</span> R, <span class="k">byte</span> G, <span class="k">byte</span> B);
+<span class="k">using</span> <span class="cc">Point3D</span>  = (<span class="k">double</span> X, <span class="k">double</span> Y, <span class="k">double</span> Z);
+
+<span class="cm">// ✅ Alias array types</span>
+<span class="k">using</span> <span class="cc">Matrix</span>   = <span class="k">double</span>[][];
+
+<span class="cm">// ✅ Alias complex generics</span>
+<span class="k">using</span> <span class="cc">UserMap</span>  = <span class="cc">Dictionary</span>&lt;<span class="k">string</span>, <span class="cc">List</span>&lt;<span class="cc">User</span>&gt;&gt;;
+<span class="k">using</span> <span class="cc">Callback</span> = <span class="cc">Func</span>&lt;<span class="cc">CancellationToken</span>, <span class="cc">Task</span>&lt;<span class="k">bool</span>&gt;&gt;;
+
+<span class="cm">// ✅ Alias nullable</span>
+<span class="k">using</span> <span class="cc">MaybeInt</span> = <span class="k">int</span>?;
+
+<span class="cm">// ─── Use them naturally ───</span>
+<span class="cc">Point</span>   origin = (<span class="n">0.0</span>, <span class="n">0.0</span>);
+<span class="cc">RGB</span>     red    = (<span class="n">255</span>, <span class="n">0</span>, <span class="n">0</span>);
+<span class="cc">UserMap</span> cache  = <span class="k">new</span>();</div>
+        </div>
+      </div>
+    </div>
+    <div class="card oo">
+      <div class="ct">Real World: Domain-Specific Aliases</div>
+      <div class="cb">
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Geo/graph domain aliases</span><span class="cbdg cs12">C# 12</span></div>
+          <div class="cb-body"><span class="cm">// ─── File top: aliases act as domain language ───</span>
+<span class="k">using</span> <span class="cc">Coordinate</span>  = (<span class="k">double</span> Lat, <span class="k">double</span> Lng);
+<span class="k">using</span> <span class="cc">BoundingBox</span> = (<span class="cc">Coordinate</span> TopLeft, <span class="cc">Coordinate</span> BottomRight);
+<span class="k">using</span> <span class="cc">Route</span>       = <span class="cc">List</span>&lt;(<span class="k">double</span> Lat, <span class="k">double</span> Lng)&gt;;
+<span class="k">using</span> <span class="cc">AdjList</span>     = <span class="cc">Dictionary</span>&lt;<span class="k">int</span>, <span class="cc">List</span>&lt;(<span class="k">int</span> To, <span class="k">double</span> Weight)&gt;&gt;;
+
+<span class="cm">// ─── Code reads like documentation ───</span>
+<span class="k">public class</span> <span class="cc">MapService</span>
+{
+    <span class="k">public</span> <span class="cc">Route</span> FindPath(<span class="cc">Coordinate</span> from, <span class="cc">Coordinate</span> to) { ... }
+
+    <span class="k">public bool</span> IsInBounds(<span class="cc">Coordinate</span> pt, <span class="cc">BoundingBox</span> box)
+        =&gt; pt.Lat &gt;= box.TopLeft.Lat
+        &amp;&amp; pt.Lng &lt;= box.BottomRight.Lng;
+}</div>
+        </div>
+        <div class="hl o"><strong>Best for:</strong> Self-documenting domain models without full class/record overhead. Especially powerful for tuple-heavy APIs.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<section class="ms" id="m-lambda">
+  <div class="mh"><span class="mn y">C# 12 · 04</span><span class="mt">Lambda Default Parameters</span><span class="md">Optional params in lambdas</span></div>
+  <div class="c2">
+    <div class="card oy cs2">
+      <div class="nb2 cs12">✦ New in C# 12</div>
+      <div class="ct">Default Parameters Now Work in Lambdas</div>
+      <div class="cb">
+        <div class="c2">
+          <div>
+            <p>Lambda expressions can now have <strong style="color:var(--yellow)">default parameter values</strong> — closing the gap between named methods and lambdas.</p>
+            <div class="cb-wrap">
+              <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Lambda default params</span><span class="cbdg cs12">C# 12</span></div>
+              <div class="cb-body"><span class="cm">// ✅ Default values in lambda</span>
+<span class="k">var</span> greet = (<span class="k">string</span> name, <span class="k">string</span> prefix = <span class="s">"Hello"</span>)
+    =&gt; <span class="s">$"{prefix}, {name}!"</span>;
+
+greet(<span class="s">"Alice"</span>);          <span class="cm">// "Hello, Alice!"</span>
+greet(<span class="s">"Bob"</span>, <span class="s">"Hi"</span>);      <span class="cm">// "Hi, Bob!"</span>
+
+<span class="cm">// ✅ Multiple defaults — paginator factory</span>
+<span class="k">var</span> paginate = (
+    <span class="cc">IQueryable</span>&lt;<span class="cc">Order</span>&gt; q,
+    <span class="k">int</span> page = <span class="n">1</span>,
+    <span class="k">int</span> size = <span class="n">20</span>,
+    <span class="k">string</span> sort = <span class="s">"CreatedAt"</span>) =&gt;
+    q.OrderBy(sort).Skip((page-<span class="n">1</span>)*size).Take(size);
+
+<span class="cm">// ✅ Func with default</span>
+<span class="cc">Func</span>&lt;<span class="k">int</span>,<span class="k">int</span>,<span class="k">int</span>&gt; add = (<span class="k">int</span> a, <span class="k">int</span> b = <span class="n">10</span>) =&gt; a + b;
+add(<span class="n">5</span>);    <span class="cm">// 15</span>
+add(<span class="n">5</span>,<span class="n">3</span>); <span class="cm">// 8</span></div>
+            </div>
+          </div>
+          <div>
+            <p style="margin-bottom:8px">Ideal for <strong>inline middleware, configurable Funcs</strong>, and factory lambdas where you want reasonable defaults.</p>
+            <div class="cb-wrap">
+              <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Configurable middleware factory</span><span class="cbdg cs12">C# 12</span></div>
+              <div class="cb-body"><span class="cm">// ✅ Lambda middleware with defaults</span>
+<span class="k">var</span> rateLimitMiddleware = (
+    <span class="cc">RequestDelegate</span> next,
+    <span class="k">int</span> maxReqs = <span class="n">100</span>,
+    <span class="cc">TimeSpan</span>? window = <span class="k">null</span>) =&gt;
+{
+    window ??= <span class="cc">TimeSpan</span>.FromMinutes(<span class="n">1</span>);
+    <span class="k">var</span> limiter = <span class="k">new</span> <span class="cc">RateLimiter</span>(maxReqs, window.Value);
+    <span class="k">return async</span> (<span class="cc">HttpContext</span> ctx) =&gt;
+    {
+        <span class="k">if</span> (!limiter.TryAcquire())
+        { ctx.Response.StatusCode = <span class="n">429</span>; <span class="k">return</span>; }
+        <span class="k">await</span> next(ctx);
+    };
+};
+
+app.Use(rateLimitMiddleware);           <span class="cm">// defaults</span>
+app.Use(ctx => rateLimitMiddleware(ctx, maxReqs: <span class="n">50</span>)); <span class="cm">// custom</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<section class="ms" id="m-inline">
+  <div class="mh"><span class="mn y">C# 12 · 05–06</span><span class="mt">Inline Arrays, ref readonly &amp; Experimental</span><span class="md">Advanced features</span></div>
+  <div class="c3">
+    <div class="card oc">
+      <div class="nb2 cs12">✦ New in C# 12</div>
+      <div class="ct">Inline Arrays</div>
+      <div class="cb">
+        <p>Fixed-size arrays on the <strong style="color:var(--cyan)">stack</strong> with full indexer support. Zero heap allocation. Used internally by ASP.NET Core.</p>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">InlineArray</span><span class="cbdg cs12">C# 12</span></div>
+          <div class="cb-body">[<span class="at">InlineArray</span>(<span class="n">8</span>)]
+<span class="k">public struct</span> <span class="cc">Buffer8</span>&lt;T&gt;
+{
+    <span class="k">private</span> T _element0;
+}
+
+<span class="cm">// Use like regular array — NO heap alloc</span>
+<span class="cc">Buffer8</span>&lt;<span class="k">int</span>&gt; buf;
+buf[<span class="n">0</span>] = <span class="n">42</span>;
+buf[<span class="n">1</span>] = <span class="n">99</span>;
+
+<span class="k">foreach</span> (<span class="k">var</span> x <span class="k">in</span> buf)
+    Console.WriteLine(x);</div>
+        </div>
+        <div class="hl c"><strong>Used by:</strong> ASP.NET Core routing, HTTP headers. Framework authors only — not everyday app code.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="nb2 cs12">✦ New in C# 12</div>
+      <div class="ct">ref readonly Parameters</div>
+      <div class="cb">
+        <p>Pass large structs by reference for read-only access — no copy, no mutation risk.</p>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">ref readonly</span><span class="cbdg cs12">C# 12</span></div>
+          <div class="cb-body"><span class="k">public struct</span> <span class="cc">BigVector</span>
+{
+    <span class="k">public double</span>[] Data; <span class="cm">// 1000 items</span>
+}
+
+<span class="cm">// ✅ Pass by ref — no copy, read-only</span>
+<span class="k">public double</span> Dot(
+    <span class="k">ref readonly</span> <span class="cc">BigVector</span> a,
+    <span class="k">ref readonly</span> <span class="cc">BigVector</span> b)
+{
+    <span class="k">double</span> sum = <span class="n">0</span>;
+    <span class="k">for</span> (<span class="k">int</span> i = <span class="n">0</span>; i &lt; a.Data.Length; i++)
+        sum += a.Data[i] * b.Data[i];
+    <span class="k">return</span> sum;
+    <span class="cm">// a.Data = null; ← compile error!</span>
+}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card oy">
+      <div class="nb2 cs12">✦ New in C# 12</div>
+      <div class="ct">C# 12 Summary — Impact Ratings</div>
+      <div class="cb">
+        <table class="tbl">
+          <thead><tr><th>Feature</th><th>Impact</th></tr></thead>
+          <tbody>
+            <tr><td>Primary Constructors</td><td style="color:var(--green)">★★★★★ Daily use</td></tr>
+            <tr><td>Collection Expressions</td><td style="color:var(--green)">★★★★★ Daily use</td></tr>
+            <tr><td>Alias Any Type</td><td style="color:var(--yellow)">★★★★☆ Libraries</td></tr>
+            <tr><td>Lambda Defaults</td><td style="color:var(--yellow)">★★★☆☆ Moderate</td></tr>
+            <tr><td>Inline Arrays</td><td style="color:var(--orange)">★★☆☆☆ Framework</td></tr>
+            <tr><td>ref readonly</td><td style="color:var(--orange)">★★☆☆☆ Perf-critical</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+</div><!-- end t-cs12 -->
+
+<hr class="div">
+
+<!-- ═══════════════ .NET 8 ═══════════════ -->
+<div id="t-net8" style="scroll-margin-top:90px">
+
+<section class="ms" id="m-aot">
+  <div class="mh"><span class="mn g">.NET 8 · 01</span><span class="mt">Native AOT</span><span class="md">Ahead-Of-Time compilation</span></div>
+  <div class="c2">
+    <div class="card og">
+      <div class="nb2 net8">✦ .NET 8</div>
+      <div class="ct">What is Native AOT?</div>
+      <div class="cb">
+        <p><strong style="color:var(--green)">Native AOT</strong> compiles your app directly to native machine code at build time — no JIT, no .NET runtime required on the target machine.</p>
+        <div class="arch">
+          <div class="ar"><div class="ab t">C# Source</div></div><div class="aa"></div>
+          <div class="ar"><div class="ab o">Roslyn → IL</div></div><div class="aa"></div>
+          <div class="ar" style="gap:20px">
+            <div><div class="ab b">JIT Path (Traditional)</div><div style="font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center;margin-top:2px">Runtime compilation</div></div>
+            <div><div class="ab g">AOT Path (.NET 8)</div><div style="font-family:var(--mono);font-size:10px;color:var(--green);text-align:center;margin-top:2px">Native binary at build ✓</div></div>
+          </div>
+        </div>
+        <div class="perf-row" style="margin-top:10px">
+          <div class="perf-item"><span class="perf-lbl">Startup time</span><div class="perf-bw"><div class="perf-b" style="width:95%;background:linear-gradient(to right,var(--green),#86efac)"></div></div><span class="perf-v" style="color:var(--green)">~5ms</span></div>
+          <div class="perf-item"><span class="perf-lbl">Memory (RSS)</span><div class="perf-bw"><div class="perf-b" style="width:28%;background:linear-gradient(to right,var(--teal),var(--teal2))"></div></div><span class="perf-v" style="color:var(--teal)">~20MB</span></div>
+          <div class="perf-item"><span class="perf-lbl">Binary size</span><div class="perf-bw"><div class="perf-b" style="width:38%;background:linear-gradient(to right,var(--blue),#60a5fa)"></div></div><span class="perf-v" style="color:var(--blue)">~8MB</span></div>
+        </div>
+        <div class="hl g"><strong>Best for:</strong> Serverless (AWS Lambda), containers, CLI tools, microservices where cold start matters.</div>
+        <div class="hl r"><strong>Limitation:</strong> Reflection-based code won't work — use source generators instead.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">AOT Setup &amp; JSON Source Generation</div>
+      <div class="cb">
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Enable AOT + AOT-safe JSON</span><span class="cbdg net8">.NET 8</span></div>
+          <div class="cb-body"><span class="cm">&lt;!-- csproj --&gt;</span>
+&lt;<span class="cc">PropertyGroup</span>&gt;
+  &lt;<span class="pr">PublishAot</span>&gt;true&lt;/<span class="pr">PublishAot</span>&gt;
+  &lt;<span class="pr">StripSymbols</span>&gt;true&lt;/<span class="pr">StripSymbols</span>&gt;
+&lt;/<span class="cc">PropertyGroup</span>&gt;
+
+<span class="cm">// ❌ NOT AOT-safe: runtime reflection</span>
+<span class="k">string</span> json = <span class="cc">JsonSerializer</span>.Serialize(order);
+
+<span class="cm">// ✅ AOT-safe: source-generated context</span>
+[<span class="at">JsonSerializable</span>(<span class="k">typeof</span>(<span class="cc">Order</span>))]
+[<span class="at">JsonSerializable</span>(<span class="k">typeof</span>(<span class="cc">List</span>&lt;<span class="cc">Order</span>&gt;))]
+<span class="k">internal partial class</span> <span class="cc">AppJsonCtx</span>
+    : <span class="cc">JsonSerializerContext</span> { }
+
+<span class="cm">// Register in DI</span>
+builder.Services.ConfigureHttpJsonOptions(opts =&gt;
+    opts.SerializerOptions.AddContext&lt;<span class="cc">AppJsonCtx</span>&gt;());
+
+<span class="cm">// Use with source gen context</span>
+<span class="k">string</span> json = <span class="cc">JsonSerializer</span>
+    .Serialize(order, <span class="cc">AppJsonCtx</span>.Default.Order);
+
+<span class="cm">// AOT-optimized minimal API builder</span>
+<span class="k">var</span> builder = <span class="cc">WebApplication</span>.CreateSlimBuilder(args);</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<section class="ms" id="m-frozen">
+  <div class="mh"><span class="mn g">.NET 8 · 02</span><span class="mt">Frozen Collections</span><span class="md">Read-only, maximally optimized lookups</span></div>
+  <div class="c2">
+    <div class="card">
+      <div class="nb2 net8">✦ .NET 8</div>
+      <div class="ct">FrozenDictionary &amp; FrozenSet</div>
+      <div class="cb">
+        <p><strong style="color:var(--teal)">Frozen collections</strong> spend extra time at creation to optimize for the absolute fastest reads. Set once at startup, read millions of times.</p>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Frozen usage</span><span class="cbdg net8">.NET 8</span></div>
+          <div class="cb-body"><span class="k">using</span> System.Collections.Frozen;
+
+<span class="cm">// ✅ Build ONCE at startup (optimization happens here)</span>
+<span class="cc">FrozenDictionary</span>&lt;<span class="k">string</span>, <span class="cc">Permission</span>&gt; perms =
+    GetAllPermissions()
+        .ToFrozenDictionary(p =&gt; p.Key, p =&gt; p.Value);
+
+<span class="cm">// ✅ Read MILLIONS of times — fastest possible</span>
+<span class="k">if</span> (perms.TryGetValue(<span class="s">"orders:read"</span>, <span class="k">out var</span> perm))
+    Authorize(perm);
+
+<span class="cm">// ✅ FrozenSet for membership checks</span>
+<span class="cc">FrozenSet</span>&lt;<span class="k">string</span>&gt; stopWords =
+    <span class="k">new</span>[] { <span class="s">"the"</span>, <span class="s">"a"</span>, <span class="s">"an"</span>, <span class="s">"in"</span> }.ToFrozenSet();
+
+<span class="cm">// O(1) Contains — SIMD-accelerated!</span>
+<span class="k">var</span> meaningful = text.Split(<span class="s">' '</span>)
+    .Where(w =&gt; !stopWords.Contains(w));</div>
+        </div>
+      </div>
+    </div>
+    <div class="card og">
+      <div class="ct">When to Use Frozen</div>
+      <div class="cb">
+        <table class="tbl">
+          <thead><tr><th>Collection</th><th>Mutability</th><th>Lookup</th><th>Use When</th></tr></thead>
+          <tbody>
+            <tr><td>Dictionary</td><td>Mutable</td><td>O(1)</td><td>Frequently updated</td></tr>
+            <tr><td>ImmutableDict</td><td>Immutable</td><td style="color:var(--orange)">O(log n)</td><td>Functional updates</td></tr>
+            <tr><td>FrozenDictionary</td><td style="color:var(--red)">Read-only</td><td style="color:var(--green)">Fastest O(1)</td><td>Set once, read always</td></tr>
+          </tbody>
+        </table>
+        <div class="hl g" style="margin-top:10px"><strong>Real world uses:</strong> HTTP route tables, permission maps, config key lookups, allowed MIME types, localization strings — anything set at startup and read constantly.</div>
+        <div class="chips"><span class="chip g">ToFrozenDictionary()</span><span class="chip g">ToFrozenSet()</span><span class="chip g">System.Collections.Frozen</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<section class="ms" id="m-time">
+  <div class="mh"><span class="mn g">.NET 8 · 03</span><span class="mt">TimeProvider</span><span class="md">Testable, injectable time abstraction</span></div>
+  <div class="c2">
+    <div class="card oy">
+      <div class="nb2 net8">✦ .NET 8</div>
+      <div class="ct">TimeProvider — No More DateTime.Now in Tests</div>
+      <div class="cb">
+        <p><strong style="color:var(--yellow)">TimeProvider</strong> is an abstract clock you can inject — real clock in production, fake clock in tests.</p>
+        <div class="cmp" style="margin-bottom:10px">
+          <div class="cmp-col bad"><div class="cmp-t">✗ Hard to test</div><div style="font-family:var(--mono);font-size:11px;color:var(--text2)">var now = DateTime.UtcNow;<br><span style="color:var(--red)">// Can't control in tests!</span></div></div>
+          <div class="cmp-col good"><div class="cmp-t">✓ Fully testable</div><div style="font-family:var(--mono);font-size:11px;color:var(--text2)">var now = _time.GetUtcNow();<br><span style="color:var(--green)">// Inject fake in tests</span></div></div>
+        </div>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">TimeProvider — prod + test</span><span class="cbdg net8">.NET 8</span></div>
+          <div class="cb-body"><span class="cm">// ─── Service uses TimeProvider ───</span>
+<span class="k">public class</span> <span class="cc">SubService</span>(<span class="cc">TimeProvider</span> time)
+{
+    <span class="k">public bool</span> IsExpired(<span class="cc">DateTime</span> exp)
+        =&gt; time.GetUtcNow() &gt; exp;
+
+    <span class="cm">// Testable delay!</span>
+    <span class="k">public async</span> <span class="cc">Task</span> WaitAsync(<span class="cc">TimeSpan</span> d)
+        =&gt; <span class="k">await</span> <span class="cc">Task</span>.Delay(d, time, <span class="cc">CancellationToken</span>.None);
+}
+
+<span class="cm">// ─── Production: real clock ───</span>
+services.AddSingleton(<span class="cc">TimeProvider</span>.System);
+
+<span class="cm">// ─── Tests: fake clock ───</span>
+<span class="k">var</span> fake = <span class="k">new</span> <span class="cc">FakeTimeProvider</span>();
+fake.SetUtcNow(<span class="k">new</span> <span class="cc">DateTimeOffset</span>(<span class="n">2025</span>, <span class="n">1</span>, <span class="n">1</span>, <span class="n">0</span>,<span class="n">0</span>,<span class="n">0</span>, <span class="cc">TimeSpan</span>.Zero));
+<span class="k">var</span> svc = <span class="k">new</span> <span class="cc">SubService</span>(fake);
+
+fake.Advance(<span class="cc">TimeSpan</span>.FromDays(<span class="n">31</span>)); <span class="cm">// fast-forward</span>
+Assert.True(svc.IsExpired(expDate)); <span class="cm">// ✅ passes!</span>
+
+<span class="cm">// Package: Microsoft.Extensions.TimeProvider.Testing</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="m-keyed">
+      <div class="nb2 net8">✦ .NET 8</div>
+      <div class="ct">Keyed DI Services</div>
+      <div class="cb">
+        <p>Register multiple implementations of the same interface differentiated by a <strong>key</strong>.</p>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Keyed services</span><span class="cbdg net8">.NET 8</span></div>
+          <div class="cb-body"><span class="cm">// ─── Register with keys ───</span>
+builder.Services.AddKeyedSingleton&lt;<span class="cc">IStorage</span>, <span class="cc">LocalStorage</span>&gt;(<span class="s">"local"</span>);
+builder.Services.AddKeyedSingleton&lt;<span class="cc">IStorage</span>, <span class="cc">AzureBlob</span>&gt;(<span class="s">"azure"</span>);
+builder.Services.AddKeyedSingleton&lt;<span class="cc">IStorage</span>, <span class="cc">S3Storage</span>&gt;(<span class="s">"s3"</span>);
+
+<span class="cm">// ─── Inject by key ───</span>
+<span class="k">public class</span> <span class="cc">FileCtrl</span>(
+    [<span class="at">FromKeyedServices</span>(<span class="s">"azure"</span>)] <span class="cc">IStorage</span> azure,
+    [<span class="at">FromKeyedServices</span>(<span class="s">"local"</span>)] <span class="cc">IStorage</span> local)
+{ }
+
+<span class="cm">// ─── Dynamic resolution ───</span>
+<span class="k">var</span> storage = sp.GetRequiredKeyedService&lt;<span class="cc">IStorage</span>&gt;(
+    user.Plan == <span class="s">"premium"</span> ? <span class="s">"azure"</span> : <span class="s">"local"</span>);
+
+<span class="cm">// ─── Enum keys (cleaner!) ───</span>
+<span class="k">public enum</span> <span class="cc">Gateway</span> { Stripe, PayPal, Crypto }
+builder.Services.AddKeyedSingleton&lt;<span class="cc">IPayment</span>, <span class="cc">StripeGw</span>&gt;(<span class="cc">Gateway</span>.Stripe);
+
+<span class="k">public class</span> <span class="cc">Checkout</span>(
+    [<span class="at">FromKeyedServices</span>(<span class="cc">Gateway</span>.Stripe)] <span class="cc">IPayment</span> stripe) { }</div>
+        </div>
+        <div class="hl"><strong>Best for:</strong> Storage providers, payment gateways, notification channels, cache backends.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<section class="ms" id="m-json8">
+  <div class="mh"><span class="mn g">.NET 8 · 04</span><span class="mt">JSON, SearchValues, IExceptionHandler &amp; Blazor</span></div>
+  <div class="c3">
+    <div class="card">
+      <div class="nb2 net8">✦ .NET 8</div>
+      <div class="ct">System.Text.Json Improvements</div>
+      <div class="cb">
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">JSON new features</span><span class="cbdg net8">.NET 8</span></div>
+          <div class="cb-body"><span class="cm">// ✅ Polymorphic hierarchy</span>
+[<span class="at">JsonDerivedType</span>(<span class="k">typeof</span>(<span class="cc">Circle</span>),  <span class="s">"circle"</span>)]
+[<span class="at">JsonDerivedType</span>(<span class="k">typeof</span>(<span class="cc">Square</span>),  <span class="s">"square"</span>)]
+<span class="k">interface</span> <span class="cc">IShape</span> { }
+
+<span class="cm">// ✅ JsonRequired attribute</span>
+<span class="k">class</span> <span class="cc">User</span> {
+    [<span class="at">JsonRequired</span>]
+    <span class="k">public required string</span> Name { <span class="k">get</span>; <span class="k">set</span>; }
+}
+
+<span class="cm">// ✅ Populate read-only collection</span>
+<span class="k">class</span> <span class="cc">Cfg</span> {
+    [<span class="at">JsonObjectCreationHandling</span>(<span class="cc">JsonObjectCreationHandling</span>.Populate)]
+    <span class="k">public</span> <span class="cc">List</span>&lt;<span class="k">string</span>&gt; Tags { <span class="k">get</span>; } = <span class="k">new</span>();
+}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card og">
+      <div class="nb2 net8">✦ .NET 8</div>
+      <div class="ct">SearchValues&lt;T&gt; — SIMD Accelerated</div>
+      <div class="cb">
+        <p>Pre-computes the optimal search algorithm for a fixed set of values. <strong style="color:var(--green)">Much faster</strong> than manual <code>IndexOf</code> checks.</p>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">SearchValues</span><span class="cbdg net8">.NET 8</span></div>
+          <div class="cb-body"><span class="k">using</span> System.Buffers;
+
+<span class="cm">// Build ONCE at startup</span>
+<span class="k">private static readonly</span> <span class="cc">SearchValues</span>&lt;<span class="k">char</span>&gt; SqlChars
+    = <span class="cc">SearchValues</span>.Create(<span class="s">"';--/*"</span>);
+
+<span class="k">private static readonly</span> <span class="cc">SearchValues</span>&lt;<span class="k">char</span>&gt; Specials
+    = <span class="cc">SearchValues</span>.Create(<span class="s">"!@#$%^&amp;*()"</span>);
+
+<span class="cm">// ✅ Extremely fast SIMD contains-any</span>
+<span class="k">bool</span> hasSpecial = input.AsSpan().ContainsAny(Specials);
+<span class="k">bool</span> sqlInject  = input.AsSpan().ContainsAny(SqlChars);
+
+<span class="cm">// Used for password strength checkers,</span>
+<span class="cm">// input sanitization, tokenizers</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card op">
+      <div class="nb2 net8">✦ .NET 8</div>
+      <div class="ct">IExceptionHandler &amp; Blazor United</div>
+      <div class="cb">
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Global error handling + Blazor modes</span><span class="cbdg net8">.NET 8</span></div>
+          <div class="cb-body"><span class="cm">// ✅ IExceptionHandler — clean global errors</span>
+<span class="k">public class</span> <span class="cc">GlobalErrHandler</span> : <span class="cc">IExceptionHandler</span>
+{
+    <span class="k">public async</span> <span class="cc">ValueTask</span>&lt;<span class="k">bool</span>&gt; TryHandleAsync(
+        <span class="cc">HttpContext</span> ctx, <span class="cc">Exception</span> ex, <span class="cc">CancellationToken</span> ct)
+    {
+        ctx.Response.StatusCode = ex <span class="k">switch</span>
+        {
+            <span class="cc">NotFoundException</span>   =&gt; <span class="n">404</span>,
+            <span class="cc">UnauthorizedException</span> =&gt; <span class="n">401</span>,
+            _ =&gt; <span class="n">500</span>
+        };
+        <span class="k">await</span> ctx.Response.WriteAsJsonAsync(
+            <span class="k">new</span> { Error = ex.Message }, ct);
+        <span class="k">return true</span>;
+    }
+}
+builder.Services.AddExceptionHandler&lt;<span class="cc">GlobalErrHandler</span>&gt;();
+
+<span class="cm">// ✅ Blazor render modes (.NET 8 United)</span>
+@rendermode InteractiveServer      <span class="cm">// SignalR</span>
+@rendermode InteractiveWebAssembly <span class="cm">// WASM</span>
+@rendermode InteractiveAuto        <span class="cm">// Server→WASM</span>
+@attribute [StreamRendering]       <span class="cm">// Streaming SSR</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div><!-- end t-net8 -->
+
+<hr class="div">
+
+<!-- ═══════════════ C# 13 ═══════════════ -->
+<div id="t-cs13" style="scroll-margin-top:90px">
+
+<section class="ms" id="m-params">
+  <div class="mh"><span class="mn o">C# 13 · 01</span><span class="mt">params Collections</span><span class="md">Zero-allocation params beyond arrays</span></div>
+  <div class="c2">
+    <div class="card oo">
+      <div class="nb2 cs13">✦ New in C# 13</div>
+      <div class="ct">params Now Works with Any Collection Type</div>
+      <div class="cb">
+        <p>C# 13 removes the restriction that <code>params</code> only supports arrays. Now any collection type works — including <code>ReadOnlySpan&lt;T&gt;</code> for <strong style="color:var(--orange)">zero-allocation params</strong>.</p>
+        <div class="ba">
+          <div class="ba-box">
+            <div class="ba-t bef">✗ C# 12 — Array only</div>
+            <div class="ba-code"><span class="cm">// Heap alloc every call!</span>
+<span class="k">void</span> Print(<span class="k">params int</span>[] nums) { }
+Print(<span class="n">1</span>, <span class="n">2</span>, <span class="n">3</span>); <span class="cm">// ⚠️ array alloc</span></div>
+          </div>
+          <div class="ba-box">
+            <div class="ba-t aft">✓ C# 13 — Any type</div>
+            <div class="ba-code"><span class="cm">// Zero allocation!</span>
+<span class="k">void</span> Print(<span class="k">params</span> <span class="cc">ReadOnlySpan</span>&lt;<span class="k">int</span>&gt; n) { }
+Print(<span class="n">1</span>, <span class="n">2</span>, <span class="n">3</span>); <span class="cm">// ✅ stack only</span></div>
+          </div>
+        </div>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">params with various collection types</span><span class="cbdg cs13">C# 13</span></div>
+          <div class="cb-body"><span class="cm">// ✅ Span — zero allocation (best for hot paths)</span>
+<span class="k">public int</span> Sum(<span class="k">params</span> <span class="cc">ReadOnlySpan</span>&lt;<span class="k">int</span>&gt; nums)
+{
+    <span class="k">int</span> total = <span class="n">0</span>;
+    <span class="k">foreach</span> (<span class="k">var</span> n <span class="k">in</span> nums) total += n;
+    <span class="k">return</span> total;
+}
+
+<span class="cm">// ✅ IEnumerable — most flexible</span>
+<span class="k">public void</span> AddAll(<span class="k">params</span> <span class="cc">IEnumerable</span>&lt;<span class="k">string</span>&gt; items)
+    =&gt; _list.AddRange(items);
+
+<span class="cm">// ✅ List&lt;T&gt; — mutable collection</span>
+<span class="k">public void</span> Process(<span class="k">params</span> <span class="cc">List</span>&lt;<span class="cc">Order</span>&gt; orders) { }
+
+<span class="cm">// ✅ Real world: high-perf logger</span>
+<span class="k">public void</span> LogError(
+    <span class="k">string</span> template,
+    <span class="k">params</span> <span class="cc">ReadOnlySpan</span>&lt;<span class="k">object</span>?&gt; args)
+{
+    <span class="cm">// No array allocated when calling:</span>
+    <span class="cm">// logger.LogError("{Name} failed", userName, orderId)</span>
+    <span class="cc">Console</span>.Error.WriteLine(
+        <span class="k">string</span>.Format(template, args.ToArray()));
+}
+
+Sum(<span class="n">1</span>, <span class="n">2</span>, <span class="n">3</span>, <span class="n">4</span>, <span class="n">5</span>); <span class="cm">// ✅ No heap alloc!</span></div>
+        </div>
+        <div class="hl o"><strong>Performance win:</strong> In hot paths (logging, formatting), eliminating array allocation per call reduces GC pressure enormously. Benchmark shows ~10× reduction in allocations.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">Overload Priority &amp; Real Use Cases</div>
+      <div class="cb">
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Priority: Span beats IEnumerable beats array</span><span class="cbdg cs13">C# 13</span></div>
+          <div class="cb-body"><span class="cm">// Compiler picks MOST SPECIFIC overload</span>
+<span class="k">public class</span> <span class="cc">Fmt</span>
+{
+    <span class="cm">// Picked for inline literals (zero alloc)</span>
+    <span class="k">public string</span> Format(
+        <span class="k">string</span> tmpl,
+        <span class="k">params</span> <span class="cc">ReadOnlySpan</span>&lt;<span class="k">object</span>?&gt; args) =&gt; ...;
+
+    <span class="cm">// Picked when passing existing IEnumerable</span>
+    <span class="k">public string</span> Format(
+        <span class="k">string</span> tmpl,
+        <span class="k">params</span> <span class="cc">IEnumerable</span>&lt;<span class="k">object</span>?&gt; args) =&gt; ...;
+}
+
+<span class="k">var</span> f = <span class="k">new</span> <span class="cc">Fmt</span>();
+f.Format(<span class="s">"{0}+{1}"</span>, <span class="n">1</span>, <span class="n">2</span>);      <span class="cm">// ← Span overload</span>
+f.Format(<span class="s">"{0}"</span>, GetArgs());      <span class="cm">// ← IEnumerable overload</span>
+
+<span class="cm">// ✅ Same syntax — compiler decides allocation strategy</span></div>
+        </div>
+        <div class="hl" style="margin-top:8px"><strong>Real projects:</strong> Microsoft rewrote core .NET logging APIs to use <code>params ReadOnlySpan&lt;T&gt;</code>. String interpolation handlers also benefit from this pattern.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<section class="ms" id="m-lock">
+  <div class="mh"><span class="mn o">C# 13 · 02</span><span class="mt">New Lock Type — System.Threading.Lock</span><span class="md">Purpose-built synchronization primitive</span></div>
+  <div class="c2">
+    <div class="card">
+      <div class="nb2 cs13">✦ New in C# 13</div>
+      <div class="ct">System.Threading.Lock</div>
+      <div class="cb">
+        <p><strong style="color:var(--teal)">System.Threading.Lock</strong> is a new purpose-built locking type — better diagnostics, performance, and ergonomics than <code>lock(object)</code>.</p>
+        <div class="ba">
+          <div class="ba-box">
+            <div class="ba-t bef">✗ Before — lock(object)</div>
+            <div class="ba-code"><span class="k">private readonly object</span> _lk = <span class="k">new</span>();
+<span class="k">public void</span> Update()
+{
+    <span class="k">lock</span> (_lk)
+    {
+        <span class="cm">// works but object overhead</span>
+        _value++;
+    }
+}</div>
+          </div>
+          <div class="ba-box">
+            <div class="ba-t aft">✓ C# 13 — Lock type</div>
+            <div class="ba-code"><span class="k">private readonly</span> <span class="cc">Lock</span> _lk = <span class="k">new</span>();
+<span class="k">public void</span> Update()
+{
+    <span class="k">lock</span> (_lk)
+    {
+        <span class="cm">// same syntax, better runtime</span>
+        _value++;
+    }
+}</div>
+          </div>
+        </div>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Lock — full feature set</span><span class="cbdg cs13">C# 13</span></div>
+          <div class="cb-body"><span class="k">using</span> System.Threading;
+
+<span class="k">public class</span> <span class="cc">SafeCounter</span>
+{
+    <span class="k">private readonly</span> <span class="cc">Lock</span> _lock = <span class="k">new</span>();
+    <span class="k">private int</span> _count = <span class="n">0</span>;
+
+    <span class="cm">// ✅ lock keyword — compiles to Lock.EnterScope</span>
+    <span class="k">public void</span> Increment()
+    {
+        <span class="k">lock</span> (_lock) { _count++; }
+    }
+
+    <span class="cm">// ✅ Scope pattern — RAII, exception safe</span>
+    <span class="k">public int</span> GetAndReset()
+    {
+        <span class="k">using</span> (<span class="cc">Lock</span>.Scope scope = _lock.EnterScope())
+        {
+            <span class="k">int</span> val = _count;
+            _count = <span class="n">0</span>;
+            <span class="k">return</span> val;
+        } <span class="cm">// auto-released here</span>
+    }
+
+    <span class="cm">// ✅ TryEnter — non-blocking attempt</span>
+    <span class="k">public bool</span> TryUpdate()
+    {
+        <span class="k">if</span> (_lock.TryEnter(<span class="k">out</span> <span class="cc">Lock</span>.Scope scope))
+        {
+            <span class="k">using</span> (scope) { _count++; <span class="k">return true</span>; }
+        }
+        <span class="k">return false</span>; <span class="cm">// another thread holds it</span>
+    }
+
+    <span class="cm">// ✅ IsHeldByCurrentThread</span>
+    <span class="k">public bool</span> IsLocked =&gt; _lock.IsHeldByCurrentThread;
+}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card oo">
+      <div class="ct">Thread-Safe Repository Example</div>
+      <div class="cb">
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Production thread-safe store</span><span class="cbdg cs13">C# 13</span></div>
+          <div class="cb-body"><span class="k">public class</span> <span class="cc">InMemoryUserStore</span>
+{
+    <span class="k">private readonly</span> <span class="cc">Lock</span> _lock  = <span class="k">new</span>();
+    <span class="k">private readonly</span> <span class="cc">Dictionary</span>&lt;<span class="k">int</span>, <span class="cc">User</span>&gt; _users = <span class="k">new</span>();
+
+    <span class="k">public</span> <span class="cc">User</span>? Get(<span class="k">int</span> id)
+    {
+        <span class="k">lock</span> (_lock)
+            <span class="k">return</span> _users.TryGetValue(id, <span class="k">out var</span> u) ? u : <span class="k">null</span>;
+    }
+
+    <span class="cm">// Non-blocking add — skip if locked</span>
+    <span class="k">public bool</span> TryAdd(<span class="cc">User</span> user)
+    {
+        <span class="k">if</span> (!_lock.TryEnter(<span class="cc">TimeSpan</span>.FromMilliseconds(<span class="n">50</span>)))
+            <span class="k">return false</span>;
+        <span class="k">try</span>
+            { <span class="k">return</span> _users.TryAdd(user.Id, user); }
+        <span class="k">finally</span>
+            { _lock.Exit(); }
+    }
+
+    <span class="cm">// Atomic read-and-update</span>
+    <span class="k">public void</span> UpdateLastSeen(<span class="k">int</span> id)
+    {
+        <span class="k">using</span> (_lock.EnterScope())
+        {
+            <span class="k">if</span> (_users.TryGetValue(id, <span class="k">out var</span> u))
+                u.LastSeen = <span class="cc">DateTime</span>.UtcNow;
+        }
+    }
+}</div>
+        </div>
+        <div class="hl o"><strong>Improvements over <code>lock(object)</code>:</strong> Lock.Scope enables exception-safe patterns, TryEnter with timeout, IsHeldByCurrentThread for diagnostics, improved debugger support.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<section class="ms" id="m-partial">
+  <div class="mh"><span class="mn o">C# 13 · 03</span><span class="mt">Partial Properties &amp; More C# 13</span><span class="md">Source generators + new syntax</span></div>
+  <div class="c2">
+    <div class="card">
+      <div class="nb2 cs13">✦ New in C# 13</div>
+      <div class="ct">Partial Properties — Source Generator Pattern</div>
+      <div class="cb">
+        <p><strong>Partial properties</strong> let source generators declare a property declaration in one file and provide the implementation in another — enabling clean observable properties without boilerplate.</p>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Partial properties — MVVM pattern</span><span class="cbdg cs13">C# 13</span></div>
+          <div class="cb-body"><span class="cm">// ─── Your code (declaration only) ───</span>
+<span class="k">public partial class</span> <span class="cc">UserViewModel</span>
+{
+    [<span class="at">ObservableProperty</span>]  <span class="cm">// CommunityToolkit.MVVM</span>
+    <span class="k">public partial string</span> Name { <span class="k">get</span>; <span class="k">set</span>; }
+
+    [<span class="at">ObservableProperty</span>]
+    <span class="k">public partial int</span>    Age  { <span class="k">get</span>; <span class="k">set</span>; }
+}
+
+<span class="cm">// ─── Generated by source generator ───</span>
+<span class="k">public partial class</span> <span class="cc">UserViewModel</span> : <span class="cc">INotifyPropertyChanged</span>
+{
+    <span class="k">private string</span> _name;
+    <span class="k">public partial string</span> Name
+    {
+        <span class="k">get</span> =&gt; _name;
+        <span class="k">set</span> { <span class="k">if</span> (_name != value) { _name = value; OnPropertyChanged(); } }
+    }
+}
+<span class="cm">// WPF/MAUI UI auto-updates on change!</span></div>
+        </div>
+        <div class="hl"><strong>Why it matters:</strong> Previously, source generators had to use backing fields like <code>[ObservableProperty] private string _name;</code>. Partial properties allow clean public API surface — <code>public partial string Name</code>.</div>
+      </div>
+    </div>
+    <div class="card oo" id="m-cs13more">
+      <div class="ct">More C# 13 Features</div>
+      <div class="cb">
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">C# 13 additional improvements</span><span class="cbdg cs13">C# 13</span></div>
+          <div class="cb-body"><span class="cm">// ✅ New \e escape sequence = ESC (0x1B)</span>
+<span class="cc">Console</span>.Write(<span class="s">$"\e[31m Red text \e[0m"</span>);
+<span class="cm">// Before: "\x1B[31m" — now cleaner \e</span>
+
+<span class="cm">// ✅ Implicit index in object initializers</span>
+<span class="k">var</span> buffer = <span class="k">new</span> <span class="cc">MyBuffer</span>
+{
+    [^<span class="n">1</span>] = <span class="s">"last"</span>,     <span class="cm">// use ^ from end</span>
+    [^<span class="n">2</span>] = <span class="s">"penultimate"</span>
+};
+
+<span class="cm">// ✅ allows ref struct constraint</span>
+<span class="cm">// Generic can now accept Span&lt;T&gt;!</span>
+<span class="k">public void</span> Process&lt;T&gt;(T value)
+    <span class="k">where</span> T : <span class="k">allows ref struct</span>
+{
+    <span class="cm">// T can now be Span&lt;T&gt;, ReadOnlySpan&lt;T&gt;</span>
+}
+
+<span class="cm">// ✅ ref locals in async methods</span>
+<span class="k">async</span> <span class="cc">Task</span> ExampleAsync()
+{
+    <span class="k">var</span> arr = <span class="k">new int</span>[] { <span class="n">1</span>, <span class="n">2</span>, <span class="n">3</span> };
+    <span class="k">ref int</span> first = <span class="k">ref</span> arr[<span class="n">0</span>];  <span class="cm">// ✅ Now OK!</span>
+    first = <span class="n">99</span>;
+    <span class="k">await</span> DoWorkAsync();
+    <span class="cm">// Note: cannot span across await points</span>
+}</div>
+        </div>
+        <table class="tbl" style="margin-top:10px">
+          <thead><tr><th>Feature</th><th>★★★★★</th></tr></thead>
+          <tbody>
+            <tr><td>params Collections</td><td style="color:var(--green)">★★★★★ Performance</td></tr>
+            <tr><td>Partial Properties</td><td style="color:var(--green)">★★★★★ MVVM/SourceGen</td></tr>
+            <tr><td>New Lock Type</td><td style="color:var(--yellow)">★★★★☆ Threading</td></tr>
+            <tr><td>allows ref struct</td><td style="color:var(--orange)">★★★☆☆ Framework</td></tr>
+            <tr><td>\e Escape</td><td style="color:var(--text3)">★★☆☆☆ QoL</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+</div><!-- end t-cs13 -->
+
+<hr class="div">
+
+<!-- ═══════════════ .NET 9 ═══════════════ -->
+<div id="t-net9" style="scroll-margin-top:90px">
+
+<section class="ms" id="m-linq9">
+  <div class="mh"><span class="mn b">.NET 9 · 01</span><span class="mt">LINQ New Methods</span><span class="md">CountBy · AggregateBy · Index</span></div>
+  <div class="c2">
+    <div class="card ob cs2">
+      <div class="nb2 net9">✦ .NET 9</div>
+      <div class="ct">CountBy, AggregateBy, Index — Three Powerful New LINQ Methods</div>
+      <div class="cb">
+        <div class="c3">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--blue);margin-bottom:8px;text-transform:uppercase">CountBy — frequency map</div>
+            <div class="cb-wrap">
+              <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">CountBy</span><span class="cbdg net9">.NET 9</span></div>
+              <div class="cb-body"><span class="cm">// ✅ Count by key in ONE pass</span>
+<span class="k">var</span> statusCounts = orders
+    .CountBy(o =&gt; o.Status);
+<span class="cm">// → { "Pending":42, "Shipped":18 }</span>
+
+<span class="cm">// Before (verbose, two-pass):</span>
+<span class="k">var</span> old = orders
+    .GroupBy(o =&gt; o.Status)
+    .Select(g =&gt; <span class="k">new</span> {
+        g.Key,
+        Count = g.Count()
+    });</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--blue);margin-bottom:8px;text-transform:uppercase">AggregateBy — group sums</div>
+            <div class="cb-wrap">
+              <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">AggregateBy</span><span class="cbdg net9">.NET 9</span></div>
+              <div class="cb-body"><span class="cm">// ✅ Aggregate per group, single pass</span>
+<span class="k">var</span> revenueByCountry = orders.AggregateBy(
+    keySelector:  o =&gt; o.Country,
+    seed:         <span class="n">0m</span>,
+    accumulator: (total, o) =&gt; total + o.Amount);
+<span class="cm">// → { "India":52000m, "USA":189000m }</span>
+
+<span class="cm">// Before: GroupBy + Sum (two passes!)</span>
+<span class="k">var</span> old = orders
+    .GroupBy(o =&gt; o.Country)
+    .ToDictionary(g =&gt; g.Key,
+                  g =&gt; g.Sum(o =&gt; o.Amount));</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--blue);margin-bottom:8px;text-transform:uppercase">Index — positional pairs</div>
+            <div class="cb-wrap">
+              <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Index()</span><span class="cbdg net9">.NET 9</span></div>
+              <div class="cb-body"><span class="cm">// ✅ (index, value) pairs cleanly</span>
+<span class="k">var</span> fruits = <span class="k">new</span>[] {<span class="s">"apple"</span>,<span class="s">"banana"</span>,<span class="s">"cherry"</span>};
+
+<span class="k">foreach</span> (<span class="k">var</span> (i, fruit) <span class="k">in</span> fruits.Index())
+    Console.WriteLine(<span class="s">$"{i}: {fruit}"</span>);
+<span class="cm">// 0: apple / 1: banana / 2: cherry</span>
+
+<span class="cm">// Before: less clean</span>
+fruits.Select((f, i) =&gt; (i, f));
+
+<span class="cm">// ✅ Use case: numbered CSV rows</span>
+<span class="k">var</span> rows = products.Index()
+    .Select(((i,p)) =&gt; <span class="s">$"{i+1}. {p.Name}"</span>);</div>
+            </div>
+          </div>
+        </div>
+        <div class="hl b" style="margin-top:10px"><strong>All three improve on GroupBy patterns:</strong> single-pass, lazy evaluation, less allocations. Use CountBy for analytics dashboards, AggregateBy for financial rollups, Index for numbered output.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<section class="ms" id="m-when">
+  <div class="mh"><span class="mn b">.NET 9 · 02</span><span class="mt">Task.WhenEach &amp; New Collections</span><span class="md">Stream parallel results as they arrive</span></div>
+  <div class="c2">
+    <div class="card">
+      <div class="nb2 net9">✦ .NET 9</div>
+      <div class="ct">Task.WhenEach — Process As They Complete</div>
+      <div class="cb">
+        <p><code>Task.WhenEach</code> returns an <code>IAsyncEnumerable</code> yielding tasks as they <em>complete</em> — don't wait for the slowest!</p>
+        <div class="ba">
+          <div class="ba-box">
+            <div class="ba-t bef">✗ WhenAll — waits for slowest</div>
+            <div class="ba-code"><span class="k">var</span> results = <span class="k">await</span> <span class="cc">Task</span>.WhenAll(tasks);
+<span class="cm">// All results at once
+// Slowest blocks everything ⚠️</span></div>
+          </div>
+          <div class="ba-box">
+            <div class="ba-t aft">✓ WhenEach — stream results</div>
+            <div class="ba-code"><span class="k">await foreach</span> (<span class="k">var</span> t <span class="k">in</span> <span class="cc">Task</span>.WhenEach(tasks))
+{
+    <span class="k">var</span> r = <span class="k">await</span> t;
+    Process(r); <span class="cm">// ✅ Immediate!</span>
+}</div>
+          </div>
+        </div>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">WhenEach — parallel search providers</span><span class="cbdg net9">.NET 9</span></div>
+          <div class="cb-body"><span class="cm">// ✅ Stream search results as providers respond</span>
+<span class="k">public async</span> <span class="cc">IAsyncEnumerable</span>&lt;<span class="cc">SearchResult</span>&gt;
+    SearchAllAsync(<span class="k">string</span> query)
+{
+    <span class="k">var</span> tasks = <span class="k">new</span>[]
+    {
+        SearchGoogleAsync(query),
+        SearchBingAsync(query),
+        SearchYandexAsync(query)
+    };
+
+    <span class="cm">// Yield results AS EACH provider responds</span>
+    <span class="k">await foreach</span> (<span class="k">var</span> task <span class="k">in</span> <span class="cc">Task</span>.WhenEach(tasks))
+    {
+        <span class="cc">SearchResult</span> result = <span class="k">await</span> task;
+        <span class="k">yield return</span> result; <span class="cm">// → UI immediately!</span>
+    }
+    <span class="cm">// Google responds first → user sees it first!</span>
+}
+
+<span class="cm">// ✅ Progress reporting for parallel downloads</span>
+<span class="k">await foreach</span> (<span class="k">var</span> done <span class="k">in</span> <span class="cc">Task</span>.WhenEach(downloads))
+{
+    <span class="k">var</span> file = <span class="k">await</span> done;
+    progressBar.Increment();
+    statusLabel.Text = <span class="s">$"Downloaded: {file.Name}"</span>;
+}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card ob">
+      <div class="ct">OrderedDictionary&lt;K,V&gt; &amp; More</div>
+      <div class="cb">
+        <div class="nb2 net9">✦ .NET 9</div>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Generic OrderedDictionary — finally!</span><span class="cbdg net9">.NET 9</span></div>
+          <div class="cb-body"><span class="cm">// ✅ Generic OrderedDictionary (insertion-ordered!)</span>
+<span class="k">var</span> menu = <span class="k">new</span> <span class="cc">OrderedDictionary</span>&lt;<span class="k">string</span>, <span class="k">decimal</span>&gt;
+{
+    [<span class="s">"Starter"</span>]  = <span class="n">5.99m</span>,
+    [<span class="s">"Main"</span>]     = <span class="n">14.99m</span>,
+    [<span class="s">"Dessert"</span>]  = <span class="n">6.99m</span>
+};
+
+<span class="cm">// Insert at specific position!</span>
+menu.Insert(<span class="n">1</span>, <span class="s">"Soup"</span>, <span class="n">4.49m</span>);
+
+<span class="cm">// Access by index OR key</span>
+(<span class="k">string</span> key, <span class="k">decimal</span> price) = menu.GetAt(<span class="n">0</span>);
+menu.RemoveAt(<span class="n">2</span>);  <span class="cm">// position-based remove</span></div>
+        </div>
+        <div class="hl b" style="margin-top:8px"><strong>.NET 9 also adds:</strong> <code>PriorityQueue.Remove()</code>, <code>ReadOnlySet&lt;T&gt;</code>, <code>Base64Url</code>, <code>Guid.CreateVersion7()</code>, and <code>HybridCache</code>.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<section class="ms" id="m-hybrid">
+  <div class="mh"><span class="mn b">.NET 9 · 03</span><span class="mt">HybridCache, Guid v7 &amp; Base64Url</span></div>
+  <div class="c3">
+    <div class="card">
+      <div class="nb2 net9">✦ .NET 9</div>
+      <div class="ct">HybridCache</div>
+      <div class="cb">
+        <p>L1 (memory) + L2 (Redis) caching with built-in <strong>stampede protection</strong>.</p>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">HybridCache setup</span><span class="cbdg net9">.NET 9</span></div>
+          <div class="cb-body"><span class="cm">// Register</span>
+builder.Services.AddHybridCache();
+
+<span class="k">public class</span> <span class="cc">ProductService</span>(<span class="cc">HybridCache</span> cache)
+{
+    <span class="k">public async</span> <span class="cc">Task</span>&lt;<span class="cc">Product</span>&gt; Get(<span class="k">int</span> id, <span class="cc">CancellationToken</span> ct)
+    {
+        <span class="cm">// L1 hit → instant</span>
+        <span class="cm">// L1 miss → check L2 (Redis)</span>
+        <span class="cm">// L2 miss → call factory ONCE</span>
+        <span class="cm">// Stampede protection built-in!</span>
+        <span class="k">return await</span> cache.GetOrCreateAsync(
+            key: <span class="s">$"product:{id}"</span>,
+            factory: <span class="k">async</span> ct =&gt; <span class="k">await</span> db.Products.FindAsync(id),
+            options: <span class="k">new</span>() { Expiration = <span class="cc">TimeSpan</span>.FromMinutes(<span class="n">5</span>) },
+            cancellationToken: ct);
+    }
+}</div>
+        </div>
+        <div class="hl"><strong>Stampede:</strong> 10,000 concurrent cache misses → only ONE factory call fires.</div>
+      </div>
+    </div>
+    <div class="card ob">
+      <div class="nb2 net9">✦ .NET 9</div>
+      <div class="ct">Guid.CreateVersion7()</div>
+      <div class="cb">
+        <p>UUID v7 — <strong>time-ordered</strong> GUIDs. Perfect for DB primary keys.</p>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">UUID v7 sortable GUIDs</span><span class="cbdg net9">.NET 9</span></div>
+          <div class="cb-body"><span class="cm">// ✅ Time-ordered — always increasing</span>
+<span class="cc">Guid</span> id1 = <span class="cc">Guid</span>.CreateVersion7();
+<span class="cc">Guid</span> id2 = <span class="cc">Guid</span>.CreateVersion7();
+
+id1 &lt; id2; <span class="cm">// ✅ true — chronological!</span>
+
+<span class="cm">// ✅ Perfect for DB primary keys</span>
+<span class="cm">// Avoids B-tree fragmentation vs NewGuid()</span>
+<span class="k">var</span> user = <span class="k">new</span> <span class="cc">User</span>
+{
+    Id = <span class="cc">Guid</span>.CreateVersion7()
+};
+
+<span class="cm">// ❌ Avoid for primary keys</span>
+<span class="k">var</span> bad = <span class="cc">Guid</span>.NewGuid(); <span class="cm">// random = fragmentation</span></div>
+        </div>
+        <div class="hl b"><strong>DB benefit:</strong> Up to 50% fewer B-tree page splits on SQL Server / PostgreSQL clustered indexes compared to random GUIDs.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="nb2 net9">✦ .NET 9</div>
+      <div class="ct">Base64Url &amp; JSON Schema</div>
+      <div class="cb">
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Base64Url + JSON Schema export</span><span class="cbdg net9">.NET 9</span></div>
+          <div class="cb-body"><span class="cm">// ✅ URL-safe Base64 (no padding)</span>
+<span class="k">string</span> token = <span class="cc">Base64Url</span>.EncodeToString(data);
+<span class="k">byte</span>[] raw   = <span class="cc">Base64Url</span>.DecodeFromString(token);
+<span class="cm">// Perfect for JWT, OAuth tokens, URLs</span>
+
+<span class="cm">// ✅ JSON Schema export</span>
+<span class="cc">JsonSchema</span> schema =
+    <span class="cc">JsonSchemaExporter</span>.GetJsonSchema&lt;<span class="cc">Order</span>&gt;(opts);
+Console.WriteLine(schema.ToString());
+<span class="cm">// {"type":"object","properties":{...}}</span>
+
+<span class="cm">// ✅ .NET 9 LINQ summary</span>
+<span class="cm">// CountBy, AggregateBy, Index</span>
+<span class="cm">// Task.WhenEach</span>
+<span class="cm">// OrderedDictionary&lt;K,V&gt; generic</span>
+<span class="cm">// HybridCache, Guid v7, Base64Url</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div><!-- end t-net9 -->
+
+<hr class="div">
+
+<!-- ═══════════════ C# 14 Preview ═══════════════ -->
+<div id="t-cs14" style="scroll-margin-top:90px">
+
+<section class="ms" id="m-field">
+  <div class="mh"><span class="mn pk">C# 14 · 01 · Preview</span><span class="mt">field Keyword — Semi-Auto Properties</span><span class="md">#1 most requested feature</span></div>
+  <div class="c2">
+    <div class="card opk">
+      <div class="nb2 cs14">✦ C# 14 Preview</div>
+      <div class="ct">field — The Compiler-Generated Backing Field</div>
+      <div class="cb">
+        <p>The <strong style="color:var(--pink)"><code>field</code></strong> keyword inside a property accessor refers to the compiler-generated backing field — eliminating the need to manually declare a backing field just to add setter validation or getter transformation.</p>
+        <div class="hl pk">This was GitHub's <strong>#1 most voted C# feature request for years.</strong></div>
+        <div class="ba">
+          <div class="ba-box">
+            <div class="ba-t bef">✗ Before — manual backing field</div>
+            <div class="ba-code"><span class="cm">// Need to declare field manually</span>
+<span class="k">private string</span> _name = <span class="s">""</span>;
+<span class="k">public string</span> Name
+{
+    <span class="k">get</span> =&gt; _name;
+    <span class="k">set</span>
+    {
+        <span class="k">if</span> (string.IsNullOrEmpty(value))
+            <span class="k">throw new</span> ArgumentException();
+        _name = value;  <span class="cm">// manual</span>
+    }
+}</div>
+          </div>
+          <div class="ba-box">
+            <div class="ba-t aft">✓ C# 14 — field keyword</div>
+            <div class="ba-code"><span class="cm">// No backing field declaration!</span>
+<span class="k">public string</span> Name
+{
+    <span class="k">get</span>;
+    <span class="k">set</span>
+    {
+        <span class="k">if</span> (string.IsNullOrEmpty(value))
+            <span class="k">throw new</span> ArgumentException();
+        <span class="k">field</span> = value;  <span class="cm">// ✅ implicit</span>
+    }
+}</div>
+          </div>
+        </div>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">field keyword — all patterns</span><span class="cbdg cs14">C# 14 Preview</span></div>
+          <div class="cb-body"><span class="cm">// ✅ Lazy initialization</span>
+<span class="k">public</span> <span class="cc">ExpensiveService</span> Service =&gt; <span class="k">field</span> ??= <span class="k">new</span>();
+
+<span class="cm">// ✅ Clamped range</span>
+<span class="k">public int</span> Age
+{
+    <span class="k">get</span> =&gt; <span class="k">field</span>;
+    <span class="k">set</span> =&gt; <span class="k">field</span> = Math.Clamp(value, <span class="n">0</span>, <span class="n">150</span>);
+}
+
+<span class="cm">// ✅ Normalized string</span>
+<span class="k">public string</span> Email
+{
+    <span class="k">get</span> =&gt; <span class="k">field</span>;
+    <span class="k">set</span> =&gt; <span class="k">field</span> = value?.ToLowerInvariant().Trim() ?? <span class="s">""</span>;
+}
+
+<span class="cm">// ✅ Manual INotifyPropertyChanged</span>
+<span class="k">public string</span> Status
+{
+    <span class="k">get</span> =&gt; <span class="k">field</span>;
+    <span class="k">set</span>
+    {
+        <span class="k">if</span> (<span class="k">field</span> != value)
+        {
+            <span class="k">field</span> = value;
+            PropertyChanged?.Invoke(<span class="k">this</span>, <span class="k">new</span>(<span class="k">nameof</span>(Status)));
+        }
+    }
+}
+
+<span class="cm">// ✅ Computed cache with field</span>
+<span class="k">public</span> <span class="cc">List</span>&lt;<span class="k">string</span>&gt; Tags
+{
+    <span class="k">get</span> =&gt; <span class="k">field</span> ??= ParseTags(_rawData);
+    <span class="k">private set</span>;
+}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">field vs Existing Patterns</div>
+      <div class="cb">
+        <table class="tbl">
+          <thead><tr><th>Approach</th><th>Lines</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Auto { get; set; }</td><td>1</td><td>No custom logic possible</td></tr>
+            <tr><td>Manual backing field</td><td>5+</td><td>Verbose but works</td></tr>
+            <tr><td>C# 14 field keyword</td><td style="color:var(--green)">2–4</td><td style="color:var(--green)">✓ Clean &amp; powerful</td></tr>
+            <tr><td>record property</td><td>1</td><td>Immutable only</td></tr>
+          </tbody>
+        </table>
+        <div class="cb-wrap" style="margin-top:10px">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Entity model — field everywhere</span><span class="cbdg cs14">C# 14 Preview</span></div>
+          <div class="cb-body"><span class="k">public class</span> <span class="cc">Order</span>
+{
+    <span class="cm">// Auto property — no logic needed</span>
+    <span class="k">public</span> <span class="cc">Guid</span>    Id      { <span class="k">get</span>; <span class="k">init</span>; } = <span class="cc">Guid</span>.CreateVersion7();
+
+    <span class="cm">// field — normalize email</span>
+    <span class="k">public string</span>  Email
+    {
+        <span class="k">get</span> =&gt; <span class="k">field</span>;
+        <span class="k">set</span> =&gt; <span class="k">field</span> = value.ToLower().Trim();
+    }
+
+    <span class="cm">// field — positive amounts only</span>
+    <span class="k">public decimal</span> Amount
+    {
+        <span class="k">get</span> =&gt; <span class="k">field</span>;
+        <span class="k">set</span>
+        {
+            <span class="k">if</span> (value &lt; <span class="n">0</span>)
+                <span class="k">throw new</span> <span class="cc">ArgumentOutOfRangeException</span>();
+            <span class="k">field</span> = value;
+        }
+    }
+}</div>
+        </div>
+        <div class="hl pk"><strong>Rule:</strong> Use <code>field</code> when you need one accessor to have simple logic touching the backing store. Still use explicit fields for complex scenarios.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<section class="ms" id="m-ext">
+  <div class="mh"><span class="mn pk">C# 14 · 02 · Preview</span><span class="mt">Extension Members</span><span class="md">Properties, operators on existing types</span></div>
+  <div class="c2">
+    <div class="card">
+      <div class="nb2 cs14">✦ C# 14 Preview</div>
+      <div class="ct">Extension Properties and More</div>
+      <div class="cb">
+        <p>C# 14 introduces <code>extension(...)</code> blocks — add <strong>properties, static members</strong>, and more to any type without inheritance.</p>
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Extension members — new syntax</span><span class="cbdg cs14">C# 14 Preview</span></div>
+          <div class="cb-body"><span class="cm">// ✅ Extension block with property</span>
+<span class="k">extension</span>(<span class="k">string</span> s)
+{
+    <span class="cm">// Extension property (brand new!)</span>
+    <span class="k">public bool</span> IsEmail
+        =&gt; s.Contains(<span class="s">'@'</span>) &amp;&amp; s.Contains(<span class="s">'.'</span>);
+
+    <span class="k">public string</span> Slug
+        =&gt; s.ToLower().Replace(<span class="s">' '</span>, <span class="s">'-'</span>).Trim();
+
+    <span class="cm">// Extension method still works</span>
+    <span class="k">public string</span> Truncate(<span class="k">int</span> max)
+        =&gt; s.Length &lt;= max ? s : s[..max] + <span class="s">"..."</span>;
+}
+
+<span class="cm">// Usage — looks like native members!</span>
+<span class="k">bool</span> valid = <span class="s">"user@email.com"</span>.IsEmail;     <span class="cm">// ✅ property</span>
+<span class="k">string</span> slug = <span class="s">"Hello World"</span>.Slug;           <span class="cm">// "hello-world"</span>
+<span class="k">string</span> short_ = <span class="s">"Long text here"</span>.Truncate(<span class="n">5</span>); <span class="cm">// "Long ..."</span>
+
+<span class="cm">// ✅ Extension on domain types</span>
+<span class="k">extension</span>(<span class="cc">Order</span> order)
+{
+    <span class="k">public bool</span>   IsOverdue    =&gt; order.DueDate &lt; <span class="cc">DateTime</span>.Today;
+    <span class="k">public string</span> StatusLabel =&gt; order.Status <span class="k">switch</span>
+    {
+        <span class="cc">OrderStatus</span>.Pending   =&gt; <span class="s">"⏳ Pending"</span>,
+        <span class="cc">OrderStatus</span>.Shipped  =&gt; <span class="s">"📦 Shipped"</span>,
+        <span class="cc">OrderStatus</span>.Delivered =&gt; <span class="s">"✅ Delivered"</span>,
+        _ =&gt; <span class="s">"❓ Unknown"</span>
+    };
+}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card opk" id="m-cs14more">
+      <div class="ct">Null-Conditional Assignment &amp; More</div>
+      <div class="cb">
+        <div class="cb-wrap">
+          <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">C# 14 additional features</span><span class="cbdg cs14">C# 14 Preview</span></div>
+          <div class="cb-body"><span class="cm">// ✅ Null-conditional assignment (?.=)</span>
+<span class="cc">User</span>? user = GetUser();
+
+<span class="cm">// Before:</span>
+<span class="k">if</span> (user != <span class="k">null</span>) user.LastSeen = <span class="cc">DateTime</span>.UtcNow;
+
+<span class="cm">// After — C# 14:</span>
+user?.LastSeen = <span class="cc">DateTime</span>.UtcNow; <span class="cm">// ✅</span>
+
+<span class="cm">// Works with nested paths too</span>
+user?.Profile?.Avatar = <span class="s">"default.png"</span>;
+user?.Settings?.Theme?.Set(<span class="s">"dark"</span>);
+
+<span class="cm">// ✅ nameof with unbound generics</span>
+<span class="k">string</span> n1 = <span class="k">nameof</span>(<span class="cc">List</span>&lt;&gt;);        <span class="cm">// "List"</span>
+<span class="k">string</span> n2 = <span class="k">nameof</span>(<span class="cc">Dictionary</span>&lt;,&gt;); <span class="cm">// "Dictionary"</span>
+
+<span class="cm">// ✅ Implicit Span conversions</span>
+<span class="k">void</span> Process(<span class="cc">ReadOnlySpan</span>&lt;<span class="k">char</span>&gt; chars) { }
+<span class="k">string</span> s = <span class="s">"hello"</span>;
+Process(s);       <span class="cm">// ✅ string → ReadOnlySpan</span>
+Process(<span class="s">"world"</span>); <span class="cm">// ✅ literal → span</span>
+
+<span class="cm">// ✅ Generic extension with constraints</span>
+<span class="k">extension</span>&lt;T&gt;(<span class="cc">IEnumerable</span>&lt;T&gt; src)
+{
+    <span class="k">public</span> T? SecondOrDefault()
+        =&gt; src.Skip(<span class="n">1</span>).FirstOrDefault();
+}
+<span class="k">var</span> second = <span class="k">new</span>[] { <span class="n">1</span>, <span class="n">2</span>, <span class="n">3</span> }.SecondOrDefault(); <span class="cm">// 2</span></div>
+        </div>
+        <div class="hl pk"><strong>Status:</strong> C# 14 features are in Preview as of 2025. Syntax may evolve before final release in November 2025 with .NET 10.</div>
+      </div>
+    </div>
+  </div>
+</section>
+</div><!-- end t-cs14 -->
+
+<hr class="div">
+
+<!-- ═══════════════ .NET 10 Preview ═══════════════ -->
+<div id="t-net10" style="scroll-margin-top:90px">
+
+<section class="ms" id="m-net10">
+  <div class="mh"><span class="mn v">.NET 10 · Preview</span><span class="mt">.NET 10 LTS — What's Coming</span><span class="md">Nov 2025 — 3-year LTS</span></div>
+  <div class="c2">
+    <div class="card ov cs2">
+      <div class="nb2 net10">✦ .NET 10 Preview</div>
+      <div class="ct">.NET 10 — Built-in OpenAPI, ASP.NET &amp; Runtime</div>
+      <div class="cb">
+        <div class="c3">
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--violet);text-transform:uppercase;margin-bottom:8px">Built-in OpenAPI (No Swashbuckle!)</div>
+            <div class="cb-wrap">
+              <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">OpenAPI built-in</span><span class="cbdg net10">.NET 10</span></div>
+              <div class="cb-body"><span class="cm">// ✅ OpenAPI is built-in!</span>
+builder.Services.AddOpenApi();
+
+app.MapOpenApi();          <span class="cm">// /openapi/v1.json</span>
+app.MapScalarApiReference(); <span class="cm">// UI</span>
+
+app.MapGet(<span class="s">"/orders/{id}"</span>, GetOrder)
+   .WithName(<span class="s">"GetOrder"</span>)
+   .WithSummary(<span class="s">"Get order by ID"</span>)
+   .WithOpenApi(op =&gt; {
+       op.Parameters[<span class="n">0</span>].Description = <span class="s">"Order GUID"</span>;
+       <span class="k">return</span> op;
+   });
+
+<span class="cm">// TypedResults improve OpenAPI schema</span>
+<span class="k">static</span> <span class="cc">Results</span>&lt;<span class="cc">Ok</span>&lt;<span class="cc">Order</span>&gt;, <span class="cc">NotFound</span>&gt; GetOrder(<span class="k">int</span> id)
+    =&gt; db.Orders.Find(id) <span class="k">is</span> {} o
+        ? <span class="cc">TypedResults</span>.Ok(o)
+        : <span class="cc">TypedResults</span>.NotFound();</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--violet);text-transform:uppercase;margin-bottom:8px">Blazor Improvements</div>
+            <div class="cb-wrap">
+              <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Blazor .NET 10</span><span class="cbdg net10">.NET 10</span></div>
+              <div class="cb-body"><span class="cm">// ✅ Better reconnection UX</span>
+<span class="cm">// ✅ Enhanced error boundaries</span>
+<span class="cm">// ✅ Asset fingerprinting (cache busting)</span>
+<span class="cm">// ✅ Improved QuickGrid</span>
+
+<span class="cm">// ✅ SSR forms with progressive enhancement</span>
+&lt;<span class="cc">EditForm</span> Model=<span class="s">"@order"</span>
+    OnValidSubmit=<span class="s">"@Submit"</span>
+    Enhance&gt;
+  <span class="cm">&lt;!-- Works without JS, enhanced with JS --&gt;</span>
+&lt;/<span class="cc">EditForm</span>&gt;
+
+<span class="cm">// ✅ Improved virtualization</span>
+&lt;<span class="cc">Virtualize</span>
+    ItemsProvider=<span class="s">"@LoadItems"</span>
+    OverscanCount=<span class="s">"3"</span>&gt;
+    &lt;<span class="cc">ItemContent</span>&gt;@context.Name&lt;/<span class="cc">ItemContent</span>&gt;
+&lt;/<span class="cc">Virtualize</span>&gt;</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--violet);text-transform:uppercase;margin-bottom:8px">Runtime &amp; EF Core 10</div>
+            <div class="cb-wrap">
+              <div class="cb-hdr"><div class="cd r"></div><div class="cd y"></div><div class="cd g"></div><span class="cl2">Runtime perf targets</span><span class="cbdg net10">.NET 10</span></div>
+              <div class="cb-body"><span class="cm">// ✅ 10–20% JIT throughput gain</span>
+<span class="cm">// ✅ Better loop vectorization AVX-512</span>
+<span class="cm">// ✅ GC: reduced pauses (write barriers)</span>
+<span class="cm">// ✅ NativeAOT: better reflection support</span>
+<span class="cm">// ✅ Smaller AOT binary sizes</span>
+
+<span class="cm">// ✅ EF Core 10 improvements:</span>
+<span class="cm">//    Better LINQ translation to SQL</span>
+<span class="cm">//    ExecuteDelete/Update improvements</span>
+<span class="cm">//    Compiled models improvements</span>
+
+<span class="cm">// ✅ LINQ LeftJoin (proposal)</span>
+<span class="k">var</span> result = orders.LeftJoin(
+    users,
+    o =&gt; o.UserId, u =&gt; u.Id,
+    (o, u) =&gt; <span class="k">new</span> { o, u });</div>
+            </div>
+          </div>
+        </div>
+        <div class="hl v" style="margin-top:10px"><strong>.NET 10 is LTS — 3 years of support.</strong> This is the recommended production upgrade from .NET 8 LTS → .NET 10 LTS. Expected release: November 2025.</div>
+      </div>
+    </div>
+  </div>
+</section>
+</div><!-- end t-net10 -->
+
+<hr class="div">
+
+<!-- ═══════════════ FUTURE ROADMAP ═══════════════ -->
+<div id="t-future" style="scroll-margin-top:90px">
+
+<section class="ms">
+  <div class="mh"><span class="mn cy">ROADMAP</span><span class="mt">C# 15 · .NET 11 &amp; Beyond</span><span class="md">Stay future-proof</span></div>
+  <div class="c2">
+    <div class="card cs2">
+      <div class="ct">🗓️ Complete .NET Release Timeline</div>
+      <div class="cb">
+        <div class="tl">
+          <div class="tl-item">
+            <div class="tl-dot g"></div>
+            <div><div class="tl-v" style="color:var(--green)">C# 12 / .NET 8 LTS <span class="bdg g">Shipped ✓</span></div><div class="tl-d">November 2023 · 3-year support until Nov 2026</div><div class="tl-desc">Primary constructors, collection expressions, native AOT, frozen collections, TimeProvider, keyed DI, SearchValues, Blazor United</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot b"></div>
+            <div><div class="tl-v" style="color:var(--blue)">C# 13 / .NET 9 STS <span class="bdg b">Shipped ✓</span></div><div class="tl-d">November 2024 · 18-month support until May 2026</div><div class="tl-desc">params collections, new Lock type, partial properties, HybridCache, Task.WhenEach, CountBy/AggregateBy, Guid v7, OrderedDictionary&lt;K,V&gt;</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot pk"></div>
+            <div><div class="tl-v" style="color:var(--pink)">C# 14 / .NET 10 LTS <span class="bdg pk">Preview 2025</span></div><div class="tl-d">November 2025 (expected) · 3-year support until Nov 2028</div><div class="tl-desc">field keyword, extension members, null-conditional assignment, implicit Span conversions, built-in OpenAPI, better Blazor, LINQ LeftJoin</div></div>
+          </div>
+          <div class="tl-item" style="opacity:0.75">
+            <div class="tl-dot c"></div>
+            <div><div class="tl-v" style="color:var(--cyan)">C# 15 / .NET 11 STS <span class="bdg c">Planned</span></div><div class="tl-d">November 2026 (projected)</div><div class="tl-desc">Discriminated unions, shapes/roles (type classes), enhanced pattern matching, compile-time computation, improved generics</div></div>
+          </div>
+          <div class="tl-item" style="opacity:0.5">
+            <div class="tl-dot dim"></div>
+            <div><div class="tl-v" style="color:var(--text3)">C# 16+ / .NET 12 LTS <span class="bdg dim">Future</span></div><div class="tl-d">November 2027 (projected) · LTS</div><div class="tl-desc">Speculative: compile-time metaprogramming, AI/ML primitives stable, dynamic AOT, next-gen GC improvements</div></div>
+          </div>
+        </div>
+        <div class="hl b" style="margin-top:10px"><strong>LTS Strategy:</strong> For production systems, always prefer LTS releases (even-numbered: .NET 6, 8, 10, 12). These get 3 years of support vs 18 months for STS.</div>
+      </div>
+    </div>
+    <div class="card oc">
+      <div class="ct">C# 15 — Key Planned Features</div>
+      <div class="cb">
+        <div class="rm-item"><div class="rm-icon">🔀</div><div><div class="rm-t">Discriminated Unions</div><div class="rm-d">True <code>union Result = Ok | Error</code>. Exhaustive pattern matching. No more OneOf workarounds.</div><span class="rm-s plan">Champion Proposal</span></div></div>
+        <div class="rm-item"><div class="rm-icon">🏷️</div><div><div class="rm-t">Shapes / Roles (Type Classes)</div><div class="rm-d">Structural contracts without inheritance. Like Rust traits / Haskell typeclasses.</div><span class="rm-s plan">Under Design</span></div></div>
+        <div class="rm-item"><div class="rm-icon">🎭</div><div><div class="rm-t">Enhanced Pattern Matching</div><div class="rm-d">Active patterns, pattern combinators, more pattern forms in more contexts.</div><span class="rm-s plan">Planned</span></div></div>
+        <div class="rm-item"><div class="rm-icon">⚡</div><div><div class="rm-t">Compile-Time Computation</div><div class="rm-d">Run C# at compile time (like constexpr in C++). Compile-time generic evaluation.</div><span class="rm-s exp">Research Phase</span></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">.NET 11 Runtime — What's Expected</div>
+      <div class="cb">
+        <div class="rm-item"><div class="rm-icon">🚀</div><div><div class="rm-t">Dynamic AOT (DAOT)</div><div class="rm-d">AOT with runtime code gen — best of both JIT and AOT combined.</div><span class="rm-s exp">Research</span></div></div>
+        <div class="rm-item"><div class="rm-icon">🧠</div><div><div class="rm-t">Unified AI/ML APIs</div><div class="rm-d">Tensor&lt;T&gt; stable, AI hardware abstractions, ML.NET next-gen.</div><span class="rm-s plan">Planned</span></div></div>
+        <div class="rm-item"><div class="rm-icon">📉</div><div><div class="rm-t">GC: Pinned Heap Generational</div><div class="rm-d">Eliminate GC pauses for pinned IO buffers — huge for networking.</div><span class="rm-s plan">In Progress</span></div></div>
+        <div class="rm-item"><div class="rm-icon">🔌</div><div><div class="rm-t">.NET Aspire V2 — Production Ready</div><div class="rm-d">Cloud-native orchestration. Full microservices support.</div><span class="rm-s plan">Coming</span></div></div>
+        <div class="chips" style="margin-top:8px"><span class="chip c">WASM threads</span><span class="chip c">RISC-V</span><span class="chip c">ARM64 perf</span><span class="chip c">AI hardware</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+</div><!-- end t-future -->
+
+<hr class="div">
+
+<!-- ═══════════════ Q&A MASTER ═══════════════ -->
+<div id="t-qa" style="scroll-margin-top:90px">
+
+<section class="ms">
+  <div class="mh"><span class="mn r">Q&amp;A MASTER</span><span class="mt">Interview Questions — All Topics</span><span class="md">50+ Questions</span></div>
+
+  <div class="card oy" style="margin-bottom:14px">
+    <div class="cn y">C# 12 &amp; .NET 8</div>
+    <div class="ct" style="color:var(--yellow)">C# 12 / .NET 8 — Questions &amp; Answers</div>
+    <div class="cb">
+      <div class="c3" style="gap:14px">
+        <div>
+          <div class="rq">What are primary constructors and how do they differ from record primary constructors?</div>
+          <div class="ra">C# 12 primary constructors declare params in the class declaration and are in scope throughout the class. Unlike records, parameters are NOT automatically stored as fields or exposed as properties — you explicitly capture what you need. Records auto-generate init properties.</div>
+          <hr class="rdiv">
+          <div class="rq">What is the spread element (..) in collection expressions?</div>
+          <div class="ra">The spread operator <code>..</code> inlines another collection: <code>[..list1, ..list2, extra]</code>. Works with any IEnumerable. Compiler picks efficient allocation — for Span, no heap allocation occurs.</div>
+          <hr class="rdiv">
+          <div class="rq">When would you NOT use primary constructors?</div>
+          <div class="ra">Avoid when you need multiple constructor overloads, complex initialization requiring try/catch, or when constructor logic needs significant transformation before storing. Regular constructors give more control in those cases.</div>
+        </div>
+        <div>
+          <div class="rq">What is Native AOT and what are its main limitations?</div>
+          <div class="ra">AOT compiles to native code at build time — no JIT, no .NET runtime needed. Benefits: ~5ms startup, ~20MB RAM, single binary. Limitations: no runtime reflection, no dynamic code gen, limited dynamic loading. Requires source generators for JSON/DI.</div>
+          <hr class="rdiv">
+          <div class="rq">What is FrozenDictionary and how does it differ from ImmutableDictionary?</div>
+          <div class="ra"><code>FrozenDictionary</code> spends extra time at creation optimizing for max read speed. <code>ImmutableDictionary</code> supports functional updates but is O(log n). FrozenDictionary: fastest reads, truly immutable. ImmutableDictionary: for persistent data with updates.</div>
+          <hr class="rdiv">
+          <div class="rq">What problem does TimeProvider solve in unit testing?</div>
+          <div class="ra"><code>DateTime.Now</code> is uncontrollable in tests. TimeProvider injects a <code>FakeTimeProvider</code> in tests that lets you set/advance time precisely — test expiry, scheduled jobs, retry delays etc. Use <code>TimeProvider.System</code> in production.</div>
+        </div>
+        <div>
+          <div class="rq">What are Keyed Services and when to use them?</div>
+          <div class="ra">Register multiple implementations of same interface with different keys: <code>AddKeyedSingleton&lt;IStorage, AzureBlob&gt;("azure")</code>. Use for strategy patterns: storage backends, payment providers, notification channels. Resolve with <code>[FromKeyedServices("key")]</code>.</div>
+          <hr class="rdiv">
+          <div class="rq">How does Blazor United work in .NET 8?</div>
+          <div class="ra">.NET 8 unified Blazor Server + WASM into one app model with per-component render modes: <code>InteractiveServer</code> (SignalR), <code>InteractiveWebAssembly</code>, <code>InteractiveAuto</code> (server first, then WASM), static SSR. One codebase, mix rendering strategies.</div>
+          <hr class="rdiv">
+          <div class="rq">What is SearchValues&lt;T&gt; and why is it faster?</div>
+          <div class="ra"><code>SearchValues.Create("abc")</code> pre-builds an optimized SIMD search structure for a fixed char/byte set. At creation the runtime picks the best algorithm (vectorized, lookup table, etc.) — much faster than repeated manual IndexOf in hot paths.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card oo" style="margin-bottom:14px">
+    <div class="cn o">C# 13 &amp; .NET 9</div>
+    <div class="ct" style="color:var(--orange)">C# 13 / .NET 9 — Questions &amp; Answers</div>
+    <div class="cb">
+      <div class="c3" style="gap:14px">
+        <div>
+          <div class="rq">Why is params ReadOnlySpan&lt;T&gt; better than params T[]?</div>
+          <div class="ra">Array params always allocate on the heap. <code>params ReadOnlySpan&lt;T&gt;</code> uses stack allocation — zero heap allocation for inline calls. In hot paths like logging and formatting called millions of times, this dramatically reduces GC pressure and improves throughput.</div>
+          <hr class="rdiv">
+          <div class="rq">What improvements does System.Threading.Lock bring over lock(object)?</div>
+          <div class="ra">Lock.Scope for RAII/exception-safe locking, TryEnter with timeout, IsHeldByCurrentThread for diagnostics, better debugger visualization, improved non-contended performance by avoiding object monitor overhead. Drop-in upgrade.</div>
+        </div>
+        <div>
+          <div class="rq">What are CountBy and AggregateBy and how do they improve on GroupBy?</div>
+          <div class="ra"><code>CountBy</code> counts by key in one pass without materializing groups. <code>AggregateBy</code> applies accumulator per key. Both are single-pass, lazy, and more memory efficient than <code>GroupBy().Select()</code> which creates intermediate group objects and materializes collections.</div>
+          <hr class="rdiv">
+          <div class="rq">What is Task.WhenEach and how does it differ from WhenAll?</div>
+          <div class="ra"><code>WhenAll</code> waits for all tasks; slowest blocks everything. <code>WhenEach</code> returns <code>IAsyncEnumerable&lt;Task&lt;T&gt;&gt;</code> yielding tasks as they complete. Process first results immediately — perfect for parallel search, download progress reporting, streaming UI updates.</div>
+        </div>
+        <div>
+          <div class="rq">What is HybridCache and how does it solve stampede?</div>
+          <div class="ra">HybridCache combines L1 (memory) + L2 (distributed/Redis). Stampede: 10,000 concurrent cache misses → only ONE factory call fires, others wait. Replaces IDistributedCache + IMemoryCache boilerplate with one GetOrCreateAsync call.</div>
+          <hr class="rdiv">
+          <div class="rq">Why use Guid.CreateVersion7() over Guid.NewGuid() for DB keys?</div>
+          <div class="ra">UUID v7 is time-ordered — newer GUIDs are always greater. Random UUIDs (v4) insert anywhere in B-tree indexes causing page splits and fragmentation. UUID v7 inserts sequentially, reducing splits by up to 50% on SQL Server/PostgreSQL clustered indexes.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card opk">
+    <div class="cn pk">C# 14 Preview &amp; Future</div>
+    <div class="ct" style="color:var(--pink)">C# 14 / Future — Questions &amp; Answers</div>
+    <div class="cb">
+      <div class="c3" style="gap:14px">
+        <div>
+          <div class="rq">What is the field keyword and why was it so requested?</div>
+          <div class="ra"><code>field</code> refers to the compiler-generated backing field inside a property. Eliminates declaring a separate backing field just to add setter validation or getter transformation. Was GitHub's #1 C# feature request for years — addresses extremely common property validation patterns.</div>
+          <hr class="rdiv">
+          <div class="rq">How are extension members different from extension methods?</div>
+          <div class="ra">Extension methods only add methods. C# 14 extension members use <code>extension(...) { }</code> blocks to add properties, operators, and static members too. Extension properties let you add computed read-only properties to types you don't own — powerful for domain enrichment.</div>
+        </div>
+        <div>
+          <div class="rq">What is .NET 10 and when should I upgrade?</div>
+          <div class="ra">.NET 10 is the next LTS (Nov 2025, 3-year support). The recommended upgrade path is .NET 8 LTS → .NET 10 LTS, skipping .NET 9 STS. For production, always favor LTS: .NET 6, 8, 10, 12 etc. STS for apps that can upgrade frequently.</div>
+          <hr class="rdiv">
+          <div class="rq">What are Discriminated Unions and why does C# need them?</div>
+          <div class="ra">DUs represent a value that is exactly one of several types: <code>union Result = Ok | Error</code>. C# currently simulates this with sealed class hierarchies or libraries like OneOf. Native DUs would enable exhaustive compile-time pattern matching and eliminate null-or-value anti-patterns.</div>
+        </div>
+        <div>
+          <div class="rq">What LTS strategy should teams follow for .NET versions?</div>
+          <div class="ra">Use LTS releases (even-numbered) for production. LTS = 3 years support, STS = 18 months. Upgrade every LTS cycle. Never let a version fall out of support. Microsoft's guidance: be on a supported version within 6 months of release.</div>
+          <hr class="rdiv">
+          <div class="rq">What are the most impactful features across all three versions combined?</div>
+          <div class="ra">Top picks: (1) Primary constructors + collection expressions [C# 12 — daily use], (2) params Span + HybridCache [C# 13/.NET 9 — performance], (3) field keyword + extension members [C# 14 — clean code], (4) Native AOT + Frozen collections [.NET 8 — architecture].</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+</div><!-- end t-qa -->
+
+</main>
+
+<!-- RIGHT PANEL -->
+<aside class="sb-right">
+  <div class="rp-h">⚡ Quick Reference</div>
+  <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:7px;text-transform:uppercase">Version Map</div>
+  <div style="display:flex;flex-direction:column;gap:3px;margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);border-radius:5px"><span style="font-family:var(--mono);font-size:11px;color:var(--yellow)">C# 12</span><span style="font-family:var(--mono);font-size:11px;color:var(--green)">.NET 8 LTS</span></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:rgba(255,107,53,0.06);border:1px solid rgba(255,107,53,0.15);border-radius:5px"><span style="font-family:var(--mono);font-size:11px;color:var(--orange)">C# 13</span><span style="font-family:var(--mono);font-size:11px;color:var(--blue)">.NET 9 STS</span></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:rgba(236,72,153,0.06);border:1px solid rgba(236,72,153,0.15);border-radius:5px"><span style="font-family:var(--mono);font-size:11px;color:var(--pink)">C# 14</span><span style="font-family:var(--mono);font-size:11px;color:var(--purple)">.NET 10 LTS</span></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:rgba(100,116,139,0.06);border:1px solid rgba(100,116,139,0.15);border-radius:5px;opacity:0.7"><span style="font-family:var(--mono);font-size:11px;color:var(--text3)">C# 15</span><span style="font-family:var(--mono);font-size:11px;color:var(--text3)">.NET 11 STS</span></div>
+  </div>
+  <hr class="rdiv">
+  <div class="rp-h">🔥 Top Features</div>
+  <div class="rq">C# 12 Must Know</div>
+  <div class="ra"><code>Primary constructors</code> + <code>[collection expressions]</code> — daily use every project.</div>
+  <hr class="rdiv">
+  <div class="rq">C# 13 Must Know</div>
+  <div class="ra"><code>params Span&lt;T&gt;</code> for zero-alloc APIs, <code>partial properties</code> for source generators.</div>
+  <hr class="rdiv">
+  <div class="rq">.NET 9 Must Know</div>
+  <div class="ra"><code>HybridCache</code>, <code>Task.WhenEach</code>, <code>CountBy</code>, <code>Guid.CreateVersion7()</code>.</div>
+  <hr class="rdiv">
+  <div class="rq">C# 14 Watch</div>
+  <div class="ra"><code>field</code> keyword + <code>extension members</code> — biggest quality-of-life improvements.</div>
+  <hr class="rdiv">
+  <div class="rp-h">📅 Support Ends</div>
+  <div style="font-family:var(--mono);font-size:11px;display:flex;flex-direction:column;gap:3px">
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--green)">.NET 8 LTS</span><span style="color:var(--text3)">Nov 2026</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--blue)">.NET 9 STS</span><span style="color:var(--text3)">May 2026</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--purple)">.NET 10 LTS</span><span style="color:var(--text3)">Nov 2028</span></div>
+  </div>
+  <hr class="rdiv">
+  <div class="rp-h">⚙️ Performance Wins</div>
+  <div style="font-family:var(--mono);font-size:11px;display:flex;flex-direction:column;gap:4px">
+    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(34,197,94,0.06);border-radius:4px"><span style="color:var(--text2)">AOT startup</span><span style="color:var(--green)">5× faster</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(34,197,94,0.06);border-radius:4px"><span style="color:var(--text2)">FrozenDict</span><span style="color:var(--green)">Fastest O(1)</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(34,197,94,0.06);border-radius:4px"><span style="color:var(--text2)">params Span</span><span style="color:var(--green)">Zero alloc</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(34,197,94,0.06);border-radius:4px"><span style="color:var(--text2)">SearchValues</span><span style="color:var(--green)">SIMD accel</span></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(34,197,94,0.06);border-radius:4px"><span style="color:var(--text2)">Guid v7</span><span style="color:var(--green)">No DB splits</span></div>
+  </div>
+  <hr class="rdiv">
+  <div class="rp-h">📌 Migration Tips</div>
+  <div class="ra" style="padding-left:0">
+    1. Upgrade .NET 8 → .NET 10 (LTS→LTS)<br>
+    2. Replace <code>lock(obj)</code> → <code>Lock</code><br>
+    3. Replace <code>DateTime.Now</code> → <code>TimeProvider</code><br>
+    4. Replace <code>Hashtable</code> → <code>Dictionary&lt;K,V&gt;</code><br>
+    5. Replace <code>Guid.NewGuid()</code> → <code>Guid.CreateVersion7()</code> for DB keys
+  </div>
+</aside>
+
+</div><!-- end layout3 -->
+
+<div class="footer">
+  <span>C# 12/13/14 & .NET 8/9/10</span> — Complete Modern Reference &nbsp;·&nbsp; 40+ Features &nbsp;·&nbsp; 70+ Code Examples &nbsp;·&nbsp; 50+ Q&amp;A &nbsp;·&nbsp; <span>Future Roadmap Included</span>
+</div>
+
+<script>
+// Active nav on scroll
+const sections = document.querySelectorAll('.ms[id]');
+const navItems = document.querySelectorAll('.ni[href]');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const id = e.target.id;
+      const a = document.querySelector(`.ni[href="#${id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { threshold: 0.2 });
+sections.forEach(s => obs.observe(s));
+
+// Topic tab activation on scroll
+const topicDivs = document.querySelectorAll('[id^="t-"]');
+const tabs = document.querySelectorAll('.ttab');
+const tObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tabs.forEach(t => t.classList.remove('active'));
+      const id = e.target.id;
+      const t = document.querySelector(`.ttab[href="#${id}"]`);
+      if (t) t.classList.add('active');
+    }
+  });
+}, { threshold: 0.15 });
+topicDivs.forEach(s => tObs.observe(s));
+</script>
+</body>
+</html>

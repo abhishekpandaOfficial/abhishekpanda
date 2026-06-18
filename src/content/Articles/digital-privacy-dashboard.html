@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Privacy Dashboard — Fight Back Against Big Tech</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --neon-cyan: #00f5ff;
+    --neon-red: #ff003c;
+    --neon-green: #00ff88;
+    --neon-yellow: #ffe600;
+    --bg-deep: #020408;
+    --bg-panel: #050d14;
+    --bg-card: #071520;
+    --border-glow: rgba(0,245,255,0.25);
+    --text-primary: #e0f7fa;
+    --text-dim: #4a7a8a;
+    --grid-color: rgba(0,245,255,0.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated Grid Background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridPulse 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes gridPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  /* Scanlines */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .wrapper { position: relative; z-index: 2; }
+
+  /* ─── HERO HEADER ─── */
+  header {
+    text-align: center;
+    padding: 60px 20px 40px;
+    position: relative;
+  }
+
+  .threat-badge {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--neon-red);
+    border: 1px solid var(--neon-red);
+    padding: 6px 18px;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    animation: badgeBlink 2s ease-in-out infinite;
+  }
+
+  @keyframes badgeBlink {
+    0%, 100% { box-shadow: 0 0 8px var(--neon-red), inset 0 0 8px rgba(255,0,60,0.1); }
+    50% { box-shadow: 0 0 20px var(--neon-red), inset 0 0 20px rgba(255,0,60,0.2); }
+  }
+
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(28px, 5vw, 64px);
+    font-weight: 900;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--neon-cyan) 0%, #fff 50%, var(--neon-cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(0,245,255,0.5));
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    margin-bottom: 40px;
+  }
+
+  /* Threat Level Meter */
+  .threat-meter {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255,0,60,0.05);
+    border: 1px solid rgba(255,0,60,0.3);
+    padding: 12px 28px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+  }
+
+  .meter-label { color: var(--neon-red); letter-spacing: 2px; }
+  .meter-bar {
+    width: 200px;
+    height: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,0,60,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .meter-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--neon-yellow), var(--neon-red));
+    box-shadow: 0 0 10px var(--neon-red);
+    animation: fillMeter 2s ease-out 0.5s forwards;
+  }
+  @keyframes fillMeter { to { width: 87%; } }
+  .meter-value { color: var(--neon-red); font-size: 18px; font-weight: bold; }
+
+  /* ─── SECTION LABELS ─── */
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 5px;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    padding: 0 40px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--neon-cyan), transparent);
+    opacity: 0.3;
+  }
+
+  /* ─── MAIN GRID ─── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 20px;
+    padding: 0 40px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ─── TRACKING CARDS ─── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    position: relative;
+    overflow: hidden;
+    padding: 28px;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    cursor: default;
+    transform-style: preserve-3d;
+    transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,245,255,0.03) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+  }
+
+  .card:hover {
+    border-color: var(--neon-cyan);
+    box-shadow:
+      0 0 30px rgba(0,245,255,0.15),
+      0 20px 60px rgba(0,0,0,0.5),
+      inset 0 0 30px rgba(0,245,255,0.03);
+    transform: perspective(1000px) rotateX(-2deg) rotateY(2deg) translateY(-6px);
+  }
+
+  .card:hover::after { transform: scaleX(1); }
+
+  .card-danger { --accent: var(--neon-red); }
+  .card-warning { --accent: var(--neon-yellow); }
+  .card-info { --accent: var(--neon-cyan); }
+
+  .card-danger::after { background: linear-gradient(90deg, transparent, var(--neon-red), transparent); }
+  .card-warning::after { background: linear-gradient(90deg, transparent, var(--neon-yellow), transparent); }
+
+  .card-danger:hover { border-color: var(--neon-red); box-shadow: 0 0 30px rgba(255,0,60,0.15), 0 20px 60px rgba(0,0,0,0.5); }
+  .card-warning:hover { border-color: var(--neon-yellow); box-shadow: 0 0 30px rgba(255,230,0,0.15), 0 20px 60px rgba(0,0,0,0.5); }
+
+  .card-icon {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .card-icon::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--accent, var(--neon-cyan));
+    transform: rotate(45deg);
+    opacity: 0.5;
+    transition: all 0.4s;
+  }
+
+  .card:hover .card-icon::before {
+    transform: rotate(0deg);
+    opacity: 1;
+    box-shadow: 0 0 15px var(--accent, var(--neon-cyan));
+  }
+
+  .card-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent, var(--neon-cyan));
+    margin-bottom: 6px;
+  }
+
+  .card-timestamp {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+
+  .card-desc {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #8ab8c8;
+    margin-bottom: 20px;
+  }
+
+  /* Risk Bar */
+  .risk-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .risk-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    width: 70px;
+    flex-shrink: 0;
+  }
+  .risk-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .risk-fill {
+    height: 100%;
+    border-radius: 2px;
+    animation: riskAnim 1.5s ease-out forwards;
+    width: 0%;
+  }
+
+  @keyframes riskAnim { to { width: var(--w); } }
+
+  .risk-fill.high { background: var(--neon-red); box-shadow: 0 0 6px var(--neon-red); --w: 92%; }
+  .risk-fill.medium { background: var(--neon-yellow); box-shadow: 0 0 6px var(--neon-yellow); --w: 68%; }
+  .risk-fill.low { background: var(--neon-green); box-shadow: 0 0 6px var(--neon-green); --w: 35%; }
+
+  .risk-pct {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .risk-pct.high { color: var(--neon-red); }
+  .risk-pct.medium { color: var(--neon-yellow); }
+  .risk-pct.low { color: var(--neon-green); }
+
+  /* ─── DIVIDER ─── */
+  .section-divider {
+    padding: 40px 40px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ─── DEFENSE STEPS ─── */
+  .defense-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    padding: 0 40px 60px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .step-card {
+    background: var(--bg-panel);
+    border: 1px solid rgba(0,255,136,0.2);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.35s ease;
+    transform-style: preserve-3d;
+  }
+
+  .step-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0%;
+    height: 2px;
+    background: var(--neon-green);
+    box-shadow: 0 0 10px var(--neon-green);
+    transition: width 0.4s ease;
+  }
+
+  .step-card:hover {
+    border-color: rgba(0,255,136,0.5);
+    box-shadow: 0 0 25px rgba(0,255,136,0.1), 0 15px 40px rgba(0,0,0,0.4);
+    transform: perspective(800px) rotateX(-1deg) translateY(-4px);
+  }
+
+  .step-card:hover::before { width: 100%; }
+
+  .step-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: rgba(0,255,136,0.4);
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+  }
+
+  .step-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--neon-green);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .step-icon { font-size: 20px; }
+
+  .step-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #7ab89a;
+    margin-bottom: 16px;
+  }
+
+  /* Tool Tags */
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border: 1px solid rgba(0,255,136,0.3);
+    color: var(--neon-green);
+    letter-spacing: 1px;
+    background: rgba(0,255,136,0.04);
+    transition: all 0.2s;
+  }
+
+  .tag:hover {
+    background: rgba(0,255,136,0.1);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 8px rgba(0,255,136,0.3);
+    cursor: pointer;
+  }
+
+  /* ─── PRIVACY SCORE ─── */
+  .score-section {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px 60px;
+  }
+
+  .score-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    padding: 40px;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 40px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .score-panel::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,245,255,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Circular Score */
+  .score-circle {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin: 0 auto;
+  }
+
+  .score-svg {
+    width: 160px;
+    height: 160px;
+    transform: rotate(-90deg);
+  }
+
+  .score-bg-ring {
+    fill: none;
+    stroke: rgba(0,245,255,0.08);
+    stroke-width: 8;
+  }
+
+  .score-progress-ring {
+    fill: none;
+    stroke: var(--neon-cyan);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 408;
+    stroke-dashoffset: 408;
+    filter: drop-shadow(0 0 6px var(--neon-cyan));
+    animation: progressAnim 2s ease-out 0.5s forwards;
+  }
+
+  @keyframes progressAnim { to { stroke-dashoffset: 245; } }
+
+  .score-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--neon-cyan);
+    line-height: 1;
+    animation: countUp 2s ease-out 0.5s forwards;
+  }
+
+  @keyframes countUp {
+    from { opacity: 0.3; }
+    to { opacity: 1; }
+  }
+
+  .score-unit {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  .score-info h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  .score-info p {
+    font-size: 15px;
+    color: #7a9aaa;
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  .checklist { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .checklist li {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: #5a8090;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 1px;
+  }
+
+  .check-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--neon-green);
+    box-shadow: 0 0 6px var(--neon-green);
+    flex-shrink: 0;
+  }
+
+  .check-dot.red { background: var(--neon-red); box-shadow: 0 0 6px var(--neon-red); }
+  .check-dot.yellow { background: var(--neon-yellow); box-shadow: 0 0 6px var(--neon-yellow); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center;
+    padding: 30px;
+    border-top: 1px solid rgba(0,245,255,0.08);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ─── FLOATING PARTICLES ─── */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .particle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    background: var(--neon-cyan);
+    border-radius: 50%;
+    animation: floatUp linear infinite;
+    opacity: 0;
+  }
+
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 0.4; }
+    100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+  }
+
+  /* ─── DATA STREAM ─── */
+  .data-stream {
+    position: fixed;
+    top: 0;
+    right: 40px;
+    width: 200px;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+    opacity: 0.15;
+  }
+
+  .stream-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--neon-cyan);
+    line-height: 1.6;
+    animation: streamFall 12s linear infinite;
+    white-space: nowrap;
+  }
+
+  @keyframes streamFall {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+
+  /* Card entrance animations */
+  .card, .step-card {
+    opacity: 0;
+    animation: cardEntrance 0.6s ease-out forwards;
+  }
+
+  @keyframes cardEntrance {
+    from { opacity: 0; transform: perspective(1000px) rotateX(10deg) translateY(20px); }
+    to { opacity: 1; transform: perspective(1000px) rotateX(0deg) translateY(0); }
+  }
+
+  .card:nth-child(1) { animation-delay: 0.1s; }
+  .card:nth-child(2) { animation-delay: 0.2s; }
+  .card:nth-child(3) { animation-delay: 0.3s; }
+  .card:nth-child(4) { animation-delay: 0.4s; }
+  .card:nth-child(5) { animation-delay: 0.5s; }
+
+  .step-card:nth-child(1) { animation-delay: 0.1s; }
+  .step-card:nth-child(2) { animation-delay: 0.2s; }
+  .step-card:nth-child(3) { animation-delay: 0.3s; }
+  .step-card:nth-child(4) { animation-delay: 0.4s; }
+  .step-card:nth-child(5) { animation-delay: 0.5s; }
+  .step-card:nth-child(6) { animation-delay: 0.6s; }
+
+  @media (max-width: 768px) {
+    header { padding: 40px 20px 30px; }
+    .main-grid, .defense-grid, .score-section { padding: 0 16px 30px; }
+    .section-label { padding: 0 16px; }
+    .section-divider { padding: 30px 16px 16px; }
+    .score-panel { grid-template-columns: 1fr; text-align: center; }
+    .checklist { grid-template-columns: 1fr; }
+    .meter-bar { width: 120px; }
+    .data-stream { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Floating Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Data Stream Effect -->
+<div class="data-stream">
+  <div class="stream-text" id="streamText"></div>
+</div>
+
+<div class="wrapper">
+
+  <!-- ─── HERO ─── -->
+  <header>
+    <div class="threat-badge">⚠ ACTIVE THREAT DETECTED</div>
+    <h1>Your Data<br>Is Being Harvested</h1>
+    <p class="subtitle">// SURVEILLANCE ATLAS · BIG TECH TRACKING METHODS & COUNTERMEASURES //</p>
+    <div class="threat-meter">
+      <span class="meter-label">EXPOSURE LEVEL</span>
+      <div class="meter-bar"><div class="meter-fill"></div></div>
+      <span class="meter-value">87%</span>
+    </div>
+  </header>
+
+  <!-- ─── TRACKING METHODS ─── -->
+  <div class="section-divider">
+    <div class="section-label">01 / TRACKING VECTORS IDENTIFIED</div>
+  </div>
+
+  <div class="main-grid">
+
+    <!-- Cookies -->
+    <div class="card card-danger">
+      <div class="card-icon">🍪</div>
+      <div class="card-title">Cookies</div>
+      <div class="card-timestamp">METHOD_ID: TRK-001 · SEVERITY: CRITICAL</div>
+      <p class="card-desc">Small data files stored in your browser that track your identity and behavior across the web. Third-party cookies follow you from site to site — even after you leave — building a detailed behavioral profile without your knowledge.</p>
+      <div class="risk-row">
+        <span class="risk-label">REACH</span>
+        <div class="risk-track"><div class="risk-fill high"></div></div>
+        <span class="risk-pct high">92%</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">STEALTH</span>
+        <div class="risk-track"><div class="risk-fill medium"></div></div>
+        <span class="risk-pct medium">64%</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">PERSIST</span>
+        <div class="risk-track"><div class="risk-fill high"></div></div>
+        <span class="risk-pct high">88%</span>
+      </div>
+    </div>
+
+    <!-- Pixels & Scripts -->
+    <div class="card card-danger">
+      <div class="card-icon">👁</div>
+      <div class="card-title">Pixels & Scripts</div>
+      <div class="card-timestamp">METHOD_ID: TRK-002 · SEVERITY: CRITICAL</div>
+      <p class="card-desc">1×1 pixel-sized invisible images and embedded JavaScript that report your activity back to tracking servers the moment a page loads. No click required — simply visiting a page triggers data collection silently in the background.</p>
+      <div class="risk-row">
+        <span class="risk-label">REACH</span>
+        <div class="risk-track"><div class="risk-fill high"></div></div>
+        <span class="risk-pct high">95%</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">STEALTH</span>
+        <div class="risk-track"><div class="risk-fill high"></div></div>
+        <span class="risk-pct high">98%</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">PERSIST</span>
+        <div class="risk-track"><div class="risk-fill medium"></div></div>
+        <span class="risk-pct medium">72%</span>
+      </div>
+    </div>
+
+    <!-- Browser Fingerprinting -->
+    <div class="card card-warning">
+      <div class="card-icon">🔬</div>
+      <div class="card-title">Browser Fingerprinting</div>
+      <div class="card-timestamp">METHOD_ID: TRK-003 · SEVERITY: HIGH</div>
+      <p class="card-desc">Creates a unique digital signature by combining your screen resolution, installed fonts, browser version, OS, timezone, and 30+ other attributes. Unlike cookies, fingerprints cannot be deleted and persist across incognito sessions.</p>
+      <div class="risk-row">
+        <span class="risk-label">REACH</span>
+        <div class="risk-track"><div class="risk-fill medium"></div></div>
+        <span class="risk-pct medium">78%</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">STEALTH</span>
+        <div class="risk-track"><div class="risk-fill high"></div></div>
+        <span class="risk-pct high">96%</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">PERSIST</span>
+        <div class="risk-track"><div class="risk-fill high"></div></div>
+        <span class="risk-pct high">91%</span>
+      </div>
+    </div>
+
+    <!-- Canvas Fingerprinting -->
+    <div class="card card-warning">
+      <div class="card-icon">🎨</div>
+      <div class="card-title">Canvas Fingerprinting</div>
+      <div class="card-timestamp">METHOD_ID: TRK-004 · SEVERITY: HIGH</div>
+      <p class="card-desc">Exploits how your GPU renders invisible graphics in the browser. Tiny hardware-level differences in rendering produce a unique image hash tied specifically to your device. Even identical models of the same phone produce different signatures.</p>
+      <div class="risk-row">
+        <span class="risk-label">REACH</span>
+        <div class="risk-track"><div class="risk-fill medium"></div></div>
+        <span class="risk-pct medium">71%</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">STEALTH</span>
+        <div class="risk-track"><div class="risk-fill high"></div></div>
+        <span class="risk-pct high">99%</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">PERSIST</span>
+        <div class="risk-track"><div class="risk-fill high"></div></div>
+        <span class="risk-pct high">89%</span>
+      </div>
+    </div>
+
+    <!-- Cross-Device Tracking -->
+    <div class="card card-danger">
+      <div class="card-icon">📡</div>
+      <div class="card-title">Cross-Device Tracking</div>
+      <div class="card-timestamp">METHOD_ID: TRK-005 · SEVERITY: CRITICAL</div>
+      <p class="card-desc">Links data from your phone, laptop, smart TV, and IoT devices (like Alexa) into one unified 360° profile. Using shared Wi-Fi, login accounts, and probabilistic matching, advertisers know you're the same person on every screen.</p>
+      <div class="risk-row">
+        <span class="risk-label">REACH</span>
+        <div class="risk-track"><div class="risk-fill high"></div></div>
+        <span class="risk-pct high">100%</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">STEALTH</span>
+        <div class="risk-track"><div class="risk-fill high"></div></div>
+        <span class="risk-pct high">85%</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">PERSIST</span>
+        <div class="risk-track"><div class="risk-fill high"></div></div>
+        <span class="risk-pct high">93%</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── DEFENSE GRID ─── -->
+  <div class="section-divider">
+    <div class="section-label">02 / COUNTERMEASURES — FIGHT BACK</div>
+  </div>
+
+  <div class="defense-grid">
+
+    <div class="step-card">
+      <div class="step-number">STEP 01 / 06</div>
+      <div class="step-title"><span class="step-icon">🚫</span> Block Third-Party Cookies</div>
+      <p class="step-desc">Access your browser settings and disable all third-party cookies. This cuts off the primary cross-site tracking pipeline. Regularly clear your first-party cookies too — don't let stale data linger.</p>
+      <div class="tags">
+        <span class="tag">Chrome Settings</span>
+        <span class="tag">Firefox</span>
+        <span class="tag">Safari ITP</span>
+        <span class="tag">Cookie AutoDelete</span>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-number">STEP 02 / 06</div>
+      <div class="step-title"><span class="step-icon">🦁</span> Switch to a Privacy Browser</div>
+      <p class="step-desc">Replace Chrome with Brave (blocks fingerprinting & ads by default) or Firefox with hardened settings. These browsers give you built-in protection without installing extras. Avoid Chromium-based browsers that phone home to Google.</p>
+      <div class="tags">
+        <span class="tag">Brave Browser</span>
+        <span class="tag">Firefox</span>
+        <span class="tag">Tor Browser</span>
+        <span class="tag">LibreWolf</span>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-number">STEP 03 / 06</div>
+      <div class="step-title"><span class="step-icon">🛡</span> Install Tracking Blockers</div>
+      <p class="step-desc">Add uBlock Origin to your browser to stop tracking scripts, pixels, and ad networks before they load. It blocks at the network level — meaning the invisible tracking code never even runs on your device.</p>
+      <div class="tags">
+        <span class="tag">uBlock Origin</span>
+        <span class="tag">Privacy Badger</span>
+        <span class="tag">Ghostery</span>
+        <span class="tag">AdGuard</span>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-number">STEP 04 / 06</div>
+      <div class="step-title"><span class="step-icon">🔒</span> Use a VPN</div>
+      <p class="step-desc">A VPN masks your real IP address, hiding your physical location and internet provider from trackers. Choose a no-logs VPN (Mullvad or ProtonVPN) — never free VPNs, which often sell the very data you're trying to protect.</p>
+      <div class="tags">
+        <span class="tag">Mullvad VPN</span>
+        <span class="tag">ProtonVPN</span>
+        <span class="tag">IVPN</span>
+        <span class="tag">WireGuard</span>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-number">STEP 05 / 06</div>
+      <div class="step-title"><span class="step-icon">🔎</span> Use a Private Search Engine</div>
+      <p class="step-desc">Google logs every search query tied to your profile. Switch to DuckDuckGo, Brave Search, or Startpage — they return quality results without building a behavioral dossier on your curiosity and interests.</p>
+      <div class="tags">
+        <span class="tag">DuckDuckGo</span>
+        <span class="tag">Brave Search</span>
+        <span class="tag">Startpage</span>
+        <span class="tag">SearXNG</span>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-number">STEP 06 / 06</div>
+      <div class="step-title"><span class="step-icon">📱</span> Harden Mobile & IoT</div>
+      <p class="step-desc">Audit app permissions — revoke location, microphone, and contacts access for apps that don't need them. Disable ad IDs on iOS and Android. For smart home devices like Alexa, review privacy settings or consider air-gapping them from sensitive conversations.</p>
+      <div class="tags">
+        <span class="tag">App Permissions</span>
+        <span class="tag">Limit Ad Tracking</span>
+        <span class="tag">DNS Firewall</span>
+        <span class="tag">GrapheneOS</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── PRIVACY SCORE ─── -->
+  <div class="section-divider">
+    <div class="section-label">03 / YOUR CURRENT EXPOSURE ANALYSIS</div>
+  </div>
+
+  <div class="score-section">
+    <div class="score-panel">
+      <div>
+        <div class="score-circle">
+          <svg class="score-svg" viewBox="0 0 160 160">
+            <circle class="score-bg-ring" cx="80" cy="80" r="65"/>
+            <circle class="score-progress-ring" cx="80" cy="80" r="65"/>
+          </svg>
+          <div class="score-text">
+            <div class="score-value">40</div>
+            <div class="score-unit">/ 100</div>
+          </div>
+        </div>
+        <p style="text-align:center; font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--neon-yellow); letter-spacing:2px; margin-top:12px;">AVG. USER SCORE</p>
+      </div>
+
+      <div class="score-info">
+        <h3>How Exposed Is the Average User?</h3>
+        <p>Without active countermeasures, the typical internet user scores under 40/100 on privacy — meaning Big Tech has access to their location, behavior, interests, search history, and device identity across every website they visit.</p>
+        <ul class="checklist">
+          <li><span class="check-dot red"></span> Third-party cookies active</li>
+          <li><span class="check-dot red"></span> Browser fingerprint exposed</li>
+          <li><span class="check-dot red"></span> Real IP address visible</li>
+          <li><span class="check-dot red"></span> Ad ID enabled on mobile</li>
+          <li><span class="check-dot yellow"></span> Search queries logged</li>
+          <li><span class="check-dot yellow"></span> Cross-device linking active</li>
+          <li><span class="check-dot"></span> HTTPS enabled (basic)</li>
+          <li><span class="check-dot"></span> Password manager used</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<footer>
+  SURVEILLANCE ATLAS · BUILT TO INFORM, NOT FRIGHTEN · TAKE BACK YOUR PRIVACY · 2025
+</footer>
+
+<script>
+  // Particle generator
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `
+      left: ${Math.random() * 100}%;
+      width: ${Math.random() * 3 + 1}px;
+      height: ${Math.random() * 3 + 1}px;
+      animation-duration: ${Math.random() * 15 + 8}s;
+      animation-delay: ${Math.random() * 10}s;
+      opacity: 0;
+    `;
+    if (Math.random() > 0.5) p.style.background = '#00f5ff';
+    else p.style.background = '#00ff88';
+    container.appendChild(p);
+  }
+
+  // Data stream
+  const chars = '01アイウエオカキクケコ0110011100101010';
+  let streamContent = '';
+  for (let i = 0; i < 800; i++) {
+    streamContent += chars[Math.floor(Math.random() * chars.length)] + (Math.random() > 0.8 ? '\n' : '');
+  }
+  document.getElementById('streamText').textContent = streamContent;
+
+  // 3D tilt effect on cards
+  document.querySelectorAll('.card, .step-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      const rotY = x * 12;
+      const rotX = -y * 8;
+      card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-6px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
+    });
+  });
+
+  // Animated counter for score
+  const scoreEl = document.querySelector('.score-value');
+  let count = 0;
+  setTimeout(() => {
+    const interval = setInterval(() => {
+      count++;
+      scoreEl.textContent = count;
+      if (count >= 40) clearInterval(interval);
+    }, 40);
+  }, 500);
+
+  // Glitch effect on title
+  const title = document.querySelector('h1');
+  setInterval(() => {
+    if (Math.random() > 0.95) {
+      title.style.textShadow = `${Math.random()*6-3}px 0 #ff003c, ${Math.random()*6-3}px 0 #00f5ff`;
+      setTimeout(() => { title.style.textShadow = 'none'; }, 80);
+    }
+  }, 500);
+</script>
+</body>
+</html>
