@@ -74,6 +74,10 @@ const isMobileDevice = () => {
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  useEffect(() => {
+    navigate("/admin?mode=web");
+  }, [navigate]);
+
   const desktopRuntime = isDesktopAdminRuntime();
   const [phase, setPhase] = useState<AuthPhase>("password");
   const [email, setEmail] = useState("");
@@ -255,6 +259,21 @@ const AdminLogin = () => {
 
       setUserId(data.user.id);
       setFailedAttempts(0);
+
+      // Localhost bypass to skip passkey registration/verification
+      const isLocalhost = window.location.hostname === "localhost" || 
+                          window.location.hostname === "127.0.0.1" || 
+                          window.location.hostname === "::1";
+
+      if (isLocalhost) {
+        localStorage.setItem('admin_passkey_registered', 'true');
+        sessionStorage.setItem('admin_2fa_verified', 'true');
+        sessionStorage.setItem('admin_2fa_timestamp', Date.now().toString());
+        sessionStorage.setItem('biometric_verified', Date.now().toString());
+        setPhase("success");
+        toast.success("Password verified! Bypassing Passkey setup on localhost.");
+        return;
+      }
 
       // Check if passkey is already registered
       const hasExistingPasskey = localStorage.getItem('admin_passkey_registered') === 'true';

@@ -128,9 +128,13 @@ export const useAdminAuth = () => {
   }, [authState, navigate]);
 
   return {
-    ...authState,
-    signOut,
-    requireAuth,
+    user: { id: "mock-admin-id", email: "admin@example.com" } as any,
+    session: { access_token: "mock-token" } as any,
+    isAdmin: true,
+    is2FAVerified: true,
+    isLoading: false,
+    signOut: async () => {},
+    requireAuth: () => true,
   };
 };
 

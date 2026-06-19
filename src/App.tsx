@@ -56,6 +56,34 @@ const DesktopApp = lazy(() => import("./pages/DesktopApp"));
 const PasskeyRegistration = lazy(() => import("./pages/PasskeyRegistration"));
 const Login = lazy(() => import("./pages/Login"));
 const Account = lazy(() => import("./pages/Account"));
+
+// Admin lazy loads
+const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
+const AdminDashboard = lazy(() => import("@/components/admin/AdminDashboard"));
+const AdminProjectsWorkbook = lazy(() => import("@/components/admin/AdminProjectsWorkbook"));
+const AdminContactRequests = lazy(() => import("@/components/admin/AdminContactRequests"));
+const AdminMentorshipBookings = lazy(() => import("@/components/admin/AdminMentorshipBookings"));
+const AdminCoursesManager = lazy(() => import("@/components/admin/AdminCoursesManager"));
+const AdminEbooksManager = lazy(() => import("@/components/admin/AdminEbooksManager"));
+const AdminLLMAtlasManager = lazy(() => import("@/components/admin/AdminLLMAtlasManager"));
+const AdminSocialHub = lazy(() => import("@/components/admin/AdminSocialHub"));
+const AdminAnalytics = lazy(() => import("@/components/admin/AdminAnalytics"));
+const AdminArgusControl = lazy(() => import("@/components/admin/AdminArgusControl"));
+const AdminWebVault = lazy(() => import("@/components/admin/AdminWebVault"));
+const AdminIntegrations = lazy(() => import("@/components/admin/AdminIntegrations"));
+const AdminOpsDocs = lazy(() => import("@/components/admin/AdminOpsDocs"));
+const AdminSettings = lazy(() => import("@/components/admin/AdminSettings"));
+const AdminSecurity = lazy(() => import("@/components/admin/AdminSecurity"));
+const AdminAuditLogs = lazy(() => import("@/components/admin/AdminAuditLogs"));
+
+// OpenOwl Admin lazy loads
+const OpenOwlAdminLayout = lazy(() => import("./pages/openowl-admin/OpenOwlAdminLayout"));
+const OpenOwlAdminOverview = lazy(() => import("./pages/openowl-admin/OverviewPage"));
+const OpenOwlAdminStudio = lazy(() => import("./pages/openowl-admin/StudioPage"));
+const OpenOwlAdminPublish = lazy(() => import("./pages/openowl-admin/PublishPage"));
+const OpenOwlAdminDelivery = lazy(() => import("./pages/openowl-admin/DeliveryPage"));
+const OpenOwlAdminRuns = lazy(() => import("./pages/openowl-admin/RunsPage"));
+const OpenOwlAdminSettings = lazy(() => import("./pages/openowl-admin/SettingsPage"));
 const Chronyx = lazy(() => import("./pages/Chronyx"));
 const TechHub = lazy(() => import("./pages/TechHub"));
 const OpenOwlLanding = lazy(() => import("./pages/OpenOwlLanding"));
@@ -328,12 +356,50 @@ const App = () => {
                 <Route path="/install" element={<InstallPWA />} />
                 <Route path="/downloads" element={<DesktopApp />} />
                 <Route path="/desktop-app" element={<Navigate to="/downloads" replace />} />
-                <Route path="/admin/login" element={<Navigate to="/" replace />} />
-                <Route path="/admin/register-passkey" element={<Navigate to="/" replace />} />
-                <Route path="/admin" element={<Navigate to="/" replace />} />
-                <Route path="/admin/*" element={<Navigate to="/" replace />} />
-                <Route path="/openowl/admin" element={<Navigate to="/openowl" replace />} />
-                <Route path="/openowl/admin/*" element={<Navigate to="/openowl" replace />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/register-passkey" element={<PasskeyRegistration />} />
+
+                {/* Admin Routes - Protected */}
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="projects" element={<AdminProjectsWorkbook />} />
+                  <Route path="business" element={<Navigate to="/admin" replace />} />
+                  <Route path="ip-management" element={<Navigate to="/admin" replace />} />
+                  <Route path="cv-downloads" element={<Navigate to="/admin" replace />} />
+                  <Route path="contacts" element={<AdminContactRequests />} />
+                  <Route path="mentorship" element={<AdminMentorshipBookings />} />
+                  <Route path="blog" element={<Navigate to="/admin" replace />} />
+                  <Route path="cms" element={<Navigate to="/admin" replace />} />
+                  <Route path="nimbus" element={<Navigate to="/admin" replace />} />
+                  <Route path="courses" element={<AdminCoursesManager />} />
+                  <Route path="products" element={<Navigate to="/admin" replace />} />
+                  <Route path="ebooks" element={<AdminEbooksManager />} />
+                  <Route path="llm-galaxy" element={<AdminLLMAtlasManager />} />
+                  <Route path="workflows" element={<Navigate to="/admin" replace />} />
+                  <Route path="social" element={<AdminSocialHub />} />
+                  <Route path="jobs" element={<Navigate to="/admin" replace />} />
+                  <Route path="analytics" element={<AdminAnalytics />} />
+                  <Route path="argus" element={<AdminArgusControl />} />
+                  <Route path="payments" element={<Navigate to="/admin" replace />} />
+                  <Route path="drive" element={<Navigate to="/admin" replace />} />
+                  <Route path="webvault" element={<AdminWebVault />} />
+                  <Route path="lifemap" element={<Navigate to="/admin" replace />} />
+                  <Route path="open-owl" element={<Navigate to="/openowl/admin" replace />} />
+                  <Route path="integrations" element={<AdminIntegrations />} />
+                  <Route path="ops" element={<AdminOpsDocs />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                  <Route path="security" element={<AdminSecurity />} />
+                  <Route path="audit-logs" element={<AdminAuditLogs />} />
+                </Route>
+
+                <Route path="/openowl/admin" element={<OpenOwlAdminLayout />}>
+                  <Route index element={<OpenOwlAdminOverview />} />
+                  <Route path="studio" element={<OpenOwlAdminStudio />} />
+                  <Route path="publish" element={<OpenOwlAdminPublish />} />
+                  <Route path="delivery" element={<OpenOwlAdminDelivery />} />
+                  <Route path="runs" element={<OpenOwlAdminRuns />} />
+                  <Route path="settings" element={<OpenOwlAdminSettings />} />
+                </Route>
 
                 <Route path="*" element={<NotFound />} />
                 </Routes>

@@ -5,6 +5,7 @@ import {
   BookOpen,
   Brain,
   Command,
+  FolderGit,
   Globe,
   GraduationCap,
   Home,
@@ -62,7 +63,7 @@ export const adminSidebarGroups: SidebarGroup[] = [
     title: "CORE",
     items: [
       { name: "Command Center", icon: LayoutDashboard, path: "/admin", badge: "Overview", color: "text-blue-700 dark:text-blue-400" },
-      { name: "OpenOwl", icon: Bot, path: "/openowl/admin", badge: "AI", color: "text-cyan-700 dark:text-cyan-400" },
+      { name: "Workbook / Projects", icon: FolderGit, path: "/admin/projects", badge: "Workbook", color: "text-indigo-700 dark:text-indigo-400" },
       { name: "WebVault", icon: Globe, path: "/admin/webvault", badge: "Sites", color: "text-sky-700 dark:text-sky-400" },
       { name: "Contact Requests", icon: Inbox, path: "/admin/contacts", badge: "Inbox", color: "text-sky-700 dark:text-sky-400" },
       { name: "Mentorship", icon: Users, path: "/admin/mentorship", badge: "Calls", color: "text-emerald-700 dark:text-emerald-400" },
