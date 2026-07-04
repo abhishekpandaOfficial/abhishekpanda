@@ -46,6 +46,7 @@ const NumpyMastery = lazy(() => import("./pages/NumpyMastery"));
 const MachineLearningCoreMastery = lazy(() => import("./pages/MachineLearningCoreMastery"));
 const NlpMastery = lazy(() => import("./pages/NlpMastery"));
 const LlmMastery = lazy(() => import("./pages/LlmMastery"));
+const TrackerViewer = lazy(() => import("./pages/TrackerViewer"));
 const ArticlesPage = lazy(() => import("./pages/Articles"));
 const CaseStudies = lazy(() => import("./pages/CaseStudies"));
 const Interview = lazy(() => import("./pages/Interview"));
@@ -156,6 +157,35 @@ const LegacyAiMlSeriesRedirect = () => {
   return <Navigate to={seriesSlug ? `/ai-ml-hub/${seriesSlug}` : "/ai-ml-hub"} replace />;
 };
 
+const CompatibilityRouteHandler = () => {
+  const location = useLocation();
+  const normalizedPath = location.pathname.replace(/\/+$/, "") || "/";
+  const legacyRedirects: Record<string, string> = {
+    "/blogs": "/techhub",
+    "/cheatsheets": "/techhub",
+    "/ai-ml-blogs": "/ai-ml-hub",
+    "/openowl-dashboard": "/openowl-dashboard.html",
+    "/openowl-blueprint": "/openowl-blueprint.html",
+    "/openowl-setup-guide": "/openowl-setup-guide.html",
+  };
+
+  if (location.pathname !== normalizedPath) {
+    return <Navigate to={normalizedPath + location.search + location.hash} replace />;
+  }
+
+  const redirectedPath = legacyRedirects[location.pathname];
+  if (redirectedPath) {
+    return <Navigate to={redirectedPath + location.search + location.hash} replace />;
+  }
+
+  if (location.pathname.endsWith(".html")) {
+    const fallbackPath = location.pathname.replace(/\.html$/, "");
+    return <Navigate to={fallbackPath + location.search + location.hash} replace />;
+  }
+
+  return <NotFound />;
+};
+
 const App = () => {
   const [showIntro, setShowIntro] = useState(false);
 
@@ -257,6 +287,7 @@ const App = () => {
                 <Route path="/ai-ml-hub/machine-learning-core-mastery" element={<MachineLearningCoreMastery />} />
                 <Route path="/ai-ml-hub/nlp-mastery" element={<NlpMastery />} />
                 <Route path="/ai-ml-hub/llm-mastery" element={<LlmMastery />} />
+                <Route path="/trackers/:trackerSlug" element={<TrackerViewer />} />
                 <Route path="/ai-ml-hub/:seriesSlug" element={<AiMlSeries />} />
                 <Route path="/blogs/dsa-mastery-csharp" element={<Navigate to="/dsa-mastery-csharp/syllabus" replace />} />
                 <Route path="/blogs/dsa-mastery-csharp/practice" element={<Navigate to="/cheatsheets/dsa-mastery-csharp/practice" replace />} />
@@ -401,7 +432,7 @@ const App = () => {
                   <Route path="settings" element={<OpenOwlAdminSettings />} />
                 </Route>
 
-                <Route path="*" element={<NotFound />} />
+                <Route path="*" element={<CompatibilityRouteHandler />} />
                 </Routes>
               </Suspense>
             </AnalyticsWrapper>
