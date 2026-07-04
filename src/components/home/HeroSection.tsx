@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, Code2, Cloud, Brain, BookOpenCheck, Download, Briefcase } from "lucide-react";
+import { Code2, Cloud, Brain, BookOpenCheck, Download, Briefcase } from "lucide-react";
 import heroAvatarDefault from "@/assets/about/hero-avatar-default.png";
 import heroAvatarHover from "@/assets/about/hero-avatar-hover.png";
 import { Button } from "@/components/ui/button";
@@ -322,6 +323,205 @@ const MagicalLocalClock = () => {
   );
 };
 
+const letterMeanings: Record<string, { title: string; desc: string; emoji: string; color: string }> = {
+  "first-0": { title: "Analytical", desc: "Solving complex systems with precision", emoji: "🔍", color: "from-blue-500 to-cyan-400" },
+  "first-1": { title: "Bold", desc: "Taking calculated architectural leaps", emoji: "⚡", color: "from-yellow-400 to-orange-400" },
+  "first-2": { title: "Humble", desc: "Always listening, learning, and teaching", emoji: "🙏", color: "from-green-400 to-emerald-500" },
+  "first-3": { title: "Innovative", desc: "Architecting the future of AI/ML systems", emoji: "💡", color: "from-violet-500 to-purple-400" },
+  "first-4": { title: "Sincere", desc: "Building with engineering integrity", emoji: "🤝", color: "from-teal-400 to-cyan-500" },
+  "first-5": { title: "Helpful", desc: "Mentoring the next generation of devs", emoji: "🌱", color: "from-lime-400 to-green-500" },
+  "first-6": { title: "Empathetic", desc: "Designing for real human needs", emoji: "❤️", color: "from-rose-400 to-pink-500" },
+  "first-7": { title: "Kinetic", desc: "Transforming thoughts into rapid code", emoji: "🚀", color: "from-sky-400 to-blue-500" },
+  "last-0":  { title: "Passionate", desc: "Crafting products with deep dedication", emoji: "🔥", color: "from-orange-400 to-red-500" },
+  "last-1":  { title: "Adaptable", desc: "Thriving across diverse tech stacks", emoji: "🌊", color: "from-cyan-400 to-sky-500" },
+  "last-2":  { title: "Noble", desc: "Upholding high professional standards", emoji: "👑", color: "from-amber-400 to-yellow-500" },
+  "last-3":  { title: "Disciplined", desc: "Discipline beats motivation, daily", emoji: "⏱️", color: "from-indigo-400 to-blue-500" },
+  "last-4":  { title: "Altruistic", desc: "Sharing knowledge and open source", emoji: "🌍", color: "from-emerald-400 to-teal-500" },
+};
+
+const InteractiveLetter = ({
+  char,
+  id,
+  letterClass,
+}: {
+  char: string;
+  id: string;
+  letterClass?: string;
+}) => {
+  const [hovered, setHovered] = useState(false);
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+  const ref = useRef<HTMLSpanElement>(null);
+  const meaning = letterMeanings[id];
+
+  const updatePos = useCallback(() => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setTooltipPos({
+        top: rect.top - 16,             // 16px above the top of the letter (viewport coords)
+        left: rect.left + rect.width / 2, // horizontally centered on the letter
+      });
+    }
+  }, []);
+
+  const handleEnter = useCallback(() => {
+    updatePos();
+    setHovered(true);
+  }, [updatePos]);
+
+  const handleLeave = useCallback(() => setHovered(false), []);
+
+  return (
+    <>
+      {/* The actual letter span – variants let the parent stagger it on mount */}
+      <motion.span
+        ref={ref}
+        className={letterClass}
+        style={{
+          display: "inline-block",
+          cursor: "default",
+          userSelect: "none",
+          willChange: "transform, text-shadow, color",
+        }}
+        variants={{
+          hidden: { y: 30, opacity: 0, rotateX: 60, scale: 0.8 },
+          visible: {
+            y: 0, opacity: 1, rotateX: 0, scale: 1,
+            transition: { type: "spring", damping: 14, stiffness: 140 },
+          },
+        }}
+        animate={hovered ? {
+          y: -8,
+          scale: 1.15,
+          color: "#22d3ee",
+          textShadow: "0 0 8px rgba(34,211,238,0.9), 0 0 20px rgba(34,211,238,0.7), 0 0 40px rgba(56,189,248,0.5), 0 0 60px rgba(99,102,241,0.3)",
+          transition: { type: "spring", stiffness: 400, damping: 14 },
+        } : {
+          y: 0,
+          scale: 1,
+          color: "#ffffff",
+          textShadow: "0 -1px 0 rgba(255,255,255,0.12), 0 1px 0 rgba(100,116,139,0.3), 0 2px 0 rgba(71,85,105,0.25), 0 3px 0 rgba(51,65,85,0.2), 0 4px 0 rgba(30,41,59,0.18), 0 8px 16px rgba(0,0,0,0.4), 0 16px 48px rgba(56,189,248,0.14)",
+          transition: { type: "spring", stiffness: 300, damping: 20 },
+        }}
+        onMouseEnter={handleEnter}
+        onMouseLeave={handleLeave}
+      >
+        {char}
+      </motion.span>
+
+      {/* Portal tooltip – renders in document.body, never clipped */}
+      {hovered && meaning && typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            <motion.div
+              key={id}
+              initial={{ opacity: 0, y: 10, scale: 0.85 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 6, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 450, damping: 24 }}
+              style={{
+                position: "fixed",
+                top: tooltipPos.top,
+                left: tooltipPos.left,
+                transform: "translate(-50%, -100%)",
+                zIndex: 99999,
+                pointerEvents: "none",
+                width: "220px",
+              }}
+            >
+              {/* Card */}
+              <div
+                style={{
+                  background: "linear-gradient(135deg, rgba(2,6,23,0.98) 0%, rgba(15,23,42,0.97) 100%)",
+                  borderRadius: "16px",
+                  padding: "14px 16px 12px",
+                  boxShadow: "0 24px 60px -12px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07), 0 0 30px rgba(56,189,248,0.18)",
+                  backdropFilter: "blur(20px)",
+                  textAlign: "center",
+                }}
+              >
+                {/* Big letter + emoji row */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "6px" }}>
+                  <span
+                    style={{
+                      fontSize: "3rem",
+                      fontWeight: 900,
+                      lineHeight: 1,
+                      background: "linear-gradient(135deg, #f8fafc 0%, #7dd3fc 50%, #22d3ee 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      display: "inline-block",
+                      filter: "drop-shadow(0 0 14px rgba(34,211,238,0.85))",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    {char.toUpperCase()}
+                  </span>
+                  <span style={{ fontSize: "1.6rem", lineHeight: 1 }}>{meaning.emoji}</span>
+                </div>
+
+                {/* Colour accent divider */}
+                <div
+                  style={{
+                    height: "2px",
+                    borderRadius: "999px",
+                    background: `linear-gradient(90deg, transparent, rgba(34,211,238,0.7), transparent)`,
+                    marginBottom: "8px",
+                  }}
+                />
+
+                {/* Title */}
+                <p
+                  style={{
+                    fontSize: "0.68rem",
+                    fontWeight: 800,
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                    color: "#67e8f9",
+                    margin: "0 0 4px",
+                  }}
+                >
+                  {meaning.title}
+                </p>
+
+                {/* Description */}
+                <p
+                  style={{
+                    fontSize: "0.68rem",
+                    fontWeight: 400,
+                    color: "#94a3b8",
+                    lineHeight: 1.45,
+                    margin: 0,
+                  }}
+                >
+                  {meaning.desc}
+                </p>
+              </div>
+
+              {/* Caret arrow pointing down */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "-6px",
+                  left: "50%",
+                  transform: "translateX(-50%) rotate(45deg)",
+                  width: "12px",
+                  height: "12px",
+                  background: "rgba(2,6,23,0.98)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  borderTop: "none",
+                  borderLeft: "none",
+                  borderRadius: "2px",
+                }}
+              />
+            </motion.div>
+          </AnimatePresence>,
+          document.body
+        )
+      }
+    </>
+  );
+};
+
 export const HeroSection = () => {
   const logoBasePath = import.meta.env.BASE_URL || "/";
   const [isHovered, setIsHovered] = useState(false);
@@ -527,23 +727,66 @@ export const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs font-semibold tracking-[0.06em] text-primary">
-              <Sparkles className="h-4 w-4" />
-              @the_abhishekpanda
-            </div>
-            <div className="mb-2 flex items-center justify-center gap-3 md:gap-5">
-              <h1 className="ap-name-display text-4xl text-foreground md:text-6xl lg:text-7xl xl:text-[5rem]">
-                <span className="ap-name-gradient inline-block">
-                  Abhishek Panda
-                </span>
+            <a 
+              href="https://instagram.com/i_am_abhishekpanda" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#e1306c]/30 bg-gradient-to-r from-[#f09433]/10 via-[#e6683c]/10 via-[#dc2743]/10 to-[#cc2366]/10 px-4 py-2 text-xs font-semibold tracking-[0.06em] text-white hover:border-[#e1306c]/60 hover:shadow-[0_0_15px_rgba(225,48,108,0.3)] transition-all duration-300 cursor-pointer"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e1306c] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#dc2743]"></span>
+              </span>
+              <span className="bg-gradient-to-r from-[#f58529] via-[#dd2a7b] to-[#8134af] bg-clip-text text-transparent font-bold">
+                @i_am_abhishekpanda
+              </span>
+            </a>
+            <div className="mb-2 flex items-center justify-center gap-4 md:gap-6 lg:gap-8 flex-wrap md:flex-nowrap">
+              <h1
+                className="ap-name-display text-4xl text-foreground md:text-6xl lg:text-7xl xl:text-[5rem]"
+                aria-label="Abhishek Panda"
+              >
+                <motion.span
+                  className="inline-flex flex-wrap justify-center"
+                  style={{ gap: "0.02em" }}
+                  variants={{
+                    hidden: {},
+                    visible: { transition: { staggerChildren: 0.05 } },
+                  }}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <span className="inline-flex">
+                    {"Abhishek".split("").map((char, index) => (
+                      <InteractiveLetter
+                        key={`first-${index}`}
+                        id={`first-${index}`}
+                        char={char}
+                        letterClass="ap-name-gradient"
+                      />
+                    ))}
+                  </span>
+                  <span style={{ display: "inline-block", width: "0.3em" }} />
+                  <span className="inline-flex">
+                    {"Panda".split("").map((char, index) => (
+                      <InteractiveLetter
+                        key={`last-${index}`}
+                        id={`last-${index}`}
+                        char={char}
+                        letterClass="ap-name-gradient"
+                      />
+                    ))}
+                  </span>
+                </motion.span>
               </h1>
+              
               <motion.div
-                className="relative h-20 w-20 shrink-0 md:h-24 md:w-24 lg:h-28 lg:w-28"
-                animate={{ y: [0, 5, 0], rotate: [1.4, -1.4, 1.4] }}
-                transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
+                className="relative h-20 w-20 shrink-0 md:h-24 md:w-24 lg:h-28 lg:w-28 flex items-center justify-center"
+                animate={{ y: [0, 4, 0], rotate: [1.2, -1.2, 1.2] }}
+                transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
               >
                 <span className="pointer-events-none absolute -top-8 left-1/2 h-8 w-px -translate-x-1/2 bg-gradient-to-b from-slate-400/80 to-slate-300/10 dark:from-slate-300/70" />
-                <div className="relative flex h-full w-full items-center justify-center rounded-2xl border border-sky-300/35 bg-gradient-to-br from-white/95 via-slate-100/95 to-sky-100/90 p-2 shadow-[0_20px_40px_-24px_rgba(34,211,238,0.8)] ring-1 ring-white/75 dark:border-sky-200/30 dark:bg-gradient-to-br dark:from-slate-900/95 dark:via-slate-800/95 dark:to-cyan-950/80 dark:ring-white/20">
+                <div className="relative flex h-full w-full items-center justify-center rounded-2xl border border-sky-300/35 bg-gradient-to-br from-white/95 via-slate-100/95 to-sky-100/90 p-1.5 shadow-[0_20px_40px_-24px_rgba(34,211,238,0.8)] ring-1 ring-white/75 dark:border-sky-200/30 dark:bg-gradient-to-br dark:from-slate-900/95 dark:via-slate-800/95 dark:to-cyan-950/80 dark:ring-white/20">
                   <img
                     src={pandaLogoSrc}
                     alt="Panda with bamboo logo"

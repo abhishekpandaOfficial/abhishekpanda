@@ -126,6 +126,7 @@ export const Navigation = () => {
     location.pathname.startsWith("/scriptures") ||
     location.pathname.startsWith("/openowl") ||
     location.pathname.startsWith("/chronyx");
+  const isTrackersActive = location.pathname.startsWith("/trackers/");
   const desktopNavItemClass =
     "relative flex items-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all duration-300 group xl:gap-2.5 xl:px-3 xl:py-2.5 xl:text-[13px] 2xl:rounded-xl 2xl:px-3.5 2xl:text-sm";
   const desktopNavIconClass = "h-4 w-4 shrink-0 transition-transform group-hover:scale-110 xl:h-[17px] xl:w-[17px] 2xl:h-[18px] 2xl:w-[18px]";
@@ -249,7 +250,10 @@ export const Navigation = () => {
                 <button
                   className={cn(
                     desktopNavItemClass,
-                    "text-muted-foreground hover:text-foreground cursor-pointer focus:outline-none bg-transparent border-none"
+                    "cursor-pointer border-none bg-transparent focus:outline-none",
+                    isTrackersActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
@@ -339,71 +343,6 @@ export const Navigation = () => {
                 </span>
               </PrefetchLink>
 
-              {/* Roadmaps Dropdown */}
-              <div 
-                className="relative"
-                onMouseEnter={() => setIsRoadmapsHovered(true)}
-                onMouseLeave={() => setIsRoadmapsHovered(false)}
-              >
-                <button
-                  className={cn(
-                    desktopNavItemClass,
-                    "text-muted-foreground hover:text-foreground cursor-pointer focus:outline-none bg-transparent border-none"
-                  )}
-                >
-                  <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                  <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                  <span className="relative flex items-center gap-2">
-                    <Map className={desktopNavIconClass} />
-                    Trackers
-                    <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-300", isRoadmapsHovered && "rotate-180")} />
-                  </span>
-                </button>
-                <AnimatePresence>
-                  {isRoadmapsHovered && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute left-0 top-full mt-2 w-[22rem] max-w-[calc(100vw-2rem)] rounded-2xl border border-border/60 bg-background/95 p-2.5 shadow-[0_24px_80px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl z-[60]"
-                    >
-                      <div className="mb-2 flex items-center justify-between rounded-xl border border-border/50 bg-muted/30 px-3 py-2">
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-primary">Mastery trackers</p>
-                          <p className="text-xs text-muted-foreground">Curated learning paths • open in a new tab</p>
-                        </div>
-                        <div className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">
-                          5 available
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        {roadmapItems.map((item) => (
-                          <a
-                            key={item.name}
-                            href={item.path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group flex items-start gap-3 rounded-xl border border-transparent bg-background/70 px-3 py-3 text-left transition-all duration-200 hover:border-primary/20 hover:bg-primary/[0.06] hover:shadow-sm"
-                          >
-                            <div className="mt-0.5 rounded-xl border border-primary/20 bg-primary/10 p-2 text-primary">
-                              <item.icon className="h-4 w-4" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-foreground">{item.name}</span>
-                                <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
-                              </div>
-                              <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.description}</p>
-                            </div>
-                          </a>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
             </nav>
 
             <div className="flex items-center justify-self-end gap-2">
@@ -482,7 +421,10 @@ export const Navigation = () => {
                   onClick={() => setIsRoadmapsMobileOpen(!isRoadmapsMobileOpen)}
                   className={cn(
                     mobileNavItemClass,
-                    "w-full flex items-center justify-between text-muted-foreground hover:text-foreground hover:bg-muted"
+                    "w-full flex items-center justify-between",
+                    isTrackersActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
                   <span className="flex items-center gap-3.5">
@@ -574,56 +516,6 @@ export const Navigation = () => {
                   <ScrollText className={mobileNavIconClass} />
                   Insights
                 </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.28 }}
-                className="flex flex-col"
-              >
-                <button
-                  onClick={() => setIsRoadmapsMobileOpen(!isRoadmapsMobileOpen)}
-                  className={cn(
-                    mobileNavItemClass,
-                    "w-full flex items-center justify-between text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <span className="flex items-center gap-3.5">
-                    <Map className={mobileNavIconClass} />
-                    Trackers
-                  </span>
-                  <ChevronDown className={cn("h-4 w-4 transition-transform duration-300", isRoadmapsMobileOpen && "rotate-180")} />
-                </button>
-                
-                <AnimatePresence initial={false}>
-                  {isRoadmapsMobileOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="mt-1 ml-[26px] flex flex-col gap-2 overflow-hidden border-l border-border/45 pl-4 pr-2"
-                    >
-                      <div className="rounded-xl border border-border/50 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-                        Open any tracker in a new tab
-                      </div>
-                      {roadmapItems.map((item) => (
-                        <a
-                          key={item.name}
-                          href={item.path}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-start gap-2.5 rounded-xl border border-border/40 bg-background/70 px-3 py-2.5 text-[14px] font-medium text-muted-foreground transition-colors hover:border-primary/20 hover:bg-primary/[0.06] hover:text-foreground"
-                        >
-                          <item.icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                          <span className="flex-1">{item.name}</span>
-                          <ArrowUpRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                        </a>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </motion.div>
 
             </nav>

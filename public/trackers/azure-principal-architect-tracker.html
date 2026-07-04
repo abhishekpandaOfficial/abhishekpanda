@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Principal Architect Mastery — Zero to Principal 2026</title>
+<style>
+:root{
+  --bg:#0b0f14;
+  --panel:#101720;
+  --panel2:#141d29;
+  --line:#22303f;
+  --line-soft:#1a2530;
+  --ink:#dfe8ef;
+  --ink-dim:#8ea3b3;
+  --ink-faint:#5d7385;
+  --accent:#3fb0ff;
+  --accent2:#7cf5c4;
+  --amber:#ffb454;
+  --violet:#b98cf2;
+  --red:#ff6b6b;
+  --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  --sans: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  --serif: "Fraunces", Georgia, serif;
+  --radius: 10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background: radial-gradient(1200px 800px at 10% -10%, #101c26 0%, var(--bg) 45%) fixed;
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:14.5px;
+  line-height:1.5;
+}
+@font-face{font-family:'Fraunces';src:local('Georgia');}
+
+/* ---------- Layout shell ---------- */
+.app{display:grid;grid-template-columns:280px 1fr;min-height:100vh;}
+.sidebar{
+  background:linear-gradient(180deg,#0d141c,#0a0f15);
+  border-right:1px solid var(--line);
+  padding:20px 16px 24px;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.brand{padding:4px 4px 18px;border-bottom:1px solid var(--line-soft);margin-bottom:14px;}
+.brand .kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--accent2);text-transform:uppercase;}
+.brand h1{font-family:var(--serif);font-weight:600;font-size:20px;line-height:1.15;margin:6px 0 4px;color:#f2f6f9;}
+.brand .sub{font-size:11.5px;color:var(--ink-dim);}
+
+.navgroup{margin-bottom:6px;}
+.navgroup-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);color:#5d7385;padding:14px 8px 6px;}
+.navitem{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 8px;border-radius:8px;cursor:pointer;
+  color:var(--ink-dim);font-size:13px;
+  border:1px solid transparent;
+}
+.navitem:hover{background:var(--panel2);color:var(--ink);}
+.navitem.active{background:#132030;color:#eaf4fb;border-color:var(--line);}
+.navitem .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);flex:none;}
+.navitem.active .dot{background:var(--accent);}
+.navitem .pct{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);}
+.navitem.module-status{margin:3px 0;padding:9px;border:1px solid transparent;border-radius:10px;transition:.2s;}
+.navitem.module-status:hover{transform:translateX(2px);}
+.navitem.module-status .dot{display:grid;place-items:center;width:23px;height:23px;border-radius:7px;font-size:12px;}
+.navitem.completed{color:#86efac;background:#0d281f;border-color:#1d5b42}.navitem.completed .dot{background:#14532d;color:#bbf7d0}
+.navitem.progress{color:#fde68a;background:#30250d;border-color:#715615}.navitem.progress .dot{background:#5b430c;color:#fef3c7}
+.navitem.pending{color:#fca5a5;background:#2b1117;border-color:#7f1d2d}.navitem.pending .dot{background:#5f1724;color:#fecaca}
+
+.main{padding:28px 34px 80px;max-width:1180px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+.topbar h2{font-family:var(--serif);font-size:26px;margin:0;color:#f4f8fb;}
+.topbar .meta{color:var(--ink-dim);font-size:12.5px;font-family:var(--mono);}
+
+.searchbar{display:flex;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 12px;margin-bottom:20px;}
+.searchbar input{flex:1;background:transparent;border:none;outline:none;color:var(--ink);font-size:13.5px;font-family:var(--sans);}
+.searchbar input::placeholder{color:var(--ink-faint);}
+.searchbar .kbd{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);border:1px solid var(--line);padding:1px 6px;border-radius:4px;}
+
+/* ---------- Dashboard cards ---------- */
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:26px;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;position:relative;overflow:hidden;}
+.card .label{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}
+.card .value{font-family:var(--serif);font-size:28px;color:#f2f7fa;margin-top:4px;}
+.card .bar{height:4px;border-radius:3px;background:var(--line-soft);margin-top:10px;overflow:hidden;}
+.card .bar > span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+
+.section-title{font-family:var(--serif);font-size:17px;color:#f0f5f8;margin:26px 0 10px;display:flex;align-items:center;gap:10px;}
+.section-title .rule{flex:1;height:1px;background:var(--line-soft);}
+
+.status-legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11.5px;color:var(--ink-dim);margin-bottom:18px;}
+.status-legend span{white-space:nowrap;}
+
+/* ---------- Module cards ---------- */
+.module{--module-accent:#38bdf8;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--module-accent);border-radius:12px;margin-bottom:14px;overflow:hidden;}
+.module:nth-of-type(6n+2){--module-accent:#a78bfa}.module:nth-of-type(6n+3){--module-accent:#34d399}.module:nth-of-type(6n+4){--module-accent:#fbbf24}.module:nth-of-type(6n+5){--module-accent:#fb7185}.module:nth-of-type(6n+6){--module-accent:#22d3ee}
+.module-head{background:linear-gradient(90deg,color-mix(in srgb,var(--module-accent) 13%,transparent),transparent 65%)}
+.module-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none;flex-wrap:wrap;}
+.module-head:hover{background:var(--panel2);}
+.module-head .chev{color:var(--ink-faint);transition:transform .15s;font-size:11px;width:12px;}
+.module.open .chev{transform:rotate(90deg);}
+.module-id{font-family:var(--mono);font-size:11px;color:var(--accent2);border:1px solid #1e3a33;background:#0e1c19;padding:2px 7px;border-radius:6px;flex:none;}
+.module-title{font-weight:600;font-size:14.5px;color:#eef4f8;flex:1;min-width:220px;}
+.module-title small{display:block;font-weight:400;color:var(--ink-faint);font-size:11px;margin-top:2px;font-family:var(--mono);} 
+.module-tags{display:flex;gap:6px;flex-wrap:wrap;max-width:100%;}
+.module-progress{width:110px;flex:none;text-align:right;margin-left:auto;}
+.cert-badge{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--cert-accent),color-mix(in srgb,var(--cert-accent) 65%,#ffffff 35%));color:#fff;font-weight:800;font-size:14px;letter-spacing:.04em;border:1px solid rgba(255,255,255,.16);box-shadow:0 10px 22px rgba(0,0,0,.18);flex:none;}
+.cert-card{display:flex;align-items:center;gap:12px;flex:1;min-width:0;flex-wrap:wrap;}
+.cert-meta{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1;}
+.module-body{display:none;border-top:1px solid var(--line-soft);padding:6px 16px 16px;flex-wrap:wrap;gap:8px;}
+.module.open .module-body{display:flex;}
+.module-body .tag{margin:0;}
+@media (max-width:860px){
+  .module-head{align-items:flex-start;}
+  .module-title{min-width:0;width:100%;}
+  .module-tags{width:100%;}
+  .module-progress{width:100%;margin-left:0;text-align:left;}
+  .cert-card{width:100%;}
+}
+
+.module-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.tag{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--ink-dim);white-space:nowrap;}
+.tag.level{color:var(--amber);border-color:#4a3520;background:#1c1710;}
+.tag.cert{color:var(--violet);border-color:#3a2c4a;background:#171220;}
+.module-progress{width:110px;flex:none;text-align:right;}
+.module-progress .pct-num{font-family:var(--mono);font-size:12px;color:var(--ink-dim);}
+.module-progress .bar{height:5px;border-radius:3px;background:var(--line-soft);margin-top:5px;overflow:hidden;}
+.module-progress .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.module-body{display:none;border-top:1px solid var(--line-soft);padding:6px 16px 16px;}
+.module.open .module-body{display:block;}
+@media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.sidebar,.toolbar,.searchbar,.tech-rail{display:none!important}.app{display:block}.main{padding:0;max-width:none}.module{break-inside:avoid}.module-body,.sublessons{display:block!important}}
+
+.chapter{margin-top:14px;}
+.chapter-title{font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;color:var(--ink-dim);text-transform:uppercase;margin-bottom:6px;padding-left:2px;border-left:2px solid var(--line);padding-left:8px;}
+
+.topic{border:1px solid var(--line-soft);border-radius:8px;margin-bottom:6px;background:#0d1420;}
+.topic-row{display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;}
+.topic-row:hover{background:#101a27;}
+.topic-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);flex:none;cursor:pointer;}
+.topic-name{flex:1;font-size:13px;color:var(--ink);}
+.topic-name.done{color:var(--ink-faint);text-decoration:line-through;}
+.topic-meta{display:flex;gap:6px;align-items:center;flex:none;}
+.difficulty-chip{font-family:var(--mono);font-size:9.5px;padding:1px 5px;border-radius:4px;border:1px solid var(--line);color:var(--ink-faint);}
+.expand-toggle{font-family:var(--mono);font-size:10px;color:var(--ink-faint);width:14px;text-align:center;}
+
+.sublessons{display:none;padding:4px 10px 10px 40px;border-top:1px dashed var(--line-soft);}
+.topic.expanded .sublessons{display:block;}
+.sublesson-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12.3px;color:var(--ink-dim);}
+.sublesson-row input[type=checkbox]{width:14px;height:14px;accent-color:var(--accent2);cursor:pointer;flex:none;}
+.sublesson-row label.done{color:var(--ink-faint);text-decoration:line-through;}
+
+.deferred-badge{font-family:var(--mono);font-size:9.5px;color:var(--red);border:1px solid #4a2323;background:#1c1212;padding:1px 6px;border-radius:4px;}
+.next-badge{font-family:var(--mono);font-size:9.5px;color:var(--accent);border:1px solid #1b3648;background:#0d1c26;padding:1px 6px;border-radius:4px;}
+
+.empty-hint{color:var(--ink-faint);font-size:12.5px;padding:20px 0;text-align:center;}
+
+.footer-note{margin-top:40px;padding-top:16px;border-top:1px solid var(--line-soft);color:var(--ink-faint);font-size:11.5px;line-height:1.7;}
+.footer-note code{font-family:var(--mono);background:var(--panel2);padding:1px 5px;border-radius:4px;}
+
+.toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.btn{font-family:var(--mono);font-size:11px;padding:7px 12px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--ink-dim);cursor:pointer;}
+.btn:hover{color:var(--ink);border-color:#334;background:var(--panel2);}
+.btn.primary{color:#03211a;background:linear-gradient(90deg,var(--accent2),#5be0ff);border:none;font-weight:600;}
+.btn.warn{color:var(--red);}
+
+.save-flag{font-family:var(--mono);font-size:10.5px;color:var(--accent2);opacity:0;transition:opacity .3s;}
+.save-flag.show{opacity:1;}
+
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-thumb{background:#1c2733;border-radius:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+.main{padding-right:calc(5vw + 92px)}.tech-rail{position:fixed;right:14px;top:50%;z-index:40;display:flex;transform:translateY(-50%);flex-direction:column;gap:9px;padding:10px;border:1px solid var(--line);border-radius:18px;background:#07111eee;box-shadow:0 18px 50px #0008;backdrop-filter:blur(14px)}.tech-title{font-size:8px;font-weight:900;letter-spacing:.14em;color:var(--ink-faint);text-align:center;text-transform:uppercase}.tech-logo{display:grid;place-items:center;width:44px;height:44px;border:1px solid #294564;border-radius:12px;background:#fff;padding:8px;transition:.2s;box-shadow:0 10px 24px rgba(0,0,0,.18)}.tech-logo:hover{transform:translateX(-4px) scale(1.08);border-color:var(--accent)}.tech-logo img{width:100%;height:100%;object-fit:contain}
+body{position:relative}.main{padding-right:5vw}.tech-rail{position:absolute;right:24px;top:24px;transform:none;flex-direction:row;align-items:center;gap:8px;padding:9px;border-radius:16px;background:#07111ed9}.tech-title{writing-mode:vertical-rl}.tech-logo{width:38px;height:38px;border-radius:10px;padding:7px}.tech-logo:hover{transform:translateY(-3px) scale(1.06)}
+
+@media (max-width:860px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{position:relative;height:auto;}
+  .main{padding:20px 16px 60px;}
+  .tech-rail{display:none;}
+}
+</style>
+</head>
+<body>
+<aside class="tech-rail" aria-label="Technology stack"><div class="tech-title">STACK</div><a class="tech-logo" title="Microsoft Azure"><img src="../brand-logos/stacks/microsoftazure.svg" alt="Microsoft Azure"></a><a class="tech-logo" title=".NET"><img src="../brand-logos/stacks/dotnet.svg" alt=".NET"></a><a class="tech-logo" title="C#"><img src="../brand-logos/stacks/csharp.svg" alt="C#"></a><a class="tech-logo" title="Docker"><img src="../brand-logos/stacks/docker.svg" alt="Docker"></a><a class="tech-logo" title="Kubernetes"><img src="../brand-logos/stacks/kubernetes.svg" alt="Kubernetes"></a><a class="tech-logo" title="Terraform"><img src="../brand-logos/stacks/terraform.svg" alt="Terraform"></a><a class="tech-logo" title="GitHub Actions"><img src="../brand-logos/stacks/github-actions.svg" alt="GitHub Actions"></a></aside>
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="kicker">Zero → Principal · 2026 Edition</div>
+      <h1>Azure Principal<br>Architect Mastery</h1>
+      <div class="sub">Curriculum · Lab Tracker · Portfolio System</div>
+    </div>
+
+    <div class="navgroup">
+      <div class="navitem active" data-view="dashboard"><span class="dot"></span> Master Dashboard</div>
+      <div class="navitem" data-view="next20"><span class="dot"></span> Next 20 Items</div>
+      <div class="navitem" data-view="certs"><span class="dot"></span> Certification Matrix</div>
+    </div>
+
+    <div class="navgroup-label">Modules</div>
+    <div id="moduleNav"></div>
+
+    <div class="navgroup-label">Views</div>
+    <div class="navitem" data-view="deferred"><span class="dot"></span> Deferred Items</div>
+    <div class="navitem" data-view="settings"><span class="dot"></span> Data · Import / Export</div>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+/* =========================================================================
+   AZURE PRINCIPAL ARCHITECT MASTERY — CURRICULUM DATA
+   ========================================================================= */
+
+const DEEP_FULL = ["Concept","Internal Mechanics","Portal Lab","CLI / PowerShell","Bicep","Terraform",".NET Integration","Security","Reliability & DR","Scaling & Performance","Observability","Cost Optimization","Troubleshooting","Industry Architecture","Production Checklist","Architect Decision Guide"];
+const DEEP_ASPIRE = DEEP_FULL.slice(0,6).concat([".NET Integration","Aspire Integration"]).concat(DEEP_FULL.slice(7));
+const DEEP_NOCODE = ["Concept","Internal Mechanics","Portal Lab","Security","Reliability & DR","Scaling & Performance","Observability","Cost Optimization","Troubleshooting","Industry Architecture","Production Checklist","Architect Decision Guide"];
+const DEEP_TRIGGER = ["Concept","Internal Mechanics","Configuration",".NET Isolated Example","Idempotency & Delivery Semantics","Retry / DLQ / Poison Handling","Security","Scaling & Performance","Observability","Cost","Troubleshooting","Industry Scenario","Production Checklist"];
+const DEEP_AI = ["Concept","API / SDK",".NET Integration","Authentication & Managed Identity","Networking & Private Endpoint","Quota & Cost","Observability","Responsible AI","Industry Scenario","Production Checklist"];
+
+function t(name, opts){ opts = opts || {}; return Object.assign({name, deep:false}, opts); }
+function d(name, lessons, opts){ opts = opts || {}; return Object.assign({name, deep:true, lessons}, opts); }
+
+// Difficulty shorthand: L1 Foundation .. L6 Principal
+const MODULES = [
+{id:"M0", title:"Program Orientation & Architecture Thinking", level:"L1", certs:[], chapters:[
+  {title:"Role Map & Career Architecture", topics:[
+    t("Cloud career role map"), t("Azure Administrator vs Developer vs Architect"),
+    t("Solution Architect vs Enterprise Architect"), t("AI Architect vs Principal Architect"),
+  ]},
+  {title:"Architecture Thinking Fundamentals", topics:[
+    t("Functional vs non-functional requirements"), t("Business requirements discovery"),
+    t("Constraint analysis"), t("Architecture trade-offs"), t("Architecture Decision Records (ADR)"),
+    t("Technical debt"), t("Build vs buy decisions"),
+  ]},
+  {title:"Reliability & Financial Vocabulary", topics:[
+    t("SLA, SLO and SLI"), t("RTO and RPO"), t("CAPEX vs OPEX"), t("Total Cost of Ownership (TCO)"),
+    t("Risk registers"), t("Architecture review boards"),
+  ]},
+  {title:"Documentation & Modeling Standards", topics:[
+    t("Documentation standards"), t("C4 Model"), t("UML awareness"), t("Sequence diagrams"),
+    t("Data-flow diagrams"), t("Threat modeling diagrams"), t("Azure architecture icon standards"),
+    t("Microsoft Well-Architected Framework — introduction"),
+  ]},
+]},
+
+{id:"M1", title:"Cloud & Azure Foundations", level:"L1", certs:["AZ-900"], chapters:[
+  {title:"Cloud Computing Fundamentals", topics:[
+    t("Public / Private / Hybrid / Multi-cloud"), t("Edge computing"), t("Distributed computing fundamentals"),
+    t("IaaS, PaaS, SaaS, FaaS, CaaS, Serverless"), t("Shared Responsibility Model"),
+    t("Cloud economics & consumption models"), t("Elasticity vs scalability"),
+    t("High availability, fault tolerance, DR, business continuity"),
+  ], status:"done"},
+  {title:"Azure Global Infrastructure", topics:[
+    t("Geographies, regions, region pairs"), t("Availability Zones"), t("Edge Zones"), t("Datacenters"),
+    t("Sovereign clouds — Azure Government / China awareness"), t("Service regional availability"),
+    t("Data residency & latency considerations"),
+  ], status:"done"},
+  {title:"Azure Resource Manager", topics:[
+    t("Control plane vs data plane"), t("Resource providers & resources"), t("Resource IDs"),
+    t("Subscriptions, Resource Groups, Management Groups, tenants"), t("Tags & naming standards"),
+    t("Resource locks"), t("Quotas & limits"), t("Azure Resource Graph"), t("ARM deployment model"),
+  ], status:"done"},
+]},
+
+{id:"M2", title:"Identity, Access & Zero Trust", level:"L3", certs:["AZ-104","AZ-500","SC-300"], chapters:[
+  {title:"Microsoft Entra ID Fundamentals", topics:[
+    t("Tenant architecture"), t("Users, groups, administrative units"), t("Devices"),
+    t("Enterprise Applications & App Registrations"), t("Service Principals"),
+    d("Managed Identities (system & user-assigned)", DEEP_NOCODE, {netnote:true}),
+    t("Workload identity federation"),
+  ]},
+  {title:"Authentication Protocols", topics:[
+    t("OAuth 2.0"), t("OpenID Connect"), t("SAML"), t("JWT structure"),
+    t("Access / ID / refresh tokens"), t("Authorization Code Flow"), t("Client Credentials Flow"),
+    t("On-Behalf-Of Flow"), t("Device Code Flow"),
+  ]},
+  {title:"Authorization — RBAC", topics:[
+    d("Azure RBAC — management & data plane", DEEP_NOCODE),
+    t("Custom roles"), t("Role inheritance"), t("Deny assignments"),
+  ]},
+  {title:"Identity Security", topics:[
+    t("Multi-factor authentication"), t("Passwordless authentication"),
+    d("Conditional Access architecture", DEEP_NOCODE),
+    t("Identity Protection"), t("Privileged Identity Management (PIM)"), t("Access Reviews"),
+    t("Entitlement Management"), t("Lifecycle Workflows"),
+    t("External Identities — B2B"), t("B2C / External ID architecture"),
+  ]},
+  {title:"Zero Trust Architecture", topics:[
+    t("Verify explicitly / least privilege / assume breach"), t("Identity segmentation"),
+    t("Privileged access strategy"), t("Break-glass accounts"),
+  ]},
+  {title:"Applied Identity Labs", topics:[
+    t(".NET — DefaultAzureCredential & ManagedIdentityCredential"), t("Microsoft Graph SDK examples"),
+    t("Banking identity architecture case study"), t("SaaS multi-tenant identity architecture case study"),
+  ]},
+]},
+
+{id:"M3", title:"Governance, Landing Zones & Policy", level:"L4", certs:["AZ-305","AZ-500"], chapters:[
+  {title:"Management Group & Landing Zone Architecture", topics:[
+    t("Management Group hierarchy design"), t("Subscription vending"),
+    t("Platform vs workload subscriptions"), t("Enterprise-scale landing zones — conceptual architecture"),
+  ]},
+  {title:"Azure Policy", topics:[
+    d("Policy definitions, initiatives & assignments", DEEP_NOCODE),
+    t("Effects — Audit, Deny, Modify, DeployIfNotExists"), t("Remediation tasks"),
+    t("Policy exemptions"), t("Policy as Code"), t("Guest Configuration / Machine Configuration"),
+  ]},
+  {title:"Governance Controls", topics:[
+    t("Resource locks & tags at scale"), t("Naming conventions"), t("Cost allocation"),
+    t("RBAC governance"), t("Azure Resource Graph queries"), t("Template Specs"),
+    t("Deployment Stacks"), t("Blueprint → Landing Zone migration awareness")
+  ]},
+  {title:"Industry Landing Zone Architectures", topics:[
+    t("Large enterprise multi-BU landing zone"), t("Banking landing zone"),
+    t("Healthcare regulated landing zone"), t("SaaS organization landing zone"),
+  ]},
+]},
+
+{id:"M4", title:"Azure Networking", level:"L4", certs:["AZ-104","AZ-305"], chapters:[
+  {title:"Core Networking", topics:[
+    d("Virtual Network — address space, subnetting, IP planning", DEEP_FULL.filter(x=>x!==".NET Integration"), {status:"done"}),
+    d("Network Security Groups (NSG) & Application Security Groups (ASG)", DEEP_FULL.filter(x=>x!==".NET Integration"), {status:"done"}),
+    d("Route Tables / UDRs & system routes", DEEP_FULL.filter(x=>x!==".NET Integration"), {status:"done"}),
+    t("BGP fundamentals"), t("Service Tags"),
+    d("VNet peering — regional & global", DEEP_NOCODE, {status:"done"}),
+    t("Hub-and-spoke topology"), t("Mesh networking"),
+  ]},
+  {title:"Traffic Distribution", topics:[
+    d("Azure Load Balancer (public & internal)", DEEP_FULL.filter(x=>x!==".NET Integration"), {status:"done"}),
+    d("Application Gateway + WAF", DEEP_FULL.filter(x=>x!==".NET Integration"), {status:"done"}),
+    d("Azure Front Door + WAF", DEEP_FULL.filter(x=>x!==".NET Integration"), {status:"done"}),
+    d("Traffic Manager", DEEP_NOCODE, {status:"done"}),
+    t("Cross-region load balancing patterns"),
+  ]},
+  {title:"DNS", topics:[
+    d("Azure DNS & Private DNS Zones", DEEP_NOCODE, {status:"done"}),
+    t("Private DNS resolution & split-horizon DNS"), t("Hybrid DNS"),
+    t("DNS Private Resolver", {deferred:true}),
+  ]},
+  {title:"Hybrid Networking", topics:[
+    d("VPN Gateway — S2S / P2S / VNet-to-VNet / active-active", DEEP_FULL.filter(x=>x!==".NET Integration"), {status:"done"}),
+    t("BGP over VPN"),
+    d("ExpressRoute — circuits, private peering, FastPath", DEEP_FULL.filter(x=>x!==".NET Integration"), {deferred:true}),
+    d("Virtual WAN & Secured Virtual Hub", DEEP_NOCODE, {deferred:true}),
+  ]},
+  {title:"Secure Networking", topics:[
+    d("NAT Gateway", DEEP_NOCODE, {status:"done"}),
+    d("Azure Bastion", DEEP_NOCODE, {status:"done"}),
+    d("Azure Firewall & Firewall Policy (incl. TLS inspection, IDPS)", DEEP_FULL.filter(x=>x!==".NET Integration"), {status:"done"}),
+    d("Web Application Firewall — advanced rules", DEEP_NOCODE, {status:"done"}),
+    t("DDoS Protection"),
+    d("Private Link & Private Endpoint", DEEP_FULL.filter(x=>x!==".NET Integration"), {deferred:true}),
+    t("Service Endpoints"),
+    d("Network Watcher & Connection Monitor", DEEP_NOCODE, {deferred:true}),
+    t("NSG Flow Logs / current traffic-analytics architecture", {deferred:true}),
+  ]},
+  {title:"Networking Decision Frameworks", topics:[
+    t("Packet flow inbound/outbound reasoning per service"),
+    t("SNAT/DNAT behaviour & exhaustion troubleshooting"),
+    t("Multi-region network architecture"),
+    t("Advanced hybrid networking capstone", {deferred:true}),
+  ]},
+]},
+
+{id:"M5", title:"Azure Compute", level:"L4", certs:["AZ-104","AZ-305"], chapters:[
+  {title:"Virtual Machines — Core", topics:[
+    d("VM architecture — host/guest boundary, disks, NICs", DEEP_FULL, {status:"done"}),
+    t("VM sizes & families (general/compute/memory/storage/GPU/HPC/burstable)"),
+    t("Accelerated Networking / SR-IOV"), t("Host caching, IOPS, throughput, latency"),
+    t("Ephemeral OS disks"), t("Spot VMs, Reserved Instances, Savings Plans"),
+  ]},
+  {title:"VM Resiliency", topics:[
+    d("Availability Sets — fault & update domains", DEEP_NOCODE, {status:"done"}),
+    d("Availability Zones for compute", DEEP_NOCODE, {status:"done"}),
+    d("Virtual Machine Scale Sets — uniform & flexible orchestration", DEEP_FULL, {status:"done"}),
+    t("Proximity Placement Groups"), t("Autoscale, health probes, rolling upgrades"),
+  ]},
+  {title:"Enterprise VM Operations", topics:[
+    t("Azure Compute Gallery & image versioning/replication"), t("Image Builder & cloud-init"),
+    t("VM Extensions"), t("Azure Update Manager & patch orchestration"),
+    t("Azure Backup & Site Recovery for VMs"), t("Disk encryption, Trusted Launch, Secure Boot, vTPM"),
+    t("Confidential VM awareness"), t("Dedicated Hosts"),
+  ]},
+]},
+
+{id:"M6", title:"Azure App Service", level:"L4", certs:["AZ-204","AZ-305"], chapters:[
+  {title:"App Service Core", topics:[
+    d("App Service Plans, tiers, workers, scale up/out", DEEP_ASPIRE, {status:"done"}),
+    t("Deployment slots, slot settings, blue-green/canary"), t("Health Check & Always On"),
+    t("Application settings, connection strings, Key Vault references"), t("Easy Auth"),
+    t("Custom domains & TLS certificates"),
+  ]},
+  {title:"App Service Networking", topics:[
+    t("Inbound networking & access restrictions"), t("Private Endpoint (inbound)"),
+    t("Outbound VNet Integration, Route All"), t("NAT Gateway / Azure Firewall integration"),
+  ]},
+  {title:"App Service Operations", topics:[
+    t("Application Insights & OpenTelemetry for App Service"), t("Kudu & diagnostics"),
+    t("Backup & restore"), t("Multi-region + Front Door + WAF architecture"), t("DR & cost optimization"),
+  ]},
+  {title:"App Service — .NET & Industry", topics:[
+    t("ASP.NET Core deployment, config, Managed Identity, health checks"),
+    t("CI/CD, Bicep, Terraform for App Service"), t(".NET Aspire → App Service integration"),
+    t("Industry: SaaS, e-commerce, banking, healthcare, B2B API platform"),
+  ]},
+]},
+
+{id:"M7", title:"Azure Functions & Serverless Architecture", level:"L5", certs:["AZ-204","AZ-305"], chapters:[
+  {title:"Functions Core Architecture", topics:[
+    d("Function App hosting models — Flex Consumption, Premium, Dedicated", DEEP_ASPIRE, {status:"done"}),
+    t("Scale controller, cold starts, pre-warmed instances, concurrency"),
+    t("host.json / local.settings.json"), t(".NET isolated worker model & Dependency Injection"),
+    t("OpenTelemetry & Application Insights for Functions"),
+  ]},
+  {title:"Trigger Master Track — 1. HTTP", topics:[
+    d("HTTP Trigger — REST, webhooks, auth, routing, CORS, APIM, idempotency", DEEP_TRIGGER, {status:"done"}),
+  ]},
+  {title:"Trigger Master Track — 2. Timer", topics:[
+    d("Timer Trigger — NCRONTAB, scheduling, time zones, singleton behaviour", DEEP_TRIGGER, {status:"done"}),
+  ]},
+  {title:"Trigger Master Track — 3. Queue Storage", topics:[
+    d("Queue Storage Trigger — visibility timeout, poison queues, dedupe", DEEP_TRIGGER, {status:"done"}),
+  ]},
+  {title:"Trigger Master Track — 4. Service Bus", topics:[
+    d("Service Bus Trigger — sessions, DLQ, transactions, duplicate detection", DEEP_TRIGGER, {status:"done"}),
+  ]},
+  {title:"Trigger Master Track — 5. Event Hubs", topics:[
+    d("Event Hubs Trigger — partitions, checkpointing, throughput/capacity units", DEEP_TRIGGER, {status:"done"}),
+  ]},
+  {title:"Trigger Master Track — 6. Blob Storage", topics:[
+    d("Blob Storage Trigger — Event Grid–based, path patterns, ADLS Gen2", DEEP_TRIGGER, {status:"done"}),
+  ]},
+  {title:"Trigger Master Track — 7. Cosmos DB", topics:[
+    d("Cosmos DB Trigger — Change Feed, lease containers, ordering, RU impact", DEEP_TRIGGER, {status:"done"}),
+  ]},
+  {title:"Trigger Master Track — 8. Event Grid", topics:[
+    d("Event Grid Trigger — topics, domains, CloudEvents, dead-lettering", DEEP_TRIGGER, {status:"done"}),
+  ]},
+  {title:"Trigger Master Track — 9. IoT Hub", topics:[
+    d("IoT Hub Trigger — device-to-cloud, routing, device twins, partitions", DEEP_TRIGGER, {status:"next"}),
+  ]},
+  {title:"Trigger Master Track — 10. SignalR / Web PubSub", topics:[
+    d("SignalR / Web PubSub — negotiation, groups, real-time dashboards", DEEP_TRIGGER, {status:"next"}),
+  ]},
+  {title:"Trigger Master Track — 11. Durable Functions", topics:[
+    d("Durable Functions — orchestrator/activity/entity, fan-out/fan-in, saga", DEEP_TRIGGER, {status:"next"}),
+  ]},
+  {title:"Trigger Master Track — 12. Administrative Patterns", topics:[
+    t("Manual invocation, admin APIs, safe production practices", {status:"next"}),
+  ]},
+  {title:"Trigger Decision Framework", topics:[
+    t("Trigger comparison / decision matrix across all trigger types", {status:"next"}),
+    t("End-to-end trigger selection case studies", {status:"next"}),
+  ]},
+  {title:"Functions Advanced Track", topics:[
+    t("Outbox / inbox / saga / compensation patterns"), t("Correlation IDs & distributed tracing"),
+    t("Multi-region design & DR for Functions"), t("Azurite & local testing"),
+    t("Load testing & chaos testing for Functions"),
+    t("Security — Private Endpoint, VNet Integration, Key Vault, Managed Identity, APIM"),
+  ]},
+]},
+
+{id:"M8", title:"Containers & Orchestration", level:"L5", certs:["AZ-204","AZ-305"], chapters:[
+  {title:"Container Fundamentals & Registry", topics:[
+    t("Docker architecture, OCI images, image layers"),
+    d("Azure Container Registry — Tasks, geo-replication, Private Link", DEEP_NOCODE),
+  ]},
+  {title:"Azure Container Apps", topics:[
+    d("Container Apps environment, revisions, traffic splitting, KEDA, Dapr", DEEP_ASPIRE),
+    t("Container Apps Jobs"), t("Private environments & secrets"),
+    t(".NET & Aspire deployment to Container Apps"),
+  ]},
+  {title:"Azure Kubernetes Service (AKS)", topics:[
+    d("AKS control plane, nodes, node pools, workload architecture", DEEP_FULL),
+    t("Azure CNI / Cilium networking & Network Policies"), t("Private AKS & ACR integration"),
+    t("Persistent volumes, CSI drivers, Key Vault CSI"),
+    t("Autoscaling — HPA / Cluster Autoscaler / KEDA"),
+    t("Helm & GitOps (Flux)"), t("Azure Policy for AKS & Defender for Containers"),
+    t("Container Insights, Prometheus, Managed Grafana"),
+    t("Cluster & node image upgrades"), t("Multi-region AKS & DR"), t("Platform engineering on AKS"),
+  ]},
+]},
+
+{id:"M9", title:"Storage, Backup & Disaster Recovery", level:"L4", certs:["AZ-104","AZ-305"], chapters:[
+  {title:"Storage Accounts", topics:[
+    d("Blob, Files, Queue, Table Storage & ADLS Gen2", DEEP_ASPIRE),
+    t("Access tiers & lifecycle management (Hot/Cool/Cold/Archive)"),
+    t("Object replication, versioning, soft delete, immutable storage (WORM)"),
+    t("SAS — user delegation vs shared key risks"),
+    t("Encryption — customer-managed keys"),
+    t("Replication — LRS / ZRS / GRS / RA-GRS / GZRS / RA-GZRS"),
+  ]},
+  {title:"Backup & Disaster Recovery", topics:[
+    d("Azure Backup — Backup Vault & Recovery Services Vault policies", DEEP_NOCODE),
+    t("Immutable vault & soft delete for backups"),
+    d("Azure Site Recovery — failover, test failover, failback", DEEP_NOCODE),
+    t("RPO/RTO design across storage & DR tiers"),
+  ]},
+]},
+
+{id:"M10", title:"Databases & Caching", level:"L5", certs:["AZ-305","DP-100"], chapters:[
+  {title:"Azure SQL Database & Managed Instance", topics:[
+    d("Azure SQL Database — DTU/vCore/Serverless/Hyperscale, Elastic Pools", DEEP_FULL),
+    t("Geo-replication & Failover Groups"), t("Microsoft Entra auth, auditing, Defender, TDE"),
+    t("SQL Managed Instance migration & networking"),
+  ]},
+  {title:"Open-Source Databases", topics:[
+    d("PostgreSQL Flexible Server — HA, read replicas, PgBouncer", DEEP_NOCODE),
+    t("MySQL Flexible Server awareness"),
+  ]},
+  {title:"Cosmos DB", topics:[
+    d("Cosmos DB — global distribution, consistency models, partitioning", DEEP_FULL),
+    t("RU/s, autoscale, serverless, indexing"), t("Change Feed & multi-region writes / conflict resolution"),
+    t("Data modeling for Cosmos DB"),
+  ]},
+  {title:"Caching", topics:[
+    d("Azure Managed Redis / current caching portfolio", DEEP_NOCODE),
+    t("Cache-aside, write-through, write-behind patterns"), t("Session state & distributed cache HA"),
+  ]},
+]},
+
+{id:"M11", title:"Integration, Messaging & API Architecture", level:"L5", certs:["AZ-204","AZ-305"], chapters:[
+  {title:"Messaging Services", topics:[
+    t("Service Bus — queues, topics, subscriptions, sessions, transactions"),
+    t("Event Grid — topics, domains, CloudEvents"),
+    t("Event Hubs — streaming ingestion"), t("Logic Apps for integration workflows"),
+  ]},
+  {title:"API Management (APIM)", topics:[
+    d("APIM gateway, policies, products, subscriptions, versioning/revisions", DEEP_FULL),
+    t("OAuth/JWT validation, rate limiting, quotas, caching, transformation"),
+    t("Developer portal & self-hosted gateway awareness"),
+    t("Private & multi-region APIM architecture"), t("API governance"),
+  ]},
+  {title:"Integration Architecture Patterns", topics:[
+    t("Request-response / queue-based load leveling / competing consumers"),
+    t("Pub/sub, event sourcing, CQRS"), t("Saga — choreography vs orchestration"),
+    t("Outbox, idempotent consumer, dead-letter channel"),
+  ]},
+]},
+
+{id:"M12", title:"DevOps, Platform Engineering & IaC", level:"L5", certs:["AZ-400"], chapters:[
+  {title:"Source Control & Workflow", topics:[
+    t("Git fundamentals & branching strategies"), t("Trunk-based development / GitFlow awareness"),
+    t("Pull requests, code review, semantic versioning"),
+  ]},
+  {title:"CI/CD Platforms", topics:[
+    t("Azure DevOps — Repos, Pipelines, Artifacts, Environments, Approvals"),
+    t("GitHub Actions — OIDC federation, environments, secrets, reusable workflows"),
+    t("CI/CD stages — build, test, scan, deploy, validate, promote, rollback"),
+    t("Deployment strategies — rolling, blue-green, canary, ring, feature flags"),
+  ]},
+  {title:"Infrastructure as Code", topics:[
+    d("Bicep — modules, registries, deployment stacks, what-if, linting, AVM", DEEP_NOCODE),
+    d("Terraform — state, remote state, modules, providers, plan/apply, drift", DEEP_NOCODE),
+    t("Policy as Code"),
+  ]},
+  {title:"Platform Engineering", topics:[
+    t("Internal Developer Platforms & golden paths"), t("Self-service environments & templates"),
+    t("Azure Deployment Environments / Developer CLI awareness"), t("GitOps"),
+  ]},
+]},
+
+{id:"M13", title:"Security & Cyber Defense", level:"L6", certs:["AZ-500","SC-100"], chapters:[
+  {title:"Security Foundations", topics:[
+    t("Zero Trust & Defense in Depth"), t("Threat modeling — STRIDE"), t("Attack surface analysis"),
+    t("Microsoft Cloud Security Benchmark awareness"),
+  ]},
+  {title:"Defender for Cloud", topics:[
+    d("Secure Score, recommendations, regulatory compliance, workload plans", DEEP_NOCODE),
+  ]},
+  {title:"Microsoft Sentinel", topics:[
+    t("Workspaces & data connectors"), t("Analytics rules & incidents"),
+    t("Automation rules & playbooks"), t("Hunting & KQL fundamentals"), t("UEBA awareness"),
+  ]},
+  {title:"Key Vault & Encryption", topics:[
+    d("Key Vault — secrets, keys, certificates, RBAC, rotation, purge protection", DEEP_ASPIRE),
+    t("Managed HSM"), t("Disk & storage encryption, CMK, double encryption awareness"),
+    t("Confidential Computing & Trusted Launch"),
+  ]},
+  {title:"Network & Application Security", topics:[
+    t("DDoS Protection, WAF, Firewall — architecture review integration"),
+    t("Security architecture review methodology"),
+  ]},
+]},
+
+{id:"M14", title:"Monitoring, Observability & SRE", level:"L5", certs:["AZ-305","AZ-400"], chapters:[
+  {title:"Azure Monitor Platform", topics:[
+    d("Metrics, logs, Activity Log, Diagnostic Settings", DEEP_NOCODE),
+    t("Log Analytics Workspace & KQL"),
+    d("Application Insights & OpenTelemetry (traces, dependencies, correlation)", DEEP_ASPIRE),
+    t("Dashboards, Workbooks, alerts, action groups"),
+    t("Prometheus, Managed Grafana, Container/VM Insights"),
+  ]},
+  {title:"SRE Practice", topics:[
+    t("SLI/SLO/SLA & error budgets"), t("Golden Signals — RED / USE methods"),
+    t("Incident management & postmortems"), t("Runbooks & on-call design"),
+    t("Chaos engineering & Azure Chaos Studio"), t("Load testing & capacity planning"),
+  ]},
+]},
+
+{id:"M15", title:"FinOps & Cost Architecture", level:"L5", certs:["AZ-104","AZ-305"], chapters:[
+  {title:"Cost Management Platform", topics:[
+    t("Cost Analysis, budgets, alerts, tags"), t("Chargeback & showback models"),
+    t("Reservations, Savings Plans, Azure Hybrid Benefit, Spot VMs"),
+  ]},
+  {title:"Cost Engineering", topics:[
+    t("Storage lifecycle & autoscaling for cost"), t("Rightsizing & orphan resource detection"),
+    t("Egress, network, logging, database cost drivers"),
+    t("AI token cost & GPU cost modeling"),
+  ]},
+  {title:"FinOps Framework & Unit Economics", topics:[
+    t("FinOps Framework awareness"), t("Unit economics — cost per tenant / API call / transaction / AI request"),
+  ]},
+]},
+
+{id:"M16", title:"Hybrid, Multicloud & Edge", level:"L5", certs:["AZ-104","AZ-305"], chapters:[
+  {title:"Azure Arc", topics:[
+    t("Arc-enabled Servers, Kubernetes, Data Services"),
+    t("Azure Policy / Monitor / Defender with Arc"), t("Hybrid update management & governance"),
+  ]},
+  {title:"Cross-Tenant & Edge", topics:[
+    t("Azure Lighthouse — delegated resource management, MSP architecture"),
+    t("Azure Local awareness & disconnected edge scenarios"),
+    t("Hybrid identity, DNS, and networking"),
+  ]},
+]},
+
+{id:"M17", title:"Data Engineering & Analytics", level:"L5", certs:["DP-100"], chapters:[
+  {title:"Data Integration Platforms", topics:[
+    t("Azure Data Factory — linked services, pipelines, activities, IR, triggers"),
+    t("Azure Databricks — Lakehouse, Delta Lake, medallion architecture, Unity Catalog"),
+    t("Azure Synapse Analytics — serverless/dedicated SQL, pipelines, Spark"),
+  ]},
+  {title:"Microsoft Fabric & Governance", topics:[
+    t("Microsoft Fabric — OneLake, Lakehouse, Warehouse, Real-Time Intelligence"),
+    t("Microsoft Purview — Data Map, catalog, classification, lineage"),
+    t("Stream Analytics & Event Hubs real-time architectures"),
+  ]},
+]},
+
+{id:"M18", title:"Azure AI Services", level:"L5", certs:["AI-102"], chapters:[
+  {title:"Cognitive / AI Services Portfolio", topics:[
+    d("Azure AI Vision", DEEP_AI), d("Azure AI Speech", DEEP_AI),
+    d("Azure AI Language", DEEP_AI), d("Azure AI Translator", DEEP_AI),
+    d("Azure AI Document Intelligence", DEEP_AI), d("Azure AI Content Safety", DEEP_AI),
+  ]},
+]},
+
+{id:"M19", title:"Azure OpenAI & Generative AI", level:"L6", certs:["AI-102"], chapters:[
+  {title:"Model Concepts", topics:[
+    t("Tokenization, context windows, embeddings"), t("Temperature, top-p, stop sequences"),
+    t("Structured outputs & tool/function calling"), t("Prompt engineering — system & few-shot prompting"),
+    t("Grounding & content filters / safety"),
+  ]},
+  {title:"Deployment & Operations", topics:[
+    t("Model deployment, quota, PTU awareness"), t("Latency, token cost, caching, streaming, retries/fallbacks"),
+  ]},
+  {title:".NET & Architecture", topics:[
+    t(".NET — Azure OpenAI SDK, Semantic Kernel, Microsoft.Extensions.AI"),
+    t("OpenTelemetry for GenAI & prompt versioning / evaluation"),
+    t("AI Gateway, model router, multi-model & fallback architecture"),
+    t("AI observability, prompt management, token budgets, PII handling, enterprise governance"),
+  ]},
+]},
+
+{id:"M20", title:"Azure AI Search & Enterprise RAG", level:"L6", certs:["AI-102"], chapters:[
+  {title:"Azure AI Search Fundamentals", topics:[
+    d("Indexes, fields, analyzers, indexers, data sources, skillsets", DEEP_AI),
+    t("Semantic ranking, vector search, hybrid search, filtering, facets"),
+    t("Integrated vectorization, chunking & embedding models"),
+  ]},
+  {title:"Enterprise RAG Pipeline", topics:[
+    t("Ingestion → parsing → chunking → embedding → indexing"),
+    t("Retrieval, reranking, prompt assembly, generation, citation"),
+    t("RAG evaluation & observability"),
+    t("Security trimming & document-level authorization for multi-tenancy"),
+  ]},
+  {title:".NET RAG Implementation", topics:[
+    t(".NET RAG implementation & Aspire orchestration"),
+    t("Blob + Functions + AI Search event-driven indexing pipeline"),
+    t("Vector DB alternatives awareness (e.g. Qdrant)"),
+  ]},
+]},
+
+{id:"M21", title:"Azure Machine Learning & MLOps", level:"L6", certs:["DP-100"], chapters:[
+  {title:"Azure ML Platform", topics:[
+    t("Workspace, compute instances/clusters, data assets, environments"),
+    t("Components, pipelines, jobs, MLflow, Model Registry"),
+    t("Managed Online / Batch Endpoints"), t("AutoML & Responsible AI Dashboard awareness"),
+  ]},
+  {title:"MLOps Practice", topics:[
+    t("Feature engineering concepts & drift monitoring"),
+    t("MLOps CI/CD — model promotion, blue-green & canary deployment"),
+  ]},
+]},
+
+{id:"M22", title:"Azure AI Foundry & Agentic AI", level:"L6", certs:["AI-102"], chapters:[
+  {title:"AI Foundry Platform", topics:[
+    t("Foundry projects, models, Prompt Flow, evaluation, tracing, safety"),
+  ]},
+  {title:"Agent Architecture", topics:[
+    t("Tools, memory concepts, grounding, RAG agents"),
+    t("Multi-agent architecture — planner-executor patterns"),
+    t("Human-in-the-loop, approval gates, long-running/durable agent execution"),
+    t("Agent observability & security — prompt injection defense, data exfiltration, tool authorization, cost controls"),
+  ]},
+  {title:".NET Agent Implementation", topics:[
+    t("Semantic Kernel & Microsoft Agent Framework awareness"),
+    t("Aspire orchestration for agent platforms"),
+    t("Enterprise agent platform architecture"),
+  ]},
+]},
+
+{id:"M23", title:".NET Cloud-Native Architecture", level:"L5", certs:["AZ-204"], chapters:[
+  {title:"Modern ASP.NET Core", topics:[
+    t("Minimal APIs vs controllers, Dependency Injection, Options Pattern"),
+    t("HttpClientFactory & resilience pipelines"), t("Background Services & Health Checks"),
+    t("OpenTelemetry, auth/authz, Managed Identity"),
+    t("Microsoft.Extensions.Azure & Microsoft.Extensions.AI"),
+  ]},
+  {title:"Architecture Styles", topics:[
+    t("Clean Architecture & Vertical Slice Architecture"), t("Modular Monolith vs Microservices"),
+    t("Domain-Driven Design & CQRS (MediatR awareness)"),
+    t("Outbox / Inbox / Saga & event-driven architecture"),
+    t("API Gateway, BFF, multi-tenancy patterns"),
+  ]},
+]},
+
+{id:"M24", title:".NET Aspire", level:"L5", certs:["AZ-204"], chapters:[
+  {title:"Aspire Fundamentals", topics:[
+    t("AppHost & ServiceDefaults"), t("Resource model, references, dependencies"),
+    t("Service discovery, configuration, parameters, secrets"),
+    t("Containers & persistent volumes — Postgres, Redis, RabbitMQ"),
+    t("Azure resource integrations"), t("OpenTelemetry, health checks, Aspire dashboard, testing"),
+    t("Deployment to Azure Container Apps / AKS awareness"),
+  ]},
+  {title:"Aspire Reference Architectures", topics:[
+    t("Modular monolith reference architecture"), t("Microservices reference architecture"),
+    t("Event-driven platform reference architecture"),
+    t("RAG platform reference architecture"), t("Multi-agent AI platform reference architecture"),
+    t("SaaS platform reference architecture"),
+  ]},
+]},
+
+{id:"M25", title:"Well-Architected & Enterprise Design", level:"L6", certs:["AZ-305"], chapters:[
+  {title:"Well-Architected Pillars", topics:[
+    t("Reliability — principles, trade-offs, anti-patterns"),
+    t("Security — principles, trade-offs, anti-patterns"),
+    t("Cost Optimization — principles, trade-offs, anti-patterns"),
+    t("Operational Excellence — principles, trade-offs, anti-patterns"),
+    t("Performance Efficiency — principles, trade-offs, anti-patterns"),
+  ]},
+  {title:"Cloud Adoption Framework", topics:[
+    t("Strategy → Plan → Ready → Adopt → Govern → Secure → Manage"),
+  ]},
+  {title:"Canonical Architecture Patterns", topics:[
+    t("N-tier, microservices, event-driven, serverless"),
+    t("CQRS, event sourcing, saga"), t("Bulkhead, circuit breaker, retry, timeout, rate limiting"),
+    t("Cache-aside, queue-based load leveling, competing consumers, pub/sub"),
+    t("Strangler Fig, sidecar, ambassador, anti-corruption layer"),
+  ]},
+]},
+
+{id:"M26", title:"Industry Architecture Case Studies", level:"L6", certs:["AZ-305"], chapters:[
+  {title:"Banking", topics:[t("Digital banking, payments, fraud detection, KYC, reconciliation, regulatory logging, DR")]},
+  {title:"Healthcare", topics:[t("Patient portals, secure medical records, document processing, AI clinical workflows, privacy architecture")]},
+  {title:"Retail & E-commerce", topics:[t("Catalog, cart, checkout, order processing, inventory, personalization, Black Friday scaling")]},
+  {title:"SaaS", topics:[t("Multi-tenancy, tenant isolation models, feature flags, usage metering, billing, global deployment")]},
+  {title:"Manufacturing & IoT", topics:[t("Telemetry ingestion, digital twin awareness, predictive maintenance, edge processing")]},
+  {title:"Logistics", topics:[t("Shipment tracking, route events, real-time dashboards, geospatial awareness")]},
+  {title:"Media", topics:[t("Upload, transcoding, metadata, CDN, content moderation, recommendations")]},
+  {title:"AI Platform", topics:[t("Model gateway, multi-model routing, RAG, agents, observability, safety, cost control")]},
+]},
+
+{id:"M27", title:"Architect Labs & Capstone Projects", level:"L6", certs:["AZ-305","AZ-400"], chapters:[
+  {title:"Capstone Portfolio", topics:[
+    t("01 — Secure Azure Landing Zone"), t("02 — Enterprise Hub-and-Spoke Network"),
+    t("03 — Multi-region Web Application"), t("04 — Banking Transaction Platform"),
+    t("05 — Event-driven E-commerce Platform"), t("06 — Enterprise AKS Platform"),
+    t("07 — Azure Container Apps Microservices Platform"), t("08 — Serverless Order Processing System"),
+    t("09 — Enterprise Data Lakehouse"), t("10 — Real-time IoT Analytics Platform"),
+    t("11 — MLOps Platform"), t("12 — Enterprise RAG Platform"),
+    t("13 — Multi-agent AI Platform"), t("14 — Hybrid Azure Arc Platform"),
+    t("15 — Multi-tenant Global SaaS Platform"), t("16 — Complete .NET Aspire Cloud-Native Application"),
+  ]},
+]},
+];
+
+/* Each capstone project's required deliverable checklist (applied uniformly) */
+const CAPSTONE_DELIVERABLES = ["Business & functional requirements","Non-functional requirements, assumptions, constraints",
+"Architecture diagram & sequence diagram","Data flow & threat model","Identity model & network model",
+"Data architecture & service selection rationale (incl. rejected alternatives)","ADR records",
+"RPO / RTO / SLA / SLO targets","Scaling model & cost estimate","Security controls & observability plan",
+"CI/CD & IaC","Testing, chaos testing & DR test","Operational runbook & production checklist"];
+
+const CERT_INFO = {
+  "AZ-900":"Azure Fundamentals", "AZ-104":"Azure Administrator", "AZ-204":"Azure Developer",
+  "AZ-305":"Azure Solutions Architect Expert", "AZ-400":"DevOps Engineer Expert",
+  "AZ-500":"Azure Security Engineer", "AI-102":"Azure AI Engineer", "DP-100":"Azure Data Scientist",
+  "SC-300":"Identity and Access Administrator", "SC-100":"Cybersecurity Architect Expert"
+};
+
+/* =========================================================================
+   STATE / PERSISTENCE
+   ========================================================================= */
+const STORAGE_KEY = "azure-architect-mastery-progress-v1";
+let STATE = {}; // { itemId: { checked: bool, status: 'done'|'learning'|'notstarted'... } }
+
+function itemId(mIdx,cIdx,tIdx,lIdx){
+  return "m"+mIdx+"-c"+cIdx+"-t"+tIdx + (lIdx===undefined ? "" : "-l"+lIdx);
+}
+
+async function storageGet(key){
+  if (window.storage && typeof window.storage.get === "function"){
+    try{ const r = await window.storage.get(key); return r ? r.value : null; }catch(e){ return null; }
+  }
+  try{ return localStorage.getItem(key); }catch(e){ return null; }
+}
+async function storageSet(key, value){
+  if (window.storage && typeof window.storage.set === "function"){
+    try{ await window.storage.set(key, value); return true; }catch(e){ /* fall through */ }
+  }
+  try{ localStorage.setItem(key, value); return true; }catch(e){ return false; }
+}
+
+async function loadState(){
+  const raw = await storageGet(STORAGE_KEY);
+  if (raw){
+    try{ STATE = JSON.parse(raw); }catch(e){ STATE = {}; }
+  }
+  // seed defaults from data (status: 'done'/'next'/'deferred') if not already present
+  MODULES.forEach((m,mi)=>{
+    m.chapters.forEach((c,ci)=>{
+      c.topics.forEach((tp,ti)=>{
+        const id = itemId(mi,ci,ti);
+        if (!(id in STATE)){
+          const seedDone = c.status === "done" || tp.status === "done";
+          STATE[id] = { checked: !!seedDone, flag: tp.deferred ? "deferred" : (tp.status==="next" ? "next" : null) };
+        }
+        if (tp.deep){
+          tp.lessons.forEach((les,li)=>{
+            const lid = itemId(mi,ci,ti,li);
+            if (!(lid in STATE)){
+              const seedDone = c.status === "done" || tp.status === "done";
+              STATE[lid] = { checked: !!seedDone };
+            }
+          });
+        }
+      });
+    });
+  });
+  await persist();
+}
+
+let saveTimer = null;
+async function persist(){
+  await storageSet(STORAGE_KEY, JSON.stringify(STATE));
+  flashSaved();
+}
+function flashSaved(){
+  const el = document.getElementById("saveFlag");
+  if (!el) return;
+  el.classList.add("show");
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove("show"), 900);
+}
+function debouncedPersist(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(persist, 250);
+}
+
+/* =========================================================================
+   COMPUTE PROGRESS
+   ========================================================================= */
+function moduleStats(mi){
+  const m = MODULES[mi];
+  let total=0, done=0;
+  m.chapters.forEach((c,ci)=>{
+    c.topics.forEach((tp,ti)=>{
+      if (tp.deep){
+        tp.lessons.forEach((les,li)=>{
+          total++; if (STATE[itemId(mi,ci,ti,li)] && STATE[itemId(mi,ci,ti,li)].checked) done++;
+        });
+      } else {
+        total++; if (STATE[itemId(mi,ci,ti)] && STATE[itemId(mi,ci,ti)].checked) done++;
+      }
+    });
+  });
+  return {total, done, pct: total? Math.round(done/total*100):0};
+}
+function overallStats(){
+  let total=0, done=0;
+  MODULES.forEach((m,mi)=>{ const s = moduleStats(mi); total += s.total; done += s.done; });
+  return {total, done, pct: total? Math.round(done/total*100):0};
+}
+function countByFlag(flag){
+  let items = [];
+  MODULES.forEach((m,mi)=>{
+    m.chapters.forEach((c,ci)=>{
+      c.topics.forEach((tp,ti)=>{
+        const id = itemId(mi,ci,ti);
+        const st = STATE[id];
+        if (st && st.flag === flag) items.push({mi,ci,ti,tp,module:m,chapter:c});
+      });
+    });
+  });
+  return items;
+}
+
+/* =========================================================================
+   RENDERING
+   ========================================================================= */
+let currentView = "dashboard";
+let currentModule = null;
+let searchQuery = "";
+
+function renderSidebarNav(){
+  const nav = document.getElementById("moduleNav");
+  nav.innerHTML = "";
+  MODULES.forEach((m,mi)=>{
+    const s = moduleStats(mi);
+    const div = document.createElement("div");
+    const status = s.pct===100 ? "completed" : s.pct>0 ? "progress" : "pending";
+    div.className = `navitem module-status ${status}` + (currentView==="module" && currentModule===mi ? " active":"");
+    div.innerHTML = `<span class="dot">${status==="completed"?"✓":status==="progress"?"◐":"○"}</span><span style="flex:1">${m.id} · ${m.title}</span><span class="pct">${s.pct}%</span>`;
+    div.onclick = ()=>{ currentView="module"; currentModule=mi; render(); };
+    nav.appendChild(div);
+  });
+  document.querySelectorAll('.navitem[data-view]').forEach(el=>{
+    el.classList.toggle('active', currentView===el.dataset.view);
+    el.onclick = ()=>{ currentView = el.dataset.view; currentModule=null; render(); };
+  });
+}
+
+function statusLegendHtml(){
+  return `<div class="status-legend">
+    <span>⬜ Not Started</span><span>🟡 Learning</span><span>🔵 Notes Created</span>
+    <span>🟣 Lab In Progress</span><span>🟠 Needs Revision</span><span>🟢 Completed</span>
+    <span>🔴 Blocked</span><span>⏸ Deferred</span></div>`;
+}
+
+function renderDashboard(){
+  const o = overallStats();
+  let html = `<div class="topbar"><h2>Master Program Dashboard</h2>
+    <div class="meta">${MODULES.length} modules · ${o.total} trackable items · updated live</div></div>`;
+  html += searchbarHtml();
+  html += `<div class="grid-cards">
+    <div class="card"><div class="label">Overall Completion</div><div class="value">${o.pct}%</div><div class="bar"><span style="width:${o.pct}%"></span></div></div>
+    <div class="card"><div class="label">Items Completed</div><div class="value">${o.done}</div><div class="bar"><span style="width:${o.total? (o.done/o.total*100):0}%"></span></div></div>
+    <div class="card"><div class="label">Total Trackable Items</div><div class="value">${o.total}</div></div>
+    <div class="card"><div class="label">Modules</div><div class="value">${MODULES.length}</div></div>
+    <div class="card"><div class="label">Deferred Items</div><div class="value">${countByFlag("deferred").length}</div></div>
+    <div class="card"><div class="label">Next-Up Items</div><div class="value">${countByFlag("next").length}</div></div>
+  </div>`;
+
+  html += `<div class="section-title">Module Completion<div class="rule"></div></div>`;
+  MODULES.forEach((m,mi)=>{
+    const s = moduleStats(mi);
+    html += `<div class="module" data-mod="${mi}"><div class="module-head" onclick="openModule(${mi})">
+      <span class="module-id">${m.id}</span>
+      <span class="module-title">${m.title}<small>${m.chapters.length} chapters · ${s.total} items</small></span>
+      <span class="module-tags"><span class="tag level">${m.level}</span>${m.certs.map(c=>'<span class="tag cert">'+c+'</span>').join('')}</span>
+      <span class="module-progress"><span class="pct-num">${s.done}/${s.total} · ${s.pct}%</span><span class="bar"><span style="width:${s.pct}%"></span></span></span>
+    </div></div>`;
+  });
+
+  html += `<div class="footer-note">Progress is saved automatically to persistent storage (<code>window.storage</code> when running inside a Claude artifact, otherwise <code>localStorage</code> in your browser) — checkbox state survives a page refresh. Use <b>Data · Import / Export</b> in the sidebar to back up your progress as JSON.</div>`;
+  document.getElementById("main").innerHTML = html;
+}
+
+function openModule(mi){ currentView="module"; currentModule=mi; render(); }
+window.openModule = openModule;
+
+function searchbarHtml(){
+  return `<div class="searchbar">🔎 <input id="searchInput" placeholder="Search topics, lessons, services…" value="${searchQuery.replace(/"/g,'')}"><span class="kbd">filters all modules</span></div>`;
+}
+
+function matchesSearch(text){
+  if (!searchQuery) return true;
+  return text.toLowerCase().includes(searchQuery.toLowerCase());
+}
+
+function renderModule(mi){
+  const m = MODULES[mi];
+  const s = moduleStats(mi);
+  let html = `<div class="topbar"><h2>${m.id} — ${m.title}</h2><div class="meta">${m.level} · ${s.done}/${s.total} complete (${s.pct}%)</div></div>`;
+  html += `<div class="module-tags" style="margin-bottom:14px">${m.certs.map(c=>'<span class="tag cert">'+c+' · '+(CERT_INFO[c]||'')+'</span>').join(' ') || '<span class="tag">No direct certification mapping</span>'}</div>`;
+  html += searchbarHtml();
+  html += `<div class="toolbar">
+    <button class="btn" onclick="setModuleAll(${mi}, true)">Mark all complete</button>
+    <button class="btn warn" onclick="setModuleAll(${mi}, false)">Reset module</button>
+  </div>`;
+
+  m.chapters.forEach((c,ci)=>{
+    const chapterTopics = c.topics.filter((tp)=> matchesSearch(tp.name) || (tp.deep && tp.lessons.some(l=>matchesSearch(l))) );
+    if (searchQuery && chapterTopics.length===0) return;
+    html += `<div class="chapter"><div class="chapter-title">Chapter ${m.id.replace('M','')}.${ci+1} — ${c.title}</div>`;
+    (searchQuery? chapterTopics : c.topics).forEach((tp)=>{
+      const ti = c.topics.indexOf(tp);
+      const id = itemId(mi,ci,ti);
+      const st = STATE[id] || {checked:false};
+      html += renderTopic(mi,ci,ti,tp,st);
+    });
+    html += `</div>`;
+  });
+
+  document.getElementById("main").innerHTML = html;
+  wireInputs();
+  const si = document.getElementById("searchInput");
+  if (si) si.oninput = (e)=>{ searchQuery = e.target.value; renderModule(mi); };
+}
+
+function renderTopic(mi,ci,ti,tp,st){
+  const id = itemId(mi,ci,ti);
+  let badges = "";
+  if (tp.deferred) badges += `<span class="deferred-badge">DEFERRED</span> `;
+  if (tp.status==="next") badges += `<span class="next-badge">NEXT UP</span> `;
+  let html = `<div class="topic ${tp.deep? '': ''}" data-topic="${id}">
+    <div class="topic-row">
+      <input type="checkbox" data-id="${id}" ${st.checked?'checked':''} onclick="event.stopPropagation()">
+      <span class="topic-name ${st.checked?'done':''}" onclick="toggleExpand('${id}')">${tp.name}</span>
+      <span class="topic-meta">${badges}${tp.deep? '<span class="expand-toggle" onclick="toggleExpand(\''+id+'\')">▸ '+tp.lessons.length+'</span>':''}</span>
+    </div>`;
+  if (tp.deep){
+    html += `<div class="sublessons">`;
+    tp.lessons.forEach((les,li)=>{
+      const lid = itemId(mi,ci,ti,li);
+      const lst = STATE[lid] || {checked:false};
+      html += `<div class="sublesson-row">
+        <input type="checkbox" data-id="${lid}" ${lst.checked?'checked':''}>
+        <label class="${lst.checked?'done':''}">${les}</label>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function toggleExpand(id){
+  const el = document.querySelector(`.topic[data-topic="${id}"]`);
+  if (el) el.classList.toggle('expanded');
+}
+window.toggleExpand = toggleExpand;
+
+function wireInputs(){
+  document.querySelectorAll('input[type=checkbox][data-id]').forEach(cb=>{
+    cb.onchange = (e)=>{
+      const id = e.target.dataset.id;
+      STATE[id] = STATE[id] || {};
+      STATE[id].checked = e.target.checked;
+      const nameEl = e.target.closest('.topic-row, .sublesson-row').querySelector('.topic-name, label');
+      if (nameEl) nameEl.classList.toggle('done', e.target.checked);
+      debouncedPersist();
+      refreshSidebarPercentagesOnly();
+    };
+  });
+}
+
+function refreshSidebarPercentagesOnly(){
+  document.querySelectorAll('#moduleNav .navitem').forEach((el,i)=>{
+    const s = moduleStats(i);
+    const pctEl = el.querySelector('.pct');
+    if (pctEl) pctEl.textContent = s.pct+"%";
+    const status = s.pct===100 ? "completed" : s.pct>0 ? "progress" : "pending";
+    el.classList.remove("completed","progress","pending");
+    el.classList.add(status);
+    const dot = el.querySelector('.dot');
+    if (dot) dot.textContent = status==="completed" ? "✓" : status==="progress" ? "◐" : "○";
+  });
+}
+
+function setModuleAll(mi, val){
+  const m = MODULES[mi];
+  m.chapters.forEach((c,ci)=>{
+    c.topics.forEach((tp,ti)=>{
+      const id = itemId(mi,ci,ti);
+      STATE[id] = STATE[id] || {}; STATE[id].checked = val;
+      if (tp.deep) tp.lessons.forEach((les,li)=>{
+        const lid = itemId(mi,ci,ti,li);
+        STATE[lid] = STATE[lid] || {}; STATE[lid].checked = val;
+      });
+    });
+  });
+  persist();
+  render();
+}
+window.setModuleAll = setModuleAll;
+
+function renderNext20(){
+  let html = `<div class="topbar"><h2>Next 20 Recommended Learning Items</h2><div class="meta">Sequenced by curriculum order &amp; explicit "next" flags</div></div>`;
+  let items = [];
+  // 1: explicit "next" flagged topics (Functions triggers continuation)
+  MODULES.forEach((m,mi)=>{
+    m.chapters.forEach((c,ci)=>{
+      c.topics.forEach((tp,ti)=>{
+        if (tp.status==="next"){
+          const id = itemId(mi,ci,ti);
+          if (!(STATE[id] && STATE[id].checked)) items.push({m,tp,tag:"Next in sequence"});
+        }
+      });
+    });
+  });
+  // 2: first incomplete item of every module after the current point, in order
+  MODULES.forEach((m,mi)=>{
+    if (items.length>=20) return;
+    m.chapters.forEach((c,ci)=>{
+      m2loop: for (let ti=0; ti<c.topics.length; ti++){
+        if (items.length>=20) break;
+        const tp = c.topics[ti];
+        const id = itemId(mi,ci,ti);
+        const already = items.find(x=>x.tp===tp);
+        if (!already && !(STATE[id] && STATE[id].checked)){
+          items.push({m,tp,tag:m.id});
+          break;
+        }
+      }
+    });
+  });
+  items = items.slice(0,20);
+  html += `<div class="grid-cards" style="grid-template-columns:1fr;">`;
+  items.forEach((it,i)=>{
+    html += `<div class="card" style="display:flex;align-items:center;gap:14px;">
+      <div style="font-family:var(--mono);color:var(--accent2);font-size:13px;width:26px">${String(i+1).padStart(2,'0')}</div>
+      <div style="flex:1"><div style="font-weight:600">${it.tp.name}</div><div style="font-size:11.5px;color:var(--ink-dim);font-family:var(--mono)">${it.m.title}</div></div>
+      <span class="tag">${it.tag}</span>
+    </div>`;
+  });
+  if (items.length===0) html += `<div class="empty-hint">Everything in the curriculum is currently marked complete. 🎉</div>`;
+  html += `</div>`;
+  document.getElementById("main").innerHTML = html;
+}
+
+function renderCerts(){
+  const certAccent = {
+    "AZ-900":"#4ec5ff",
+    "AZ-104":"#38bdf8",
+    "AZ-204":"#6ee7b7",
+    "AZ-305":"#a78bfa",
+    "AZ-400":"#fbbf24",
+    "AZ-500":"#fb7185",
+    "AI-102":"#22d3ee",
+    "DP-100":"#34d399",
+    "SC-300":"#f59e0b",
+    "SC-100":"#8b5cf6"
+  };
+  const certBadge = {
+    "AZ-900":"AZ",
+    "AZ-104":"AZ",
+    "AZ-204":"AZ",
+    "AZ-305":"AZ",
+    "AZ-400":"DV",
+    "AZ-500":"SEC",
+    "AI-102":"AI",
+    "DP-100":"DP",
+    "SC-300":"ID",
+    "SC-100":"CY"
+  };
+  let html = `<div class="topbar"><h2>Certification Mapping Matrix</h2><div class="meta">Verify current Microsoft certification status before exam registration</div></div>`;
+  html += `<div class="footer-note" style="margin-top:0">Exam codes and names shift periodically — treat this as a mapping of <i>content</i> to <i>competency area</i>, and always confirm current exam availability on Microsoft Learn before scheduling.</div>`;
+  Object.keys(CERT_INFO).forEach(code=>{
+    const mods = MODULES.filter(m=>m.certs.includes(code));
+    let totalDone=0, totalItems=0;
+    mods.forEach(m=>{ const mi = MODULES.indexOf(m); const s = moduleStats(mi); totalDone+=s.done; totalItems+=s.total; });
+    const pct = totalItems? Math.round(totalDone/totalItems*100):0;
+    html += `<div class="module open"><div class="module-head" style="cursor:default">
+      <span class="cert-badge" style="--cert-accent:${certAccent[code] || '#7c3aed'}">${certBadge[code] || code.slice(0,2)}</span>
+      <div class="cert-card">
+        <div class="cert-meta">
+          <span class="module-id">${code}</span>
+          <span class="module-title">${CERT_INFO[code]}<small>${mods.length} mapped modules</small></span>
+        </div>
+        <span class="module-progress"><span class="pct-num">${totalDone}/${totalItems} · ${pct}%</span><span class="bar"><span style="width:${pct}%"></span></span></span>
+      </div>
+    </div><div class="module-body" style="display:flex;flex-wrap:wrap;gap:8px;padding-top:10px">
+      ${mods.map(m=>'<span class="tag" style="margin:0">'+m.id+' · '+m.title+'</span>').join('')}
+    </div></div>`;
+  });
+  document.getElementById("main").innerHTML = html;
+}
+
+function renderDeferred(){
+  let html = `<div class="topbar"><h2>Deferred Items</h2><div class="meta">Marked "Needs Dedicated Deep Dive" — not casually mentioned, genuinely postponed</div></div>`;
+  const items = countByFlag("deferred");
+  html += `<div class="grid-cards" style="grid-template-columns:1fr;">`;
+  items.forEach(it=>{
+    html += `<div class="card" style="display:flex;align-items:center;gap:14px;">
+      <span class="deferred-badge">DEFERRED</span>
+      <div style="flex:1"><div style="font-weight:600">${it.tp.name}</div><div style="font-size:11.5px;color:var(--ink-dim);font-family:var(--mono)">${it.module.title} → ${it.chapter.title}</div></div>
+      <button class="btn" onclick="openModule(${it.mi})">Open module</button>
+    </div>`;
+  });
+  if (items.length===0) html += `<div class="empty-hint">No deferred items.</div>`;
+  html += `</div>`;
+  document.getElementById("main").innerHTML = html;
+}
+
+function renderSettings(){
+  const o = overallStats();
+  let html = `<div class="topbar"><h2>Data · Import / Export</h2><div class="meta">${o.done}/${o.total} items tracked locally</div></div>`;
+  html += `<div class="toolbar">
+    <button class="btn primary" onclick="exportData()">Export progress (.json)</button>
+    <button class="btn primary" onclick="downloadFullTracker()">Download / Print full tracker</button>
+    <button class="btn" onclick="document.getElementById('importFile').click()">Import progress (.json)</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none">
+    <button class="btn warn" onclick="resetAll()">Reset all progress</button>
+    <span class="save-flag" id="saveFlag">✓ saved</span>
+  </div>
+  <div class="footer-note">
+    Storage engine in use: <code>${(window.storage && typeof window.storage.get==='function') ? 'window.storage (artifact persistent storage)' : 'localStorage (browser)'}</code>.<br>
+    Export regularly if you plan to clear browser data or move to a new device/browser.
+  </div>`;
+  document.getElementById("main").innerHTML = html;
+  document.getElementById("importFile").onchange = (e)=>{
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev)=>{
+      try{
+        const parsed = JSON.parse(ev.target.result);
+        STATE = parsed;
+        await persist();
+        render();
+      }catch(err){ alert("Invalid JSON file."); }
+    };
+    reader.readAsText(file);
+  };
+}
+
+function exportData(){
+  const blob = new Blob([JSON.stringify(STATE,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "azure-architect-mastery-progress.json";
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+window.exportData = exportData;
+
+function downloadFullTracker(){
+  const main = document.getElementById("main");
+  let html = `<div class="topbar"><h2>Azure Principal Architect — Full Progress Tracker</h2><div class="meta">${overallStats().done}/${overallStats().total} complete</div></div>`;
+  MODULES.forEach((m,mi)=>{
+    const s=moduleStats(mi);
+    html += `<section class="module open"><div class="module-head"><span class="module-id">${m.id}</span><span class="module-title">${m.title}<small>${s.done}/${s.total} complete · ${s.pct}%</small></span><span class="module-progress"><span class="pct-num">${s.pct}%</span><span class="bar"><span style="width:${s.pct}%"></span></span></span></div><div class="module-body">`;
+    m.chapters.forEach((c,ci)=>{
+      html += `<div class="chapter"><div class="chapter-title">${c.title}</div>`;
+      c.topics.forEach((tp,ti)=>{ html += renderTopic(mi,ci,ti,tp,STATE[itemId(mi,ci,ti)]||{checked:false}); });
+      html += `</div>`;
+    });
+    html += `</div></section>`;
+  });
+  main.innerHTML=html;
+  main.querySelectorAll('.topic').forEach(topic=>topic.classList.add('expanded'));
+  window.addEventListener('afterprint',()=>render(),{once:true});
+  window.print();
+}
+window.downloadFullTracker=downloadFullTracker;
+
+async function resetAll(){
+  if (!confirm("This clears ALL saved progress. Continue?")) return;
+  STATE = {};
+  await loadState();
+  await persist();
+  render();
+}
+window.resetAll = resetAll;
+
+/* =========================================================================
+   MAIN RENDER DISPATCH
+   ========================================================================= */
+function render(){
+  renderSidebarNav();
+  if (currentView==="dashboard") renderDashboard();
+  else if (currentView==="module") renderModule(currentModule);
+  else if (currentView==="next20") renderNext20();
+  else if (currentView==="certs") renderCerts();
+  else if (currentView==="deferred") renderDeferred();
+  else if (currentView==="settings") renderSettings();
+}
+
+(async function init(){
+  await loadState();
+  render();
+})();
+</script>
+</body>
+</html>

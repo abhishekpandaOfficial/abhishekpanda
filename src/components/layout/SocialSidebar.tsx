@@ -4,6 +4,7 @@ import { resolveSocialProfiles } from "@/lib/social/resolveProfiles";
 import { iconForKey } from "@/lib/social/iconMap";
 import { useTheme } from "@/components/ThemeProvider";
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 const OFFICIAL_BRAND_COLORS: Record<string, string> = {
   x: "#111111",
@@ -36,18 +37,20 @@ const colorForProfile = (theme: string, platform: string, fallback?: string | nu
 export const SocialSidebar = () => {
   const { data } = usePublicSocialProfiles();
   const { theme } = useTheme();
+  const location = useLocation();
+  const effectiveTheme = location.pathname.startsWith("/trackers/") ? "dark" : theme;
   const profiles = useMemo(() => resolveSocialProfiles(data), [data]);
 
-  // Collapsed by default — user must click to open
-  const [desktopOpen, setDesktopOpen] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  // Expanded by default so social icons are visible on first visit
+  const [desktopOpen, setDesktopOpen] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(true);
 
   if (profiles.length === 0) return null;
 
   return (
     <>
       {/* ── Desktop: fixed right sidebar ── */}
-      <aside className="pointer-events-none fixed right-0 top-1/2 z-40 hidden -translate-y-1/2 lg:flex items-center xl:right-0">
+      <aside className="pointer-events-none fixed right-0 top-1/2 z-[70] hidden -translate-y-1/2 items-center lg:flex xl:right-0">
         {/* Toggle tab — always visible */}
         <button
           onClick={() => setDesktopOpen((v) => !v)}
@@ -78,7 +81,7 @@ export const SocialSidebar = () => {
             <nav aria-label="Social profiles" className="space-y-2">
               {profiles.map((profile) => {
                 const Icon = iconForKey(profile.icon_key);
-                const iconColor = colorForProfile(theme, profile.platform, profile.brand_color);
+                const iconColor = colorForProfile(effectiveTheme, profile.platform, profile.brand_color);
 
                 return (
                   <a
@@ -102,7 +105,7 @@ export const SocialSidebar = () => {
       </aside>
 
       {/* ── Mobile: fixed bottom bar ── */}
-      <aside className="pointer-events-none fixed bottom-0 left-0 right-0 z-50 px-3 lg:hidden">
+      <aside className="pointer-events-none fixed bottom-0 left-0 right-0 z-[70] px-3 lg:hidden">
         {/* Toggle tab — always visible, sits on top */}
         <div className="pointer-events-auto flex justify-center">
           <button
@@ -135,7 +138,7 @@ export const SocialSidebar = () => {
               <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 {profiles.map((profile) => {
                   const Icon = iconForKey(profile.icon_key);
-                  const iconColor = colorForProfile(theme, profile.platform, profile.brand_color);
+                  const iconColor = colorForProfile(effectiveTheme, profile.platform, profile.brand_color);
                   return (
                     <a
                       key={`m-${profile.platform}`}
