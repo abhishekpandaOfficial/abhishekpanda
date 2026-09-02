@@ -1,6 +1,7 @@
 const routeImporters: Array<[pattern: RegExp, () => Promise<unknown>]> = [
   [/^\/about$/, () => import("@/pages/About")],
   [/^\/blog$/, () => import("@/pages/Blog")],
+  [/^\/blog\/substack\/[^/]+$/, () => import("@/pages/SubstackPost")],
   [/^\/blogs$/, () => import("@/pages/BlogAggregator")],
   [/^\/techhub$/, () => import("@/pages/BlogAggregator")],
   [/^\/techhub\/[^/]+$/, () => import("@/pages/BlogSeries")],
