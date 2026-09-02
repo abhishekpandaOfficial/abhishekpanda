@@ -34,6 +34,13 @@ const asNumber = (...values: unknown[]) => {
   return typeof match === "number" ? match : null;
 };
 
+const asIdentifier = (...values: unknown[]) => {
+  const match = values.find((value) =>
+    (typeof value === "string" && value.trim()) || (typeof value === "number" && Number.isFinite(value)),
+  );
+  return typeof match === "number" ? String(match) : typeof match === "string" ? match.trim() : null;
+};
+
 const cleanText = (value: string | null) =>
   value
     ?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
@@ -55,20 +62,47 @@ const safeUrl = (value: string | null) => {
   }
 };
 
+const imageUrl = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "string") {
+      const url = safeUrl(value);
+      if (url) return url;
+    }
+    const record = asRecord(value);
+    if (record) {
+      const nested = asString(record.original, record.og, record.large, record.medium, record.small, record.url, record.src);
+      const url = safeUrl(nested);
+      if (url) return url;
+    }
+  }
+  return null;
+};
+
+const postRecord = (payload: unknown): UnknownRecord => {
+  const record = asRecord(payload) || {};
+  const directPost = asRecord(record.post);
+  if (directPost) return directPost;
+  const data = asRecord(record.data);
+  if (data) return asRecord(data.post) || data;
+  const feedData = asRecord(record.feedData);
+  const initialPost = asRecord(feedData?.initialPost);
+  return asRecord(initialPost?.post) || record;
+};
+
 const normalizePost = (input: unknown) => {
   const row = asRecord(input) || {};
   const slug = asString(row.slug, row.post_slug);
   const canonicalUrl = safeUrl(asString(row.canonical_url, row.canonicalUrl, row.url, slug ? `/p/${slug}` : null));
   const title = cleanText(asString(row.title, row.name)) || "Untitled StackedIN post";
   const subtitle = cleanText(asString(row.subtitle, row.description, row.excerpt, row.truncated_body_text));
-  const heroImage = safeUrl(asString(row.cover_image, row.social_image, row.image, row.image_url));
+  const heroImage = imageUrl(row.cover_image, row.social_image, row.image, row.image_url);
   const publishedAt = asString(row.post_date, row.published_at, row.pubDate, row.date);
   const updatedAt = asString(row.updated_at, row.last_updated_at, publishedAt);
   const wordCount = asNumber(row.wordcount, row.word_count);
   const readingTimeMinutes = Math.max(1, Math.round(asNumber(row.reading_time, row.reading_time_minutes) || (wordCount ? wordCount / 220 : 5)));
 
   return {
-    id: asString(row.id, row.post_id, slug) || canonicalUrl || title,
+    id: asIdentifier(row.id, row.post_id, slug) || canonicalUrl || title,
     title,
     slug,
     subtitle,
@@ -90,9 +124,11 @@ const archiveRows = (payload: unknown): unknown[] => {
   if (Array.isArray(payload)) return payload;
   const record = asRecord(payload);
   if (!record) return [];
-  for (const key of ["posts", "post_previews", "items", "results"]) {
+  for (const key of ["posts", "post_previews", "items", "results", "data"]) {
     if (Array.isArray(record[key])) return record[key] as unknown[];
   }
+  const data = asRecord(record.data);
+  if (data) return archiveRows(data);
   return [];
 };
 
@@ -100,6 +136,26 @@ const fetchJson = async (url: string) => {
   const response = await fetch(url, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(12_000) });
   if (!response.ok) throw new Error(`StackedIN returned ${response.status}`);
   return response.json() as Promise<unknown>;
+};
+
+const fetchText = async (url: string) => {
+  const response = await fetch(url, {
+    headers: { ...REQUEST_HEADERS, Accept: "text/html,application/xhtml+xml" },
+    signal: AbortSignal.timeout(12_000),
+  });
+  if (!response.ok) throw new Error(`StackedIN returned ${response.status}`);
+  return response.text();
+};
+
+const extractPreloadedPost = (html: string) => {
+  const match = html.match(/window\._preloads\s*=\s*JSON\.parse\(("(?:\\.|[^"\\])*")\)/);
+  if (!match) return null;
+  try {
+    const serialized = JSON.parse(match[1]) as string;
+    return postRecord(JSON.parse(serialized));
+  } catch {
+    return null;
+  }
 };
 
 const xmlValue = (source: string, tag: string) => {
@@ -129,6 +185,26 @@ const fetchRssFallback = async () => {
       cover_image: media || enclosure,
     });
   });
+};
+
+const fetchRssPost = async (slug: string) => {
+  const response = await fetch(`${PUBLICATION_ORIGIN}/feed`, {
+    headers: REQUEST_HEADERS,
+    signal: AbortSignal.timeout(12_000),
+  });
+  if (!response.ok) throw new Error(`StackedIN RSS returned ${response.status}`);
+  const xml = await response.text();
+  const items = xml.match(/<item[\s\S]*?<\/item>/gi) || [];
+  const item = items.find((candidate) => xmlValue(candidate, "link")?.includes(`/p/${slug}`));
+  if (!item) throw new Error("Post was not present in the StackedIN feed");
+  return {
+    title: xmlValue(item, "title"),
+    subtitle: xmlValue(item, "description"),
+    slug,
+    canonical_url: xmlValue(item, "link"),
+    post_date: xmlValue(item, "pubDate"),
+    body_html: xmlValue(item, "content:encoded") || xmlValue(item, "description"),
+  };
 };
 
 const fallbackKnownPost = (entry: { title: string; slug: string }) => ({
@@ -164,8 +240,20 @@ export const fetchArchive = async () => {
 
   for (let page = 0; page < MAX_ARCHIVE_PAGES; page += 1) {
     const offset = page * ARCHIVE_PAGE_SIZE;
-    const url = `${PUBLICATION_ORIGIN}/api/v1/archive?sort=new&search=&offset=${offset}&limit=${ARCHIVE_PAGE_SIZE}`;
-    const rows = archiveRows(await fetchJson(url));
+    const urls = [
+      `${PUBLICATION_ORIGIN}/api/v1/posts?limit=${ARCHIVE_PAGE_SIZE}&offset=${offset}`,
+      `${PUBLICATION_ORIGIN}/api/v1/archive?sort=new&search=&offset=${offset}&limit=${ARCHIVE_PAGE_SIZE}`,
+    ];
+    let rows: unknown[] = [];
+    for (const url of urls) {
+      try {
+        rows = archiveRows(await fetchJson(url));
+        if (rows.length) break;
+      } catch {
+        // Try the next public Substack listing surface.
+      }
+    }
+    if (!rows.length && page === 0) throw new Error("StackedIN archive returned no posts");
     collected.push(...rows.map(normalizePost).filter((post) => post.slug && post.canonicalUrl));
     if (rows.length < ARCHIVE_PAGE_SIZE) break;
   }
@@ -174,10 +262,45 @@ export const fetchArchive = async () => {
 };
 
 const fetchPost = async (slug: string) => {
-  const payload = await fetchJson(`${PUBLICATION_ORIGIN}/api/v1/posts/${encodeURIComponent(slug)}`);
-  const row = asRecord(payload) || {};
-  const post = normalizePost(row);
-  const bodyHtml = asString(row.body_html, row.content_html, row.html);
+  const encodedSlug = encodeURIComponent(slug);
+  const [apiResult, pageResult, rssResult] = await Promise.allSettled([
+    fetchJson(`${PUBLICATION_ORIGIN}/api/v1/posts/${encodedSlug}`),
+    fetchText(`${PUBLICATION_ORIGIN}/p/${encodedSlug}`),
+    fetchRssPost(slug),
+  ]);
+
+  const apiRow = apiResult.status === "fulfilled" ? postRecord(apiResult.value) : null;
+  const pageRow = pageResult.status === "fulfilled" ? extractPreloadedPost(pageResult.value) : null;
+  const rssRow = rssResult.status === "fulfilled" ? postRecord(rssResult.value) : null;
+  let row = pageRow || apiRow || rssRow;
+  let bodyHtml = asString(
+    row?.body_html,
+    row?.content_html,
+    row?.html,
+    apiRow?.body_html,
+    apiRow?.content_html,
+    rssRow?.body_html,
+    rssRow?.content_html,
+  );
+
+  if (!bodyHtml) {
+    try {
+      const listings = archiveRows(await fetchJson(`${PUBLICATION_ORIGIN}/api/v1/posts?limit=100&offset=0`));
+      const listing = listings.map(postRecord).find((entry) => asString(entry.slug, entry.post_slug) === slug);
+      const postId = listing ? asIdentifier(listing.id, listing.post_id) : null;
+      if (postId) {
+        const byId = postRecord(await fetchJson(`${PUBLICATION_ORIGIN}/api/v1/posts/by-id/${encodeURIComponent(postId)}`));
+        row = { ...(listing || {}), ...byId };
+        bodyHtml = asString(byId.body_html, byId.content_html, byId.html);
+      }
+    } catch {
+      // The public page/API result below is still usable when the by-id fallback is unavailable.
+    }
+  }
+
+  const known = knownPosts.find((entry) => entry.slug === slug);
+  const resolvedRow = row || (known ? { ...known } : { slug });
+  const post = normalizePost(resolvedRow);
   return {
     ...post,
     bodyHtml,
