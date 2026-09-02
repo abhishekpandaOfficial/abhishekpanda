@@ -149,32 +149,11 @@ const fallbackKnownPost = (entry: { title: string; slug: string }) => ({
   comments: null,
 });
 
-const enrichKnownPosts = async (existing: Map<string | null, ReturnType<typeof normalizePost>>) => {
-  const missing = knownPosts.filter((entry) => !existing.has(entry.slug));
-  const batchSize = 6;
-
-  for (let index = 0; index < missing.length; index += batchSize) {
-    const batch = missing.slice(index, index + batchSize);
-    const results = await Promise.allSettled(
-      batch.map(async (entry) => {
-        const payload = await fetchJson(`${PUBLICATION_ORIGIN}/api/v1/posts/${encodeURIComponent(entry.slug)}`);
-        return { entry, post: normalizePost(payload) };
-      }),
-    );
-
-    results.forEach((result, resultIndex) => {
-      const entry = batch[resultIndex];
-      const post = result.status === "fulfilled" && result.value.post.slug
-        ? result.value.post
-        : fallbackKnownPost(entry);
-      existing.set(entry.slug, post);
-    });
-  }
-};
-
-const completeArchive = async (posts: ReturnType<typeof normalizePost>[]) => {
+const completeArchive = (posts: ReturnType<typeof normalizePost>[]) => {
   const unique = new Map(posts.map((post) => [post.slug, post]));
-  await enrichKnownPosts(unique);
+  knownPosts.forEach((entry) => {
+    if (!unique.has(entry.slug)) unique.set(entry.slug, fallbackKnownPost(entry));
+  });
   return Array.from(unique.values()).sort((a, b) =>
     new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime(),
   );
@@ -238,10 +217,10 @@ export default async function handler(request: ApiRequest, response: ApiResponse
       posts = await fetchArchive();
     } catch {
       try {
-        posts = await completeArchive(await fetchRssFallback());
+        posts = completeArchive(await fetchRssFallback());
         mode = "rss+manifest";
       } catch {
-        posts = knownPosts.map(fallbackKnownPost);
+        posts = [...knownPosts].reverse().map(fallbackKnownPost);
         mode = "manifest";
       }
     }

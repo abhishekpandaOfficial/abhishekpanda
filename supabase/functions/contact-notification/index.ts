@@ -229,7 +229,7 @@ const handler = async (req: Request): Promise<Response> => {
               <div style="margin-top: 20px; text-align: center;">
                 <a href="${SITE_URL}/blog" style="display: inline-block; margin: 5px; color: #3B82F6; text-decoration: none;">Blog</a> •
                 <a href="${SITE_URL}/courses" style="display: inline-block; margin: 5px; color: #3B82F6; text-decoration: none;">Courses</a> •
-                <a href="https://www.linkedin.com/in/abhishekpandaofficial/" style="display: inline-block; margin: 5px; color: #3B82F6; text-decoration: none;">LinkedIn</a>
+                <a href="https://www.linkedin.com/in/iamabhishekpanda/" style="display: inline-block; margin: 5px; color: #3B82F6; text-decoration: none;">LinkedIn</a>
               </div>
               
               <p style="color: #1e293b; font-size: 16px; line-height: 1.6; margin-top: 30px;">
