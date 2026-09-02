@@ -207,7 +207,7 @@ export const Navigation = () => {
               </PrefetchLink>
 
               <PrefetchLink
-                to="/blog"
+                to="/blog/stackedin"
                 className={cn(
                   desktopNavItemClass,
                   location.pathname.startsWith("/blog")
@@ -289,7 +289,7 @@ export const Navigation = () => {
                 transition={{ delay: 0.16 }}
               >
                 <Link
-                  to="/blog"
+                  to="/blog/stackedin"
                   className={cn(
                     mobileNavItemClass,
                     location.pathname.startsWith("/blog")

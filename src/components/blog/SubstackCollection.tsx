@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, ChevronDown, Clock, ExternalLink, Layers3, RefreshCw, Search } from "lucide-react";
-import { FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
+import { FaInstagram, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchSubstackArchive, STACKEDIN_PUBLICATION_URL } from "@/lib/substack";
@@ -56,6 +55,18 @@ export function SubstackCollection() {
     ? new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit", day: "numeric", month: "short" }).format(new Date(data.syncedAt))
     : null;
   const syncPosts = () => setSyncVersion(Date.now());
+  const shareToInstagram = async (title: string, url: string) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text: title, url });
+        return;
+      } catch (shareError) {
+        if (shareError instanceof DOMException && shareError.name === "AbortError") return;
+      }
+    }
+    void navigator.clipboard?.writeText(url);
+    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+  };
   const toggleCategory = (categoryId: string) => {
     setCollapsedCategories((current) => {
       const next = new Set(current);
@@ -184,7 +195,7 @@ export function SubstackCollection() {
                         {categoryPosts.map((post, index) => (
                 <motion.article key={post.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ delay: Math.min(index, 8) * 0.04 }}>
                   <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-background/80 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl dark:border-white/10 dark:bg-white/[0.06] dark:hover:border-cyan-300/35 dark:hover:bg-white/[0.09]">
-                    <Link to={`/blog/stackedin/${post.slug}`} aria-label={`Read ${post.title}`}>
+                    <a href={post.canonicalUrl} target="_blank" rel="noopener noreferrer" aria-label={`Open the original ${post.title} post on StackedIN`}>
                     <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-cyan-500/30 via-blue-500/20 to-violet-500/30">
                       {post.heroImage ? (
                         <img
@@ -207,7 +218,7 @@ export function SubstackCollection() {
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent dark:from-slate-950/75" />
                     </div>
-                    </Link>
+                    </a>
                     <div className="flex flex-1 flex-col p-5">
                       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground dark:text-slate-400">
                         {formatDate(post.publishedAt) ? <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />{formatDate(post.publishedAt)}</span> : null}
@@ -218,12 +229,12 @@ export function SubstackCollection() {
                           <span key={tag} className={`rounded-full border px-2.5 py-1 text-xs font-bold ${getTagStyle(tag)}`}>{tag}</span>
                         ))}
                       </div>
-                      <Link to={`/blog/stackedin/${post.slug}`}>
+                      <a href={post.canonicalUrl} target="_blank" rel="noopener noreferrer">
                         <h3 className="mt-3 text-xl font-black leading-tight text-foreground transition group-hover:text-primary dark:text-white dark:group-hover:text-cyan-200">{post.title}</h3>
-                      </Link>
+                      </a>
                       {post.subtitle ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground dark:text-slate-300">{post.subtitle}</p> : null}
                       <div className="mt-auto flex items-center gap-2 pt-5">
-                        <Link to={`/blog/stackedin/${post.slug}`} className="mr-auto inline-flex items-center gap-2 text-sm font-bold text-primary dark:text-cyan-200">Read article <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></Link>
+                        <a href={post.canonicalUrl} target="_blank" rel="noopener noreferrer" className="mr-auto inline-flex items-center gap-2 text-sm font-bold text-primary dark:text-cyan-200">Original post <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></a>
                         <a
                           href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(post.canonicalUrl)}`}
                           target="_blank"
@@ -234,6 +245,15 @@ export function SubstackCollection() {
                         >
                           <FaLinkedinIn className="h-4 w-4" />
                         </a>
+                        <button
+                          type="button"
+                          onClick={() => void shareToInstagram(post.title, post.canonicalUrl)}
+                          aria-label={`Share ${post.title} to Instagram`}
+                          title="Share to Instagram"
+                          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-pink-500/25 bg-card text-[#E1306C] transition hover:border-[#E1306C]/45 hover:bg-[#E1306C]/10 dark:border-white/10"
+                        >
+                          <FaInstagram className="h-4 w-4" />
+                        </button>
                         <a
                           href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(post.canonicalUrl)}&text=${encodeURIComponent(post.title)}`}
                           target="_blank"
