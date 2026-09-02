@@ -214,7 +214,6 @@ const buildSitemap = (posts) => {
     { loc: `${SITE_URL}/`, changefreq: "weekly", priority: "1.0" },
     { loc: `${SITE_URL}/about`, changefreq: "monthly", priority: "0.9" },
     { loc: `${SITE_URL}/blog`, changefreq: "daily", priority: "0.95" },
-    { loc: `${SITE_URL}/blog/stackedin`, changefreq: "daily", priority: "0.95" },
     { loc: `${SITE_URL}/blogs`, changefreq: "weekly", priority: "0.8" },
     { loc: `${SITE_URL}/products`, changefreq: "weekly", priority: "0.85" },
     { loc: `${SITE_URL}/courses`, changefreq: "weekly", priority: "0.85" },

@@ -6,11 +6,11 @@ import { SubstackCollection } from "@/components/blog/SubstackCollection";
 const SITE_URL = "https://www.abhishekpanda.com";
 
 export default function StackedInArchive() {
-  const canonical = `${SITE_URL}/blog/stackedin`;
+  const canonical = `${SITE_URL}/blog`;
   const description = "Browse all 45 StackedIN engineering posts by Abhishek Panda with hero images, topic tags, social sharing, and direct links to the original Substack articles.";
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-white text-slate-950">
       <Helmet>
         <title>StackedIN Engineering Posts | Abhishek Panda</title>
         <meta name="description" content={description} />
