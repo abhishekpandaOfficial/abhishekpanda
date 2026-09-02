@@ -169,6 +169,8 @@ export default async function handler(request: ApiRequest, response: ApiResponse
 
   const rawSlug = request.query?.slug;
   const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
+  const rawRefresh = request.query?.refresh;
+  const forceRefresh = Boolean(Array.isArray(rawRefresh) ? rawRefresh[0] : rawRefresh);
 
   try {
     if (slug) {
@@ -181,7 +183,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
       return;
     }
 
-    response.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=3600");
+    response.setHeader("Cache-Control", forceRefresh ? "no-store" : "public, s-maxage=300, stale-while-revalidate=3600");
     let posts: Awaited<ReturnType<typeof fetchArchive>>;
     let mode = "archive";
     try {
