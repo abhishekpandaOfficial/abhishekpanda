@@ -63,28 +63,31 @@ const imageFromHtml = (html: string) => {
 };
 
 const fetchOriginalImage = async (slug: string) => {
-  try {
+  const apiImage = async () => {
     const response = await fetch(`${PUBLICATION_ORIGIN}/api/v1/posts/${encodeURIComponent(slug)}`, {
       headers: REQUEST_HEADERS,
-      signal: AbortSignal.timeout(4_500),
+      signal: AbortSignal.timeout(3_500),
     });
     if (response.ok) {
       const image = imageFromPost(await response.json());
       if (image) return image;
     }
-  } catch {
-    // Fall through to the public article page.
-  }
+    return null;
+  };
 
-  try {
+  const pageImage = async () => {
     const response = await fetch(`${PUBLICATION_ORIGIN}/p/${encodeURIComponent(slug)}`, {
       headers: { ...REQUEST_HEADERS, Accept: "text/html,application/xhtml+xml" },
-      signal: AbortSignal.timeout(4_500),
+      signal: AbortSignal.timeout(3_500),
     });
     return response.ok ? imageFromHtml(await response.text()) : null;
-  } catch {
-    return null;
+  };
+
+  const results = await Promise.allSettled([apiImage(), pageImage()]);
+  for (const result of results) {
+    if (result.status === "fulfilled" && result.value) return result.value;
   }
+  return null;
 };
 
 export default async function handler(request: ApiRequest, response: ApiResponse) {

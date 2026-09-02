@@ -130,7 +130,7 @@ const archiveRows = (payload: unknown): unknown[] => {
 };
 
 const fetchJson = async (url: string) => {
-  const response = await fetch(url, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(6_000) });
+  const response = await fetch(url, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(2_500) });
   if (!response.ok) throw new Error(`StackedIN returned ${response.status}`);
   return response.json() as Promise<unknown>;
 };
@@ -143,7 +143,7 @@ const xmlValue = (source: string, tag: string) => {
 const fetchRssFallback = async () => {
   const response = await fetch(`${PUBLICATION_ORIGIN}/feed`, {
     headers: REQUEST_HEADERS,
-    signal: AbortSignal.timeout(6_000),
+    signal: AbortSignal.timeout(2_500),
   });
   if (!response.ok) throw new Error(`StackedIN RSS returned ${response.status}`);
   const xml = await response.text();
