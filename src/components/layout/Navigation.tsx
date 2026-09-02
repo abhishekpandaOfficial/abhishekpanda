@@ -14,7 +14,8 @@ import {
   Brain,
   Cpu,
   Cloud,
-  ArrowUpRight
+  ArrowUpRight,
+  BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -327,6 +328,23 @@ export const Navigation = () => {
               </PrefetchLink>
 
               <PrefetchLink
+                to="/blog"
+                className={cn(
+                  desktopNavItemClass,
+                  location.pathname.startsWith("/blog")
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                <span className="relative flex items-center gap-2">
+                  <BookOpen className={desktopNavIconClass} />
+                  Blog
+                </span>
+              </PrefetchLink>
+
+              <PrefetchLink
                 to="/projects"
                 className={cn(
                   desktopNavItemClass,
@@ -468,6 +486,25 @@ export const Navigation = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.16 }}
+              >
+                <Link
+                  to="/blog"
+                  className={cn(
+                    mobileNavItemClass,
+                    location.pathname.startsWith("/blog")
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <BookOpen className={mobileNavIconClass} />
+                  Blog
+                </Link>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.18 }}
               >
                 <Link
                   to="/projects"
