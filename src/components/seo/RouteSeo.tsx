@@ -438,7 +438,9 @@ export function RouteSeo() {
   const pathname = location.pathname;
 
   // Let BlogPost and ModelDetail own their dynamic metadata.
-  const isDynamicRoute = !!matchPath("/blog/:slug", pathname);
+  const isDynamicRoute =
+    !!matchPath("/blog/:slug", pathname) ||
+    !!matchPath("/blog/stackedin/:slug", pathname);
   if (isDynamicRoute) return null;
 
   const matched = PAGE_SEO.find((entry) => matchPath({ path: entry.pattern, end: true }, pathname));

@@ -16,6 +16,7 @@ const About = lazy(() => import("./pages/About"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const SubstackPost = lazy(() => import("./pages/SubstackPost"));
+const StackedInArchive = lazy(() => import("./pages/StackedInArchive"));
 const Courses = lazy(() => import("./pages/Courses"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const Products = lazy(() => import("./pages/Products"));
@@ -156,6 +157,11 @@ const LegacyAiMlSeriesRedirect = () => {
   return <Navigate to={seriesSlug ? `/ai-ml-hub/${seriesSlug}` : "/ai-ml-hub"} replace />;
 };
 
+const LegacySubstackPostRedirect = () => {
+  const { slug } = useParams();
+  return <Navigate to={`/blog/stackedin/${slug || ""}`} replace />;
+};
+
 const CompatibilityRouteHandler = () => {
   const location = useLocation();
   const normalizedPath = location.pathname.replace(/\/+$/, "") || "/";
@@ -229,7 +235,9 @@ const App = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/substack/:slug" element={<SubstackPost />} />
+                <Route path="/blog/stackedin" element={<StackedInArchive />} />
+                <Route path="/blog/stackedin/:slug" element={<SubstackPost />} />
+                <Route path="/blog/substack/:slug" element={<LegacySubstackPostRedirect />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/academy" element={<Navigate to="/courses" replace />} />
                 <Route path="/courses" element={<Courses />} />

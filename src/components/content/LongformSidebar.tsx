@@ -1,4 +1,5 @@
 import { ArrowDown, ArrowRight, ArrowUp, Flame, ListOrdered, Mail, Newspaper, Sparkles, type LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { LongformTocItem } from "@/lib/longformNavigation";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,8 @@ type LongformSidebarProps = {
   onScrollBottom: () => void;
   actions?: LongformSidebarAction[];
   showMobileActions?: boolean;
+  tocFirst?: boolean;
+  afterToc?: ReactNode;
 };
 
 export function LongformSidebar({
@@ -57,15 +60,17 @@ export function LongformSidebar({
   onScrollBottom,
   actions = [],
   showMobileActions = false,
+  tocFirst = false,
+  afterToc,
 }: LongformSidebarProps) {
   const activeIndex = toc.findIndex((item) => item.id === activeHeadingId);
   const minutesRead = Math.max(0, Math.round((readMinutes * progressPercent) / 100));
   const minutesRemaining = Math.max(readMinutes - minutesRead, 0);
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       {actions.length ? (
-        <div className="rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
+        <div className={`${tocFirst ? "order-3" : "order-1"} rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur`}>
           <div className="inline-flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
               <Sparkles className="h-4 w-4" />
@@ -95,7 +100,7 @@ export function LongformSidebar({
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
+      <div className={`${tocFirst ? "order-4" : "order-2"} rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur`}>
         <div className="inline-flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/20 text-amber-300">
             <Flame className="h-4 w-4" />
@@ -137,7 +142,7 @@ export function LongformSidebar({
       </div>
 
       {toc.length ? (
-        <div className="rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
+        <div className={`${tocFirst ? "order-1" : "order-3"} rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur`}>
           <div className="flex items-center justify-between gap-4">
             <div className="inline-flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-300">
@@ -206,8 +211,10 @@ export function LongformSidebar({
         </div>
       ) : null}
 
+      {afterToc ? <div className={tocFirst ? "order-2" : "order-4"}>{afterToc}</div> : null}
+
       {secondaryTitle && secondaryItems.length ? (
-        <div className="rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
+        <div className="order-5 rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
           <div className="inline-flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/20 text-cyan-300">
               <Newspaper className="h-4 w-4" />
@@ -230,7 +237,7 @@ export function LongformSidebar({
         </div>
       ) : null}
 
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-900 to-cyan-800 p-5 text-white shadow-sm">
+      <div className="order-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-900 to-cyan-800 p-5 text-white shadow-sm">
         <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10" />
         <div className="absolute -bottom-8 -left-6 h-16 w-16 rounded-full bg-white/10" />
         <div className="relative">

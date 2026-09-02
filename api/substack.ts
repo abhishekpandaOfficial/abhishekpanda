@@ -129,7 +129,7 @@ const fetchRssFallback = async () => {
   });
 };
 
-const fetchArchive = async () => {
+export const fetchArchive = async () => {
   const collected: ReturnType<typeof normalizePost>[] = [];
 
   for (let page = 0; page < MAX_ARCHIVE_PAGES; page += 1) {
