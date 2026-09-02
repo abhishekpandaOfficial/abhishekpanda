@@ -26,10 +26,10 @@ const SUPABASE_ANON =
   process.env.SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON) {
-  console.error(
-    "Missing Supabase env. Need VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or SUPABASE_URL/SUPABASE_ANON_KEY)."
+  console.warn(
+    "Skipping Supabase blog prerender because its environment variables are unavailable. The client-rendered site remains deployable."
   );
-  process.exit(1);
+  process.exit(0);
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
