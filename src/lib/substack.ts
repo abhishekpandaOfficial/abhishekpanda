@@ -1,5 +1,3 @@
-import knownPosts from "../../data/stackedin-posts.json";
-
 export const STACKEDIN_PUBLICATION_URL = "https://stackedin.substack.com";
 
 export type SubstackPostSummary = {
@@ -27,7 +25,6 @@ export type SubstackPostDetail = SubstackPostSummary & {
 type ArchiveResponse = {
   posts?: SubstackPostSummary[];
   syncedAt?: string;
-  mode?: string;
   error?: string;
 };
 
@@ -42,38 +39,10 @@ const readJson = async <T>(response: Response): Promise<T> => {
   return payload;
 };
 
-const verifiedArchive = (): SubstackPostSummary[] =>
-  [...knownPosts].reverse().map((post) => ({
-    id: `verified-${post.slug}`,
-    title: post.title,
-    slug: post.slug,
-    subtitle: null,
-    excerpt: null,
-    heroImage: null,
-    canonicalUrl: `${STACKEDIN_PUBLICATION_URL}/p/${post.slug}`,
-    publishedAt: null,
-    updatedAt: null,
-    readingTimeMinutes: 5,
-    wordCount: null,
-    audience: null,
-    type: "newsletter",
-    reactions: null,
-    comments: null,
-  }));
-
-export const fetchSubstackArchive = async (forceRefresh = false) => {
-  try {
-    const endpoint = forceRefresh ? `/api/substack?refresh=${Date.now()}` : "/api/substack";
-    const response = await fetch(endpoint, {
-      headers: { Accept: "application/json" },
-      cache: forceRefresh ? "no-store" : "default",
-    });
-    const payload = await readJson<ArchiveResponse>(response);
-    if (!payload.posts?.length) throw new Error("StackedIN returned an empty archive");
-    return { posts: payload.posts, syncedAt: payload.syncedAt || null, mode: payload.mode || "live" };
-  } catch {
-    return { posts: verifiedArchive(), syncedAt: new Date().toISOString(), mode: "verified" };
-  }
+export const fetchSubstackArchive = async () => {
+  const response = await fetch("/api/substack", { headers: { Accept: "application/json" } });
+  const payload = await readJson<ArchiveResponse>(response);
+  return { posts: payload.posts || [], syncedAt: payload.syncedAt || null };
 };
 
 export const fetchSubstackPost = async (slug: string) => {
@@ -93,13 +62,7 @@ export const sanitizeSubstackHtml = (html: string) => {
     Array.from(element.attributes).forEach((attribute) => {
       const name = attribute.name.toLowerCase();
       const value = attribute.value.trim().toLowerCase();
-      const shouldRemovePresentationAttribute = name === "style";
-      if (
-        shouldRemovePresentationAttribute ||
-        name.startsWith("on") ||
-        name === "srcdoc" ||
-        ((name === "href" || name === "src") && value.startsWith("javascript:"))
-      ) {
+      if (name.startsWith("on") || name === "srcdoc" || ((name === "href" || name === "src") && value.startsWith("javascript:"))) {
         element.removeAttribute(attribute.name);
       }
     });
