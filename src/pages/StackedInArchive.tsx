@@ -7,7 +7,7 @@ const SITE_URL = "https://www.abhishekpanda.com";
 
 export default function StackedInArchive() {
   const canonical = `${SITE_URL}/blog/stackedin`;
-  const description = "Browse every StackedIN engineering post by Abhishek Panda, synced from Substack and available in a focused in-site reader.";
+  const description = "Browse all 45 StackedIN engineering posts by Abhishek Panda with hero images, topic tags, social sharing, and direct links to the original Substack articles.";
 
   return (
     <div className="min-h-screen bg-background text-foreground">
