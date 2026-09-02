@@ -130,7 +130,7 @@ const archiveRows = (payload: unknown): unknown[] => {
 };
 
 const fetchJson = async (url: string) => {
-  const response = await fetch(url, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(12_000) });
+  const response = await fetch(url, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(6_000) });
   if (!response.ok) throw new Error(`StackedIN returned ${response.status}`);
   return response.json() as Promise<unknown>;
 };
@@ -143,7 +143,7 @@ const xmlValue = (source: string, tag: string) => {
 const fetchRssFallback = async () => {
   const response = await fetch(`${PUBLICATION_ORIGIN}/feed`, {
     headers: REQUEST_HEADERS,
-    signal: AbortSignal.timeout(12_000),
+    signal: AbortSignal.timeout(6_000),
   });
   if (!response.ok) throw new Error(`StackedIN RSS returned ${response.status}`);
   const xml = await response.text();
@@ -217,21 +217,6 @@ const completeArchive = (posts: NormalizedPost[]) => {
   return Array.from(unique.values()).sort(newestFirst);
 };
 
-const enrichMissingImages = async (posts: NormalizedPost[]) => {
-  const enriched = await Promise.all(posts.map(async (post) => {
-    if (post.heroImage || !post.slug) return post;
-    try {
-      const detail = normalizePost(postRecord(await fetchJson(
-        `${PUBLICATION_ORIGIN}/api/v1/posts/${encodeURIComponent(post.slug)}`,
-      )));
-      return mergePostMetadata(post, detail);
-    } catch {
-      return post;
-    }
-  }));
-  return enriched.sort(newestFirst);
-};
-
 const fetchArchive = async () => {
   const collected: NormalizedPost[] = [];
 
@@ -251,7 +236,7 @@ const fetchArchive = async () => {
     if (Math.max(...sourceRows.map((items) => items.length), 0) < ARCHIVE_PAGE_SIZE) break;
   }
 
-  return enrichMissingImages(completeArchive(collected));
+  return completeArchive(collected);
 };
 
 const fetchPost = async (slug: string) => {
