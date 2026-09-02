@@ -77,6 +77,15 @@ const imageUrl = (...values: unknown[]) => {
   return null;
 };
 
+const postRecord = (payload: unknown): UnknownRecord => {
+  const record = asRecord(payload) || {};
+  const directPost = asRecord(record.post);
+  if (directPost) return directPost;
+  const data = asRecord(record.data);
+  if (data) return asRecord(data.post) || data;
+  return record;
+};
+
 const normalizePost = (input: unknown) => {
   const row = asRecord(input) || {};
   const slug = asString(row.slug, row.post_slug);
@@ -175,49 +184,79 @@ const fallbackKnownPost = (entry: { title: string; slug: string }) => ({
 
 const knownRank = new Map(knownPosts.map((post, index) => [post.slug, index]));
 
-const newestFirst = (a: ReturnType<typeof normalizePost>, b: ReturnType<typeof normalizePost>) => {
+type NormalizedPost = ReturnType<typeof normalizePost>;
+
+const mergePostMetadata = (existing: NormalizedPost, incoming: NormalizedPost): NormalizedPost => ({
+  ...existing,
+  ...incoming,
+  title: incoming.title === "Untitled StackedIN post" ? existing.title : incoming.title,
+  subtitle: incoming.subtitle || existing.subtitle,
+  excerpt: incoming.excerpt || existing.excerpt,
+  heroImage: incoming.heroImage || existing.heroImage,
+  canonicalUrl: incoming.canonicalUrl || existing.canonicalUrl,
+  publishedAt: incoming.publishedAt || existing.publishedAt,
+  updatedAt: incoming.updatedAt || existing.updatedAt,
+  wordCount: incoming.wordCount || existing.wordCount,
+});
+
+const newestFirst = (a: NormalizedPost, b: NormalizedPost) => {
   const dateDifference = new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime();
   if (dateDifference) return dateDifference;
   return (knownRank.get(b.slug || "") ?? -1) - (knownRank.get(a.slug || "") ?? -1);
 };
 
-const completeArchive = (posts: ReturnType<typeof normalizePost>[]) => {
-  const unique = new Map(posts.filter((post) => post.slug).map((post) => [post.slug, post]));
+const completeArchive = (posts: NormalizedPost[]) => {
+  const unique = new Map<string, NormalizedPost>();
+  posts.filter((post) => post.slug).forEach((post) => {
+    const existing = unique.get(post.slug!);
+    unique.set(post.slug!, existing ? mergePostMetadata(existing, post) : post);
+  });
   knownPosts.forEach((entry) => {
     if (!unique.has(entry.slug)) unique.set(entry.slug, fallbackKnownPost(entry));
   });
   return Array.from(unique.values()).sort(newestFirst);
 };
 
+const enrichMissingImages = async (posts: NormalizedPost[]) => {
+  const enriched = await Promise.all(posts.map(async (post) => {
+    if (post.heroImage || !post.slug) return post;
+    try {
+      const detail = normalizePost(postRecord(await fetchJson(
+        `${PUBLICATION_ORIGIN}/api/v1/posts/${encodeURIComponent(post.slug)}`,
+      )));
+      return mergePostMetadata(post, detail);
+    } catch {
+      return post;
+    }
+  }));
+  return enriched.sort(newestFirst);
+};
+
 const fetchArchive = async () => {
-  const collected: ReturnType<typeof normalizePost>[] = [];
+  const collected: NormalizedPost[] = [];
 
   for (let page = 0; page < MAX_ARCHIVE_PAGES; page += 1) {
     const offset = page * ARCHIVE_PAGE_SIZE;
     const urls = [
-      `${PUBLICATION_ORIGIN}/api/v1/posts?limit=${ARCHIVE_PAGE_SIZE}&offset=${offset}`,
       `${PUBLICATION_ORIGIN}/api/v1/archive?sort=new&search=&offset=${offset}&limit=${ARCHIVE_PAGE_SIZE}`,
+      `${PUBLICATION_ORIGIN}/api/v1/posts?limit=${ARCHIVE_PAGE_SIZE}&offset=${offset}`,
     ];
-    let rows: unknown[] = [];
-    for (const url of urls) {
-      try {
-        rows = archiveRows(await fetchJson(url));
-        if (rows.length) break;
-      } catch {
-        // Try the other public Substack archive surface.
-      }
-    }
+    const results = await Promise.allSettled(urls.map(fetchJson));
+    const sourceRows = results.map((result) =>
+      result.status === "fulfilled" ? archiveRows(result.value) : [],
+    );
+    const rows = sourceRows.flat();
     if (!rows.length && page === 0) throw new Error("StackedIN archive returned no posts");
-    collected.push(...rows.map(normalizePost).filter((post) => post.slug && post.canonicalUrl));
-    if (rows.length < ARCHIVE_PAGE_SIZE) break;
+    collected.push(...rows.map(postRecord).map(normalizePost).filter((post) => post.slug && post.canonicalUrl));
+    if (Math.max(...sourceRows.map((items) => items.length), 0) < ARCHIVE_PAGE_SIZE) break;
   }
 
-  return completeArchive(collected);
+  return enrichMissingImages(completeArchive(collected));
 };
 
 const fetchPost = async (slug: string) => {
   const payload = await fetchJson(`${PUBLICATION_ORIGIN}/api/v1/posts/${encodeURIComponent(slug)}`);
-  const row = asRecord(payload) || {};
+  const row = postRecord(payload);
   const post = normalizePost(row);
   const bodyHtml = asString(row.body_html, row.content_html, row.html);
   return {
