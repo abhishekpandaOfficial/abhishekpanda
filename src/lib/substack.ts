@@ -1,4 +1,4 @@
-import knownPosts from "../../data/stackedin-posts.json";
+import knownPosts from "../../data/stackedin-posts.ts";
 
 export const STACKEDIN_PUBLICATION_URL = "https://stackedin.substack.com";
 
