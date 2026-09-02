@@ -5,16 +5,7 @@ import {
   Menu, 
   X, 
   Send,
-  FolderOpen,
   ScrollText,
-  MessageCircle,
-  Map,
-  ChevronDown,
-  Sparkles,
-  Brain,
-  Cpu,
-  Cloud,
-  ArrowUpRight,
   BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,52 +14,15 @@ import { PublicSearch } from "@/components/layout/PublicSearch";
 import { PrefetchLink } from "@/components/PrefetchLink";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/BIz1l1qK9lu1oZEIJOBmDS?mode=gi_t";
-
 // Header nav links
 const navLinks = [
   { name: "Contact", path: "/contact", icon: Send },
-];
-
-const roadmapItems = [
-  {
-    name: "Machine Learning Zero to Hero",
-    path: "/trackers/machine-learning-zero-to-hero",
-    description: "Structured foundations for ML concepts, practice, and deployment",
-    icon: Brain,
-  },
-  {
-    name: "Deep Learning Zero to Hero",
-    path: "/trackers/deep-learning-zero-to-hero",
-    description: "Neural networks, CNNs, transformers, and modern deep learning paths",
-    icon: Cpu,
-  },
-  {
-    name: "NLP Zero to Hero",
-    path: "/trackers/nlp-llm-rag-agents-mcp",
-    description: "A complete roadmap for language AI, retrieval, agents, and MCP",
-    icon: Sparkles,
-  },
-  {
-    name: "LLM & Agentic AI",
-    path: "/trackers/llm-agentic-ai",
-    description: "Essential guidance for prompt design, reasoning, tools, and agents",
-    icon: Sparkles,
-  },
-  {
-    name: "Azure Principal Architect",
-    path: "/trackers/azure-principal-architect",
-    description: "Enterprise Azure architecture and solution design mastery tracker",
-    icon: Cloud,
-  },
 ];
 
 export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isRoadmapsHovered, setIsRoadmapsHovered] = useState(false);
-  const [isRoadmapsMobileOpen, setIsRoadmapsMobileOpen] = useState(false);
   const logoBasePath = import.meta.env.BASE_URL || "/";
   const primaryHeaderLogo = `${logoBasePath}panda-bamboo-trimmed.png`;
   const secondaryHeaderLogo = `${logoBasePath}pandalogo-transparent.png`;
@@ -121,14 +75,6 @@ export const Navigation = () => {
     location.pathname === "/solid-principles-guide" ||
     location.pathname === "/blogs/solid-principles" ||
     location.pathname === "/cheatsheets/solid-principles";
-  const isProjectsActive =
-    location.pathname.startsWith("/projects") ||
-    location.pathname.startsWith("/products") ||
-    location.pathname.startsWith("/llm-galaxy") ||
-    location.pathname.startsWith("/scriptures") ||
-    location.pathname.startsWith("/openowl") ||
-    location.pathname.startsWith("/chronyx");
-  const isTrackersActive = location.pathname.startsWith("/trackers/");
   const desktopNavItemClass =
     "relative flex items-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all duration-300 group xl:gap-2.5 xl:px-3 xl:py-2.5 xl:text-[13px] 2xl:rounded-xl 2xl:px-3.5 2xl:text-sm";
   const desktopNavIconClass = "h-4 w-4 shrink-0 transition-transform group-hover:scale-110 xl:h-[17px] xl:w-[17px] 2xl:h-[18px] 2xl:w-[18px]";
@@ -243,74 +189,6 @@ export const Navigation = () => {
                 </PrefetchLink>
               ))}
 
-              {/* Roadmaps Dropdown */}
-              <div 
-                className="relative"
-                onMouseEnter={() => setIsRoadmapsHovered(true)}
-                onMouseLeave={() => setIsRoadmapsHovered(false)}
-              >
-                <button
-                  className={cn(
-                    desktopNavItemClass,
-                    "cursor-pointer border-none bg-transparent focus:outline-none",
-                    isTrackersActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                  <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                  <span className="relative flex items-center gap-2">
-                    <Map className={desktopNavIconClass} />
-                    Trackers
-                    <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-300", isRoadmapsHovered && "rotate-180")} />
-                  </span>
-                </button>
-                <AnimatePresence>
-                  {isRoadmapsHovered && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute left-0 top-full mt-2 w-[22rem] max-w-[calc(100vw-2rem)] rounded-2xl border border-border/60 bg-background/95 p-2.5 shadow-[0_24px_80px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl z-[60]"
-                    >
-                      <div className="mb-2 flex items-center justify-between rounded-xl border border-border/50 bg-muted/30 px-3 py-2">
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-primary">Mastery trackers</p>
-                          <p className="text-xs text-muted-foreground">Curated learning paths • open in a new tab</p>
-                        </div>
-                        <div className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">
-                          5 available
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        {roadmapItems.map((item) => (
-                          <a
-                            key={item.name}
-                            href={item.path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group flex items-start gap-3 rounded-xl border border-transparent bg-background/70 px-3 py-3 text-left transition-all duration-200 hover:border-primary/20 hover:bg-primary/[0.06] hover:shadow-sm"
-                          >
-                            <div className="mt-0.5 rounded-xl border border-primary/20 bg-primary/10 p-2 text-primary">
-                              <item.icon className="h-4 w-4" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-foreground">{item.name}</span>
-                                <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
-                              </div>
-                              <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.description}</p>
-                            </div>
-                          </a>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
               <PrefetchLink
                 to="/insights"
                 className={cn(
@@ -345,37 +223,11 @@ export const Navigation = () => {
                 </span>
               </PrefetchLink>
 
-              <PrefetchLink
-                to="/projects"
-                className={cn(
-                  desktopNavItemClass,
-                  isProjectsActive
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                <span className="relative flex items-center gap-2">
-                  <FolderOpen className={desktopNavIconClass} />
-                  Projects
-                </span>
-              </PrefetchLink>
-
             </nav>
 
             <div className="flex items-center justify-self-end gap-2">
               <ThemeToggle />
               <PublicSearch />
-              <a
-                href={WHATSAPP_GROUP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group hidden h-10 items-center gap-2 rounded-xl border border-emerald-400/40 bg-gradient-to-r from-emerald-500/90 to-teal-500/90 px-3 text-xs font-semibold text-white shadow-[0_16px_30px_-18px_rgba(16,185,129,0.85)] transition-all duration-300 hover:-translate-y-0.5 hover:from-emerald-400 hover:to-teal-400 hover:shadow-[0_20px_36px_-16px_rgba(20,184,166,0.95)] md:inline-flex"
-              >
-                <MessageCircle className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-                Talk with me
-              </a>
               <Button
                 variant="ghost"
                 size="icon"
@@ -434,59 +286,6 @@ export const Navigation = () => {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.12 }}
-                className="flex flex-col"
-              >
-                <button
-                  onClick={() => setIsRoadmapsMobileOpen(!isRoadmapsMobileOpen)}
-                  className={cn(
-                    mobileNavItemClass,
-                    "w-full flex items-center justify-between",
-                    isTrackersActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                >
-                  <span className="flex items-center gap-3.5">
-                    <Map className={mobileNavIconClass} />
-                    Trackers
-                  </span>
-                  <ChevronDown className={cn("h-4 w-4 transition-transform duration-300", isRoadmapsMobileOpen && "rotate-180")} />
-                </button>
-                
-                <AnimatePresence initial={false}>
-                  {isRoadmapsMobileOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="mt-1 ml-[26px] flex flex-col gap-2 overflow-hidden border-l border-border/45 pl-4 pr-2"
-                    >
-                      <div className="rounded-xl border border-border/50 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-                        Open any tracker in a new tab
-                      </div>
-                      {roadmapItems.map((item) => (
-                        <a
-                          key={item.name}
-                          href={item.path}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-start gap-2.5 rounded-xl border border-border/40 bg-background/70 px-3 py-2.5 text-[14px] font-medium text-muted-foreground transition-colors hover:border-primary/20 hover:bg-primary/[0.06] hover:text-foreground"
-                        >
-                          <item.icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                          <span className="flex-1">{item.name}</span>
-                          <ArrowUpRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                        </a>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.16 }}
               >
                 <Link
@@ -501,41 +300,6 @@ export const Navigation = () => {
                   <BookOpen className={mobileNavIconClass} />
                   Blog
                 </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.18 }}
-              >
-                <Link
-                  to="/projects"
-                  className={cn(
-                    mobileNavItemClass,
-                    isProjectsActive
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <FolderOpen className={mobileNavIconClass} />
-                  Projects
-                </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <a
-                  href={WHATSAPP_GROUP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(mobileNavItemClass, "text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400")}
-                >
-                  <MessageCircle className={mobileNavIconClass} />
-                  Talk with me
-                </a>
               </motion.div>
 
               <motion.div

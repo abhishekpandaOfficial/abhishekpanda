@@ -170,7 +170,7 @@ export default function SubstackPost() {
                 </div>
               </header>
 
-              <div className="mx-auto mt-12 grid max-w-[1200px] items-start gap-10 lg:grid-cols-[minmax(0,800px)_340px]">
+              <div className="relative mx-auto mt-12 max-w-[1200px] xl:pr-[380px]">
                 <article className="min-w-0 rounded-[1.75rem] border border-border bg-card px-5 py-8 shadow-sm sm:px-8 md:px-12 md:py-12">
                   {safeHtml ? (
                     <div ref={articleBodyRef} className="reader-prose" dangerouslySetInnerHTML={{ __html: safeHtml }} />
@@ -192,7 +192,7 @@ export default function SubstackPost() {
                   </div>
                 </article>
 
-                <aside className="reader-sidebar-scrollbar min-w-0 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1">
+                <aside className="reader-fixed-sidebar reader-sidebar-scrollbar mt-10 min-w-0 xl:mt-0">
                   <div className="mb-4 rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
                     <p className="text-sm font-semibold text-foreground">Share the original article</p>
                     <p className="mt-1 text-xs leading-5 text-muted-foreground">These links share the canonical StackedIN URL.</p>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ExternalLink, Compass, FolderKanban, Sparkles } from "lucide-react";
+import { ExternalLink, Compass, Sparkles } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { AbhishekAnimatedLogo } from "@/components/ui/AbhishekAnimatedLogo";
 import { usePublicSocialProfiles } from "@/hooks/useSocialProfiles";
@@ -34,20 +34,8 @@ const footerSections: FooterSection[] = [
     links: [
       { name: "Home", path: "/" },
       { name: "About", path: "/about" },
-      { name: "Projects", path: "/projects" },
       { name: "Insights", path: "/insights" },
       { name: "Contact", path: "/contact" },
-    ],
-  },
-  {
-    title: "Projects",
-    icon: FolderKanban,
-    links: [
-      { name: "Projects Hub", path: "/projects" },
-      { name: "LLM Galaxy", path: "/llm-galaxy" },
-      { name: "Scriptures", path: "/scriptures" },
-      { name: "OpenOwl", path: "/openowl" },
-      { name: "Chronyx", path: "/chronyx" },
     ],
   },
   {
@@ -184,7 +172,7 @@ export const Footer = () => {
             </section>
           </div>
 
-          <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
             {footerSections.map((section) => {
               const Icon = section.icon;
               return (
