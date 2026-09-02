@@ -100,11 +100,16 @@ export function SubstackCollection() {
                 <motion.article key={post.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ delay: Math.min(index, 8) * 0.04 }}>
                   <a href={post.canonicalUrl} target="_blank" rel="noopener noreferrer" className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] transition duration-300 hover:-translate-y-1 hover:border-cyan-300/35 hover:bg-white/[0.09]">
                     <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-cyan-500/30 via-blue-500/20 to-violet-500/30">
-                      {post.heroImage ? (
-                        <img src={post.heroImage} alt={`${post.title} cover`} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
-                      ) : (
-                        <div className="absolute inset-0 grid place-items-center"><span className="text-6xl font-black text-white/15">S</span></div>
-                      )}
+                      <div className="absolute inset-0 grid place-items-center"><span className="text-6xl font-black text-white/15">S</span></div>
+                      <img
+                        src={post.heroImage || `/api/substack-image?slug=${encodeURIComponent(post.slug)}`}
+                        alt={`${post.title} cover`}
+                        className="relative h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                        loading="lazy"
+                        decoding="async"
+                        referrerPolicy="no-referrer"
+                        onError={(event) => { event.currentTarget.style.display = "none"; }}
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent" />
                     </div>
                     <div className="flex flex-1 flex-col p-5">
