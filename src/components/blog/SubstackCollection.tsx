@@ -187,9 +187,23 @@ export function SubstackCollection() {
                     <Link to={`/blog/stackedin/${post.slug}`} aria-label={`Read ${post.title}`}>
                     <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-cyan-500/30 via-blue-500/20 to-violet-500/30">
                       {post.heroImage ? (
-                        <img src={post.heroImage} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" />
+                        <img
+                          src={post.heroImage}
+                          alt={`${post.title} cover`}
+                          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                        />
                       ) : (
-                        <div className="absolute inset-0 grid place-items-center"><span className="text-6xl font-black text-white/15">S</span></div>
+                        <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${category.accent} p-6 text-white`}>
+                          <div className="flex max-w-[90%] items-center gap-4 rounded-2xl border border-white/20 bg-slate-950/25 p-4 shadow-xl backdrop-blur-sm">
+                            <img src="/brand/stackedin/icon.webp" alt="" className="h-14 w-14 shrink-0 object-contain" />
+                            <div className="min-w-0">
+                              <span className="block text-xs font-black uppercase tracking-[0.18em] text-white/75">StackedIN</span>
+                              <span className="mt-1 line-clamp-2 block text-lg font-black leading-tight">{category.label}</span>
+                            </div>
+                          </div>
+                        </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent dark:from-slate-950/75" />
                     </div>
