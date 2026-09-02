@@ -154,7 +154,7 @@ export function LongformSidebar({
             <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-muted text-sm font-bold text-foreground">
               <div
                 className="absolute inset-0 rounded-full"
-                style={{ background: `conic-gradient(rgb(99 102 241) ${progressPercent}%, rgb(226 232 240) 0%)` }}
+                style={{ background: `conic-gradient(hsl(var(--primary)) ${progressPercent}%, hsl(var(--muted)) 0%)` }}
               />
               <div className="absolute inset-[6px] rounded-full bg-background" />
               <span className="relative">{progressPercent}%</span>

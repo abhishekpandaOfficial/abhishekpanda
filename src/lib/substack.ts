@@ -62,7 +62,17 @@ export const sanitizeSubstackHtml = (html: string) => {
     Array.from(element.attributes).forEach((attribute) => {
       const name = attribute.name.toLowerCase();
       const value = attribute.value.trim().toLowerCase();
-      if (name.startsWith("on") || name === "srcdoc" || ((name === "href" || name === "src") && value.startsWith("javascript:"))) {
+      const shouldRemovePresentationAttribute =
+        name === "style" ||
+        name === "width" ||
+        name === "height" ||
+        (name === "class" && element.tagName !== "CODE" && element.tagName !== "PRE");
+      if (
+        shouldRemovePresentationAttribute ||
+        name.startsWith("on") ||
+        name === "srcdoc" ||
+        ((name === "href" || name === "src") && value.startsWith("javascript:"))
+      ) {
         element.removeAttribute(attribute.name);
       }
     });
