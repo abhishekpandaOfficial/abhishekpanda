@@ -1,3 +1,5 @@
+import knownPosts from "../data/stackedin-posts.json";
+
 type ApiRequest = {
   method?: string;
   query?: Record<string, string | string[] | undefined>;
@@ -32,6 +34,13 @@ const asNumber = (...values: unknown[]) => {
   return typeof match === "number" ? match : null;
 };
 
+const asIdentifier = (...values: unknown[]) => {
+  const match = values.find((value) =>
+    (typeof value === "string" && value.trim()) || (typeof value === "number" && Number.isFinite(value)),
+  );
+  return typeof match === "number" ? String(match) : typeof match === "string" ? match.trim() : null;
+};
+
 const cleanText = (value: string | null) =>
   value
     ?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
@@ -53,20 +62,35 @@ const safeUrl = (value: string | null) => {
   }
 };
 
+const imageUrl = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "string") {
+      const url = safeUrl(value);
+      if (url) return url;
+    }
+    const record = asRecord(value);
+    if (record) {
+      const url = safeUrl(asString(record.original, record.og, record.large, record.medium, record.url, record.src));
+      if (url) return url;
+    }
+  }
+  return null;
+};
+
 const normalizePost = (input: unknown) => {
   const row = asRecord(input) || {};
   const slug = asString(row.slug, row.post_slug);
   const canonicalUrl = safeUrl(asString(row.canonical_url, row.canonicalUrl, row.url, slug ? `/p/${slug}` : null));
   const title = cleanText(asString(row.title, row.name)) || "Untitled StackedIN post";
   const subtitle = cleanText(asString(row.subtitle, row.description, row.excerpt, row.truncated_body_text));
-  const heroImage = safeUrl(asString(row.cover_image, row.social_image, row.image, row.image_url));
+  const heroImage = imageUrl(row.cover_image, row.social_image, row.image, row.image_url);
   const publishedAt = asString(row.post_date, row.published_at, row.pubDate, row.date);
   const updatedAt = asString(row.updated_at, row.last_updated_at, publishedAt);
   const wordCount = asNumber(row.wordcount, row.word_count);
   const readingTimeMinutes = Math.max(1, Math.round(asNumber(row.reading_time, row.reading_time_minutes) || (wordCount ? wordCount / 220 : 5)));
 
   return {
-    id: asString(row.id, row.post_id, slug) || canonicalUrl || title,
+    id: asIdentifier(row.id, row.post_id, slug) || canonicalUrl || title,
     title,
     slug,
     subtitle,
@@ -88,9 +112,11 @@ const archiveRows = (payload: unknown): unknown[] => {
   if (Array.isArray(payload)) return payload;
   const record = asRecord(payload);
   if (!record) return [];
-  for (const key of ["posts", "post_previews", "items", "results"]) {
+  for (const key of ["posts", "post_previews", "items", "results", "data"]) {
     if (Array.isArray(record[key])) return record[key] as unknown[];
   }
+  const data = asRecord(record.data);
+  if (data) return archiveRows(data);
   return [];
 };
 
@@ -129,21 +155,64 @@ const fetchRssFallback = async () => {
   });
 };
 
+const fallbackKnownPost = (entry: { title: string; slug: string }) => ({
+  id: `verified-${entry.slug}`,
+  title: entry.title,
+  slug: entry.slug,
+  subtitle: null,
+  excerpt: null,
+  heroImage: null,
+  canonicalUrl: `${PUBLICATION_ORIGIN}/p/${entry.slug}`,
+  publishedAt: null,
+  updatedAt: null,
+  readingTimeMinutes: 5,
+  wordCount: null,
+  audience: null,
+  type: "newsletter",
+  reactions: null,
+  comments: null,
+});
+
+const knownRank = new Map(knownPosts.map((post, index) => [post.slug, index]));
+
+const newestFirst = (a: ReturnType<typeof normalizePost>, b: ReturnType<typeof normalizePost>) => {
+  const dateDifference = new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime();
+  if (dateDifference) return dateDifference;
+  return (knownRank.get(b.slug || "") ?? -1) - (knownRank.get(a.slug || "") ?? -1);
+};
+
+const completeArchive = (posts: ReturnType<typeof normalizePost>[]) => {
+  const unique = new Map(posts.filter((post) => post.slug).map((post) => [post.slug, post]));
+  knownPosts.forEach((entry) => {
+    if (!unique.has(entry.slug)) unique.set(entry.slug, fallbackKnownPost(entry));
+  });
+  return Array.from(unique.values()).sort(newestFirst);
+};
+
 const fetchArchive = async () => {
   const collected: ReturnType<typeof normalizePost>[] = [];
 
   for (let page = 0; page < MAX_ARCHIVE_PAGES; page += 1) {
     const offset = page * ARCHIVE_PAGE_SIZE;
-    const url = `${PUBLICATION_ORIGIN}/api/v1/archive?sort=new&search=&offset=${offset}&limit=${ARCHIVE_PAGE_SIZE}`;
-    const rows = archiveRows(await fetchJson(url));
+    const urls = [
+      `${PUBLICATION_ORIGIN}/api/v1/posts?limit=${ARCHIVE_PAGE_SIZE}&offset=${offset}`,
+      `${PUBLICATION_ORIGIN}/api/v1/archive?sort=new&search=&offset=${offset}&limit=${ARCHIVE_PAGE_SIZE}`,
+    ];
+    let rows: unknown[] = [];
+    for (const url of urls) {
+      try {
+        rows = archiveRows(await fetchJson(url));
+        if (rows.length) break;
+      } catch {
+        // Try the other public Substack archive surface.
+      }
+    }
+    if (!rows.length && page === 0) throw new Error("StackedIN archive returned no posts");
     collected.push(...rows.map(normalizePost).filter((post) => post.slug && post.canonicalUrl));
     if (rows.length < ARCHIVE_PAGE_SIZE) break;
   }
 
-  const unique = new Map(collected.map((post) => [post.slug, post]));
-  return Array.from(unique.values()).sort((a, b) =>
-    new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime(),
-  );
+  return completeArchive(collected);
 };
 
 const fetchPost = async (slug: string) => {
@@ -187,8 +256,13 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     try {
       posts = await fetchArchive();
     } catch {
-      posts = await fetchRssFallback();
-      mode = "rss";
+      try {
+        posts = completeArchive(await fetchRssFallback());
+        mode = "rss+verified";
+      } catch {
+        posts = [...knownPosts].reverse().map(fallbackKnownPost);
+        mode = "verified";
+      }
     }
     response.status(200).json({ posts, count: posts.length, source: PUBLICATION_ORIGIN, mode, syncedAt: new Date().toISOString() });
   } catch (error) {
