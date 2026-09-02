@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PublicSearch } from "@/components/layout/PublicSearch";
 import { PrefetchLink } from "@/components/PrefetchLink";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/BIz1l1qK9lu1oZEIJOBmDS?mode=gi_t";
 
@@ -364,6 +365,7 @@ export const Navigation = () => {
             </nav>
 
             <div className="flex items-center justify-self-end gap-2">
+              <ThemeToggle />
               <PublicSearch />
               <a
                 href={WHATSAPP_GROUP_URL}
