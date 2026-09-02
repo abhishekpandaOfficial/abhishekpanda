@@ -489,8 +489,8 @@ export function RouteSeo() {
       <meta property="og:locale" content="en_US" />
 
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:site" content="@Panda_Abhishek8" />
-      <meta name="twitter:creator" content="@Panda_Abhishek8" />
+      <meta name="twitter:site" content="@Stacked_in" />
+      <meta name="twitter:creator" content="@Stacked_in" />
       <meta name="twitter:title" content={seo.title} />
       <meta name="twitter:description" content={seo.description} />
       <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
@@ -508,10 +508,12 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
     name: "Abhishek Panda",
     url: "https://www.abhishekpanda.com",
     sameAs: [
-      "https://www.linkedin.com/in/abhishekpandaofficial/",
+      "https://www.linkedin.com/in/iamabhishekpanda/",
+      "https://www.instagram.com/i_am_abhishekPanda",
       "https://github.com/abhishekpandaOfficial",
-      "https://www.youtube.com/@abhishekpanda_official",
-      "https://x.com/Panda_Abhishek8",
+      "https://www.youtube.com/@stackedin",
+      "https://x.com/Stacked_in",
+      "https://stackedin.substack.com/",
     ],
     founder: {
       "@id": "https://www.abhishekpanda.com/#person",
@@ -541,12 +543,13 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
       "developer education",
     ],
     sameAs: [
-      "https://www.linkedin.com/in/abhishekpandaofficial/",
+      "https://www.linkedin.com/in/iamabhishekpanda/",
+      "https://www.instagram.com/i_am_abhishekPanda",
       "https://github.com/abhishekpandaOfficial",
-      "https://www.youtube.com/@abhishekpanda_official",
-      "https://x.com/Panda_Abhishek8",
+      "https://www.youtube.com/@stackedin",
+      "https://x.com/Stacked_in",
       "https://medium.com/@official.abhishekpanda",
-      "https://substack.com/@abhishekpanda08",
+      "https://stackedin.substack.com/",
       "https://hashnode.com/@abhishekpanda",
       "https://writing.stackexchange.com/users/82639/abhishek-official",
       "https://www.stackcraft.io/",

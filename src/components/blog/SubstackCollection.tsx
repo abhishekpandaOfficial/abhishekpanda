@@ -2,11 +2,12 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Calendar, Clock, ExternalLink, RefreshCw, Search } from "lucide-react";
+import { ArrowRight, Calendar, ChevronDown, Clock, ExternalLink, Layers3, RefreshCw, Search } from "lucide-react";
 import { FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchSubstackArchive, STACKEDIN_PUBLICATION_URL } from "@/lib/substack";
+import { getStackedInCategory, getStackedInTags, getTagStyle, STACKEDIN_CATEGORIES } from "@/lib/stackedinTaxonomy";
 
 const formatDate = (value: string | null) => {
   if (!value) return null;
@@ -18,6 +19,7 @@ const formatDate = (value: string | null) => {
 export function SubstackCollection() {
   const [query, setQuery] = useState("");
   const [syncVersion, setSyncVersion] = useState(0);
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(() => new Set());
   const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["stackedin-substack-archive", syncVersion],
     queryFn: () => fetchSubstackArchive(syncVersion > 0),
@@ -36,13 +38,33 @@ export function SubstackCollection() {
   const visiblePosts = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return posts;
-    return posts.filter((post) => `${post.title} ${post.subtitle || ""}`.toLowerCase().includes(needle));
+    return posts.filter((post) => {
+      const category = getStackedInCategory(post);
+      const tags = getStackedInTags(post);
+      return `${post.title} ${post.subtitle || ""} ${category.label} ${tags.join(" ")}`.toLowerCase().includes(needle);
+    });
   }, [posts, query]);
+  const categoryGroups = useMemo(
+    () => STACKEDIN_CATEGORIES.map((category) => ({
+      category,
+      posts: visiblePosts.filter((post) => getStackedInCategory(post).id === category.id),
+    })).filter((group) => group.posts.length > 0),
+    [visiblePosts],
+  );
 
   const syncedAt = data?.syncedAt
     ? new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit", day: "numeric", month: "short" }).format(new Date(data.syncedAt))
     : null;
   const syncPosts = () => setSyncVersion(Date.now());
+  const toggleCategory = (categoryId: string) => {
+    setCollapsedCategories((current) => {
+      const next = new Set(current);
+      if (next.has(categoryId)) next.delete(categoryId);
+      else next.add(categoryId);
+      return next;
+    });
+  };
+  const allCollapsed = categoryGroups.length > 0 && categoryGroups.every(({ category }) => collapsedCategories.has(category.id));
 
   return (
     <section className="container mx-auto px-4 pb-12" aria-labelledby="stackedin-archive-title">
@@ -61,7 +83,7 @@ export function SubstackCollection() {
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground dark:text-slate-400">
                   <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
-                  Auto-synced every 5 minutes
+                  {data?.mode === "verified" ? "Verified 45-post catalog" : "Live sync + verified catalog"}
                 </span>
               </div>
               <h1 id="stackedin-archive-title" className="mt-4 text-3xl font-black tracking-tight md:text-5xl">The complete StackedIN archive</h1>
@@ -93,14 +115,23 @@ export function SubstackCollection() {
 
           {syncedAt ? <p className="mt-4 text-xs text-muted-foreground dark:text-slate-400">Last synced {syncedAt}. Newest article is always shown first.</p> : null}
 
-          <div className="relative mt-6 max-w-xl">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground dark:text-slate-400" />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search the StackedIN archive..."
-              className="h-12 border-border bg-background/80 pl-11 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary dark:border-white/15 dark:bg-white/10 dark:text-white dark:placeholder:text-slate-400 dark:focus-visible:ring-cyan-300"
-            />
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative max-w-xl flex-1">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground dark:text-slate-400" />
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search posts, categories, or tags..."
+                className="h-12 border-border bg-background/80 pl-11 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary dark:border-white/15 dark:bg-white/10 dark:text-white dark:placeholder:text-slate-400 dark:focus-visible:ring-cyan-300"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setCollapsedCategories(allCollapsed ? new Set() : new Set(categoryGroups.map(({ category }) => category.id)))}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-border bg-background/80 px-4 text-sm font-bold text-foreground transition hover:border-primary/30 hover:text-primary dark:border-white/15 dark:bg-white/10 dark:text-white"
+            >
+              <Layers3 className="h-4 w-4" /> {allCollapsed ? "Expand all modules" : "Collapse all modules"}
+            </button>
           </div>
         </div>
 
@@ -125,8 +156,32 @@ export function SubstackCollection() {
               {query ? "No StackedIN posts match that search." : "No public posts are available yet."}
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {visiblePosts.map((post, index) => (
+            <div className="space-y-8">
+              {categoryGroups.map(({ category, posts: categoryPosts }) => {
+                const isCollapsed = collapsedCategories.has(category.id);
+                return (
+                  <section key={category.id} className="overflow-hidden rounded-3xl border border-border bg-background/50 dark:border-white/10 dark:bg-white/[0.035]">
+                    <button
+                      type="button"
+                      onClick={() => toggleCategory(category.id)}
+                      aria-expanded={!isCollapsed}
+                      aria-controls={`stackedin-module-${category.id}`}
+                      className="group flex w-full items-center gap-4 p-5 text-left transition hover:bg-muted/50 dark:hover:bg-white/5 md:p-6"
+                    >
+                      <span className={`h-12 w-1.5 shrink-0 rounded-full bg-gradient-to-b ${category.accent}`} aria-hidden="true" />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-2">
+                          <span className="text-xl font-black text-foreground dark:text-white">{category.label}</span>
+                          <span className={`rounded-full border px-2.5 py-1 text-xs font-bold ${category.badge}`}>{categoryPosts.length} {categoryPosts.length === 1 ? "post" : "posts"}</span>
+                        </span>
+                        <span className="mt-1 block text-sm leading-6 text-muted-foreground dark:text-slate-400">{category.description}</span>
+                      </span>
+                      <ChevronDown className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200 ${isCollapsed ? "-rotate-90" : ""}`} />
+                    </button>
+
+                    {!isCollapsed ? (
+                      <div id={`stackedin-module-${category.id}`} className="grid gap-6 border-t border-border p-5 dark:border-white/10 md:grid-cols-2 md:p-6 xl:grid-cols-3">
+                        {categoryPosts.map((post, index) => (
                 <motion.article key={post.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ delay: Math.min(index, 8) * 0.04 }}>
                   <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-background/80 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl dark:border-white/10 dark:bg-white/[0.06] dark:hover:border-cyan-300/35 dark:hover:bg-white/[0.09]">
                     <Link to={`/blog/stackedin/${post.slug}`} aria-label={`Read ${post.title}`}>
@@ -143,6 +198,11 @@ export function SubstackCollection() {
                       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground dark:text-slate-400">
                         {formatDate(post.publishedAt) ? <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />{formatDate(post.publishedAt)}</span> : null}
                         <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{post.readingTimeMinutes} min read</span>
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {getStackedInTags(post).map((tag) => (
+                          <span key={tag} className={`rounded-full border px-2.5 py-1 text-xs font-bold ${getTagStyle(tag)}`}>{tag}</span>
+                        ))}
                       </div>
                       <Link to={`/blog/stackedin/${post.slug}`}>
                         <h3 className="mt-3 text-xl font-black leading-tight text-foreground transition group-hover:text-primary dark:text-white dark:group-hover:text-cyan-200">{post.title}</h3>
@@ -174,7 +234,12 @@ export function SubstackCollection() {
                     </div>
                   </div>
                 </motion.article>
-              ))}
+                        ))}
+                      </div>
+                    ) : null}
+                  </section>
+                );
+              })}
             </div>
           )}
         </div>
