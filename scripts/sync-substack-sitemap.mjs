@@ -33,7 +33,7 @@ const posts = new Map(manifest.map((post) => [post.slug, { slug: post.slug, upda
 for (const post of livePosts) posts.set(post.slug, post);
 
 const urls = [
-  `  <url>\n    <loc>${SITE_URL}/blog/stackedin</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.95</priority>\n  </url>`,
+  `  <url>\n    <loc>${SITE_URL}/blog</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.95</priority>\n  </url>`,
   ...Array.from(posts.values()).map((post) => {
     const lastmod = post.updatedAt && !Number.isNaN(new Date(post.updatedAt).getTime())
       ? `\n    <lastmod>${escapeXml(new Date(post.updatedAt).toISOString())}</lastmod>`

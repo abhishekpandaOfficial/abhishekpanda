@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
 import { HeroSection } from "@/components/home/HeroSection";
@@ -9,13 +9,20 @@ import { CertificatesSection } from "@/components/about/CertificatesSection";
 import { BooksSection } from "@/components/products/BooksSection";
 import { BookNewsletterPopup } from "@/components/BookNewsletterPopup";
 import { heroImages } from "@/data/heroImages";
+import { useTheme } from "@/components/ThemeProvider";
 
 const Footer = lazy(() => import("@/components/layout/Footer").then((m) => ({ default: m.Footer })));
 
 const Index = () => {
+  const { setTheme } = useTheme();
+
+  useEffect(() => {
+    setTheme("light");
+  }, [setTheme]);
+
   return (
     <motion.div
-      className="landing-open-source-typo dark min-h-screen bg-slate-950 text-slate-100"
+      className="landing-open-source-typo min-h-screen bg-white text-slate-950"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35, ease: "easeOut" }}

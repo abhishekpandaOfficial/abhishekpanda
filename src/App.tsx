@@ -234,8 +234,9 @@ const App = () => {
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/stackedin" element={<StackedInArchive />} />
+                <Route path="/blog" element={<StackedInArchive />} />
+                <Route path="/blog/library" element={<Blog />} />
+                <Route path="/blog/stackedin" element={<Navigate to="/blog" replace />} />
                 <Route path="/blog/stackedin/:slug" element={<SubstackPost />} />
                 <Route path="/blog/substack/:slug" element={<LegacySubstackPostRedirect />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />

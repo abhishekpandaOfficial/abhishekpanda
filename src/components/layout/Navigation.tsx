@@ -190,6 +190,23 @@ export const Navigation = () => {
               ))}
 
               <PrefetchLink
+                to="/blog"
+                className={cn(
+                  desktopNavItemClass,
+                  location.pathname.startsWith("/blog")
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
+                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
+                <span className="relative flex items-center gap-2">
+                  <BookOpen className={desktopNavIconClass} />
+                  Blogs
+                </span>
+              </PrefetchLink>
+
+              <PrefetchLink
                 to="/insights"
                 className={cn(
                   desktopNavItemClass,
@@ -203,23 +220,6 @@ export const Navigation = () => {
                 <span className="relative flex items-center gap-2">
                   <ScrollText className={desktopNavIconClass} />
                   Insights
-                </span>
-              </PrefetchLink>
-
-              <PrefetchLink
-                to="/blog/stackedin"
-                className={cn(
-                  desktopNavItemClass,
-                  location.pathname.startsWith("/blog")
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                <span className="relative flex items-center gap-2">
-                  <BookOpen className={desktopNavIconClass} />
-                  Blog
                 </span>
               </PrefetchLink>
 
@@ -289,7 +289,7 @@ export const Navigation = () => {
                 transition={{ delay: 0.16 }}
               >
                 <Link
-                  to="/blog/stackedin"
+                  to="/blog"
                   className={cn(
                     mobileNavItemClass,
                     location.pathname.startsWith("/blog")
@@ -298,7 +298,7 @@ export const Navigation = () => {
                   )}
                 >
                   <BookOpen className={mobileNavIconClass} />
-                  Blog
+                  Blogs
                 </Link>
               </motion.div>
 

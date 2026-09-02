@@ -21,7 +21,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
   try {
     const posts = await fetchArchive();
     const urls = [
-      `<url><loc>${SITE_URL}/blog/stackedin</loc><changefreq>daily</changefreq><priority>0.95</priority></url>`,
+      `<url><loc>${SITE_URL}/blog</loc><changefreq>daily</changefreq><priority>0.95</priority></url>`,
       ...posts.map((post) => {
         const lastmod = post.updatedAt || post.publishedAt;
         return `<url><loc>${escapeXml(`${SITE_URL}/blog/stackedin/${post.slug}`)}</loc>${lastmod ? `<lastmod>${escapeXml(new Date(lastmod).toISOString())}</lastmod>` : ""}<changefreq>monthly</changefreq><priority>0.85</priority></url>`;
@@ -33,6 +33,6 @@ export default async function handler(request: ApiRequest, response: ApiResponse
   } catch {
     response.setHeader("Content-Type", "application/xml; charset=utf-8");
     response.setHeader("Cache-Control", "no-store");
-    response.status(503).send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${SITE_URL}/blog/stackedin</loc></url></urlset>`);
+    response.status(503).send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${SITE_URL}/blog</loc></url></urlset>`);
   }
 }
