@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BlogSeriesGrid } from "@/components/blog/BlogSeriesGrid";
 import { LOCAL_BLOG_POSTS, getLocalBlogFolderPath, getLocalBlogUploadHint } from "@/content/blogs";
 import { BLOG_SERIES, BLOG_SERIES_BY_SLUG, matchesBlogSeries } from "@/lib/blogSeries";
-import { SubstackCollection } from "@/components/blog/SubstackCollection";
+import { StackedInSourceCard } from "@/components/blog/StackedInSourceCard";
 
 const LEVELS = ["beginner", "fundamentals", "intermediate", "general", "architect"] as const;
 type TagStyleRow = {
@@ -268,7 +268,7 @@ const Blog = () => {
           </div>
         </section>
 
-        <SubstackCollection />
+        <StackedInSourceCard />
 
         <section className="container mx-auto px-4">
           <div className="mb-8 rounded-[2rem] border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8">

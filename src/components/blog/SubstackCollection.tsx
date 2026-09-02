@@ -45,21 +45,26 @@ export function SubstackCollection() {
   const syncPosts = () => setSyncVersion(Date.now());
 
   return (
-    <section id="stackedin-posts" className="container mx-auto px-4 pb-12">
+    <section className="container mx-auto px-4 pb-12" aria-labelledby="stackedin-archive-title">
       <div className="overflow-hidden rounded-[2rem] border border-border bg-card text-foreground shadow-2xl shadow-slate-950/5 dark:border-cyan-500/20 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-cyan-950 dark:text-white dark:shadow-cyan-950/10">
         <div className="border-b border-border bg-gradient-to-br from-white via-sky-50/50 to-cyan-50/70 p-6 dark:border-white/10 dark:from-transparent dark:via-transparent dark:to-transparent md:p-9">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
+              <img src="/brand/stackedin/wordmark.webp" alt="StackedIN" className="mb-5 h-12 w-auto max-w-[240px] object-contain object-left dark:invert" />
               <div className="flex flex-wrap items-center gap-3">
                 <span className="rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-cyan-700 dark:border-cyan-300/25 dark:bg-cyan-300/10 dark:text-cyan-200">
                   Live from StackedIN
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-[#ff6719]/25 bg-[#ff6719]/10 px-3 py-1 text-xs font-bold text-[#d84c00] dark:text-[#ff9b69]">
+                  <img src="/brand-logos/social/substack.svg" alt="" className="h-3.5 w-3.5 dark:invert" />
+                  Substack · {posts.length} {posts.length === 1 ? "post" : "posts"}
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground dark:text-slate-400">
                   <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
                   Auto-synced every 5 minutes
                 </span>
               </div>
-              <h2 className="mt-4 text-3xl font-black tracking-tight md:text-5xl">The complete StackedIN archive</h2>
+              <h1 id="stackedin-archive-title" className="mt-4 text-3xl font-black tracking-tight md:text-5xl">The complete StackedIN archive</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground dark:text-slate-300 md:text-base">
                 Every public post, its original hero visual, summary, publication date, and reading time—kept in step with the newsletter.
               </p>
@@ -124,7 +129,7 @@ export function SubstackCollection() {
               {visiblePosts.map((post, index) => (
                 <motion.article key={post.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ delay: Math.min(index, 8) * 0.04 }}>
                   <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-background/80 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl dark:border-white/10 dark:bg-white/[0.06] dark:hover:border-cyan-300/35 dark:hover:bg-white/[0.09]">
-                    <Link to={`/blog/substack/${post.slug}`} aria-label={`Read ${post.title}`}>
+                    <Link to={`/blog/stackedin/${post.slug}`} aria-label={`Read ${post.title}`}>
                     <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-cyan-500/30 via-blue-500/20 to-violet-500/30">
                       {post.heroImage ? (
                         <img src={post.heroImage} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" />
@@ -139,12 +144,12 @@ export function SubstackCollection() {
                         {formatDate(post.publishedAt) ? <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />{formatDate(post.publishedAt)}</span> : null}
                         <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{post.readingTimeMinutes} min read</span>
                       </div>
-                      <Link to={`/blog/substack/${post.slug}`}>
+                      <Link to={`/blog/stackedin/${post.slug}`}>
                         <h3 className="mt-3 text-xl font-black leading-tight text-foreground transition group-hover:text-primary dark:text-white dark:group-hover:text-cyan-200">{post.title}</h3>
                       </Link>
                       {post.subtitle ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground dark:text-slate-300">{post.subtitle}</p> : null}
                       <div className="mt-auto flex items-center gap-2 pt-5">
-                        <Link to={`/blog/substack/${post.slug}`} className="mr-auto inline-flex items-center gap-2 text-sm font-bold text-primary dark:text-cyan-200">Read article <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></Link>
+                        <Link to={`/blog/stackedin/${post.slug}`} className="mr-auto inline-flex items-center gap-2 text-sm font-bold text-primary dark:text-cyan-200">Read article <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></Link>
                         <a
                           href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(post.canonicalUrl)}`}
                           target="_blank"
