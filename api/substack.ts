@@ -12,8 +12,8 @@ type ApiResponse = {
 };
 
 const PUBLICATION_ORIGIN = "https://stackedin.substack.com";
-const ARCHIVE_PAGE_SIZE = 50;
-const MAX_ARCHIVE_PAGES = 20;
+const ARCHIVE_PAGE_SIZE = 100;
+const MAX_ARCHIVE_PAGES = 1;
 const REQUEST_HEADERS = {
   Accept: "application/json, application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
   "User-Agent": "StackedIN-Portfolio-Sync/1.0 (+https://www.abhishekpanda.com/blog)",
