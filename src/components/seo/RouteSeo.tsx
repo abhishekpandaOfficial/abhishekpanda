@@ -438,9 +438,7 @@ export function RouteSeo() {
   const pathname = location.pathname;
 
   // Let BlogPost and ModelDetail own their dynamic metadata.
-  const isDynamicRoute =
-    !!matchPath("/blog/:slug", pathname) ||
-    !!matchPath("/blog/stackedin/:slug", pathname);
+  const isDynamicRoute = !!matchPath("/blog/:slug", pathname);
   if (isDynamicRoute) return null;
 
   const matched = PAGE_SEO.find((entry) => matchPath({ path: entry.pattern, end: true }, pathname));
@@ -489,8 +487,8 @@ export function RouteSeo() {
       <meta property="og:locale" content="en_US" />
 
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:site" content="@Stacked_in" />
-      <meta name="twitter:creator" content="@Stacked_in" />
+      <meta name="twitter:site" content="@Panda_Abhishek8" />
+      <meta name="twitter:creator" content="@Panda_Abhishek8" />
       <meta name="twitter:title" content={seo.title} />
       <meta name="twitter:description" content={seo.description} />
       <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
@@ -508,12 +506,10 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
     name: "Abhishek Panda",
     url: "https://www.abhishekpanda.com",
     sameAs: [
-      "https://www.linkedin.com/in/iamabhishekpanda/",
-      "https://www.instagram.com/i_am_abhishekPanda",
+      "https://www.linkedin.com/in/abhishekpandaofficial/",
       "https://github.com/abhishekpandaOfficial",
-      "https://www.youtube.com/@stackedin",
-      "https://x.com/Stacked_in",
-      "https://stackedin.substack.com/",
+      "https://www.youtube.com/@abhishekpanda_official",
+      "https://x.com/Panda_Abhishek8",
     ],
     founder: {
       "@id": "https://www.abhishekpanda.com/#person",
@@ -543,13 +539,12 @@ function buildSchemaGraph(pathname: string, canonical: string, title: string, de
       "developer education",
     ],
     sameAs: [
-      "https://www.linkedin.com/in/iamabhishekpanda/",
-      "https://www.instagram.com/i_am_abhishekPanda",
+      "https://www.linkedin.com/in/abhishekpandaofficial/",
       "https://github.com/abhishekpandaOfficial",
-      "https://www.youtube.com/@stackedin",
-      "https://x.com/Stacked_in",
+      "https://www.youtube.com/@abhishekpanda_official",
+      "https://x.com/Panda_Abhishek8",
       "https://medium.com/@official.abhishekpanda",
-      "https://stackedin.substack.com/",
+      "https://substack.com/@abhishekpanda08",
       "https://hashnode.com/@abhishekpanda",
       "https://writing.stackexchange.com/users/82639/abhishek-official",
       "https://www.stackcraft.io/",

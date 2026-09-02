@@ -728,7 +728,7 @@ export const HeroSection = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <a 
-              href="https://www.instagram.com/i_am_abhishekPanda"
+              href="https://instagram.com/i_am_abhishekpanda" 
               target="_blank" 
               rel="noopener noreferrer"
               className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#e1306c]/30 bg-gradient-to-r from-[#f09433]/10 via-[#e6683c]/10 via-[#dc2743]/10 to-[#cc2366]/10 px-4 py-2 text-xs font-semibold tracking-[0.06em] text-white hover:border-[#e1306c]/60 hover:shadow-[0_0_15px_rgba(225,48,108,0.3)] transition-all duration-300 cursor-pointer"

@@ -107,7 +107,7 @@ export const DELIVERY_RECORDS: DeliveryRecord[] = [
   {
     id: "msg_102",
     platform: "X",
-    destination: "@Stacked_in",
+    destination: "@Panda_Abhishek8",
     state: "SENT",
     updatedAt: "2026-03-02 10:07",
   },
