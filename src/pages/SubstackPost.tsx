@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, Calendar, Check, Clock, Copy, ExternalLink, Share2, UserRound } from "lucide-react";
+import { ArrowLeft, Calendar, Check, Clock, Copy, ExternalLink, UserRound } from "lucide-react";
+import { FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { LongformSidebar } from "@/components/content/LongformSidebar";
@@ -34,12 +35,14 @@ export default function SubstackPost() {
   });
   const { data: archive } = useQuery({
     queryKey: ["stackedin-substack-archive"],
-    queryFn: fetchSubstackArchive,
+    queryFn: () => fetchSubstackArchive(),
     staleTime: 5 * 60 * 1000,
   });
 
   const safeHtml = useMemo(() => (post?.bodyHtml ? sanitizeSubstackHtml(post.bodyHtml) : ""), [post?.bodyHtml]);
   const originalUrl = post?.canonicalUrl || (slug ? `${STACKEDIN_PUBLICATION_URL}/p/${slug}` : STACKEDIN_PUBLICATION_URL);
+  const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(originalUrl)}`;
+  const xShareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(originalUrl)}&text=${encodeURIComponent(post?.title || "Read this StackedIN article")}`;
   const relatedPosts = useMemo(
     () =>
       (archive?.posts || [])
@@ -61,6 +64,11 @@ export default function SubstackPost() {
       return;
     }
     const built = buildTocFromRoot(root);
+    const leadImage = root.querySelector<HTMLImageElement>("img");
+    if (leadImage) {
+      leadImage.loading = "eager";
+      leadImage.fetchPriority = "high";
+    }
     setToc(built.items);
     headingElementsRef.current = built.elements;
     setActiveHeadingId(built.items[0]?.id || null);
@@ -92,18 +100,10 @@ export default function SubstackPost() {
   }, []);
 
   const copyArticleLink = useCallback(async () => {
-    await navigator.clipboard.writeText(window.location.href);
+    await navigator.clipboard.writeText(originalUrl);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
-  }, []);
-
-  const shareArticle = useCallback(async () => {
-    if (navigator.share && post) {
-      await navigator.share({ title: post.title, text: post.subtitle || undefined, url: window.location.href });
-      return;
-    }
-    await copyArticleLink();
-  }, [copyArticleLink, post]);
+  }, [originalUrl]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -157,7 +157,12 @@ export default function SubstackPost() {
                 </div>
 
                 <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-                  <button type="button" onClick={() => void shareArticle()} className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold shadow-sm transition hover:border-primary/30 hover:text-primary"><Share2 className="h-4 w-4" /> Share</button>
+                  <a href={linkedInShareUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-[#0A66C2] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#004182]">
+                    <FaLinkedinIn className="h-4 w-4" /> Share to LinkedIn
+                  </a>
+                  <a href={xShareUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
+                    <FaXTwitter className="h-4 w-4" /> Share to X
+                  </a>
                   <button type="button" onClick={() => void copyArticleLink()} className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold shadow-sm transition hover:border-primary/30 hover:text-primary">
                     {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}{copied ? "Copied" : "Copy link"}
                   </button>
@@ -165,13 +170,7 @@ export default function SubstackPost() {
                 </div>
               </header>
 
-              {post.heroImage ? (
-                <figure className="mt-10 overflow-hidden rounded-[2rem] border border-border bg-card shadow-[0_28px_80px_-48px_hsl(var(--foreground)/0.35)]">
-                  <img src={post.heroImage} alt={`Cover for ${post.title}`} className="aspect-[16/7] w-full object-cover" fetchPriority="high" />
-                </figure>
-              ) : null}
-
-              <div className="mt-12 grid items-start gap-10 xl:grid-cols-[minmax(0,820px)_360px] xl:justify-center">
+              <div className="mx-auto mt-12 grid max-w-[1200px] items-start gap-10 lg:grid-cols-[minmax(0,800px)_340px]">
                 <article className="min-w-0 rounded-[1.75rem] border border-border bg-card px-5 py-8 shadow-sm sm:px-8 md:px-12 md:py-12">
                   {safeHtml ? (
                     <div ref={articleBodyRef} className="reader-prose" dangerouslySetInnerHTML={{ __html: safeHtml }} />
@@ -193,7 +192,19 @@ export default function SubstackPost() {
                   </div>
                 </article>
 
-                <aside className="min-w-0 xl:sticky xl:top-24">
+                <aside className="reader-sidebar-scrollbar min-w-0 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1">
+                  <div className="mb-4 rounded-2xl border border-border bg-card/95 p-5 shadow-sm backdrop-blur">
+                    <p className="text-sm font-semibold text-foreground">Share the original article</p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">These links share the canonical StackedIN URL.</p>
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      <a href={linkedInShareUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0A66C2] px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-[#004182]">
+                        <FaLinkedinIn className="h-4 w-4" /> LinkedIn
+                      </a>
+                      <a href={xShareUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
+                        <FaXTwitter className="h-4 w-4" /> X
+                      </a>
+                    </div>
+                  </div>
                   <LongformSidebar
                     readMinutes={post.readingTimeMinutes}
                     progressPercent={progressPercent}

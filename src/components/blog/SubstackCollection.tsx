@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Clock, ExternalLink, RefreshCw, Search } from "lucide-react";
+import { FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchSubstackArchive, STACKEDIN_PUBLICATION_URL } from "@/lib/substack";
@@ -16,19 +17,32 @@ const formatDate = (value: string | null) => {
 
 export function SubstackCollection() {
   const [query, setQuery] = useState("");
-  const { data, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: ["stackedin-substack-archive"],
-    queryFn: fetchSubstackArchive,
+  const [syncVersion, setSyncVersion] = useState(0);
+  const { data, isLoading, isFetching, error } = useQuery({
+    queryKey: ["stackedin-substack-archive", syncVersion],
+    queryFn: () => fetchSubstackArchive(syncVersion > 0),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 
-  const posts = data?.posts || [];
+  const posts = useMemo(
+    () =>
+      [...(data?.posts || [])].sort(
+        (a, b) => new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime(),
+      ),
+    [data?.posts],
+  );
   const visiblePosts = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return posts;
     return posts.filter((post) => `${post.title} ${post.subtitle || ""}`.toLowerCase().includes(needle));
   }, [posts, query]);
+
+  const syncedAt = data?.syncedAt
+    ? new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit", day: "numeric", month: "short" }).format(new Date(data.syncedAt))
+    : null;
+  const syncPosts = () => setSyncVersion(Date.now());
 
   return (
     <section id="stackedin-posts" className="container mx-auto px-4 pb-12">
@@ -50,16 +64,29 @@ export function SubstackCollection() {
                 Every public post, its original hero visual, summary, publication date, and reading time—kept in step with the newsletter.
               </p>
             </div>
-            <a
-              href={STACKEDIN_PUBLICATION_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background/80 px-4 py-3 text-sm font-bold text-foreground transition hover:border-primary/30 hover:text-primary dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
-            >
-              Visit StackedIN
-              <ExternalLink className="h-4 w-4" />
-            </a>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={syncPosts}
+                disabled={isFetching}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary/90 disabled:cursor-wait disabled:opacity-70"
+              >
+                <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+                {isFetching ? "Syncing…" : "Sync posts"}
+              </button>
+              <a
+                href={STACKEDIN_PUBLICATION_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background/80 px-4 py-3 text-sm font-bold text-foreground transition hover:border-primary/30 hover:text-primary dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+              >
+                Visit StackedIN
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </div>
           </div>
+
+          {syncedAt ? <p className="mt-4 text-xs text-muted-foreground dark:text-slate-400">Last synced {syncedAt}. Newest article is always shown first.</p> : null}
 
           <div className="relative mt-6 max-w-xl">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground dark:text-slate-400" />
@@ -86,7 +113,7 @@ export function SubstackCollection() {
             <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-6 text-center">
               <p className="font-bold text-amber-800 dark:text-amber-100">The live archive could not refresh.</p>
               <p className="mt-2 text-sm text-muted-foreground dark:text-slate-300">You can retry here or open the publication directly.</p>
-              <button onClick={() => void refetch()} className="mt-4 rounded-xl bg-foreground px-4 py-2 text-sm font-bold text-background">Retry sync</button>
+              <button onClick={syncPosts} className="mt-4 rounded-xl bg-foreground px-4 py-2 text-sm font-bold text-background">Retry sync</button>
             </div>
           ) : visiblePosts.length === 0 ? (
             <div className="rounded-2xl border border-border bg-muted/40 p-8 text-center text-muted-foreground dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
@@ -96,7 +123,8 @@ export function SubstackCollection() {
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {visiblePosts.map((post, index) => (
                 <motion.article key={post.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ delay: Math.min(index, 8) * 0.04 }}>
-                  <Link to={`/blog/substack/${post.slug}`} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-background/80 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl dark:border-white/10 dark:bg-white/[0.06] dark:hover:border-cyan-300/35 dark:hover:bg-white/[0.09]">
+                  <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-background/80 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl dark:border-white/10 dark:bg-white/[0.06] dark:hover:border-cyan-300/35 dark:hover:bg-white/[0.09]">
+                    <Link to={`/blog/substack/${post.slug}`} aria-label={`Read ${post.title}`}>
                     <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-cyan-500/30 via-blue-500/20 to-violet-500/30">
                       {post.heroImage ? (
                         <img src={post.heroImage} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" />
@@ -105,16 +133,41 @@ export function SubstackCollection() {
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent dark:from-slate-950/75" />
                     </div>
+                    </Link>
                     <div className="flex flex-1 flex-col p-5">
                       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground dark:text-slate-400">
                         {formatDate(post.publishedAt) ? <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />{formatDate(post.publishedAt)}</span> : null}
                         <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{post.readingTimeMinutes} min read</span>
                       </div>
-                      <h3 className="mt-3 text-xl font-black leading-tight text-foreground transition group-hover:text-primary dark:text-white dark:group-hover:text-cyan-200">{post.title}</h3>
+                      <Link to={`/blog/substack/${post.slug}`}>
+                        <h3 className="mt-3 text-xl font-black leading-tight text-foreground transition group-hover:text-primary dark:text-white dark:group-hover:text-cyan-200">{post.title}</h3>
+                      </Link>
                       {post.subtitle ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground dark:text-slate-300">{post.subtitle}</p> : null}
-                      <span className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold text-primary dark:text-cyan-200">Read article <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+                      <div className="mt-auto flex items-center gap-2 pt-5">
+                        <Link to={`/blog/substack/${post.slug}`} className="mr-auto inline-flex items-center gap-2 text-sm font-bold text-primary dark:text-cyan-200">Read article <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></Link>
+                        <a
+                          href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(post.canonicalUrl)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`Share ${post.title} to LinkedIn`}
+                          title="Share to LinkedIn"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-[#0A66C2] transition hover:border-[#0A66C2]/40 hover:bg-[#0A66C2]/10 dark:border-white/10"
+                        >
+                          <FaLinkedinIn className="h-4 w-4" />
+                        </a>
+                        <a
+                          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(post.canonicalUrl)}&text=${encodeURIComponent(post.title)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`Share ${post.title} to X`}
+                          title="Share to X"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-foreground transition hover:border-foreground/30 hover:bg-muted dark:border-white/10"
+                        >
+                          <FaXTwitter className="h-4 w-4" />
+                        </a>
+                      </div>
                     </div>
-                  </Link>
+                  </div>
                 </motion.article>
               ))}
             </div>

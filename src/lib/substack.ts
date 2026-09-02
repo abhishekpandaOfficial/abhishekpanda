@@ -39,8 +39,12 @@ const readJson = async <T>(response: Response): Promise<T> => {
   return payload;
 };
 
-export const fetchSubstackArchive = async () => {
-  const response = await fetch("/api/substack", { headers: { Accept: "application/json" } });
+export const fetchSubstackArchive = async (forceRefresh = false) => {
+  const endpoint = forceRefresh ? `/api/substack?refresh=${Date.now()}` : "/api/substack";
+  const response = await fetch(endpoint, {
+    headers: { Accept: "application/json" },
+    cache: forceRefresh ? "no-store" : "default",
+  });
   const payload = await readJson<ArchiveResponse>(response);
   return { posts: payload.posts || [], syncedAt: payload.syncedAt || null };
 };
@@ -62,11 +66,7 @@ export const sanitizeSubstackHtml = (html: string) => {
     Array.from(element.attributes).forEach((attribute) => {
       const name = attribute.name.toLowerCase();
       const value = attribute.value.trim().toLowerCase();
-      const shouldRemovePresentationAttribute =
-        name === "style" ||
-        name === "width" ||
-        name === "height" ||
-        (name === "class" && element.tagName !== "CODE" && element.tagName !== "PRE");
+      const shouldRemovePresentationAttribute = name === "style";
       if (
         shouldRemovePresentationAttribute ||
         name.startsWith("on") ||
