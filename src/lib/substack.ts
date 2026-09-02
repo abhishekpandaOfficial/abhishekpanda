@@ -1,3 +1,5 @@
+import knownPosts from "../../data/stackedin-posts.json";
+
 export const STACKEDIN_PUBLICATION_URL = "https://stackedin.substack.com";
 
 export type SubstackPostSummary = {
@@ -25,6 +27,7 @@ export type SubstackPostDetail = SubstackPostSummary & {
 type ArchiveResponse = {
   posts?: SubstackPostSummary[];
   syncedAt?: string;
+  mode?: string;
   error?: string;
 };
 
@@ -39,10 +42,34 @@ const readJson = async <T>(response: Response): Promise<T> => {
   return payload;
 };
 
+const verifiedArchive = (): SubstackPostSummary[] =>
+  [...knownPosts].reverse().map((post) => ({
+    id: `verified-${post.slug}`,
+    title: post.title,
+    slug: post.slug,
+    subtitle: null,
+    excerpt: null,
+    heroImage: null,
+    canonicalUrl: `${STACKEDIN_PUBLICATION_URL}/p/${post.slug}`,
+    publishedAt: null,
+    updatedAt: null,
+    readingTimeMinutes: 5,
+    wordCount: null,
+    audience: null,
+    type: "newsletter",
+    reactions: null,
+    comments: null,
+  }));
+
 export const fetchSubstackArchive = async () => {
-  const response = await fetch("/api/substack", { headers: { Accept: "application/json" } });
-  const payload = await readJson<ArchiveResponse>(response);
-  return { posts: payload.posts || [], syncedAt: payload.syncedAt || null };
+  try {
+    const response = await fetch("/api/substack", { headers: { Accept: "application/json" } });
+    const payload = await readJson<ArchiveResponse>(response);
+    if (!payload.posts?.length) throw new Error("StackedIN returned an empty archive");
+    return { posts: payload.posts, syncedAt: payload.syncedAt || null, mode: payload.mode || "live" };
+  } catch {
+    return { posts: verifiedArchive(), syncedAt: null, mode: "verified" };
+  }
 };
 
 export const fetchSubstackPost = async (slug: string) => {

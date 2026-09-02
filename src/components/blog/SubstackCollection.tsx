@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Clock, ExternalLink, RefreshCw, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,6 +38,9 @@ export function SubstackCollection() {
               <div className="flex flex-wrap items-center gap-3">
                 <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-cyan-200">
                   Live from StackedIN
+                </span>
+                <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold text-slate-200">
+                  {posts.length || 45} articles
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-xs text-slate-400">
                   <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
@@ -96,7 +98,7 @@ export function SubstackCollection() {
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {visiblePosts.map((post, index) => (
                 <motion.article key={post.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ delay: Math.min(index, 8) * 0.04 }}>
-                  <Link to={`/blog/substack/${post.slug}`} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] transition duration-300 hover:-translate-y-1 hover:border-cyan-300/35 hover:bg-white/[0.09]">
+                  <a href={post.canonicalUrl} target="_blank" rel="noopener noreferrer" className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] transition duration-300 hover:-translate-y-1 hover:border-cyan-300/35 hover:bg-white/[0.09]">
                     <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-cyan-500/30 via-blue-500/20 to-violet-500/30">
                       {post.heroImage ? (
                         <img src={post.heroImage} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" />
@@ -112,9 +114,9 @@ export function SubstackCollection() {
                       </div>
                       <h3 className="mt-3 text-xl font-black leading-tight text-white transition group-hover:text-cyan-200">{post.title}</h3>
                       {post.subtitle ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-300">{post.subtitle}</p> : null}
-                      <span className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold text-cyan-200">Read article <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+                      <span className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold text-cyan-200">Read on StackedIN <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
                     </div>
-                  </Link>
+                  </a>
                 </motion.article>
               ))}
             </div>
