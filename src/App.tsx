@@ -8,7 +8,6 @@ import { BrowserRouter, Navigate, Routes, Route, useLocation, useParams } from "
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { RouteScrollRestoration } from "@/components/layout/RouteScrollRestoration";
 import { SocialSidebar } from "@/components/layout/SocialSidebar";
-import { WhatsAppChatButton } from "@/components/layout/WhatsAppChatButton";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Index from "./pages/Index";
 import { RouteSeo } from "@/components/seo/RouteSeo";
@@ -220,7 +219,6 @@ const App = () => {
           <Sonner />
           <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
             <SocialSidebar />
-            <WhatsAppChatButton />
             <AnalyticsWrapper>
               <RouteScrollRestoration />
               <RouteSeo />
