@@ -5,6 +5,8 @@ import { Helmet } from "react-helmet-async";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { useTheme } from "@/components/ThemeProvider";
+import { ReadingModeToggle } from "@/components/blog/ReadingModeToggle";
+import { useReadingMode } from "@/hooks/useReadingMode";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { Markdown } from "@/components/blog/Markdown";
@@ -170,6 +172,7 @@ const extractIntroduction = (content: string | null | undefined, fallback: strin
 const RemoteBlogPost = ({ slug }: { slug?: string }) => {
   const { user } = useUserAuth();
   const { theme } = useTheme();
+  const { isReadingMode, toggleReadingMode } = useReadingMode();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
@@ -869,8 +872,9 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
         {meta.hero_image ? <meta name="twitter:image" content={meta.hero_image} /> : null}
       </Helmet>
 
-      <Navigation />
-      <main className="pt-24 pb-32 lg:pb-20">
+      {!isReadingMode ? <Navigation /> : null}
+      <ReadingModeToggle active={isReadingMode} onToggle={toggleReadingMode} />
+      <main className={isReadingMode ? "pb-20 pt-16" : "pb-32 pt-24 lg:pb-20"}>
         <section className="container mx-auto px-4 max-w-[1320px]">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
             <article
@@ -1923,7 +1927,7 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
         </div>
       </div>
 
-      <Footer />
+      {!isReadingMode ? <Footer /> : null}
     </div>
   );
 };
