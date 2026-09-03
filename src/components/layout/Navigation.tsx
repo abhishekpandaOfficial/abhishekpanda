@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PublicSearch } from "@/components/layout/PublicSearch";
 import { PrefetchLink } from "@/components/PrefetchLink";
-import portfolioLogo from "@/assets/branding/abhishek-panda-monogram.png";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import portfolioLogo from "@/assets/branding/abhishek-a-mark.png";
 
 // Header nav links
 const navLinks = [
@@ -78,8 +79,8 @@ export const Navigation = () => {
               to="/"
               className="group flex items-center gap-2.5 justify-self-start"
             >
-              <div className="relative transition-transform duration-300 group-hover:scale-110">
-                <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+              <div className="relative transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-105">
+                <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-blue-200/70 bg-white p-1 shadow-[0_8px_24px_-12px_rgba(37,99,235,0.8)] dark:border-blue-400/20 dark:bg-slate-900">
                   <img
                     src={portfolioLogo}
                     alt="Abhishek Panda portfolio logo"
@@ -112,6 +113,7 @@ export const Navigation = () => {
 
             <div className="flex items-center justify-self-end gap-2">
               <PublicSearch />
+              <ThemeToggle />
               <Button
                 variant="ghost"
                 size="icon"

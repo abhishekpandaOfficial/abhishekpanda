@@ -140,22 +140,12 @@ export function PortfolioHero() {
       <PortfolioAtmosphere />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(59,130,246,0.13),transparent_28%),radial-gradient(circle_at_82%_28%,rgba(14,165,233,0.10),transparent_24%),linear-gradient(to_bottom,rgba(255,255,255,0.18),#f7f8fa_72%)] dark:bg-[radial-gradient(circle_at_18%_12%,rgba(37,99,235,0.20),transparent_28%),linear-gradient(to_bottom,rgba(2,6,23,0.1),#020617_76%)]" />
 
-      <div className="relative mx-auto grid w-full max-w-[1480px] gap-12 px-5 pb-20 md:px-8 lg:grid-cols-[minmax(330px,0.72fr)_minmax(0,1.28fr)] lg:items-start lg:gap-20 lg:pb-28 xl:px-12">
-        <div className="lg:sticky lg:top-20 lg:h-[calc(100vh-5.75rem)] lg:self-start">
+      <div className="relative mx-auto grid w-full max-w-[1480px] gap-12 px-5 pb-20 md:px-8 lg:grid-cols-[minmax(310px,0.68fr)_minmax(0,1.32fr)] lg:items-start lg:gap-16 lg:pb-28 xl:px-12 xl:gap-20">
+        <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-blue-700 shadow-sm backdrop-blur dark:border-blue-400/25 dark:bg-slate-900/70 dark:text-blue-300">
-              <Sparkles className="h-3.5 w-3.5" /> Enterprise AI Solution Architect
-            </div>
-            <h1 className="whitespace-nowrap text-[clamp(2.15rem,7vw,4.6rem)] font-black leading-none tracking-[-0.055em]">
-              Abhishek <span className="bg-gradient-to-r from-blue-700 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">Panda.</span>
-            </h1>
-            <p className="mt-4 max-w-xl text-base font-medium leading-7 text-slate-600 dark:text-slate-300 xl:text-lg">
-              I design secure, scalable, production-grade AI systems where business ambition meets engineering reality.
-            </p>
-
-            <div className="relative mt-5 overflow-hidden rounded-[1.75rem] border border-white/90 bg-white/70 p-2 shadow-[0_36px_90px_-42px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/65">
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-white/90 bg-white/70 p-2 shadow-[0_36px_90px_-42px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/65">
               <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[1.35rem] bg-slate-200 lg:h-[clamp(250px,36vh,390px)] lg:aspect-auto">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[1.35rem] bg-slate-200 lg:h-[clamp(260px,40vh,410px)] lg:aspect-auto">
                 <motion.img src={portrait} alt="Abhishek Panda, Enterprise AI Solution Architect" className="h-full w-full object-cover object-[center_18%]" initial={{ scale: 1.04 }} animate={{ scale: 1 }} transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-5 text-white md:p-7">
@@ -167,23 +157,44 @@ export function PortfolioHero() {
               </div>
             </div>
 
+            <div className="mt-6 min-w-0">
+              <h1 className="text-[clamp(2.15rem,4vw,3.55rem)] font-black leading-[0.98] tracking-[-0.055em]">
+                Abhishek <span className="bg-gradient-to-r from-blue-700 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">Panda</span>
+              </h1>
+              <div className="mt-4 inline-flex max-w-full items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-blue-700 shadow-sm backdrop-blur dark:border-blue-400/25 dark:bg-slate-900/70 dark:text-blue-300">
+                <Sparkles className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">Enterprise AI Solution Architect</span>
+              </div>
+              <p className="mt-4 max-w-xl text-sm font-medium leading-6 text-slate-600 dark:text-slate-300 xl:text-base">
+                Building governed AI platforms, intelligent products, and cloud architecture for complex enterprise environments.
+              </p>
+            </div>
+
             <div className="mt-3 grid grid-cols-3 gap-2">
               {[['12.6+', 'Years'], ['7', 'Career chapters'], ['4', 'Industries']].map(([value, label]) => (
                 <div key={label} className="rounded-2xl border border-slate-200 bg-white/75 px-2 py-3 text-center backdrop-blur dark:border-slate-800 dark:bg-slate-900/70"><div className="text-lg font-black tracking-tight">{value}</div><div className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">{label}</div></div>
               ))}
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-3">
-              <button onClick={() => setDownloadOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-blue-700 dark:bg-white dark:text-slate-950 dark:hover:bg-blue-100"><Download className="h-4 w-4" /> Download CV</button>
-              <a href="https://www.linkedin.com/in/iamabhishekpanda/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:-translate-y-0.5 hover:border-blue-400 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-white">LinkedIn <ArrowUpRight className="h-4 w-4" /></a>
+            <div className="mt-4 grid grid-cols-[minmax(0,1fr)_repeat(3,44px)] gap-2">
+              <button onClick={() => setDownloadOpen(true)} className="inline-flex min-w-0 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-blue-700 dark:bg-white dark:text-slate-950 dark:hover:bg-blue-100"><Download className="h-4 w-4 shrink-0" /> <span className="truncate">Download CV</span></button>
+              {[
+                { href: "https://www.linkedin.com/in/iamabhishekpanda/", icon: "/brand-logos/social/linkedin.svg", label: "LinkedIn" },
+                { href: "https://github.com/abhishekpandaOfficial", icon: "/brand-logos/social/github.svg", label: "GitHub" },
+                { href: "https://stackedin.substack.com/", icon: "/brand-logos/social/substack.svg", label: "Substack" },
+              ].map((link) => (
+                <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={`Open ${link.label}`} title={link.label} className="group relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
+                  <img src={link.icon} alt="" className="h-full w-full object-contain dark:brightness-0 dark:invert" />
+                  <ArrowUpRight className="absolute right-1 top-1 h-2.5 w-2.5 text-slate-400 transition group-hover:text-blue-600" />
+                </a>
+              ))}
             </div>
           </motion.div>
         </div>
 
-        <div>
+        <div className="min-w-0">
           <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, delay: 0.12, ease: [0.22, 1, 0.36, 1] }} className="mb-12 border-b border-slate-200 pb-10 dark:border-slate-800">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-blue-600 dark:text-blue-300">Profile summary</p>
-            <h2 className="mt-4 max-w-4xl text-3xl font-black tracking-[-0.04em] md:text-5xl md:leading-[1.08]">Architecture for intelligent systems that have to work in the real world.</h2>
+            <h2 className="mt-4 max-w-4xl text-3xl font-black tracking-[-0.04em] md:text-4xl md:leading-[1.08] xl:text-5xl">Architecture for intelligent systems that have to work in the real world.</h2>
             <p className="mt-6 max-w-3xl text-base leading-8 text-slate-600 dark:text-slate-300 md:text-lg">Enterprise AI Solution Architect with experience across insurance, banking, aviation, and automotive domains. My work spans Generative AI, LLMs, RAG, agentic systems, vector search, MLOps, LLMOps, and multi-cloud architecture across Microsoft Foundry, Azure, Google Cloud, Python, Kubernetes, and .NET.</p>
             <div className="mt-6 flex flex-wrap gap-2">{skills.map((skill) => <span key={skill} className="rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">{skill}</span>)}</div>
           </motion.div>
