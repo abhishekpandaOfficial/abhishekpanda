@@ -44,6 +44,7 @@ const heroImages = {
   "design-patterns-from-zero-to-architecture": "https://substackcdn.com/image/fetch/$s_!0Cv7!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F53b15c80-ce86-4f75-8969-3dcab71006a5_2172x724.png",
   "data-engineering-data-architect-mastery": "https://substackcdn.com/image/fetch/$s_!NY1f!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fd7c5f442-805c-409e-b7d9-56ba5656888a_1536x1024.png",
   "computer-vision-syllabus": "https://substackcdn.com/image/fetch/$s_!tRpO!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fbf683d4f-50a9-4ec7-94fb-2657904c693f_1983x793.png",
+  "adaboost-classification-employee": "https://substackcdn.com/image/fetch/$s_!TgpP!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fab226f9c-9ecd-4bc9-8eae-0b0976719177_1672x941.png",
 } as const;
 
 const stackedInPosts = [
@@ -92,6 +93,7 @@ const stackedInPosts = [
   { title: "Design Patterns — From Zero to Architecture", slug: "design-patterns-from-zero-to-architecture" },
   { title: "Data Engineering and Data Architect Mastery", slug: "data-engineering-data-architect-mastery" },
   { title: "Computer Vision Mastery — Complete Syllabus", slug: "computer-vision-syllabus" },
+  { title: "AdaBoost Classification — Employee Attrition Prediction", slug: "adaboost-classification-employee" },
 ] as const;
 
 export default stackedInPosts.map((post) => ({

@@ -1,5 +1,3 @@
-import knownPosts from "../data/stackedin-posts.ts";
-
 type ApiRequest = {
   method?: string;
   query?: Record<string, string | string[] | undefined>;
@@ -164,26 +162,6 @@ const fetchRssFallback = async () => {
   });
 };
 
-const fallbackKnownPost = (entry: { title: string; slug: string; heroImage: string }) => ({
-  id: `verified-${entry.slug}`,
-  title: entry.title,
-  slug: entry.slug,
-  subtitle: null,
-  excerpt: null,
-  heroImage: entry.heroImage,
-  canonicalUrl: `${PUBLICATION_ORIGIN}/p/${entry.slug}`,
-  publishedAt: null,
-  updatedAt: null,
-  readingTimeMinutes: 5,
-  wordCount: null,
-  audience: null,
-  type: "newsletter",
-  reactions: null,
-  comments: null,
-});
-
-const knownRank = new Map(knownPosts.map((post, index) => [post.slug, index]));
-
 type NormalizedPost = ReturnType<typeof normalizePost>;
 
 const mergePostMetadata = (existing: NormalizedPost, incoming: NormalizedPost): NormalizedPost => ({
@@ -202,7 +180,7 @@ const mergePostMetadata = (existing: NormalizedPost, incoming: NormalizedPost): 
 const newestFirst = (a: NormalizedPost, b: NormalizedPost) => {
   const dateDifference = new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime();
   if (dateDifference) return dateDifference;
-  return (knownRank.get(b.slug || "") ?? -1) - (knownRank.get(a.slug || "") ?? -1);
+  return a.title.localeCompare(b.title);
 };
 
 const completeArchive = (posts: NormalizedPost[]) => {
@@ -210,11 +188,6 @@ const completeArchive = (posts: NormalizedPost[]) => {
   posts.filter((post) => post.slug).forEach((post) => {
     const existing = unique.get(post.slug!);
     unique.set(post.slug!, existing ? mergePostMetadata(existing, post) : post);
-  });
-  knownPosts.forEach((entry) => {
-    const existing = unique.get(entry.slug);
-    if (!existing) unique.set(entry.slug, fallbackKnownPost(entry));
-    else if (!existing.heroImage) unique.set(entry.slug, { ...existing, heroImage: entry.heroImage });
   });
   return Array.from(unique.values()).sort(newestFirst);
 };
@@ -277,18 +250,13 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     }
 
     response.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=3600");
-    let posts: Awaited<ReturnType<typeof fetchArchive>>;
+    let posts: NormalizedPost[];
     let mode = "archive";
     try {
       posts = await fetchArchive();
     } catch {
-      try {
-        posts = completeArchive(await fetchRssFallback());
-        mode = "rss+verified";
-      } catch {
-        posts = [...knownPosts].reverse().map(fallbackKnownPost);
-        mode = "verified";
-      }
+      posts = completeArchive(await fetchRssFallback());
+      mode = "rss";
     }
     response.status(200).json({ posts, count: posts.length, source: PUBLICATION_ORIGIN, mode, syncedAt: new Date().toISOString() });
   } catch (error) {
