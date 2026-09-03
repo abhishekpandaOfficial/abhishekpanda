@@ -66,7 +66,9 @@ export const fetchSubstackArchive = async () => {
     const response = await fetch("/api/substack", { headers: { Accept: "application/json" } });
     const payload = await readJson<ArchiveResponse>(response);
     if (!payload.posts?.length) throw new Error("StackedIN returned an empty archive");
-    return { posts: payload.posts, syncedAt: payload.syncedAt || null, mode: payload.mode || "live" };
+    const liveSlugs = new Set(payload.posts.map((post) => post.slug));
+    const posts = [...payload.posts, ...verifiedArchive().filter((post) => !liveSlugs.has(post.slug))];
+    return { posts, syncedAt: payload.syncedAt || null, mode: payload.mode || "live" };
   } catch {
     return { posts: verifiedArchive(), syncedAt: null, mode: "verified" };
   }

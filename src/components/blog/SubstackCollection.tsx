@@ -40,7 +40,7 @@ export function SubstackCollection() {
                   Live from StackedIN
                 </span>
                 <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold text-slate-200">
-                  {posts.length || 45} articles
+                  {posts.length || 46} articles
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-xs text-slate-400">
                   <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
@@ -52,15 +52,26 @@ export function SubstackCollection() {
                 Every public post, its original hero visual, summary, publication date, and reading time—kept in step with the newsletter.
               </p>
             </div>
-            <a
-              href={STACKEDIN_PUBLICATION_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold transition hover:bg-white/15"
-            >
-              Visit StackedIN
-              <ExternalLink className="h-4 w-4" />
-            </a>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => void refetch()}
+                disabled={isFetching}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-300 px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-200 disabled:cursor-wait disabled:opacity-70"
+              >
+                <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+                {isFetching ? "Syncing…" : "Sync latest posts"}
+              </button>
+              <a
+                href={STACKEDIN_PUBLICATION_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold transition hover:bg-white/15"
+              >
+                Visit StackedIN
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </div>
           </div>
 
           <div className="relative mt-6 max-w-xl">
