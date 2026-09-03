@@ -290,15 +290,6 @@ const PAGE_SEO: Array<{ pattern: string; data: SeoData }> = [
     },
   },
   {
-    pattern: "/contact",
-    data: {
-      title: "Contact Abhishek Panda",
-      description:
-        "Contact Abhishek Panda for collaborations, speaking, consulting, technical advisory, and strategic partnerships.",
-      pageType: "ContactPage",
-    },
-  },
-  {
     pattern: "/privacy",
     data: {
       title: "Privacy Policy | Abhishek Panda",

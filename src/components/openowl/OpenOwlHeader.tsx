@@ -7,7 +7,6 @@ const links = [
   { label: "TechHub", to: "/techhub" },
   { label: "Projects", to: "/products" },
   { label: "OpenOwl", to: "/openowl" },
-  { label: "Contact", to: "/contact" },
 ];
 
 export function OpenOwlHeader() {

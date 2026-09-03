@@ -146,7 +146,7 @@ export default function Chronyx() {
                 </p>
                 <div className="mt-6">
                   <Button variant="glass" size="lg" asChild>
-                    <Link to="/contact">
+                    <Link to="/#contact">
                       Connect with Abhishek
                       <ArrowRight className="w-5 h-5" />
                     </Link>

@@ -129,8 +129,8 @@ const mainPages: SiteSearchItem[] = [
   {
     id: "contact",
     title: "Contact",
-    description: "Contact page for mentorship, consulting, and collaboration.",
-    href: "/contact",
+    description: "Email and official social profiles for collaboration.",
+    href: "/#contact",
     section: "Main Pages",
     keywords: ["contact", "mentorship", "consulting", "reach out"],
   },

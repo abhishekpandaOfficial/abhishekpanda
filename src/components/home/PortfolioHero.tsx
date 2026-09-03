@@ -17,6 +17,9 @@ import metlifeLogo from "@/assets/company-logos/client-metlife.svg";
 import boaLogo from "@/assets/company-logos/client-boa.svg";
 import { CVDownloadModal } from "@/components/cv/CVDownloadModal";
 import { PortfolioAtmosphere } from "@/components/home/PortfolioAtmosphere";
+import { CvTechnologyStack } from "@/components/home/CvTechnologyStack";
+import { LandingContact } from "@/components/home/LandingContact";
+import { Footer } from "@/components/layout/Footer";
 
 type Logo = { src: string; alt: string; className?: string };
 type Technology = { name: string; icon: string };
@@ -136,16 +139,16 @@ export function PortfolioHero() {
   const [downloadOpen, setDownloadOpen] = useState(false);
 
   return (
-    <section className="relative overflow-x-clip border-b border-slate-200 bg-[#f7f8fa] pt-24 text-slate-950 dark:border-slate-800 dark:bg-slate-950 dark:text-white md:pt-28">
+    <section className="relative overflow-x-clip border-b border-slate-200 bg-[#f7f8fa] pt-20 text-slate-950 dark:border-slate-800 dark:bg-slate-950 dark:text-white lg:h-screen lg:overflow-hidden">
       <PortfolioAtmosphere />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(59,130,246,0.13),transparent_28%),radial-gradient(circle_at_82%_28%,rgba(14,165,233,0.10),transparent_24%),linear-gradient(to_bottom,rgba(255,255,255,0.18),#f7f8fa_72%)] dark:bg-[radial-gradient(circle_at_18%_12%,rgba(37,99,235,0.20),transparent_28%),linear-gradient(to_bottom,rgba(2,6,23,0.1),#020617_76%)]" />
 
-      <div className="relative mx-auto grid w-full max-w-[1480px] gap-12 px-5 pb-20 md:px-8 lg:grid-cols-[minmax(310px,0.68fr)_minmax(0,1.32fr)] lg:items-start lg:gap-16 lg:pb-28 xl:px-12 xl:gap-20">
-        <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
+      <div className="relative mx-auto grid w-full max-w-[1480px] gap-12 px-5 pb-20 md:px-8 lg:h-[calc(100vh-5rem)] lg:grid-cols-[minmax(310px,0.68fr)_minmax(0,1.32fr)] lg:items-start lg:gap-16 lg:pb-0 xl:px-12 xl:gap-20">
+        <aside className="min-w-0 lg:h-[calc(100vh-5rem)] lg:overflow-hidden lg:py-5">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
             <div className="relative overflow-hidden rounded-[1.75rem] border border-white/90 bg-white/70 p-2 shadow-[0_36px_90px_-42px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/65">
               <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[1.35rem] bg-slate-200 lg:h-[clamp(260px,40vh,410px)] lg:aspect-auto">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[1.35rem] bg-slate-200 lg:h-[clamp(220px,32vh,330px)] lg:aspect-auto">
                 <motion.img src={portrait} alt="Abhishek Panda, Enterprise AI Solution Architect" className="h-full w-full object-cover object-[center_18%]" initial={{ scale: 1.04 }} animate={{ scale: 1 }} transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-5 text-white md:p-7">
@@ -157,14 +160,14 @@ export function PortfolioHero() {
               </div>
             </div>
 
-            <div className="mt-6 min-w-0">
-              <h1 className="text-[clamp(2.15rem,4vw,3.55rem)] font-black leading-[0.98] tracking-[-0.055em]">
+            <div className="mt-5 min-w-0">
+              <h1 className="whitespace-nowrap text-[clamp(2.1rem,3.2vw,3.25rem)] font-black leading-[0.98] tracking-[-0.055em]">
                 Abhishek <span className="bg-gradient-to-r from-blue-700 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">Panda</span>
               </h1>
               <div className="mt-4 inline-flex max-w-full items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-blue-700 shadow-sm backdrop-blur dark:border-blue-400/25 dark:bg-slate-900/70 dark:text-blue-300">
                 <Sparkles className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">Enterprise AI Solution Architect</span>
               </div>
-              <p className="mt-4 max-w-xl text-sm font-medium leading-6 text-slate-600 dark:text-slate-300 xl:text-base">
+              <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-slate-600 dark:text-slate-300">
                 Building governed AI platforms, intelligent products, and cloud architecture for complex enterprise environments.
               </p>
             </div>
@@ -189,9 +192,9 @@ export function PortfolioHero() {
               ))}
             </div>
           </motion.div>
-        </div>
+        </aside>
 
-        <div className="min-w-0">
+        <div className="min-w-0 lg:h-[calc(100vh-5rem)] lg:overflow-y-auto lg:overscroll-contain lg:py-5 lg:pr-3 [scrollbar-color:rgba(100,116,139,0.35)_transparent] [scrollbar-width:thin]">
           <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, delay: 0.12, ease: [0.22, 1, 0.36, 1] }} className="mb-12 border-b border-slate-200 pb-10 dark:border-slate-800">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-blue-600 dark:text-blue-300">Profile summary</p>
             <h2 className="mt-4 max-w-4xl text-3xl font-black tracking-[-0.04em] md:text-4xl md:leading-[1.08] xl:text-5xl">Architecture for intelligent systems that have to work in the real world.</h2>
@@ -210,7 +213,7 @@ export function PortfolioHero() {
                   </div>
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0"><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600 dark:text-blue-300">{item.period}</p><h3 className="mt-2 text-xl font-black tracking-tight md:text-2xl">{item.company}</h3><p className="mt-1 text-sm font-bold text-slate-600 dark:text-slate-300">{item.role}</p><p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.location}</p></div>
-                    {item.clientLogos?.length ? <div className="flex max-w-[230px] flex-wrap items-center gap-2 sm:justify-end">{item.clientLogos.map((logo) => <div key={logo.alt} className="flex h-12 min-w-16 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm" title={`${logo.alt} client`}><img src={logo.src} alt={`${logo.alt} client logo`} className={`max-h-7 max-w-[110px] object-contain ${logo.className || ""}`} loading="lazy" /></div>)}</div> : null}
+                    {item.clientLogos?.length ? <div className="max-w-[280px]"><p className="mb-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 sm:text-right">Client</p><div className="flex flex-wrap items-center gap-2 sm:justify-end">{item.clientLogos.map((logo) => <div key={logo.alt} className="flex h-16 min-w-28 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-[0_10px_30px_-18px_rgba(15,23,42,0.55)]" title={`${logo.alt} client`}><img src={logo.src} alt={`${logo.alt} official client logo`} className={`max-h-9 w-auto max-w-[145px] object-contain ${logo.className || ""}`} loading="lazy" /></div>)}</div></div> : null}
                   </div>
                   {item.client ? <p className="mt-5 text-xs font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">{item.client}</p> : null}
                   <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300 md:text-[15px]">{item.summary}</p>
@@ -226,6 +229,9 @@ export function PortfolioHero() {
               ))}
             </div>
           </div>
+          <CvTechnologyStack />
+          <LandingContact />
+          <Footer />
         </div>
       </div>
       <CVDownloadModal isOpen={downloadOpen} onClose={() => setDownloadOpen(false)} />
