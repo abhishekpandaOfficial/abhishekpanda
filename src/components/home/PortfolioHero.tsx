@@ -9,6 +9,7 @@ import wellsfargoLogo from "@/assets/company-logos/wellsfargo-official.png";
 import virtusaLogo from "@/assets/company-logos/virtusa-official.svg";
 import jdSportsLogo from "@/assets/company-logos/jd-sports-official.svg";
 import conduentLogo from "@/assets/company-logos/conduent-official.png";
+import qualityAiLogo from "@/assets/company-logos/quality-ai-official.png";
 import hiscoxLogo from "@/assets/company-logos/client-hiscox.svg";
 import dellLogo from "@/assets/company-logos/client-dell.svg";
 import qatarLogo from "@/assets/company-logos/client-qatar-airways.svg";
@@ -17,7 +18,8 @@ import boaLogo from "@/assets/company-logos/client-boa.svg";
 import { CVDownloadModal } from "@/components/cv/CVDownloadModal";
 import { PortfolioAtmosphere } from "@/components/home/PortfolioAtmosphere";
 
-type Logo = { src?: string; alt: string; className?: string; monogram?: string };
+type Logo = { src: string; alt: string; className?: string };
+type Technology = { name: string; icon: string };
 type CareerItem = {
   period: string;
   company: string;
@@ -28,6 +30,21 @@ type CareerItem = {
   clientLogos?: Logo[];
   client?: string;
   highlights: string[];
+  technologies: Technology[];
+};
+
+const stack = {
+  angular: { name: "Angular", icon: "/brand-logos/stacks/angular.svg" },
+  azure: { name: "Microsoft Azure", icon: "/brand-logos/stacks/microsoftazure.svg" },
+  csharp: { name: "C#", icon: "/brand-logos/stacks/csharp.svg" },
+  docker: { name: "Docker", icon: "/brand-logos/stacks/docker.svg" },
+  dotnet: { name: ".NET", icon: "/brand-logos/stacks/dotnet.svg" },
+  gcp: { name: "Google Cloud", icon: "/brand-logos/stacks/gcp.svg" },
+  kubernetes: { name: "Kubernetes", icon: "/brand-logos/stacks/kubernetes.svg" },
+  postgres: { name: "PostgreSQL", icon: "/brand-logos/stacks/postgresql.svg" },
+  python: { name: "Python", icon: "/brand-logos/stacks/python.svg" },
+  pytorch: { name: "PyTorch", icon: "/brand-logos/stacks/pytorch.svg" },
+  sqlserver: { name: "Microsoft SQL Server", icon: "/brand-logos/stacks/microsoftsqlserver.svg" },
 };
 
 const career: CareerItem[] = [
@@ -37,10 +54,11 @@ const career: CareerItem[] = [
     role: "Architect | AI Solution Architect",
     location: "Bengaluru",
     summary: "Architecting governed, cloud-native AI for underwriting transformation, document intelligence, knowledge discovery, and intelligent workflow automation.",
-    companyLogos: [{ alt: "Quality AI", monogram: "QAI" }],
+    companyLogos: [{ src: qualityAiLogo, alt: "Quality AI" }],
     clientLogos: [{ src: hiscoxLogo, alt: "Hiscox" }],
     client: "Client: Hiscox - London Market Insurance",
     highlights: ["Agentic AI + multi-agent systems", "MCP-enabled enterprise integrations", "Azure + Vertex AI + ADK"],
+    technologies: [stack.azure, stack.gcp, stack.python, stack.docker, stack.kubernetes],
   },
   {
     period: "Jan 2023 - Aug 2025",
@@ -51,6 +69,7 @@ const career: CareerItem[] = [
     companyLogos: [{ src: soleraLogo, alt: "Solera" }],
     client: "Enterprise Fleet Intelligence & Agentic AI Platform",
     highlights: ["10K+ active drivers", "100K+ documents", "40% faster deployments"],
+    technologies: [stack.python, stack.azure, stack.pytorch, stack.kubernetes, stack.docker, stack.postgres],
   },
   {
     period: "Jun 2022 - Dec 2022",
@@ -62,6 +81,7 @@ const career: CareerItem[] = [
     clientLogos: [{ src: dellLogo, alt: "Dell" }],
     client: "KPMG contract: Jun-Aug 2022 | Accion Labs: Aug-Dec 2022",
     highlights: ["25K+ monthly queries", "92% intent accuracy", "35% less manual support"],
+    technologies: [stack.python, stack.azure, stack.kubernetes, stack.docker, stack.postgres],
   },
   {
     period: "May 2020 - Jul 2022",
@@ -72,6 +92,7 @@ const career: CareerItem[] = [
     companyLogos: [{ src: wellsfargoLogo, alt: "Wells Fargo", className: "max-h-8" }],
     client: "Wealth & Investment Management Technology",
     highlights: ["14+ governed platforms", "40% infrastructure efficiency", "10+ engineers mentored"],
+    technologies: [stack.csharp, stack.dotnet, stack.azure, stack.kubernetes, stack.docker, stack.sqlserver],
   },
   {
     period: "Aug 2018 - Jun 2020",
@@ -83,6 +104,7 @@ const career: CareerItem[] = [
     clientLogos: [{ src: qatarLogo, alt: "Qatar Airways" }],
     client: "Client: Qatar Airways",
     highlights: ["Azure API Management", "OAuth 2.0 + JWT", "Service Bus event workflows"],
+    technologies: [stack.csharp, stack.dotnet, stack.azure, stack.angular],
   },
   {
     period: "Apr 2018 - Jun 2018",
@@ -92,6 +114,7 @@ const career: CareerItem[] = [
     summary: "Delivered retail applications for orders, inventory, and customer-service workflows with C#, .NET, Angular, SQL Server, and RabbitMQ.",
     companyLogos: [{ src: jdSportsLogo, alt: "JD Sports & Fashion" }],
     highlights: ["Retail operations", "Asynchronous messaging", "Release automation"],
+    technologies: [stack.csharp, stack.dotnet, stack.angular, stack.sqlserver],
   },
   {
     period: "Jul 2015 - Jul 2017",
@@ -103,6 +126,7 @@ const career: CareerItem[] = [
     clientLogos: [{ src: metlifeLogo, alt: "MetLife" }, { src: boaLogo, alt: "Bank of America" }],
     client: "Clients: MetLife and Bank of America",
     highlights: ["~30% SQL performance gain", "~35% less downtime", ".NET enterprise services"],
+    technologies: [stack.csharp, stack.dotnet, stack.sqlserver],
   },
 ];
 
@@ -122,8 +146,8 @@ export function PortfolioHero() {
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-blue-700 shadow-sm backdrop-blur dark:border-blue-400/25 dark:bg-slate-900/70 dark:text-blue-300">
               <Sparkles className="h-3.5 w-3.5" /> Enterprise AI Solution Architect
             </div>
-            <h1 className="max-w-xl text-5xl font-black tracking-[-0.055em] md:text-6xl xl:text-[4.6rem] xl:leading-[0.92]">
-              Abhishek<br /><span className="bg-gradient-to-r from-blue-700 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">Panda.</span>
+            <h1 className="whitespace-nowrap text-[clamp(2.15rem,7vw,4.6rem)] font-black leading-none tracking-[-0.055em]">
+              Abhishek <span className="bg-gradient-to-r from-blue-700 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">Panda.</span>
             </h1>
             <p className="mt-4 max-w-xl text-base font-medium leading-7 text-slate-600 dark:text-slate-300 xl:text-lg">
               I design secure, scalable, production-grade AI systems where business ambition meets engineering reality.
@@ -171,11 +195,7 @@ export function PortfolioHero() {
               {career.map((item, index) => (
                 <motion.article key={`${item.company}-${item.period}`} initial={{ opacity: 0, x: 28 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.58, delay: Math.min(index, 3) * 0.05, ease: [0.22, 1, 0.36, 1] }} className="group relative rounded-[1.6rem] border border-slate-200 bg-white/80 p-5 shadow-[0_18px_60px_-40px_rgba(15,23,42,0.4)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-[0_28px_70px_-38px_rgba(37,99,235,0.28)] dark:border-slate-800 dark:bg-slate-900/75 md:p-7">
                   <div className="absolute -left-[4.05rem] top-5 z-10 flex min-h-12 w-12 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-[0_10px_30px_-12px_rgba(37,99,235,0.55)] ring-4 ring-[#f7f8fa] dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-950 md:-left-[6rem] md:min-h-16 md:w-16 md:p-2">
-                    {item.companyLogos.map((logo) => logo.src ? (
-                      <img key={logo.alt} src={logo.src} alt={`${logo.alt} logo`} title={logo.alt} className={`${item.companyLogos.length > 1 ? "max-h-5 md:max-h-6" : "max-h-7 md:max-h-9"} max-w-full object-contain ${logo.className || ""}`} loading="lazy" />
-                    ) : (
-                      <span key={logo.alt} title={logo.alt} className="flex h-full w-full items-center justify-center rounded-xl bg-slate-950 text-[11px] font-black tracking-tight text-white dark:bg-blue-600 md:text-sm">{logo.monogram}</span>
-                    ))}
+                    {item.companyLogos.map((logo) => <img key={logo.alt} src={logo.src} alt={`${logo.alt} logo`} title={logo.alt} className={`${item.companyLogos.length > 1 ? "max-h-5 md:max-h-6" : "max-h-7 md:max-h-9"} max-w-full object-contain ${logo.className || ""}`} loading="lazy" />)}
                   </div>
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0"><p className="text-xs font-black uppercase tracking-[0.16em] text-blue-600 dark:text-blue-300">{item.period}</p><h3 className="mt-2 text-xl font-black tracking-tight md:text-2xl">{item.company}</h3><p className="mt-1 text-sm font-bold text-slate-600 dark:text-slate-300">{item.role}</p><p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.location}</p></div>
@@ -183,6 +203,13 @@ export function PortfolioHero() {
                   </div>
                   {item.client ? <p className="mt-5 text-xs font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">{item.client}</p> : null}
                   <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300 md:text-[15px]">{item.summary}</p>
+                  <div className="mt-5 flex flex-wrap items-center gap-2" aria-label={`${item.company} technology stack`}>
+                    {item.technologies.map((technology) => (
+                      <span key={technology.name} title={technology.name} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white p-2 shadow-sm transition-transform group-hover:scale-105 dark:border-slate-700 dark:bg-slate-950">
+                        <img src={technology.icon} alt={technology.name} className="h-full w-full object-contain" loading="lazy" />
+                      </span>
+                    ))}
+                  </div>
                   <div className="mt-5 flex flex-wrap gap-2">{item.highlights.map((highlight) => <span key={highlight} className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{highlight}</span>)}</div>
                 </motion.article>
               ))}

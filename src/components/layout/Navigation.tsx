@@ -6,25 +6,20 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PublicSearch } from "@/components/layout/PublicSearch";
 import { PrefetchLink } from "@/components/PrefetchLink";
+import portfolioLogo from "@/assets/branding/abhishek-panda-monogram.png";
 
 // Header nav links
 const navLinks = [
   { name: "Contact", path: "/contact" },
   { name: "Blog", path: "/blog" },
+  { name: "Books", path: "/books" },
   { name: "Insights", path: "/insights" },
 ];
 
 export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const logoBasePath = import.meta.env.BASE_URL || "/";
-  const primaryHeaderLogo = `${logoBasePath}panda-bamboo-trimmed.png`;
-  const secondaryHeaderLogo = `${logoBasePath}pandalogo-transparent.png`;
-  const tertiaryHeaderLogo = `${logoBasePath}panda.svg`;
-  const quaternaryHeaderLogo = `${logoBasePath}Pandalogo.png`;
-  const [headerLogoSrc, setHeaderLogoSrc] = useState(primaryHeaderLogo);
   const location = useLocation();
-  const isHomePage = location.pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,7 +30,7 @@ export const Navigation = () => {
     handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isHomePage]);
+  }, []);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -69,15 +64,6 @@ export const Navigation = () => {
   const desktopNavItemClass = "rounded-full px-3.5 py-2 text-sm font-semibold transition-colors";
   const mobileNavItemClass = "rounded-xl px-4 py-3 text-base font-semibold transition-colors";
   const navShellClass = "mx-auto w-full max-w-[1480px] px-4 md:px-8 xl:px-12";
-  const handleHeaderLogoError = () => {
-    setHeaderLogoSrc((prev) => {
-      if (prev === primaryHeaderLogo) return secondaryHeaderLogo;
-      if (prev === secondaryHeaderLogo) return tertiaryHeaderLogo;
-      if (prev === tertiaryHeaderLogo) return quaternaryHeaderLogo;
-      return prev;
-    });
-  };
-
   return (
     <>
       <motion.header
@@ -95,12 +81,11 @@ export const Navigation = () => {
               <div className="relative transition-transform duration-300 group-hover:scale-110">
                 <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
                   <img
-                    src={headerLogoSrc}
-                    alt="Abhishek Panda panda logo"
-                    className="h-full w-full scale-110 object-contain"
+                    src={portfolioLogo}
+                    alt="Abhishek Panda portfolio logo"
+                    className="h-full w-full object-contain"
                     loading="eager"
                     decoding="async"
-                    onError={handleHeaderLogoError}
                   />
                 </div>
               </div>
