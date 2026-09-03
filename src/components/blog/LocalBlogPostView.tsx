@@ -7,6 +7,8 @@ import { Footer } from "@/components/layout/Footer";
 import { Markdown } from "@/components/blog/Markdown";
 import { GiscusComments } from "@/components/blog/GiscusComments";
 import { useTheme } from "@/components/ThemeProvider";
+import { ReadingModeToggle } from "@/components/blog/ReadingModeToggle";
+import { useReadingMode } from "@/hooks/useReadingMode";
 import { LongformEngagementBar, useLongformEngagement } from "@/components/content/LongformEngagementBar";
 import { LongformSidebar, type LongformSidebarLink } from "@/components/content/LongformSidebar";
 import { LongformSummaryDialog } from "@/components/content/LongformSummaryDialog";
@@ -42,6 +44,7 @@ const SITE_URL =
 
 export function LocalBlogPostView({ post }: LocalBlogPostViewProps) {
   const { theme } = useTheme();
+  const { isReadingMode, toggleReadingMode } = useReadingMode();
   const { personalPosts } = usePublishedPersonalBlogs();
   const htmlContent = useMemo(() => getRenderableLocalBlogHtml(post), [post]);
   const articleBodyRef = useRef<HTMLDivElement | null>(null);
@@ -291,9 +294,10 @@ export function LocalBlogPostView({ post }: LocalBlogPostViewProps) {
         <link rel="canonical" href={canonical} />
       </Helmet>
 
-      <Navigation />
+      {!isReadingMode ? <Navigation /> : null}
+      <ReadingModeToggle active={isReadingMode} onToggle={toggleReadingMode} />
 
-      <main className="pt-24 pb-28 lg:pb-20">
+      <main className={isReadingMode ? "pb-20 pt-16" : "pb-28 pt-24 lg:pb-20"}>
         <section className="container mx-auto max-w-[1360px] px-4">
           <div className="mb-6">
             <Link
@@ -433,7 +437,7 @@ export function LocalBlogPostView({ post }: LocalBlogPostViewProps) {
         tags={post.tags}
       />
 
-      <Footer />
+      {!isReadingMode ? <Footer /> : null}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 type Theme = "dark" | "light";
 
@@ -14,7 +14,7 @@ type ThemeProviderState = {
 };
 
 const initialState: ThemeProviderState = {
-  theme: "dark",
+  theme: "light",
   setTheme: () => null,
 };
 
@@ -22,28 +22,35 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = "dark",
+  defaultTheme = "light",
   storageKey = "abhishekpanda-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>(() => {
+    const saved = typeof window === "undefined" ? null : window.localStorage.getItem(storageKey);
+    return saved === "dark" || saved === "light" ? saved : defaultTheme;
+  });
 
   useEffect(() => {
-    setTheme("dark");
-  }, [defaultTheme]);
+    const saved = window.localStorage.getItem(storageKey);
+    setThemeState(saved === "dark" || saved === "light" ? saved : defaultTheme);
+  }, [defaultTheme, storageKey]);
 
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
-    root.classList.add("dark");
-    root.style.colorScheme = "dark";
+    root.classList.add(theme);
+    root.style.colorScheme = theme;
   }, [theme]);
 
   useEffect(() => {
     let channel: BroadcastChannel | null = null;
     try {
       channel = new BroadcastChannel("abhishekpanda-theme");
-      channel.addEventListener("message", () => setTheme("dark"));
+      channel.addEventListener("message", (event) => {
+        const nextTheme = event.data?.theme;
+        if (nextTheme === "dark" || nextTheme === "light") setThemeState(nextTheme);
+      });
     } catch {}
 
     return () => {
@@ -51,19 +58,18 @@ export function ThemeProvider({
     };
   }, [defaultTheme]);
 
-  const value = {
-    theme,
-    setTheme: (_nextTheme: Theme) => {
-      localStorage.setItem(storageKey, "dark");
+  const setTheme = useCallback((nextTheme: Theme) => {
+      localStorage.setItem(storageKey, nextTheme);
       // Broadcast to embedded iframes via BroadcastChannel (same-origin, any tab)
       try {
         const bc = new BroadcastChannel("abhishekpanda-theme");
-        bc.postMessage({ type: "theme-change", theme: "dark" });
+        bc.postMessage({ type: "theme-change", theme: nextTheme });
         bc.close();
       } catch {}
-      setTheme("dark");
-    },
-  };
+      setThemeState(nextTheme);
+  }, [storageKey]);
+
+  const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme]);
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>

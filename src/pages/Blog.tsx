@@ -9,6 +9,8 @@ import { BlogSeriesGrid } from "@/components/blog/BlogSeriesGrid";
 import { LOCAL_BLOG_POSTS } from "@/content/blogs";
 import { BLOG_SERIES, BLOG_SERIES_BY_SLUG, matchesBlogSeries } from "@/lib/blogSeries";
 import { SubstackCollection } from "@/components/blog/SubstackCollection";
+import { ReadingModeToggle } from "@/components/blog/ReadingModeToggle";
+import { useReadingMode } from "@/hooks/useReadingMode";
 
 const isMissingTableError = (err: unknown) => {
   if (!err || typeof err !== "object") return false;
@@ -23,6 +25,7 @@ const getPublishingChannel = (tags: string[] | null | undefined): "personal" | "
 };
 
 const Blog = () => {
+  const { isReadingMode, toggleReadingMode } = useReadingMode();
   const [searchParams] = useSearchParams();
   const selectedSeriesSlug = searchParams.get("series");
   const selectedSeries = selectedSeriesSlug ? BLOG_SERIES_BY_SLUG.get(selectedSeriesSlug) || null : null;
@@ -106,10 +109,11 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
+      {!isReadingMode ? <Navigation /> : null}
+      <ReadingModeToggle active={isReadingMode} onToggle={toggleReadingMode} />
 
-      <main className="pt-24 pb-20">
-        <section className="relative overflow-hidden py-16">
+      <main className={isReadingMode ? "pb-12 pt-16" : "pb-20 pt-24"}>
+        {!isReadingMode ? <section className="relative overflow-hidden py-16">
           <div className="absolute inset-0 mesh-gradient opacity-50" />
           <div className="relative container mx-auto px-4 text-center">
             <motion.div
@@ -126,11 +130,11 @@ const Blog = () => {
             </motion.div>
 
           </div>
-        </section>
+        </section> : null}
 
         <SubstackCollection />
 
-        <section className="container mx-auto px-4">
+        {!isReadingMode ? <section className="container mx-auto px-4">
           <div className="mb-8 rounded-[2rem] border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
@@ -169,10 +173,10 @@ const Blog = () => {
             </div>
           </div>
 
-        </section>
+        </section> : null}
       </main>
 
-      <Footer />
+      {!isReadingMode ? <Footer /> : null}
     </div>
   );
 };
