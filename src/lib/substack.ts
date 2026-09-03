@@ -49,7 +49,7 @@ const verifiedArchive = (): SubstackPostSummary[] =>
     slug: post.slug,
     subtitle: null,
     excerpt: null,
-    heroImage: null,
+    heroImage: post.heroImage,
     canonicalUrl: `${STACKEDIN_PUBLICATION_URL}/p/${post.slug}`,
     publishedAt: null,
     updatedAt: null,

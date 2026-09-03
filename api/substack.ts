@@ -164,13 +164,13 @@ const fetchRssFallback = async () => {
   });
 };
 
-const fallbackKnownPost = (entry: { title: string; slug: string }) => ({
+const fallbackKnownPost = (entry: { title: string; slug: string; heroImage: string }) => ({
   id: `verified-${entry.slug}`,
   title: entry.title,
   slug: entry.slug,
   subtitle: null,
   excerpt: null,
-  heroImage: null,
+  heroImage: entry.heroImage,
   canonicalUrl: `${PUBLICATION_ORIGIN}/p/${entry.slug}`,
   publishedAt: null,
   updatedAt: null,
@@ -212,7 +212,9 @@ const completeArchive = (posts: NormalizedPost[]) => {
     unique.set(post.slug!, existing ? mergePostMetadata(existing, post) : post);
   });
   knownPosts.forEach((entry) => {
-    if (!unique.has(entry.slug)) unique.set(entry.slug, fallbackKnownPost(entry));
+    const existing = unique.get(entry.slug);
+    if (!existing) unique.set(entry.slug, fallbackKnownPost(entry));
+    else if (!existing.heroImage) unique.set(entry.slug, { ...existing, heroImage: entry.heroImage });
   });
   return Array.from(unique.values()).sort(newestFirst);
 };
