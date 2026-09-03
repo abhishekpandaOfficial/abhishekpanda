@@ -47,15 +47,15 @@ const groups = [
 
 export function CvTechnologyStack() {
   return (
-    <section className="border-b border-slate-200 bg-white px-5 py-20 text-slate-950 dark:border-slate-800 dark:bg-slate-950 dark:text-white md:px-8 md:py-28 xl:px-12">
-      <div className="mx-auto max-w-[1380px]">
+    <section className="mt-20 border-t border-slate-200 py-16 text-slate-950 dark:border-slate-800 dark:text-white md:py-20">
+      <div>
         <div className="max-w-3xl">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-blue-600 dark:text-blue-300">Technical stack</p>
           <h2 className="mt-4 text-4xl font-black tracking-[-0.045em] md:text-6xl">The systems behind the outcomes.</h2>
           <p className="mt-5 text-base leading-8 text-slate-600 dark:text-slate-300 md:text-lg">A focused view of the technologies used throughout the career timeline, organized exactly by the work they enable.</p>
         </div>
 
-        <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-10 grid gap-4 md:grid-cols-2">
           {groups.map((group, index) => (
             <motion.article
               key={group.title}

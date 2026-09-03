@@ -11,7 +11,6 @@ import portfolioLogo from "@/assets/branding/abhishek-a-mark.png";
 
 // Header nav links
 const navLinks = [
-  { name: "Contact", path: "/contact" },
   { name: "Blog", path: "/blog" },
   { name: "Books", path: "/books" },
   { name: "Insights", path: "/insights" },

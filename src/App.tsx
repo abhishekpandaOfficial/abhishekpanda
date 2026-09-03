@@ -22,7 +22,6 @@ const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const Products = lazy(() => import("./pages/Products"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Mentorship = lazy(() => import("./pages/Mentorship"));
-const Contact = lazy(() => import("./pages/Contact"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
@@ -242,7 +241,7 @@ const App = () => {
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:productSlug" element={<ProductDetail />} />
                 <Route path="/mentorship" element={<Mentorship />} />
-                <Route path="/contact" element={<Contact />} />
+                <Route path="/contact" element={<Navigate to="/#contact" replace />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/terms" element={<TermsOfService />} />
                 <Route path="/refund" element={<RefundPolicy />} />

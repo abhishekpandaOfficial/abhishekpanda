@@ -1,10 +1,6 @@
-import { lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/layout/Navigation";
 import { PortfolioHero } from "@/components/home/PortfolioHero";
-import { CvTechnologyStack } from "@/components/home/CvTechnologyStack";
-
-const Footer = lazy(() => import("@/components/layout/Footer").then((m) => ({ default: m.Footer })));
 
 const Index = () => {
   return (
@@ -21,10 +17,6 @@ const Index = () => {
         transition={{ duration: 0.45, delay: 0.08, ease: "easeOut" }}
       >
         <PortfolioHero />
-        <CvTechnologyStack />
-        <Suspense fallback={null}>
-          <Footer />
-        </Suspense>
       </motion.main>
     </motion.div>
   );

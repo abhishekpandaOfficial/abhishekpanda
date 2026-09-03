@@ -30,7 +30,6 @@ export const Footer = () => (
       </div>
 
       <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground" aria-label="Footer navigation">
-        <PrefetchLink to="/contact" className="transition hover:text-foreground">Contact</PrefetchLink>
         <PrefetchLink to="/blog" className="transition hover:text-foreground">Blog</PrefetchLink>
         <PrefetchLink to="/insights" className="transition hover:text-foreground">Insights</PrefetchLink>
         <PrefetchLink to="/privacy" className="transition hover:text-foreground">Privacy</PrefetchLink>
