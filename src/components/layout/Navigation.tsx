@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Menu, 
-  X, 
-  Send,
-  ScrollText,
-  BookOpen
-} from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PublicSearch } from "@/components/layout/PublicSearch";
@@ -15,12 +9,13 @@ import { PrefetchLink } from "@/components/PrefetchLink";
 
 // Header nav links
 const navLinks = [
-  { name: "Contact", path: "/contact", icon: Send },
+  { name: "Contact", path: "/contact" },
+  { name: "Blog", path: "/blog" },
+  { name: "Insights", path: "/insights" },
 ];
 
 export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const logoBasePath = import.meta.env.BASE_URL || "/";
   const primaryHeaderLogo = `${logoBasePath}panda-bamboo-trimmed.png`;
@@ -35,9 +30,6 @@ export const Navigation = () => {
     const handleScroll = () => {
       const nextScrollY = window.scrollY;
       setIsScrolled(nextScrollY > 20);
-      if (isHomePage) {
-        setScrollProgress(Math.min(nextScrollY / 180, 1));
-      }
     };
 
     handleScroll();
@@ -74,19 +66,9 @@ export const Navigation = () => {
     location.pathname === "/solid-principles-guide" ||
     location.pathname === "/blogs/solid-principles" ||
     location.pathname === "/cheatsheets/solid-principles";
-  const desktopNavItemClass =
-    "relative flex items-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all duration-300 group xl:gap-2.5 xl:px-3 xl:py-2.5 xl:text-[13px] 2xl:rounded-xl 2xl:px-3.5 2xl:text-sm";
-  const desktopNavIconClass = "h-4 w-4 shrink-0 transition-transform group-hover:scale-110 xl:h-[17px] xl:w-[17px] 2xl:h-[18px] 2xl:w-[18px]";
-  const mobileNavItemClass = "flex items-center gap-3.5 rounded-xl px-4 py-3.5 text-base font-medium transition-all duration-200";
-  const mobileNavIconClass = "h-5 w-5 shrink-0";
-  const landingHeaderHeight = 88 - scrollProgress * 20;
-  const landingHeaderPadding = 24 - scrollProgress * 10;
-  const landingHeaderRadius = 28 - scrollProgress * 12;
-  const landingLogoScale = 1.06 - scrollProgress * 0.12;
-  const landingShadow = `0 ${14 + scrollProgress * 18}px ${34 + scrollProgress * 26}px -${24 - scrollProgress * 8}px rgba(15,23,42,${0.08 + scrollProgress * 0.18})`;
-  const landingBorderOpacity = 0.08 + scrollProgress * 0.16;
-  const landingBackgroundOpacity = 0.38 + scrollProgress * 0.42;
-  const navShellClass = "mx-auto w-full max-w-[1600px] px-4 md:px-6 xl:px-8";
+  const desktopNavItemClass = "rounded-full px-3.5 py-2 text-sm font-semibold transition-colors";
+  const mobileNavItemClass = "rounded-xl px-4 py-3 text-base font-semibold transition-colors";
+  const navShellClass = "mx-auto w-full max-w-[1480px] px-4 md:px-8 xl:px-12";
   const handleHeaderLogoError = () => {
     setHeaderLogoSrc((prev) => {
       if (prev === primaryHeaderLogo) return secondaryHeaderLogo;
@@ -101,127 +83,46 @@ export const Navigation = () => {
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          isScrolled
-            ? "bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm"
-            : "bg-transparent"
-        )}
-        style={
-          isHomePage
-            ? {
-                backgroundColor: `hsl(var(--background) / ${landingBackgroundOpacity})`,
-                backdropFilter: `blur(${10 + scrollProgress * 14}px) saturate(${1 + scrollProgress * 0.22})`,
-                borderBottomColor: `hsl(var(--border) / ${landingBorderOpacity})`,
-                boxShadow: landingShadow,
-              }
-            : undefined
-        }
+        className={cn("fixed inset-x-0 top-0 z-50 border-b transition-all duration-300", isScrolled ? "border-border/70 bg-background/88 shadow-sm backdrop-blur-2xl" : "border-transparent bg-background/65 backdrop-blur-xl")}
       >
-        <div
-          className={navShellClass}
-          style={
-            isHomePage
-              ? {
-                  paddingTop: `${landingHeaderPadding}px`,
-                  paddingBottom: `${Math.max(10, landingHeaderPadding - 6)}px`,
-                }
-              : undefined
-          }
-        >
-          <div
-            className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 lg:gap-4"
-            style={
-              isHomePage
-                ? {
-                    minHeight: `${landingHeaderHeight}px`,
-                    borderRadius: `${landingHeaderRadius}px`,
-                    paddingInline: `${16 + (1 - scrollProgress) * 12}px`,
-                    background: `linear-gradient(180deg, hsl(var(--background) / ${0.66 + scrollProgress * 0.18}), hsl(var(--background) / ${0.54 + scrollProgress * 0.26}))`,
-                    border: `1px solid hsl(var(--border) / ${0.2 + scrollProgress * 0.14})`,
-                    boxShadow: `inset 0 1px 0 hsl(var(--background) / 0.48), 0 12px 30px -24px rgba(15,23,42,${0.18 + scrollProgress * 0.1})`,
-                  }
-                : { height: "4rem" }
-            }
-          >
+        <div className={navShellClass}>
+          <div className="grid h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4">
             {/* Logo */}
             <PrefetchLink
               to="/"
-              className="flex items-center gap-2 group justify-self-start"
-              style={isHomePage ? { transform: `scale(${landingLogoScale})`, transformOrigin: "left center" } : undefined}
+              className="group flex items-center gap-2.5 justify-self-start"
             >
               <div className="relative transition-transform duration-300 group-hover:scale-110">
-                <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.28),rgba(255,255,255,0))] blur-md" />
-                <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-sky-300/45 bg-gradient-to-br from-white/95 via-slate-100/95 to-sky-100/90 p-0.5 shadow-[0_16px_34px_-20px_rgba(34,211,238,0.7)] ring-1 ring-white/70 dark:border-sky-200/35 dark:bg-gradient-to-br dark:from-slate-900/95 dark:via-slate-800/95 dark:to-cyan-900/75 dark:ring-white/20 md:h-14 md:w-14">
+                <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
                   <img
                     src={headerLogoSrc}
                     alt="Abhishek Panda panda logo"
-                    className="h-full w-full scale-[1.12] object-contain brightness-[1.28] contrast-[1.34] saturate-[1.2] drop-shadow-[0_0_10px_rgba(125,211,252,0.55)]"
+                    className="h-full w-full scale-110 object-contain"
                     loading="eager"
                     decoding="async"
                     onError={handleHeaderLogoError}
                   />
                 </div>
               </div>
+              <span className="hidden text-sm font-black tracking-[-0.02em] text-foreground sm:block">Abhishek Panda</span>
             </PrefetchLink>
 
             {/* Desktop Navigation */}
-            <nav className="hidden min-[1180px]:flex min-w-0 items-center justify-center gap-0 flex-nowrap 2xl:gap-0.5">
-              {/* Contact */}
-              {navLinks.slice(0, 1).map((link) => (
+            <nav className="hidden min-[900px]:flex min-w-0 items-center justify-center gap-1">
+              {navLinks.map((link) => {
+                const active = link.path === "/insights" ? isInsightsActive : location.pathname === link.path || (link.path === "/blog" && location.pathname.startsWith("/blog"));
+                return (
                 <PrefetchLink
                   key={link.path}
                   to={link.path}
                   className={cn(
                     desktopNavItemClass,
-                    location.pathname === link.path
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground"
+                    active ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
-                  <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                  <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                  <span className="relative flex items-center gap-2">
-                    <link.icon className={desktopNavIconClass} />
-                    {link.name}
-                  </span>
+                  {link.name}
                 </PrefetchLink>
-              ))}
-
-              <PrefetchLink
-                to="/insights"
-                className={cn(
-                  desktopNavItemClass,
-                  isInsightsActive
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                <span className="relative flex items-center gap-2">
-                  <ScrollText className={desktopNavIconClass} />
-                  Insights
-                </span>
-              </PrefetchLink>
-
-              <PrefetchLink
-                to="/blog"
-                className={cn(
-                  desktopNavItemClass,
-                  location.pathname.startsWith("/blog")
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 blur-sm" />
-                <span className="absolute inset-[1px] rounded-lg bg-background/80 group-hover:bg-background/90 transition-colors" />
-                <span className="relative flex items-center gap-2">
-                  <BookOpen className={desktopNavIconClass} />
-                  Blog
-                </span>
-              </PrefetchLink>
-
+              );})}
             </nav>
 
             <div className="flex items-center justify-self-end gap-2">
@@ -229,8 +130,10 @@ export const Navigation = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 min-[1180px]:hidden"
+                className="h-9 w-9 min-[900px]:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label={isMobileMenuOpen ? "Close navigation" : "Open navigation"}
+                aria-expanded={isMobileMenuOpen}
               >
                 {isMobileMenuOpen ? <X /> : <Menu />}
               </Button>
@@ -246,7 +149,7 @@ export const Navigation = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 min-[1180px]:hidden pt-20"
+            className="fixed inset-0 z-40 min-[900px]:hidden pt-16"
           >
             <div className="absolute inset-0 bg-background/95 backdrop-blur-xl" />
             <nav className={cn(navShellClass, "relative flex max-h-[calc(100vh-5rem)] flex-col gap-2 overflow-y-auto py-8")}>
@@ -258,8 +161,7 @@ export const Navigation = () => {
                 <PublicSearch mobile />
               </motion.div>
 
-              {/* Contact */}
-              {navLinks.slice(0, 1).map((link, index) => (
+              {navLinks.map((link, index) => (
                 <motion.div
                   key={link.path}
                   initial={{ opacity: 0, x: -20 }}
@@ -275,49 +177,10 @@ export const Navigation = () => {
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     )}
                   >
-                    <link.icon className={mobileNavIconClass} />
                     {link.name}
                   </Link>
                 </motion.div>
               ))}
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.16 }}
-              >
-                <Link
-                  to="/blog"
-                  className={cn(
-                    mobileNavItemClass,
-                    location.pathname.startsWith("/blog")
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <BookOpen className={mobileNavIconClass} />
-                  Blog
-                </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.24 }}
-              >
-                <Link
-                  to="/insights"
-                  className={cn(
-                    mobileNavItemClass,
-                    isInsightsActive
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <ScrollText className={mobileNavIconClass} />
-                  Insights
-                </Link>
-              </motion.div>
 
             </nav>
           </motion.div>
