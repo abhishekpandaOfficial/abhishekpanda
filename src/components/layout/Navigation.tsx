@@ -6,15 +6,12 @@ import {
   X, 
   Send,
   ScrollText,
-  MessageCircle,
   BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PublicSearch } from "@/components/layout/PublicSearch";
 import { PrefetchLink } from "@/components/PrefetchLink";
-
-const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/BIz1l1qK9lu1oZEIJOBmDS?mode=gi_t";
 
 // Header nav links
 const navLinks = [
@@ -229,15 +226,6 @@ export const Navigation = () => {
 
             <div className="flex items-center justify-self-end gap-2">
               <PublicSearch />
-              <a
-                href={WHATSAPP_GROUP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group hidden h-10 items-center gap-2 rounded-xl border border-emerald-400/40 bg-gradient-to-r from-emerald-500/90 to-teal-500/90 px-3 text-xs font-semibold text-white shadow-[0_16px_30px_-18px_rgba(16,185,129,0.85)] transition-all duration-300 hover:-translate-y-0.5 hover:from-emerald-400 hover:to-teal-400 hover:shadow-[0_20px_36px_-16px_rgba(20,184,166,0.95)] md:inline-flex"
-              >
-                <MessageCircle className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-                Talk with me
-              </a>
               <Button
                 variant="ghost"
                 size="icon"
@@ -310,22 +298,6 @@ export const Navigation = () => {
                   <BookOpen className={mobileNavIconClass} />
                   Blog
                 </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <a
-                  href={WHATSAPP_GROUP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(mobileNavItemClass, "text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400")}
-                >
-                  <MessageCircle className={mobileNavIconClass} />
-                  Talk with me
-                </a>
               </motion.div>
 
               <motion.div

@@ -83,12 +83,6 @@ export default function Chronyx() {
                     <ArrowRight className="w-5 h-5" />
                   </a>
                 </Button>
-                <Button variant="hero-outline" size="xl" asChild>
-                  <Link to="/contact">
-                    Talk to me
-                    <ArrowRight className="w-5 h-5" />
-                  </Link>
-                </Button>
               </motion.div>
 
               <motion.div
