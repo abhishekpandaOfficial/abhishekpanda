@@ -105,7 +105,8 @@ export function SubstackCollection() {
                         src={post.heroImage || `/api/substack-image?slug=${encodeURIComponent(post.slug)}`}
                         alt={`${post.title} cover`}
                         className="relative h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-                        loading="lazy"
+                        loading={index < 6 ? "eager" : "lazy"}
+                        fetchPriority={index < 3 ? "high" : "auto"}
                         decoding="async"
                         referrerPolicy="no-referrer"
                         onError={(event) => { event.currentTarget.style.display = "none"; }}
