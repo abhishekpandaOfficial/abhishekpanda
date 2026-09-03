@@ -14,6 +14,7 @@ const BrandIntro = lazy(() => import("@/components/BrandIntro").then((m) => ({ d
 
 const About = lazy(() => import("./pages/About"));
 const Blog = lazy(() => import("./pages/Blog"));
+const Books = lazy(() => import("./pages/Books"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const SubstackPost = lazy(() => import("./pages/SubstackPost"));
 const Courses = lazy(() => import("./pages/Courses"));
@@ -229,6 +230,7 @@ const App = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/blog" element={<Blog />} />
+                <Route path="/books" element={<Books />} />
                 <Route path="/blog/substack/:slug" element={<SubstackPost />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/academy" element={<Navigate to="/courses" replace />} />
