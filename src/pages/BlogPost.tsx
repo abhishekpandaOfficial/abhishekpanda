@@ -38,7 +38,6 @@ import {
   AtSign,
   Linkedin,
   Facebook,
-  MessageCircle,
   Send,
   Mail,
   Github,
@@ -672,7 +671,6 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
     window.open(url, "_blank", "noopener,noreferrer,width=720,height=760");
   };
 
-  const shareText = `${meta?.title || "Blog post"}\n${canonical}`;
   const shareTargets = [
     {
       key: "x",
@@ -706,14 +704,6 @@ const RemoteBlogPost = ({ slug }: { slug?: string }) => {
         "border-blue-300 hover:border-[#1877F2] hover:bg-[#1877F2] hover:text-white",
       action: () =>
         openSharePopup(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonical)}`),
-    },
-    {
-      key: "whatsapp",
-      label: "WhatsApp",
-      icon: MessageCircle,
-      className:
-        "border-emerald-300 hover:border-[#25D366] hover:bg-[#25D366] hover:text-white",
-      action: () => openSharePopup(`https://wa.me/?text=${encodeURIComponent(shareText)}`),
     },
     {
       key: "telegram",

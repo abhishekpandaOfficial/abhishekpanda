@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Calendar as CalendarIcon, Clock, Phone, Send, User } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, Send } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -143,25 +143,6 @@ export function CourseOneToOneModal({
     }
   };
 
-  const whatsappLink = useMemo(() => {
-    const text = [
-      "1:1 Course Session Request",
-      `Name: ${name || "-"}`,
-      `Email: ${email || "-"}`,
-      `Course: ${courseTitle}`,
-      `Fee: ${feeLabel}`,
-      `Session: ${durationMinutes} min daily (Night slot)`,
-      `Preferred slot: ${slot || "-"}`,
-      `Start date: ${formatDate(range?.from)}`,
-      `End date: ${formatDate(range?.to)}`,
-      `Payment: ${payAfterSchedule ? "Pay after schedule confirmation" : "Pay before scheduling"}`,
-    ].join("\n");
-    const encoded = encodeURIComponent(text);
-    return `https://wa.me/918917549065?text=${encoded}`;
-  }, [name, email, courseTitle, feeLabel, slot, range, durationMinutes, payAfterSchedule]);
-
-  const canWhatsapp = name.trim() && email.trim();
-
   return (
     <Dialog open={open} onOpenChange={close}>
       <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto overflow-x-hidden">
@@ -252,28 +233,6 @@ export function CourseOneToOneModal({
                 <Send className="h-4 w-4" />
                 {submitting ? "Submitting..." : "Submit 1:1 Request"}
               </Button>
-              <Button asChild variant="outline" disabled={!canWhatsapp} className="gap-2">
-                <a
-                  href={canWhatsapp ? whatsappLink : "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(event) => {
-                    if (!canWhatsapp) {
-                      event.preventDefault();
-                      toast.error("Add name and email to enable WhatsApp.");
-                    }
-                  }}
-                >
-                  <Phone className="h-4 w-4" />
-                  WhatsApp Abhishek
-                </a>
-              </Button>
-              {!canWhatsapp ? (
-                <div className="text-xs text-muted-foreground inline-flex items-center gap-2">
-                  <User className="h-3 w-3" />
-                  Add name + email to enable WhatsApp.
-                </div>
-              ) : null}
             </div>
           </div>
         </div>
