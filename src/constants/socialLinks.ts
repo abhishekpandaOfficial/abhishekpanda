@@ -66,15 +66,6 @@ export const FALLBACK_SOCIAL_LINKS: FallbackSocialLink[] = [
     sort_order: 6,
   },
   {
-    platform: "whatsapp",
-    display_name: "WhatsApp",
-    category: "social",
-    profile_url: "https://chat.whatsapp.com/BIz1l1qK9lu1oZEIJOBmDS?mode=gi_t",
-    icon_key: "whatsapp",
-    brand_color: "#25d366",
-    sort_order: 7,
-  },
-  {
     platform: "substack",
     display_name: "Substack",
     category: "blog",
